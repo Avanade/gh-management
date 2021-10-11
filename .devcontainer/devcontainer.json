@@ -25,9 +25,7 @@
 
 	// Add the IDs of extensions you want installed when the container is created.
 	"extensions": [
-		"ms-dotnettools.csharp",
-		"ms-python.python",
-		"ms-python.vscode-pylance"
+		"humao.rest-client",
 	],
 
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
