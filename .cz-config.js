@@ -24,7 +24,7 @@ module.exports = {
       { value: "WIP", name: "WIP:      Work in progress" },
     ],
 
-    scopes: [{ name: "infra" }, { name: "ci-cd" }, { name: "your-scope-1" }],
+    scopes: [{ name: "infra" }, { name: "ci-cd" }, { name: "powerapp" }, { name: "powerautomate" }],
 
     allowTicketNumber: false,
     isTicketNumberRequired: false,
