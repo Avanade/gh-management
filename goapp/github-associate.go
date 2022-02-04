@@ -19,35 +19,6 @@ func getGithubUsers() {
 
 }
 
-func getUserStatus(userEmail string) map[string]interface{} {
-	connStr := os.Getenv("TABLE_CONNECTION_STRING")
-	serviceClient, err := aztables.NewServiceClientFromConnectionString(connStr, nil)
-	if err != nil {
-		log.Println(err)
-		return map[string]interface{}{"ebonded": false}
-	}
-	table := serviceClient.NewClient("users")
-	ctx := context.TODO()
-	entity, err := table.GetEntity(ctx, "avanade", userEmail, nil)
-	if err != nil {
-		log.Println("Error getting entity")
-		return map[string]interface{}{"ebonded": false}
-	}
-	var entityResult aztables.EDMEntity
-	err = json.Unmarshal(entity.Value, &entityResult)
-	if err != nil {
-		log.Println("failed to unmarshal entity: %w", err)
-		return map[string]interface{}{"ebonded": false}
-	}
-	returnMap := map[string]interface{}{
-		"ebonded":   true,
-		"ghJoined":  entityResult.Properties["ghJoined"],
-		"gheJoined": entityResult.Properties["gheJoined"],
-		"githubId":  entityResult.Properties["githubId"],
-	}
-	return returnMap
-}
-
 func inviteUser(id int64, email string) {
 
 }
@@ -218,6 +189,50 @@ func handleGitHubCallback(w http.ResponseWriter, r *http.Request) {
 	t.Execute(w, map[string]string{"PrivacyUrl": os.Getenv("PRIVACY_URL"), "Username": *user.Login})
 }
 
+// /api/ebonded. Called by PowerApp on load.
+// Displays if the user is currently connected to GitHub or not.
+func handleApiEbondedStatus(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusCreated)
+	w.Header().Set("Content-Type", "application/json")
+	state := r.FormValue("state")
+	userEmail := getUserEmail(state)
+	ebonded := false
+	connStr := os.Getenv("TABLE_CONNECTION_STRING")
+	serviceClient, err := aztables.NewServiceClientFromConnectionString(connStr, nil)
+	if err != nil {
+		log.Println(err)
+	}
+	table := serviceClient.NewClient("users")
+	ctx := context.TODO()
+	entity, err := table.GetEntity(ctx, "avanade", userEmail, nil)
+	if err != nil {
+		log.Println("Error getting entity")
+	}
+	var entityResult aztables.EDMEntity
+	err = json.Unmarshal(entity.Value, &entityResult)
+	if err != nil {
+		log.Println("failed to unmarshal entity: %w", err)
+	} else {
+		ebonded = true
+	}
+	resp := make(map[string]interface{})
+	if ebonded {
+		resp["ebonded"] = true
+		resp["ghJoined"] = entityResult.Properties["ghJoined"]
+		resp["gheJoined"] = entityResult.Properties["gheJoined"]
+		resp["githubId"] = entityResult.Properties["githubId"]
+	} else {
+		resp["ebonded"] = false
+	}
+
+	jsonResp, err := json.Marshal(resp)
+	if err != nil {
+		log.Fatalf("Error happened in JSON marshal. Err: %s", err)
+	}
+	w.Write(jsonResp)
+	return
+}
+
 func main() {
 	err := godotenv.Load()
 	if err != nil {
@@ -227,6 +242,7 @@ func main() {
 	http.HandleFunc("/", handleMain)
 	http.HandleFunc("/login", handleGitHubLogin)
 	http.HandleFunc("/github_oauth_cb", handleGitHubCallback)
+	http.HandleFunc("/api/ebonded", handleApiEbondedStatus)
 	fmt.Print("Started running on http://127.0.0.1:5000\n")
 	fmt.Println(http.ListenAndServe(":5000", nil))
 }
