@@ -16,7 +16,7 @@ import (
 )
 
 func getGithubUsers() {
-
+	// TODO: Not implemented
 }
 
 func inviteUser(id int64) {
@@ -316,13 +316,11 @@ func handleApiEbondedStatus(w http.ResponseWriter, r *http.Request) {
 	resp := make(map[string]interface{})
 	if ebonded {
 		resp["ebonded"] = true
-		resp["ghJoined"] = entityResult.Properties["ghJoined"]
-		resp["gheJoined"] = entityResult.Properties["gheJoined"]
 		resp["githubId"] = entityResult.Properties["githubId"]
 		resp["githubUsername"] = entityResult.Properties["githubUsername"]
 		isPublic, isPrivate := getGithubOrgMembership(fmt.Sprint(entityResult.Properties["githubUsername"]))
-		resp["isPublic"] = isPublic
-		resp["isPrivate"] = isPrivate
+		resp["isPublicMember"] = isPublic
+		resp["isPrivateMember"] = isPrivate
 	} else {
 		resp["ebonded"] = false
 	}
