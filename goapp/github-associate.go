@@ -235,7 +235,8 @@ func handleApiEbondedStatus(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	err := godotenv.Load()
-	if err != nil {
+	log.Printf("Loaded as %v\n", os.Getenv("ENV"))
+	if err != nil && os.Getenv("ENV") == "local" {
 		log.Fatal("Error loading .env file")
 	}
 
@@ -243,6 +244,6 @@ func main() {
 	http.HandleFunc("/login", handleGitHubLogin)
 	http.HandleFunc("/github_oauth_cb", handleGitHubCallback)
 	http.HandleFunc("/api/ebonded", handleApiEbondedStatus)
-	fmt.Print("Started running on http://127.0.0.1:5000\n")
-	fmt.Println(http.ListenAndServe(":5000", nil))
+	fmt.Print("Started running on http://127.0.0.1:8000\n")
+	fmt.Println(http.ListenAndServe(":8000", nil))
 }
