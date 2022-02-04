@@ -1,14 +1,19 @@
 # gh-management
-> A set of flows and PowerApps to manage GitHub organizational access.
+> This tool allows an organization to manage users, and their association to a public GitHub, and a private GitHub enterprise (for InnerSource.)
 
 [![Commitizen friendly](https://img.shields.io/badge/commitizen-friendly-brightgreen.svg)](http://commitizen.github.io/cz-cli/)
 ![GitHub issues](https://img.shields.io/github/issues/Avanade/gh-management)
 ![GitHub](https://img.shields.io/github/license/Avanade/gh-management)
 ![GitHub Repo stars](https://img.shields.io/github/stars/Avanade/gh-management?style=social)
 [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg)](https://avanade.github.io/code-of-conduct/)
+[![Incubating InnerSource](https://img.shields.io/badge/Incubating-Ava--Maturity-%23FF5800?labelColor=yellow)](https://avanade.github.io/maturity-model/)
 
 ## Overview
+This project contains a PowerApp, which is the main entry point for the application. Backend functionality is provided through a Go application, which handles associations with GitHub, and events (including leavers.)
+
 Microsoft has an excellent [GitHub management portal](https://github.com/microsoft/opensource-portal) to allow for self-service at scale - but this provides significantly more functionality than some organizations require.
+
+It's recommended to call the leaving API as part of your JML process when users leave the organisation, but a Power Automate example is provided as an alternative (this is significantly less performant.)
 
 This repository allows for basic self-service and automation of common workflows using PowerApps for:
 - Automatically
@@ -33,6 +38,7 @@ The `docs` folder contains [more detailed documentation](./docs/start-here.md), 
 
 ## Contact
 Feel free to [raise an issue on GitHub](https://github.com/Avanade/gh-management/issues), or see our [security disclosure](./SECURITY.md) policy.
+
 ## Contributing
 Contributions are welcome. See information on [contributing](./CONTRIBUTING.md), as well as our [code of conduct](https://avanade.github.io/code-of-conduct/).
 
