@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/Azure/azure-sdk-for-go/sdk/data/aztables"
-	"github.com/google/go-github/github"
+	"github.com/google/go-github/v42/github"
 	"github.com/joho/godotenv"
 	"golang.org/x/oauth2"
 	githuboauth "golang.org/x/oauth2/github"
@@ -25,6 +25,44 @@ func inviteUser(id int64, email string) {
 
 func getGithubRepositories() {
 
+}
+
+//createGithubRepository("gh_app_test", "ava-innersource", "test")
+func createPrivateGithubRepository(name string, owner string, description string) {
+	// create github oauth client from token
+	ctx := context.Background()
+	ts := oauth2.StaticTokenSource(
+		&oauth2.Token{AccessToken: os.Getenv("GITHUB_TOKEN")},
+	)
+	tc := oauth2.NewClient(ctx, ts)
+	client := github.NewClient(tc)
+
+	repoRequest := &github.TemplateRepoRequest{
+		Name:        &name,
+		Owner:       &owner,
+		Description: &description,
+		Private:     github.Bool(true),
+	}
+
+	_, _, err := client.Repositories.CreateFromTemplate(context.Background(), "avanade", "avanade-template", repoRequest)
+	if err != nil {
+		log.Fatalf("Error happened in getting creating repo from template. Err: %s", err)
+	}
+}
+
+func handleTest(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusCreated)
+	w.Header().Set("Content-Type", "application/json")
+
+	resp := make(map[string]interface{})
+
+	resp["processed"] = true
+	jsonResp, err := json.Marshal(resp)
+	if err != nil {
+		log.Fatalf("Error happened in JSON marshal. Err: %s", err)
+	}
+	w.Write(jsonResp)
+	return
 }
 
 func getUserEmail(stateString string) string {
@@ -245,6 +283,7 @@ func main() {
 	http.HandleFunc("/login", handleGitHubLogin)
 	http.HandleFunc("/github_oauth_cb", handleGitHubCallback)
 	http.HandleFunc("/api/ebonded", handleApiEbondedStatus)
+	http.HandleFunc("/api/test", handleTest)
 	fmt.Print("Started running on http://127.0.0.1:8000\n")
 	fmt.Println(http.ListenAndServe(":8000", nil))
 }
