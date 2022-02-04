@@ -88,3 +88,5 @@ Temporary Items
 /env.sh
 /notes.MD
 /.env
+/.env.azure
+/.env.*
