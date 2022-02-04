@@ -19,12 +19,51 @@ func getGithubUsers() {
 
 }
 
-func inviteUser(id int64, email string) {
+func inviteUser(id int64) {
+	ctx := context.Background()
+	ts := oauth2.StaticTokenSource(
+		&oauth2.Token{AccessToken: os.Getenv("GITHUB_TOKEN")},
+	)
+	tc := oauth2.NewClient(ctx, ts)
+	client := github.NewClient(tc)
 
+	// Create a new invitation
+	role := "direct_member"
+	invite := &github.CreateOrgInvitationOptions{
+		InviteeID: &id,
+		Role:      &role,
+		TeamID:    nil,
+	}
+
+	_, _, err := client.Organizations.CreateOrgInvitation(ctx, os.Getenv("GITHUB_PUBLIC_ORG"), invite)
+	if err != nil {
+		log.Printf("Error creating public invitation: %v", err)
+	}
+
+	_, _, err = client.Organizations.CreateOrgInvitation(ctx, os.Getenv("GITHUB_INTERNAL_ORG"), invite)
+	if err != nil {
+		log.Printf("Error creating public invitation: %v", err)
+	}
 }
 
-func getGithubRepositories() {
+func getGithubOrgMembership(username string) (isPublicMember bool, isPrivateMember bool) {
+	ctx := context.Background()
+	ts := oauth2.StaticTokenSource(
+		&oauth2.Token{AccessToken: os.Getenv("GITHUB_TOKEN")},
+	)
+	tc := oauth2.NewClient(ctx, ts)
+	client := github.NewClient(tc)
 
+	// check to see if the user is a member of the rog
+	isPublicMember, _, err := client.Organizations.IsMember(ctx, os.Getenv("GITHUB_PUBLIC_ORG"), username)
+	if err != nil {
+		log.Printf("Error checking public membership: %v", err)
+	}
+	isInternalMember, _, err := client.Organizations.IsMember(ctx, os.Getenv("GITHUB_INTERNAL_ORG"), username)
+	if err != nil {
+		log.Printf("Error checking internal membership: %v", err)
+	}
+	return isPublicMember, isInternalMember
 }
 
 //createGithubRepository("gh_app_test", "ava-innersource", "test")
@@ -57,6 +96,27 @@ func handleTest(w http.ResponseWriter, r *http.Request) {
 	resp := make(map[string]interface{})
 
 	resp["processed"] = true
+	jsonResp, err := json.Marshal(resp)
+	if err != nil {
+		log.Fatalf("Error happened in JSON marshal. Err: %s", err)
+	}
+	w.Write(jsonResp)
+	return
+}
+
+func handleGithubCheck(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusCreated)
+	w.Header().Set("Content-Type", "application/json")
+	state := r.FormValue("state")
+	if (state == "") || (!isValidGuid(state)) {
+		handleError(w, "Invalid State", "The state parameter is invalid. Please try again.")
+		return
+	}
+	id := r.FormValue("id")
+	resp := make(map[string]interface{})
+	isPublic, isPrivate := getGithubOrgMembership(id)
+	resp["isPublicMember"] = isPublic
+	resp["isPrivateMember"] = isPrivate
 	jsonResp, err := json.Marshal(resp)
 	if err != nil {
 		log.Fatalf("Error happened in JSON marshal. Err: %s", err)
@@ -260,6 +320,9 @@ func handleApiEbondedStatus(w http.ResponseWriter, r *http.Request) {
 		resp["gheJoined"] = entityResult.Properties["gheJoined"]
 		resp["githubId"] = entityResult.Properties["githubId"]
 		resp["githubUsername"] = entityResult.Properties["githubUsername"]
+		isPublic, isPrivate := getGithubOrgMembership(fmt.Sprint(entityResult.Properties["githubUsername"]))
+		resp["isPublic"] = isPublic
+		resp["isPrivate"] = isPrivate
 	} else {
 		resp["ebonded"] = false
 	}
