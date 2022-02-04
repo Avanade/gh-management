@@ -1,0 +1,5 @@
+GET https://api.github.com/repos/{{$dotenv GITHUB_ORG}}/.github HTTP/1.1
+content-type: application/json
+User-Agent: vs-code-user-query
+Accept: application/vnd.github.v3+json
+Authorization: token {{$dotenv GITHUB_TOKEN}}
