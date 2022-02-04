@@ -12,12 +12,13 @@ concurrency:
   group: main_branch_build
   cancel-in-progress: true
 
+defaults:
+  run:
+    working-directory: goapp
+
 jobs:
-  build-sql-ledger:
+  build-goapp-container:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: goapp
     steps:
       - uses: actions/checkout@v2
       - uses: azure/docker-login@v1
