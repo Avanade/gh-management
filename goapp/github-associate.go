@@ -221,6 +221,7 @@ func handleApiEbondedStatus(w http.ResponseWriter, r *http.Request) {
 		resp["ghJoined"] = entityResult.Properties["ghJoined"]
 		resp["gheJoined"] = entityResult.Properties["gheJoined"]
 		resp["githubId"] = entityResult.Properties["githubId"]
+		resp["githubUsername"] = entityResult.Properties["githubUsername"]
 	} else {
 		resp["ebonded"] = false
 	}
