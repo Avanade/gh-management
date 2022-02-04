@@ -13,13 +13,10 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 )
 
-func getGithubUsers() {
-	// TODO: Not implemented
-}
-
-func inviteUser(id int64) {
+func inviteUser(id int64, orgName string) {
 	ctx := context.Background()
 	ts := oauth2.StaticTokenSource(
 		&oauth2.Token{AccessToken: os.Getenv("GITHUB_TOKEN")},
@@ -35,14 +32,9 @@ func inviteUser(id int64) {
 		TeamID:    nil,
 	}
 
-	_, _, err := client.Organizations.CreateOrgInvitation(ctx, os.Getenv("GITHUB_PUBLIC_ORG"), invite)
+	_, _, err := client.Organizations.CreateOrgInvitation(ctx, orgName, invite)
 	if err != nil {
-		log.Printf("Error creating public invitation: %v", err)
-	}
-
-	_, _, err = client.Organizations.CreateOrgInvitation(ctx, os.Getenv("GITHUB_INTERNAL_ORG"), invite)
-	if err != nil {
-		log.Printf("Error creating public invitation: %v", err)
+		log.Printf("Error creating invitation: %v", err)
 	}
 }
 
@@ -96,27 +88,6 @@ func handleTest(w http.ResponseWriter, r *http.Request) {
 	resp := make(map[string]interface{})
 
 	resp["processed"] = true
-	jsonResp, err := json.Marshal(resp)
-	if err != nil {
-		log.Fatalf("Error happened in JSON marshal. Err: %s", err)
-	}
-	w.Write(jsonResp)
-	return
-}
-
-func handleGithubCheck(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusCreated)
-	w.Header().Set("Content-Type", "application/json")
-	state := r.FormValue("state")
-	if (state == "") || (!isValidGuid(state)) {
-		handleError(w, "Invalid State", "The state parameter is invalid. Please try again.")
-		return
-	}
-	id := r.FormValue("id")
-	resp := make(map[string]interface{})
-	isPublic, isPrivate := getGithubOrgMembership(id)
-	resp["isPublicMember"] = isPublic
-	resp["isPrivateMember"] = isPrivate
 	jsonResp, err := json.Marshal(resp)
 	if err != nil {
 		log.Fatalf("Error happened in JSON marshal. Err: %s", err)
@@ -333,6 +304,51 @@ func handleApiEbondedStatus(w http.ResponseWriter, r *http.Request) {
 	return
 }
 
+func handleInvite(w http.ResponseWriter, r *http.Request, orgName string) {
+	w.WriteHeader(http.StatusCreated)
+	w.Header().Set("Content-Type", "application/json")
+	state := r.FormValue("state")
+	userEmail := getUserEmail(state)
+	connStr := os.Getenv("TABLE_CONNECTION_STRING")
+	serviceClient, err := aztables.NewServiceClientFromConnectionString(connStr, nil)
+	if err != nil {
+		log.Println(err)
+	}
+	table := serviceClient.NewClient("users")
+	ctx := context.TODO()
+	entity, err := table.GetEntity(ctx, "avanade", userEmail, nil)
+	if err != nil {
+		log.Println("Error getting entity")
+	}
+	var entityResult aztables.EDMEntity
+	err = json.Unmarshal(entity.Value, &entityResult)
+	if err != nil {
+		log.Println("failed to unmarshal entity: %w", err)
+	}
+	resp := make(map[string]interface{})
+	githubId, _ := strconv.ParseInt(fmt.Sprint(entityResult.Properties["githubId"]), 10, 64)
+
+	inviteUser(githubId, orgName)
+	resp["processed"] = true
+
+	jsonResp, err := json.Marshal(resp)
+	if err != nil {
+		log.Fatalf("Error happened in JSON marshal. Err: %s", err)
+	}
+	w.Write(jsonResp)
+	return
+}
+
+func handleInvitePublic(w http.ResponseWriter, r *http.Request) {
+	handleInvite(w, r, os.Getenv("GITHUB_PUBLIC_ORG"))
+	return
+}
+
+func handleInviteInternal(w http.ResponseWriter, r *http.Request) {
+	handleInvite(w, r, os.Getenv("GITHUB_INTERNAL_ORG"))
+	return
+}
+
 func main() {
 	err := godotenv.Load()
 	log.Printf("Loaded as %v\n", os.Getenv("ENV"))
@@ -344,6 +360,8 @@ func main() {
 	http.HandleFunc("/login", handleGitHubLogin)
 	http.HandleFunc("/github_oauth_cb", handleGitHubCallback)
 	http.HandleFunc("/api/ebonded", handleApiEbondedStatus)
+	http.HandleFunc("/api/invite_public", handleInvitePublic)
+	http.HandleFunc("/api/invite_private", handleInviteInternal)
 	http.HandleFunc("/api/test", handleTest)
 	fmt.Print("Started running on http://127.0.0.1:8000\n")
 	fmt.Println(http.ListenAndServe(":8000", nil))
