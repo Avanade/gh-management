@@ -415,7 +415,6 @@ func handleInvite(w http.ResponseWriter, r *http.Request, orgName string) {
 
 	inviteUser(githubId, orgName)
 	resp["processed"] = true
-
 	jsonResp, err := json.Marshal(resp)
 	if err != nil {
 		log.Fatalf("Error happened in JSON marshal. Err: %s", err)
