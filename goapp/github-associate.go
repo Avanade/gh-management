@@ -138,9 +138,9 @@ func handlePrivateRepo(w http.ResponseWriter, r *http.Request) {
 					log.Printf("Error setting visibility: %v", err)
 					resp["message"] = "Repository created, although there was an error setting the proper visibility."
 				}
-				// add user to github repository in the maintainer role
+				// add user to github repository in the admin role
 				collaboratorOptions := &github.RepositoryAddCollaboratorOptions{
-					Permission: "maintain",
+					Permission: "admin",
 				}
 				_, _, err = client.Repositories.AddCollaborator(ctx, os.Getenv("GITHUB_INTERNAL_ORG"), newRepoName, ghUsername, collaboratorOptions)
 				if err != nil {
