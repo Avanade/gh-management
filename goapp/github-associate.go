@@ -30,6 +30,9 @@ func inviteUser(id int64, orgName string) {
 	invite := &github.CreateOrgInvitationOptions{
 		InviteeID: &id,
 		Role:      &role,
+		TeamID:    []int64{
+			// Team ID for "Developers"
+		},
 	}
 
 	_, _, err := client.Organizations.CreateOrgInvitation(ctx, orgName, invite)
@@ -181,7 +184,7 @@ func getUserEmail(stateString string) string {
 	ctx := context.TODO()
 	entity, err := table.GetEntity(ctx, "avanade", stateString, nil)
 	if err != nil {
-		log.Println("Error getting entity")
+		log.Println("Error getting entity getting user email")
 		return ""
 	}
 	var entityResult aztables.EDMEntity
@@ -205,7 +208,7 @@ func isValidGuid(stateString string) bool {
 	ctx := context.TODO()
 	entity, err := table.GetEntity(ctx, "avanade", stateString, nil)
 	if err != nil {
-		log.Println("Error getting entity")
+		log.Println("Error getting entity in GUID check")
 		return false
 	}
 	var entityResult aztables.EDMEntity
@@ -342,9 +345,10 @@ func getUserRecord(userEmail string) (aztables.EDMEntity, error) {
 	}
 	table := serviceClient.NewClient("users")
 	ctx := context.TODO()
+	fmt.Println("Getting user record for: " + userEmail)
 	entity, err := table.GetEntity(ctx, "avanade", userEmail, nil)
 	if err != nil {
-		log.Println("Error getting entity")
+		log.Println("Error getting entity in user record")
 	}
 	var entityResult aztables.EDMEntity
 	err = json.Unmarshal(entity.Value, &entityResult)
