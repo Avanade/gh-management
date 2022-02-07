@@ -396,6 +396,9 @@ func handleInvite(w http.ResponseWriter, r *http.Request, orgName string) {
 	w.WriteHeader(http.StatusCreated)
 	w.Header().Set("Content-Type", "application/json")
 	state := r.FormValue("state")
+	if (state == "") || (!isValidGuid(state)) {
+		fmt.Printf("oauth string '%s', isn't valid", state)
+	}
 	userEmail := getUserEmail(state)
 	entityResult, err := getUserRecord(userEmail)
 	if err != nil {
