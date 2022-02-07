@@ -10,7 +10,6 @@ import (
 	"golang.org/x/oauth2"
 	githuboauth "golang.org/x/oauth2/github"
 	"html/template"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -109,11 +108,15 @@ func handlePrivateRepo(w http.ResponseWriter, r *http.Request) {
 			log.Println("failed to resolve entity: %w", err)
 			resp["message"] = "Unable to identify your GitHub username."
 		} else {
-			body, _ := ioutil.ReadAll(r.Body) // check for errors
-			keyVal := make(map[string]string)
-			json.Unmarshal(body, &keyVal)
-			newRepoName := keyVal["new_repo_name"]
-			newRepoDescription := keyVal["new_repo_description"]
+			// get the repo name from the json body
+			newRepoName := r.FormValue("new_repo_name")
+			// get the repo description from the json body
+			newRepoDescription := r.FormValue("new_repo_description")
+
+			if newRepoName == "" {
+				log.Fatal("new repo name is empty")
+			}
+			log.Printf("Requested by %s", userEmail)
 			// check to see if github repository already exists
 			repo, _, err := client.Repositories.Get(ctx, os.Getenv("GITHUB_INTERNAL_ORG"), newRepoName)
 			if err != nil && !strings.Contains(fmt.Sprintf("%v", err), "404 Not Found []") {
