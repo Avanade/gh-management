@@ -14,6 +14,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"strings"
 )
 
 func inviteUser(id int64, orgName string) {
@@ -79,6 +80,74 @@ func createPrivateGithubRepository(name string, owner string, description string
 	if err != nil {
 		log.Fatalf("Error happened in getting creating repo from template. Err: %s", err)
 	}
+}
+
+func handlePrivateRepo(w http.ResponseWriter, r *http.Request) {
+	// create github oauth client from token
+	ctx := context.Background()
+	ts := oauth2.StaticTokenSource(
+		&oauth2.Token{AccessToken: os.Getenv("GITHUB_TOKEN")},
+	)
+	tc := oauth2.NewClient(ctx, ts)
+	client := github.NewClient(tc)
+	state := r.FormValue("state")
+
+	// set up json response
+	w.WriteHeader(http.StatusCreated)
+	w.Header().Set("Content-Type", "application/json")
+
+	resp := make(map[string]interface{})
+	resp["processed"] = false
+	if (state == "") || (!isValidGuid(state)) {
+		resp["message"] = "Your repository was not created. If the app has been opened for more than an hour, reload the page."
+	} else {
+		userEmail := getUserEmail(state)
+		userRecord, err := getUserRecord(userEmail)
+		ghUsername := fmt.Sprint(userRecord.Properties["githubUsername"])
+		if err != nil {
+			log.Println("failed to resolve entity: %w", err)
+			resp["message"] = "Unable to identify your GitHub username."
+		} else {
+			newRepoName := r.FormValue("new_repo_name")
+			newRepoDescription := r.FormValue("new_repo_description")
+			// check to see if github repository already exists
+			repo, _, err := client.Repositories.Get(ctx, os.Getenv("GITHUB_INTERNAL_ORG"), newRepoName)
+			if err != nil && !strings.Contains(fmt.Sprintf("%v", err), "404 Not Found []") {
+				log.Printf("Error checking for existing repository: %v", err)
+				resp["message"] = "Unable to create your repository. Please try again later."
+			} else if repo != nil {
+				log.Printf("Repo already exists: %v", repo)
+				resp["message"] = "A repository by that name already exists."
+			} else {
+				log.Printf("Repo does not exist, creating it")
+				createPrivateGithubRepository(newRepoName, os.Getenv("GITHUB_INTERNAL_ORG"), newRepoDescription)
+				resp["message"] = "Your repository has been created."
+				resp["processed"] = true
+				// set github repository visibility to private
+				_, _, err := client.Repositories.Edit(ctx, os.Getenv("GITHUB_INTERNAL_ORG"), newRepoName, &github.Repository{
+					Visibility: github.String("internal"),
+				})
+				if err != nil {
+					log.Printf("Error setting visibility: %v", err)
+					resp["message"] = "Repository created, although there was an error setting the proper visibility."
+				}
+				// add user to github repository in the maintainer role
+				collaboratorOptions := &github.RepositoryAddCollaboratorOptions{
+					Permission: "maintain",
+				}
+				_, _, err = client.Repositories.AddCollaborator(ctx, os.Getenv("GITHUB_INTERNAL_ORG"), newRepoName, ghUsername, collaboratorOptions)
+				if err != nil {
+					log.Printf("Error adding user as a maintainer: %v", err)
+					resp["message"] = "Repository created, although there was an error adding your username to it as a maintainer."
+				}
+			}
+		}
+	}
+	jsonResp, err := json.Marshal(resp)
+	if err != nil {
+		log.Fatalf("Error happened in JSON marshal. Err: %s", err)
+	}
+	w.Write(jsonResp)
 }
 
 func handleTest(w http.ResponseWriter, r *http.Request) {
@@ -258,14 +327,8 @@ func handleGitHubCallback(w http.ResponseWriter, r *http.Request) {
 	t.Execute(w, map[string]string{"PrivacyUrl": os.Getenv("PRIVACY_URL"), "Username": *user.Login})
 }
 
-// /api/ebonded. Called by PowerApp on load.
-// Displays if the user is currently connected to GitHub or not.
-func handleApiEbondedStatus(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusCreated)
-	w.Header().Set("Content-Type", "application/json")
-	state := r.FormValue("state")
-	userEmail := getUserEmail(state)
-	ebonded := false
+func getUserRecord(userEmail string) (aztables.EDMEntity, error) {
+	var err error
 	connStr := os.Getenv("TABLE_CONNECTION_STRING")
 	serviceClient, err := aztables.NewServiceClientFromConnectionString(connStr, nil)
 	if err != nil {
@@ -281,6 +344,21 @@ func handleApiEbondedStatus(w http.ResponseWriter, r *http.Request) {
 	err = json.Unmarshal(entity.Value, &entityResult)
 	if err != nil {
 		log.Println("failed to unmarshal entity: %w", err)
+	}
+	return entityResult, err
+}
+
+// /api/ebonded. Called by PowerApp on load.
+// Displays if the user is currently connected to GitHub or not.
+func handleApiEbondedStatus(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusCreated)
+	w.Header().Set("Content-Type", "application/json")
+	state := r.FormValue("state")
+	userEmail := getUserEmail(state)
+	ebonded := false
+	entityResult, err := getUserRecord(userEmail)
+	if err != nil {
+		log.Println("failed to resolve entity: %w", err)
 	} else {
 		ebonded = true
 	}
@@ -355,13 +433,15 @@ func main() {
 	if err != nil && os.Getenv("ENV") == "local" {
 		log.Fatal("Error loading .env file")
 	}
-
+	// TODO: Periodically check github username hasn't been changed
+	// TODO: Pass state and approval directly from automate so user can't listen to state keys
 	http.HandleFunc("/", handleMain)
 	http.HandleFunc("/login", handleGitHubLogin)
 	http.HandleFunc("/github_oauth_cb", handleGitHubCallback)
 	http.HandleFunc("/api/ebonded", handleApiEbondedStatus)
 	http.HandleFunc("/api/invite_public", handleInvitePublic)
 	http.HandleFunc("/api/invite_private", handleInviteInternal)
+	http.HandleFunc("/api/create_private_repo", handlePrivateRepo)
 	http.HandleFunc("/api/test", handleTest)
 	fmt.Print("Started running on http://127.0.0.1:8000\n")
 	fmt.Println(http.ListenAndServe(":8000", nil))
