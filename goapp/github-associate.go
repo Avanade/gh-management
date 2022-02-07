@@ -30,7 +30,6 @@ func inviteUser(id int64, orgName string) {
 	invite := &github.CreateOrgInvitationOptions{
 		InviteeID: &id,
 		Role:      &role,
-		TeamID:    nil,
 	}
 
 	_, _, err := client.Organizations.CreateOrgInvitation(ctx, orgName, invite)
@@ -144,8 +143,8 @@ func handlePrivateRepo(w http.ResponseWriter, r *http.Request) {
 				}
 				_, _, err = client.Repositories.AddCollaborator(ctx, os.Getenv("GITHUB_INTERNAL_ORG"), newRepoName, ghUsername, collaboratorOptions)
 				if err != nil {
-					log.Printf("Error adding user as a maintainer: %v", err)
-					resp["message"] = "Repository created, although there was an error adding your username to it as a maintainer."
+					log.Printf("Error adding user in admin role: %v", err)
+					resp["message"] = "Repository created, although there was an error adding your username to it as the admin."
 				}
 			}
 		}
@@ -394,21 +393,9 @@ func handleInvite(w http.ResponseWriter, r *http.Request, orgName string) {
 	w.Header().Set("Content-Type", "application/json")
 	state := r.FormValue("state")
 	userEmail := getUserEmail(state)
-	connStr := os.Getenv("TABLE_CONNECTION_STRING")
-	serviceClient, err := aztables.NewServiceClientFromConnectionString(connStr, nil)
+	entityResult, err := getUserRecord(userEmail)
 	if err != nil {
-		log.Println(err)
-	}
-	table := serviceClient.NewClient("users")
-	ctx := context.TODO()
-	entity, err := table.GetEntity(ctx, "avanade", userEmail, nil)
-	if err != nil {
-		log.Println("Error getting entity")
-	}
-	var entityResult aztables.EDMEntity
-	err = json.Unmarshal(entity.Value, &entityResult)
-	if err != nil {
-		log.Println("failed to unmarshal entity: %w", err)
+		log.Println("failed to unmarshal entity from user table: %w", err)
 	}
 	resp := make(map[string]interface{})
 	githubId, _ := strconv.ParseInt(fmt.Sprint(entityResult.Properties["githubId"]), 10, 64)
@@ -417,7 +404,7 @@ func handleInvite(w http.ResponseWriter, r *http.Request, orgName string) {
 	resp["processed"] = true
 	jsonResp, err := json.Marshal(resp)
 	if err != nil {
-		log.Fatalf("Error happened in JSON marshal. Err: %s", err)
+		log.Fatalf("Error happened in JSON marshal with github ID. Err: %s", err)
 	}
 	w.Write(jsonResp)
 	return
