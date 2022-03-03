@@ -1,0 +1,8 @@
+sequenceDiagram
+    User->>GhApp: User opens Frontend
+    GhApp->>User: App requests authentication
+    User->>+AzureAD: User must log into AzureAD
+    AzureAD-->>-GhApp: AzureAD login confirmed, user.email provided
+    User->>+GitHub: User must log in to GitHub
+    GitHub-->>-GhApp: GitHub Login confirmed
+    User->>GhApp: User can complete tasks, based on groups the user has access to
