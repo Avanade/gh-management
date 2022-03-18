@@ -1,4 +1,4 @@
-package main
+package webserver
 
 import (
 	"net/http"
@@ -20,11 +20,3 @@ func TestWebserverLoads(t *testing.T) {
 		t.Errorf("got %q, want %q", got, want)
 	}
 }
-
-/* 	err := godotenv.Load()
-log.Printf("Loaded as %v\n", os.Getenv("ENV"))
-if err != nil && os.Getenv("ENV") == "local" {
-	log.Fatal("Error loading .env file")
-}
-
-*/
