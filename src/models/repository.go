@@ -41,7 +41,6 @@ const (
 )
 
 const (
-	stateInnerSource         = "InnerSource"
 	stateInnerSourceInternal = "InnerSourceInternal"
 	stateInnerSourcePrivate  = "InnerSourcePrivate"
 	stateInnerSourceDeleted  = "InnerSourceDeleted"

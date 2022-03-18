@@ -17,6 +17,8 @@ stateDiagram-v2
     InnerSource --> OpenSource: Review process completed
     state OpenSource {
         [*] --> Public
+        Public --> OS.Private : For legal hold only
+        OS.Private --> Public : When legal hold is complete
         Public --> OS.Retired
         state OS.Retired {
             [*] --> OS.Archived
@@ -27,3 +29,4 @@ stateDiagram-v2
     }
     OpenSource --> InnerSource: By exception only
     OpenSource --> [*]
+            

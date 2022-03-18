@@ -1,4 +1,4 @@
-package webserver
+package main
 
 import (
 	"flag"
@@ -25,7 +25,7 @@ func loadEnvironmentalVariables() {
 func main() {
 	loadEnvironmentalVariables()
 	http.Handle("/", &templateHandler{filename: "index.html"})
-
+	http.HandleFunc("/ossLogic", handleGraphRequest)
 	port := os.Getenv("PORT")
 	log.Printf("Starting server on port %v\n", port)
 	if err := http.ListenAndServe(port, nil); err != nil {
