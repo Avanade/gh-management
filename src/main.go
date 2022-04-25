@@ -1,34 +1,44 @@
 package main
 
 import (
-	"flag"
+	"fmt"
+	"html/template"
+	"log"
 	"net/http"
-	"os"
+	session "webserver/pkg/session"
+	routes "webserver/routes"
 
+	"github.com/codegangsta/negroni"
 	"github.com/joho/godotenv"
 )
 
-import (
-	"log"
-)
-
-var host = flag.String("host", ":8080", "The host of the application.")
-
-func loadEnvironmentalVariables() {
-	err := godotenv.Load()
-	log.Printf("Loaded as %v\n", os.Getenv("ENV"))
-	if err != nil && os.Getenv("ENV") == "local" {
-		log.Fatal("Error loading .env file")
-	}
-}
+var tmpl *template.Template
 
 func main() {
-	loadEnvironmentalVariables()
-	http.Handle("/", &templateHandler{filename: "index.html"})
-	http.HandleFunc("/ossLogic", handleGraphRequest)
-	port := os.Getenv("PORT")
-	log.Printf("Starting server on port %v\n", port)
-	if err := http.ListenAndServe(port, nil); err != nil {
-		log.Fatal("ListenAndServe:", err)
+
+	// Set environment variables
+	err := godotenv.Load()
+	if err != nil {
+		log.Print(err.Error())
 	}
+
+	// Create session
+	session.InitializeSession()
+
+	// Start server
+	mux := http.NewServeMux()
+
+	fs := http.FileServer(http.Dir("./public"))
+	mux.Handle("/public/", http.StripPrefix("/public/", fs))
+	mux.Handle("/", negroni.New(
+		negroni.HandlerFunc(session.IsAuthenticated),
+		negroni.Wrap(http.HandlerFunc(routes.IndexHandler)),
+	))
+	mux.HandleFunc("/login", routes.LoginHandler)
+	mux.HandleFunc("/callback", routes.CallbackHandler)
+	mux.HandleFunc("/logout", routes.LogoutHandler)
+
+	port := "8080"
+	fmt.Printf("Now listening on port %v\n", port)
+	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%v", port), mux))
 }
