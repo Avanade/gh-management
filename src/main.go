@@ -51,7 +51,7 @@ func loadPage(f func(w http.ResponseWriter, r *http.Request, data *models.TypPag
 		negroni.HandlerFunc(session.IsAuthenticated),
 		negroni.Wrap(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			// reset contents on data
-			*&data.Content = nil
+			data.Content = nil
 
 			// data pointer is passed on
 			f(w, r, &data)
