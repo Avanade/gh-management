@@ -48,7 +48,9 @@ func main() {
 // Verifies authentication before loading the page.
 func loadPage(f func(w http.ResponseWriter, r *http.Request, data *models.TypPageData)) *negroni.Negroni {
 	return negroni.New(
-		negroni.HandlerFunc(session.IsAuthenticated),
+		negroni.HandlerFunc(func(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
+			session.IsAuthenticated(w, r, next, &data)
+		}),
 		negroni.Wrap(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			// reset contents on data
 			data.Content = nil
