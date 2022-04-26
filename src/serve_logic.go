@@ -3,7 +3,7 @@ package main
 import (
 	"net/http"
 
-	"webserver/models"
+	"main/models"
 )
 
 func handleGraphRequest(w http.ResponseWriter, r *http.Request) {

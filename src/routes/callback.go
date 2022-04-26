@@ -8,11 +8,12 @@ import (
 
 	"github.com/coreos/go-oidc"
 
-	auth "webserver/pkg/authentication"
-	session "webserver/pkg/session"
+	"main/models"
+	auth "main/pkg/authentication"
+	session "main/pkg/session"
 )
 
-func CallbackHandler(w http.ResponseWriter, r *http.Request) {
+func CallbackHandler(w http.ResponseWriter, r *http.Request, data *models.TypPageData) {
 
 	// Check session
 	session, err := session.Store.Get(r, "auth-session")
@@ -77,6 +78,7 @@ func CallbackHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	data.Profile = profile
 	// Redirect to index
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
