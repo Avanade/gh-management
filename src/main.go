@@ -34,8 +34,8 @@ func main() {
 	mux.Handle("/public/", http.StripPrefix("/public/", fs))
 	mux.Handle("/", loadPage(routes.IndexHandler))
 	mux.Handle("/github", loadPage(routes.GithubHandler))
-	mux.HandleFunc("/login", routes.LoginHandler)
-	mux.HandleFunc("/callback", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/login/azure", routes.LoginHandler)
+	mux.HandleFunc("/login/azure/callback", func(w http.ResponseWriter, r *http.Request) {
 		routes.CallbackHandler(w, r, &data)
 	})
 	mux.HandleFunc("/logout", routes.LogoutHandler)
