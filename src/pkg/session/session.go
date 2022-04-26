@@ -10,6 +10,7 @@ import (
 	"os"
 	"time"
 
+	"main/models"
 	auth "main/pkg/authentication"
 
 	"github.com/gorilla/sessions"
@@ -26,7 +27,7 @@ func InitializeSession() {
 	gob.Register(map[string]interface{}{})
 }
 
-func IsAuthenticated(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
+func IsAuthenticated(w http.ResponseWriter, r *http.Request, next http.HandlerFunc, data *models.TypPageData) {
 	// Check session if there is saved user profile
 	session, err := Store.Get(r, "auth-session")
 	if err != nil {
@@ -37,11 +38,15 @@ func IsAuthenticated(w http.ResponseWriter, r *http.Request, next http.HandlerFu
 	if _, ok := session.Values["profile"]; !ok {
 
 		// Asks user to login if there is no saved user profile
-		http.Redirect(w, r, "/login", http.StatusTemporaryRedirect)
+		http.Redirect(w, r, "/login/azure", http.StatusTemporaryRedirect)
 
 	} else {
-
 		// If there is a user profile saved
+		// Save user profile on page data variable
+		if data.Profile == nil {
+			data.Profile = session.Values["profile"]
+		}
+
 		authenticator, err := auth.NewAuthenticator()
 
 		if err != nil {
@@ -69,23 +74,15 @@ func IsAuthenticated(w http.ResponseWriter, r *http.Request, next http.HandlerFu
 					fmt.Println(details.Error, details.ErrorDescription)
 				}
 
-				// Delete current session
-				session.Options.MaxAge = -1
-				session.Save(r, w)
-				if err != nil {
-					http.Error(w, err.Error(), http.StatusInternalServerError)
-					return
-				}
-
-				// Ask user to re-login
-				http.Redirect(w, r, "/login", http.StatusTemporaryRedirect)
+				// Log out the user if the attempt to refresh the token failed
+				http.Redirect(w, r, "/logout", http.StatusTemporaryRedirect)
 
 			} else if newToken != nil {
 				fmt.Printf("TOKEN REFRESHED\n")
 
 				// Save new token data
 				session.Values["refresh_token"] = newToken.RefreshToken
-				session.Values["expiry"] = newToken.Expiry.String()
+				session.Values["expiry"] = newToken.Expiry.UTC().Format("2006-01-02 15:04:05")
 				session.Values["access_token"] = newToken.AccessToken
 				err = session.Save(r, w)
 

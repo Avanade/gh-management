@@ -34,8 +34,8 @@ func main() {
 	mux.Handle("/public/", http.StripPrefix("/public/", fs))
 	mux.Handle("/", loadPage(routes.IndexHandler))
 	mux.Handle("/github", loadPage(routes.GithubHandler))
-	mux.HandleFunc("/login", routes.LoginHandler)
-	mux.HandleFunc("/callback", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/login/azure", routes.LoginHandler)
+	mux.HandleFunc("/login/azure/callback", func(w http.ResponseWriter, r *http.Request) {
 		routes.CallbackHandler(w, r, &data)
 	})
 	mux.HandleFunc("/logout", routes.LogoutHandler)
@@ -48,7 +48,9 @@ func main() {
 // Verifies authentication before loading the page.
 func loadPage(f func(w http.ResponseWriter, r *http.Request, data *models.TypPageData)) *negroni.Negroni {
 	return negroni.New(
-		negroni.HandlerFunc(session.IsAuthenticated),
+		negroni.HandlerFunc(func(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
+			session.IsAuthenticated(w, r, next, &data)
+		}),
 		negroni.Wrap(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			// reset contents on data
 			data.Content = nil
