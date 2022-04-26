@@ -1,10 +1,10 @@
 package routes
 
 import (
+	session "main/pkg/session"
 	"net/http"
 	"net/url"
 	"os"
-	session "webserver/pkg/session"
 )
 
 func LogoutHandler(w http.ResponseWriter, r *http.Request) {

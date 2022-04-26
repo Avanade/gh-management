@@ -5,8 +5,8 @@ import (
 	"encoding/base64"
 	"net/http"
 
-	auth "webserver/pkg/authentication"
-	session "webserver/pkg/session"
+	auth "main/pkg/authentication"
+	session "main/pkg/session"
 )
 
 func LoginHandler(w http.ResponseWriter, r *http.Request) {

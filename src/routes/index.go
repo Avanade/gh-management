@@ -1,21 +1,16 @@
 package routes
 
 import (
+	"main/models"
+	template "main/pkg/template"
 	"net/http"
-	session "webserver/pkg/session"
-	template "webserver/pkg/template"
 )
 
-func IndexHandler(w http.ResponseWriter, r *http.Request) {
-
-	session, err := session.Store.Get(r, "auth-session")
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	user := session.Values["profile"]
-
+func IndexHandler(w http.ResponseWriter, r *http.Request, data *models.TypPageData) {
+	// var test map[string]string
+	// test["data"] = "hi"
+	// test["data2"] = "hello"
+	// data.Content = test
 	tmpl := template.UseTemplate("index")
-	tmpl.Execute(w, user)
+	tmpl.Execute(w, data)
 }

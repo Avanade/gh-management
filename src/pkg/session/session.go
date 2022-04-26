@@ -10,7 +10,7 @@ import (
 	"os"
 	"time"
 
-	auth "webserver/pkg/authentication"
+	auth "main/pkg/authentication"
 
 	"github.com/gorilla/sessions"
 	"golang.org/x/oauth2"
@@ -27,7 +27,6 @@ func InitializeSession() {
 }
 
 func IsAuthenticated(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
-
 	// Check session if there is saved user profile
 	session, err := Store.Get(r, "auth-session")
 	if err != nil {
