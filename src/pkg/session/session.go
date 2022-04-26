@@ -43,7 +43,9 @@ func IsAuthenticated(w http.ResponseWriter, r *http.Request, next http.HandlerFu
 	} else {
 		// If there is a user profile saved
 		// Save user profile on page data variable
-		data.Profile = session.Values["profile"]
+		if data.Profile == nil {
+			data.Profile = session.Values["profile"]
+		}
 
 		authenticator, err := auth.NewAuthenticator()
 
