@@ -7,10 +7,5 @@ import (
 )
 
 func IndexHandler(w http.ResponseWriter, r *http.Request, data *models.TypPageData) {
-	// var test map[string]string
-	// test["data"] = "hi"
-	// test["data2"] = "hello"
-	// data.Content = test
-	tmpl := template.UseTemplate("index")
-	tmpl.Execute(w, data)
+	template.UseTemplate(&w, data, "index")
 }

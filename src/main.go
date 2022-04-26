@@ -24,6 +24,14 @@ func main() {
 		log.Print(err.Error())
 	}
 
+	// Data on master page
+	var menu []TypMenu
+
+	menu = append(menu, TypMenu{Name: "Home", Url: "/"})
+	menu = append(menu, TypMenu{Name: "Github", Url: "/github"})
+
+	data.Header = TypHeaders{Menu: menu}
+
 	// Create session
 	session.InitializeSession()
 
@@ -58,4 +66,13 @@ func loadPage(f func(w http.ResponseWriter, r *http.Request, data *models.TypPag
 			// data pointer is passed on
 			f(w, r, &data)
 		})))
+}
+
+type TypHeaders struct {
+	Menu []TypMenu
+}
+
+type TypMenu struct {
+	Name string
+	Url  string
 }
