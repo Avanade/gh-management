@@ -6,6 +6,9 @@ import (
 	"net/http"
 )
 
-func IndexHandler(w http.ResponseWriter, r *http.Request, data *models.TypPageData) {
-	template.UseTemplate(&w, data, "index")
+func IndexHandler(w http.ResponseWriter, r *http.Request, pageHeaders *models.TypHeaders) {
+	var data models.TypPageData
+	data.Header = pageHeaders
+
+	template.UseTemplate(&w, r, &data, "index")
 }

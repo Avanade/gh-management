@@ -8,12 +8,11 @@ import (
 
 	"github.com/coreos/go-oidc"
 
-	"main/models"
 	auth "main/pkg/authentication"
 	session "main/pkg/session"
 )
 
-func CallbackHandler(w http.ResponseWriter, r *http.Request, data *models.TypPageData) {
+func CallbackHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Check session
 	session, err := session.Store.Get(r, "auth-session")
@@ -70,7 +69,7 @@ func CallbackHandler(w http.ResponseWriter, r *http.Request, data *models.TypPag
 	session.Values["profile"] = profile
 	session.Values["refresh_token"] = token.RefreshToken
 	session.Values["expiry"] = token.Expiry.UTC().Format("2006-01-02 15:04:05")
-	// session.Options.MaxAge = 0
+
 	err = session.Save(r, w)
 
 	if err != nil {
@@ -78,7 +77,6 @@ func CallbackHandler(w http.ResponseWriter, r *http.Request, data *models.TypPag
 		return
 	}
 
-	data.Profile = profile
 	// Redirect to index
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }

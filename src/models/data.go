@@ -5,3 +5,12 @@ type TypPageData struct {
 	Profile interface{}
 	Content interface{}
 }
+
+type TypHeaders struct {
+	Menu []TypMenu
+}
+
+type TypMenu struct {
+	Name string
+	Url  string
+}

@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"html/template"
 	"log"
 	"main/models"
 	session "main/pkg/session"
@@ -13,10 +12,6 @@ import (
 	"github.com/joho/godotenv"
 )
 
-var tmpl *template.Template
-
-var data models.TypPageData
-
 func main() {
 	// Set environment variables
 	err := godotenv.Load()
@@ -25,12 +20,12 @@ func main() {
 	}
 
 	// Data on master page
-	var menu []TypMenu
+	var menu []models.TypMenu
 
-	menu = append(menu, TypMenu{Name: "Home", Url: "/"})
-	menu = append(menu, TypMenu{Name: "Github", Url: "/github"})
+	menu = append(menu, models.TypMenu{Name: "Home", Url: "/"})
+	menu = append(menu, models.TypMenu{Name: "Github", Url: "/github"})
 
-	data.Header = TypHeaders{Menu: menu}
+	pageHeaders := models.TypHeaders{Menu: menu}
 
 	// Create session
 	session.InitializeSession()
@@ -40,12 +35,10 @@ func main() {
 
 	fs := http.FileServer(http.Dir("./public"))
 	mux.Handle("/public/", http.StripPrefix("/public/", fs))
-	mux.Handle("/", loadPage(routes.IndexHandler))
-	mux.Handle("/github", loadPage(routes.GithubHandler))
+	mux.Handle("/", loadPage(routes.IndexHandler, &pageHeaders))
+	mux.Handle("/github", loadPage(routes.GithubHandler, &pageHeaders))
 	mux.HandleFunc("/login/azure", routes.LoginHandler)
-	mux.HandleFunc("/login/azure/callback", func(w http.ResponseWriter, r *http.Request) {
-		routes.CallbackHandler(w, r, &data)
-	})
+	mux.HandleFunc("/login/azure/callback", routes.CallbackHandler)
 	mux.HandleFunc("/logout", routes.LogoutHandler)
 
 	port := "8080"
@@ -54,25 +47,10 @@ func main() {
 }
 
 // Verifies authentication before loading the page.
-func loadPage(f func(w http.ResponseWriter, r *http.Request, data *models.TypPageData)) *negroni.Negroni {
+func loadPage(f func(http.ResponseWriter, *http.Request, *models.TypHeaders), pageHeaders *models.TypHeaders) *negroni.Negroni {
 	return negroni.New(
-		negroni.HandlerFunc(func(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
-			session.IsAuthenticated(w, r, next, &data)
-		}),
+		negroni.HandlerFunc(session.IsAuthenticated),
 		negroni.Wrap(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			// reset contents on data
-			data.Content = nil
-
-			// data pointer is passed on
-			f(w, r, &data)
+			f(w, r, pageHeaders)
 		})))
-}
-
-type TypHeaders struct {
-	Menu []TypMenu
-}
-
-type TypMenu struct {
-	Name string
-	Url  string
 }

@@ -6,6 +6,8 @@ import (
 	"net/http"
 )
 
-func GithubHandler(w http.ResponseWriter, r *http.Request, data *models.TypPageData) {
-	template.UseTemplate(&w, data, "github")
+func GithubHandler(w http.ResponseWriter, r *http.Request, pageHeaders *models.TypHeaders) {
+	var data models.TypPageData
+	data.Header = pageHeaders
+	template.UseTemplate(&w, r, &data, "github")
 }
