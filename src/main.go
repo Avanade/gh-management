@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"log"
-	"main/models"
 	session "main/pkg/session"
 	routes "main/routes"
 	"net/http"
@@ -19,14 +18,6 @@ func main() {
 		log.Print(err.Error())
 	}
 
-	// Data on master page
-	var menu []models.TypMenu
-
-	menu = append(menu, models.TypMenu{Name: "Home", Url: "/"})
-	menu = append(menu, models.TypMenu{Name: "Github", Url: "/github"})
-
-	pageHeaders := models.TypHeaders{Menu: menu}
-
 	// Create session
 	session.InitializeSession()
 
@@ -35,8 +26,8 @@ func main() {
 
 	fs := http.FileServer(http.Dir("./public"))
 	mux.Handle("/public/", http.StripPrefix("/public/", fs))
-	mux.Handle("/", loadPage(routes.IndexHandler, &pageHeaders))
-	mux.Handle("/github", loadPage(routes.GithubHandler, &pageHeaders))
+	mux.Handle("/", loadPage(routes.IndexHandler))
+	mux.Handle("/github", loadPage(routes.GithubHandler))
 	mux.HandleFunc("/login/azure", routes.LoginHandler)
 	mux.HandleFunc("/login/azure/callback", routes.CallbackHandler)
 	mux.HandleFunc("/logout", routes.LogoutHandler)
@@ -47,10 +38,9 @@ func main() {
 }
 
 // Verifies authentication before loading the page.
-func loadPage(f func(http.ResponseWriter, *http.Request, *models.TypHeaders), pageHeaders *models.TypHeaders) *negroni.Negroni {
+func loadPage(f func(w http.ResponseWriter, r *http.Request)) *negroni.Negroni {
 	return negroni.New(
 		negroni.HandlerFunc(session.IsAuthenticated),
-		negroni.Wrap(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			f(w, r, pageHeaders)
-		})))
+		negroni.Wrap(http.HandlerFunc(f)),
+	)
 }
