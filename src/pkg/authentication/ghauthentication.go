@@ -17,7 +17,6 @@ func GetGitHubLoginUrl(state string) string {
 	githubCallbackUrl := os.Getenv("ghcallbackurl")
 
 	redirectURL := fmt.Sprintf("https://github.com/login/oauth/authorize?client_id=%s&redirect_uri=%s&state=%s", githubClientID, githubCallbackUrl, url.QueryEscape(state))
-	fmt.Println(redirectURL)
 	return redirectURL
 }
 

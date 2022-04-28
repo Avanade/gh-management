@@ -1,7 +1,6 @@
 package routes
 
 import (
-	"fmt"
 	auth "main/pkg/authentication"
 	session "main/pkg/session"
 	"net/http"
@@ -15,7 +14,7 @@ func GithubCallbackHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	fmt.Println(r.URL.Query().Get("state"))
+
 	if r.URL.Query().Get("state") != session.Values["state"] {
 		http.Error(w, "Invalid state parameter", http.StatusBadRequest)
 		return
