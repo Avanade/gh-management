@@ -15,7 +15,6 @@ func IndexHandler(w http.ResponseWriter, r *http.Request, pageHeaders *models.Ty
 	if err != nil {
 		return
 	}
-	data.Content = gitHubUser
 
-	template.UseTemplate(&w, r, &data, "index")
+	template.UseTemplate(&w, r, "index", gitHubUser)
 }
