@@ -40,6 +40,8 @@ func main() {
 	mux.HandleFunc("/login/azure", routes.LoginHandler)
 	mux.HandleFunc("/login/azure/callback", routes.CallbackHandler)
 	mux.HandleFunc("/logout", routes.LogoutHandler)
+	mux.HandleFunc("/login/github", routes.GithubLoginHandler)
+	mux.HandleFunc("/login/github/callback", routes.GithubCallbackHandler)
 
 	port := "8080"
 	fmt.Printf("Now listening on port %v\n", port)
