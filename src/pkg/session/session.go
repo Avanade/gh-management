@@ -10,7 +10,6 @@ import (
 	"os"
 	"time"
 
-	"main/models"
 	auth "main/pkg/authentication"
 
 	"github.com/gorilla/sessions"
@@ -27,7 +26,7 @@ func InitializeSession() {
 	gob.Register(map[string]interface{}{})
 }
 
-func IsAuthenticated(w http.ResponseWriter, r *http.Request, next http.HandlerFunc, data *models.TypPageData) {
+func IsAuthenticated(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
 	// Check session if there is saved user profile
 	session, err := Store.Get(r, "auth-session")
 	if err != nil {
@@ -42,11 +41,6 @@ func IsAuthenticated(w http.ResponseWriter, r *http.Request, next http.HandlerFu
 
 	} else {
 		// If there is a user profile saved
-		// Save user profile on page data variable
-		if data.Profile == nil {
-			data.Profile = session.Values["profile"]
-		}
-
 		authenticator, err := auth.NewAuthenticator()
 
 		if err != nil {

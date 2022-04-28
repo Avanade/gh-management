@@ -2,9 +2,7 @@ package main
 
 import (
 	"fmt"
-	"html/template"
 	"log"
-	"main/models"
 	session "main/pkg/session"
 	routes "main/routes"
 	"net/http"
@@ -13,24 +11,12 @@ import (
 	"github.com/joho/godotenv"
 )
 
-var tmpl *template.Template
-
-var data models.TypPageData
-
 func main() {
 	// Set environment variables
 	err := godotenv.Load()
 	if err != nil {
 		log.Print(err.Error())
 	}
-
-	// Data on master page
-	var menu []TypMenu
-
-	menu = append(menu, TypMenu{Name: "Home", Url: "/"})
-	menu = append(menu, TypMenu{Name: "Github", Url: "/github"})
-
-	data.Header = TypHeaders{Menu: menu}
 
 	// Create session
 	session.InitializeSession()
@@ -43,9 +29,7 @@ func main() {
 	mux.Handle("/", loadPage(routes.IndexHandler))
 	mux.Handle("/github", loadPage(routes.GithubHandler))
 	mux.HandleFunc("/login/azure", routes.LoginHandler)
-	mux.HandleFunc("/login/azure/callback", func(w http.ResponseWriter, r *http.Request) {
-		routes.CallbackHandler(w, r, &data)
-	})
+	mux.HandleFunc("/login/azure/callback", routes.CallbackHandler)
 	mux.HandleFunc("/logout", routes.LogoutHandler)
 
 	port := "8080"
@@ -54,25 +38,9 @@ func main() {
 }
 
 // Verifies authentication before loading the page.
-func loadPage(f func(w http.ResponseWriter, r *http.Request, data *models.TypPageData)) *negroni.Negroni {
+func loadPage(f func(w http.ResponseWriter, r *http.Request)) *negroni.Negroni {
 	return negroni.New(
-		negroni.HandlerFunc(func(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
-			session.IsAuthenticated(w, r, next, &data)
-		}),
-		negroni.Wrap(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			// reset contents on data
-			data.Content = nil
-
-			// data pointer is passed on
-			f(w, r, &data)
-		})))
-}
-
-type TypHeaders struct {
-	Menu []TypMenu
-}
-
-type TypMenu struct {
-	Name string
-	Url  string
+		negroni.HandlerFunc(session.IsAuthenticated),
+		negroni.Wrap(http.HandlerFunc(f)),
+	)
 }
