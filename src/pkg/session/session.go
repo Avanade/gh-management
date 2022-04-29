@@ -10,6 +10,7 @@ import (
 	"os"
 	"time"
 
+	"main/models"
 	auth "main/pkg/authentication"
 
 	"github.com/gorilla/sessions"
@@ -88,6 +89,45 @@ func IsAuthenticated(w http.ResponseWriter, r *http.Request, next http.HandlerFu
 		}
 		next(w, r)
 	}
+}
+
+func GetGitHubUserData(w http.ResponseWriter, r *http.Request) (models.TypGitHubUser, error) {
+	session, err := Store.Get(r, "auth-session")
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return models.TypGitHubUser{LoggedIn: false}, err
+	}
+	var gitHubUser models.TypGitHubUser
+
+	if _, ok := session.Values["ghProfile"]; ok {
+		err = json.Unmarshal([]byte(fmt.Sprintf("%s", session.Values["ghProfile"])), &gitHubUser)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return models.TypGitHubUser{LoggedIn: false}, err
+		}
+
+		gitHubUser.AccessToken = fmt.Sprintf("%s", session.Values["ghAccessToken"])
+		gitHubUser.LoggedIn = true
+	} else {
+		gitHubUser.LoggedIn = false
+	}
+
+	return gitHubUser, nil
+}
+
+func GetState(w http.ResponseWriter, r *http.Request) (string, error) {
+	session, err := Store.Get(r, "auth-session")
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return "", err
+	}
+
+	if _, ok := session.Values["state"]; ok {
+
+		return fmt.Sprintf("%s", session.Values["state"]), nil
+
+	}
+	return "", nil
 }
 
 type ErrorDetails struct {

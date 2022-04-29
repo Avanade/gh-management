@@ -13,7 +13,20 @@
     </div>
     <div>
         <h2 class="font-bold pt-3">Actions</h2>
-        <div><button class="bg-[#FF5800] p-3 text-white" onclick="redirect('/login/github')">Connect to Github</button></div>
+        {{if not .LoggedIn}}
+        <div><button class="bg-[#FF5800] p-3 text-white" onclick="redirect('/login/github'), false">Connect to Github</button></div>
+        {{else}}
+        <div class="flex items-center border-gray-200 border w-96 shadow rounded-md py-5 my-3">
+            <div class="mr-4 flex-shrink-0 ">
+                <img class="rounded-full h-10 w-10 ml-5 mr-3" src="{{ .AvatarUrl }}" />
+            </div>
+            <div>
+                <h4 class="text-lg font-bold">{{ .Username }}</h4>
+                <p class="text-gray-500 text-sm leading-none">GitHub username</p>
+            </div>
+        </div>
+
+        {{end}}
         <div class="pt-1">
             <button class="bg-[#FF5800] p-3 text-white">Invite me to InnerSource</button>
             <button class="bg-[#FF5800] p-3 text-white">Invite me to the public GitHub organization</button>
@@ -28,16 +41,16 @@
     </div>
     <div>
         <h2 class="font-bold pt-3">External Websites</h2>
-        <button class="bg-[#FF5800] p-3 text-white" onclick="redirect('https://github.com/Avanade')">Open Avanade's Github</button>
+        <button class="bg-[#FF5800] p-3 text-white" onclick="redirect('https://github.com/Avanade', true)">Open Avanade's Github</button>
         <button class="bg-gray-200 p-3 text-gray-400" disabled>Open Avanade's InnerSource</button>
-        <button class="bg-[#FF5800] p-3 text-white" onclick="redirect('https://avanade.sharepoint.com/sites/VisualStudioSubscriptions/')">Visual Studio @ Avanade</button>
+        <button class="bg-[#FF5800] p-3 text-white" onclick="redirect('https://avanade.sharepoint.com/sites/VisualStudioSubscriptions/', true)">Visual Studio @ Avanade</button>
     </div>
     <div>
         TEST DATA: {{ . }}
     </div>
     <script type="text/javascript">
-        function redirect(url){
-            window.open(url, '_blank')
+        function redirect(url, newTab){
+            window.open(url, newTab? '_blank' : '_self')
         }
     </script>
 {{ end }}
