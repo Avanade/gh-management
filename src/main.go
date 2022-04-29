@@ -10,7 +10,7 @@ import (
 	"github.com/codegangsta/negroni"
 	"github.com/joho/godotenv"
 
-	port "main/port"
+	port "main/pkg/envvar"
 )
 
 func main() {
