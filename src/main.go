@@ -9,6 +9,8 @@ import (
 
 	"github.com/codegangsta/negroni"
 	"github.com/joho/godotenv"
+
+	ev "main/pkg/envvar"
 )
 
 func main() {
@@ -34,9 +36,10 @@ func main() {
 	mux.HandleFunc("/login/github", routes.GithubLoginHandler)
 	mux.HandleFunc("/login/github/callback", routes.GithubCallbackHandler)
 
-	port := "8080"
+	port := ev.GetEnvVar("PORT", "8080")
 	fmt.Printf("Now listening on port %v\n", port)
 	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%v", port), mux))
+
 }
 
 // Verifies authentication before loading the page.
