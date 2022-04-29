@@ -10,7 +10,7 @@ import (
 	"github.com/codegangsta/negroni"
 	"github.com/joho/godotenv"
 
-	port "main/pkg/envvar"
+	ev "main/pkg/envvar"
 )
 
 func main() {
@@ -34,7 +34,7 @@ func main() {
 	mux.HandleFunc("/login/azure/callback", routes.CallbackHandler)
 	mux.HandleFunc("/logout", routes.LogoutHandler)
 
-	port := port.GetEnvVar("PORT", "8080")
+	port := ev.GetEnvVar("PORT", "8080")
 	fmt.Printf("Now listening on port %v\n", port)
 	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%v", port), mux))
 
