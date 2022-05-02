@@ -22,7 +22,7 @@ func LogoutHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	logoutUrl, err := url.Parse("https://login.microsoftonline.com/" + os.Getenv("tenantid") + "/oauth2/logout?client_id=" + os.Getenv("clientid") + "&post_logout_redirect_uri=" + os.Getenv("home"))
+	logoutUrl, err := url.Parse("https://login.microsoftonline.com/" + os.Getenv("tenantid") + "/oauth2/logout?client_id=" + os.Getenv("clientid") + "&post_logout_redirect_uri=" + os.Getenv("homeurl"))
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

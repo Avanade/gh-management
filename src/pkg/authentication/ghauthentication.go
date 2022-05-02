@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"main/pkg/envvar"
 	"net/http"
 	"net/url"
 	"os"
@@ -14,7 +15,7 @@ import (
 // Returns the GitHub Login URL
 func GetGitHubLoginUrl(state string) string {
 	githubClientID := os.Getenv("ghclientid")
-	githubCallbackUrl := os.Getenv("ghcallbackurl")
+	githubCallbackUrl := envvar.GetEnvVar("homeurl", "http://localhost:8080") + "/login/github/callback"
 
 	redirectURL := fmt.Sprintf("https://github.com/login/oauth/authorize?client_id=%s&redirect_uri=%s&state=%s", githubClientID, githubCallbackUrl, url.QueryEscape(state))
 	return redirectURL
