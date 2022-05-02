@@ -12,5 +12,5 @@ func GithubLoginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	http.Redirect(w, r, auth.GetGitHubLoginUrl(state), 301)
+	http.Redirect(w, r, auth.GetGitHubLoginUrl(state), http.StatusTemporaryRedirect)
 }
