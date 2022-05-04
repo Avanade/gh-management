@@ -7,10 +7,14 @@ import (
 	routes "main/routes"
 	"net/http"
 
-	"github.com/codegangsta/negroni"
-	"github.com/joho/godotenv"
+	"github.com/gorilla/mux"
+
+	//"net/http"
 
 	ev "main/pkg/envvar"
+
+	"github.com/codegangsta/negroni"
+	"github.com/joho/godotenv"
 )
 
 func main() {
@@ -23,11 +27,8 @@ func main() {
 	// Create session
 	session.InitializeSession()
 
-	// Start server
-	mux := http.NewServeMux()
-
-	fs := http.FileServer(http.Dir("./public"))
-	mux.Handle("/public/", http.StripPrefix("/public/", fs))
+	mux := mux.NewRouter()
+	mux.PathPrefix("/public/").Handler(http.StripPrefix("/public/", http.FileServer(http.Dir("./public/"))))
 	mux.Handle("/", loadPage(routes.IndexHandler))
 	mux.Handle("/github", loadPage(routes.GithubHandler))
 	mux.HandleFunc("/login/azure", routes.LoginHandler)

@@ -9,7 +9,10 @@ require (
 	github.com/qmuntal/stateless v1.5.3
 )
 
-require github.com/gorilla/securecookie v1.1.1 // indirect
+require (
+	github.com/gorilla/mux v1.8.0 // indirect
+	github.com/gorilla/securecookie v1.1.1 // indirect
+)
 
 require (
 	github.com/golang/protobuf v1.4.2 // indirect
