@@ -46,19 +46,19 @@ func Init(cp ConnectionParam) (*DB, error) {
 		log.Fatal(err.Error())
 		return nil, err
 	}
-	fmt.Println("Connected!")
+
 	return &DB{db}, nil
 }
 
 func (db *DB) ExecuteStoredProcedure(procedure string, params map[string]interface{}) (sql.Result, error) {
-	var args []sql.NamedArg
+	var args []interface{}
 
 	for i, v := range params {
 		args = append(args, sql.Named(i, v))
 	}
 
 	ctx := context.Background()
-	result, err := db.ExecContext(ctx, procedure, args)
+	result, err := db.ExecContext(ctx, procedure, args...)
 
 	if err != nil {
 		return nil, err
@@ -67,26 +67,19 @@ func (db *DB) ExecuteStoredProcedure(procedure string, params map[string]interfa
 	return result, nil
 }
 
+// Add comment
 func (db *DB) ExecuteStoredProcedureWithResult(procedure string, params map[string]interface{}) ([]map[string]interface{}, error) {
-	var args []sql.NamedArg
-
-	var rows *sql.Rows
-	var errQC error
+	var args []interface{}
 
 	ctx := context.Background()
 
-	if params != nil {
-		for i, v := range params {
-			args = append(args, sql.Named(i, v))
-		}
-
-		rows, errQC = db.QueryContext(ctx, procedure, args)
-	} else {
-		rows, errQC = db.QueryContext(ctx, procedure, nil)
+	for i, v := range params {
+		args = append(args, sql.Named(i, v))
 	}
 
-	if errQC != nil {
-		return nil, errQC
+	rows, err := db.QueryContext(ctx, procedure, args...)
+	if err != nil {
+		return nil, err
 	}
 
 	defer rows.Close()
