@@ -1,44 +1,119 @@
-// package sql
+package sql
 
-// import (
-// 	"context"
-// 	"database/sql"
-// 	"fmt"
-// 	"log"
+import (
+	"context"
+	"database/sql"
+	"fmt"
+	"log"
 
-// 	_ "github.com/denisenkom/go-mssqldb"
-// )
+	_ "github.com/microsoft/go-mssqldb"
+)
 
-// // Connection Parameters
-// type ConnectionParam struct {
-// 	connectionString string
-// 	server           string
-// 	port             int
-// 	user             string
-// 	password         string
-// 	database         string
-// }
+type DB struct {
+	*sql.DB
+}
 
-// func Init(cp ConnectionParam) (*sql.DB, error) {
-// 	connString := cp.connectionString
-// 	// Build connection string if property connection string is not set
-// 	if connString == "" {
-// 		connString = fmt.Sprintf("server=%s;user id=%s;password=%s;port=%d;database=%s;",
-// 			cp.server, cp.user, cp.password, cp.port, cp.database)
-// 	}
+// Connection Parameters
+type ConnectionParam struct {
+	connectionString string
+	server           string
+	port             int
+	user             string
+	password         string
+	database         string
+}
 
-// 	// Create connection pool
-// 	db, err := sql.Open("sqlserver", connString)
-// 	if err != nil {
-// 		log.Fatal("Error creating connection pool: ", err.Error())
-// 		return nil, err
-// 	}
-// 	ctx := context.Background()
-// 	err = db.PingContext(ctx)
-// 	if err != nil {
-// 		log.Fatal(err.Error())
-// 		return nil, err
-// 	}
-// 	fmt.Printf("Connected!")
-// 	return db, nil
-// }
+// Connection
+func Init(cp ConnectionParam) (*DB, error) {
+	connString := cp.connectionString
+	// Build connection string if property connection string is not set
+	if connString == "" {
+		connString = fmt.Sprintf("server=%s;user id=%s;password=%s;port=%d;database=%s;",
+			cp.server, cp.user, cp.password, cp.port, cp.database)
+	}
+
+	// Create connection pool
+	db, err := sql.Open("sqlserver", connString)
+	if err != nil {
+		log.Fatal("Error creating connection pool: ", err.Error())
+		return nil, err
+	}
+
+	// Check connection
+	ctx := context.Background()
+	err = db.PingContext(ctx)
+	if err != nil {
+		log.Fatal(err.Error())
+		return nil, err
+	}
+	fmt.Println("Connected!")
+	return &DB{db}, nil
+}
+
+func (db *DB) ExecuteStoredProcedure(procedure string, params map[string]interface{}) (sql.Result, error) {
+	var args []sql.NamedArg
+
+	for i, v := range params {
+		args = append(args, sql.Named(i, v))
+	}
+
+	ctx := context.Background()
+	result, err := db.ExecContext(ctx, procedure, args)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return result, nil
+}
+
+func (db *DB) ExecuteStoredProcedureWithResult(procedure string, params map[string]interface{}) ([]map[string]interface{}, error) {
+	var args []sql.NamedArg
+
+	var rows *sql.Rows
+	var errQC error
+
+	ctx := context.Background()
+
+	if params != nil {
+		for i, v := range params {
+			args = append(args, sql.Named(i, v))
+		}
+
+		rows, errQC = db.QueryContext(ctx, procedure, args)
+	} else {
+		rows, errQC = db.QueryContext(ctx, procedure, nil)
+	}
+
+	if errQC != nil {
+		return nil, errQC
+	}
+
+	defer rows.Close()
+
+	columns, err := rows.Columns()
+	if err != nil {
+		return nil, err
+	}
+
+	var results []map[string]interface{}
+
+	for rows.Next() {
+		values := make([]interface{}, len(columns))
+		pointers := make([]interface{}, len(columns))
+		for i, _ := range values {
+			pointers[i] = &values[i]
+		}
+		err := rows.Scan(pointers...)
+		if err != nil {
+			return nil, err
+		}
+		result := make(map[string]interface{})
+		for i, val := range values {
+			result[columns[i]] = val
+		}
+		results = append(results, result)
+	}
+
+	return results, nil
+}
