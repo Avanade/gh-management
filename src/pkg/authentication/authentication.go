@@ -3,6 +3,7 @@ package authentication
 import (
 	"context"
 	"log"
+	"main/pkg/envvar"
 	"os"
 
 	oidc "github.com/coreos/go-oidc"
@@ -26,7 +27,7 @@ func NewAuthenticator() (*Authenticator, error) {
 	conf := oauth2.Config{
 		ClientID:     os.Getenv("clientid"),
 		ClientSecret: os.Getenv("clientsecret"),
-		RedirectURL:  os.Getenv("callbackurl"),
+		RedirectURL:  envvar.GetEnvVar("homeurl", "http://localhost:8080") + "/login/azure/callback",
 		Endpoint:     provider.Endpoint(),
 		Scopes:       []string{oidc.ScopeOpenID, oidc.ScopeOfflineAccess, "profile"},
 	}

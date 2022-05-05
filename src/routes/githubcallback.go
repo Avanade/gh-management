@@ -4,6 +4,8 @@ import (
 	auth "main/pkg/authentication"
 	session "main/pkg/session"
 	"net/http"
+
+	"golang.org/x/oauth2"
 )
 
 func GithubCallbackHandler(w http.ResponseWriter, r *http.Request) {
@@ -20,14 +22,20 @@ func GithubCallbackHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Get GitHub temporary code
+	ghauth := auth.GetGitHubOauthConfig()
+
+	// Exchange temporary code for access token
 	code := r.URL.Query().Get("code")
 
-	ghAccessToken := auth.GetGithubAccessToken(code)
-	ghProfile := auth.GetGitHubUserProfile(ghAccessToken)
+	ghAccessToken, err := ghauth.Exchange(oauth2.NoContext, code)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	ghProfile := auth.GetGitHubUserProfile(ghAccessToken.AccessToken)
 
 	// Save GitHub auth data on session cookies
-	session.Values["ghAccessToken"] = ghAccessToken
+	session.Values["ghAccessToken"] = ghAccessToken.AccessToken
 	session.Values["ghProfile"] = ghProfile
 
 	err = session.Save(r, w)
