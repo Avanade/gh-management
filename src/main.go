@@ -4,7 +4,10 @@ import (
 	"fmt"
 	"log"
 	session "main/pkg/session"
-	routes "main/routes"
+	rtAzure "main/routes/login/azure"
+	rtGithub "main/routes/login/github"
+	rtPages "main/routes/pages"
+	rtProjects "main/routes/pages/projects"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -29,13 +32,14 @@ func main() {
 
 	mux := mux.NewRouter()
 	mux.PathPrefix("/public/").Handler(http.StripPrefix("/public/", http.FileServer(http.Dir("./public/"))))
-	mux.Handle("/", loadPage(routes.IndexHandler))
-	mux.Handle("/github", loadPage(routes.GithubHandler))
-	mux.HandleFunc("/login/azure", routes.LoginHandler)
-	mux.HandleFunc("/login/azure/callback", routes.CallbackHandler)
-	mux.HandleFunc("/logout", routes.LogoutHandler)
-	mux.HandleFunc("/login/github", routes.GithubLoginHandler)
-	mux.HandleFunc("/login/github/callback", routes.GithubCallbackHandler)
+	mux.Handle("/", loadPage(rtPages.IndexHandler))
+	mux.Handle("/sample", loadPage(rtPages.SampleHandler))
+	mux.Handle("/projects/new", loadPage(rtProjects.ProjectsNewHandler))
+	mux.HandleFunc("/login/azure", rtAzure.LoginHandler)
+	mux.HandleFunc("/login/azure/callback", rtAzure.CallbackHandler)
+	mux.HandleFunc("/logout", rtAzure.LogoutHandler)
+	mux.HandleFunc("/login/github", rtGithub.GithubLoginHandler)
+	mux.HandleFunc("/login/github/callback", rtGithub.GithubCallbackHandler)
 
 	port := ev.GetEnvVar("port", "80")
 	fmt.Printf("Now listening on port %v\n", port)
