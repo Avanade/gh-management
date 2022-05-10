@@ -18,13 +18,10 @@ func UseTemplate(w *http.ResponseWriter, r *http.Request, page string, pageData 
 	}
 
 	// Data on master page
-	var menu []models.TypMenu
-	menu = append(menu, models.TypMenu{Name: "Home", Url: "/"})
-	menu = append(menu, models.TypMenu{Name: "Sample", Url: "/sample"})
-	pageHeaders := models.TypHeaders{Menu: menu}
+	masterPageData := models.TypHeaders{Page: page}
 
 	data := models.TypPageData{
-		Header:  pageHeaders,
+		Header:  masterPageData,
 		Profile: session.Values["profile"],
 		Content: pageData}
 
