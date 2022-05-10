@@ -1,3 +1,90 @@
 {{ define "content" }}
-    New Project
+<form action="#" method="POST">
+<p>
+<h3 class="text-lg font-medium leading-6 text-gray-900">Project information</h3>
+All projects start on Avanade’s innersource on GitHub. Once you have identified a business sponsor, and submitted your first automated security scan, you can request to move the project to open source. If you open source this application, it will be displayed publicly, so think carefully.
+</p>
+<br>
+
+<!-- <div class="flex flex-row">
+    <div>  <h3 class="text-lg font-medium leading-6 text-gray-900">Project name</h3></div>
+    <div>  <h3 class="text-lg font-medium leading-6 text-gray-900">Project co-owner</h3></div>
+</div> -->
+<table>
+    <tbody>
+        <tr>
+            <td style="width:50%;"> 
+                <h3 class="text-lg font-medium leading-6 text-gray-900">Project name</h3>
+            </td>
+            <td>
+                <h3 class="text-lg font-medium leading-6 text-gray-900">Project co-owner</h3>
+            </td>
+        </tr>
+        <tr>
+            <td> <input type="text" name="first-name" id="first-name" autocomplete="given-name"
+                    class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
+            </td>
+            <td><input type="text" name="first-name" id="first-name" autocomplete="given-name"
+                class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
+        </td>
+        </tr>
+        <tr>
+            <td>The title should represent what the asset does. Avoid acronyms, code names and the use of the word
+                &#39;Avanade&#39;.</td>
+            <td>All projects must have two or more owners, to ensure that security alerts can be dealt with promptly.
+            </td>
+        </tr>
+        <tr>
+            <td><h3 class="text-lg font-medium leading-6 text-gray-900">Project description</h3></td>
+            <td>&nbsp;</td>
+        </tr>
+        <tr>
+            <td><input type="text" name="first-name" id="first-name" autocomplete="given-name"
+                class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
+</td>
+            <td>&nbsp;</td>
+        </tr>
+        <tr>
+            <td>Be verbose in the description. Describe what the asset does and how it achieves this. If your asset
+                improves an existing product or approach then be sure to explicitly state how it does this. Provide
+                information on business value and potential effort saving or avoidance.</td>
+            <td>&nbsp;</td>
+        </tr>
+    </tbody>
+</table>
+
+
+<p>
+<div class="flex items-start">
+    <div class="flex items-center h-5">
+        <input id="comments" name="comments" type="checkbox"
+            class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded">
+    </div>
+    <div class="ml-3 text-sm">
+
+        <p class="text-gray-500">I confirm that this project is Avanade owned intellectual property, or the client legal
+            team have approved this project.
+        </p>
+    </div>
+</div>
+</p>
+
+<p>
+<div class="flex items-start">
+    <div class="flex items-center h-5">
+        <input id="comments" name="comments" type="checkbox"
+            class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded">
+    </div>
+    <div class="ml-3 text-sm">
+
+        <p class="text-gray-500">I confirm that I will keep automated security and intellectual property scans enabled.
+        </p>
+    </div>
+</div>
+</p>
+<p> will be automatically created in Avanade innersource, and you will receive a Teams notification with a link to the
+    project.<br />
+    You can also view your projects under the projects tab.
+</p>
+</form>
 {{ end }}
