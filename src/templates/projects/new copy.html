@@ -1,7 +1,7 @@
 {{ define "content" }}
 <form action="#" method="POST">
-
-
+ 
+    
     <div>
         <p>
         <h3 class="text-lg font-medium leading-6 text-gray-900">Project information</h3>
@@ -12,50 +12,54 @@
         </p>
         <br>
 
-        <div class="flex flex-row ...">
-            <div class="basis-1/2">
-                <div class="flex flex-col ...">
-                    <div > 
+        <table>
+            <tbody>
+                <tr>
+                    <td style="width:50%;">
                         <h3 class="text-lg font-medium leading-6 text-gray-900">Project name</h3>
-                    </div>
-                    <div> <input type="text" name="first-name" id="first-name" autocomplete="given-name"
+                    </td>
+                    <td>
+                        <h3 class="text-lg font-medium leading-6 text-gray-900">Project co-owner</h3>
+                    </td>
+                </tr>
+                <tr>
+                    <td> <input type="text" name="first-name" id="first-name" autocomplete="given-name"
                             class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md border-2">
-                    </div>
-                    <div>The title should represent what the asset does. Avoid acronyms, code names and the use of the
+                    </td>
+                    <td><input type="text" name="first-name" id="first-name" autocomplete="given-name"
+                            class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md border-2">
+                    </td>
+                </tr>
+                <tr>
+                    <td>The title should represent what the asset does. Avoid acronyms, code names and the use of the
                         word
-                        &#39;Avanade&#39;.</div>
-                </div>
-                <div class="flex flex-col ...">
-                    <div>
+                        &#39;Avanade&#39;.</td>
+                    <td>All projects must have two or more owners, to ensure that security alerts can be dealt with
+                        promptly.
+                    </td>
+                </tr>
+                <tr>
+                    <td>
                         <h3 class="text-lg font-medium leading-6 text-gray-900">Project description</h3>
-                    </div>
-                    <div>
-                        <input type="text" name="first-name" id="first-name" autocomplete="given-name"
+                    </td>
+                    <td>&nbsp;</td>
+                </tr>
+                <tr>
+                    <td><input type="text" name="first-name" id="first-name" autocomplete="given-name"
                             class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md  border-2">
-                    </div>
-                    <div>Be verbose in the description. Describe what the asset does and how it achieves this. If your
+                    </td>
+                    <td>&nbsp;</td>
+                </tr>
+                <tr>
+                    <td>Be verbose in the description. Describe what the asset does and how it achieves this. If your
                         asset
                         improves an existing product or approach then be sure to explicitly state how it does this.
                         Provide
-                        information on business value and potential effort saving or avoidance.</div>
-                </div>
-            </div>
-            <div class="basis-1/2">
-                <div class="flex flex-col ...">
-                    <div>
-                        <h3 class="text-lg font-medium leading-6 text-gray-900">Project co-owner</h3>
-                    </div>
-                    <div>
-                        <input type="text" name="first-name" id="first-name" autocomplete="given-name"
-                            class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md border-2">
-                    </div>
-                    <div>All projects must have two or more owners, to ensure that security alerts can be dealt with
-                        promptly.</div>
-                </div>
-
-            </div>
-        </div>
-
+                        information on business value and potential effort saving or avoidance.</td>
+                    <td>&nbsp;</td>
+                </tr>
+            </tbody>
+        </table>
 
 
         <p>
@@ -89,16 +93,18 @@
             </div>
         </div>
         </p>
-        <p> Projects will be automatically created in Avanade innersource, and you will receive a Teams notification with a link to the project.<br />
+        <p> will be automatically created in Avanade innersource, and you will receive a Teams notification with a link
+            to
+            the
+            project.<br />
             You can also view your projects under the projects tab.
         </p>
-    
 
-        <div>
-            <div align="right">
-                <button type="submit" style="background-color:orangered"
-                    class="bg-orange-500  inline-flex justify-center py-2 px-4 ">Submit project</button>
 
+        <div  >
+            <div align="right"  >
+                <button type="submit" style="background-color:orangered"class="bg-orange-500  inline-flex justify-center py-2 px-4 ">Submit project</button>
+            
             </div>
         </div>
 
