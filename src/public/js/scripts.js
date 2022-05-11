@@ -4,6 +4,10 @@
     sidebar = document.getElementById("sidebar");
     shade = document.getElementById("shade")
 
+    let pageTitle = document.getElementById("pageTitle")
+    pageTitle.style = "display:none"
+    document.getElementById("pageTitlePlaceholder").innerHTML = pageTitle.innerHTML
+
   function toggleSidebar() {
     let classesToApplyForSidebar = {
       active: [],
