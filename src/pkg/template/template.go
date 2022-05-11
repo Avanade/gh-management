@@ -18,7 +18,18 @@ func UseTemplate(w *http.ResponseWriter, r *http.Request, page string, pageData 
 	}
 
 	// Data on master page
-	masterPageData := models.TypHeaders{Page: page}
+	var menu []models.TypMenu
+	menu = append(menu, models.TypMenu{Name: "Dashboard", Url: "/", IconPath: "/public/icons/dashboard.svg"})
+	menu = append(menu, models.TypMenu{Name: "Projects", Url: "/projects/my", IconPath: "/public/icons/projects.svg"})
+	menu = append(menu, models.TypMenu{Name: "Communities", Url: "/communities/my", IconPath: "/public/icons/communities.svg"})
+	menu = append(menu, models.TypMenu{Name: "Guidance", Url: "/guidance", IconPath: "/public/icons/guidance.svg"})
+	menu = append(menu, models.TypMenu{Name: "Approvals", Url: "/approvals/my", IconPath: "/public/icons/approvals.svg"})
+
+	var externalLinks []models.TypMenu
+	externalLinks = append(externalLinks, models.TypMenu{Name: "Tech Community Calendar", Url: "/#", IconPath: "/public/icons/calendar.svg"})
+	externalLinks = append(externalLinks, models.TypMenu{Name: "Stack Overflow at Avanade", Url: "/#", IconPath: "/public/icons/questionmark.svg"})
+	externalLinks = append(externalLinks, models.TypMenu{Name: "Open Innovation Meetup", Url: "/#", IconPath: "/public/icons/microphone.svg"})
+	masterPageData := models.TypHeaders{Menu: menu, ExternalLinks: externalLinks, Page: page}
 
 	data := models.TypPageData{
 		Header:  masterPageData,
