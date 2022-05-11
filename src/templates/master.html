@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="shortcut icon" href="data:image/x-icon;," type="image/x-icon"> 
     <title>GH-Management</title>
     <!-- <link rel="stylesheet" href="/public/css/style.css"> -->
     <link rel="stylesheet" href="/public/css/output.css" />
@@ -54,10 +55,11 @@
               </div>
               <div class="pl-4 text-sm pb-7">Open Technology</div>
               <nav class="mt-5 px-2 space-y-1">
+              {{ $page := .Header.Page}}
               {{ range $menu := .Header.Menu }}
               <a
                 href="{{ $menu.Url }}"
-                {{ if eq $menu.Name "Dashboard" }}
+                {{ if eq $menu.Name $page  }}
                 class="bg-gray-100 text-gray-900 group flex items-center px-2 py-2 text-base font-medium rounded-md"
                 {{ else }}
                 class="text-gray-600 hover:bg-gray-50 hover:text-gray-900 group flex items-center px-2 py-2 text-base font-medium rounded-md"
@@ -134,10 +136,11 @@
             </div>
             <div class="pl-4 text-sm pb-7">Open Technology</div>
             <nav class="mt-5 px-2 space-y-1">
+              {{ $page := .Header.Page}}
               {{ range $menu := .Header.Menu }}
               <a
                 href="{{ $menu.Url }}"
-                {{ if eq $menu.Name "Dashboard" }}
+                {{ if eq $menu.Name $page  }}
                 class="bg-gray-100 text-gray-900 group flex items-center px-2 py-2 text-base font-medium rounded-md"
                 {{ else }}
                 class="text-gray-600 hover:bg-gray-50 hover:text-gray-900 group flex items-center px-2 py-2 text-base font-medium rounded-md"
