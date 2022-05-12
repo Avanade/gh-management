@@ -15,10 +15,13 @@ type TypGitHubUser struct {
 }
 
 type TypHeaders struct {
-	Menu []TypMenu
+	Menu          []TypMenu
+	ExternalLinks []TypMenu
+	Page          string
 }
 
 type TypMenu struct {
-	Name string
-	Url  string
+	Name     string
+	Url      string
+	IconPath string
 }
