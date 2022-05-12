@@ -8,18 +8,26 @@ import (
 )
 
 func LogoutHandler(w http.ResponseWriter, r *http.Request) {
-	session, err := session.Store.Get(r, "auth-session")
+	azSession, err := session.Store.Get(r, "auth-session")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	session.Options.MaxAge = -1
-	err = session.Save(r, w)
-
+	azSession.Options.MaxAge = -1
+	err = azSession.Save(r, w)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
+	}
+
+	user, err := session.GetGitHubUserData(w, r)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	if user.LoggedIn {
+		session.RemoveGitHubAccount(w, r)
 	}
 
 	logoutUrl, err := url.Parse("https://login.microsoftonline.com/" + os.Getenv("tenantid") + "/oauth2/logout?client_id=" + os.Getenv("clientid") + "&post_logout_redirect_uri=" + os.Getenv("homeurl"))

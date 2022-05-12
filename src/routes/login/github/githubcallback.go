@@ -10,14 +10,16 @@ import (
 
 func GithubCallbackHandler(w http.ResponseWriter, r *http.Request) {
 
-	// Check session
-	session, err := session.Store.Get(r, "auth-session")
+	// Check session and state
+	state, err := session.GetState(w, r)
+
+	session, err := session.Store.Get(r, "gh-auth-session")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	if r.URL.Query().Get("state") != session.Values["state"] {
+	if r.URL.Query().Get("state") != state {
 		http.Error(w, "Invalid state parameter", http.StatusBadRequest)
 		return
 	}

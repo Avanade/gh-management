@@ -37,9 +37,10 @@ func main() {
 	mux.Handle("/projects/new", loadPage(rtProjects.ProjectsNewHandler))
 	mux.HandleFunc("/login/azure", rtAzure.LoginHandler)
 	mux.HandleFunc("/login/azure/callback", rtAzure.CallbackHandler)
-	mux.HandleFunc("/logout", rtAzure.LogoutHandler)
+	mux.HandleFunc("/logout/azure", rtAzure.LogoutHandler)
 	mux.HandleFunc("/login/github", rtGithub.GithubLoginHandler)
 	mux.HandleFunc("/login/github/callback", rtGithub.GithubCallbackHandler)
+	mux.HandleFunc("/logout/github", rtGithub.GitHubLogoutHandler)
 	mux.NotFoundHandler = loadPage(rtPages.NotFoundHandler)
 
 	port := ev.GetEnvVar("port", "80")
