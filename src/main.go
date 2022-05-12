@@ -32,7 +32,7 @@ func main() {
 
 	mux := mux.NewRouter()
 	mux.PathPrefix("/public/").Handler(http.StripPrefix("/public/", http.FileServer(http.Dir("./public/"))))
-	mux.Handle("/", loadPage(rtPages.IndexHandler))
+	mux.Handle("/", loadPage(rtPages.HomeHandler))
 	mux.Handle("/sample", loadPage(rtPages.SampleHandler))
 	mux.Handle("/projects/new", loadPage(rtProjects.ProjectsNewHandler))
 	mux.HandleFunc("/login/azure", rtAzure.LoginHandler)
