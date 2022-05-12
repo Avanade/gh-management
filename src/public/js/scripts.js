@@ -4,9 +4,17 @@
     sidebar = document.getElementById("sidebar");
     shade = document.getElementById("shade")
 
-    let pageTitle = document.getElementById("pageTitle")
-    pageTitle.style = "display:none"
-    document.getElementById("pageTitlePlaceholder").innerHTML = pageTitle.innerHTML
+  moveToMain("pageTitle")
+  moveToMain("ghAccount")
+
+  function moveToMain(id) {
+    let dom = document.getElementById(id)
+    let masterDom = document.getElementById(id + "Placeholder")
+    if(dom != null && masterDom != null){
+      masterDom.innerHTML = dom.innerHTML
+      dom.remove()
+    }
+  }
 
   function toggleSidebar() {
     let classesToApplyForSidebar = {

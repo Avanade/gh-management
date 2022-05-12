@@ -91,6 +91,24 @@ func IsAuthenticated(w http.ResponseWriter, r *http.Request, next http.HandlerFu
 	}
 }
 
+func IsGHAuthenticated(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
+	// Check session if there is saved user profile
+	session, err := Store.Get(r, "gh-auth-session")
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if _, ok := session.Values["ghProfile"]; !ok {
+
+		// Asks user to login if there is no saved user profile
+		http.Redirect(w, r, "/error/ghlogin", http.StatusTemporaryRedirect)
+
+	} else {
+		next(w, r)
+	}
+}
+
 func GetGitHubUserData(w http.ResponseWriter, r *http.Request) (models.TypGitHubUser, error) {
 	session, err := Store.Get(r, "gh-auth-session")
 	if err != nil {
