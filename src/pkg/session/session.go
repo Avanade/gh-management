@@ -92,7 +92,7 @@ func IsAuthenticated(w http.ResponseWriter, r *http.Request, next http.HandlerFu
 }
 
 func GetGitHubUserData(w http.ResponseWriter, r *http.Request) (models.TypGitHubUser, error) {
-	session, err := Store.Get(r, "auth-session")
+	session, err := Store.Get(r, "gh-auth-session")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return models.TypGitHubUser{LoggedIn: false}, err
@@ -128,6 +128,22 @@ func GetState(w http.ResponseWriter, r *http.Request) (string, error) {
 
 	}
 	return "", nil
+}
+
+func RemoveGitHubAccount(w http.ResponseWriter, r *http.Request) error {
+	session, err := Store.Get(r, "gh-auth-session")
+	if err != nil {
+		return err
+	}
+
+	session.Options.MaxAge = -1
+	err = session.Save(r, w)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 type ErrorDetails struct {
