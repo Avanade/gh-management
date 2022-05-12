@@ -1,8 +1,6 @@
 {{ define "content" }}
 <div id="pageTitle">Request a project</div>
 <form action="#" method="POST">
-
-
     <div>
         <p>
         <h3 class="text-lg font-medium leading-6 text-gray-900">Project information</h3>
@@ -13,10 +11,10 @@
         </p>
         <br>
 
-        <div class="flex flex flex-col md:flex-row">
-            <div class="basis-1/2  md:flex-row mx-3">
+        <div class="flex flex flex-col md:flex-row ">
+            <div class="basis-1/2 md:base-full  md:flex-row mx-3">
                 <div class="flex flex-col  ">
-                    <div > 
+                    <div>
                         <h3 class="text-lg font-medium leading-6 text-gray-900">Project name</h3>
                     </div>
                     <div> <input type="text" name="first-name" id="first-name" autocomplete="given-name"
@@ -29,22 +27,8 @@
                 <div>
                     <h3 class="text-lg font-medium leading-6 text-gray-900"> <br> </h3>
                 </div>
-                <div class="flex flex-col ">
-                    <div>
-                        <h3 class="text-lg font-medium leading-6 text-gray-900">Project description</h3>
-                    </div>
-                    <div>
-                        <input type="text" name="first-name" id="first-name" autocomplete="given-name"
-                            class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md  border-2">
-                    </div>
-                    <div>Be verbose in the description. Describe what the asset does and how it achieves this. If your
-                        asset
-                        improves an existing product or approach then be sure to explicitly state how it does this.
-                        Provide
-                        information on business value and potential effort saving or avoidance.</div>
-                </div>
             </div>
-            <div class="basis-1/2">
+            <div class="basis-1/2 md:base-full md:flex-row mx-3">
                 <div class="flex flex-col ...">
                     <div>
                         <h3 class="text-lg font-medium leading-6 text-gray-900">Project co-owner</h3>
@@ -54,14 +38,40 @@
                             class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md border-2">
                     </div>
                     <div>All projects must have two or more owners, to ensure that security alerts can be dealt with
-                        promptly.</div>
+                        promptly. <div>
+                            <h3 class="text-lg font-medium leading-6 text-gray-900"> <br> </h3>
+                        </div>
+                    </div>
                 </div>
 
             </div>
+
+
         </div>
 
+        <div class="flex flex flex-col md:flex-row  ">
+            <div class="basis-1/2 md:base-full  md:flex-row   mx-3">
+                <div class="flex flex-col ">
+                    <div>
+                        <h3 class="text-lg font-medium leading-6 text-gray-900">Project description</h3>
+                    </div>
+                    <div>
+                        <input type="text" name="first-name" id="first-name" autocomplete="given-name"
+                            class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md  border-2">
+                    </div>
+                    <div>Be verbose in the description. Describe what the asset does and how it achieves this. If your
+                        improves an existing product or approach then be sure to explicitly state how it does this.
+                        Provide
+                        information on business value and potential effort saving or avoidance.</div>
+                </div>
+            </div>
+            <div class="basis-1/2 md:base-full  md:flex-row   mx-3">
+                <div class="flex flex-col ">
+                </div>
+            </div>
+        </div>
 
-        <br> 
+        <br>
         <p>
         <div class="flex items-start">
             <div class="flex items-center h-5">
@@ -69,16 +79,13 @@
                     class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded">
             </div>
             <div class="ml-3 text-sm">
-            
-                <p class="text-gray-500">I confirm that this project is Avanade owned intellectual property, or the
-                    client
-                    legal
-                    team have approved this project.
+                <p class="text-gray-500">
+                    I confirm that this project is Avanade owned intellectual property, or the legal team have approved
+                    this project.
                 </p>
             </div>
         </div>
         </p>
-       
         <p>
         <div class="flex items-start">
             <div class="flex items-center h-5">
@@ -86,23 +93,23 @@
                     class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded">
             </div>
             <div class="ml-3 text-sm">
-             
+
                 <p class="text-gray-500">I confirm that I will keep automated security and intellectual property scans
                     enabled.
                 </p>
             </div>
         </div>
         </p>
-        <br> 
-        <p> Projects will be automatically created in Avanade innersource, and you will receive a Teams notification with a link to the project.<br />
+        <br>
+        <p> Projects will be automatically created in Avanade innersource, and you will receive a Teams notification
+            with a link to the project.<br />
             You can also view your projects under the projects tab.
         </p>
-    
-
         <div>
             <div align="right">
-                <button type="submit"  
-                    class="bg-orange-500  inline-flex justify-center py-2 px-4 rounded-md text-white">Submit project</button>
+                <button type="submit"
+                    class="bg-orange-500  inline-flex justify-center py-2 px-4 rounded-md text-white">Submit
+                    project</button>
 
             </div>
         </div>
