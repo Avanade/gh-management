@@ -2,6 +2,13 @@
 <div id="pageTitle">Dashboard</div>
 
 {{ if .LoggedIn }}
+<div id="ghAccount">
+  <p class="text text-right">
+    Logged in to GitHub as <b>{{ .Username }}.</b>
+    <a href="/logout/github" class="hover:underline">(Logout)</a>
+  </p>
+</div>
+{{ else }}
 <div class="bg-blue-50 p-4 mb-3">
   <div class="flex">
     <div class="flex-shrink-0">
@@ -13,7 +20,7 @@
       <p class="text-sm text-blue-700">Your GitHub account is not currently connected.
         To request a new project you need to associate your GitHub account - if you already have one, please use that, rather than creating a new one.</p>
       <p class="mt-3 text-sm md:mt-0 md:ml-6">
-        <a href="#" class="whitespace-nowrap font-medium text-blue-700 hover:text-blue-600">Associate GitHub Account<span aria-hidden="true">&rarr;</span></a>
+        <a href="/login/github" class="whitespace-nowrap font-medium text-blue-700 hover:text-blue-600">Associate GitHub Account<span aria-hidden="true">&rarr;</span></a>
       </p>
     </div>
   </div>
