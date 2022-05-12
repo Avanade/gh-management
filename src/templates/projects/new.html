@@ -1,4 +1,5 @@
 {{ define "content" }}
+<div id="pageTitle">Request a project</div>
 <form action="#" method="POST">
 
 
@@ -12,9 +13,9 @@
         </p>
         <br>
 
-        <div class="flex flex-row ...">
-            <div class="basis-1/2">
-                <div class="flex flex-col ...">
+        <div class="flex flex flex-col md:flex-row">
+            <div class="basis-1/2  md:flex-row mx-3">
+                <div class="flex flex-col  ">
                     <div > 
                         <h3 class="text-lg font-medium leading-6 text-gray-900">Project name</h3>
                     </div>
@@ -23,9 +24,12 @@
                     </div>
                     <div>The title should represent what the asset does. Avoid acronyms, code names and the use of the
                         word
-                        &#39;Avanade&#39;.</div>
+                        &#39;Avanade&#39;. <br></div>
                 </div>
-                <div class="flex flex-col ...">
+                <div>
+                    <h3 class="text-lg font-medium leading-6 text-gray-900"> <br> </h3>
+                </div>
+                <div class="flex flex-col ">
                     <div>
                         <h3 class="text-lg font-medium leading-6 text-gray-900">Project description</h3>
                     </div>
@@ -57,7 +61,7 @@
         </div>
 
 
-
+        <br> 
         <p>
         <div class="flex items-start">
             <div class="flex items-center h-5">
@@ -65,7 +69,7 @@
                     class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded">
             </div>
             <div class="ml-3 text-sm">
-
+            
                 <p class="text-gray-500">I confirm that this project is Avanade owned intellectual property, or the
                     client
                     legal
@@ -74,7 +78,7 @@
             </div>
         </div>
         </p>
-
+       
         <p>
         <div class="flex items-start">
             <div class="flex items-center h-5">
@@ -82,13 +86,14 @@
                     class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded">
             </div>
             <div class="ml-3 text-sm">
-
+             
                 <p class="text-gray-500">I confirm that I will keep automated security and intellectual property scans
                     enabled.
                 </p>
             </div>
         </div>
         </p>
+        <br> 
         <p> Projects will be automatically created in Avanade innersource, and you will receive a Teams notification with a link to the project.<br />
             You can also view your projects under the projects tab.
         </p>
