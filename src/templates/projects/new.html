@@ -3,17 +3,15 @@
 
 <div id="pageTitle">Request a project</div>
 
-<form action="#" method="POST">
- 
- 
-    <div x-data="{accept1: false ,accept2: false}">
+<div x-data="data()">
+    <form onsubmit="event.preventDefault()">
         <p>
-        <h3 class="text-lg font-medium leading-6 text-gray-900">Project information</h3>
-        All projects start on Avanade’s innersource on GitHub. Once you have identified a business sponsor, and
-        submitted
-        your first automated security scan, you can request to move the project to open source. If you open source this
-        application, it will be displayed publicly, so think carefully.
-        </p>
+            <h3 class="text-lg font-medium leading-6 text-gray-900">Project information</h3>
+            All projects start on Avanade’s innersource on GitHub. Once you have identified a business sponsor, and
+            submitted
+            your first automated security scan, you can request to move the project to open source. If you open source this
+            application, it will be displayed publicly, so think carefully.
+            </p>
         <br>
 
         <div class="flex flex flex-col md:flex-row ">
@@ -22,7 +20,7 @@
                     <div>
                         <h3 class="text-lg font-medium leading-6 text-gray-900">Project name</h3>
                     </div>
-                    <div> <input type="text" name="projectname" id="projectname"
+                    <div> <input type="text" name="name" id="name" x-model="form.name"
                             class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md border-2">
                     </div>
                     <div>The title should represent what the asset does. Avoid acronyms, code names and the use of the
@@ -39,7 +37,7 @@
                         <h3 class="text-lg font-medium leading-6 text-gray-900">Project co-owner</h3>
                     </div>
                     <div>
-                        <input type="text" name="projectcoowner" id="projectcoowner"
+                        <input type="text" name="coowner" id="coowner" x-model="form.coowner"
                             class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md border-2">
                     </div>
                     <div>All projects must have two or more owners, to ensure that security alerts can be dealt with
@@ -61,7 +59,7 @@
                         <h3 class="text-lg font-medium leading-6 text-gray-900">Project description</h3>
                     </div>
                     <div>
-                        <input type="text" name="projectdescription" id="projectdescription"
+                        <input type="text" name="description" id="description" x-model="form.description"
                             class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md  border-2">
                     </div>
                     <div>Be verbose in the description. Describe what the asset does and how it achieves this. If your
@@ -80,7 +78,7 @@
         <p>
         <div class="flex items-start">
             <div class="flex items-center h-5">
-                <input id="confirm1" name="comments" type="checkbox"   x-model="accept1"
+                <input id="confirm1" name="confirmAvaIP" type="checkbox"   x-model="form.confirmAvaIP"
                     class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded">
             </div>
             <div class="ml-3 text-sm">
@@ -94,7 +92,7 @@
         <p>
         <div class="flex items-start">
             <div class="flex items-center h-5">
-                <input id="confirm2" name="comments" type="checkbox"   x-model="accept2"
+                <input id="confirm2" name="confirmSecIPScan" type="checkbox"   x-model="form.confirmSecIPScan"
                     class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded">
             </div>
             <div class="ml-3 text-sm">
@@ -113,12 +111,60 @@
         <div>
             <div align="right">
                 <button type="submit"
-                    class="bg-orange-500  inline-flex justify-center py-2 px-4 rounded-md text-white"  x-bind:disabled="!accept1 ||  !accept2"   >Submit
+                    class="bg-orange-500  inline-flex justify-center py-2 px-4 rounded-md text-white"
+                    :class="!isValid ? 'bg-orange-200' : ''"
+                    x-bind:disabled="!isValid"
+                    @click="submit()"
+                    >Submit
                     project</button>
 
             </div>
         </div>
+    </form>
+</div>
 
-    </div>
-</form>
+<script type="text/javascript">
+    function data() {
+        return {
+            form: {
+                name: '',
+                coowner: '',
+                description: '',
+                confirmAvaIP: false,
+                confirmSecIPScan: false
+            },
+            formValid: false,
+            submit(){
+                fetch('/projects/new', {
+                    method: 'post',
+                    body: this.form
+                })
+                .then(r=>{
+                    // Redirect to Home
+                    if(r.status==200){
+                        window.location = '/'
+                    } else {
+                        console.log("Error posting data")
+                    }
+                })
+                .catch(e=>{
+                    // Catch error
+                    console.log("Error posting data")
+                })
+            },
+            get isValid() {
+                if(
+                    !!this.form.name &&
+                    !!this.form.coowner &&
+                    !!this.form.description &&
+                    this.form.confirmAvaIP &&
+                    this.form.confirmSecIPScan){
+                        return true
+                } else {
+                    return false
+                }
+            }
+        }
+    }
+</script>
 {{ end }}

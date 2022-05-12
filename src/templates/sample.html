@@ -1,9 +1,0 @@
-{{ define "content" }}
-    <h1 class="text-xl font-bold">UseTemplate Rules</h1>
-    {{ range $key, $value := . }}
-    <div style="padding-top: 10px;">
-        <h2 class="text-lg font-semibold">{{.Title}}</h2>
-        <p>{{.Message}}</p>
-    </div>
-    {{ end }}
-{{ end }}

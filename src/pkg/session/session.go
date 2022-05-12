@@ -59,7 +59,7 @@ func IsAuthenticated(w http.ResponseWriter, r *http.Request, next http.HandlerFu
 			ts := authenticator.Config.TokenSource(context.Background(), &oauth2.Token{RefreshToken: refreshToken, Expiry: expiry})
 			newToken, err := ts.Token()
 			if err != nil {
-				fmt.Printf("ERROR REFRESHING TOKEN\n")
+				// fmt.Printf("ERROR REFRESHING TOKEN\n")
 				if rErr, ok := err.(*oauth2.RetrieveError); ok {
 					details := new(ErrorDetails)
 					if err := json.Unmarshal(rErr.Body, details); err != nil {
@@ -73,7 +73,7 @@ func IsAuthenticated(w http.ResponseWriter, r *http.Request, next http.HandlerFu
 				http.Redirect(w, r, "/logout", http.StatusTemporaryRedirect)
 
 			} else if newToken != nil {
-				fmt.Printf("TOKEN REFRESHED\n")
+				// fmt.Printf("TOKEN REFRESHED\n")
 
 				// Save new token data
 				session.Values["refresh_token"] = newToken.RefreshToken
