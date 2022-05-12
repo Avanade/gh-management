@@ -40,6 +40,7 @@ func main() {
 	mux.HandleFunc("/logout", rtAzure.LogoutHandler)
 	mux.HandleFunc("/login/github", rtGithub.GithubLoginHandler)
 	mux.HandleFunc("/login/github/callback", rtGithub.GithubCallbackHandler)
+	mux.NotFoundHandler = loadPage(rtPages.NotFoundHandler)
 
 	port := ev.GetEnvVar("port", "80")
 	fmt.Printf("Now listening on port %v\n", port)
