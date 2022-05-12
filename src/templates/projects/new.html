@@ -1,7 +1,12 @@
 {{ define "content" }}
+
+
 <div id="pageTitle">Request a project</div>
+
 <form action="#" method="POST">
-    <div>
+ 
+ 
+    <div x-data="{accept1: false ,accept2: false}">
         <p>
         <h3 class="text-lg font-medium leading-6 text-gray-900">Project information</h3>
         All projects start on Avanade’s innersource on GitHub. Once you have identified a business sponsor, and
@@ -17,7 +22,7 @@
                     <div>
                         <h3 class="text-lg font-medium leading-6 text-gray-900">Project name</h3>
                     </div>
-                    <div> <input type="text" name="first-name" id="first-name" autocomplete="given-name"
+                    <div> <input type="text" name="projectname" id="projectname"
                             class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md border-2">
                     </div>
                     <div>The title should represent what the asset does. Avoid acronyms, code names and the use of the
@@ -34,7 +39,7 @@
                         <h3 class="text-lg font-medium leading-6 text-gray-900">Project co-owner</h3>
                     </div>
                     <div>
-                        <input type="text" name="first-name" id="first-name" autocomplete="given-name"
+                        <input type="text" name="projectcoowner" id="projectcoowner"
                             class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md border-2">
                     </div>
                     <div>All projects must have two or more owners, to ensure that security alerts can be dealt with
@@ -56,7 +61,7 @@
                         <h3 class="text-lg font-medium leading-6 text-gray-900">Project description</h3>
                     </div>
                     <div>
-                        <input type="text" name="first-name" id="first-name" autocomplete="given-name"
+                        <input type="text" name="projectdescription" id="projectdescription"
                             class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md  border-2">
                     </div>
                     <div>Be verbose in the description. Describe what the asset does and how it achieves this. If your
@@ -75,7 +80,7 @@
         <p>
         <div class="flex items-start">
             <div class="flex items-center h-5">
-                <input id="comments" name="comments" type="checkbox"
+                <input id="confirm1" name="comments" type="checkbox"   x-model="accept1"
                     class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded">
             </div>
             <div class="ml-3 text-sm">
@@ -89,7 +94,7 @@
         <p>
         <div class="flex items-start">
             <div class="flex items-center h-5">
-                <input id="comments" name="comments" type="checkbox"
+                <input id="confirm2" name="comments" type="checkbox"   x-model="accept2"
                     class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded">
             </div>
             <div class="ml-3 text-sm">
@@ -108,7 +113,7 @@
         <div>
             <div align="right">
                 <button type="submit"
-                    class="bg-orange-500  inline-flex justify-center py-2 px-4 rounded-md text-white">Submit
+                    class="bg-orange-500  inline-flex justify-center py-2 px-4 rounded-md text-white"  x-bind:disabled="!accept1 ||  !accept2"   >Submit
                     project</button>
 
             </div>

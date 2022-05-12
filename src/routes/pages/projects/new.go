@@ -6,5 +6,6 @@ import (
 )
 
 func ProjectsNewHandler(w http.ResponseWriter, r *http.Request) {
+
 	template.UseTemplate(&w, r, "projects/new", nil)
 }
