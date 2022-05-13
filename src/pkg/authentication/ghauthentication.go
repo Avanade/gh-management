@@ -1,51 +1,27 @@
 package authentication
 
 import (
-	"bytes"
-	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"log"
+	"main/pkg/envvar"
 	"net/http"
-	"net/url"
 	"os"
+
+	"golang.org/x/oauth2"
+	githuboauth "golang.org/x/oauth2/github"
 )
 
-// Returns the GitHub Login URL
-func GetGitHubLoginUrl(state string) string {
-	githubClientID := os.Getenv("ghclientid")
-	githubCallbackUrl := os.Getenv("ghcallbackurl")
-
-	redirectURL := fmt.Sprintf("https://github.com/login/oauth/authorize?client_id=%s&redirect_uri=%s&state=%s", githubClientID, githubCallbackUrl, url.QueryEscape(state))
-	return redirectURL
-}
-
-// Exchange temporary code for an access token
-func GetGithubAccessToken(code string) string {
-	clientID := os.Getenv("ghclientid")
-	clientSecret := os.Getenv("ghclientsecret")
-
-	requestBodyMap := map[string]string{"client_id": clientID, "client_secret": clientSecret, "code": code}
-	requestJSON, _ := json.Marshal(requestBodyMap)
-
-	req, reqerr := http.NewRequest("POST", "https://github.com/login/oauth/access_token", bytes.NewBuffer(requestJSON))
-	if reqerr != nil {
-		log.Panic("Request creation failed")
+// Set up OAuth2 Configurations for GitHub Authentication
+func GetGitHubOauthConfig() *oauth2.Config {
+	oauthConf := &oauth2.Config{
+		ClientID:     os.Getenv("ghclientid"),
+		ClientSecret: os.Getenv("ghclientsecret"),
+		Scopes:       []string{"user:email", "repo"},
+		RedirectURL:  envvar.GetEnvVar("homeurl", "http://localhost:8080") + "/login/github/callback",
+		Endpoint:     githuboauth.Endpoint,
 	}
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Accept", "application/json")
-
-	resp, resperr := http.DefaultClient.Do(req)
-	if resperr != nil {
-		log.Panic("Request failed")
-	}
-
-	respbody, _ := ioutil.ReadAll(resp.Body)
-
-	var ghresp githubAccessTokenResponse
-	json.Unmarshal(respbody, &ghresp)
-
-	return ghresp.AccessToken
+	return oauthConf
 }
 
 // Returns GitHub profile of the user
@@ -66,10 +42,4 @@ func GetGitHubUserProfile(accessToken string) string {
 	respbody, _ := ioutil.ReadAll(resp.Body)
 
 	return string(respbody)
-}
-
-type githubAccessTokenResponse struct {
-	AccessToken string `json:"access_token"`
-	TokenType   string `json:"token_type"`
-	Scope       string `json:"scope"`
 }

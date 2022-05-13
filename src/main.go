@@ -4,13 +4,19 @@ import (
 	"fmt"
 	"log"
 	session "main/pkg/session"
-	routes "main/routes"
+	rtAzure "main/routes/login/azure"
+	rtGithub "main/routes/login/github"
+	rtPages "main/routes/pages"
+	rtProjects "main/routes/pages/projects"
 	"net/http"
+
+	"github.com/gorilla/mux"
+
+
+	ev "main/pkg/envvar"
 
 	"github.com/codegangsta/negroni"
 	"github.com/joho/godotenv"
-
-	ev "main/pkg/envvar"
 )
 
 func main() {
@@ -23,18 +29,18 @@ func main() {
 	// Create session
 	session.InitializeSession()
 
-	// Start server
-	mux := http.NewServeMux()
-
-	fs := http.FileServer(http.Dir("./public"))
-	mux.Handle("/public/", http.StripPrefix("/public/", fs))
-	mux.Handle("/", loadPage(routes.IndexHandler))
-	mux.Handle("/github", loadPage(routes.GithubHandler))
-	mux.HandleFunc("/login/azure", routes.LoginHandler)
-	mux.HandleFunc("/login/azure/callback", routes.CallbackHandler)
-	mux.HandleFunc("/logout", routes.LogoutHandler)
-	mux.HandleFunc("/login/github", routes.GithubLoginHandler)
-	mux.HandleFunc("/login/github/callback", routes.GithubCallbackHandler)
+	mux := mux.NewRouter()
+	mux.PathPrefix("/public/").Handler(http.StripPrefix("/public/", http.FileServer(http.Dir("./public/"))))
+	mux.Handle("/", loadAzAuthPage(rtPages.HomeHandler))
+	mux.Handle("/error/ghlogin", loadAzAuthPage(rtPages.GHLoginRequire))
+	mux.Handle("/projects/new", loadAzGHAuthPage(rtProjects.ProjectsNewHandler))
+	mux.HandleFunc("/login/azure", rtAzure.LoginHandler)
+	mux.HandleFunc("/login/azure/callback", rtAzure.CallbackHandler)
+	mux.HandleFunc("/logout/azure", rtAzure.LogoutHandler)
+	mux.HandleFunc("/login/github", rtGithub.GithubLoginHandler)
+	mux.HandleFunc("/login/github/callback", rtGithub.GithubCallbackHandler)
+	mux.HandleFunc("/logout/github", rtGithub.GitHubLogoutHandler)
+	mux.NotFoundHandler = loadAzAuthPage(rtPages.NotFoundHandler)
 
 	port := ev.GetEnvVar("port", "80")
 	fmt.Printf("Now listening on port %v\n", port)
@@ -43,9 +49,17 @@ func main() {
 }
 
 // Verifies authentication before loading the page.
-func loadPage(f func(w http.ResponseWriter, r *http.Request)) *negroni.Negroni {
+func loadAzAuthPage(f func(w http.ResponseWriter, r *http.Request)) *negroni.Negroni {
 	return negroni.New(
 		negroni.HandlerFunc(session.IsAuthenticated),
+		negroni.Wrap(http.HandlerFunc(f)),
+	)
+}
+
+func loadAzGHAuthPage(f func(w http.ResponseWriter, r *http.Request)) *negroni.Negroni {
+	return negroni.New(
+		negroni.HandlerFunc(session.IsAuthenticated),
+		negroni.HandlerFunc(session.IsGHAuthenticated),
 		negroni.Wrap(http.HandlerFunc(f)),
 	)
 }

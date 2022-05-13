@@ -59,7 +59,7 @@ func IsAuthenticated(w http.ResponseWriter, r *http.Request, next http.HandlerFu
 			ts := authenticator.Config.TokenSource(context.Background(), &oauth2.Token{RefreshToken: refreshToken, Expiry: expiry})
 			newToken, err := ts.Token()
 			if err != nil {
-				fmt.Printf("ERROR REFRESHING TOKEN\n")
+				// fmt.Printf("ERROR REFRESHING TOKEN\n")
 				if rErr, ok := err.(*oauth2.RetrieveError); ok {
 					details := new(ErrorDetails)
 					if err := json.Unmarshal(rErr.Body, details); err != nil {
@@ -73,7 +73,7 @@ func IsAuthenticated(w http.ResponseWriter, r *http.Request, next http.HandlerFu
 				http.Redirect(w, r, "/logout", http.StatusTemporaryRedirect)
 
 			} else if newToken != nil {
-				fmt.Printf("TOKEN REFRESHED\n")
+				// fmt.Printf("TOKEN REFRESHED\n")
 
 				// Save new token data
 				session.Values["refresh_token"] = newToken.RefreshToken
@@ -91,8 +91,26 @@ func IsAuthenticated(w http.ResponseWriter, r *http.Request, next http.HandlerFu
 	}
 }
 
+func IsGHAuthenticated(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
+	// Check session if there is saved user profile
+	session, err := Store.Get(r, "gh-auth-session")
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if _, ok := session.Values["ghProfile"]; !ok {
+
+		// Asks user to login if there is no saved user profile
+		http.Redirect(w, r, "/error/ghlogin", http.StatusTemporaryRedirect)
+
+	} else {
+		next(w, r)
+	}
+}
+
 func GetGitHubUserData(w http.ResponseWriter, r *http.Request) (models.TypGitHubUser, error) {
-	session, err := Store.Get(r, "auth-session")
+	session, err := Store.Get(r, "gh-auth-session")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return models.TypGitHubUser{LoggedIn: false}, err
@@ -128,6 +146,22 @@ func GetState(w http.ResponseWriter, r *http.Request) (string, error) {
 
 	}
 	return "", nil
+}
+
+func RemoveGitHubAccount(w http.ResponseWriter, r *http.Request) error {
+	session, err := Store.Get(r, "gh-auth-session")
+	if err != nil {
+		return err
+	}
+
+	session.Options.MaxAge = -1
+	err = session.Save(r, w)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 type ErrorDetails struct {
