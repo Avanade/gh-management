@@ -1,4 +1,8 @@
 {
     "python.linting.pylintEnabled": true,
-    "python.linting.enabled": true
+    "python.linting.enabled": true,
+    "dataworkspace.excludedProjects": [
+        "src/approvalapi/sqldb/ApprovalApiSqlDb/ApprovalApiSqlDb.sqlproj",
+        "src/sqldb/SQL/SQL.sqlproj"
+    ]
 }

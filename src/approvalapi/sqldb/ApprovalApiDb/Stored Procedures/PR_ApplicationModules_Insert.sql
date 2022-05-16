@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[PR_ApplicationModules_Insert]
+CREATE PROCEDURE [dbo].[PR_ApplicationModules_Insert]
 	@ApplicationId uniqueidentifier,
 	@Name varchar(100),
 	@IsActive bit = true,
