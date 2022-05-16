@@ -6,6 +6,7 @@ on:
       - test
     paths:
       - "src/approvalapi/**"
+  workflow_dispatch:
 
 defaults:
   run:
