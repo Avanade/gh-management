@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
-      - uses: azure/sql-action@v1.2
+      - uses: azure/sql-action@master
         with:        
           connection-string: ${{ secrets.APPROVALAPIDB_CONNECTION_STRING }}
           project-file: './sqldb/ApprovalApiSqlDb/ApprovalApiSqlDb.sqlproj'
