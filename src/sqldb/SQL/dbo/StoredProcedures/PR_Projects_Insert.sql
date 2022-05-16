@@ -24,8 +24,9 @@ VALUES (
 	@Description,
 	@ConfirmAvaIP,
 	@ConfirmEnabledSecurity,
-	@Username,
 	GETDATE(),
 	@Username,
-	GETDATE()
+	GETDATE(),
+	@Username
+
 )
