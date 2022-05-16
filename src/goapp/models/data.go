@@ -25,3 +25,11 @@ type TypMenu struct {
 	Url      string
 	IconPath string
 }
+
+type TypNewProjectReqBody struct {
+	Name             string `json:"name"`
+	Coowner          string `json:"coowner"`
+	Description      string `json:"description"`
+	ConfirmAvaIP     bool   `json:"confirmAvaIP"`
+	ConfirmSecIPScan bool   `json:"confirmSecIPScan"`
+}
