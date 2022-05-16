@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	githubAPI "main/pkg/github"
 	session "main/pkg/session"
 	rtAzure "main/routes/login/azure"
 	rtGithub "main/routes/login/github"
@@ -11,8 +12,6 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
-
-	//"net/http"
 
 	ev "main/pkg/envvar"
 
@@ -27,8 +26,9 @@ func main() {
 		log.Print(err.Error())
 	}
 
-	// Create session
+	// Create session and GitHubClient
 	session.InitializeSession()
+	githubAPI.CreateClient()
 
 	mux := mux.NewRouter()
 	mux.PathPrefix("/public/").Handler(http.StripPrefix("/public/", http.FileServer(http.Dir("./public/"))))
