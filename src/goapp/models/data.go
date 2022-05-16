@@ -1,9 +1,10 @@
 package models
 
 type TypPageData struct {
-	Header  interface{}
-	Profile interface{}
-	Content interface{}
+	Header    interface{}
+	Profile   interface{}
+	ProfileGH TypGitHubUser
+	Content   interface{}
 }
 
 type TypGitHubUser struct {

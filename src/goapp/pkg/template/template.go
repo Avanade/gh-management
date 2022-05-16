@@ -12,9 +12,14 @@ import (
 // This parses the master page layout and the required page template.
 func UseTemplate(w *http.ResponseWriter, r *http.Request, page string, pageData interface{}) error {
 
-	session, err := session.Store.Get(r, "auth-session")
+	sessionaz, err := session.Store.Get(r, "auth-session")
 	if err != nil {
 		http.Error(*w, err.Error(), http.StatusInternalServerError)
+		return err
+	}
+
+	sessiongh, err := session.GetGitHubUserData(*w, r)
+	if err != nil {
 		return err
 	}
 
@@ -33,9 +38,10 @@ func UseTemplate(w *http.ResponseWriter, r *http.Request, page string, pageData 
 	masterPageData := models.TypHeaders{Menu: menu, ExternalLinks: externalLinks, Page: getUrlPath(r.URL.Path)}
 
 	data := models.TypPageData{
-		Header:  masterPageData,
-		Profile: session.Values["profile"],
-		Content: pageData}
+		Header:    masterPageData,
+		Profile:   sessionaz.Values["profile"],
+		ProfileGH: sessiongh,
+		Content:   pageData}
 
 	tmpl := template.Must(
 		template.ParseFiles("templates/master.html",
