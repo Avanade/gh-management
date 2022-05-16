@@ -10,9 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
-      - uses: azure/sql-action@v1.2
+      - uses: azure/sql-action@master
         with:        
           connection-string: ${{ secrets.APPROVALAPIDB_CONNECTION_STRING }}
           project-file: '.src/approvalapi/sqldb/ApprovalApiSqlDb/ApprovalApiSqlDb.sqlproj'
-          build-arguments: '-c Release'                 # Optional arguments passed to dotnet build
-          arguments: '/p:DropObjectsNotInSource=true'   # Optional parameters for SqlPackage Publish
