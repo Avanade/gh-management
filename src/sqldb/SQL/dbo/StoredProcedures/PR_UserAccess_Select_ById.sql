@@ -1,5 +1,7 @@
-﻿CREATE PROCEDURE PR_UserAccess_Select
-
+﻿CREATE PROCEDURE PR_UserAccess_Select_ById
+(
+	@Id Int
+)
 AS
 BEGIN
 	-- SET NOCOUNT ON added to prevent extra result sets from
@@ -14,5 +16,8 @@ SELECT [Id],
        [CreatedBy],
        [Modified],
        [ModifiedBy]
-  FROM [dbo].[UserAccess]
+  FROM 
+       [dbo].[UserAccess]
+  WHERE  
+       [Id] =@Id
 END

@@ -1,5 +1,7 @@
-﻿Create PROCEDURE [dbo].[PR_Projects_Select]
-
+﻿Create PROCEDURE [dbo].[PR_Projects_Select_UserId]
+(
+	@Id Int
+)
 AS
 BEGIN
 	-- SET NOCOUNT ON added to prevent extra result sets from
@@ -19,5 +21,6 @@ SELECT [Id],
        [ModifiedBy]
   FROM 
        [dbo].[Projects]
-
+  WHERE  
+       [Id] =@Id
 END

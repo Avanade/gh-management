@@ -1,10 +1,9 @@
 ﻿CREATE PROCEDURE PR_UserAccess_Insert
 	-- Add the parameters for the stored procedure here
 ( 
-           @ProjectId int
+            @ProjectId int
            ,@Username varchar(100)
-		   ,@CreatedBy varchar(50)
-           ,@ModifiedBy varchar(50)
+
 )
 AS
 BEGIN
@@ -14,18 +13,20 @@ BEGIN
 
 INSERT INTO [dbo].[UserAccess]
            ( 
-           [ProjectId]
-           ,[Username]
-           ,[Created]
-           ,[CreatedBy]
-           ,[Modified]
-           ,[ModifiedBy])
+            [ProjectId],
+            [Username],
+            [Created],
+            [CreatedBy],
+            [Modified],
+            [ModifiedBy]
+            )
      VALUES
            ( 
-            @ProjectId
-           ,@Username
-           ,GETDATE()
-           ,@CreatedBy
-           ,GETDATE()
-           ,@ModifiedBy)
+            @ProjectId,
+            @Username,
+            GETDATE(),
+            @Username,
+            GETDATE(),
+            @Username
+            )
 END

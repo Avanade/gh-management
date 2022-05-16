@@ -1,5 +1,7 @@
-﻿CREATE PROCEDURE [dbo].[PR_Users_Select]
- 
+﻿CREATE PROCEDURE [dbo].[PR_Users_Select_ByUsername]
+(
+	@Username varchar(100)
+)
 AS
 BEGIN
 	-- SET NOCOUNT ON added to prevent extra result sets from
@@ -20,6 +22,7 @@ SELECT
 		[ModifiedBy]
   FROM 
 		[dbo].[Users]
-
+  WHERE  
+	    [Username] =@Username 
 
 END

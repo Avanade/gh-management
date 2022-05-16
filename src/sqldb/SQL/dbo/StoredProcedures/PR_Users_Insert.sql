@@ -4,10 +4,8 @@
            ,@FirstName varchar(50)
            ,@LastName varchar(50)
            ,@Email varchar(50)
-           ,@Created datetime
-           ,@CreatedBy varchar(50)
-           ,@Modified datetime
-           ,@ModifiedBy varchar(50)
+           ,@GithubUser varchar(100)
+
 )
 AS
 BEGIN
@@ -18,21 +16,27 @@ BEGIN
     -- Insert statements for procedure here
 
 INSERT INTO [dbo].[Users]
-           ([Username]
-           ,[FirstName]
-           ,[LastName]
-           ,[Email]
-           ,[Created]
-           ,[CreatedBy]
-           ,[Modified]
-           ,[ModifiedBy])
+           (
+           [Username],
+           [FirstName],
+           [LastName],
+           [Email],
+           [GithubUser],
+           [Created],
+           [CreatedBy],
+           [Modified],
+           [ModifiedBy]
+           )
      VALUES
-           (@Username
-           ,@FirstName
-           ,@LastName
-           ,@Email
-           ,GETDATE()
-           ,@CreatedBy
-           ,GETDATE()
-           ,@ModifiedBy)
+           (
+           @Username,
+           @FirstName,
+           @LastName,
+           @Email,
+           @GithubUser,
+           GETDATE(),
+           @Username,
+           GETDATE(),
+           @Username
+           )
 END
