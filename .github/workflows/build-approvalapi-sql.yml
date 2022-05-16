@@ -14,4 +14,4 @@ jobs:
       - uses: azure/sql-action@master
         with:        
           connection-string: ${{ secrets.APPROVALAPIDB_CONNECTION_STRING }}
-          project-file: 'src\approvalapi\sqldb\ApprovalApiDb\ApprovalApiDb.sqlproj'
+          project-file: 'src/approvalapi/sqldb/ApprovalApiDb/ApprovalApiDb.sqlproj'
