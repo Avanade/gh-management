@@ -6,10 +6,6 @@ on:
       - test
   workflow_dispatch:
 
-defaults:
-  run:
-    working-directory: 
-
 jobs:
   build-approvalapi-sqlproj:
     runs-on: ubuntu-latest
