@@ -1,4 +1,4 @@
-﻿CREATE TABLE [dbo].[ApplicationModules] (
+CREATE TABLE [dbo].[ApplicationModules] (
     [Id]             UNIQUEIDENTIFIER CONSTRAINT [DF_ApplicationModules_Id] DEFAULT (newid()) NOT NULL,
     [ApplicationId]  UNIQUEIDENTIFIER NOT NULL,
     [Name]           VARCHAR (100)    NOT NULL,

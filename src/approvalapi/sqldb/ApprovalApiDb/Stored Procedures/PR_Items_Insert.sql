@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[PR_Items_Insert]
+CREATE PROCEDURE [dbo].[PR_Items_Insert]
 	@ApplicationModuleId uniqueidentifier,
 	@ApproverEmail varchar(100),
 	@Subject varchar(100),

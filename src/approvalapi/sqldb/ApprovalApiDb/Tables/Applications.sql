@@ -1,4 +1,4 @@
-﻿CREATE TABLE [dbo].[Applications] (
+CREATE TABLE [dbo].[Applications] (
     [Id]         UNIQUEIDENTIFIER CONSTRAINT [DF_Applications_Id] DEFAULT (newid()) NOT NULL,
     [Name]       VARCHAR (100)    NOT NULL,
     [IsActive]   BIT              CONSTRAINT [DF_Applications_IsActive] DEFAULT ((1)) NOT NULL,

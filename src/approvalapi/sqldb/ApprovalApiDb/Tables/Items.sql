@@ -1,4 +1,4 @@
-﻿CREATE TABLE [dbo].[Items] (
+CREATE TABLE [dbo].[Items] (
     [Id]                  UNIQUEIDENTIFIER CONSTRAINT [DF_Items_Id] DEFAULT (newid()) NOT NULL,
     [ApplicationModuleId] UNIQUEIDENTIFIER NOT NULL,
     [ApproverEmail]       VARCHAR (100)    NOT NULL,

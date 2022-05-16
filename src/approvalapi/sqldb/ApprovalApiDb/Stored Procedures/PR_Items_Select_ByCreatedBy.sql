@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[PR_Items_Select_ByCreatedBy]
+CREATE PROCEDURE [dbo].[PR_Items_Select_ByCreatedBy]
 	@CreatedBy varchar(255)
 AS
 	SELECT

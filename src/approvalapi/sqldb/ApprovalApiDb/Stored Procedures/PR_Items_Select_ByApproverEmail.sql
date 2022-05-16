@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[PR_Items_Select_ByApproverEmail]
+CREATE PROCEDURE [dbo].[PR_Items_Select_ByApproverEmail]
 	@ApproverEmail varchar(100)
 AS
 	SELECT
