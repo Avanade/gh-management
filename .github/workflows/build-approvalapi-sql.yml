@@ -4,13 +4,11 @@ on:
   push:
     branches:
       - test
-    paths:
-      - "src/approvalapi/**"
   workflow_dispatch:
 
 defaults:
   run:
-    working-directory: src/approvalapi
+    working-directory: 
 
 jobs:
   build-approvalapi-sqlproj:
@@ -20,4 +18,4 @@ jobs:
       - uses: azure/sql-action@master
         with:        
           connection-string: ${{ secrets.APPROVALAPIDB_CONNECTION_STRING }}
-          project-file: './sqldb/ApprovalApiSqlDb/ApprovalApiSqlDb.sqlproj'
+          project-file: 'src/approvalapi/sqldb/ApprovalApiSqlDb/ApprovalApiSqlDb.sqlproj'
