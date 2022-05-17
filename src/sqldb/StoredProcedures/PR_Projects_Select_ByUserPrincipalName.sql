@@ -1,6 +1,6 @@
-﻿Create PROCEDURE [dbo].[PR_Projects_Select_ByUserId]
+﻿Create PROCEDURE [dbo].[PR_Projects_Select_ByUserPrincipalName]
 (
-	@Id Int
+	@UserPrincipalName varchar(100)
 )
 AS
 BEGIN
@@ -22,5 +22,5 @@ SELECT [Id],
   FROM 
        [dbo].[Projects]
   WHERE  
-       [Id] = @Id
+       [UserPrincipalName] = @UserPrincipalName
 END

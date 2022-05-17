@@ -1,17 +1,15 @@
-﻿CREATE PROCEDURE PR_UserAccess_Select_ById
+﻿CREATE PROCEDURE PR_UserAccess_Select_ByProjectId
 (
-	@Id Int
+	@ProjectId Int
 )
 AS
 BEGIN
 	-- SET NOCOUNT ON added to prevent extra result sets from
 	-- interfering with SELECT statements.
  
-
-    -- Insert statements for procedure here
 SELECT [Id],
        [ProjectId],
-       [Username],
+       [UserPrincipalName],
        [Created],
        [CreatedBy],
        [Modified],
@@ -19,5 +17,5 @@ SELECT [Id],
   FROM 
        [dbo].[UserAccess]
   WHERE  
-       [Id] = @Id
+       [ProjectId] = @ProjectId
 END

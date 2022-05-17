@@ -5,8 +5,8 @@
 		@CoOwner varchar(100),
 		@Description varchar(1000),
 		@ConfirmAvaIP bit,
-		@ConfirmEnabledSecurity bit
-
+		@ConfirmEnabledSecurity bit,
+		@ModifiedBy varchar(100)
 )
 AS
 BEGIN
@@ -22,9 +22,9 @@ UPDATE
 		[CoOwner] = @CoOwner,
 		[Description] = @Description,
 		[ConfirmAvaIP] = @ConfirmAvaIP,
-		[ConfirmEnabledSecurity] =@ConfirmEnabledSecurity,
+		[ConfirmEnabledSecurity] = @ConfirmEnabledSecurity,
 		[Modified] = GETDATE(),
-		[ModifiedBy] = @Name
+		[ModifiedBy] = @ModifiedBy
  WHERE  
 		[Id] = @Id
 END

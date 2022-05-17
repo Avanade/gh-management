@@ -2,7 +2,7 @@
 (	   
         @Id int,
         @ProjectId int,
-        @Username varchar(100),
+        @UserPrincipalName varchar(100),
         @IsActive BIT 
 
 )
@@ -15,10 +15,10 @@ BEGIN
 UPDATE [dbo].[UserAccess]
    SET
         [ProjectId] = @ProjectId,
-        [Username] =  @Username,
+        [UserPrincipalName] =  @UserPrincipalName,
         [IsActive] = @IsActive,
         [Modified] = GETDATE(),
-        [ModifiedBy] = @Username
+        [ModifiedBy] = @UserPrincipalName
     WHERE  
         [Id] = @Id
 END

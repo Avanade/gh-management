@@ -2,7 +2,7 @@
 	-- Add the parameters for the stored procedure here
 ( 
             @ProjectId int
-           ,@Username varchar(100)
+           ,@UserPrincipalName varchar(100)
 
 )
 AS
@@ -14,7 +14,7 @@ BEGIN
 INSERT INTO [dbo].[UserAccess]
            ( 
             [ProjectId],
-            [Username],
+            [UserPrincipalName],
             [Created],
             [CreatedBy],
             [Modified],
@@ -23,10 +23,10 @@ INSERT INTO [dbo].[UserAccess]
      VALUES
            ( 
             @ProjectId,
-            @Username,
+            @UserPrincipalName,
             GETDATE(),
-            @Username,
+            @UserPrincipalName,
             GETDATE(),
-            @Username
+            @UserPrincipalName
             )
 END
