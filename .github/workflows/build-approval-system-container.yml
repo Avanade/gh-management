@@ -1,4 +1,4 @@
-name: Docker - GH-Management Container
+name: Docker - Approval System Container
 
 on:
   push:
