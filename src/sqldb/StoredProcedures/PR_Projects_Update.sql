@@ -5,8 +5,8 @@
 		@CoOwner varchar(100),
 		@Description varchar(1000),
 		@ConfirmAvaIP bit,
-		@ConfirmEnabledSecurity bit
-
+		@ConfirmEnabledSecurity bit,
+		@ModifiedBy varchar(100)
 )
 AS
 BEGIN
@@ -18,16 +18,13 @@ BEGIN
 UPDATE 
 		[dbo].[Projects]
    SET 
-		[Id] = @ID,
 		[Name] = @Name,
 		[CoOwner] = @CoOwner,
 		[Description] = @Description,
 		[ConfirmAvaIP] = @ConfirmAvaIP,
-		[ConfirmEnabledSecurity] =@ConfirmEnabledSecurity,
-		[Created] =	GETDATE(),
-		[CreatedBy] = @Name,
-		[Modified] =	GETDATE(),
-		[ModifiedBy] = @Name
+		[ConfirmEnabledSecurity] = @ConfirmEnabledSecurity,
+		[Modified] = GETDATE(),
+		[ModifiedBy] = @ModifiedBy
  WHERE  
-		[Id] =@Id or @Id IS NULL
+		[Id] = @Id
 END

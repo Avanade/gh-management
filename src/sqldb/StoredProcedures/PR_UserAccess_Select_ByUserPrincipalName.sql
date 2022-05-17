@@ -1,12 +1,12 @@
-﻿CREATE PROCEDURE PR_UserAccess_Select
-
+﻿CREATE PROCEDURE PR_UserAccess_Select_ByUserPrincipalName
+(
+	@UserPrincipalName varchar(100)
+)
 AS
 BEGIN
 	-- SET NOCOUNT ON added to prevent extra result sets from
 	-- interfering with SELECT statements.
  
-
-    -- Insert statements for procedure here
 SELECT [Id],
        [ProjectId],
        [UserPrincipalName],
@@ -14,5 +14,8 @@ SELECT [Id],
        [CreatedBy],
        [Modified],
        [ModifiedBy]
-  FROM [dbo].[UserAccess]
+  FROM 
+       [dbo].[UserAccess]
+  WHERE  
+       [UserPrincipalName] = @UserPrincipalName
 END

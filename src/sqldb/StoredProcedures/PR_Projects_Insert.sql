@@ -5,7 +5,7 @@
 	@Description varchar(1000),
 	@ConfirmAvaIP bit,
 	@ConfirmEnabledSecurity bit,
-	@Username varchar(100)
+	@CreatedBy varchar(100)
 ) AS
 
 INSERT INTO Projects (
@@ -25,8 +25,8 @@ VALUES (
 	@ConfirmAvaIP,
 	@ConfirmEnabledSecurity,
 	GETDATE(),
-	@Username,
+	@CreatedBy,
 	GETDATE(),
-	@Username
+	@CreatedBy
 
 )
