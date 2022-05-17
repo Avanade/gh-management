@@ -25,5 +25,5 @@ UPDATE
         [Modified] = GETDATE(),
         [ModifiedBy] = @ModifiedBy
  WHERE  
-	   [UserPrincipalName] = @UserPrincipalName
+        [UserPrincipalName] = @UserPrincipalName
 END

@@ -35,8 +35,8 @@ INSERT INTO [dbo].[Users]
            @JobTitle,
            @GithubUser,
            GETDATE(),
-           @Username,
+           @UserPrincipalName,
            GETDATE(),
-           @Username
+           @UserPrincipalName
            )
 END
