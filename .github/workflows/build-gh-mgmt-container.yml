@@ -1,0 +1,27 @@
+name: Docker - GH-Management Container
+
+on:
+  push:
+    branches:
+      - test
+    paths:
+      - "src/goapp/**"
+  workflow_dispatch:
+
+defaults:
+  run:
+    working-directory: src/goapp
+
+jobs:
+  build-goapp-container:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: azure/docker-login@v1
+        with:
+          login-server: ${{ secrets.ACR_REGISTRY }}
+          username: ${{ secrets.ACR_USERNAME }}
+          password: ${{ secrets.ACR_PASSWORD }}
+      - run: |
+          docker build . -t ${{ secrets.ACR_REGISTRY }}/test-gh-mgmt-app:${{ github.sha }} -t ${{ secrets.ACR_REGISTRY }}/test-gh-mgmt-app:latest
+          docker push ${{ secrets.ACR_REGISTRY }}/test-gh-mgmt-app
