@@ -1,9 +1,9 @@
 ﻿CREATE PROCEDURE PR_Users_Insert
 (
-			@Username varchar(100)
-           ,@FirstName varchar(50)
-           ,@LastName varchar(50)
-           ,@Email varchar(50)
+			@UserPrincipalName varchar(100)
+           ,@GivenName varchar(100)
+           ,@SurName varchar(100)
+           ,@JobTitle varchar(100)
            ,@GithubUser varchar(100)
 
 )
@@ -17,10 +17,10 @@ BEGIN
 
 INSERT INTO [dbo].[Users]
            (
-           [Username],
-           [FirstName],
-           [LastName],
-           [Email],
+           [UserPrincipalName],
+           [GivenName],
+           [SurName],
+           [JobTitle],
            [GithubUser],
            [Created],
            [CreatedBy],
@@ -29,10 +29,10 @@ INSERT INTO [dbo].[Users]
            )
      VALUES
            (
-           @Username,
-           @FirstName,
-           @LastName,
-           @Email,
+           @UserPrincipalName,
+           @GivenName,
+           @SurName,
+           @JobTitle,
            @GithubUser,
            GETDATE(),
            @Username,

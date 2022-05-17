@@ -2,7 +2,8 @@
 (
 	[Id] INT NOT NULL PRIMARY KEY IDENTITY, 
     [ProjectId] INT NOT NULL, 
-    [Username] VARCHAR(100) NOT NULL, 
+    [Username] VARCHAR(100) NOT NULL,
+    [IsActive] BIT NOT NULL DEFAULT 1,
     [Created] DATETIME NOT NULL DEFAULT getdate(), 
     [CreatedBy] VARCHAR(50) NULL, 
     [Modified] DATETIME NOT NULL DEFAULT getdate(), 

@@ -9,10 +9,10 @@ BEGIN
     -- Insert statements for procedure here
 
 SELECT 
-		[Username],
-		[FirstName],
-		[LastName],
-		[Email],
+		[UserPrincipalName],
+		[GivenName],
+		[SurName],
+		[JobTitle],
 		[GithubUser],
 		[Created],
 		[CreatedBy],

@@ -1,14 +1,11 @@
 ﻿Create PROCEDURE [dbo].[PR_Users_Update]
 (
-        @Username varchar(100),
-        @FirstName varchar(50),
-        @LastName varchar(50),
-        @Email varchar(50),
+        @UserPrincipalName varchar(100),
+        @GivenName varchar(50),
+        @SurName varchar(50),
+        @JobTitle varchar(50),
         @GithubUser varchar(100),
-        @Created datetime,
-        @CreatedBy varchar(50),
-        @Modified datetime,
-        @ModifiedBy varchar(50)
+        @ModifiedBy varchar(100)
 )
 AS
 BEGIN
@@ -20,15 +17,13 @@ BEGIN
 UPDATE 
         [dbo].[Users]
    SET 
-        [Username] = @Username,
-        [FirstName] = @FirstName,
-        [LastName] = @LastName,
-        [Email] = @Email,
+        [UserPrincipalName] = @UserPrincipalName,
+        [GivenName] = @GivenName,
+        [SurName] = @SurName,
+        [JobTitle] = @JobTitle,
         [GithubUser] = @GithubUser,
-        [Created] = @Created,
-        [CreatedBy] = @CreatedBy,
-        [Modified] = @Modified,
+        [Modified] = GETDATE(),
         [ModifiedBy] = @ModifiedBy
  WHERE  
-	   [Username] =@Username
+	   [UserPrincipalName] = @UserPrincipalName
 END

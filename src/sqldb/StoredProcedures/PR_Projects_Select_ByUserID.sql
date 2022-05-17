@@ -1,4 +1,4 @@
-﻿Create PROCEDURE [dbo].[PR_Projects_Select_UserId]
+﻿Create PROCEDURE [dbo].[PR_Projects_Select_ByUserId]
 (
 	@Id Int
 )
@@ -22,5 +22,5 @@ SELECT [Id],
   FROM 
        [dbo].[Projects]
   WHERE  
-       [Id] =@Id
+       [Id] = @Id
 END

@@ -18,16 +18,13 @@ BEGIN
 UPDATE 
 		[dbo].[Projects]
    SET 
-		[Id] = @ID,
 		[Name] = @Name,
 		[CoOwner] = @CoOwner,
 		[Description] = @Description,
 		[ConfirmAvaIP] = @ConfirmAvaIP,
 		[ConfirmEnabledSecurity] =@ConfirmEnabledSecurity,
-		[Created] =	GETDATE(),
-		[CreatedBy] = @Name,
-		[Modified] =	GETDATE(),
+		[Modified] = GETDATE(),
 		[ModifiedBy] = @Name
  WHERE  
-		[Id] =@Id or @Id IS NULL
+		[Id] = @Id
 END

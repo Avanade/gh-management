@@ -19,5 +19,5 @@ SELECT [Id],
   FROM 
        [dbo].[UserAccess]
   WHERE  
-       [Id] =@Id
+       [Id] = @Id
 END

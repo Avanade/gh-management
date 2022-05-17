@@ -1,8 +1,9 @@
 ﻿CREATE PROCEDURE PR_UserAccess_Update
 (	   
-        @Id  int ,
-        @ProjectId	int ,
-        @Username	varchar(100) 
+        @Id int,
+        @ProjectId int,
+        @Username varchar(100),
+        @IsActive BIT 
 
 )
 AS
@@ -12,13 +13,12 @@ BEGIN
 	SET NOCOUNT ON;
 
 UPDATE [dbo].[UserAccess]
-   SET [Id] =@Id,
-       [ProjectId] =@ProjectId,
-       [Username] = @Username,
-       [Created] = GETDATE(),
-       [CreatedBy] = @Username,
-       [Modified] =GETDATE(),
-       [ModifiedBy] = @Username
+   SET
+        [ProjectId] = @ProjectId,
+        [Username] =  @Username,
+        [IsActive] = @IsActive,
+        [Modified] = GETDATE(),
+        [ModifiedBy] = @Username
     WHERE  
-	   [Id] =@Id
+        [Id] = @Id
 END

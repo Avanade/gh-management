@@ -1,6 +1,6 @@
-﻿CREATE PROCEDURE [dbo].[PR_Users_Select_ByUsername]
+﻿CREATE PROCEDURE [dbo].[PR_Users_Select_ByUserPrincipalName]
 (
-	@Username varchar(100)
+	@UserPrincipalName varchar(100)
 )
 AS
 BEGIN
@@ -11,10 +11,10 @@ BEGIN
     -- Insert statements for procedure here
 
 SELECT 
-		[Username],
-		[FirstName],
-		[LastName],
-		[Email],
+		[UserPrincipalName],
+		[GivenName],
+		[SurName],
+		[JobTitle],
 		[GithubUser],
 		[Created],
 		[CreatedBy],
@@ -23,6 +23,6 @@ SELECT
   FROM 
 		[dbo].[Users]
   WHERE  
-	    [Username] =@Username 
+	    [UserPrincipalName] = @UserPrincipalName 
 
 END

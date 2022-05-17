@@ -1,11 +1,11 @@
 ﻿CREATE PROCEDURE [dbo].[PR_Users_IsExisting]
-	@Username varchar(100)
+	@UserPrincipalName varchar(100)
 AS
 
 IF EXISTS (
-	SELECT Username
+	SELECT UserPrincipalName
 	FROM Users
-	WHERE Username = @Username
+	WHERE UserPrincipalName = @UserPrincipalName
 )
 	BEGIN
 		SELECT '1' AS Result
