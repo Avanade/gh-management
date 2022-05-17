@@ -22,5 +22,5 @@ SELECT [Id],
   FROM 
        [dbo].[Projects]
   WHERE  
-       [UserPrincipalName] = @UserPrincipalName
+       [CreatedBy] = @UserPrincipalName
 END
