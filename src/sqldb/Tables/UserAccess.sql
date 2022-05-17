@@ -1,6 +1,6 @@
 ﻿CREATE TABLE [dbo].[UserAccess]
 (
-	[Id] INT NOT NULL PRIMARY KEY, 
+	[Id] INT NOT NULL PRIMARY KEY IDENTITY, 
     [ProjectId] INT NOT NULL, 
     [Username] VARCHAR(100) NOT NULL, 
     [Created] DATETIME NOT NULL DEFAULT getdate(), 

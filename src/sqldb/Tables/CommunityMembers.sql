@@ -1,6 +1,6 @@
 ﻿CREATE TABLE [dbo].[CommunityMembers]
 (
-	[Id] INT NOT NULL PRIMARY KEY, 
+	[Id] INT NOT NULL PRIMARY KEY IDENTITY, 
     [CommunityId] INT NOT NULL, 
     [Username] VARCHAR(100) NULL, 
     [Created] DATETIME NOT NULL DEFAULT getdate(), 

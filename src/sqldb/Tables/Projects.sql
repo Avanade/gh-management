@@ -1,6 +1,6 @@
 ﻿CREATE TABLE [dbo].[Projects]
 (
-	[Id] INT NOT NULL PRIMARY KEY, 
+	[Id] INT NOT NULL PRIMARY KEY IDENTITY, 
     [Name] VARCHAR(50) NOT NULL, 
     [CoOwner] VARCHAR(100) NULL, 
     [Description] VARCHAR(1000) NULL, 

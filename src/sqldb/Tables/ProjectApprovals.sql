@@ -1,6 +1,6 @@
 ﻿CREATE TABLE [dbo].[ProjectApprovals]
 (
-	[Id] INT NOT NULL PRIMARY KEY, 
+	[Id] INT NOT NULL PRIMARY KEY IDENTITY, 
     [ProjectId] INT NOT NULL, 
     [ApprovalTypeId] INT NOT NULL, 
     [ApproverUsername] VARCHAR(100) NOT NULL, 
