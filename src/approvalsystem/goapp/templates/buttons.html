@@ -1,0 +1,23 @@
+{{ define "buttons" }}
+    <table style="margin: 10px 0;width:100%; text-align: center;">
+        <tr>
+            <td colspan="5" style="padding: 5px 0;">To process your response, click any of the buttons below:</td>
+        </tr>
+        
+        <tr style="color: white;">
+            <td style="padding: 5px 0px; width: 20%; "></td>
+            <td style="padding: 5px 0px; width: 26%; background-color: green;">
+                <a href="{{ .ApproveUrl }}">
+                    {{ .ApproveText }}
+                </a>
+            </td>
+            <td style="padding: 5px 0px; width: 8%; "></td>
+            <td style="padding: 5px 0px; width: 26%; background-color: red;">
+                <a href="{{ .RejectUrl }}">
+                    {{ .RejectText }}
+                </a>
+            </td>
+            <td style="padding: 5px 0px; width: 20%; "></td>
+        </tr>
+    </table>
+{{ end }}
