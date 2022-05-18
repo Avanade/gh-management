@@ -6,6 +6,7 @@ import (
 	session "main/pkg/session"
 	rtAzure "main/routes/login/azure"
 	rtPages "main/routes/pages"
+	rtApprovals "main/routes/pages/approvals"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -32,6 +33,7 @@ func main() {
 	mux.HandleFunc("/login/azure", rtAzure.LoginHandler)
 	mux.HandleFunc("/login/azure/callback", rtAzure.CallbackHandler)
 	mux.HandleFunc("/logout/azure", rtAzure.LogoutHandler)
+	mux.HandleFunc("/requestapproval", rtApprovals.ApprovalRequestHandler)
 	mux.NotFoundHandler = loadAzAuthPage(rtPages.NotFoundHandler)
 
 	port := ev.GetEnvVar("PORT", "80")
