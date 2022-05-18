@@ -17,7 +17,7 @@ func CreateClient() {
 	// create github oauth client from token
 	ctx := context.Background()
 	ts := oauth2.StaticTokenSource(
-		&oauth2.Token{AccessToken: os.Getenv("ghtoken")},
+		&oauth2.Token{AccessToken: os.Getenv("GH_TOKEN")},
 	)
 	tc := oauth2.NewClient(ctx, ts)
 	GitHubClient = github.NewClient(tc)

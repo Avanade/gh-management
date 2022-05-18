@@ -18,16 +18,16 @@ type Authenticator struct {
 
 func NewAuthenticator() (*Authenticator, error) {
 	ctx := context.Background()
-	provider, err := oidc.NewProvider(ctx, "https://login.microsoftonline.com/"+os.Getenv("tenantid")+"/v2.0")
+	provider, err := oidc.NewProvider(ctx, "https://login.microsoftonline.com/"+os.Getenv("TENANT_ID")+"/v2.0")
 	if err != nil {
 		log.Printf("failed to get provider: %v", err)
 		return nil, err
 	}
 
 	conf := oauth2.Config{
-		ClientID:     os.Getenv("clientid"),
-		ClientSecret: os.Getenv("clientsecret"),
-		RedirectURL:  envvar.GetEnvVar("homeurl", "http://localhost:8080") + "/login/azure/callback",
+		ClientID:     os.Getenv("CLIENT_ID"),
+		ClientSecret: os.Getenv("CLIENT_SECRET"),
+		RedirectURL:  envvar.GetEnvVar("HOME_URL", "http://localhost:8080") + "/login/azure/callback",
 		Endpoint:     provider.Endpoint(),
 		Scopes:       []string{oidc.ScopeOpenID, oidc.ScopeOfflineAccess, "profile"},
 	}
