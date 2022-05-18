@@ -1,0 +1,26 @@
+{{ define "content" }}
+<div x-data="data()">
+    <h1 class="text-4xl">{{.data.Subject}}</h1>
+    <span x-html="body"></span>
+    <form action="" onsubmit="event.preventDefault()">
+        <div class="flex justify-between">
+            <div>
+                <textarea type="remarks" name="remarks"
+                class="w-full mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md border-2"></textarea>
+            </div>
+            <div>
+                <button type="submit" onclick="submit()" class="bg-blue-300 rounded-md px-4 py-2">Submit</button>
+            </div>
+        </div>
+        
+    </form>
+</div>
+
+<script type="text/javascript">
+    function data(){
+        return {
+            body: "{{.data.Body}}"
+        }
+    }
+</script>
+{{ end }}

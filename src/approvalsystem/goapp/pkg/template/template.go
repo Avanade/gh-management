@@ -29,7 +29,7 @@ func UseTemplate(w *http.ResponseWriter, r *http.Request, page string, pageData 
 		Content: pageData}
 
 	tmpl := template.Must(
-		template.ParseFiles("templates/master.html",
+		template.ParseFiles("templates/master.html", "templates/buttons.html",
 			fmt.Sprintf("templates/%v.html", page)))
 	return tmpl.Execute(*w, data)
 }
