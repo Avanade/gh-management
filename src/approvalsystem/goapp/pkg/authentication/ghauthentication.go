@@ -15,10 +15,10 @@ import (
 // Set up OAuth2 Configurations for GitHub Authentication
 func GetGitHubOauthConfig() *oauth2.Config {
 	oauthConf := &oauth2.Config{
-		ClientID:     os.Getenv("ghclientid"),
-		ClientSecret: os.Getenv("ghclientsecret"),
+		ClientID:     os.Getenv("GH_CLIENT_ID"),
+		ClientSecret: os.Getenv("GH_CLIENT_SECRET"),
 		Scopes:       []string{"user:email", "repo"},
-		RedirectURL:  envvar.GetEnvVar("homeurl", "http://localhost:8080") + "/login/github/callback",
+		RedirectURL:  envvar.GetEnvVar("HOME_URL", "http://localhost:8080") + "/login/github/callback",
 		Endpoint:     githuboauth.Endpoint,
 	}
 	return oauthConf

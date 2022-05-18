@@ -16,7 +16,7 @@ func GetSecretKV(secretName string) string {
 	keyVaultName := os.Getenv("KEY_VAULT_NAME")
 	keyVaultUrl := fmt.Sprintf("https://%s.vault.azure.net/", keyVaultName)
 
-	cred, err := azidentity.NewClientSecretCredential(os.Getenv("tenantid"), os.Getenv("clientid"), os.Getenv("clientsecret"), nil)
+	cred, err := azidentity.NewClientSecretCredential(os.Getenv("TENANT_ID"), os.Getenv("CLIENT_ID"), os.Getenv("CLIENT_SECRET"), nil)
 
 	client, err := azsecrets.NewClient(keyVaultUrl, cred, nil)
 	if err != nil {
