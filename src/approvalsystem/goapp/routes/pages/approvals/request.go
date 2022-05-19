@@ -82,8 +82,8 @@ func ApprovalRequestHandler(w http.ResponseWriter, r *http.Request) {
 			Body:        req.Body,
 			ApproveText: fmt.Sprintf("%s", appModule[0]["ApproveText"]),
 			RejectText:  fmt.Sprintf("%s", appModule[0]["RejectText"]),
-			ApproveUrl:  fmt.Sprintf("%s/%s/%s/%s/%s/1", os.Getenv("homeurl"), baseResponseUrl, req.ApplicationId, req.ApplicationModuleId, item[0]["Id"]),
-			RejectUrl:   fmt.Sprintf("%s/%s/%s/%s/%s/0", os.Getenv("homeurl"), baseResponseUrl, req.ApplicationId, req.ApplicationModuleId, item[0]["Id"]),
+			ApproveUrl:  fmt.Sprintf("%s/%s/%s/%s/%s/1", os.Getenv("HOME_URL"), baseResponseUrl, req.ApplicationId, req.ApplicationModuleId, item[0]["Id"]),
+			RejectUrl:   fmt.Sprintf("%s/%s/%s/%s/%s/0", os.Getenv("HOME_URL"), baseResponseUrl, req.ApplicationId, req.ApplicationModuleId, item[0]["Id"]),
 		}
 
 		emailBody, err := email.ComposeEmail(emailBodyData)
