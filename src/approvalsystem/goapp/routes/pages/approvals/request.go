@@ -62,6 +62,7 @@ func ApprovalRequestHandler(w http.ResponseWriter, r *http.Request) {
 		params["ApproverEmail"] = req.Email
 		params["Subject"] = req.Subject
 		params["Body"] = req.Body
+		params["RequesterEmail"] = req.RequesterEmail
 		item, err := db.ExecuteStoredProcedureWithResult("PR_Items_Insert", params)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
