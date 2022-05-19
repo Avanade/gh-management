@@ -13,7 +13,6 @@ RUN go mod download
 COPY . .
 
 EXPOSE 8080
-EXPOSE 80
 
 # Build the Go app
 RUN go build -o approvalsystem .
