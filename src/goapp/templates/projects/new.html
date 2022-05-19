@@ -198,7 +198,8 @@
                         showResult("success", "Successful", "Your repository has been created.")
                     } else {
                         console.log("Error posting data")
-                        showResult("error", "Failed", "An error has occured while creating the repository.")
+                      //  showResult("error", "Failed", "An error has occured while creating the repository.")
+                      showResult("error", "Failed", r.statusText)
                     }
                 })
                 .catch(e=>{
