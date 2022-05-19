@@ -16,6 +16,7 @@ require (
 	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/gorilla/mux v1.8.0 // indirect
 	github.com/gorilla/securecookie v1.1.1 // indirect
+	github.com/microsoft/go-mssqldb v0.13.2 // indirect
 )
 
 require (
