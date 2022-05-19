@@ -69,13 +69,15 @@ func ResponseHandler(w http.ResponseWriter, r *http.Request) {
 			} else {
 				resItems, _ := db.ExecuteStoredProcedureWithResult("PR_Items_Select_ById", sqlParamsItems)
 
+				requireRemarks := resIsAuth[0]["RequireRemarks"]
 				data := map[string]interface{}{
 					"ApplicationId":       appGuid,
 					"ApplicationModuleId": appModuleGuid,
 					"ItemId":              itemGuid,
 					"ApproverEmail":       username,
-					"isApproved":          isApproved,
-					"data":                resItems[0],
+					"IsApproved":          isApproved,
+					"Data":                resItems[0],
+					"RequireRemarks":      requireRemarks,
 				}
 				template.UseTemplate(&w, r, "response", data)
 			}
@@ -130,14 +132,12 @@ func ProcessResponseHandler(w http.ResponseWriter, r *http.Request) {
 			params["IsApproved"] = isApproved
 			params["ApproverRemarks"] = req.Remarks
 			fmt.Println("isApproved", isApproved)
-			result, err := db.ExecuteStoredProcedure("PR_Items_Update_Response", params)
+			_, err := db.ExecuteStoredProcedure("PR_Items_Update_Response", params)
 			if err != nil {
 				fmt.Println(err)
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
 			}
-			fmt.Println(result)
-			w.WriteHeader(200)
 			return
 		} else {
 			fmt.Println(err)

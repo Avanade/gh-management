@@ -55,13 +55,6 @@ func ApprovalRequestHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		var baseResponseUrl string
-		if appModule[0]["RequireRemarks"].(bool) {
-			baseResponseUrl = "responseRemarks"
-		} else {
-			baseResponseUrl = "response"
-		}
-
 		// Add item to database
 		for k := range params {
 			delete(params, k)
@@ -82,8 +75,8 @@ func ApprovalRequestHandler(w http.ResponseWriter, r *http.Request) {
 			Body:        req.Body,
 			ApproveText: fmt.Sprintf("%s", appModule[0]["ApproveText"]),
 			RejectText:  fmt.Sprintf("%s", appModule[0]["RejectText"]),
-			ApproveUrl:  fmt.Sprintf("%s/%s/%s/%s/%s/1", os.Getenv("homeurl"), baseResponseUrl, req.ApplicationId, req.ApplicationModuleId, item[0]["Id"]),
-			RejectUrl:   fmt.Sprintf("%s/%s/%s/%s/%s/0", os.Getenv("homeurl"), baseResponseUrl, req.ApplicationId, req.ApplicationModuleId, item[0]["Id"]),
+			ApproveUrl:  fmt.Sprintf("%s/response/%s/%s/%s/1", os.Getenv("HOME_URL"), req.ApplicationId, req.ApplicationModuleId, item[0]["Id"]),
+			RejectUrl:   fmt.Sprintf("%s/response/%s/%s/%s/0", os.Getenv("HOME_URL"), req.ApplicationId, req.ApplicationModuleId, item[0]["Id"]),
 		}
 
 		emailBody, err := email.ComposeEmail(emailBodyData)
