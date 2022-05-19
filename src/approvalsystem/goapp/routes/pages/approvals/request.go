@@ -46,7 +46,6 @@ func ApprovalRequestHandler(w http.ResponseWriter, r *http.Request) {
 		for k := range params {
 			delete(params, k)
 		}
-
 		// Get application module
 		params["Id"] = req.ApplicationModuleId
 		appModule, err := db.ExecuteStoredProcedureWithResult("PR_ApplicationModules_Select_ById", params)
@@ -93,6 +92,18 @@ func ApprovalRequestHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		_, err = email.SendEmail(emailData)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		// Update Date Sent
+		for k := range params {
+			delete(params, k)
+		}
+
+		params["Id"] = item[0]["Id"]
+		_, err = db.ExecuteStoredProcedure("PR_Items_Update_DateSent", params)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
