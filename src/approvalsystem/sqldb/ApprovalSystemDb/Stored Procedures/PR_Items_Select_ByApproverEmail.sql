@@ -5,7 +5,7 @@ AS
 		A.[Name] [Application],
 		AM.[Name] [Module],
 		[Subject], Body, DateSent,
-		DateResponded, IsApproved, ApproverRemarks
+		DateResponded, IsApproved, ApproverRemarks, Created
 	FROM Items I
 	INNER JOIN ApplicationModules AM ON I.ApplicationModuleId = AM.Id
 	INNER JOIN Applications A ON AM.ApplicationId = A.Id
