@@ -115,7 +115,7 @@
                 }
                 this.status = "submitted"
                 this.showModal = true
-                fetch('/processapproval', {
+                fetch('/process', {
                     method: 'post',
                     body: JSON.stringify(this.form),
                     headers: {

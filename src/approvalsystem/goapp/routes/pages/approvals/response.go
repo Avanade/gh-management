@@ -54,7 +54,6 @@ func ResponseHandler(w http.ResponseWriter, r *http.Request) {
 			template.UseTemplate(&w, r, "Unauthorized", nil)
 		} else {
 			isProcessed := resIsAuth[0]["IsApproved"]
-			fmt.Println(isProcessed)
 			if isProcessed != nil {
 				var text string
 				if isProcessed == true {
@@ -93,7 +92,6 @@ func ProcessResponseHandler(w http.ResponseWriter, r *http.Request) {
 		var req models.TypRequestProcess
 		err := json.NewDecoder(r.Body).Decode(&req)
 		if err != nil {
-			fmt.Println(err)
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
@@ -118,7 +116,6 @@ func ProcessResponseHandler(w http.ResponseWriter, r *http.Request) {
 		params["ApproverEmail"] = req.ApproverEmail
 		verification, err := db.ExecuteStoredProcedureWithResult("PR_Items_IsValid", params)
 		if err != nil {
-			fmt.Println(err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
@@ -131,7 +128,7 @@ func ProcessResponseHandler(w http.ResponseWriter, r *http.Request) {
 			params["Id"] = req.ItemId
 			params["IsApproved"] = isApproved
 			params["ApproverRemarks"] = req.Remarks
-			fmt.Println("isApproved", isApproved)
+			params["Username"] = req.ApproverEmail
 			_, err := db.ExecuteStoredProcedure("PR_Items_Update_Response", params)
 			if err != nil {
 				fmt.Println(err)
@@ -140,7 +137,6 @@ func ProcessResponseHandler(w http.ResponseWriter, r *http.Request) {
 			}
 			return
 		} else {
-			fmt.Println(err)
 			http.Error(w, err.Error(), http.StatusUnauthorized)
 			return
 		}

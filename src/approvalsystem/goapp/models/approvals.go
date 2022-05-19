@@ -15,4 +15,5 @@ type TypRequestProcess struct {
 	ApproverEmail       string `json:"approverEmail"`
 	Remarks             string `json:"remarks"`
 	IsApproved          string `json:"isApproved"`
+	Username            string `json:"username"`
 }
