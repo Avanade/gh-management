@@ -5,7 +5,7 @@ CREATE PROCEDURE PR_Applications_Select_ById
 AS
 
 SELECT
-Id, [Name]
+dbo.UidToString(Id) [Id], [Name]
 FROM Applications
 WHERE
 IsActive = 1

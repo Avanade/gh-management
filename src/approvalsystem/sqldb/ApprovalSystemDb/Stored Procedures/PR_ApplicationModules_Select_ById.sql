@@ -5,8 +5,8 @@ CREATE PROCEDURE PR_ApplicationModules_Select_ById
 AS
 
 SELECT
-A.Id [ApplicationId], A.[Name] [ApplicationName],
-AM.Id [ApplicationModuleId], AM.[Name] [ApplicationModuleName],
+dbo.UidToString(A.Id) [ApplicationId], A.[Name] [ApplicationName],
+dbo.UidToString(AM.Id) [ApplicationModuleId], AM.[Name] [ApplicationModuleName],
 AM.CallbackUrl, AM.RequireRemarks, AM.ApprovalTypeId, [AT].ApproveText, [AT].RejectText
 FROM Applications A
 INNER JOIN ApplicationModules AM ON A.Id = AM.ApplicationId

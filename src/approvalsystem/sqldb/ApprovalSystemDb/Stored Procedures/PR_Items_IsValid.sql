@@ -1,4 +1,4 @@
-CREATE PROCEDURE PR_RESPONSE_IsAuthorized
+CREATE PROCEDURE [dbo].[PR_Items_IsValid]
 	
 	@ApplicationId UNIQUEIDENTIFIER,
 	@ApplicationModuleId UNIQUEIDENTIFIER,
@@ -8,7 +8,7 @@ CREATE PROCEDURE PR_RESPONSE_IsAuthorized
 AS
 
 IF EXISTS (
-	SELECT A.[Name] [ApplicationName], AM.[Name] [ApplicationModuleName]
+	SELECT I.[Subject]
 	FROM Applications A
 	INNER JOIN ApplicationModules AM ON A.Id = AM.ApplicationId
 	INNER JOIN Items I ON AM.Id = I.ApplicationModuleId
@@ -19,14 +19,14 @@ IF EXISTS (
 	AND AM.Id = @ApplicationModuleId
 	AND I.Id = @ItemId
 	AND I.ApproverEmail = @ApproverEmail
-	)
+	AND I.IsApproved IS NULL)
 	
 	BEGIN
-		SELECT '1' [IsAuthorized], (SELECT IsApproved FROM Items WHERE Id = @ItemId) [IsApproved]
+		SELECT '1' [IsValid]
 		return 1
 	END
 ELSE
 	BEGIN
-		SELECT '0' [IsAuthorized]
+		SELECT '0' [IsValid]
 		return 0
 	END

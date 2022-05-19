@@ -1,3 +1,8 @@
+/****** Object:  StoredProcedure [dbo].[PR_Items_Insert]    Script Date: 05/18/2022 11:24:57 pm ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
 ALTER PROCEDURE [dbo].[PR_Items_Insert]
 	@ApplicationModuleId uniqueidentifier,
 	@ApproverEmail varchar(100),
@@ -21,6 +26,5 @@ AS
 		@Body
 	)
 
-	SELECT [Id] FROM @ResultTable
+	SELECT dbo.UidToString(Id) [Id] FROM @ResultTable
 
-GO
