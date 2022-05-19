@@ -9,3 +9,4 @@ AS
 		ApproverRemarks = @ApproverRemarks,
 		DateResponded = GETDATE(),
 		Modified = GETDATE()
+	WHERE Id = @Id
