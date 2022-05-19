@@ -5,12 +5,12 @@ on:
     branches:
       - test
     paths:
-      - "src/goapp/**"
+      - "src/approvalsystem/goapp/**"
   workflow_dispatch:
 
 defaults:
   run:
-    working-directory: src/goapp
+    working-directory: src/approvalsystem/goapp
 
 jobs:
   build-goapp-container:
