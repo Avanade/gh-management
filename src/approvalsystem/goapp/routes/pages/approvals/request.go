@@ -46,20 +46,12 @@ func ApprovalRequestHandler(w http.ResponseWriter, r *http.Request) {
 		for k := range params {
 			delete(params, k)
 		}
-
 		// Get application module
 		params["Id"] = req.ApplicationModuleId
 		appModule, err := db.ExecuteStoredProcedureWithResult("PR_ApplicationModules_Select_ById", params)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
-		}
-
-		var baseResponseUrl string
-		if appModule[0]["RequireRemarks"].(bool) {
-			baseResponseUrl = "responseRemarks"
-		} else {
-			baseResponseUrl = "response"
 		}
 
 		// Add item to database
@@ -70,6 +62,7 @@ func ApprovalRequestHandler(w http.ResponseWriter, r *http.Request) {
 		params["ApproverEmail"] = req.Email
 		params["Subject"] = req.Subject
 		params["Body"] = req.Body
+		params["RequesterEmail"] = req.RequesterEmail
 		item, err := db.ExecuteStoredProcedureWithResult("PR_Items_Insert", params)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -82,8 +75,8 @@ func ApprovalRequestHandler(w http.ResponseWriter, r *http.Request) {
 			Body:        req.Body,
 			ApproveText: fmt.Sprintf("%s", appModule[0]["ApproveText"]),
 			RejectText:  fmt.Sprintf("%s", appModule[0]["RejectText"]),
-			ApproveUrl:  fmt.Sprintf("%s/%s/%s/%s/%s/1", os.Getenv("homeurl"), baseResponseUrl, req.ApplicationId, req.ApplicationModuleId, item[0]["Id"]),
-			RejectUrl:   fmt.Sprintf("%s/%s/%s/%s/%s/0", os.Getenv("homeurl"), baseResponseUrl, req.ApplicationId, req.ApplicationModuleId, item[0]["Id"]),
+			ApproveUrl:  fmt.Sprintf("%s/response/%s/%s/%s/1", os.Getenv("HOME_URL"), req.ApplicationId, req.ApplicationModuleId, item[0]["Id"]),
+			RejectUrl:   fmt.Sprintf("%s/response/%s/%s/%s/0", os.Getenv("HOME_URL"), req.ApplicationId, req.ApplicationModuleId, item[0]["Id"]),
 		}
 
 		emailBody, err := email.ComposeEmail(emailBodyData)
@@ -100,6 +93,18 @@ func ApprovalRequestHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		_, err = email.SendEmail(emailData)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		// Update Date Sent
+		for k := range params {
+			delete(params, k)
+		}
+
+		params["Id"] = item[0]["Id"]
+		_, err = db.ExecuteStoredProcedure("PR_Items_Update_DateSent", params)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
