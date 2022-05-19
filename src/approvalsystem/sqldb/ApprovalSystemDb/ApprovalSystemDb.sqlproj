@@ -16,5 +16,6 @@
   <ItemGroup>
     <Folder Include="Tables\" />
     <Folder Include="Stored Procedures\" />
+    <Folder Include="Functions\" />
   </ItemGroup>
 </Project>
