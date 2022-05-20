@@ -16,8 +16,8 @@
 <!-- This example requires Tailwind CSS v2.0+ -->
 <div x-data="initHome()" class="px-4">
   <div class="py-2"><h2 class="font-medium">Pending Requests</h2></div>
-  <div class="italic" x-show="pending.length === 0">No pending requests.</div>
-  <div class="bg-white shadow overflow-hidden sm:rounded-md">
+  <div class="italic" x-show="!pending">No pending requests.</div>
+  <div class="bg-white shadow overflow-hidden sm:rounded-md" x-show="pending">
     <ul role="list" class="divide-y divide-gray-300">
       <template x-for="item in pending">
         <li x-on:click="item.Show = !item.Show">
@@ -74,8 +74,8 @@
     </ul>
   </div>
   <div class="pb-2 mt-10"><h2 class="font-medium">Closed Requests</h2></div>
-  <div class="italic" x-show="approved.length === 0">You have not responded to any requests.</div>
-  <div class="bg-white shadow overflow-hidden sm:rounded-md">
+  <div class="italic" x-show="!approved">You have not responded to any requests.</div>
+  <div class="bg-white shadow overflow-hidden sm:rounded-md" x-show="approved">
     <ul role="list" class="divide-y divide-gray-300">
       <template x-for="item in approved">
         <li x-on:click="item.Show = !item.Show">
