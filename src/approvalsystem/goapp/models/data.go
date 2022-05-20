@@ -17,3 +17,8 @@ type TypMenu struct {
 	Url      string
 	IconPath string
 }
+
+type TypAzureUser struct {
+	Name  string `json:"name"`
+	Email string `json:"preferred_username"`
+}

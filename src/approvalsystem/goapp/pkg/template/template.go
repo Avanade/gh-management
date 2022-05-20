@@ -20,7 +20,7 @@ func UseTemplate(w *http.ResponseWriter, r *http.Request, page string, pageData 
 
 	// Data on master page
 	var menu []models.TypMenu
-	menu = append(menu, models.TypMenu{Name: "Approvals", Url: "/approvals/my", IconPath: "/public/icons/approvals.svg"})
+	menu = append(menu, models.TypMenu{Name: "My Approvals", Url: "/", IconPath: "/public/icons/approvals.svg"})
 	masterPageData := models.TypHeaders{Menu: menu, Page: getUrlPath(r.URL.Path)}
 
 	data := models.TypPageData{
@@ -31,13 +31,14 @@ func UseTemplate(w *http.ResponseWriter, r *http.Request, page string, pageData 
 	tmpl := template.Must(
 		template.ParseFiles("templates/master.html", "templates/buttons.html",
 			fmt.Sprintf("templates/%v.html", page)))
+
 	return tmpl.Execute(*w, data)
 }
 
 func getUrlPath(path string) string {
 	p := strings.Split(path, "/")
 	if p[1] == "" {
-		return "Approvals"
+		return "My Approvals"
 	} else {
 		return strings.Title(p[1])
 	}
