@@ -54,7 +54,6 @@ func ResponseHandler(w http.ResponseWriter, r *http.Request) {
 			template.UseTemplate(&w, r, "Unauthorized", nil)
 		} else {
 			isProcessed := resIsAuth[0]["IsApproved"]
-			fmt.Println(isProcessed)
 			if isProcessed != nil {
 				var text string
 				if isProcessed == true {
@@ -69,13 +68,15 @@ func ResponseHandler(w http.ResponseWriter, r *http.Request) {
 			} else {
 				resItems, _ := db.ExecuteStoredProcedureWithResult("PR_Items_Select_ById", sqlParamsItems)
 
+				requireRemarks := resIsAuth[0]["RequireRemarks"]
 				data := map[string]interface{}{
 					"ApplicationId":       appGuid,
 					"ApplicationModuleId": appModuleGuid,
 					"ItemId":              itemGuid,
 					"ApproverEmail":       username,
-					"isApproved":          isApproved,
-					"data":                resItems[0],
+					"IsApproved":          isApproved,
+					"Data":                resItems[0],
+					"RequireRemarks":      requireRemarks,
 				}
 				template.UseTemplate(&w, r, "response", data)
 			}
@@ -91,7 +92,6 @@ func ProcessResponseHandler(w http.ResponseWriter, r *http.Request) {
 		var req models.TypRequestProcess
 		err := json.NewDecoder(r.Body).Decode(&req)
 		if err != nil {
-			fmt.Println(err)
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
@@ -116,7 +116,6 @@ func ProcessResponseHandler(w http.ResponseWriter, r *http.Request) {
 		params["ApproverEmail"] = req.ApproverEmail
 		verification, err := db.ExecuteStoredProcedureWithResult("PR_Items_IsValid", params)
 		if err != nil {
-			fmt.Println(err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
@@ -129,18 +128,15 @@ func ProcessResponseHandler(w http.ResponseWriter, r *http.Request) {
 			params["Id"] = req.ItemId
 			params["IsApproved"] = isApproved
 			params["ApproverRemarks"] = req.Remarks
-			fmt.Println("isApproved", isApproved)
-			result, err := db.ExecuteStoredProcedure("PR_Items_Update_Response", params)
+			params["Username"] = req.ApproverEmail
+			_, err := db.ExecuteStoredProcedure("PR_Items_Update_Response", params)
 			if err != nil {
 				fmt.Println(err)
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
 			}
-			fmt.Println(result)
-			w.WriteHeader(200)
 			return
 		} else {
-			fmt.Println(err)
 			http.Error(w, err.Error(), http.StatusUnauthorized)
 			return
 		}

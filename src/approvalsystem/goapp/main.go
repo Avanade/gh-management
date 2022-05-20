@@ -34,11 +34,11 @@ func main() {
 	mux.HandleFunc("/login/azure", rtAzure.LoginHandler)
 	mux.HandleFunc("/login/azure/callback", rtAzure.CallbackHandler)
 	mux.HandleFunc("/logout/azure", rtAzure.LogoutHandler)
-	mux.HandleFunc("/requestapproval", rtApprovals.ApprovalRequestHandler)
-	mux.HandleFunc("/processapproval", rtApprovals.ProcessResponseHandler)
+	mux.HandleFunc("/request", rtApprovals.ApprovalRequestHandler)
+	mux.HandleFunc("/process", rtApprovals.ProcessResponseHandler)
 	mux.NotFoundHandler = loadAzAuthPage(rtPages.NotFoundHandler)
 
-	port := ev.GetEnvVar("PORT", "80")
+	port := ev.GetEnvVar("PORT", "8080")
 	fmt.Printf("Now listening on port %v\n", port)
 	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%v", port), mux))
 

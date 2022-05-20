@@ -123,7 +123,7 @@
     </form>
 
     <!-- Modal -->
-    <div x-show="showModal" class="relative z-10" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+    <div x-show="showModal" id="modal" hidden class="relative z-10" aria-labelledby="modal-title" role="dialog" aria-modal="true">
       <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
     
       <div class="fixed z-10 inset-0 overflow-y-auto">
@@ -173,6 +173,9 @@
             status: "",
             modalText: "Please wait...",
             modalSubText: "Your request is being processed.",
+            onLoad(){
+              document.getElementById("modal").attributes.removeNamedItem("hidden")
+            },
             submit(){
                 let showResult = (status, title, subtext) => {
                     this.status = status
