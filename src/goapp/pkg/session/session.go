@@ -103,6 +103,7 @@ func IsGHAuthenticated(w http.ResponseWriter, r *http.Request, next http.Handler
 			Name:   "gh-auth-session",
 			MaxAge: -1}
 		http.SetCookie(w, &c)
+		http.Redirect(w, r, "/login/github", http.StatusTemporaryRedirect)
 		return
 	}
 
