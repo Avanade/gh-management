@@ -23,7 +23,7 @@ UPDATE
         [SurName] = @SurName,
         [JobTitle] = @JobTitle,
         [GitHubId] = @GitHubId,
-        [GithubUser] = @GithubUser,
+        [GitHubUser] = @GithubUser,
         [Modified] = GETDATE(),
         [ModifiedBy] = @ModifiedBy
  WHERE  

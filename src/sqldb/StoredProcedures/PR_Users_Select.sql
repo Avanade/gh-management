@@ -14,7 +14,7 @@ SELECT
 		[SurName],
 		[JobTitle],
 		[GitHubId],
-		[GithubUser],
+		[GitHubUser],
 		[Created],
 		[CreatedBy],
 		[Modified],

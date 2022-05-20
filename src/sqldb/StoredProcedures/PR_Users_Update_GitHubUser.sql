@@ -16,7 +16,7 @@ BEGIN
         FROM Users
         WHERE
         UserPrincipalName = @UserPrincipalName
-        AND GithubId IS NULL
+        AND GitHubId IS NULL
     ) OR @Force = 1
         BEGIN
             UPDATE 
@@ -38,7 +38,7 @@ BEGIN
                 SELECT UserPrincipalName
                 FROM Users WHERE
                 UserPrincipalName = @UserPrincipalName
-                AND GithubId = @GitHubId
+                AND GitHubId = @GitHubId
             )
             BEGIN
                 SELECT CONVERT(BIT, 1) [IsValid], @GitHubId [GitHubId], @GitHubUser [GitHubUser]

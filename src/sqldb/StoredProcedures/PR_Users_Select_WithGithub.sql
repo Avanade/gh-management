@@ -7,12 +7,12 @@ SELECT
 		[GivenName],
 		[SurName],
 		[JobTitle],
-		[GithubId],
-		[GithubUser],
+		[GitHubId],
+		[GitHubUser],
 		[Created],
 		[CreatedBy],
 		[Modified],
 		[ModifiedBy]
   FROM 
 		[dbo].[Users]
-		WHERE GithubId IS NOT NULL
+		WHERE GitHubId IS NOT NULL
