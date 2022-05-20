@@ -104,10 +104,10 @@
                 </div>
               </div>
               <div x-show="item.Show" class="border-t-[1px] border-gray-100 mt-3 pt-3">
-                <div x-html="item.Body"></div>
+                <div x-html="item.Body" class="text-sm truncate"></div>
                 <div class="border-[1px] mt-2 p-3 rounded-md">
                   <div class="text-sm font-medium text-gray-800 truncate pb-2">Remarks</div>
-                  <div x-text="item.ApproverRemarks? item.ApproverRemarks:'none'"></div>
+                  <div x-text="item.ApproverRemarks? item.ApproverRemarks:'none'" class="text-sm truncate"></div>
                 </div>
               </div>
             </div>
