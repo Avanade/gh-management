@@ -1,7 +1,8 @@
 ﻿CREATE TABLE [dbo].[Users]
 (
     [UserPrincipalName] VARCHAR(100) NOT NULL PRIMARY KEY, 
-    [GivenName] VARCHAR(100) NOT NULL, 
+    [Name] VARCHAR(100) NOT NULL, 
+    [GivenName] VARCHAR(100) NULL, 
     [SurName] VARCHAR(100) NULL, 
     [JobTitle] VARCHAR(100) NULL, 
     [GitHubId] VARCHAR(100) NULL,

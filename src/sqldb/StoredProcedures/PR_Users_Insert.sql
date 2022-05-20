@@ -1,8 +1,9 @@
 ﻿CREATE PROCEDURE [dbo].[PR_Users_Insert]
 (
 			@UserPrincipalName varchar(100)
-           ,@GivenName varchar(100)
-           ,@SurName varchar(100)
+           ,@Name varchar(100)
+           ,@GivenName varchar(100) = NULL
+           ,@SurName varchar(100) = NULL
            ,@JobTitle varchar(100) = NULL
 )
 AS
@@ -17,6 +18,7 @@ BEGIN
 		INSERT INTO [dbo].[Users]
 			(
 			[UserPrincipalName],
+            [Name],
 			[GivenName],
 			[SurName],
 			[JobTitle],
@@ -28,6 +30,7 @@ BEGIN
 		VALUES
 			(
 			@UserPrincipalName,
+            @Name,
 			@GivenName,
 			@SurName,
 			@JobTitle,
