@@ -13,7 +13,6 @@
 
 <div id="pageTitle">Approval Requests Assigned To You</div>
 
-<!-- This example requires Tailwind CSS v2.0+ -->
 <div x-data="initHome()" class="px-4">
   <div class="py-2"><h2 class="font-medium">Pending Requests</h2></div>
   <div class="italic" x-show="!pending">No pending requests.</div>
@@ -28,9 +27,9 @@
               </div>
               <div class="mt-2 sm:flex sm:justify-between">
                 <div class="sm:flex">
-                  <p class="flex items-center text-sm text-gray-500" x-text="item.Application">
+                  <p class="flex items-center text-sm text-gray-500" x-data="{ app: 'Application: ' + item.Application}" x-text="app">
                   </p>
-                  <p class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0 sm:ml-6" x-text="item.Module">
+                  <p class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0 sm:ml-6" x-data="{ mod: 'Module: ' + item.Module}" x-text="mod">
                   </p>
                 </div>
                 <div class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
@@ -89,9 +88,9 @@
               </div>
               <div class="mt-2 sm:flex sm:justify-between">
                 <div class="sm:flex">
-                  <p class="flex items-center text-sm text-gray-500" x-text="item.Application">
+                  <p class="flex items-center text-sm text-gray-500" x-data="{ app: 'Application: ' + item.Application}" x-text="app">
                   </p>
-                  <p class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0 sm:ml-6" x-text="item.Module">
+                  <p class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0 sm:ml-6" x-data="{ mod: 'Module: ' + item.Module}" x-text="mod">
                   </p>
                 </div>
                 <div class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
@@ -107,7 +106,7 @@
               <div x-show="item.Show" class="border-t-[1px] border-gray-100 mt-3 pt-3">
                 <div x-html="item.Body"></div>
                 <div class="border-[1px] mt-2 p-3 rounded-md">
-                  <div class="font-medium pb-2">Remarks</div>
+                  <div class="text-sm font-medium text-gray-800 truncate pb-2">Remarks</div>
                   <div x-text="item.ApproverRemarks? item.ApproverRemarks:'none'"></div>
                 </div>
               </div>
