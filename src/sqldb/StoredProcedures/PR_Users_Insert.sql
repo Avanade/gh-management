@@ -1,11 +1,9 @@
-﻿CREATE PROCEDURE PR_Users_Insert
+﻿CREATE PROCEDURE [dbo].[PR_Users_Insert]
 (
 			@UserPrincipalName varchar(100)
            ,@GivenName varchar(100)
            ,@SurName varchar(100)
-           ,@JobTitle varchar(100)
-           ,@GithubUser varchar(100)
-
+           ,@JobTitle varchar(100) = NULL
 )
 AS
 BEGIN
@@ -14,29 +12,29 @@ BEGIN
 	SET NOCOUNT ON;
 
     -- Insert statements for procedure here
-
-INSERT INTO [dbo].[Users]
-           (
-           [UserPrincipalName],
-           [GivenName],
-           [SurName],
-           [JobTitle],
-           [GithubUser],
-           [Created],
-           [CreatedBy],
-           [Modified],
-           [ModifiedBy]
-           )
-     VALUES
-           (
-           @UserPrincipalName,
-           @GivenName,
-           @SurName,
-           @JobTitle,
-           @GithubUser,
-           GETDATE(),
-           @UserPrincipalName,
-           GETDATE(),
-           @UserPrincipalName
-           )
+	IF NOT EXISTS (SELECT UserPrincipalName From Users WHERE UserPrincipalName = @UserPrincipalName)
+	BEGIN
+		INSERT INTO [dbo].[Users]
+			(
+			[UserPrincipalName],
+			[GivenName],
+			[SurName],
+			[JobTitle],
+			[Created],
+			[CreatedBy],
+			[Modified],
+			[ModifiedBy]
+			)
+		VALUES
+			(
+			@UserPrincipalName,
+			@GivenName,
+			@SurName,
+			@JobTitle,
+			GETDATE(),
+			@UserPrincipalName,
+			GETDATE(),
+			@UserPrincipalName
+			)
+	END
 END

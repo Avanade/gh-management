@@ -4,7 +4,8 @@
         @GivenName varchar(50),
         @SurName varchar(50),
         @JobTitle varchar(50),
-        @GithubUser varchar(100),
+        @GitHubId VARCHAR(100),
+        @GitHubUser varchar(100),
         @ModifiedBy varchar(100)
 )
 AS
@@ -21,6 +22,7 @@ UPDATE
         [GivenName] = @GivenName,
         [SurName] = @SurName,
         [JobTitle] = @JobTitle,
+        [GitHubId] = @GitHubId,
         [GithubUser] = @GithubUser,
         [Modified] = GETDATE(),
         [ModifiedBy] = @ModifiedBy

@@ -13,6 +13,7 @@ SELECT
 		[GivenName],
 		[SurName],
 		[JobTitle],
+		[GitHubId],
 		[GithubUser],
 		[Created],
 		[CreatedBy],
