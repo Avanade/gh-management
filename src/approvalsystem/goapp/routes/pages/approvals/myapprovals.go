@@ -10,7 +10,7 @@ import (
 	"os"
 )
 
-func HomeHandler(w http.ResponseWriter, r *http.Request) {
+func MyApprovalsHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Connect to database
 	dbConnectionParam := sql.ConnectionParam{
