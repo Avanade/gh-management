@@ -173,9 +173,7 @@
             status: "",
             modalText: "Please wait...",
             modalSubText: "Your request is being processed.",
-            // onLoad(){
-            //   document.getElementById("modal").attributes.removeNamedItem("hidden")
-            // },
+          
             submit(){
                 let showResult = (status, title, subtext) => {
                     this.status = status
@@ -201,9 +199,7 @@
                         showResult("success", "Successful", "Your repository has been created.")
                     } else {
                         console.log("Error posting data")
-                      //  showResult("error", "Failed", "An error has occured while creating the repository.")
-                      //showResult("error", "Failed", r.statusText)
-                      r.text().then(body => showResult("error", "Failed", body));
+                        r.text().then(body => showResult("error", "Failed", body));
                     }
                 })
                 .catch(e=>{
