@@ -26,16 +26,16 @@ func IsUserExist(userPrincipalName string) bool {
 	return result[0]["Result"] == 1
 }
 
-func InsertUser(userPrincipalName, givenName, surName, jobTitle, githubUser string) error {
+func InsertUser(userPrincipalName, name, givenName, surName, jobTitle string) error {
 	db := ConnectDb()
 	defer db.Close()
 
 	param := map[string]interface{}{
 		"UserPrincipalName": userPrincipalName,
+		"Name":              name,
 		"GivenName":         givenName,
 		"SurName":           surName,
 		"JobTitle":          jobTitle,
-		"GithubUser":        githubUser,
 	}
 
 	_, err := db.ExecuteStoredProcedure("PR_Users_Insert", param)
@@ -44,6 +44,25 @@ func InsertUser(userPrincipalName, givenName, surName, jobTitle, githubUser stri
 	}
 
 	return nil
+}
+
+func UpdateUserGithub(userPrincipalName, githubId, githubUser string, force int) (map[string]interface{}, error) {
+	db := ConnectDb()
+	defer db.Close()
+
+	param := map[string]interface{}{
+		"UserPrincipalName": userPrincipalName,
+		"GitHubId":          githubId,
+		"GitHubUser":        githubUser,
+		"Force":             force,
+	}
+
+	result, err := db.ExecuteStoredProcedureWithResult("PR_Users_Update_GitHubUser", param)
+	if err != nil {
+		return nil, err
+	}
+
+	return result[0], nil
 }
 
 func ConnectDb() *sql.DB {
