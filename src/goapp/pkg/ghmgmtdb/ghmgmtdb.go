@@ -70,15 +70,11 @@ func Projects_IsExisting(body models.TypNewProjectReqBody) bool {
 		return false
 	}
 
-	for _, element := range result {
-		for _, element_ := range element {
-			if element_ == "1" {
-				return true
-			} else {
-				return false
-			}
-		}
-
+	if result[0]["Result"] == "1" {
+		return true
+	} else {
+		return false
 	}
+
 	return false
 }
