@@ -2,7 +2,6 @@ package routes
 
 import (
 	"encoding/json"
-	"fmt"
 	models "main/models"
 	ghmgmtdb "main/pkg/ghmgmtdb"
 	githubAPI "main/pkg/github"
@@ -19,7 +18,6 @@ func ProjectsNewHandler(w http.ResponseWriter, r *http.Request) {
 		sessionaz, _ := session.Store.Get(r, "auth-session")
 		iprofile := sessionaz.Values["profile"]
 		profile := iprofile.(map[string]interface{})
-		fmt.Println(profile["preferred_username"])
 		username := profile["preferred_username"]
 		r.ParseForm()
 

@@ -29,7 +29,7 @@ func PRProjectsInsert(body models.TypNewProjectReqBody, user string) {
 
 	cp := sql.ConnectionParam{
 
-		ConnectionString: "Server=tcp:gh-mgmt.database.windows.net,1433;Initial Catalog=gh-mgmt;Persist Security Info=False;User ID=ghmsql;Password=Dfku2h391kj0@0cNjsl0;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;Database=GhManagementDb",
+		ConnectionString: os.Getenv("GHMGMTDB_CONNECTION_STRING"),
 	}
 
 	db, _ := sql.Init(cp)
@@ -43,7 +43,6 @@ func PRProjectsInsert(body models.TypNewProjectReqBody, user string) {
 		"ConfirmEnabledSecurity": body.ConfirmSecIPScan,
 		"CreatedBy":              user,
 	}
-	fmt.Println(param)
 	_, err := db.ExecuteStoredProcedure("dbo.PR_Projects_Insert", param)
 	if err != nil {
 		fmt.Println(err)
