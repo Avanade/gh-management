@@ -1,6 +1,8 @@
 package ghmgmt
 
 import (
+	"fmt"
+	models "main/models"
 	sql "main/pkg/sql"
 	"os"
 )
@@ -13,12 +15,71 @@ func GetUsersWithGithub() interface{} {
 	return result
 }
 
-func ConnectDb() (*sql.DB) {
+func ConnectDb() *sql.DB {
 	cp := sql.ConnectionParam{
 		ConnectionString: os.Getenv("GHMGMTDB_CONNECTION_STRING"),
-		}
+	}
 
 	db, _ := sql.Init(cp)
 
 	return db
+}
+
+func PRProjectsInsert(body models.TypNewProjectReqBody, user string) {
+
+	cp := sql.ConnectionParam{
+
+		ConnectionString: "Server=tcp:gh-mgmt.database.windows.net,1433;Initial Catalog=gh-mgmt;Persist Security Info=False;User ID=ghmsql;Password=Dfku2h391kj0@0cNjsl0;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;Database=GhManagementDb",
+	}
+
+	db, _ := sql.Init(cp)
+
+	param := map[string]interface{}{
+
+		"Name":                   body.Name,
+		"CoOwner":                body.Coowner,
+		"Description":            body.Description,
+		"ConfirmAvaIP":           body.ConfirmAvaIP,
+		"ConfirmEnabledSecurity": body.ConfirmSecIPScan,
+		"CreatedBy":              user,
+	}
+	fmt.Println(param)
+	_, err := db.ExecuteStoredProcedure("dbo.PR_Projects_Insert", param)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+}
+
+func Projects_IsExisting(body models.TypNewProjectReqBody) bool {
+
+	cp := sql.ConnectionParam{
+		ConnectionString: "Server=tcp:gh-mgmt.database.windows.net,1433;Initial Catalog=gh-mgmt;Persist Security Info=False;User ID=ghmsql;Password=Dfku2h391kj0@0cNjsl0;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;Database=GhManagementDb",
+	}
+
+	db, _ := sql.Init(cp)
+
+	param := map[string]interface{}{
+
+		"Name": body.Name,
+	}
+
+	result, err := db.ExecuteStoredProcedureWithResult("dbo.PR_Projects_IsExisting", param)
+
+	if err != nil {
+		fmt.Println(err)
+		return false
+	}
+
+	for _, element := range result {
+		for _, element_ := range element {
+			if element_ == "1" {
+				return true
+			} else {
+				return false
+			}
+		}
+
+	}
+	return false
 }
