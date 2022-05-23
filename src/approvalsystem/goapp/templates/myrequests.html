@@ -11,11 +11,11 @@
   }
 </script>
 
-<div id="pageTitle">Approval Requests Assigned To You</div>
+<div id="pageTitle">Approval Requests You Created</div>
 
 <div x-data="initHome()" class="px-4">
   <div class="py-2"><h2 class="font-medium">Pending Requests</h2></div>
-  <div class="italic" x-show="!pending">No pending requests.</div>
+  <div class="italic" x-show="!pending">You have no pending request.</div>
   <div class="bg-white shadow overflow-hidden sm:rounded-md" x-show="pending">
     <ul role="list" class="divide-y divide-gray-300">
       <template x-for="item in pending">
@@ -43,28 +43,7 @@
                 </div>
               </div>
               <div x-show="item.Show" class="border-t-[1px] border-gray-100 mt-3 pt-3">
-                <div x-html="item.Body"></div>
-                <div>
-                  <table style="margin: 10px 0;width:100%; text-align: center;">
-                    <tr>
-                        <td colspan="5" style="padding: 5px 0;">To process your response, click any of the buttons below:</td>
-                    </tr>
-                    
-                    <tr style="color: white;">
-                        <td style="padding: 5px 0px; width: 20%; "></td>
-                        <td style="padding: 5px 0px; width: 26%; background-color: green;" @click.stop>
-                            <a x-bind:href="item.ApproveUrl" x-text="item.ApproveText" style="color: white;">
-                            </a>
-                        </td>
-                        <td style="padding: 5px 0px; width: 8%; "></td>
-                        <td style="padding: 5px 0px; width: 26%; background-color: red;" @click.stop>
-                            <a x-bind:href="item.RejectUrl" x-text="item.RejectText" style="color: white;">
-                            </a>
-                        </td>
-                        <td style="padding: 5px 0px; width: 20%; "></td>
-                    </tr>
-                </table>
-                </div>
+                <div x-html="item.Body" class="text-sm"></div>
               </div>
             </div>
           </a>
@@ -73,7 +52,7 @@
     </ul>
   </div>
   <div class="pb-2 mt-10"><h2 class="font-medium">Closed Requests</h2></div>
-  <div class="italic" x-show="!approved">You have not responded to any requests.</div>
+  <div class="italic" x-show="!approved">You have no closed request.</div>
   <div class="bg-white shadow overflow-hidden sm:rounded-md" x-show="approved">
     <ul role="list" class="divide-y divide-gray-300">
       <template x-for="item in approved">
@@ -104,10 +83,10 @@
                 </div>
               </div>
               <div x-show="item.Show" class="border-t-[1px] border-gray-100 mt-3 pt-3">
-                <div x-html="item.Body" class="text-sm truncate"></div>
+                <div x-html="item.Body" class="text-sm"></div>
                 <div class="border-[1px] mt-2 p-3 rounded-md">
-                  <div class="text-sm font-medium text-gray-800 truncate pb-2">Remarks</div>
-                  <div x-text="item.ApproverRemarks? item.ApproverRemarks:'none'" class="text-sm truncate"></div>
+                  <div class="text-sm font-medium text-gray-800 pb-2">Remarks</div>
+                  <div x-text="item.ApproverRemarks? item.ApproverRemarks:'none'" class="text-sm"></div>
                 </div>
               </div>
             </div>

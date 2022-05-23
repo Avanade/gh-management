@@ -1,4 +1,4 @@
-package routes
+package route
 
 import (
 	"encoding/json"
@@ -10,7 +10,7 @@ import (
 	"os"
 )
 
-func HomeHandler(w http.ResponseWriter, r *http.Request) {
+func MyApprovalsHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Connect to database
 	dbConnectionParam := sql.ConnectionParam{
@@ -65,7 +65,7 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	template.UseTemplate(&w, r, "home", string(b))
+	template.UseTemplate(&w, r, "myapprovals", string(b))
 }
 
 func itemMapper(item map[string]interface{}, isApproved bool) TypItem {

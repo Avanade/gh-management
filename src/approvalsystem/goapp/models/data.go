@@ -16,6 +16,7 @@ type TypMenu struct {
 	Name     string
 	Url      string
 	IconPath string
+	UrlPath  string
 }
 
 type TypAzureUser struct {
