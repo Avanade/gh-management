@@ -1,7 +1,9 @@
 package ghmgmt
 
 import (
+
 	"main/pkg/sql"
+
 	"os"
 )
 
@@ -12,6 +14,7 @@ func GetUsersWithGithub() interface{} {
 
 	return result
 }
+
 
 func IsUserExist(userPrincipalName string) bool {
 	db := ConnectDb()
@@ -65,6 +68,7 @@ func UpdateUserGithub(userPrincipalName, githubId, githubUser string, force int)
 	return result[0], nil
 }
 
+
 func ConnectDb() *sql.DB {
 	cp := sql.ConnectionParam{
 		ConnectionString: os.Getenv("GHMGMTDB_CONNECTION_STRING"),
@@ -74,3 +78,58 @@ func ConnectDb() *sql.DB {
 
 	return db
 }
+
+func PRProjectsInsert(body models.TypNewProjectReqBody, user string) {
+
+	cp := sql.ConnectionParam{
+
+		ConnectionString: os.Getenv("GHMGMTDB_CONNECTION_STRING"),
+	}
+
+	db, _ := sql.Init(cp)
+
+	param := map[string]interface{}{
+
+		"Name":                   body.Name,
+		"CoOwner":                body.Coowner,
+		"Description":            body.Description,
+		"ConfirmAvaIP":           body.ConfirmAvaIP,
+		"ConfirmEnabledSecurity": body.ConfirmSecIPScan,
+		"CreatedBy":              user,
+	}
+	_, err := db.ExecuteStoredProcedure("dbo.PR_Projects_Insert", param)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+}
+
+func Projects_IsExisting(body models.TypNewProjectReqBody) bool {
+
+	cp := sql.ConnectionParam{
+		ConnectionString: os.Getenv("GHMGMTDB_CONNECTION_STRING"),
+	}
+
+	db, _ := sql.Init(cp)
+
+	param := map[string]interface{}{
+
+		"Name": body.Name,
+	}
+
+	result, err := db.ExecuteStoredProcedureWithResult("dbo.PR_Projects_IsExisting", param)
+
+	if err != nil {
+		fmt.Println(err)
+		return false
+	}
+
+	if result[0]["Result"] == "1" {
+		return true
+	} else {
+		return false
+	}
+
+	return false
+}
+
