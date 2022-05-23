@@ -53,7 +53,7 @@ func PRProjectsInsert(body models.TypNewProjectReqBody, user string) {
 func Projects_IsExisting(body models.TypNewProjectReqBody) bool {
 
 	cp := sql.ConnectionParam{
-		ConnectionString: "Server=tcp:gh-mgmt.database.windows.net,1433;Initial Catalog=gh-mgmt;Persist Security Info=False;User ID=ghmsql;Password=Dfku2h391kj0@0cNjsl0;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;Database=GhManagementDb",
+		ConnectionString: os.Getenv("GHMGMTDB_CONNECTION_STRING"),
 	}
 
 	db, _ := sql.Init(cp)
