@@ -1,4 +1,4 @@
-package routes
+package route
 
 import (
 	"encoding/json"
@@ -65,7 +65,7 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	template.UseTemplate(&w, r, "home", string(b))
+	template.UseTemplate(&w, r, "myapprovals", string(b))
 }
 
 func itemMapper(item map[string]interface{}, isApproved bool) TypItem {

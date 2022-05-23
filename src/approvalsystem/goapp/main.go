@@ -29,7 +29,8 @@ func main() {
 
 	mux := mux.NewRouter()
 	mux.PathPrefix("/public/").Handler(http.StripPrefix("/public/", http.FileServer(http.Dir("./public/"))))
-	mux.Handle("/", loadAzAuthPage(rtPages.HomeHandler))
+	mux.Handle("/", loadAzAuthPage(rtApprovals.MyRequestsHandler))
+	mux.Handle("/myapprovals", loadAzAuthPage(rtApprovals.HomeHandler))
 	mux.Handle("/response/{appGuid}/{appModuleGuid}/{itemGuid}/{isApproved}", loadAzAuthPage(rtApprovals.ResponseHandler))
 	mux.HandleFunc("/login/azure", rtAzure.LoginHandler)
 	mux.HandleFunc("/login/azure/callback", rtAzure.CallbackHandler)

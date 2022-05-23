@@ -55,7 +55,7 @@
               {{ range $menu := .Header.Menu }}
               <a
                 href="{{ $menu.Url }}"
-                {{ if eq $menu.Name $page  }}
+                {{ if eq $menu.Url $page  }}
                 class="bg-gray-100 text-gray-900 group flex items-center px-2 py-2 text-base font-medium rounded-md"
                 {{ else }}
                 class="text-gray-600 hover:bg-gray-50 hover:text-gray-900 group flex items-center px-2 py-2 text-base font-medium rounded-md"
@@ -124,7 +124,7 @@
               {{ range $menu := .Header.Menu }}
               <a
                 href="{{ $menu.Url }}"
-                {{ if eq $menu.Name $page  }}
+                {{ if eq $menu.Url $page  }}
                 class="bg-gray-100 text-gray-900 group flex items-center px-2 py-2 text-base font-medium rounded-md"
                 {{ else }}
                 class="text-gray-600 hover:bg-gray-50 hover:text-gray-900 group flex items-center px-2 py-2 text-base font-medium rounded-md"
