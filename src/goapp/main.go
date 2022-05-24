@@ -40,6 +40,7 @@ func main() {
 	mux.HandleFunc("/logout/azure", rtAzure.LogoutHandler)
 	mux.HandleFunc("/login/github", rtGithub.GithubLoginHandler)
 	mux.HandleFunc("/login/github/callback", rtGithub.GithubCallbackHandler)
+	mux.HandleFunc("/login/github/force", rtGithub.GithubForceSaveHandler)
 	mux.HandleFunc("/logout/github", rtGithub.GitHubLogoutHandler)
 	mux.NotFoundHandler = http.HandlerFunc(rtPages.NotFoundHandler)
 

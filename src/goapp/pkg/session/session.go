@@ -132,6 +132,10 @@ func GetGitHubUserData(w http.ResponseWriter, r *http.Request) (models.TypGitHub
 			return models.TypGitHubUser{LoggedIn: false}, err
 		}
 
+		if _, okIsValid := session.Values["ghIsValid"]; okIsValid {
+			gitHubUser.IsValid = session.Values["ghIsValid"].(bool)
+		}
+
 		gitHubUser.AccessToken = fmt.Sprintf("%s", session.Values["ghAccessToken"])
 		gitHubUser.LoggedIn = true
 	} else {

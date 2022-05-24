@@ -173,9 +173,7 @@
             status: "",
             modalText: "Please wait...",
             modalSubText: "Your request is being processed.",
-            onLoad(){
-              document.getElementById("modal").attributes.removeNamedItem("hidden")
-            },
+          
             submit(){
                 let showResult = (status, title, subtext) => {
                     this.status = status
@@ -187,6 +185,7 @@
                 }
                 this.status = "submitted"
                 this.showModal = true
+                document.getElementById("modal").attributes.removeNamedItem("hidden")
                 fetch('/projects/new', {
                     method: 'post',
                     body: JSON.stringify(this.form),
@@ -200,7 +199,7 @@
                         showResult("success", "Successful", "Your repository has been created.")
                     } else {
                         console.log("Error posting data")
-                        showResult("error", "Failed", "An error has occured while creating the repository.")
+                        r.text().then(body => showResult("error", "Failed", body));
                     }
                 })
                 .catch(e=>{
