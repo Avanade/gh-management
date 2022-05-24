@@ -31,7 +31,11 @@ func IsAuthenticated(w http.ResponseWriter, r *http.Request, next http.HandlerFu
 	// Check session if there is saved user profile
 	session, err := Store.Get(r, "auth-session")
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		c := http.Cookie{
+			Name:   "auth-session",
+			MaxAge: -1}
+		http.SetCookie(w, &c)
+		http.Redirect(w, r, "/login/azure", http.StatusTemporaryRedirect)
 		return
 	}
 
@@ -95,7 +99,11 @@ func IsGHAuthenticated(w http.ResponseWriter, r *http.Request, next http.Handler
 	// Check session if there is saved user profile
 	session, err := Store.Get(r, "gh-auth-session")
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		c := http.Cookie{
+			Name:   "gh-auth-session",
+			MaxAge: -1}
+		http.SetCookie(w, &c)
+		http.Redirect(w, r, "/login/github", http.StatusTemporaryRedirect)
 		return
 	}
 

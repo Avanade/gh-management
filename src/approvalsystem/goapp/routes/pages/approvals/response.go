@@ -1,6 +1,7 @@
 package route
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"main/models"
@@ -10,9 +11,31 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"time"
 
 	"github.com/gorilla/mux"
 )
+
+func connectSql() (db *sql.DB) {
+	db, err := sql.Init(sql.ConnectionParam{ConnectionString: os.Getenv("APPROVALSYSTEMDB_CONNECTION_STRING")})
+	if err != nil {
+		fmt.Printf("ERROR: %+v", err)
+	}
+	return
+}
+
+func handleErrorReturn(w http.ResponseWriter, err error) {
+	if err != nil {
+		fmt.Printf("ERROR: %+v", err)
+		http.Error(w, err.Error(), http.StatusBadRequest)
+	}
+}
+
+func handleError(err error) {
+	if err != nil {
+		fmt.Printf("ERROR: %+v", err)
+	}
+}
 
 func ResponseHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
@@ -30,12 +53,6 @@ func ResponseHandler(w http.ResponseWriter, r *http.Request) {
 
 		username := profile["preferred_username"]
 
-		db, err := sql.Init(sql.ConnectionParam{ConnectionString: os.Getenv("APPROVALSYSTEMDB_CONNECTION_STRING")})
-		defer db.Close()
-
-		if err != nil {
-			fmt.Printf("ERROR: %+v", err)
-		}
 		sqlParamsIsAuth := map[string]interface{}{
 			"ApplicationId":       appGuid,
 			"ApplicationModuleId": appModuleGuid,
@@ -47,7 +64,10 @@ func ResponseHandler(w http.ResponseWriter, r *http.Request) {
 			"Id": itemGuid,
 		}
 
+		db := connectSql()
+		defer db.Close()
 		resIsAuth, err := db.ExecuteStoredProcedureWithResult("PR_RESPONSE_IsAuthorized", sqlParamsIsAuth)
+		handleErrorReturn(w, err)
 
 		isAuth := resIsAuth[0]["IsAuthorized"]
 		if isAuth == "0" {
@@ -66,8 +86,8 @@ func ResponseHandler(w http.ResponseWriter, r *http.Request) {
 				}
 				template.UseTemplate(&w, r, "AlreadyProcessed", data)
 			} else {
-				resItems, _ := db.ExecuteStoredProcedureWithResult("PR_Items_Select_ById", sqlParamsItems)
-
+				resItems, err := db.ExecuteStoredProcedureWithResult("PR_Items_Select_ById", sqlParamsItems)
+				handleErrorReturn(w, err)
 				requireRemarks := resIsAuth[0]["RequireRemarks"]
 				data := map[string]interface{}{
 					"ApplicationId":       appGuid,
@@ -92,20 +112,11 @@ func ProcessResponseHandler(w http.ResponseWriter, r *http.Request) {
 		var req models.TypRequestProcess
 		err := json.NewDecoder(r.Body).Decode(&req)
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusBadRequest)
+
 			return
 		}
 
-		// Connect to database
-		dbConnectionParam := sql.ConnectionParam{
-			ConnectionString: os.Getenv("APPROVALSYSTEMDB_CONNECTION_STRING"),
-		}
-
-		db, err := sql.Init(dbConnectionParam)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
+		db := connectSql()
 		defer db.Close()
 
 		// Validate payload
@@ -115,10 +126,7 @@ func ProcessResponseHandler(w http.ResponseWriter, r *http.Request) {
 		params["ItemId"] = req.ItemId
 		params["ApproverEmail"] = req.ApproverEmail
 		verification, err := db.ExecuteStoredProcedureWithResult("PR_Items_IsValid", params)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
+		handleErrorReturn(w, err)
 
 		if verification[0]["IsValid"] == "1" {
 			for k := range params {
@@ -130,15 +138,81 @@ func ProcessResponseHandler(w http.ResponseWriter, r *http.Request) {
 			params["ApproverRemarks"] = req.Remarks
 			params["Username"] = req.ApproverEmail
 			_, err := db.ExecuteStoredProcedure("PR_Items_Update_Response", params)
-			if err != nil {
-				fmt.Println(err)
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return
-			}
+			handleErrorReturn(w, err)
+			postCallback(req.ItemId)
 			return
 		} else {
 			http.Error(w, err.Error(), http.StatusUnauthorized)
 			return
 		}
 	}
+}
+
+func ProcessFailedCallbacks() {
+	db := connectSql()
+	defer db.Close()
+	res, err := db.ExecuteStoredProcedureWithResult("PR_Items_Select_FailedCallbacks", nil)
+	handleError(err)
+
+	for _, i := range res {
+		go postCallback(i["Id"].(string))
+	}
+}
+
+func postCallback(itemId string) {
+	db := connectSql()
+	defer db.Close()
+
+	queryParams := map[string]interface{}{
+		"Id": itemId,
+	}
+	res, err := db.ExecuteStoredProcedureWithResult("PR_Items_Select_ById", queryParams)
+	handleError(err)
+
+	var callbackUrl string
+	callbackUrl = res[0]["CallbackUrl"].(string)
+	if callbackUrl != "" {
+		postParams := TypPostParams{
+			itemId:       itemId,
+			isApproved:   res[0]["IsApproved"].(bool),
+			remarks:      res[0]["ApproverRemarks"].(string),
+			responseDate: res[0]["DateResponded"].(time.Time),
+		}
+
+		ch := make(chan *http.Response)
+		// var res *http.Response
+
+		go getHttpPostResponseStatus(callbackUrl, postParams, ch)
+
+		res := <-ch
+
+		var isCallbackFailed bool
+
+		if res.StatusCode == 200 {
+			isCallbackFailed = false
+		} else {
+			isCallbackFailed = true
+		}
+		params := map[string]interface{}{
+			"ItemId":           itemId,
+			"IsCallbackFailed": isCallbackFailed,
+		}
+		db.ExecuteStoredProcedure("PR_Items_Update_Callback", params)
+
+	}
+
+}
+
+func getHttpPostResponseStatus(url string, data interface{}, ch chan *http.Response) {
+	jsonReq, err := json.Marshal(data)
+	res, err := http.Post(url, "application/json; charset=utf-8", bytes.NewBuffer(jsonReq))
+	handleError(err)
+	ch <- res
+}
+
+type TypPostParams struct {
+	itemId       string
+	isApproved   bool
+	remarks      string
+	responseDate time.Time
 }

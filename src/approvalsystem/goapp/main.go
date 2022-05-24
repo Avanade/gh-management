@@ -8,6 +8,7 @@ import (
 	rtPages "main/routes/pages"
 	rtApprovals "main/routes/pages/approvals"
 	"net/http"
+	"time"
 
 	"github.com/gorilla/mux"
 
@@ -39,6 +40,8 @@ func main() {
 	mux.HandleFunc("/process", rtApprovals.ProcessResponseHandler)
 	mux.NotFoundHandler = loadAzAuthPage(rtPages.NotFoundHandler)
 
+	go checkFailedCallbacks()
+
 	port := ev.GetEnvVar("PORT", "8080")
 	fmt.Printf("Now listening on port %v\n", port)
 	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%v", port), mux))
@@ -51,4 +54,12 @@ func loadAzAuthPage(f func(w http.ResponseWriter, r *http.Request)) *negroni.Neg
 		negroni.HandlerFunc(session.IsAuthenticated),
 		negroni.Wrap(http.HandlerFunc(f)),
 	)
+}
+
+func checkFailedCallbacks() {
+	// TIMER SERVICE
+	for now := range time.NewTicker(5 * time.Second).C {
+		fmt.Println(now, ": Processing failed callbacks.")
+		rtApprovals.ProcessFailedCallbacks()
+	}
 }

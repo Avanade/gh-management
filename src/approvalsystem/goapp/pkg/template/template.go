@@ -32,7 +32,7 @@ func UseTemplate(w *http.ResponseWriter, r *http.Request, page string, pageData 
 	tmpl := template.Must(
 		template.ParseFiles("templates/master.html", "templates/buttons.html",
 			fmt.Sprintf("templates/%v.html", page)))
-
+	(*w).WriteHeader(http.StatusBadRequest)
 	return tmpl.Execute(*w, data)
 }
 
