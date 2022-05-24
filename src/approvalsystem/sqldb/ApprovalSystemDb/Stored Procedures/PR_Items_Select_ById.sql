@@ -6,7 +6,8 @@ AS
 		AM.[Name] [Module],
 		[Subject], Body, DateSent,
 		DateResponded, IsApproved, ApproverRemarks,
-		T.ApproveText, T.RejectText
+		T.ApproveText, T.RejectText,
+		AM.CallbackUrl
 	FROM Items I
 	INNER JOIN ApplicationModules AM ON I.ApplicationModuleId = AM.Id
 	INNER JOIN Applications A ON AM.ApplicationId = A.Id
