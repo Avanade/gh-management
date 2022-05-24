@@ -244,14 +244,13 @@
                   <div id="ghAccountPlaceholder"></div>
                 </div>
                 {{ if .ProfileGH.LoggedIn }}
-                  {{ if .ProfileGH.IsValid}}
-                    <div id="ghAccount">
-                      <p class="text text-right">
-                        Logged in to GitHub as <b>{{ .ProfileGH.Username }}.</b>
-                        <a href="/logout/github" class="hover:underline">(Logout)</a>
-                      </p>
-                    </div>
-                  {{ else }}
+                  <div id="ghAccount">
+                    <p class="text text-right">
+                      Logged in to GitHub as <b>{{ .ProfileGH.Username }}.</b>
+                      <a href="/logout/github" class="hover:underline">(Logout)</a>
+                    </p>
+                  </div>
+                  {{ if not .ProfileGH.IsValid}}
                   <div class="bg-red-50 p-4 mb-3">
                     <div class="flex">
                       <div class="flex-shrink-0">
@@ -260,9 +259,9 @@
                         </svg>
                       </div>
                       <div class="ml-3 flex-1 md:flex md:justify-between">
-                        <p class="text-sm text-red-700">Logged in to Github as <b>{{ .ProfileGH.Username }}</b> which is different from the previous logged in account</p>
+                        <p class="text-sm text-red-700">Logged in to Github as rainiermendiola which is different from the associated Github account.</p>
                         <p class="mt-3 text-sm md:mt-0 md:ml-6">
-                          <a href="/login/github/force" class="whitespace-nowrap font-medium text-red-700 hover:text-red-600">Save this new Github account<span aria-hidden="true">&rarr;</span></a>
+                          <a href="/login/github/force" class="whitespace-nowrap font-medium text-red-700 hover:text-red-600">Associate this new Github account.<span aria-hidden="true">&rarr;</span></a>
                         </p>
                       </div>
                     </div>
