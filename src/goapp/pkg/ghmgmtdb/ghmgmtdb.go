@@ -1,7 +1,8 @@
 package ghmgmt
 
 import (
-
+	"fmt"
+	"main/models"
 	"main/pkg/sql"
 
 	"os"
@@ -14,7 +15,6 @@ func GetUsersWithGithub() interface{} {
 
 	return result
 }
-
 
 func IsUserExist(userPrincipalName string) bool {
 	db := ConnectDb()
@@ -67,7 +67,6 @@ func UpdateUserGithub(userPrincipalName, githubId, githubUser string, force int)
 
 	return result[0], nil
 }
-
 
 func ConnectDb() *sql.DB {
 	cp := sql.ConnectionParam{
@@ -132,4 +131,3 @@ func Projects_IsExisting(body models.TypNewProjectReqBody) bool {
 
 	return false
 }
-
