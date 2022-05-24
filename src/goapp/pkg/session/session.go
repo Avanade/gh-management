@@ -35,6 +35,10 @@ func IsAuthenticated(w http.ResponseWriter, r *http.Request, next http.HandlerFu
 			Name:   "auth-session",
 			MaxAge: -1}
 		http.SetCookie(w, &c)
+		cgh := http.Cookie{
+			Name:   "gh-auth-session",
+			MaxAge: -1}
+		http.SetCookie(w, &cgh)
 		http.Redirect(w, r, "/login/azure", http.StatusTemporaryRedirect)
 		return
 	}
