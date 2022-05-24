@@ -66,13 +66,12 @@ func CallbackHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Println(idToken)
-
 	session.Values["id_token"] = rawIDToken
 	session.Values["access_token"] = token.AccessToken
 	session.Values["profile"] = profile
 	session.Values["refresh_token"] = token.RefreshToken
 	session.Values["expiry"] = token.Expiry.UTC().Format("2006-01-02 15:04:05")
+	errS := session.Save(r, w)
 
 	// Insert Azure User
 	userPrincipalName := fmt.Sprint(profile["preferred_username"])
@@ -82,8 +81,6 @@ func CallbackHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, errIU.Error(), http.StatusInternalServerError)
 		return
 	}
-
-	errS := session.Save(r, w)
 
 	if errS != nil {
 		http.Error(w, errS.Error(), http.StatusInternalServerError)
