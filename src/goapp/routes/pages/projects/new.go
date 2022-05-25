@@ -28,17 +28,22 @@ func ProjectsNewHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		if ghmgmtdb.Projects_IsExisting(body) {
-			http.Error(w, "Existing Project Name", http.StatusBadRequest)
-		} else {
-			ghmgmtdb.PRProjectsInsert(body, username.(string))
-		}
-
-		_, err = githubAPI.CreatePrivateGitHubRepository(body)
+		dbCheck := ghmgmtdb.Projects_IsExisting(body)
+		repoCheck, err := githubAPI.Repo_IsExisting(body.Name)
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusBadRequest)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 
+		if dbCheck || repoCheck {
+			http.Error(w, "Project already exists.", http.StatusBadRequest)
+		} else {
+			_, err = githubAPI.CreatePrivateGitHubRepository(body)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+			ghmgmtdb.PRProjectsInsert(body, username.(string))
+		}
 	}
 }
