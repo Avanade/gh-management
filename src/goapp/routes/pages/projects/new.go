@@ -28,14 +28,12 @@ func ProjectsNewHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		dbCheck := ghmgmtdb.Projects_IsExisting(body)
-		repoCheck, err := githubAPI.Repo_IsExisting(body.Name)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
+		nameCheck := make(chan bool, 2)
 
-		if dbCheck || repoCheck {
+		go func() { nameCheck <- ghmgmtdb.Projects_IsExisting(body) }()
+		go func() { b, _ := githubAPI.Repo_IsExisting(body.Name); nameCheck <- b }()
+
+		if <-nameCheck || <-nameCheck {
 			http.Error(w, "Project already exists.", http.StatusBadRequest)
 		} else {
 			_, err = githubAPI.CreatePrivateGitHubRepository(body)
