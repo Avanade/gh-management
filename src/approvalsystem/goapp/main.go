@@ -8,6 +8,7 @@ import (
 	rtPages "main/routes/pages"
 	rtApprovals "main/routes/pages/approvals"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/gorilla/mux"
@@ -58,8 +59,11 @@ func loadAzAuthPage(f func(w http.ResponseWriter, r *http.Request)) *negroni.Neg
 
 func checkFailedCallbacks() {
 	// TIMER SERVICE
-	for now := range time.NewTicker(5 * time.Second).C {
-		fmt.Println(now, ": Processing failed callbacks.")
-		rtApprovals.ProcessFailedCallbacks()
+	freq := ev.GetEnvVar("CALLBACK_RETRY_FREQ", "15")
+	freqInt, _ := strconv.ParseInt(freq, 0, 64)
+	if freq > "0" {
+		for range time.NewTicker(time.Duration(freqInt) * time.Minute).C {
+			rtApprovals.ProcessFailedCallbacks()
+		}
 	}
 }
