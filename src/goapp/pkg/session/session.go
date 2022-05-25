@@ -111,7 +111,7 @@ func IsGHAuthenticated(w http.ResponseWriter, r *http.Request, next http.Handler
 		return
 	}
 
-	if _, ok := session.Values["ghProfile"]; !ok {
+	if _, ok := session.Values["ghProfile"]; !ok || !session.Values["ghIsValid"].(bool) {
 
 		// Asks user to login if there is no saved user profile
 		http.Redirect(w, r, "/error/ghlogin", http.StatusTemporaryRedirect)
