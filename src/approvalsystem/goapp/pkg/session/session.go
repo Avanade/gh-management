@@ -30,10 +30,14 @@ func IsAuthenticated(w http.ResponseWriter, r *http.Request, next http.HandlerFu
 	// Check session if there is saved user profile
 	session, err := Store.Get(r, "auth-session")
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		c := http.Cookie{
+			Name:   "auth-session",
+			MaxAge: -1}
+		http.SetCookie(w, &c)
+		http.Redirect(w, r, "/login/azure", http.StatusTemporaryRedirect)
 		return
 	}
-
+	// fmt.Println(session)
 	if _, ok := session.Values["profile"]; !ok {
 
 		// Asks user to login if there is no saved user profile

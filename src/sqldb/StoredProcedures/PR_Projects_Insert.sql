@@ -8,6 +8,8 @@
 	@CreatedBy varchar(100)
 ) AS
 
+DECLARE @ResultTable table(Id int);
+
 INSERT INTO Projects (
 	[Name],
 	CoOwner,
@@ -18,6 +20,7 @@ INSERT INTO Projects (
 	CreatedBy,
 	Modified,
 	ModifiedBy)
+OUTPUT INSERTED.Id INTO @ResultTable
 VALUES (
 	@Name,
 	@CoOwner,
@@ -28,5 +31,12 @@ VALUES (
 	@CreatedBy,
 	GETDATE(),
 	@CreatedBy
-
 )
+
+DECLARE @Id AS int
+
+SELECT @Id = Id FROM @ResultTable
+
+EXEC [PR_UserAccess_Insert] @Id, @CreatedBy
+
+EXEC [PR_UserAccess_Insert] @Id, @CoOwner

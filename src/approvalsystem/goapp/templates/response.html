@@ -68,7 +68,7 @@
               </div>
             </div>
             <div class="mt-3 text-center sm:mt-5" @click="showModal = false" x-bind:hidden="status!='success'">
-              <a href="/">Go back to home page</a>
+              <a href="/myapprovals">Go back to approvals page</a>
             </div>
             <div class="mt-3 text-center sm:mt-5" @click="showModal = false" x-bind:hidden="status!='error'">close</div>
           </div>
@@ -102,19 +102,14 @@
               document.getElementById("modal").attributes.removeNamedItem("hidden")
               document.getElementById("form").attributes.removeNamedItem("hidden")
             },
+            showResult(status, title, subtext, show=true){
+              this.status = status
+              this.modalText = title
+              this.modalSubText = subtext
+              this.showModal = show
+            },
             submit(){
-                let showResult = (status, title, subtext) => {
-                    this.status = status
-                    this.modalText = title
-                    this.modalSubText = subtext
-                    // if(status=="success"){
-                    //     setTimeout(() => {
-                    //         window.location = '/'
-                    //     }, 1500);
-                    // }
-                }
-                this.status = "submitted"
-                this.showModal = true
+                this.showResult("submitted", "Processing", "Please wait while processing your request.")
                 fetch('/process', {
                     method: 'post',
                     body: JSON.stringify(this.form),
@@ -126,20 +121,18 @@
                     // Redirect to Home
                     switch (r.status) {
                       case 200:
-                        showResult("success", "Successful", "Your response has been submitted.")
+                        this.showResult("success", "Successful", "Your response has been submitted.")
                         break;
                       case 401:
-                        showResult("error", "Failed", "You are unauthorized to process this approval.")
+                        this.showResult("error", "Failed", "You are unauthorized to process this approval.")
                         break;
                       default:
-                        showResult("error", "Failed", "An error has occured while submitting your response.")
+                        this.showResult("error", "Failed", "An error has occured while submitting your response.")
                         break;
                     }
                 })
                 .catch(e=>{
-                    // Catch error
-                    console.log(e)
-                    showResult("error", "Failed", "An error has occured while submitting your response.")
+                    this.showResult("error", "Failed", "An error has occured while submitting your response.")
                 })
             },
             get isValid() {

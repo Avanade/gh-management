@@ -1,6 +1,6 @@
 ﻿CREATE PROCEDURE PR_Projects_Update
 (
-		@ID Int,
+		@Id Int,
 		@Name varchar(50),
 		@CoOwner varchar(100),
 		@Description varchar(1000),
