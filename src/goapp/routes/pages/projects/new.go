@@ -8,12 +8,14 @@ import (
 	session "main/pkg/session"
 	template "main/pkg/template"
 	"net/http"
+	db "main/pkg/ghmgmtdb"
 )
 
 func ProjectsNewHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "GET":
-		template.UseTemplate(&w, r, "projects/new", nil)
+		users := db.GetUsersWithGithub()
+		template.UseTemplate(&w, r, "projects/new", users)
 	case "POST":
 		sessionaz, _ := session.Store.Get(r, "auth-session")
 		iprofile := sessionaz.Values["profile"]
