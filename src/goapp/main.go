@@ -40,10 +40,13 @@ func main() {
 	mux.HandleFunc("/logout/azure", rtAzure.LogoutHandler)
 	mux.HandleFunc("/login/github", rtGithub.GithubLoginHandler)
 	mux.HandleFunc("/login/github/callback", rtGithub.GithubCallbackHandler)
+	mux.HandleFunc("/login/github/force", rtGithub.GithubForceSaveHandler)
 	mux.HandleFunc("/logout/github", rtGithub.GitHubLogoutHandler)
-	mux.NotFoundHandler = loadAzAuthPage(rtPages.NotFoundHandler)
+	mux.NotFoundHandler = http.HandlerFunc(rtPages.NotFoundHandler)
 
-	port := ev.GetEnvVar("port", "80")
+	//loadAzAuthPage()
+
+	port := ev.GetEnvVar("PORT", "8080")
 	fmt.Printf("Now listening on port %v\n", port)
 	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%v", port), mux))
 

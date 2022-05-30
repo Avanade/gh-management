@@ -47,7 +47,7 @@ func CallbackHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	oidcConfig := &oidc.Config{
-		ClientID: os.Getenv("clientid"),
+		ClientID: os.Getenv("CLIENT_ID"),
 	}
 
 	idToken, err := authenticator.Provider.Verifier(oidcConfig).Verify(context.TODO(), rawIDToken)
@@ -69,7 +69,7 @@ func CallbackHandler(w http.ResponseWriter, r *http.Request) {
 	session.Values["profile"] = profile
 	session.Values["refresh_token"] = token.RefreshToken
 	session.Values["expiry"] = token.Expiry.UTC().Format("2006-01-02 15:04:05")
-
+	session.Options.MaxAge = 43200
 	err = session.Save(r, w)
 
 	if err != nil {

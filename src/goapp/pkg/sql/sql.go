@@ -15,21 +15,21 @@ type DB struct {
 
 // Connection Parameters
 type ConnectionParam struct {
-	connectionString string
-	server           string
-	port             int
-	user             string
-	password         string
-	database         string
+	ConnectionString string
+	Server           string
+	Port             int
+	User             string
+	Password         string
+	Database         string
 }
 
 // Connection
 func Init(cp ConnectionParam) (*DB, error) {
-	connString := cp.connectionString
+	connString := cp.ConnectionString
 	// Build connection string if property connection string is not set
 	if connString == "" {
 		connString = fmt.Sprintf("server=%s;user id=%s;password=%s;port=%d;database=%s;",
-			cp.server, cp.user, cp.password, cp.port, cp.database)
+			cp.Server, cp.User, cp.Password, cp.Port, cp.Database)
 	}
 
 	// Create connection pool

@@ -31,7 +31,15 @@ func IsAuthenticated(w http.ResponseWriter, r *http.Request, next http.HandlerFu
 	// Check session if there is saved user profile
 	session, err := Store.Get(r, "auth-session")
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		c := http.Cookie{
+			Name:   "auth-session",
+			MaxAge: -1}
+		http.SetCookie(w, &c)
+		cgh := http.Cookie{
+			Name:   "gh-auth-session",
+			MaxAge: -1}
+		http.SetCookie(w, &cgh)
+		http.Redirect(w, r, "/login/azure", http.StatusTemporaryRedirect)
 		return
 	}
 
@@ -95,11 +103,15 @@ func IsGHAuthenticated(w http.ResponseWriter, r *http.Request, next http.Handler
 	// Check session if there is saved user profile
 	session, err := Store.Get(r, "gh-auth-session")
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		c := http.Cookie{
+			Name:   "gh-auth-session",
+			MaxAge: -1}
+		http.SetCookie(w, &c)
+		http.Redirect(w, r, "/login/github", http.StatusTemporaryRedirect)
 		return
 	}
 
-	if _, ok := session.Values["ghProfile"]; !ok {
+	if _, ok := session.Values["ghProfile"]; !ok || !session.Values["ghIsValid"].(bool) {
 
 		// Asks user to login if there is no saved user profile
 		http.Redirect(w, r, "/error/ghlogin", http.StatusTemporaryRedirect)
@@ -122,6 +134,10 @@ func GetGitHubUserData(w http.ResponseWriter, r *http.Request) (models.TypGitHub
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return models.TypGitHubUser{LoggedIn: false}, err
+		}
+
+		if _, okIsValid := session.Values["ghIsValid"]; okIsValid {
+			gitHubUser.IsValid = session.Values["ghIsValid"].(bool)
 		}
 
 		gitHubUser.AccessToken = fmt.Sprintf("%s", session.Values["ghAccessToken"])
