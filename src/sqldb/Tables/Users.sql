@@ -8,7 +8,7 @@
     [GitHubId] VARCHAR(100) NULL,
     [GitHubUser] VARCHAR(100) NULL,
     [Created] DATETIME NOT NULL DEFAULT getdate(), 
-    [CreatedBy] VARCHAR(50) NULL, 
+    [CreatedBy] VARCHAR(100) NULL, 
     [Modified] DATETIME NOT NULL DEFAULT getdate(), 
-    [ModifiedBy] VARCHAR(50) NULL
+    [ModifiedBy] VARCHAR(100) NULL
 )

@@ -2,8 +2,12 @@
 (
 	[Id] INT NOT NULL PRIMARY KEY IDENTITY, 
     [Name] VARCHAR(50) NOT NULL, 
+    [Url] varchar(255) NULL,
+    [Description] varchar(255) NULL,
+    [Notes] varchar(255) NULL,
+    [TradeAssocId] varchar(50) NULL,
     [Created] DATETIME NOT NULL DEFAULT getdate(), 
-    [CreatedBy] VARCHAR(50) NULL, 
+    [CreatedBy] VARCHAR(100) NULL, 
     [Modified] DATETIME NOT NULL DEFAULT getdate(), 
-    [ModifiedBy] VARCHAR(50) NULL
+    [ModifiedBy] VARCHAR(100) NULL
 )

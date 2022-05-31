@@ -7,7 +7,7 @@
     [ConfirmAvaIP] BIT NOT NULL DEFAULT 0, 
     [ConfirmEnabledSecurity] BIT NOT NULL DEFAULT 0, 
     [Created] DATETIME NOT NULL DEFAULT getdate(), 
-    [CreatedBy] VARCHAR(50) NULL, 
+    [CreatedBy] VARCHAR(100) NULL, 
     [Modified] DATETIME NOT NULL DEFAULT getdate(), 
-    [ModifiedBy] VARCHAR(50) NULL
+    [ModifiedBy] VARCHAR(100) NULL
 )
