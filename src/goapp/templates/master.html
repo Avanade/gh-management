@@ -40,40 +40,24 @@
               this.redirectUrl = "/"
             }
           },
-          fetchData(method, endpoint, body, successMessage, actionButtonText, redirectUrl) {
-            switch(method) {
-              case 'GET':
-                fetch(endpoint)
-                .then( r => {
-                  if(r.status === 200) {
-                    this.modal.update('success','Success',successMessage, actionButtonText, redirectUrl)
-                  }
-                  else {
-                    r.text().then(body => {
-                        this.modal.update("error", "Failed", body, "", "")
-                    });
-                  }
-                })
-                break
-              case 'POST':
-                fetch(endpoint, {
-                  method: 'POST',
-                  body: JSON.stringify(body),
-                  headers: {
-                      'Content-Type': 'application/json'
-                  },
-                })
-                .then( r => {
-                  if(r.status === 200) {
-                    this.modal.update('success','Success',successMessage, actionButtonText, redirectUrl)
-                  }
-                  else {
-                    r.text().then(body => {
-                        this.modal.update("error", "Failed", body, "", "")
-                    });
-                  }
-                })
-            }
+          postData(endpoint, body, successMessage, actionButtonText, redirectUrl) {
+            fetch(endpoint, {
+              method: 'POST',
+              body: JSON.stringify(body),
+              headers: {
+                  'Content-Type': 'application/json'
+              },
+            })
+            .then( r => {
+              if(r.status === 200) {
+                this.modal.update('success','Success',successMessage, actionButtonText, redirectUrl)
+              }
+              else {
+                r.text().then(body => {
+                    this.modal.update("error", "Failed", body, "", "")
+                });
+              }
+            })
           }
         })
       })
