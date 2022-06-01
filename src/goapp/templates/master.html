@@ -8,6 +8,8 @@
     <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <link rel="stylesheet" href="/public/css/output.css" />
     <title>GH-Management</title>
+
+    <!-- Global Store -->
     <script>
       document.addEventListener('alpine:init', () => {
         Alpine.store('master', {
@@ -38,18 +40,38 @@
               this.redirectUrl = "/"
             }
           },
-          async fetchData(method, endpoint, body) {
+          fetchData(method, endpoint, body, successMessage, actionButtonText, redirectUrl) {
             switch(method) {
               case 'GET':
-                return await fetch(endpoint)
+                fetch(endpoint)
+                .then( r => {
+                  if(r.status === 200) {
+                    this.modal.update('success','Success',successMessage, actionButtonText, redirectUrl)
+                  }
+                  else {
+                    r.text().then(body => {
+                        this.modal.update("error", "Failed", body, "", "")
+                    });
+                  }
+                })
                 break
               case 'POST':
-                return await fetch(endpoint, {
+                fetch(endpoint, {
                   method: 'POST',
                   body: JSON.stringify(body),
                   headers: {
                       'Content-Type': 'application/json'
                   },
+                })
+                .then( r => {
+                  if(r.status === 200) {
+                    this.modal.update('success','Success',successMessage, actionButtonText, redirectUrl)
+                  }
+                  else {
+                    r.text().then(body => {
+                        this.modal.update("error", "Failed", body, "", "")
+                    });
+                  }
                 })
             }
           }

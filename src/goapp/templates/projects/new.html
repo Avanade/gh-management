@@ -175,21 +175,9 @@
             coowner:{
                 show: false,
             },
-            async submit(){
+            submit(){
                 Alpine.store('master').modal.show()
-                await Alpine.store('master').fetchData("POST", "/projects/new", this.form)
-                .then(r => {
-                    console.log(r)
-                    if(r.status==200){
-                        Alpine.store('master').modal.update("success", "Successful", "Your repository has been created.", "Go back to homepage", "/")
-                    } 
-                    else {
-                        r.text().then(body => {
-                            Alpine.store('master').modal.update("error", "Failed", body, "", "")
-                        });
-                    }
-                })
-                
+                Alpine.store('master').fetchData("POST", "/projects/new", this.form, "Your repository has been created.", "Go back to homepage", "/")                
             },
             showName(userPrincipalName, githubUser){
                 return userPrincipalName.includes(this.form.coowner) || githubUser.includes(this.form.coowner) ? true : false
