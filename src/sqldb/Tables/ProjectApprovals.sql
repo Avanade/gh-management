@@ -10,9 +10,9 @@
     [ApprovalSystemGUID] UNIQUEIDENTIFIER NULL,
     [ApprovalSystemDateSent] DATETIME NULL,
     [Created] DATETIME NOT NULL DEFAULT getdate(), 
-    [CreatedBy] VARCHAR(50) NULL, 
+    [CreatedBy] VARCHAR(100) NULL, 
     [Modified] DATETIME NOT NULL DEFAULT getdate(), 
-    [ModifiedBy] VARCHAR(50) NULL
+    [ModifiedBy] VARCHAR(100) NULL
     CONSTRAINT [FK_ProjectApprovals_Projects] FOREIGN KEY (ProjectId) REFERENCES Projects(Id), 
     CONSTRAINT [FK_ProjectApprovals_ApprovalTypes] FOREIGN KEY (ApprovalTypeId) REFERENCES ApprovalTypes(Id), 
     CONSTRAINT [FK_ProjectApprovals_Users] FOREIGN KEY (ApproverUserPrincipalName) REFERENCES Users(UserPrincipalName), 
