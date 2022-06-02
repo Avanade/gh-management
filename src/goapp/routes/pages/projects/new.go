@@ -34,13 +34,24 @@ func ProjectsNewHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		nameCheck := make(chan bool, 2)
+		checkDB := make(chan bool)
+		checkGH := make(chan bool)
 
-		go func() { nameCheck <- ghmgmtdb.Projects_IsExisting(body) }()
-		go func() { b, _ := githubAPI.Repo_IsExisting(body.Name); nameCheck <- b }()
+		var existsDb bool
+		var existsGH bool
 
-		if <-nameCheck || <-nameCheck {
-			http.Error(w, "Project already exists.", http.StatusBadRequest)
+		go func() { checkDB <- ghmgmtdb.Projects_IsExisting(body) }()
+		go func() { b, _ := githubAPI.Repo_IsExisting(body.Name); checkGH <- b }()
+
+		existsDb = <-checkDB
+		existsGH = <-checkGH
+		if existsDb || existsGH {
+			if existsDb {
+				httpResponseError(w, http.StatusBadRequest, "The project name is existing in the database.")
+			}
+			if existsGH {
+				httpResponseError(w, http.StatusBadRequest, "The project name is existing in Github.")
+			}
 		} else {
 			_, err = githubAPI.CreatePrivateGitHubRepository(body)
 			if err != nil {
@@ -130,4 +141,19 @@ func handleError(err error) {
 	if err != nil {
 		fmt.Printf("ERROR: %+v", err)
 	}
+}
+
+func httpResponseError(w http.ResponseWriter, code int, errorMessage string) {
+	msg := TypErrorJsonReturn{
+		Error: errorMessage,
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(code)
+	jsonResponse, err := json.Marshal(msg)
+	handleError(err)
+	w.Write(jsonResponse)
+}
+
+type TypErrorJsonReturn struct {
+	Error string `json:"error"`
 }

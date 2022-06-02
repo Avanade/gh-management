@@ -229,23 +229,25 @@
             submit(){
                 this.showResult("submitted", "Processing", "Please wait while processing your request.")
                 
-                fetch('/projects/new', {
-                    method: 'POST',
-                    body: JSON.stringify(this.form),
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                })
+                // fetch('/projects/new', {
+                //     method: 'POST',
+                //     body: JSON.stringify(this.form),
+                //     headers: {
+                //         'Content-Type': 'application/json'
+                //     },
+                // })
+                axios.post('/projects/new', this.form)
                 .then(r=>{
                     // Redirect to Home
                     if(r.status==200){
                         this.showResult("success", "Successful", "Your repository has been created.")
                     } else {
-                        r.text().then(body => this.showResult("error", "Failed", "There is an error processing your request."));
+                        r.text().then(body => this.showResult("error", "Failed", r.data.Error));
                     }
                 })
                 .catch(e=>{
-                    this.showResult("error", "Failed", "An error has occured while creating the repository.")
+                    var msg = e.response.data.error ? e.response.data.error : "An error has occured while creating the repository."
+                    this.showResult("error", "Failed", msg)
                 })
             },
             showName(userPrincipalName, githubUser){
