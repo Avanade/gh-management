@@ -11,7 +11,6 @@ import (
 	"net/http"
 	"os"
 	"strconv"
-	"time"
 
 	"github.com/gorilla/mux"
 )
@@ -176,7 +175,7 @@ func postCallback(itemId string) {
 			itemId:       itemId,
 			isApproved:   res[0]["IsApproved"].(bool),
 			remarks:      res[0]["ApproverRemarks"].(string),
-			responseDate: res[0]["DateResponded"].(time.Time),
+			responseDate: res[0]["DateResponded"].(string),
 		}
 
 		ch := make(chan *http.Response)
@@ -214,5 +213,5 @@ type TypPostParams struct {
 	itemId       string
 	isApproved   bool
 	remarks      string
-	responseDate time.Time
+	responseDate string
 }

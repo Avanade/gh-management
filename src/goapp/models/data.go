@@ -36,3 +36,10 @@ type TypNewProjectReqBody struct {
 	ConfirmAvaIP     bool   `json:"confirmAvaIP"`
 	ConfirmSecIPScan bool   `json:"confirmSecIPScan"`
 }
+
+type TypUpdateApprovalStatusReqBody struct {
+	ItemId       string `json:"itemId"`
+	IsApproved   bool   `json:"isApproved"`
+	Remarks      string `json:"Remarks"`
+	ResponseDate string `json:"responseDate"`
+}
