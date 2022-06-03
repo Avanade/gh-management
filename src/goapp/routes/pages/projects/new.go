@@ -39,9 +39,9 @@ func ProjectsNewHandler(w http.ResponseWriter, r *http.Request) {
 
 		var existsDb bool
 		var existsGH bool
-
+		dashedProjName := strings.ReplaceAll(body.Name, " ", "-")
 		go func() { checkDB <- ghmgmtdb.Projects_IsExisting(body) }()
-		go func() { b, _ := githubAPI.Repo_IsExisting(body.Name); checkGH <- b }()
+		go func() { b, _ := githubAPI.Repo_IsExisting(dashedProjName); checkGH <- b }()
 
 		existsDb = <-checkDB
 		existsGH = <-checkGH
@@ -56,7 +56,6 @@ func ProjectsNewHandler(w http.ResponseWriter, r *http.Request) {
 			_, err = githubAPI.CreatePrivateGitHubRepository(body)
 			if err != nil {
 				httpResponseError(w, http.StatusInternalServerError, "There is a problem creating the GitHub repository.")
-				return
 			}
 			id := ghmgmtdb.PRProjectsInsert(body, username.(string))
 			RequestApproval(id)
