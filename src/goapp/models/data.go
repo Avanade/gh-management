@@ -69,3 +69,10 @@ type TypApprovalSystemPost struct {
 type TypApprovalSystemPostResponse struct {
 	ItemId string `json:"itemId"`
 }
+
+type TypUpdateApprovalStatusReqBody struct {
+	ItemId       string `json:"itemId"`
+	IsApproved   bool   `json:"isApproved"`
+	Remarks      string `json:"Remarks"`
+	ResponseDate string `json:"responseDate"`
+}
