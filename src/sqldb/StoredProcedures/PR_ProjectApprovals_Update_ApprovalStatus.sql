@@ -2,7 +2,7 @@ CREATE PROCEDURE [dbo].[PR_ProjectsApproval_Update_ApproverResponse]
 (
   @ApprovalSystemGUID UNIQUEIDENTIFIER,
   @ApprovalStatusId INT,
-  @ApprovalDescription varchar(500),
+  @ApprovalRemarks varchar(500),
   @ApprovalDate DATETIME
 )
 AS
@@ -15,7 +15,7 @@ UPDATE
 	[dbo].[ProjectApprovals]
   SET
     [ApprovalStatusId] = @ApprovalStatusId,
-    [ApprovalDescription] = @ApprovalDescription,
+    [ApprovalRemarks] = @ApprovalRemarks,
     [ModifiedBy] = [ApproverUserPrincipalName],
     [Modified] = GETDATE(),
     [ApprovalDate] = convert(DATETIME, @ApprovalDate)

@@ -42,7 +42,7 @@ func main() {
 	mux.HandleFunc("/login/github/callback", rtGithub.GithubCallbackHandler)
 	mux.HandleFunc("/login/github/force", rtGithub.GithubForceSaveHandler)
 	mux.HandleFunc("/logout/github", rtGithub.GitHubLogoutHandler)
-	mux.HandleFunc("/projects/approvalcallback", rtProjects.UpdateApprovalStatus)
+	mux.HandleFunc("/approvals/callback", rtProjects.UpdateApprovalStatus)
 	mux.NotFoundHandler = http.HandlerFunc(rtPages.NotFoundHandler)
 
 	//loadAzAuthPage()
