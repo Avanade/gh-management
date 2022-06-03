@@ -78,7 +78,7 @@ func ConnectDb() *sql.DB {
 	return db
 }
 
-func PRProjectsInsert(body models.TypNewProjectReqBody, user string) {
+func PRProjectsInsert(body models.TypNewProjectReqBody, user string) (id int64) {
 
 	cp := sql.ConnectionParam{
 
@@ -96,11 +96,12 @@ func PRProjectsInsert(body models.TypNewProjectReqBody, user string) {
 		"ConfirmEnabledSecurity": body.ConfirmSecIPScan,
 		"CreatedBy":              user,
 	}
-	_, err := db.ExecuteStoredProcedure("dbo.PR_Projects_Insert", param)
+	result, err := db.ExecuteStoredProcedureWithResult("dbo.PR_Projects_Insert", param)
 	if err != nil {
 		fmt.Println(err)
 	}
-
+	id = result[0]["ItemId"].(int64)
+	return
 }
 
 func Projects_IsExisting(body models.TypNewProjectReqBody) bool {
@@ -130,4 +131,50 @@ func Projects_IsExisting(body models.TypNewProjectReqBody) bool {
 	}
 
 	return false
+}
+
+func PopulateProjectsApproval(id int64) (ProjectApprovals []models.TypProjectApprovals) {
+	db := ConnectDb()
+	defer db.Close()
+
+	param := map[string]interface{}{
+		"ProjectId": id,
+	}
+	result, _ := db.ExecuteStoredProcedureWithResult("PR_ProjectsApproval_Populate", param)
+
+	for _, v := range result {
+		data := models.TypProjectApprovals{
+			Id:                         v["Id"].(int64),
+			ProjectId:                  v["ProjectId"].(int64),
+			ProjectName:                v["ProjectName"].(string),
+			ProjectCoowner:             v["ProjectCoowner"].(string),
+			ProjectDescription:         v["ProjectDescription"].(string),
+			RequesterGivenName:         v["RequesterGivenName"].(string),
+			RequesterSurName:           v["RequesterSurName"].(string),
+			RequesterName:              v["RequesterName"].(string),
+			RequesterUserPrincipalName: v["RequesterUserPrincipalName"].(string),
+			CoownerGivenName:           v["CoownerGivenName"].(string),
+			CoownerSurName:             v["CoownerSurName"].(string),
+			CoownerName:                v["CoownerName"].(string),
+			CoownerUserPrincipalName:   v["CoownerUserPrincipalName"].(string),
+			ApprovalTypeId:             v["ApprovalTypeId"].(int64),
+			ApprovalType:               v["ApprovalType"].(string),
+			ApproverUserPrincipalName:  v["ApproverUserPrincipalName"].(string),
+			ApprovalDescription:        v["ApprovalDescription"].(string),
+		}
+		ProjectApprovals = append(ProjectApprovals, data)
+	}
+
+	return
+}
+
+func ProjectsApprovalUpdateGUID(id int64, ApprovalSystemGUID string) {
+	db := ConnectDb()
+	defer db.Close()
+
+	param := map[string]interface{}{
+		"Id":                 id,
+		"ApprovalSystemGUID": ApprovalSystemGUID,
+	}
+	db.ExecuteStoredProcedure("PR_ProjectsApproval_Update_ApprovalSystemGUID", param)
 }
