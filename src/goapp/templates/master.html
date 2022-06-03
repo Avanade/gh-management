@@ -42,9 +42,8 @@
             }
           },
           postData(endpoint, body, successMessage, actionButtonText, redirectUrl) {
-            fetch(endpoint, {
-              method: 'POST',
-              body: JSON.stringify(body),
+            axios.post(endpoint, body,
+            {
               headers: {
                   'Content-Type': 'application/json'
               },
@@ -58,6 +57,10 @@
                     this.modal.update("error", "Failed", body, "", "")
                 });
               }
+            })
+            .catch(e=>{
+              var msg = e.response.data.error ? e.response.data.error : "An error occured while processing."
+              this.modal.update("error", "Failed", msg, "","")
             })
           }
         })
