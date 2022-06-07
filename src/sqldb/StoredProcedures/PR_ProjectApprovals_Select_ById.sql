@@ -12,7 +12,9 @@ SELECT
 	U2.Name [CoownerName], U2.GivenName [CoownerGivenName], U2.SurName [CoownerSurName], U2.UserPrincipalName [CoownerUserPrincipalName],
 	PA.ApprovalTypeId, T.[Name] ApprovalType,
 	PA.ApproverUserPrincipalName,
-	PA.ApprovalDescription
+	PA.ApprovalDescription,
+	S.Name [RequestStatus],
+	PA.[ApprovalDate], PA.[ApprovalRemarks]
     
 FROM 
     [dbo].[ProjectApprovals] PA
@@ -20,6 +22,7 @@ FROM
 	INNER JOIN Projects P ON PA.ProjectId = P.Id
 	INNER JOIN Users U1 ON P.CreatedBy = U1.UserPrincipalName
 	INNER JOIN Users U2 ON P.CoOwner = U2.UserPrincipalName
+	INNER JOIN ApprovalStatus S ON S.Id = PA.ApprovalStatusId
 WHERE  
     P.[Id] = @Id
 END

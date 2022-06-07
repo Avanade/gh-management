@@ -177,7 +177,7 @@
             },
             submit(){
                 Alpine.store('master').modal.show()
-                Alpine.store('master').postData("/projects/new", this.form, "Your repository has been created.", "Go back to homepage", "/")                
+                Alpine.store('master').postData("/projects/new", this.form, "Your repository has been created.", "Go to project list", "/projects/my")                
             },
             showName(userPrincipalName, githubUser){
                 return userPrincipalName.includes(this.form.coowner) || githubUser.includes(this.form.coowner) ? true : false

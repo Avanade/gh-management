@@ -18,4 +18,5 @@ SELECT [Id],
        [dbo].[UserAccess]
   WHERE  
        [UserPrincipalName] = @UserPrincipalName
+  ORDER BY [Created] DESC
 END
