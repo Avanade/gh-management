@@ -9,6 +9,9 @@ import (
 	rtGithub "main/routes/login/github"
 	rtPages "main/routes/pages"
 	rtProjects "main/routes/pages/projects"
+
+	rtApicommunities "main/routes/pages/api"
+	rtCommunity "main/routes/pages/community"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -35,6 +38,9 @@ func main() {
 	mux.Handle("/", loadAzAuthPage(rtPages.HomeHandler))
 	mux.Handle("/error/ghlogin", loadAzAuthPage(rtPages.GHLoginRequire))
 	mux.Handle("/projects/new", loadAzGHAuthPage(rtProjects.ProjectsNewHandler))
+	mux.Handle("/community/community", loadAzGHAuthPage(rtCommunity.CommunityHandler))
+	mux.HandleFunc("/api/community", rtApicommunities.CommunityAPIHandler)
+	mux.HandleFunc("/api/communitySponsors", rtApicommunities.CommunitySponsorsAPIHandler)
 	mux.HandleFunc("/login/azure", rtAzure.LoginHandler)
 	mux.HandleFunc("/login/azure/callback", rtAzure.CallbackHandler)
 	mux.HandleFunc("/logout/azure", rtAzure.LogoutHandler)
