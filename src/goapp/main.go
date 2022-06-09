@@ -8,6 +8,7 @@ import (
 	rtAzure "main/routes/login/azure"
 	rtGithub "main/routes/login/github"
 	rtPages "main/routes/pages"
+	rtApis "main/routes/pages/api"
 	rtProjects "main/routes/pages/projects"
 	"net/http"
 
@@ -38,6 +39,7 @@ func main() {
 	mux.Handle("/projects/my", loadAzGHAuthPage(rtProjects.MyProjects))
 	mux.Handle("/projects", loadAzGHAuthPage(rtProjects.GetUserProjects))
 	mux.Handle("/projects/{id}", loadAzGHAuthPage(rtProjects.GetRequestStatusByProject))
+	mux.Handle("/api/allusers", loadAzAuthPage(rtApis.GetAllUserFromActiveDirectory))
 	mux.HandleFunc("/login/azure", rtAzure.LoginHandler)
 	mux.HandleFunc("/login/azure/callback", rtAzure.CallbackHandler)
 	mux.HandleFunc("/logout/azure", rtAzure.LogoutHandler)
