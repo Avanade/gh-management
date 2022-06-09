@@ -37,7 +37,6 @@ type TypNewProjectReqBody struct {
 	ConfirmSecIPScan bool   `json:"confirmSecIPScan"`
 }
 
-<<<<<<< HEAD
 type TypCommunity struct {
 	Id           string   `json:"id"`
 	Name         string   `json:"name"`
@@ -59,7 +58,7 @@ type TypCommunitySponsors struct {
 	CreatedBy         string `json:"createdBy"`
 	Modified          string `json:"modified"`
 	ModifiedBy        string `json:"modifiedBy"`
-=======
+}
 type TypProjectApprovals struct {
 	Id                         int64
 	ProjectId                  int64
@@ -98,5 +97,4 @@ type TypUpdateApprovalStatusReqBody struct {
 	IsApproved   bool   `json:"isApproved"`
 	Remarks      string `json:"Remarks"`
 	ResponseDate string `json:"responseDate"`
->>>>>>> bae09f5ab0c2d6e17bfbc3a6f4854ec462e5f18e
 }

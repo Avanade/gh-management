@@ -38,15 +38,14 @@ func main() {
 	mux.Handle("/", loadAzAuthPage(rtPages.HomeHandler))
 	mux.Handle("/error/ghlogin", loadAzAuthPage(rtPages.GHLoginRequire))
 	mux.Handle("/projects/new", loadAzGHAuthPage(rtProjects.ProjectsNewHandler))
-<<<<<<< HEAD
 	mux.Handle("/community/community", loadAzGHAuthPage(rtCommunity.CommunityHandler))
+	mux.Handle("/community/communitylist", loadAzGHAuthPage(rtCommunity.CommunitylistHandler))
+	mux.Handle("/community", loadAzGHAuthPage(rtCommunity.GetUserCommunitylist))
 	mux.HandleFunc("/api/community", rtApicommunities.CommunityAPIHandler)
 	mux.HandleFunc("/api/communitySponsors", rtApicommunities.CommunitySponsorsAPIHandler)
-=======
 	mux.Handle("/projects/my", loadAzGHAuthPage(rtProjects.MyProjects))
 	mux.Handle("/projects", loadAzGHAuthPage(rtProjects.GetUserProjects))
 	mux.Handle("/projects/{id}", loadAzGHAuthPage(rtProjects.GetRequestStatusByProject))
->>>>>>> bae09f5ab0c2d6e17bfbc3a6f4854ec462e5f18e
 	mux.HandleFunc("/login/azure", rtAzure.LoginHandler)
 	mux.HandleFunc("/login/azure/callback", rtAzure.CallbackHandler)
 	mux.HandleFunc("/logout/azure", rtAzure.LogoutHandler)
