@@ -3,7 +3,7 @@ class clsDataTable {
         id,
         name,
         description,
-        headers,
+        headers, // Must be an array object with properties "name" for display name and "value" for the exact field name
         data,
         addUrl='',
         editUrl='',
