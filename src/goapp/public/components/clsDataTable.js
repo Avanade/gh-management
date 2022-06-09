@@ -4,10 +4,10 @@ class clsDataTable {
         name,
         description,
         headers, // Must be an array object with properties "name" for display name and "value" for the exact field name
-        data,
-        addUrl='',
-        editUrl='',
-        editKey=''
+        data, // Your array of data
+        addUrl='', //Redirect url to Add page
+        editUrl='', // Example: /user/{Id}/edit
+        editKey='' // key used to replace the parameter on editUrl. Example: if editKey is Id, this will replace the specified {Id} to actual value for each data.
     ){
         return `
             <div class="px-4 sm:px-6 lg:px-8" x-data="{
