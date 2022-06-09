@@ -3,7 +3,13 @@ class clsDropdown {
         return `
         <!-- ****** CO-OWNER CB ****** -->
         <div x-data="{
-            ${id}_show: false
+            ${id}_show: false,
+            get filteredData(){
+                return !this.${model} ? this.${data} : this.${data}.filter(d => {
+                    return d['${text}'].toString().toLowerCase().includes(this.${model}.toLowerCase()) ||
+                        d['${subText}'].toString().toLowerCase().includes(this.${model}.toLowerCase())
+                })
+            }
         }">
             <div class="relative mt-1" >
                 <input id="input_${id}_id" name="input_${id}_name" @click="${id}_show = !${id}_show" x-model="${model}" type="text" class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md border-2" role="combobox" aria-controls="options" aria-expanded="false" autocomplete="false">
@@ -14,7 +20,7 @@ class clsDropdown {
 
                 <ul class="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm" id="${id}_options" x-show="${id}_show" role="listbox">
 
-                    <template x-for="(i,n) in ${data}">
+                    <template x-for="(i,n) in filteredData">
                         <li class="relative cursor-default select-none py-2 pl-3 pr-9 text-gray-900" :key="n" role="option" @click="${model}=i.${value}; ${id}_show = !${id}_show" tabindex="-1">
                             <div class="flex" >
                                 <span class="truncate" x-text="i.${text}"></span>
