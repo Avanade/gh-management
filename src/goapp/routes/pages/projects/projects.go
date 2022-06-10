@@ -11,8 +11,8 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func MyProjects(w http.ResponseWriter, r *http.Request) {
-	template.UseTemplate(&w, r, "projects/my", nil)
+func Projects(w http.ResponseWriter, r *http.Request) {
+	template.UseTemplate(&w, r, "projects/projects", nil)
 }
 
 func GetUserProjects(w http.ResponseWriter, r *http.Request) {
