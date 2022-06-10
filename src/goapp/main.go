@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"log"
-	githubAPI "main/pkg/github"
 	session "main/pkg/session"
 	rtAzure "main/routes/login/azure"
 	rtGithub "main/routes/login/github"
@@ -29,7 +28,6 @@ func main() {
 
 	// Create session and GitHubClient
 	session.InitializeSession()
-	githubAPI.CreateClient()
 
 	mux := mux.NewRouter()
 	mux.PathPrefix("/public/").Handler(http.StripPrefix("/public/", http.FileServer(http.Dir("./public/"))))
@@ -40,6 +38,7 @@ func main() {
 	mux.Handle("/projects/list", loadAzGHAuthPage(rtProjects.GetUserProjects))
 	mux.Handle("/projects/{id}", loadAzGHAuthPage(rtProjects.GetRequestStatusByProject))
 	mux.Handle("/api/allusers", loadAzAuthPage(rtApis.GetAllUserFromActiveDirectory))
+	mux.Handle("/api/allavanadeprojects", loadAzGHAuthPage(rtApis.GetAvanadeProjects))
 	mux.HandleFunc("/login/azure", rtAzure.LoginHandler)
 	mux.HandleFunc("/login/azure/callback", rtAzure.CallbackHandler)
 	mux.HandleFunc("/logout/azure", rtAzure.LogoutHandler)
