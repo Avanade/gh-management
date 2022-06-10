@@ -8,11 +8,10 @@ import (
 	rtAzure "main/routes/login/azure"
 	rtGithub "main/routes/login/github"
 	rtPages "main/routes/pages"
-	rtApis "main/routes/pages/api"
-	rtProjects "main/routes/pages/projects"
 
-	rtApicommunities "main/routes/pages/api"
+	rtApis "main/routes/pages/api"
 	rtCommunity "main/routes/pages/community"
+	rtProjects "main/routes/pages/projects"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -42,8 +41,8 @@ func main() {
 	mux.Handle("/community/community", loadAzGHAuthPage(rtCommunity.CommunityHandler))
 	mux.Handle("/community/communitylist", loadAzGHAuthPage(rtCommunity.CommunitylistHandler))
 	mux.Handle("/community", loadAzGHAuthPage(rtCommunity.GetUserCommunitylist))
-	mux.HandleFunc("/api/community", rtApicommunities.CommunityAPIHandler)
-	mux.HandleFunc("/api/communitySponsors", rtApicommunities.CommunitySponsorsAPIHandler)
+	mux.HandleFunc("/api/community", rtApis.CommunityAPIHandler)
+	mux.HandleFunc("/api/communitySponsors", rtApis.CommunitySponsorsAPIHandler)
 	mux.Handle("/projects/my", loadAzGHAuthPage(rtProjects.MyProjects))
 	mux.Handle("/projects", loadAzGHAuthPage(rtProjects.GetUserProjects))
 	mux.Handle("/projects/{id}", loadAzGHAuthPage(rtProjects.GetRequestStatusByProject))
