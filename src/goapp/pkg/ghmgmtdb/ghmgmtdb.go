@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"main/models"
 	"main/pkg/sql"
+	"strconv"
 
 	"os"
 )
@@ -130,4 +131,99 @@ func Projects_IsExisting(body models.TypNewProjectReqBody) bool {
 	}
 
 	return false
+}
+
+// ACTIVITIES
+func PRActivities_Select() interface{} {
+	db := ConnectDb()
+	defer db.Close()
+
+	result, _ := db.ExecuteStoredProcedureWithResult("PR_Activities_Select", nil)
+	return result
+}
+
+func PRActivities_Insert(name, url, createdBy string, communityId, activityId int) (int, error) {
+	db := ConnectDb()
+	defer db.Close()
+
+	param := map[string]interface{}{
+		"Name":           name,
+		"Url":            url,
+		"CreatedBy":      createdBy,
+		"CommunityId":    communityId,
+		"ActivityTypeId": activityId,
+	}
+
+	result, err := db.ExecuteStoredProcedureWithResult("PR_CommunitiesActivities_Insert", param)
+	if err != nil {
+		return -1, err
+	}
+	id, err := strconv.Atoi(fmt.Sprint(result[0]["Id"]))
+	if err != nil {
+		return -1, err
+	}
+	return id, nil
+}
+
+// ACTIVITIES TYPE
+func PRActivityTypes_Select() interface{} {
+	db := ConnectDb()
+	defer db.Close()
+
+	result, err := db.ExecuteStoredProcedureWithResult("PR_ActivityTypes_Select", nil)
+	if err != nil {
+		return err
+	}
+	return result
+}
+
+func PRActivityTypes_Insert(name string) (int, error) {
+	db := ConnectDb()
+	defer db.Close()
+
+	param := map[string]interface{}{
+		"Name": name,
+	}
+
+	result, err := db.ExecuteStoredProcedureWithResult("PR_ActivityTypes_Insert", param)
+	if err != nil {
+		return -1, err
+	}
+	id, err := strconv.Atoi(fmt.Sprint(result[0]["Id"]))
+	if err != nil {
+		return -1, err
+	}
+	return id, nil
+}
+
+// CONTRIBUTION AREA
+func PRContributionAreas_Select() interface{} {
+	db := ConnectDb()
+	defer db.Close()
+
+	result, err := db.ExecuteStoredProcedureWithResult("PR_ContributionAreas_Select", nil)
+	if err != nil {
+		return err
+	}
+	return result
+}
+
+func PRContributionAreas_Insert(name, createdBy string) (int, error) {
+	db := ConnectDb()
+	defer db.Close()
+
+	param := map[string]interface{}{
+		"Name":      name,
+		"CreatedBy": createdBy,
+	}
+
+	result, err := db.ExecuteStoredProcedureWithResult("PR_ContributionAreas_Insert", param)
+	if err != nil {
+		return -1, err
+	}
+	id, err := strconv.Atoi(fmt.Sprint(result[0]["Id"]))
+	if err != nil {
+		return -1, err
+	}
+	return id, nil
 }
