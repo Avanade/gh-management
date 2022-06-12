@@ -40,3 +40,5 @@ SELECT @Id = Id FROM @ResultTable
 EXEC [PR_UserAccess_Insert] @Id, @CreatedBy
 
 EXEC [PR_UserAccess_Insert] @Id, @CoOwner
+
+SELECT @Id [ItemId]

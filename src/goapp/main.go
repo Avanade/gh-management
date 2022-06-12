@@ -10,6 +10,7 @@ import (
 	rtGithub "main/routes/login/github"
 	rtPages "main/routes/pages"
 	rtActivities "main/routes/pages/activities"
+	rtApis "main/routes/pages/api"
 	rtProjects "main/routes/pages/projects"
 	"net/http"
 
@@ -37,6 +38,10 @@ func main() {
 	mux.Handle("/", loadAzAuthPage(rtPages.HomeHandler))
 	mux.Handle("/error/ghlogin", loadAzAuthPage(rtPages.GHLoginRequire))
 	mux.Handle("/projects/new", loadAzGHAuthPage(rtProjects.ProjectsNewHandler))
+	mux.Handle("/projects/my", loadAzGHAuthPage(rtProjects.MyProjects))
+	mux.Handle("/projects", loadAzGHAuthPage(rtProjects.GetUserProjects))
+	mux.Handle("/projects/{id}", loadAzGHAuthPage(rtProjects.GetRequestStatusByProject))
+	mux.Handle("/api/allusers", loadAzAuthPage(rtApis.GetAllUserFromActiveDirectory))
 	mux.HandleFunc("/login/azure", rtAzure.LoginHandler)
 	mux.HandleFunc("/login/azure/callback", rtAzure.CallbackHandler)
 	mux.HandleFunc("/logout/azure", rtAzure.LogoutHandler)
@@ -55,6 +60,7 @@ func main() {
 	muxApi.Handle("/contributionarea", loadAzGHAuthPage(rtApi.CreateContributionAreas)).Methods("POST")
 	muxApi.Handle("/contributionarea", loadAzGHAuthPage(rtApi.GetContributionAreas)).Methods("GET")
 
+	mux.HandleFunc("/approvals/callback", rtProjects.UpdateApprovalStatus)
 	mux.NotFoundHandler = http.HandlerFunc(rtPages.NotFoundHandler)
 
 	//loadAzAuthPage()
