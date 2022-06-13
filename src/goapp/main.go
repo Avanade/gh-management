@@ -3,14 +3,13 @@ package main
 import (
 	"fmt"
 	"log"
-	githubAPI "main/pkg/github"
 	session "main/pkg/session"
 	rtApi "main/routes/api"
 	rtAzure "main/routes/login/azure"
 	rtGithub "main/routes/login/github"
 	rtPages "main/routes/pages"
-	rtActivities "main/routes/pages/activities"
-	rtApis "main/routes/pages/api"
+
+	// rtActivities "main/routes/pages/activities"
 	rtProjects "main/routes/pages/projects"
 	"net/http"
 
@@ -31,17 +30,13 @@ func main() {
 
 	// Create session and GitHubClient
 	session.InitializeSession()
-	githubAPI.CreateClient()
 
 	mux := mux.NewRouter()
 	mux.PathPrefix("/public/").Handler(http.StripPrefix("/public/", http.FileServer(http.Dir("./public/"))))
 	mux.Handle("/", loadAzAuthPage(rtPages.HomeHandler))
 	mux.Handle("/error/ghlogin", loadAzAuthPage(rtPages.GHLoginRequire))
 	mux.Handle("/projects/new", loadAzGHAuthPage(rtProjects.ProjectsNewHandler))
-	mux.Handle("/projects/my", loadAzGHAuthPage(rtProjects.MyProjects))
-	mux.Handle("/projects", loadAzGHAuthPage(rtProjects.GetUserProjects))
-	mux.Handle("/projects/{id}", loadAzGHAuthPage(rtProjects.GetRequestStatusByProject))
-	mux.Handle("/api/allusers", loadAzAuthPage(rtApis.GetAllUserFromActiveDirectory))
+	mux.Handle("/projects", loadAzGHAuthPage(rtProjects.Projects))
 	mux.HandleFunc("/login/azure", rtAzure.LoginHandler)
 	mux.HandleFunc("/login/azure/callback", rtAzure.CallbackHandler)
 	mux.HandleFunc("/logout/azure", rtAzure.LogoutHandler)
@@ -50,15 +45,19 @@ func main() {
 	mux.HandleFunc("/login/github/force", rtGithub.GithubForceSaveHandler)
 	mux.HandleFunc("/logout/github", rtGithub.GitHubLogoutHandler)
 
-	muxActivites := mux.PathPrefix("/activities").Subrouter()
-	muxActivites.HandleFunc("/new", rtActivities.PostNewHandler).Methods("POST")
-	muxActivites.HandleFunc("/new", rtActivities.GetNewHandler).Methods("GET")
+	// muxActivites := mux.PathPrefix("/activities").Subrouter()
+	// // muxActivites.HandleFunc("/new", rtActivities.PostNewHandler).Methods("POST")
+	// // muxActivites.HandleFunc("/new", rtActivities.GetNewHandler).Methods("GET")
 
 	muxApi := mux.PathPrefix("/api").Subrouter()
 	muxApi.Handle("/activity/type", loadAzGHAuthPage(rtApi.GetActivityTypes)).Methods("GET")
 	muxApi.Handle("/activity/type", loadAzGHAuthPage(rtApi.CreateActivityType)).Methods("POST")
 	muxApi.Handle("/contributionarea", loadAzGHAuthPage(rtApi.CreateContributionAreas)).Methods("POST")
 	muxApi.Handle("/contributionarea", loadAzGHAuthPage(rtApi.GetContributionAreas)).Methods("GET")
+	muxApi.Handle("/projects/list", loadAzGHAuthPage(rtApi.GetUserProjects))
+	muxApi.Handle("/projects/{id}", loadAzGHAuthPage(rtApi.GetRequestStatusByProject))
+	muxApi.Handle("/allusers", loadAzAuthPage(rtApi.GetAllUserFromActiveDirectory))
+	muxApi.Handle("/allavanadeprojects", loadAzGHAuthPage(rtApi.GetAvanadeProjects))
 
 	mux.HandleFunc("/approvals/callback", rtProjects.UpdateApprovalStatus)
 	mux.NotFoundHandler = http.HandlerFunc(rtPages.NotFoundHandler)

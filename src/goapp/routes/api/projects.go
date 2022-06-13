@@ -4,16 +4,11 @@ import (
 	"encoding/json"
 	session "main/pkg/session"
 	"main/pkg/sql"
-	template "main/pkg/template"
 	"net/http"
 	"os"
 
 	"github.com/gorilla/mux"
 )
-
-func MyProjects(w http.ResponseWriter, r *http.Request) {
-	template.UseTemplate(&w, r, "projects/my", nil)
-}
 
 func GetUserProjects(w http.ResponseWriter, r *http.Request) {
 	// Get email address of the user

@@ -25,4 +25,5 @@ SELECT [Id],
        [dbo].[Projects]
   WHERE  
        [CreatedBy] = @UserPrincipalName
+  ORDER BY [Created] DESC
 END
