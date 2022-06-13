@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"main/models"
 	"main/pkg/sql"
-  "strconv"
+	"strconv"
 
 	"os"
 )
@@ -130,8 +130,30 @@ func Projects_IsExisting(body models.TypNewProjectReqBody) bool {
 	} else {
 		return false
 	}
+}
 
-	return false
+func Users_Get_GHUser(UserPrincipalName string) (GHUser string) {
+
+	cp := sql.ConnectionParam{
+		ConnectionString: os.Getenv("GHMGMTDB_CONNECTION_STRING"),
+	}
+
+	db, _ := sql.Init(cp)
+
+	param := map[string]interface{}{
+
+		"UserPrincipalName": UserPrincipalName,
+	}
+
+	result, err := db.ExecuteStoredProcedureWithResult("dbo.PR_Users_Get_GHUser", param)
+
+	if err != nil {
+		fmt.Println(err)
+		return ""
+	}
+
+	GHUser = result[0]["GitHubUser"].(string)
+	return GHUser
 }
 
 func PopulateProjectsApproval(id int64) (ProjectApprovals []models.TypProjectApprovals) {

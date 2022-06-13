@@ -4,6 +4,7 @@ import (
 	"context"
 	"main/models"
 	"main/pkg/envvar"
+	ghmgmt "main/pkg/ghmgmtdb"
 	"os"
 	"strings"
 
@@ -35,7 +36,26 @@ func CreatePrivateGitHubRepository(data models.TypNewProjectReqBody) (*github.Re
 	if err != nil {
 		return nil, err
 	}
+
+	AddCollaborator(data)
 	return repo, nil
+}
+
+func AddCollaborator(data models.TypNewProjectReqBody) (*github.Response, error) {
+	client := createClient(os.Getenv("GH_TOKEN"))
+	owner := envvar.GetEnvVar("GH_PROJECT_OWNER", "ava-innersource")
+	opts := &github.RepositoryAddCollaboratorOptions{
+		Permission: "admin",
+	}
+
+	GHUser := ghmgmt.Users_Get_GHUser(data.Coowner)
+
+	_, resp, err := client.Repositories.AddCollaborator(context.Background(), owner, data.Name, GHUser, opts)
+	if err != nil {
+		return nil, err
+	}
+
+	return resp, err
 }
 
 func GetRepository(repoName string) (*github.Repository, error) {
