@@ -68,7 +68,11 @@ func GetRepositoriesFromOrganization(org string) ([]Repo, error) {
 	for {
 		repos, resp, err := client.Repositories.ListByOrg(context.Background(), org, opt)
 		if err != nil {
-			return nil, err
+			if resp.Response.StatusCode == 403 {
+				return nil, nil
+			} else {
+				return nil, err
+			}
 		}
 		allRepos = append(allRepos, repos...)
 		if resp.NextPage == 0 {
@@ -84,6 +88,8 @@ func GetRepositoriesFromOrganization(org string) ([]Repo, error) {
 			Link:        repo.GetHTMLURL(),
 			Org:         org,
 			Description: repo.GetDescription(),
+			Private:     repo.GetPrivate(),
+			Created:     repo.GetCreatedAt(),
 		}
 		repoList = append(repoList, r)
 	}
@@ -92,8 +98,10 @@ func GetRepositoriesFromOrganization(org string) ([]Repo, error) {
 }
 
 type Repo struct {
-	Name        string `json:"repoName"`
-	Link        string `json:"repoLink"`
-	Org         string `json:"org"`
-	Description string `json:"description"`
+	Name        string           `json:"repoName"`
+	Link        string           `json:"repoLink"`
+	Org         string           `json:"org"`
+	Description string           `json:"description"`
+	Private     bool             `json:"private"`
+	Created     github.Timestamp `json:"created"`
 }
