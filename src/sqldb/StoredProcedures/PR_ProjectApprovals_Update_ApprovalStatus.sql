@@ -22,3 +22,8 @@ UPDATE
   WHERE
     [ApprovalSystemGUID] = @ApprovalSystemGUID
 END
+
+DECLARE @ProjectId INT
+SELECT @ProjectId = ProjectId FROM ProjectApprovals WHERE [ApprovalSystemGUID] = @ApprovalSystemGUID
+
+EXEC PR_Projects_Update_Status @ProjectId
