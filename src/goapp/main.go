@@ -5,9 +5,11 @@ import (
 	"log"
 	githubAPI "main/pkg/github"
 	session "main/pkg/session"
+	rtApi "main/routes/api"
 	rtAzure "main/routes/login/azure"
 	rtGithub "main/routes/login/github"
 	rtPages "main/routes/pages"
+	rtActivities "main/routes/pages/activities"
 	rtApis "main/routes/pages/api"
 	rtProjects "main/routes/pages/projects"
 	"net/http"
@@ -47,6 +49,17 @@ func main() {
 	mux.HandleFunc("/login/github/callback", rtGithub.GithubCallbackHandler)
 	mux.HandleFunc("/login/github/force", rtGithub.GithubForceSaveHandler)
 	mux.HandleFunc("/logout/github", rtGithub.GitHubLogoutHandler)
+
+	muxActivites := mux.PathPrefix("/activities").Subrouter()
+	muxActivites.HandleFunc("/new", rtActivities.PostNewHandler).Methods("POST")
+	muxActivites.HandleFunc("/new", rtActivities.GetNewHandler).Methods("GET")
+
+	muxApi := mux.PathPrefix("/api").Subrouter()
+	muxApi.Handle("/activity/type", loadAzGHAuthPage(rtApi.GetActivityTypes)).Methods("GET")
+	muxApi.Handle("/activity/type", loadAzGHAuthPage(rtApi.CreateActivityType)).Methods("POST")
+	muxApi.Handle("/contributionarea", loadAzGHAuthPage(rtApi.CreateContributionAreas)).Methods("POST")
+	muxApi.Handle("/contributionarea", loadAzGHAuthPage(rtApi.GetContributionAreas)).Methods("GET")
+
 	mux.HandleFunc("/approvals/callback", rtProjects.UpdateApprovalStatus)
 	mux.NotFoundHandler = http.HandlerFunc(rtPages.NotFoundHandler)
 
