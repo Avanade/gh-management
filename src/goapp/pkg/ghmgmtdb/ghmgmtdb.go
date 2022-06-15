@@ -296,3 +296,47 @@ func PRContributionAreas_Insert(name, createdBy string) (int, error) {
 	}
 	return id, nil
 }
+
+func IsUserAdmin(userPrincipalName string) bool {
+	db := ConnectDb()
+	defer db.Close()
+
+	param := map[string]interface{}{
+		"UserPrincipalName": userPrincipalName,
+	}
+
+	result, _ := db.ExecuteStoredProcedureWithResult("PR_Admins_IsAdmin", param)
+
+	return result[0]["Result"] == "1"
+}
+
+func GetProjectByName(projectName string) []map[string]interface{} {
+	db := ConnectDb()
+	defer db.Close()
+
+	param := map[string]interface{}{
+		"Name": projectName,
+	}
+
+	result, _ := db.ExecuteStoredProcedureWithResult("PR_Projects_Select_ByName", param)
+
+	return result
+}
+
+func UpdateIsArchiveIsPrivate(projectName string, isArchived bool, isPrivate bool) error {
+	db := ConnectDb()
+	defer db.Close()
+
+	param := map[string]interface{}{
+		"Name":       projectName,
+		"IsArchived": isArchived,
+		"IsPrivate":  isPrivate,
+	}
+
+	_, err := db.ExecuteStoredProcedure("PR_Projects_Update_VisibilityByName", param)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

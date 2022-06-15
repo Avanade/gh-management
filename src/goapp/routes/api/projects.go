@@ -2,6 +2,8 @@ package routes
 
 import (
 	"encoding/json"
+	ghmgmt "main/pkg/ghmgmtdb"
+	gh "main/pkg/github"
 	session "main/pkg/session"
 	"main/pkg/sql"
 	"net/http"
@@ -81,4 +83,28 @@ func GetRequestStatusByProject(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.Write(jsonResp)
+}
+
+func ArchiveProject(w http.ResponseWriter, r *http.Request) {
+	req := mux.Vars(r)
+	project := req["project"]
+	archive := req["archive"]
+	private := req["private"]
+
+	err := ghmgmt.UpdateIsArchiveIsPrivate(project, archive == "1", true)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	//If project is currently public, set visibility to private
+	if private == "0" {
+		err := gh.SetProjectVisibility(project, "private")
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+	}
+
+	w.WriteHeader(http.StatusOK)
 }

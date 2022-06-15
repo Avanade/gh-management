@@ -159,10 +159,33 @@
       <ul role="list" class="divide-y divide-gray-100">
         <template x-for="(project, index) in filteredAllProjects">
           <li>
-            <a x-bind:href="project.repoLink" target="_">
-              <div class="px-4 py-4 sm:px-6 hover:bg-gray-50">
+            <!-- <a x-bind:href="project.repoLink" target="_"> -->
+              <div class="px-4 py-4 sm:px-6 hover:bg-gray-50 cursor-pointer" @click="openLink(project.repoLink)">
                 <div class="flex items-center justify-between">
-                  <p class="text-sm font-medium text-indigo-600 truncate" x-text="project.repoName" title="Repository name"></p>
+                  <div>
+                    <span class="text-sm font-medium truncate" x-bind:class="project.archived? 'text-gray-600' : 'text-indigo-600'" x-text="project.repoName" title="Repository name"></span>
+                    <span class="text-sm font-medium text-gray-400 truncate" x-show="project.archived">(Archived)</span>
+                  </div>
+                  <!-- Admin Options -->
+                  {{ if .isUserAdmin }}
+                  <div @click.stop @click.outside="closeOptions(-1)">
+                    <div class="relative mt-1">
+                      <button @click="project.showOptions = !project.showOptions; closeOptions(index);" type="button" class="absolute inset-y-0 right-0 flex items-center rounded-r-md px-2 focus:outline-none">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z" />
+                        </svg>
+                      </button>
+                      <ul x-show="project.showOptions" class="absolute z-10 mt-1 max-h-60 right-0 top-1 overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm" id="options" role="listbox">
+                        <li @click="archiveProject(project.repoName, project.archived, project.private)" class="hover:bg-[#fff2eb] relative cursor-pointer select-none py-2 pl-3 pr-9 text-gray-900" id="option-0" role="option" tabindex="-1">
+                          <span class="block truncate" x-text="project.archived? 'Unarchive' : 'Archive'">Archive</span>
+                        </li>
+                        <li @click="setVisibility(project.repoName, project.archived, project.private)" x-show="!project.archived" class="hover:bg-[#fff2eb] relative cursor-pointer select-none py-2 pl-3 pr-9 text-gray-900" id="option-0" role="option" tabindex="-1">
+                          <span class="block truncate" x-text="project.private? 'Make Public' : 'Make Private'"></span>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                  {{ end }}
                 </div>
                 <div class="mt-2 sm:flex sm:justify-between">
                   <div class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
@@ -191,7 +214,7 @@
                   </div>
                 </div>
               </div>
-            </a>
+            <!-- </a> -->
           </li>
         </template>
       </ul>
@@ -209,6 +232,7 @@
       userProjectsList: [],
       allProjectsList: [],
       filteredAllProjects: [],
+      currentSelected: -1,
       getUserProjects() {
         if (!this.userProjectsList || this.userProjectsList.length === 0) {
           this.showSpinner = true
@@ -283,6 +307,28 @@
       },
       filterAllProject() {
         this.filteredAllProjects = this.allProjectsList.filter(p => p.repoName.toLowerCase().includes(this.search.toLowerCase()))
+      },
+      openLink(link) {
+        window.open(link, '_blank').focus();
+      },
+      closeOptions(newSelected) {
+        if (newSelected !== this.currentSelected) {
+          if (this.currentSelected > -1) {
+            this.filteredAllProjects[this.currentSelected].showOptions = false
+          }
+          this.currentSelected = newSelected
+        }
+        
+      },
+      archiveProject(projectName, isArchived, isPrivate) {
+        let url = `/api/projects/${projectName}/archive/${isArchived? '0' : '1'}/private/${isPrivate? '1': '0'}`
+        Alpine.store('master').modal.show()
+        Alpine.store('master').getData(url, `Project has been ${isArchived? 'unarchived.' : 'archived.'}`, "Refresh project list", "/projects?view=all")                
+      },
+      setVisibility(projectName, isArchived, isPrivate) {
+        let url = `/api/projects/${projectName}/private/${isPrivate? '0' : '1'}/archive/${isArchived? '1': '0'}`
+        Alpine.store('master').modal.show()
+        Alpine.store('master').getData(url, `Project has been made ${isPrivate? 'public.' : 'private.'}`, "Refresh project list", "/projects?view=all")                
       }
     }
   }

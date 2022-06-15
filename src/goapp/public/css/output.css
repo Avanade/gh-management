@@ -1624,6 +1624,10 @@ select {
   right: 0px;
 }
 
+.top-1 {
+  top: 0.25rem;
+}
+
 .isolate {
   isolation: isolate;
 }
@@ -4238,6 +4242,11 @@ select {
 .hover\:bg-\[\#FF4300\]:hover {
   --tw-bg-opacity: 1;
   background-color: rgb(255 67 0 / var(--tw-bg-opacity));
+}
+
+.hover\:bg-\[\#fff2eb\]:hover {
+  --tw-bg-opacity: 1;
+  background-color: rgb(255 242 235 / var(--tw-bg-opacity));
 }
 
 .hover\:font-bold:hover {
