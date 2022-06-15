@@ -9,6 +9,7 @@ import (
 	rtGithub "main/routes/login/github"
 	rtPages "main/routes/pages"
 	rtProjects "main/routes/pages/projects"
+	rtSearch "main/routes/pages/search"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -38,6 +39,9 @@ func main() {
 	mux.Handle("/projects/my", loadAzGHAuthPage(rtProjects.MyProjects))
 	mux.Handle("/projects", loadAzGHAuthPage(rtProjects.GetUserProjects))
 	mux.Handle("/projects/{id}", loadAzGHAuthPage(rtProjects.GetRequestStatusByProject))
+	mux.Handle("/search/{searchText}", loadAzGHAuthPage(rtSearch.GetSearchResults))
+	mux.Handle("/search", loadAzGHAuthPage(rtSearch.SearchHandler))
+	mux.Handle("/search/all/", loadAzGHAuthPage(rtSearch.GetAllResults))
 	mux.HandleFunc("/login/azure", rtAzure.LoginHandler)
 	mux.HandleFunc("/login/azure/callback", rtAzure.CallbackHandler)
 	mux.HandleFunc("/logout/azure", rtAzure.LogoutHandler)
