@@ -86,12 +86,24 @@ func GetRequestStatusByProject(w http.ResponseWriter, r *http.Request) {
 }
 
 func ArchiveProject(w http.ResponseWriter, r *http.Request) {
+	// Check if user is an admin
+	isAdmin, err := session.IsUserAdmin(w, r)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if !isAdmin {
+		http.Error(w, "Not enough privilege to do the action.", http.StatusForbidden)
+		return
+	}
+
 	req := mux.Vars(r)
 	project := req["project"]
 	archive := req["archive"]
 	private := req["private"]
 
-	err := ghmgmt.UpdateIsArchiveIsPrivate(project, archive == "1", true)
+	err = ghmgmt.UpdateIsArchiveIsPrivate(project, archive == "1", true)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

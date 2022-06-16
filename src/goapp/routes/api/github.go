@@ -5,6 +5,7 @@ import (
 	"main/pkg/envvar"
 	ghmgmt "main/pkg/ghmgmtdb"
 	gh "main/pkg/github"
+	session "main/pkg/session"
 	"net/http"
 	"sort"
 	"strings"
@@ -63,12 +64,24 @@ func GetAvanadeProjects(w http.ResponseWriter, r *http.Request) {
 }
 
 func SetVisibility(w http.ResponseWriter, r *http.Request) {
+	// Check if user is an admin
+	isAdmin, err := session.IsUserAdmin(w, r)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if !isAdmin {
+		http.Error(w, "Not enough privilege to do the action.", http.StatusForbidden)
+		return
+	}
+
 	req := mux.Vars(r)
 	project := req["project"]
 	archive := req["archive"]
 	private := req["private"]
 
-	err := ghmgmt.UpdateIsArchiveIsPrivate(project, archive == "1", private == "1")
+	err = ghmgmt.UpdateIsArchiveIsPrivate(project, archive == "1", private == "1")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

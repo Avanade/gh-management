@@ -180,6 +180,16 @@ func RemoveGitHubAccount(w http.ResponseWriter, r *http.Request) error {
 	return nil
 }
 
+// Check if user is an admin
+func IsUserAdmin(w http.ResponseWriter, r *http.Request) (bool, error) {
+	session, err := Store.Get(r, "auth-session")
+	if err != nil {
+		return false, err
+	}
+
+	return session.Values["isUserAdmin"].(bool), nil
+}
+
 type ErrorDetails struct {
 	Error            string `json:"error"`
 	ErrorDescription string `json:"error_description"`
