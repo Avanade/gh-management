@@ -4,8 +4,11 @@
 <div id="pageTitle">Community List</div>
 
 <div x-data="myCommunitiesData()" x-init="getCommunity()">
-
-    <div>
+ 
+    <div x-html="tbl.template">
+ 
+    </div>
+    <!-- <div>
         <div class="flex items-center justify-center h-40" x-show="showSpinner">
             <svg role="status" class="w-8 h-8 mr-2 text-gray-200 animate-spin dark:text-gray-600 fill-[#FF5800]"
                 viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -17,8 +20,9 @@
                     fill="currentFill" />
             </svg>
         </div>
-
+    -->
         <!-- This example requires Tailwind CSS v2.0+ -->
+          <!--
         <div class="bg-white shadow overflow-hidden sm:rounded-md mt-4" x-show="!showSpinner && Communitylist">
             <ul role="list" class="divide-y divide-gray-200">
                 <template x-for="(Community, index) in Communitylist">
@@ -67,15 +71,14 @@
                 </template>
             </ul>
         </div>
-    </div>
+    </div> -->
     <div>
 
     </div>
+    
 </div>
-<div x-html="tbl.template">
 
-</div>
- <script  src="/public/components/clsDataTable.js"></script> 
+<script src="/public/components/clsDataTable.js"></script>
 
 
 <script>
@@ -85,42 +88,43 @@
             Communitylist: [],
             tbl: {
                 template: "",
-                headers: [
-                    { Name: "First Name ", value: "FirstName" },
-                    { Name: "Last Name ", value: "LastName" },
-                    { Name: "User Name ", value: "UserPrincipalName" },
+                headers: 
+                [
+                    { Name: "Name ", value: "Name" },
+                    { Name: "Description ", value: "Description" },
+                    { Name: "URL ", value: "Url" },
+                    { Name: "Notes ", value: "Notes" },
+                    { Name: "TradeAssocId ", value: "TradeAssocId" },
                 ]
                 ,
-                data: [
-                    { Id: 1, FirstName: "Mendiola", LastName: "Raineir", UserPrincipalName: "reinier@dasd" },
-                    { Id: 1, FirstName: "Mendiola2", LastName: "Raineir2", UserPrincipalName: "reinier2@aad" },
-                    { Id: 1, FirstName: "Mendiola3", LastName: "Raineir3", UserPrincipalName: "reinier3@das" },
-                ]
+                data:[]
+              
             },
 
             getCommunity() {
+                console.log('test')
                 fetch('/community')
                     .then(r => {
                         r.json().then(body => {
                             this.Communitylist = body
-                            console.log(body)
+                            this.tbl.data = body    
                             this.showSpinner = false
                         });
                     })
                     .catch(e => {
                         console.log(e)
                     })
-                // var dt = new clsDataTable()
-                // this.tbl.template = dt.template(
-                //     'tbl1',
-                //     'users table',
-                //     'List of all users',
-                //     'tbl.headers',
-                //     'tbl.data',
-                //     '/users/new',
-                //     '/users/{ID}/edit',
-                //     'Id'
-                // )
+                 var dt = new clsDataTable()
+                this.tbl.template = dt.template(
+                     'tbl1',
+                     'Community List',
+                     'List of all Community',
+                     'tbl.headers',
+                     'tbl.data',
+                     '/users/new',
+                     '/community/{Id}',
+                     'Id'
+                 )
             }
         }
     }

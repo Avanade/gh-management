@@ -38,12 +38,13 @@ type TypNewProjectReqBody struct {
 }
 
 type TypCommunity struct {
-	Id           string   `json:"id"`
+	Id           int      `json:"id"`
 	Name         string   `json:"name"`
 	Url          string   `json:"url"`
 	Description  string   `json:"description"`
 	Notes        string   `json:"notes"`
 	TradeAssocId string   `json:"tradeAssocId"`
+	IsExternal   bool     `json:"isExternal"`
 	Created      string   `json:"created"`
 	CreatedBy    string   `json:"createdBy"`
 	Modified     string   `json:"modified"`

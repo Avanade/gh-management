@@ -4,13 +4,14 @@
 <div id="pageTitle">Request a Community</div>
 <div x-data="data()" x-init="onLoad()">
     <form onsubmit="event.preventDefault()">
-        <P></P>
-
-        <h3 class="text-lg font-medium leading-6 text-gray-900"> Community Information</h3>
+        <div  x-show="!form.id">
+        <P> 
+       
+        <h3 class="text-lg font-medium leading-6 text-gray-900"> Community Information</h3>  
         If you have been unable to find the community you need in the drop-down, please submit your request here so that
         we
         can add it. Please ensure you have reviewed the full list before requesting this community for review. ​</P>
-
+      </div>
         <br>
         <div class="flex flex flex-col md:flex-row ">
             <div class="basis-1/2 md:base-full  md:flex-row mx-3">
@@ -25,14 +26,23 @@
             </div>
             <div class="basis-1/2 md:base-full  md:flex-row mx-3">
                 <div class="flex flex-col  ">
-                    <div>
+                    <div class="flex flex-row" >
+                        <div   class="basis-1/2">
                         <h3 class="text-lg font-medium leading-6 text-gray-900">Community Site URL</h3>
+                        </div>
+                        <div     x-show="form.id"  class="basis-1/2 flex flex-row text-right"  >
+                           ID:   <p x-text="form.id"></p> 
+                        </div>
                     </div>
                     <div> <input type="text" name="url" id="url" x-model="form.url" maxlength="255"
                             class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md border-2">
                     </div>
                 </div>
             </div>
+          
+                  
+                 
+                
         </div>
 
         <div class="max-w-full  md:base-full  md:flex-row   mx-3">
@@ -57,7 +67,8 @@
                         <h3 class="text-lg font-medium leading-6 text-gray-900">Business Sponsors*</h3>
                     </div>
                     <div class="relative mt-1">
-                        <input type="text" name="UserPrincipalName" id="UserPrincipalName"
+                        <div x-html="sponsors.template"></div>
+                        <!-- <input type="text" name="UserPrincipalName" id="UserPrincipalName"
                             placeholder="UserPrincipalName" maxlength="50" autocomplete="false"
                             @keyup.enter="datapush()"
                             class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md border-2">
@@ -68,7 +79,7 @@
                                 <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
                                     clip-rule="evenodd" />
                             </svg>
-                        </button>
+                        </button> -->
 
                     </div>
 
@@ -99,6 +110,13 @@
                 <div> <textarea name="Notes" id="Notes" x-model="form.notes" rows="3" maxlength="255"
                         class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md  border-2">
             </textarea> </div>
+            <div class="flex flex-row  mx-3   my-3 ">
+           
+                <input type="checkbox" name="IsExternal" id="IsExternal" x-model="form.isExternal">   
+                This is an external community
+             
+            
+            </div> 
             </div>
         </div>
 </div>
@@ -111,22 +129,57 @@
     </div>
 </div>
 </form>
+
 </div>
  
 
- 
+<script src="/public/components/clsDropdown.js"></script>
 
 <script type="text/javascript">
     function data() {
         return {
             form: {
+                id: '{{.Id}}',
                 name: '',
                 url: '',
                 description: '',
                 notes: '',
+                isExternal: false,
                 sponsors: []
             },
-            
+            sponsors:{
+                template:'',
+                selected:'',
+                data:[]
+            },
+            async getUsersList(){
+                var modal = Alpine.store('master').modal
+                modal.update('loading', 'Loading', 'Please wait', '','')
+             
+
+                    await fetch('/api/allusers').then(j=>j.json()
+                    .then(data=>{
+
+                        this.sponsors.data = data
+                        modal.visible = false
+                    }))
+                    .catch(()=>{
+                        modal.update('error', 'Error', 'Please try again', '','')
+
+                    })
+
+
+                    console.log(this.sponsors.data)
+                    var dd = new clsDropdown()
+                    this.sponsors.template = dd.template(
+                        'ddBusSponsor',
+                        'sponsors.selected',
+                        'sponsors.data',
+                        'displayName',
+                        'mail','mail',
+                        'datapush()')
+            },
+
             showModal: false,
             status: "",
             modalText: "Please wait...",
@@ -136,43 +189,122 @@
                 this.modalText = title
                 this.modalSubText = subtext
                 this.showModal = show
-            },
-            onLoad() {
-            }
-            ,
-
-            submit() {
-
-                this.showResult("submitted", "Processing", "Please wait while processing your request.")
-
-                fetch('/api/community', {
-                    method: 'POST',
-                    body: JSON.stringify(this.form),
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                })
+            },onLoad()
+            {
+                
+                fetch('/community/getcommunity/'  +'{{.Id}}')
                     .then(r => {
-                        // Redirect to Home
-                        if (r.status == 200) {
-                            this.showResult("success", "Successful", "Your repository has been created.")
+                        r.json().then(body => {
+                            this.Communitylist = body
+                            console.log(body)
+                            console.log( body[0])
+                            this.form.id =body[0]["Id"]
+                            this.form.name =body[0]["Name"]
+                            this.form.url =body[0]["Url"]
+                            this.form.description =body[0]["Description"]
+                            this.form.notes =body[0]["Notes"]
+                            this.form.isExternal =body[0]["IsExternal"]
 
-                            
-
-                        } else {
-                            r.text().then(body => this.showResult("error", "Failed", "There is an error processing your request."));
-                        }
-
-
+                
+                           // this.tbl.data = body    
+                            this.showSpinner = false
+                        });
                     })
                     .catch(e => {
-                        this.showResult("error", "Failed", "An error has occured while creating the repository.")
+                        console.log(e)
+                })
+
+                fetch('/api/CommunitySponsorsPerCommunityId/'  +'{{.Id}}')
+                    .then(r => {
+                        r.json().then(body => {
+                             
+                            console.log(body)
+                            console.log( body[0])
+                
+                            
+                           for (let index = 0; index < body.length; index++) {
+                   
+                                console.log( body[index])
+                                console.log( body[index])
+                              this.form.sponsors.push  (body[index]['UserPrincipalName'])
+                           }
+                           // this.tbl.data = body    
+                            this.showSpinner = false
+                        });
                     })
+                    .catch(e => {
+                        console.log(e)
+                })
+
+                
+                this.getUsersList()
+
+            },
+          
+
+            submit() {
+             
+                this.showResult("submitted", "Processing", "Please wait while processing your request.")
+                console.log('1')
+                 if (!this.form.id  )
+                     {this.form.id = 0
+                         console.log('this.form.id =0')
+                     }
+                     console.log('id')
+                 console.log(this.form)
+                Alpine.store('master').postData('/api/community', this.form, "Your community has been created.", "Go to communities list", "/communities/list")                
+                // console.log('form')
+                // console.log(this.form.id)
+                // console.log(this.form)
+                // if (!this.form.id  )
+                //     {this.form.id = 0
+                //         console.log('this.form.id =0')
+                //     }
+
+                //     console.log('id')
+                // console.log(this.form.id)
+                //  fetch('/api/community', {
+                //      method: 'POST',
+                //      body: JSON.stringify(this.form),
+                //      headers: {
+                //          'Content-Type': 'application/json'
+                //      },
+                //  })
+                //      .then(r => {
+                //          // Redirect to Home
+                //          console.log('2')
+                //          console.log(r)
+                //          console.log('3')
+                //          if (r.status == 200) {
+                //              this.showResult("success", "Successful", "Your repository has been created.")
+                //              r.json().then(body => {
+                       
+                //              console.log(body)
+                //          })
+                                            
+
+                //          } else {
+                //              r.text().then(body => this.showResult("error", "Failed", "There is an error processing your request."));
+                //          }
+
+
+                //      })
+                //      .catch(e => {
+                //          this.showResult("error", "Failed", "An error has occured while creating the repository.")
+                //      })
             },
             datapush() {
-
-                this.form.sponsors.push(document.getElementById("UserPrincipalName").value)
-                document.getElementById("UserPrincipalName").value = "";
+                console.log('sponsors.selected')
+                console.log(this.sponsors.selected)
+                console.log('sponsors.template')
+                console.log(this.sponsors.data)
+                console.log('.sponsors.select')
+                console.log(this.sponsors.data.filter(i => i.mail == this.sponsors.selected)[0]["displayName"])
+               this.form.sponsors.push(this.sponsors.selected )
+               this.sponsors.selected = null
+               console.log(this.sponsors.selected)
+               // this.form.sponsors.push(document.getElementById("UserPrincipalName").value)
+               // document.getElementById("UserPrincipalName").value = "";
                
             },
             removeField(sponsors) {
@@ -192,7 +324,7 @@
             get isValid() {
                 if (
                     ( !!this.form.name &&
-                     !!this.form.url &&
+                    !!this.form.url &&
                     !!this.form.description &&
                     !!this.form.notes ) &&
                     this.form.sponsors.length >= 2) {

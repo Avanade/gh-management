@@ -4,10 +4,12 @@ import (
 	"encoding/json"
 	"fmt"
 	models "main/models"
+	ghmgmt "main/pkg/ghmgmtdb"
 	session "main/pkg/session"
 	"main/pkg/sql"
 	"net/http"
 	"os"
+	"strconv"
 )
 
 func CommunityAPIHandler(w http.ResponseWriter, r *http.Request) {
@@ -15,14 +17,18 @@ func CommunityAPIHandler(w http.ResponseWriter, r *http.Request) {
 	iprofile := sessionaz.Values["profile"]
 	profile := iprofile.(map[string]interface{})
 	username := profile["preferred_username"]
-
+	fmt.Println("apI")
+	fmt.Println(r.Method)
 	var body models.TypCommunity
 	err := json.NewDecoder(r.Body).Decode(&body)
+	fmt.Println("apI2")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
+		fmt.Println(err)
+		fmt.Println(body)
 		return
 	}
-
+	fmt.Println("apI3")
 	cp := sql.ConnectionParam{
 
 		ConnectionString: os.Getenv("GHMGMTDB_CONNECTION_STRING"),
@@ -31,6 +37,8 @@ func CommunityAPIHandler(w http.ResponseWriter, r *http.Request) {
 	db, _ := sql.Init(cp)
 	switch r.Method {
 	case "POST":
+		fmt.Println("POST")
+		fmt.Println(body)
 		param := map[string]interface{}{
 
 			"Name":         body.Name,
@@ -38,20 +46,37 @@ func CommunityAPIHandler(w http.ResponseWriter, r *http.Request) {
 			"Description":  body.Description,
 			"Notes":        body.Notes,
 			"TradeAssocId": body.TradeAssocId,
+			"IsExternal":   body.IsExternal,
 			"CreatedBy":    username,
 			"ModifiedBy":   username,
+			"Id":           body.Id,
 		}
-
-		_, err := db.ExecuteStoredProcedure("dbo.PR_Communities_Insert", param)
+		fmt.Println("body.IsExternal")
+		fmt.Println(body.IsExternal)
+		fmt.Println("param")
+		fmt.Println(param)
+		fmt.Println("body.Sponsors")
+		fmt.Println(body.Sponsors)
+		result, err := db.ExecuteStoredProcedureWithResult("dbo.PR_Communities_Insert", param)
 		if err != nil {
 			fmt.Println(err)
 		}
-
+		id, _ := strconv.Atoi(fmt.Sprint(result[0]["Id"]))
+		fmt.Println("id")
+		fmt.Println(id)
+		if err != nil {
+			fmt.Println(err)
+		}
+		// 6/16
 		for _, s := range body.Sponsors {
-
+			errIU := ghmgmt.InsertUser(s, "", "", "", "")
+			if errIU != nil {
+				http.Error(w, errIU.Error(), http.StatusInternalServerError)
+				return
+			}
 			sponsorsparam := map[string]interface{}{
 
-				"CommunityId":        1,
+				"CommunityId":        id,
 				"UserPrincipalName ": s,
 				"CreatedBy":          username,
 			}
@@ -59,7 +84,9 @@ func CommunityAPIHandler(w http.ResponseWriter, r *http.Request) {
 			if err != nil {
 				fmt.Println(err)
 			}
+
 		}
+
 	case "GET":
 		param := map[string]interface{}{
 
