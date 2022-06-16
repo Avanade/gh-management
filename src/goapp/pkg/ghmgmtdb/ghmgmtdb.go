@@ -79,6 +79,7 @@ func ConnectDb() *sql.DB {
 	return db
 }
 
+// PROJECTS
 func PRProjectsInsert(body models.TypNewProjectReqBody, user string) (id int64) {
 
 	cp := sql.ConnectionParam{
@@ -176,6 +177,37 @@ func ProjectsApprovalUpdateGUID(id int64, ApprovalSystemGUID string) {
 		"ApprovalSystemGUID": ApprovalSystemGUID,
 	}
 	db.ExecuteStoredProcedure("PR_ProjectsApproval_Update_ApprovalSystemGUID", param)
+}
+
+func GetProjectByName(projectName string) []map[string]interface{} {
+	db := ConnectDb()
+	defer db.Close()
+
+	param := map[string]interface{}{
+		"Name": projectName,
+	}
+
+	result, _ := db.ExecuteStoredProcedureWithResult("PR_Projects_Select_ByName", param)
+
+	return result
+}
+
+func UpdateIsArchiveIsPrivate(projectName string, isArchived bool, isPrivate bool) error {
+	db := ConnectDb()
+	defer db.Close()
+
+	param := map[string]interface{}{
+		"Name":       projectName,
+		"IsArchived": isArchived,
+		"IsPrivate":  isPrivate,
+	}
+
+	_, err := db.ExecuteStoredProcedure("PR_Projects_Update_VisibilityByName", param)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // ACTIVITIES
@@ -296,6 +328,19 @@ func Users_Get_GHUser(UserPrincipalName string) (GHUser string) {
 
 	GHUser = result[0]["GitHubUser"].(string)
 	return GHUser
+}
+
+func IsUserAdmin(userPrincipalName string) bool {
+	db := ConnectDb()
+	defer db.Close()
+
+	param := map[string]interface{}{
+		"UserPrincipalName": userPrincipalName,
+	}
+
+	result, _ := db.ExecuteStoredProcedureWithResult("PR_Admins_IsAdmin", param)
+
+	return result[0]["Result"] == "1"
 }
 
 // COMMUNITIES
@@ -476,48 +521,4 @@ func Community_Membership_IsMember(CommunityId int64, UserPrincipalName string) 
 	isExisting := strconv.FormatInt(result[0]["IsExisting"].(int64), 2)
 	isMember, _ = strconv.ParseBool(isExisting)
 	return
-}
-
-func IsUserAdmin(userPrincipalName string) bool {
-	db := ConnectDb()
-	defer db.Close()
-
-	param := map[string]interface{}{
-		"UserPrincipalName": userPrincipalName,
-	}
-
-	result, _ := db.ExecuteStoredProcedureWithResult("PR_Admins_IsAdmin", param)
-
-	return result[0]["Result"] == "1"
-}
-
-func GetProjectByName(projectName string) []map[string]interface{} {
-	db := ConnectDb()
-	defer db.Close()
-
-	param := map[string]interface{}{
-		"Name": projectName,
-	}
-
-	result, _ := db.ExecuteStoredProcedureWithResult("PR_Projects_Select_ByName", param)
-
-	return result
-}
-
-func UpdateIsArchiveIsPrivate(projectName string, isArchived bool, isPrivate bool) error {
-	db := ConnectDb()
-	defer db.Close()
-
-	param := map[string]interface{}{
-		"Name":       projectName,
-		"IsArchived": isArchived,
-		"IsPrivate":  isPrivate,
-	}
-
-	_, err := db.ExecuteStoredProcedure("PR_Projects_Update_VisibilityByName", param)
-	if err != nil {
-		return err
-	}
-
-	return nil
 }
