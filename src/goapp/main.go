@@ -8,8 +8,7 @@ import (
 	rtAzure "main/routes/login/azure"
 	rtGithub "main/routes/login/github"
 	rtPages "main/routes/pages"
-
-	// rtActivities "main/routes/pages/activities"
+	rtCommunity "main/routes/pages/community"
 	rtProjects "main/routes/pages/projects"
 	"net/http"
 
@@ -37,6 +36,7 @@ func main() {
 	mux.Handle("/error/ghlogin", loadAzAuthPage(rtPages.GHLoginRequire))
 	mux.Handle("/projects/new", loadAzGHAuthPage(rtProjects.ProjectsNewHandler))
 	mux.Handle("/projects", loadAzGHAuthPage(rtProjects.Projects))
+	mux.Handle("/community/{id}/onboarding", loadAzGHAuthPage(rtCommunity.CommunityOnBoarding))
 	mux.HandleFunc("/login/azure", rtAzure.LoginHandler)
 	mux.HandleFunc("/login/azure/callback", rtAzure.CallbackHandler)
 	mux.HandleFunc("/logout/azure", rtAzure.LogoutHandler)
@@ -52,6 +52,7 @@ func main() {
 	muxApi := mux.PathPrefix("/api").Subrouter()
 	muxApi.Handle("/activity/type", loadAzGHAuthPage(rtApi.GetActivityTypes)).Methods("GET")
 	muxApi.Handle("/activity/type", loadAzGHAuthPage(rtApi.CreateActivityType)).Methods("POST")
+	muxApi.Handle("/community/onboarding/{id}", loadAzGHAuthPage(rtApi.GetCommunityOnBoardingInfo)).Methods("GET", "POST", "DELETE")
 	muxApi.Handle("/contributionarea", loadAzGHAuthPage(rtApi.CreateContributionAreas)).Methods("POST")
 	muxApi.Handle("/contributionarea", loadAzGHAuthPage(rtApi.GetContributionAreas)).Methods("GET")
 	muxApi.Handle("/projects/list", loadAzGHAuthPage(rtApi.GetUserProjects))

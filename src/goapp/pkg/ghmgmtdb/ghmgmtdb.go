@@ -132,30 +132,6 @@ func Projects_IsExisting(body models.TypNewProjectReqBody) bool {
 	}
 }
 
-func Users_Get_GHUser(UserPrincipalName string) (GHUser string) {
-
-	cp := sql.ConnectionParam{
-		ConnectionString: os.Getenv("GHMGMTDB_CONNECTION_STRING"),
-	}
-
-	db, _ := sql.Init(cp)
-
-	param := map[string]interface{}{
-
-		"UserPrincipalName": UserPrincipalName,
-	}
-
-	result, err := db.ExecuteStoredProcedureWithResult("dbo.PR_Users_Get_GHUser", param)
-
-	if err != nil {
-		fmt.Println(err)
-		return ""
-	}
-
-	GHUser = result[0]["GitHubUser"].(string)
-	return GHUser
-}
-
 func PopulateProjectsApproval(id int64) (ProjectApprovals []models.TypProjectApprovals) {
 	db := ConnectDb()
 	defer db.Close()
@@ -295,6 +271,211 @@ func PRContributionAreas_Insert(name, createdBy string) (int, error) {
 		return -1, err
 	}
 	return id, nil
+}
+
+//USERS
+func Users_Get_GHUser(UserPrincipalName string) (GHUser string) {
+
+	cp := sql.ConnectionParam{
+		ConnectionString: os.Getenv("GHMGMTDB_CONNECTION_STRING"),
+	}
+
+	db, _ := sql.Init(cp)
+
+	param := map[string]interface{}{
+
+		"UserPrincipalName": UserPrincipalName,
+	}
+
+	result, err := db.ExecuteStoredProcedureWithResult("dbo.PR_Users_Get_GHUser", param)
+
+	if err != nil {
+		fmt.Println(err)
+		return ""
+	}
+
+	GHUser = result[0]["GitHubUser"].(string)
+	return GHUser
+}
+
+// COMMUNITIES
+func Communities_AddMember(CommunityId int, UserPrincipalName string) error {
+
+	cp := sql.ConnectionParam{
+		ConnectionString: os.Getenv("GHMGMTDB_CONNECTION_STRING"),
+	}
+
+	db, _ := sql.Init(cp)
+
+	param := map[string]interface{}{
+		"CommunityId":       CommunityId,
+		"UserPrincipalName": UserPrincipalName,
+	}
+
+	_, err := db.ExecuteStoredProcedure("dbo.PR_CommunityMembers_Insert", param)
+
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+
+	return nil
+
+}
+
+func Communities_Related(CommunityId int64) (data []models.TypRelatedCommunities, err error) {
+
+	cp := sql.ConnectionParam{
+		ConnectionString: os.Getenv("GHMGMTDB_CONNECTION_STRING"),
+	}
+
+	db, _ := sql.Init(cp)
+
+	param := map[string]interface{}{
+
+		"CommunityId": CommunityId,
+	}
+
+	result, err := db.ExecuteStoredProcedureWithResult("dbo.PR_Communities_Select_Related", param)
+
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	for _, v := range result {
+		d := models.TypRelatedCommunities{
+			Name:       v["Name"].(string),
+			Url:        v["Url"].(string),
+			IsExternal: v["IsExternal"].(bool),
+		}
+		data = append(data, d)
+	}
+	return
+}
+
+func Community_Sponsors(CommunityId int64) (data []models.TypCommunitySponsors, err error) {
+	cp := sql.ConnectionParam{
+		ConnectionString: os.Getenv("GHMGMTDB_CONNECTION_STRING"),
+	}
+
+	db, _ := sql.Init(cp)
+
+	param := map[string]interface{}{
+
+		"CommunityId": CommunityId,
+	}
+
+	result, err := db.ExecuteStoredProcedureWithResult("dbo.PR_CommunitySponsors_Select_By_CommunityId", param)
+
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	for _, v := range result {
+		d := models.TypCommunitySponsors{
+			Name:      v["Name"].(string),
+			GivenName: v["GivenName"].(string),
+			SurName:   v["SurName"].(string),
+			Email:     v["UserPrincipalName"].(string),
+		}
+		data = append(data, d)
+	}
+	return
+}
+
+func Community_Info(CommunityId int64) (data models.TypCommunityOnBoarding, err error) {
+	cp := sql.ConnectionParam{
+		ConnectionString: os.Getenv("GHMGMTDB_CONNECTION_STRING"),
+	}
+
+	db, _ := sql.Init(cp)
+
+	param := map[string]interface{}{
+
+		"Id": CommunityId,
+	}
+
+	result, err := db.ExecuteStoredProcedureWithResult("dbo.PR_Communities_select_byID", param)
+
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	data = models.TypCommunityOnBoarding{
+		Id:   result[0]["Id"].(int64),
+		Name: result[0]["Name"].(string),
+		Url:  result[0]["Url"].(string),
+	}
+
+	return
+}
+
+func Community_Onboarding_AddMember(CommunityId int64, UserPrincipalName string) (err error) {
+	cp := sql.ConnectionParam{
+		ConnectionString: os.Getenv("GHMGMTDB_CONNECTION_STRING"),
+	}
+
+	db, _ := sql.Init(cp)
+
+	param := map[string]interface{}{
+
+		"CommunityId":       CommunityId,
+		"UserPrincipalName": UserPrincipalName,
+	}
+
+	_, err = db.ExecuteStoredProcedure("dbo.PR_CommunityMembers_Insert", param)
+
+	if err != nil {
+		fmt.Println(err)
+	}
+	return
+}
+
+func Community_Onboarding_RemoveMember(CommunityId int64, UserPrincipalName string) (err error) {
+	cp := sql.ConnectionParam{
+		ConnectionString: os.Getenv("GHMGMTDB_CONNECTION_STRING"),
+	}
+
+	db, _ := sql.Init(cp)
+
+	param := map[string]interface{}{
+
+		"CommunityId":       CommunityId,
+		"UserPrincipalName": UserPrincipalName,
+	}
+
+	_, err = db.ExecuteStoredProcedure("dbo.PR_CommunityMembers_Remove", param)
+
+	if err != nil {
+		fmt.Println(err)
+	}
+	return
+}
+
+func Community_Membership_IsMember(CommunityId int64, UserPrincipalName string) (isMember bool, err error) {
+	cp := sql.ConnectionParam{
+		ConnectionString: os.Getenv("GHMGMTDB_CONNECTION_STRING"),
+	}
+
+	db, _ := sql.Init(cp)
+
+	param := map[string]interface{}{
+
+		"CommunityId":       CommunityId,
+		"UserPrincipalName": UserPrincipalName,
+	}
+
+	result, err := db.ExecuteStoredProcedureWithResult("dbo.PR_CommunityMembers_IsExisting", param)
+
+	if err != nil {
+		fmt.Println(err)
+	}
+	isExisting := strconv.FormatInt(result[0]["IsExisting"].(int64), 2)
+	isMember, _ = strconv.ParseBool(isExisting)
+	return
 }
 
 func IsUserAdmin(userPrincipalName string) bool {

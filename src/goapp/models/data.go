@@ -76,3 +76,24 @@ type TypUpdateApprovalStatusReqBody struct {
 	Remarks      string `json:"Remarks"`
 	ResponseDate string `json:"responseDate"`
 }
+
+type TypRelatedCommunities struct {
+	Name       string `json:"Name"`
+	Url        string `json:"Url"`
+	IsExternal bool   `json:"IsExternal"`
+}
+
+type TypCommunitySponsors struct {
+	Name      string `json:"Name"`
+	GivenName string `json:"GivenName"`
+	SurName   string `json:"SurName"`
+	Email     string `json:"Email"`
+}
+
+type TypCommunityOnBoarding struct {
+	Id          int64                   `json:"Id"`
+	Name        string                  `json:"Name"`
+	Url         string                  `json:"Url"`
+	Sponsors    []TypCommunitySponsors  `json:"Sponsors"`
+	Communities []TypRelatedCommunities `json:"Communities"`
+}
