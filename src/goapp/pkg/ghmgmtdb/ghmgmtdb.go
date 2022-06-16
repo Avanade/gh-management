@@ -192,7 +192,7 @@ func GetProjectByName(projectName string) []map[string]interface{} {
 	return result
 }
 
-func UpdateIsArchiveIsPrivate(projectName string, isArchived bool, isPrivate bool) error {
+func UpdateIsArchiveIsPrivate(projectName string, isArchived bool, isPrivate bool, username string) error {
 	db := ConnectDb()
 	defer db.Close()
 
@@ -200,6 +200,7 @@ func UpdateIsArchiveIsPrivate(projectName string, isArchived bool, isPrivate boo
 		"Name":       projectName,
 		"IsArchived": isArchived,
 		"IsPrivate":  isPrivate,
+		"ModifiedBy": username,
 	}
 
 	_, err := db.ExecuteStoredProcedure("PR_Projects_Update_VisibilityByName", param)

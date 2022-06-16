@@ -102,12 +102,17 @@ func ArchiveProject(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	sessionaz, _ := session.Store.Get(r, "auth-session")
+	iprofile := sessionaz.Values["profile"]
+	profile := iprofile.(map[string]interface{})
+	username := profile["preferred_username"]
+
 	req := mux.Vars(r)
 	project := req["project"]
 	archive := req["archive"]
 	private := req["private"]
 
-	err = ghmgmt.UpdateIsArchiveIsPrivate(project, archive == "1", true)
+	err = ghmgmt.UpdateIsArchiveIsPrivate(project, archive == "1", true, username.(string))
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -187,12 +192,17 @@ func SetVisibility(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	sessionaz, _ := session.Store.Get(r, "auth-session")
+	iprofile := sessionaz.Values["profile"]
+	profile := iprofile.(map[string]interface{})
+	username := profile["preferred_username"]
+
 	req := mux.Vars(r)
 	project := req["project"]
 	archive := req["archive"]
 	private := req["private"]
 
-	err = ghmgmt.UpdateIsArchiveIsPrivate(project, archive == "1", private == "1")
+	err = ghmgmt.UpdateIsArchiveIsPrivate(project, archive == "1", private == "1", username.(string))
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
