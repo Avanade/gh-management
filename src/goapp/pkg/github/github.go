@@ -1,10 +1,14 @@
 package githubAPI
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
+	"fmt"
 	"main/models"
 	"main/pkg/envvar"
 	ghmgmt "main/pkg/ghmgmtdb"
+	"net/http"
 	"os"
 	"strings"
 
@@ -104,6 +108,7 @@ func GetRepositoriesFromOrganization(org string) ([]Repo, error) {
 	var repoList []Repo
 	for _, repo := range allRepos {
 		r := Repo{
+			FullName:    repo.GetFullName(),
 			Name:        repo.GetName(),
 			Link:        repo.GetHTMLURL(),
 			Org:         org,
@@ -117,11 +122,33 @@ func GetRepositoriesFromOrganization(org string) ([]Repo, error) {
 	return repoList, nil
 }
 
+func SetProjectVisibility(projectName string, visibility string) error {
+	client := &http.Client{}
+	urlPath := fmt.Sprintf("https://api.github.com/repos/%s/%s", envvar.GetEnvVar("GH_PROJECT_OWNER", "Avanade"), projectName)
+	postBody, _ := json.Marshal(map[string]string{
+		"visibility": visibility,
+	})
+	reqBody := bytes.NewBuffer(postBody)
+
+	req, err := http.NewRequest(http.MethodPatch, urlPath, reqBody)
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", "Bearer "+envvar.GetEnvVar("GH_TOKEN", ""))
+
+	_, err = client.Do(req)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 type Repo struct {
+	FullName    string           `json:"repoFullName"`
 	Name        string           `json:"repoName"`
 	Link        string           `json:"repoLink"`
 	Org         string           `json:"org"`
 	Description string           `json:"description"`
 	Private     bool             `json:"private"`
 	Created     github.Timestamp `json:"created"`
+	IsArchived  bool             `json:"archived"`
 }
