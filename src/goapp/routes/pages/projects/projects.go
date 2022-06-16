@@ -9,14 +9,13 @@ import (
 func Projects(w http.ResponseWriter, r *http.Request) {
 	pageData := make(map[string]interface{})
 
-	// Check session
-	session, err := session.Store.Get(r, "auth-session")
+	isAdmin, err := session.IsUserAdmin(w, r)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	pageData["isUserAdmin"] = session.Values["isUserAdmin"].(bool)
+	pageData["isUserAdmin"] = isAdmin
 
 	template.UseTemplate(&w, r, "projects/projects", pageData)
 }

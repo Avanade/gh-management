@@ -108,6 +108,7 @@ func GetRepositoriesFromOrganization(org string) ([]Repo, error) {
 	var repoList []Repo
 	for _, repo := range allRepos {
 		r := Repo{
+			FullName:    repo.GetFullName(),
 			Name:        repo.GetName(),
 			Link:        repo.GetHTMLURL(),
 			Org:         org,
@@ -142,6 +143,7 @@ func SetProjectVisibility(projectName string, visibility string) error {
 }
 
 type Repo struct {
+	FullName    string           `json:"repoFullName"`
 	Name        string           `json:"repoName"`
 	Link        string           `json:"repoLink"`
 	Org         string           `json:"org"`
