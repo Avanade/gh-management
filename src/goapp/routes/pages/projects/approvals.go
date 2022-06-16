@@ -2,7 +2,6 @@ package routes
 
 import (
 	"encoding/json"
-	"fmt"
 	models "main/models"
 	"main/pkg/sql"
 	"net/http"
@@ -10,28 +9,21 @@ import (
 )
 
 func UpdateApprovalStatusProjects(w http.ResponseWriter, r *http.Request) {
-
 	err := processApprovalProjects(r, "projects")
-
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-
 	w.WriteHeader(http.StatusOK)
 
 }
 func UpdateApprovalStatusCommunity(w http.ResponseWriter, r *http.Request) {
-	fmt.Println(1)
 	err := processApprovalProjects(r, "community")
-	fmt.Println(2)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	fmt.Println(1)
 	w.WriteHeader(http.StatusOK)
-
 }
 
 func processApprovalProjects(r *http.Request, module string) error {
