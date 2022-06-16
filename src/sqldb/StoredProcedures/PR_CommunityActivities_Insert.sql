@@ -5,7 +5,7 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 
-CREATE PROCEDURE [dbo].[PR_CommunitiesActivities_Insert]
+CREATE PROCEDURE [dbo].[PR_CommunityActivities_Insert]
 (
     @CommunityId int,
     @Name varchar(255),
