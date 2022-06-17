@@ -53,3 +53,32 @@ func GetCommunityOnBoardingInfo(w http.ResponseWriter, r *http.Request) {
 	}
 
 }
+
+func GetCommunities(w http.ResponseWriter, r *http.Request) {
+	result := db.GetCommunities()
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+
+	jsonResp, err := json.Marshal(result)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.Write(jsonResp)
+}
+
+func GetCommunityMembers(w http.ResponseWriter, r *http.Request) {
+	params := mux.Vars(r)
+	id, _ := strconv.ParseInt(params["id"], 0, 64)
+
+	result := db.GetCommunityMembers(id)
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+
+	jsonResp, err := json.Marshal(result)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.Write(jsonResp)
+}

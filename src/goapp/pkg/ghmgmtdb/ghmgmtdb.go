@@ -523,3 +523,29 @@ func Community_Membership_IsMember(CommunityId int64, UserPrincipalName string) 
 	isMember, _ = strconv.ParseBool(isExisting)
 	return
 }
+
+func GetCommunities() interface{} {
+	db := ConnectDb()
+	defer db.Close()
+
+	result, err := db.ExecuteStoredProcedureWithResult("PR_Communities_select", nil)
+	if err != nil {
+		return err
+	}
+	return result
+}
+
+func GetCommunityMembers(id int64) interface{} {
+	db := ConnectDb()
+	defer db.Close()
+
+	param := map[string]interface{}{
+		"CommunityId": id,
+	}
+
+	result, err := db.ExecuteStoredProcedureWithResult("PR_CommunityMembers_Select_ByCommunityId", param)
+	if err != nil {
+		return err
+	}
+	return result
+}

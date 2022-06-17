@@ -1719,6 +1719,11 @@ select {
   margin-bottom: 1.25rem;
 }
 
+.-my-5 {
+  margin-top: -1.25rem;
+  margin-bottom: -1.25rem;
+}
+
 .mt-1 {
   margin-top: 0.25rem;
 }
@@ -1943,12 +1948,16 @@ select {
   height: 3rem;
 }
 
-.h-4 {
-  height: 1rem;
-}
-
 .h-40 {
   height: 10rem;
+}
+
+.h-\[calc\(67vh\)\] {
+  height: calc(67vh);
+}
+
+.h-4 {
+  height: 1rem;
 }
 
 .h-20 {
@@ -1965,6 +1974,10 @@ select {
 
 .h-\[calc\(100\%-theme\(\"spacing\.1\"\)\)\] {
   height: calc(100% - 0.25rem);
+}
+
+.h-full {
+  height: 100%;
 }
 
 .max-h-60 {
@@ -2019,16 +2032,20 @@ select {
   width: 2rem;
 }
 
-.w-4 {
-  width: 1rem;
-}
-
 .w-1\/2 {
   width: 50%;
 }
 
+.w-4 {
+  width: 1rem;
+}
+
 .min-w-full {
   min-width: 100%;
+}
+
+.min-w-0 {
+  min-width: 0px;
 }
 
 .max-w-max {
@@ -3063,11 +3080,6 @@ select {
   border-color: rgb(203 213 225 / var(--tw-border-opacity));
 }
 
-.border-black {
-  --tw-border-opacity: 1;
-  border-color: rgb(0 0 0 / var(--tw-border-opacity));
-}
-
 .bg-white {
   --tw-bg-opacity: 1;
   background-color: rgb(255 255 255 / var(--tw-bg-opacity));
@@ -3163,6 +3175,11 @@ select {
   background-color: rgb(249 250 251 / var(--tw-bg-opacity));
 }
 
+.bg-\[\#fff2eb\] {
+  --tw-bg-opacity: 1;
+  background-color: rgb(255 242 235 / var(--tw-bg-opacity));
+}
+
 .bg-orange-400 {
   --tw-bg-opacity: 1;
   background-color: rgb(251 146 60 / var(--tw-bg-opacity));
@@ -3171,11 +3188,6 @@ select {
 .bg-orange-500 {
   --tw-bg-opacity: 1;
   background-color: rgb(249 115 22 / var(--tw-bg-opacity));
-}
-
-.bg-\[\#fff2eb\] {
-  --tw-bg-opacity: 1;
-  background-color: rgb(255 242 235 / var(--tw-bg-opacity));
 }
 
 .bg-\[rgb\(255\2c 0\2c 0\)\] {
@@ -3436,6 +3448,21 @@ select {
   padding-right: 0.25rem;
 }
 
+.px-2\.5 {
+  padding-left: 0.625rem;
+  padding-right: 0.625rem;
+}
+
+.py-0\.5 {
+  padding-top: 0.125rem;
+  padding-bottom: 0.125rem;
+}
+
+.py-0 {
+  padding-top: 0px;
+  padding-bottom: 0px;
+}
+
 .pl-3 {
   padding-left: 0.75rem;
 }
@@ -3490,6 +3517,10 @@ select {
 
 .pr-9 {
   padding-right: 2.25rem;
+}
+
+.pr-8 {
+  padding-right: 2rem;
 }
 
 .text-left {
@@ -4243,6 +4274,31 @@ select {
 
 .\[content\:\"hello\"\] {
   content: "hello";
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 10px;
+  height: 18px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  width: 10px;
+  height: 10px;
+  background-clip: padding-box;
+  background: lightgrey;
+  -webkit-border-radius: 7px;
+  -webkit-box-shadow: inset -1px -1px 0px rgba(0, 0, 0, 0.05),
+    inset 1px 1px 0px rgba(0, 0, 0, 0.05);
+}
+
+.custom-scrollbar::-webkit-scrollbar-button {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+.custom-scrollbar::-webkit-scrollbar-corner {
+  background-color: transparent;
 }
 
 .default\:border-solid:default {
