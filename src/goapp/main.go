@@ -11,6 +11,8 @@ import (
 	rtCommunity "main/routes/pages/community"
 	rtProjects "main/routes/pages/projects"
 	"net/http"
+	"strconv"
+	"time"
 
 	"github.com/gorilla/mux"
 
@@ -66,7 +68,7 @@ func main() {
 	mux.HandleFunc("/approvals/community/callback", rtProjects.UpdateApprovalStatusCommunity).Methods("POST")
 	mux.NotFoundHandler = http.HandlerFunc(rtPages.NotFoundHandler)
 
-	//loadAzAuthPage()
+	go checkFailedApprovalRequests()
 
 	port := ev.GetEnvVar("PORT", "8080")
 	fmt.Printf("Now listening on port %v\n", port)
@@ -88,4 +90,15 @@ func loadAzGHAuthPage(f func(w http.ResponseWriter, r *http.Request)) *negroni.N
 		negroni.HandlerFunc(session.IsGHAuthenticated),
 		negroni.Wrap(http.HandlerFunc(f)),
 	)
+}
+
+func checkFailedApprovalRequests() {
+	// TIMER SERVICE
+	freq := ev.GetEnvVar("APPROVALREQUESTS_RETRY_FREQ", "15")
+	freqInt, _ := strconv.ParseInt(freq, 0, 64)
+	if freq > "0" {
+		for range time.NewTicker(time.Duration(freqInt) * time.Minute).C {
+			rtProjects.ReprocessRequestApproval()
+		}
+	}
 }
