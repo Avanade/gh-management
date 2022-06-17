@@ -37,6 +37,30 @@ type TypNewProjectReqBody struct {
 	ConfirmSecIPScan bool   `json:"confirmSecIPScan"`
 }
 
+type TypCommunity struct {
+	Id           int           `json:"id"`
+	Name         string        `json:"name"`
+	Url          string        `json:"url"`
+	Description  string        `json:"description"`
+	Notes        string        `json:"notes"`
+	TradeAssocId string        `json:"tradeAssocId"`
+	IsExternal   bool          `json:"isExternal"`
+	Created      string        `json:"created"`
+	CreatedBy    string        `json:"createdBy"`
+	Modified     string        `json:"modified"`
+	ModifiedBy   string        `json:"modifiedBy"`
+	Sponsors     []TypSponsors `json:"sponsors"`
+}
+
+type TypCommunitySponsors struct {
+	Id                string `json:"id"`
+	CommunityId       string `json:"communityId"`
+	UserPrincipalName string `json:"userprincipalname"`
+	Created           string `json:"created"`
+	CreatedBy         string `json:"createdBy"`
+	Modified          string `json:"modified"`
+	ModifiedBy        string `json:"modifiedBy"`
+}
 type TypProjectApprovals struct {
 	Id                         int64
 	ProjectId                  int64
@@ -77,6 +101,10 @@ type TypUpdateApprovalStatusReqBody struct {
 	ResponseDate string `json:"responseDate"`
 }
 
+type TypSponsors struct {
+	DisplayName string `json:"displayName"`
+	Mail        string `json:"mail"`
+}
 type TypRelatedCommunities struct {
 	Name       string `json:"Name"`
 	Url        string `json:"Url"`
@@ -91,11 +119,11 @@ type TypCommunitySponsorsList struct {
 }
 
 type TypCommunityOnBoarding struct {
-	Id          int64                   `json:"Id"`
-	Name        string                  `json:"Name"`
-	Url         string                  `json:"Url"`
-	Sponsors    []TypCommunitySponsorsList  `json:"Sponsors"`
-	Communities []TypRelatedCommunities `json:"Communities"`
+	Id          int64                      `json:"Id"`
+	Name        string                     `json:"Name"`
+	Url         string                     `json:"Url"`
+	Sponsors    []TypCommunitySponsorsList `json:"Sponsors"`
+	Communities []TypRelatedCommunities    `json:"Communities"`
 }
 
 type TypCommunityApprovals struct {
