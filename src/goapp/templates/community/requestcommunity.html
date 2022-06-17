@@ -170,8 +170,6 @@
 
                     })
 
-
-                    console.log(this.sponsors.data)
                     var dd = new clsDropdown()
                     this.sponsors.template = dd.template(
                         'ddBusSponsor',
@@ -198,17 +196,13 @@
                     .then(r => {
                         r.json().then(body => {
                             this.Communitylist = body
-                            console.log(body)
-                            console.log( body[0])
+                          
                             this.form.id =body[0]["Id"]
                             this.form.name =body[0]["Name"]
                             this.form.url =body[0]["Url"]
                             this.form.description =body[0]["Description"]
                             this.form.notes =body[0]["Notes"]
                             this.form.isExternal =body[0]["IsExternal"]
-
-                
-                           // this.tbl.data = body    
                             this.showSpinner = false
                         });
                     })
@@ -219,22 +213,9 @@
                 fetch('/api/CommunitySponsorsPerCommunityId/'  +'{{.Id}}')
                     .then(r => {
                         r.json().then(body => {
-                            console.log(' CommunitySponsorsPerCommunityId')
-                            console.log(body)
-                            console.log( body[0])
-                
-                            
                            for (let index = 0; index < body.length; index++) {
-                   
-                                console.log( 'body[index]')
-                                console.log( body[index])
-                                console.log( body[index]['UserPrincipalName'])
                               this.form.sponsors.push({displayName:body[index]['UserPrincipalName'],mail:body[index]['UserPrincipalName']})
-                             
                            }
-                           // this.tbl.data = body    
-                           console.log( ' this.form.sponsors')
-                                console.log( this.form.sponsors)
                             this.showSpinner = false
                         });
                     })
@@ -251,65 +232,18 @@
             submit() {
              
                 this.showResult("submitted", "Processing", "Please wait while processing your request.")
-                console.log('1')
                  if (!this.form.id  )
-                     {this.form.id = 0
-                         console.log('this.form.id =0')
+                     {
+                         this.form.id = 0
+ 
                      }
-                     console.log('id')
-                 console.log(this.form)
+
                 Alpine.store('master').postData('/api/community', this.form, "Your community has been created.", "Go to communities list", "/communities/list")                
-                // console.log('form')
-                // console.log(this.form.id)
-                // console.log(this.form)
-                // if (!this.form.id  )
-                //     {this.form.id = 0
-                //         console.log('this.form.id =0')
-                //     }
-
-                //     console.log('id')
-                // console.log(this.form.id)
-                //  fetch('/api/community', {
-                //      method: 'POST',
-                //      body: JSON.stringify(this.form),
-                //      headers: {
-                //          'Content-Type': 'application/json'
-                //      },
-                //  })
-                //      .then(r => {
-                //          // Redirect to Home
-                //          console.log('2')
-                //          console.log(r)
-                //          console.log('3')
-                //          if (r.status == 200) {
-                //              this.showResult("success", "Successful", "Your repository has been created.")
-                //              r.json().then(body => {
-                       
-                //              console.log(body)
-                //          })
-                                            
-
-                //          } else {
-                //              r.text().then(body => this.showResult("error", "Failed", "There is an error processing your request."));
-                //          }
-
-
-                //      })
-                //      .catch(e => {
-                //          this.showResult("error", "Failed", "An error has occured while creating the repository.")
-                //      })
+             
             },
             datapush() {
-       
                 this.form.sponsors.push(this.sponsors.data.filter(i => i.mail == this.sponsors.selected)[0])
-               console.log('this.form.sponsors')
-                console.log(this.form.sponsors)
-
-               this.sponsors.selected = null
-               console.log(this.sponsors.selected)
-               // this.form.sponsors.push(document.getElementById("UserPrincipalName").value)
-               // document.getElementById("UserPrincipalName").value = "";
-               
+                this.sponsors.selected=''
             },
             removeField(sponsors) {
                 this.form.sponsors.splice( this.form.sponsors.indexOf(sponsors), 1);

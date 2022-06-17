@@ -99,13 +99,3 @@ func CommunitySponsorsPerCommunityId(w http.ResponseWriter, r *http.Request) {
 	//fmt.Printf(projects)
 	w.Write(jsonResp)
 }
-
-// func ConnectDb() *sql.DB {
-// 	cp := sql.ConnectionParam{
-// 		ConnectionString: os.Getenv("GHMGMTDB_CONNECTION_STRING"),
-// 	}
-
-// 	db, _ := sql.Init(cp)
-
-// 	return db
-// }
