@@ -15,7 +15,7 @@
     <div class="flex justify-between" x-show="communitiesLoaded">
       <div class="w-1/2 pt-2 pl-4 pr-8">
         <div>Communities</div>
-        <div class="h-[calc(67vh)] overflow-scroll overflow-x-hidden custom-scrollbar">
+        <div class="mt-6 h-[calc(67vh)] overflow-scroll overflow-x-hidden custom-scrollbar">
           <ul role="list">
             <template x-for="(community, index) in communities">
               <li class="flex rounded-md" x-bind:class="selectedCommunity === community.Id? 'bg-[#fff2eb] hover:bg-[#fff2eb]' : 'hover:bg-gray-50'">
