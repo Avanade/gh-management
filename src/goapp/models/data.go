@@ -83,7 +83,7 @@ type TypRelatedCommunities struct {
 	IsExternal bool   `json:"IsExternal"`
 }
 
-type TypCommunitySponsors struct {
+type TypCommunitySponsorsList struct {
 	Name      string `json:"Name"`
 	GivenName string `json:"GivenName"`
 	SurName   string `json:"SurName"`
@@ -94,6 +94,23 @@ type TypCommunityOnBoarding struct {
 	Id          int64                   `json:"Id"`
 	Name        string                  `json:"Name"`
 	Url         string                  `json:"Url"`
-	Sponsors    []TypCommunitySponsors  `json:"Sponsors"`
+	Sponsors    []TypCommunitySponsorsList  `json:"Sponsors"`
 	Communities []TypRelatedCommunities `json:"Communities"`
+}
+
+type TypCommunityApprovals struct {
+	Id						   int64
+	CommunityId                int64
+	CommunityName              string
+	CommunityUrl	           string
+	CommunityDescription       string
+	CommunityNotes             string
+	CommunityTradeAssocId      string
+	CommunityIsExternal        bool
+	RequesterName              string
+	RequesterGivenName         string
+	RequesterSurName           string
+	RequesterUserPrincipalName string
+	ApproverUserPrincipalName  string
+	ApprovalDescription        string
 }

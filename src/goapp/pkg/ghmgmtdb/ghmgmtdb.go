@@ -432,7 +432,7 @@ func Communities_Related(CommunityId int64) (data []models.TypRelatedCommunities
 	return
 }
 
-func Community_Sponsors(CommunityId int64) (data []models.TypCommunitySponsors, err error) {
+func Community_Sponsors(CommunityId int64) (data []models.TypCommunitySponsorsList, err error) {
 	cp := sql.ConnectionParam{
 		ConnectionString: os.Getenv("GHMGMTDB_CONNECTION_STRING"),
 	}
@@ -452,7 +452,7 @@ func Community_Sponsors(CommunityId int64) (data []models.TypCommunitySponsors, 
 	}
 
 	for _, v := range result {
-		d := models.TypCommunitySponsors{
+		d := models.TypCommunitySponsorsList{
 			Name:      v["Name"].(string),
 			GivenName: v["GivenName"].(string),
 			SurName:   v["SurName"].(string),
@@ -554,4 +554,47 @@ func Community_Membership_IsMember(CommunityId int64, UserPrincipalName string) 
 	isExisting := strconv.FormatInt(result[0]["IsExisting"].(int64), 2)
 	isMember, _ = strconv.ParseBool(isExisting)
 	return
+}
+
+func PopulateCommunityApproval(id int64) (CommunityApprovals []models.TypCommunityApprovals) {
+	db := ConnectDb()
+	defer db.Close()
+
+	param := map[string]interface{}{
+		"CommunityId": id,
+	}
+	result, _ := db.ExecuteStoredProcedureWithResult("PR_CommunityApprovals_Populate", param)
+
+	for _, v := range result {
+		data := models.TypCommunityApprovals{
+			Id:                         v["Id"].(int64),
+			CommunityId:                  v["CommunityId"].(int64),
+			CommunityName:                v["CommunityName"].(string),
+			CommunityUrl:             v["CommunityUrl"].(string),
+			CommunityDescription:         v["ProjectDescription"].(string),
+			CommunityNotes:         v["CommunityNotes"].(string),
+			CommunityTradeAssocId:         v["CommunityTradeAssocId"].(string),
+			CommunityIsExternal:         v["CommunityIsExternal"].(bool),
+			RequesterName:              v["RequesterName"].(string),
+			RequesterGivenName:         v["RequesterGivenName"].(string),
+			RequesterSurName:           v["RequesterSurName"].(string),
+			RequesterUserPrincipalName: v["RequesterUserPrincipalName"].(string),
+			ApproverUserPrincipalName:  v["ApproverUserPrincipalName"].(string),
+			ApprovalDescription:        v["ApprovalDescription"].(string),
+		}
+		CommunityApprovals = append(CommunityApprovals, data)
+	}
+
+	return
+}
+
+func CommunityApprovalUpdateGUID(id int64, ApprovalSystemGUID string) {
+	db := ConnectDb()
+	defer db.Close()
+
+	param := map[string]interface{}{
+		"Id":                 id,
+		"ApprovalSystemGUID": ApprovalSystemGUID,
+	}
+	db.ExecuteStoredProcedure("PR_CommunityApproval_Update_ApprovalSystemGUID", param)
 }
