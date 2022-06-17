@@ -12,7 +12,7 @@
                     <div class="sm:col-span-3">
                         <div 
                             x-data="dropdown({
-                                    data : [{Id : 1, Name : 'FIRST'}, {Id : 2, Name : 'SECOND'}, {Id : 3, Name : 'THIRD'}],
+                                    ajax : getCommunity,
                                     id : 'Id',
                                     text : 'Name',
                                     label : 'Community*'
@@ -153,6 +153,14 @@
                     Alpine.store('master').postData("/api/activity", data, "Your activity has been added.", "Go to your activity list", "/activities")                
                 }
             }
+        }
+
+        async function getCommunity(){
+            const res = await fetch('/community')
+
+            const data = await res.json()
+            console.log(data)
+            return data
         }
 
         async function getTypes(){
