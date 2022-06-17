@@ -83,24 +83,62 @@ func GetAllResults(w http.ResponseWriter, r *http.Request) {
 	w.Write(jsonResp)
 }
 
-// func ConnectDb() *sql.DB {
-// 	cp := sql.ConnectionParam{
-// 		ConnectionString: os.Getenv("GHMGMTDB_CONNECTION_STRING"),
-// 	}
+func GetResultsByName(w http.ResponseWriter, r *http.Request) {
+	// Connect to database
+	dbConnectionParam := sql.ConnectionParam{
+		ConnectionString: os.Getenv("GHMGMTDB_CONNECTION_STRING"),
+	}
 
-// 	db, _ := sql.Init(cp)
+	db, err := sql.Init(dbConnectionParam)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer db.Close()
 
-// 	return db
-// }
+	// Get Searh List from SP
+	searchResults, err := db.ExecuteStoredProcedureWithResult("PR_SearchByName_communities_projects_users", nil)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 
-// func AllResults() interface{} {
-//     db := ConnectDb()
-//     defer db.Close()
+	w.WriteHeader(http.StatusOK)
+	w.Header().Set("Content-Type", "application/json")
+	jsonResp, err := json.Marshal(searchResults)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.Write(jsonResp)
+}
 
-//     result, err := db.ExecuteStoredProcedureWithResult("PR_SearchAll_communities_projects_users", nil)
-//     if err != nil {
-//         return err
-//     }
+func GetResultsByDescription(w http.ResponseWriter, r *http.Request) {
+	// Connect to database
+	dbConnectionParam := sql.ConnectionParam{
+		ConnectionString: os.Getenv("GHMGMTDB_CONNECTION_STRING"),
+	}
 
-//     return result
-// }
+	db, err := sql.Init(dbConnectionParam)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer db.Close()
+
+	// Get Searh List from SP
+	searchResults, err := db.ExecuteStoredProcedureWithResult("PR_SearchByDescription_communities_projects_users", nil)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Header().Set("Content-Type", "application/json")
+	jsonResp, err := json.Marshal(searchResults)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.Write(jsonResp)
+}

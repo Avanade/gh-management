@@ -42,6 +42,8 @@ func main() {
 	mux.Handle("/search/{searchText}", loadAzGHAuthPage(rtSearch.GetSearchResults))
 	mux.Handle("/search", loadAzGHAuthPage(rtSearch.SearchHandler))
 	mux.Handle("/search/all/", loadAzGHAuthPage(rtSearch.GetAllResults))
+	mux.Handle("/search/name/", loadAzGHAuthPage(rtSearch.GetResultsByName))
+	mux.Handle("/search/description/", loadAzGHAuthPage(rtSearch.GetResultsByDescription))
 	mux.HandleFunc("/login/azure", rtAzure.LoginHandler)
 	mux.HandleFunc("/login/azure/callback", rtAzure.CallbackHandler)
 	mux.HandleFunc("/logout/azure", rtAzure.LogoutHandler)
