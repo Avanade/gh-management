@@ -211,9 +211,6 @@ func ProjectsApprovalUpdateGUID(id int64, ApprovalSystemGUID string) {
 	db.ExecuteStoredProcedure("PR_ProjectsApproval_Update_ApprovalSystemGUID", param)
 }
 
-<<<<<<< HEAD
-func CommunitiesActivities_Insert(body models.Activity) (int, error) {
-=======
 func GetProjectByName(projectName string) []map[string]interface{} {
 	db := ConnectDb()
 	defer db.Close()
@@ -255,8 +252,7 @@ func PRActivities_Select() interface{} {
 	return result
 }
 
-func PRActivities_Insert(name, url, createdBy string, communityId, activityId int) (int, error) {
->>>>>>> c16fda31a6f7a1be7544e280ed45ebaec986b481
+func CommunitiesActivities_Insert(body models.Activity) (int, error) {
 	db := ConnectDb()
 	defer db.Close()
 
