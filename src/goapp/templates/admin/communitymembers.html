@@ -77,7 +77,7 @@
       members: [],
       selectedCommunity: -1,
       getCommunities() {
-        fetch('/api/community')
+        fetch('/api/community/all')
           .then(r => {
             r.json().then(body => {
               this.communities = body
@@ -93,7 +93,7 @@
         }
         else {
           this.membersLoaded = false
-          fetch('/api/community/' + community.Id)
+          fetch('/api/community/' + community.Id + '/members')
             .then(r => {
               r.json().then(body => {
                 if (!body) {
