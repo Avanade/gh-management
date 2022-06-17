@@ -79,6 +79,7 @@ func ConnectDb() *sql.DB {
 	return db
 }
 
+// PROJECTS
 func PRProjectsInsert(body models.TypNewProjectReqBody, user string) (id int64) {
 
 	cp := sql.ConnectionParam{
@@ -167,6 +168,38 @@ func PopulateProjectsApproval(id int64) (ProjectApprovals []models.TypProjectApp
 	return
 }
 
+func GetFailedProjectApprovalRequests() (ProjectApprovals []models.TypProjectApprovals) {
+	db := ConnectDb()
+	defer db.Close()
+
+	result, _ := db.ExecuteStoredProcedureWithResult("PR_ProjectApprovals_Select_Failed", nil)
+
+	for _, v := range result {
+		data := models.TypProjectApprovals{
+			Id:                         v["Id"].(int64),
+			ProjectId:                  v["ProjectId"].(int64),
+			ProjectName:                v["ProjectName"].(string),
+			ProjectCoowner:             v["ProjectCoowner"].(string),
+			ProjectDescription:         v["ProjectDescription"].(string),
+			RequesterGivenName:         v["RequesterGivenName"].(string),
+			RequesterSurName:           v["RequesterSurName"].(string),
+			RequesterName:              v["RequesterName"].(string),
+			RequesterUserPrincipalName: v["RequesterUserPrincipalName"].(string),
+			CoownerGivenName:           v["CoownerGivenName"].(string),
+			CoownerSurName:             v["CoownerSurName"].(string),
+			CoownerName:                v["CoownerName"].(string),
+			CoownerUserPrincipalName:   v["CoownerUserPrincipalName"].(string),
+			ApprovalTypeId:             v["ApprovalTypeId"].(int64),
+			ApprovalType:               v["ApprovalType"].(string),
+			ApproverUserPrincipalName:  v["ApproverUserPrincipalName"].(string),
+			ApprovalDescription:        v["ApprovalDescription"].(string),
+		}
+		ProjectApprovals = append(ProjectApprovals, data)
+	}
+
+	return
+}
+
 func ProjectsApprovalUpdateGUID(id int64, ApprovalSystemGUID string) {
 	db := ConnectDb()
 	defer db.Close()
@@ -178,7 +211,52 @@ func ProjectsApprovalUpdateGUID(id int64, ApprovalSystemGUID string) {
 	db.ExecuteStoredProcedure("PR_ProjectsApproval_Update_ApprovalSystemGUID", param)
 }
 
+<<<<<<< HEAD
 func CommunitiesActivities_Insert(body models.Activity) (int, error) {
+=======
+func GetProjectByName(projectName string) []map[string]interface{} {
+	db := ConnectDb()
+	defer db.Close()
+
+	param := map[string]interface{}{
+		"Name": projectName,
+	}
+
+	result, _ := db.ExecuteStoredProcedureWithResult("PR_Projects_Select_ByName", param)
+
+	return result
+}
+
+func UpdateIsArchiveIsPrivate(projectName string, isArchived bool, isPrivate bool, username string) error {
+	db := ConnectDb()
+	defer db.Close()
+
+	param := map[string]interface{}{
+		"Name":       projectName,
+		"IsArchived": isArchived,
+		"IsPrivate":  isPrivate,
+		"ModifiedBy": username,
+	}
+
+	_, err := db.ExecuteStoredProcedure("PR_Projects_Update_VisibilityByName", param)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// ACTIVITIES
+func PRActivities_Select() interface{} {
+	db := ConnectDb()
+	defer db.Close()
+
+	result, _ := db.ExecuteStoredProcedureWithResult("PR_Activities_Select", nil)
+	return result
+}
+
+func PRActivities_Insert(name, url, createdBy string, communityId, activityId int) (int, error) {
+>>>>>>> c16fda31a6f7a1be7544e280ed45ebaec986b481
 	db := ConnectDb()
 	defer db.Close()
 
@@ -308,6 +386,19 @@ func Users_Get_GHUser(UserPrincipalName string) (GHUser string) {
 
 	GHUser = result[0]["GitHubUser"].(string)
 	return GHUser
+}
+
+func IsUserAdmin(userPrincipalName string) bool {
+	db := ConnectDb()
+	defer db.Close()
+
+	param := map[string]interface{}{
+		"UserPrincipalName": userPrincipalName,
+	}
+
+	result, _ := db.ExecuteStoredProcedureWithResult("PR_Admins_IsAdmin", param)
+
+	return result[0]["Result"] == "1"
 }
 
 // COMMUNITIES
