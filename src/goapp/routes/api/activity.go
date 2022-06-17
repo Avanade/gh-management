@@ -32,24 +32,10 @@ type CommunityActivitiesContributionAreasDto struct {
 }
 
 func CreateActivity(w http.ResponseWriter, r *http.Request) {
-	// COMMUNITY :  SECOND
-	// DATE :  2022-06-15
-	// ACTIVITY :  FIRST ACTIVITY
-	// TYPE First Activity
-	// URL :  sample.com
-	// PRIMARY CONTRIBUTION AREA :  FirstContributionArea
-	// ADDITIONAL CONTRIBUTION AREAS
-	// 	FirstContributionArea
-	// 	SecondContributionArea
-
-	// MOVE DATA FROM FORM TO MODEL
 	sessionaz, _ := session.Store.Get(r, "auth-session")
 	iprofile := sessionaz.Values["profile"]
 	profile := iprofile.(map[string]interface{})
 	username := fmt.Sprint(profile["preferred_username"])
-
-	// communityId, _ := strconv.Atoi(r.FormValue("community_id"))
-	// typeId, _ := strconv.Atoi(r.FormValue("type_id"))
 
 	var body ActivityDto
 	err := json.NewDecoder(r.Body).Decode(&body)
@@ -57,8 +43,6 @@ func CreateActivity(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-
-	body.CreatedBy = fmt.Sprint(profile["preferred_username"])
 
 	// COMMUNITY ACTIVITY
 	communityActivityId, err := db.CommunitiesActivities_Insert(models.Activity{
