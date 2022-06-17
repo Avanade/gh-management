@@ -168,6 +168,38 @@ func PopulateProjectsApproval(id int64) (ProjectApprovals []models.TypProjectApp
 	return
 }
 
+func GetFailedProjectApprovalRequests() (ProjectApprovals []models.TypProjectApprovals) {
+	db := ConnectDb()
+	defer db.Close()
+
+	result, _ := db.ExecuteStoredProcedureWithResult("PR_ProjectApprovals_Select_Failed", nil)
+
+	for _, v := range result {
+		data := models.TypProjectApprovals{
+			Id:                         v["Id"].(int64),
+			ProjectId:                  v["ProjectId"].(int64),
+			ProjectName:                v["ProjectName"].(string),
+			ProjectCoowner:             v["ProjectCoowner"].(string),
+			ProjectDescription:         v["ProjectDescription"].(string),
+			RequesterGivenName:         v["RequesterGivenName"].(string),
+			RequesterSurName:           v["RequesterSurName"].(string),
+			RequesterName:              v["RequesterName"].(string),
+			RequesterUserPrincipalName: v["RequesterUserPrincipalName"].(string),
+			CoownerGivenName:           v["CoownerGivenName"].(string),
+			CoownerSurName:             v["CoownerSurName"].(string),
+			CoownerName:                v["CoownerName"].(string),
+			CoownerUserPrincipalName:   v["CoownerUserPrincipalName"].(string),
+			ApprovalTypeId:             v["ApprovalTypeId"].(int64),
+			ApprovalType:               v["ApprovalType"].(string),
+			ApproverUserPrincipalName:  v["ApproverUserPrincipalName"].(string),
+			ApprovalDescription:        v["ApprovalDescription"].(string),
+		}
+		ProjectApprovals = append(ProjectApprovals, data)
+	}
+
+	return
+}
+
 func ProjectsApprovalUpdateGUID(id int64, ApprovalSystemGUID string) {
 	db := ConnectDb()
 	defer db.Close()
@@ -400,7 +432,7 @@ func Communities_Related(CommunityId int64) (data []models.TypRelatedCommunities
 	return
 }
 
-func Community_Sponsors(CommunityId int64) (data []models.TypCommunitySponsors, err error) {
+func Community_Sponsors(CommunityId int64) (data []models.TypCommunitySponsorsList, err error) {
 	cp := sql.ConnectionParam{
 		ConnectionString: os.Getenv("GHMGMTDB_CONNECTION_STRING"),
 	}
@@ -420,7 +452,7 @@ func Community_Sponsors(CommunityId int64) (data []models.TypCommunitySponsors, 
 	}
 
 	for _, v := range result {
-		d := models.TypCommunitySponsors{
+		d := models.TypCommunitySponsorsList{
 			Name:      v["Name"].(string),
 			GivenName: v["GivenName"].(string),
 			SurName:   v["SurName"].(string),

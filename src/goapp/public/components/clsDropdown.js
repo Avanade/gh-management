@@ -1,5 +1,5 @@
 class clsDropdown {
-    template(id, model, data, text, subText, value=text){
+    template(id, model, data, text, subText, value=text, onClickAction=null){
         return `
         <!-- ****** CO-OWNER CB ****** -->
         <div x-data="{
@@ -21,7 +21,7 @@ class clsDropdown {
                 <ul class="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm" id="${id}_options" x-show="${id}_show" role="listbox">
 
                     <template x-for="(i,n) in filteredData">
-                        <li class="relative cursor-default select-none py-2 pl-3 pr-9 text-gray-900" :key="n" role="option" @click="${model}=i.${value}; ${id}_show = !${id}_show" tabindex="-1">
+                    <li class="relative cursor-default select-none py-2 pl-3 pr-9 text-gray-900" :key="n" role="option" @click="${model}=i.${value}; ${id}_show = !${id}_show; ${onClickAction}" tabindex="-1">
                             <div class="flex" >
                                 <span class="truncate" x-text="i.${text}"></span>
                                 <span class="ml-2 truncate text-gray-500" x-show="!!i.${subText}" x-text="'&nbsp@'+i.${subText}"></span>

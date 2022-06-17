@@ -5,6 +5,7 @@ import (
 	"log"
 	session "main/pkg/session"
 	rtApi "main/routes/api"
+	rtApis "main/routes/api"
 	rtAzure "main/routes/login/azure"
 	rtGithub "main/routes/login/github"
 	rtPages "main/routes/pages"
@@ -12,6 +13,8 @@ import (
 	rtCommunity "main/routes/pages/community"
 	rtProjects "main/routes/pages/projects"
 	"net/http"
+	"strconv"
+	"time"
 
 	"github.com/gorilla/mux"
 
@@ -36,6 +39,19 @@ func main() {
 	mux.Handle("/", loadAzAuthPage(rtPages.HomeHandler))
 	mux.Handle("/error/ghlogin", loadAzAuthPage(rtPages.GHLoginRequire))
 	mux.Handle("/projects/new", loadAzGHAuthPage(rtProjects.ProjectsNewHandler))
+	mux.Handle("/community/new", loadAzGHAuthPage(rtCommunity.CommunityHandler))
+	mux.Handle("/community/{id}", loadAzGHAuthPage(rtCommunity.CommunityHandler))
+	mux.Handle("/community/getcommunity/{id}", loadAzGHAuthPage(rtCommunity.GetUserCommunity))
+	mux.Handle("/communities/list", loadAzGHAuthPage(rtCommunity.CommunitylistHandler))
+	mux.Handle("/community", loadAzGHAuthPage(rtCommunity.GetUserCommunitylist))
+	//mux.HandleFunc("/api/community", rtApis.CommunityAPIHandler)
+	mux.Handle("/api/community", loadAzGHAuthPage(rtApis.CommunityAPIHandler))
+	mux.HandleFunc("/api/communitySponsors", rtApis.CommunitySponsorsAPIHandler)
+	mux.HandleFunc("/api/CommunitySponsorsPerCommunityId/{id}", rtApis.CommunitySponsorsPerCommunityId)
+	//mux.Handle("/projects/my", loadAzGHAuthPage(rtProjects.MyProjects))
+	//mux.Handle("/projects", loadAzGHAuthPage(rtProjects.GetUserProjects))
+	//mux.Handle("/projects/{id}", loadAzGHAuthPage(rtProjects.GetRequestStatusByProject))
+	mux.Handle("/api/allusers", loadAzAuthPage(rtApis.GetAllUserFromActiveDirectory))
 	mux.Handle("/projects", loadAzGHAuthPage(rtProjects.Projects))
 	mux.Handle("/community/{id}/onboarding", loadAzGHAuthPage(rtCommunity.CommunityOnBoarding))
 	mux.HandleFunc("/login/azure", rtAzure.LoginHandler)
@@ -72,7 +88,7 @@ func main() {
 	mux.HandleFunc("/approvals/community/callback", rtProjects.UpdateApprovalStatusCommunity).Methods("POST")
 	mux.NotFoundHandler = http.HandlerFunc(rtPages.NotFoundHandler)
 
-	//loadAzAuthPage()
+	go checkFailedApprovalRequests()
 
 	port := ev.GetEnvVar("PORT", "8080")
 	fmt.Printf("Now listening on port %v\n", port)
@@ -94,4 +110,15 @@ func loadAzGHAuthPage(f func(w http.ResponseWriter, r *http.Request)) *negroni.N
 		negroni.HandlerFunc(session.IsGHAuthenticated),
 		negroni.Wrap(http.HandlerFunc(f)),
 	)
+}
+
+func checkFailedApprovalRequests() {
+	// TIMER SERVICE
+	freq := ev.GetEnvVar("APPROVALREQUESTS_RETRY_FREQ", "15")
+	freqInt, _ := strconv.ParseInt(freq, 0, 64)
+	if freq > "0" {
+		for range time.NewTicker(time.Duration(freqInt) * time.Minute).C {
+			rtProjects.ReprocessRequestApproval()
+		}
+	}
 }
