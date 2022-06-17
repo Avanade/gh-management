@@ -1,0 +1,66 @@
+{{ define "content" }}
+
+
+<div id="pageTitle">Community List</div>
+
+<div x-data="myCommunitiesData()" x-init="getCommunity()">
+ 
+    <div x-html="tbl.template">
+ 
+    </div>
+    
+
+</div>
+
+<script src="/public/components/clsDataTable.js"></script>
+
+
+<script>
+    function myCommunitiesData() {
+        return {
+            showSpinner: true,
+            Communitylist: [],
+            tbl: {
+                template: "",
+                headers: 
+                [
+                    { Name: "Name ", value: "Name" },
+                    { Name: "Description ", value: "Description" },
+                    { Name: "URL ", value: "Url" },
+                    { Name: "Notes ", value: "Notes" },
+                    { Name: "TradeAssocId ", value: "TradeAssocId" },
+                ]
+                ,
+                data:[]
+              
+            },
+
+            getCommunity() {
+
+                fetch('/community')
+                    .then(r => {
+                        r.json().then(body => {
+                            this.Communitylist = body
+                            this.tbl.data = body    
+                            this.showSpinner = false
+                        });
+                    })
+                    .catch(e => {
+                        console.log(e)
+                    })
+                 var dt = new clsDataTable()
+                this.tbl.template = dt.template(
+                     'tbl1',
+                     'Community List',
+                     'List of all Community',
+                     'tbl.headers',
+                     'tbl.data',
+                     '/users/new',
+                     '/community/{Id}',
+                     'Id'
+                 )
+            }
+        }
+    }
+</script>
+{{ end }}

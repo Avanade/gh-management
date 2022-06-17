@@ -2045,8 +2045,13 @@ select {
   max-width: 80rem;
 }
 
+<<<<<<< HEAD
 .max-w-2xl {
   max-width: 42rem;
+=======
+.max-w-full {
+  max-width: 100%;
+>>>>>>> 74f9c0e40182f7b8839605168389dca2d5651444
 }
 
 .max-w-xl {

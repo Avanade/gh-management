@@ -453,7 +453,7 @@ func Communities_Related(CommunityId int64) (data []models.TypRelatedCommunities
 	return
 }
 
-func Community_Sponsors(CommunityId int64) (data []models.TypCommunitySponsors, err error) {
+func Community_Sponsors(CommunityId int64) (data []models.TypCommunitySponsorsList, err error) {
 	cp := sql.ConnectionParam{
 		ConnectionString: os.Getenv("GHMGMTDB_CONNECTION_STRING"),
 	}
@@ -473,7 +473,7 @@ func Community_Sponsors(CommunityId int64) (data []models.TypCommunitySponsors, 
 	}
 
 	for _, v := range result {
-		d := models.TypCommunitySponsors{
+		d := models.TypCommunitySponsorsList{
 			Name:      v["Name"].(string),
 			GivenName: v["GivenName"].(string),
 			SurName:   v["SurName"].(string),
