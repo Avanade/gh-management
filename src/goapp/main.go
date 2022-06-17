@@ -8,6 +8,7 @@ import (
 	rtAzure "main/routes/login/azure"
 	rtGithub "main/routes/login/github"
 	rtPages "main/routes/pages"
+	rtActivities "main/routes/pages/activities"
 	rtCommunity "main/routes/pages/community"
 	rtProjects "main/routes/pages/projects"
 	"net/http"
@@ -34,6 +35,7 @@ func main() {
 	mux.PathPrefix("/public/").Handler(http.StripPrefix("/public/", http.FileServer(http.Dir("./public/"))))
 	mux.Handle("/", loadAzAuthPage(rtPages.HomeHandler))
 	mux.Handle("/error/ghlogin", loadAzAuthPage(rtPages.GHLoginRequire))
+	mux.Handle("/activities/new", loadAzGHAuthPage(rtActivities.ActivitiesNewHandler))
 	mux.Handle("/projects/new", loadAzGHAuthPage(rtProjects.ProjectsNewHandler))
 	mux.Handle("/projects", loadAzGHAuthPage(rtProjects.Projects))
 	mux.Handle("/community/{id}/onboarding", loadAzGHAuthPage(rtCommunity.CommunityOnBoarding))
@@ -45,11 +47,8 @@ func main() {
 	mux.HandleFunc("/login/github/force", rtGithub.GithubForceSaveHandler)
 	mux.HandleFunc("/logout/github", rtGithub.GitHubLogoutHandler)
 
-	// muxActivites := mux.PathPrefix("/activities").Subrouter()
-	// // muxActivites.HandleFunc("/new", rtActivities.PostNewHandler).Methods("POST")
-	// // muxActivites.HandleFunc("/new", rtActivities.GetNewHandler).Methods("GET")
-
 	muxApi := mux.PathPrefix("/api").Subrouter()
+	muxApi.Handle("/activity", loadAzGHAuthPage(rtApi.CreateActivity)).Methods("POST")
 	muxApi.Handle("/activity/type", loadAzGHAuthPage(rtApi.GetActivityTypes)).Methods("GET")
 	muxApi.Handle("/activity/type", loadAzGHAuthPage(rtApi.CreateActivityType)).Methods("POST")
 	muxApi.Handle("/community/onboarding/{id}", loadAzGHAuthPage(rtApi.GetCommunityOnBoardingInfo)).Methods("GET", "POST", "DELETE")

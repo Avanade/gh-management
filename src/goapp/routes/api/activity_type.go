@@ -13,7 +13,7 @@ type ActivityTypeDto struct {
 }
 
 func GetActivityTypes(w http.ResponseWriter, r *http.Request) {
-	result := db.PRActivityTypes_Select()
+	result := db.ActivityTypes_Select()
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(result)
@@ -22,7 +22,7 @@ func GetActivityTypes(w http.ResponseWriter, r *http.Request) {
 func CreateActivityType(w http.ResponseWriter, r *http.Request) {
 	var activityType ActivityTypeDto
 	json.NewDecoder(r.Body).Decode(&activityType)
-	id, err := db.PRActivityTypes_Insert(activityType.Name)
+	id, err := db.ActivityTypes_Insert(activityType.Name)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 	}

@@ -17,7 +17,7 @@ type ContributionAreaDto struct {
 }
 
 func GetContributionAreas(w http.ResponseWriter, r *http.Request) {
-	result := db.PRContributionAreas_Select()
+	result := db.ContributionAreas_Select()
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(result)
@@ -27,7 +27,7 @@ func CreateContributionAreas(w http.ResponseWriter, r *http.Request) {
 	var contributionArea ContributionAreaDto
 	json.NewDecoder(r.Body).Decode(&contributionArea)
 
-	id, err := db.PRContributionAreas_Insert(contributionArea.Name, contributionArea.CreatedBy)
+	id, err := db.ContributionAreas_Insert(contributionArea.Name, contributionArea.CreatedBy)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 	}
