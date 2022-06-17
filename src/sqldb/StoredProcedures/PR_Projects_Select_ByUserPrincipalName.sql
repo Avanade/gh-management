@@ -16,7 +16,8 @@ SELECT [Id],
        [ConfirmAvaIP],
        [ConfirmEnabledSecurity],
        [ApprovalStatusId],
-       [IsGHRepoPublic],
+       [IsPrivate],
+       [IsArchived],
        [Created],
        [CreatedBy],
        [Modified],
@@ -25,4 +26,5 @@ SELECT [Id],
        [dbo].[Projects]
   WHERE  
        [CreatedBy] = @UserPrincipalName
+  ORDER BY [Created] DESC
 END

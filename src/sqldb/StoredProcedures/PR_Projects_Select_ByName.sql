@@ -1,5 +1,7 @@
-﻿Create PROCEDURE [dbo].[PR_Projects_Select]
-
+﻿Create PROCEDURE [dbo].[PR_Projects_Select_ByName]
+(
+	@Name varchar(50)
+)
 AS
 BEGIN
 	-- SET NOCOUNT ON added to prevent extra result sets from
@@ -14,13 +16,14 @@ SELECT [Id],
        [ConfirmAvaIP],
        [ConfirmEnabledSecurity],
        [ApprovalStatusId],
-       [IsPrivate],
        [IsArchived],
+       [IsPrivate],
        [Created],
        [CreatedBy],
        [Modified],
        [ModifiedBy]
   FROM 
        [dbo].[Projects]
-
+  WHERE
+      [Name] = @Name
 END

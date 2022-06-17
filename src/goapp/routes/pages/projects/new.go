@@ -58,21 +58,31 @@ func ProjectsNewHandler(w http.ResponseWriter, r *http.Request) {
 				httpResponseError(w, http.StatusInternalServerError, "There is a problem creating the GitHub repository.")
 			}
 			id := ghmgmtdb.PRProjectsInsert(body, username.(string))
-			RequestApproval(id)
+			go RequestApproval(id)
+			w.WriteHeader(http.StatusOK)
 		}
-
 	}
 }
 func RequestApproval(id int64) {
 	projectApprovals := ghmgmtdb.PopulateProjectsApproval(id)
 
 	for _, v := range projectApprovals {
-		ApprovalSystemRequest(v)
+		err := ApprovalSystemRequest(v)
+		handleError(err)
 	}
 
 }
 
-func ApprovalSystemRequest(data models.TypProjectApprovals) {
+func ReprocessRequestApproval() {
+	projectApprovals := ghmgmtdb.GetFailedProjectApprovalRequests()
+
+	for _, v := range projectApprovals {
+		go ApprovalSystemRequest(v)
+	}
+
+}
+
+func ApprovalSystemRequest(data models.TypProjectApprovals) error {
 
 	url := os.Getenv("APPROVAL_SYSTEM_APP_URL")
 	if url != "" {
@@ -119,20 +129,25 @@ func ApprovalSystemRequest(data models.TypProjectApprovals) {
 
 		go getHttpPostResponseStatus(url, postParams, ch)
 		r := <-ch
+		if r != nil {
+			var res models.TypApprovalSystemPostResponse
+			err := json.NewDecoder(r.Body).Decode(&res)
+			if err != nil {
+				return err
+			}
 
-		var res models.TypApprovalSystemPostResponse
-		err := json.NewDecoder(r.Body).Decode(&res)
-		handleError(err)
-
-		ghmgmtdb.ProjectsApprovalUpdateGUID(data.Id, res.ItemId)
+			ghmgmtdb.ProjectsApprovalUpdateGUID(data.Id, res.ItemId)
+		}
 	}
-
+	return nil
 }
 
 func getHttpPostResponseStatus(url string, data interface{}, ch chan *http.Response) {
 	jsonReq, err := json.Marshal(data)
 	res, err := http.Post(url, "application/json; charset=utf-8", bytes.NewBuffer(jsonReq))
-	handleError(err)
+	if err != nil {
+		ch <- nil
+	}
 	ch <- res
 }
 

@@ -51,6 +51,7 @@ type TypCommunity struct {
 	ModifiedBy   string        `json:"modifiedBy"`
 	Sponsors     []TypSponsors `json:"sponsors"`
 }
+
 type TypCommunitySponsors struct {
 	Id                string `json:"id"`
 	CommunityId       string `json:"communityId"`
@@ -103,4 +104,24 @@ type TypUpdateApprovalStatusReqBody struct {
 type TypSponsors struct {
 	DisplayName string `json:"displayName"`
 	Mail        string `json:"mail"`
+}
+type TypRelatedCommunities struct {
+	Name       string `json:"Name"`
+	Url        string `json:"Url"`
+	IsExternal bool   `json:"IsExternal"`
+}
+
+type TypCommunitySponsorsList struct {
+	Name      string `json:"Name"`
+	GivenName string `json:"GivenName"`
+	SurName   string `json:"SurName"`
+	Email     string `json:"Email"`
+}
+
+type TypCommunityOnBoarding struct {
+	Id          int64                      `json:"Id"`
+	Name        string                     `json:"Name"`
+	Url         string                     `json:"Url"`
+	Sponsors    []TypCommunitySponsorsList `json:"Sponsors"`
+	Communities []TypRelatedCommunities    `json:"Communities"`
 }
