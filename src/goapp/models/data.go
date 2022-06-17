@@ -38,18 +38,18 @@ type TypNewProjectReqBody struct {
 }
 
 type TypCommunity struct {
-	Id           int      `json:"id"`
-	Name         string   `json:"name"`
-	Url          string   `json:"url"`
-	Description  string   `json:"description"`
-	Notes        string   `json:"notes"`
-	TradeAssocId string   `json:"tradeAssocId"`
-	IsExternal   bool     `json:"isExternal"`
-	Created      string   `json:"created"`
-	CreatedBy    string   `json:"createdBy"`
-	Modified     string   `json:"modified"`
-	ModifiedBy   string   `json:"modifiedBy"`
-	Sponsors     []string `json:"sponsors"`
+	Id           int           `json:"id"`
+	Name         string        `json:"name"`
+	Url          string        `json:"url"`
+	Description  string        `json:"description"`
+	Notes        string        `json:"notes"`
+	TradeAssocId string        `json:"tradeAssocId"`
+	IsExternal   bool          `json:"isExternal"`
+	Created      string        `json:"created"`
+	CreatedBy    string        `json:"createdBy"`
+	Modified     string        `json:"modified"`
+	ModifiedBy   string        `json:"modifiedBy"`
+	Sponsors     []TypSponsors `json:"sponsors"`
 }
 type TypCommunitySponsors struct {
 	Id                string `json:"id"`
@@ -98,4 +98,9 @@ type TypUpdateApprovalStatusReqBody struct {
 	IsApproved   bool   `json:"isApproved"`
 	Remarks      string `json:"Remarks"`
 	ResponseDate string `json:"responseDate"`
+}
+
+type TypSponsors struct {
+	DisplayName string `json:"displayName"`
+	Mail        string `json:"mail"`
 }

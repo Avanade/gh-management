@@ -67,9 +67,9 @@ func CommunityAPIHandler(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			fmt.Println(err)
 		}
-		// 6/16
+
 		for _, s := range body.Sponsors {
-			errIU := ghmgmt.InsertUser(s, "", "", "", "")
+			errIU := ghmgmt.InsertUser(s.Mail, s.DisplayName, "", "", "")
 			if errIU != nil {
 				http.Error(w, errIU.Error(), http.StatusInternalServerError)
 				return
@@ -77,7 +77,7 @@ func CommunityAPIHandler(w http.ResponseWriter, r *http.Request) {
 			sponsorsparam := map[string]interface{}{
 
 				"CommunityId":        id,
-				"UserPrincipalName ": s,
+				"UserPrincipalName ": s.DisplayName,
 				"CreatedBy":          username,
 			}
 			_, err := db.ExecuteStoredProcedure("dbo.PR_CommunitySponsors_Insert", sponsorsparam)

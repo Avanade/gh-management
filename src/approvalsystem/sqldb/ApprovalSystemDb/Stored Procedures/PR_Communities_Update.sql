@@ -25,6 +25,7 @@ UPDATE [dbo].[Communities]
       ,[Modified] = GETDATE()
       ,[ModifiedBy] = @ModifiedBy
  WHERE  [Name] = @Name
-
+ 
+ delete from CommunitySponsors where CommunityId = @Id
 
 end

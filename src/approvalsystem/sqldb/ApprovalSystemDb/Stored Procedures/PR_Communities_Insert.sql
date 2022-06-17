@@ -14,26 +14,29 @@ create PROCEDURE [dbo].[PR_Communities_Insert]
 			@ModifiedBy  varchar(50)
 ) AS
 BEGIN
-INSERT INTO [dbo].[Communities]
-           ([Name]
-           ,[Url]
-           ,[Description]
-           ,[Notes]
-           ,[TradeAssocId]
-           ,[Created]
-           ,[CreatedBy]
-           ,[Modified]
-           ,[ModifiedBy])
-     VALUES
-           (@Name
-           ,@Url
-           ,@Description
-           ,@Notes
-           ,@TradeAssocId
-           ,GETDATE()
-           ,@CreatedBy
-           ,GETDATE()
-           ,@ModifiedBy	)
-
+	DECLARE @Id AS INT
+            
+            INSERT INTO [dbo].[Communities]
+                  ([Name]
+                  ,[Url]
+                  ,[Description]
+                  ,[Notes]
+                  ,[TradeAssocId]
+                  ,[Created]
+                  ,[CreatedBy]
+                  ,[Modified]
+                  ,[ModifiedBy])
+            VALUES
+                  (@Name
+                  ,@Url
+                  ,@Description
+                  ,@Notes
+                  ,@TradeAssocId
+                  ,GETDATE()
+                  ,@CreatedBy
+                  ,GETDATE()
+                  ,@ModifiedBy	)
+            SET @Id = SCOPE_IDENTITY()
+ 	SELECT @Id Id
 
 end

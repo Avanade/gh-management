@@ -89,7 +89,7 @@
                      
                         <template x-for="(sponsor, i) in form.sponsors">
                             <div style="display: flex; " class="border" >
-                                <div style="flex-grow: 1;" x-text="sponsor" > </div>
+                                <div style="flex-grow: 1;" x-text="sponsor.displayName" > </div>
                                 <div> <button   type="button" class="btn btn-danger btn-small   "
                                     @click="removeField(sponsor)">&times;</button></div>
                               </div>
@@ -145,13 +145,15 @@
                 description: '',
                 notes: '',
                 isExternal: false,
-                sponsors: []
+                sponsors:[ ],
             },
             sponsors:{
                 template:'',
                 selected:'',
                 data:[]
             },
+            sponsor:{ displayName: '',
+                mail: '',},
             async getUsersList(){
                 var modal = Alpine.store('master').modal
                 modal.update('loading', 'Loading', 'Please wait', '','')
@@ -217,18 +219,22 @@
                 fetch('/api/CommunitySponsorsPerCommunityId/'  +'{{.Id}}')
                     .then(r => {
                         r.json().then(body => {
-                             
+                            console.log(' CommunitySponsorsPerCommunityId')
                             console.log(body)
                             console.log( body[0])
                 
                             
                            for (let index = 0; index < body.length; index++) {
                    
+                                console.log( 'body[index]')
                                 console.log( body[index])
-                                console.log( body[index])
-                              this.form.sponsors.push  (body[index]['UserPrincipalName'])
+                                console.log( body[index]['UserPrincipalName'])
+                              this.form.sponsors.push({displayName:body[index]['UserPrincipalName'],mail:body[index]['UserPrincipalName']})
+                             
                            }
                            // this.tbl.data = body    
+                           console.log( ' this.form.sponsors')
+                                console.log( this.form.sponsors)
                             this.showSpinner = false
                         });
                     })
@@ -294,13 +300,11 @@
                 //      })
             },
             datapush() {
-                console.log('sponsors.selected')
-                console.log(this.sponsors.selected)
-                console.log('sponsors.template')
-                console.log(this.sponsors.data)
-                console.log('.sponsors.select')
-                console.log(this.sponsors.data.filter(i => i.mail == this.sponsors.selected)[0]["displayName"])
-               this.form.sponsors.push(this.sponsors.selected )
+       
+                this.form.sponsors.push(this.sponsors.data.filter(i => i.mail == this.sponsors.selected)[0])
+               console.log('this.form.sponsors')
+                console.log(this.form.sponsors)
+
                this.sponsors.selected = null
                console.log(this.sponsors.selected)
                // this.form.sponsors.push(document.getElementById("UserPrincipalName").value)
