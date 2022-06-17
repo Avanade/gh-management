@@ -1704,6 +1704,11 @@ select {
   margin-bottom: -0.5rem;
 }
 
+.-my-5 {
+  margin-top: -1.25rem;
+  margin-bottom: -1.25rem;
+}
+
 .mx-10 {
   margin-left: 2.5rem;
   margin-right: 2.5rem;
@@ -1717,11 +1722,6 @@ select {
 .my-5 {
   margin-top: 1.25rem;
   margin-bottom: 1.25rem;
-}
-
-.-my-5 {
-  margin-top: -1.25rem;
-  margin-bottom: -1.25rem;
 }
 
 .mt-1 {
@@ -1956,6 +1956,10 @@ select {
   height: calc(67vh);
 }
 
+.h-full {
+  height: 100%;
+}
+
 .h-4 {
   height: 1rem;
 }
@@ -1974,10 +1978,6 @@ select {
 
 .h-\[calc\(100\%-theme\(\"spacing\.1\"\)\)\] {
   height: calc(100% - 0.25rem);
-}
-
-.h-full {
-  height: 100%;
 }
 
 .max-h-60 {
@@ -2060,6 +2060,10 @@ select {
 
 .max-w-7xl {
   max-width: 80rem;
+}
+
+.max-w-full {
+  max-width: 100%;
 }
 
 .max-w-xl {
@@ -3448,21 +3452,6 @@ select {
   padding-right: 0.25rem;
 }
 
-.px-2\.5 {
-  padding-left: 0.625rem;
-  padding-right: 0.625rem;
-}
-
-.py-0\.5 {
-  padding-top: 0.125rem;
-  padding-bottom: 0.125rem;
-}
-
-.py-0 {
-  padding-top: 0px;
-  padding-bottom: 0px;
-}
-
 .pl-3 {
   padding-left: 0.75rem;
 }
@@ -4339,14 +4328,14 @@ select {
   background-color: rgb(249 115 22 / var(--tw-bg-opacity));
 }
 
-.hover\:bg-\[\#FF4300\]:hover {
-  --tw-bg-opacity: 1;
-  background-color: rgb(255 67 0 / var(--tw-bg-opacity));
-}
-
 .hover\:bg-\[\#fff2eb\]:hover {
   --tw-bg-opacity: 1;
   background-color: rgb(255 242 235 / var(--tw-bg-opacity));
+}
+
+.hover\:bg-\[\#FF4300\]:hover {
+  --tw-bg-opacity: 1;
+  background-color: rgb(255 67 0 / var(--tw-bg-opacity));
 }
 
 .hover\:font-bold:hover {
