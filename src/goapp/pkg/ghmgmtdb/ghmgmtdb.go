@@ -571,7 +571,36 @@ func PopulateCommunityApproval(id int64) (CommunityApprovals []models.TypCommuni
 			CommunityId:                  v["CommunityId"].(int64),
 			CommunityName:                v["CommunityName"].(string),
 			CommunityUrl:             v["CommunityUrl"].(string),
-			CommunityDescription:         v["ProjectDescription"].(string),
+			CommunityDescription:         v["CommunityDescription"].(string),
+			CommunityNotes:         v["CommunityNotes"].(string),
+			CommunityTradeAssocId:         v["CommunityTradeAssocId"].(string),
+			CommunityIsExternal:         v["CommunityIsExternal"].(bool),
+			RequesterName:              v["RequesterName"].(string),
+			RequesterGivenName:         v["RequesterGivenName"].(string),
+			RequesterSurName:           v["RequesterSurName"].(string),
+			RequesterUserPrincipalName: v["RequesterUserPrincipalName"].(string),
+			ApproverUserPrincipalName:  v["ApproverUserPrincipalName"].(string),
+			ApprovalDescription:        v["ApprovalDescription"].(string),
+		}
+		CommunityApprovals = append(CommunityApprovals, data)
+	}
+
+	return
+}
+
+func GetFailedCommunityApprovalRequests() (CommunityApprovals []models.TypCommunityApprovals) {
+	db := ConnectDb()
+	defer db.Close()
+
+	result, _ := db.ExecuteStoredProcedureWithResult("PR_CommunityApprovals_Select_Failed", nil)
+
+	for _, v := range result {
+		data := models.TypCommunityApprovals{
+			Id:                         v["Id"].(int64),
+			CommunityId:                  v["CommunityId"].(int64),
+			CommunityName:                v["CommunityName"].(string),
+			CommunityUrl:             v["CommunityUrl"].(string),
+			CommunityDescription:         v["CommunityDescription"].(string),
 			CommunityNotes:         v["CommunityNotes"].(string),
 			CommunityTradeAssocId:         v["CommunityTradeAssocId"].(string),
 			CommunityIsExternal:         v["CommunityIsExternal"].(bool),

@@ -103,7 +103,8 @@ func checkFailedApprovalRequests() {
 	freqInt, _ := strconv.ParseInt(freq, 0, 64)
 	if freq > "0" {
 		for range time.NewTicker(time.Duration(freqInt) * time.Minute).C {
-			rtProjects.ReprocessRequestApproval()
+			go rtProjects.ReprocessRequestApproval()
+			go rtCommunity.ReprocessRequestCommunityApproval()
 		}
 	}
 }

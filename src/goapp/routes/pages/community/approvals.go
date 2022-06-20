@@ -26,15 +26,27 @@ func getHttpPostResponseStatus(url string, data interface{}, ch chan *http.Respo
 	ch <- res
 }
 
-func RequestCommunityApproval(id int64) {
+func RequestCommunityApproval(id int64) error {
 	communityApprovals := ghmgmtdb.PopulateCommunityApproval(id)
 
 	for _, v := range communityApprovals {
 		err := ApprovalSystemRequestCommunity(v)
-		handleError(err)
+		if err != nil{
+			return err
+		}
+	}
+	return nil
+}
+
+func ReprocessRequestCommunityApproval() {
+	projectApprovals := ghmgmtdb.GetFailedCommunityApprovalRequests()
+
+	for _, v := range projectApprovals {
+		go ApprovalSystemRequestCommunity(v)
 	}
 
 }
+
 
 func ApprovalSystemRequestCommunity (data models.TypCommunityApprovals) error {
 
