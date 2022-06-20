@@ -3,14 +3,17 @@ package main
 import (
 	"fmt"
 	"log"
-	githubAPI "main/pkg/github"
 	session "main/pkg/session"
+	rtApi "main/routes/api"
 	rtAzure "main/routes/login/azure"
 	rtGithub "main/routes/login/github"
 	rtPages "main/routes/pages"
+	rtCommunity "main/routes/pages/community"
 	rtProjects "main/routes/pages/projects"
 	rtSearch "main/routes/pages/search"
 	"net/http"
+	"strconv"
+	"time"
 
 	"github.com/gorilla/mux"
 
@@ -29,7 +32,6 @@ func main() {
 
 	// Create session and GitHubClient
 	session.InitializeSession()
-	githubAPI.CreateClient()
 
 	mux := mux.NewRouter()
 	mux.PathPrefix("/public/").Handler(http.StripPrefix("/public/", http.FileServer(http.Dir("./public/"))))
@@ -44,6 +46,13 @@ func main() {
 	mux.Handle("/search/all/", loadAzGHAuthPage(rtSearch.GetAllResults))
 	mux.Handle("/search/name/", loadAzGHAuthPage(rtSearch.GetResultsByName))
 	mux.Handle("/search/description/", loadAzGHAuthPage(rtSearch.GetResultsByDescription))
+	mux.Handle("/community/new", loadAzGHAuthPage(rtCommunity.CommunityHandler))
+	mux.Handle("/community/{id}", loadAzGHAuthPage(rtCommunity.CommunityHandler))
+	mux.Handle("/community/getcommunity/{id}", loadAzGHAuthPage(rtCommunity.GetUserCommunity))
+	mux.Handle("/communities/list", loadAzGHAuthPage(rtCommunity.CommunitylistHandler))
+	mux.Handle("/community", loadAzGHAuthPage(rtCommunity.GetUserCommunitylist))
+	mux.Handle("/projects", loadAzGHAuthPage(rtProjects.Projects))
+	mux.Handle("/community/{id}/onboarding", loadAzGHAuthPage(rtCommunity.CommunityOnBoarding))
 	mux.HandleFunc("/login/azure", rtAzure.LoginHandler)
 	mux.HandleFunc("/login/azure/callback", rtAzure.CallbackHandler)
 	mux.HandleFunc("/logout/azure", rtAzure.LogoutHandler)
@@ -51,10 +60,29 @@ func main() {
 	mux.HandleFunc("/login/github/callback", rtGithub.GithubCallbackHandler)
 	mux.HandleFunc("/login/github/force", rtGithub.GithubForceSaveHandler)
 	mux.HandleFunc("/logout/github", rtGithub.GitHubLogoutHandler)
-	mux.HandleFunc("/approvals/callback", rtProjects.UpdateApprovalStatus)
+		
+	muxApi := mux.PathPrefix("/api").Subrouter()
+	mux.Handle("/allusers", loadAzAuthPage(rtApi.GetAllUserFromActiveDirectory))
+	muxApi.Handle("/activity/type", loadAzGHAuthPage(rtApi.GetActivityTypes)).Methods("GET")
+	muxApi.Handle("/activity/type", loadAzGHAuthPage(rtApi.CreateActivityType)).Methods("POST")
+	muxApi.Handle("/community", loadAzGHAuthPage(rtApi.CommunityAPIHandler))
+	muxApi.Handle("/communitySponsors", loadAzGHAuthPage(rtApi.CommunitySponsorsAPIHandler))
+	muxApi.Handle("/CommunitySponsorsPerCommunityId/{id}", loadAzGHAuthPage(rtApi.CommunitySponsorsPerCommunityId))
+	muxApi.Handle("/community/onboarding/{id}", loadAzGHAuthPage(rtApi.GetCommunityOnBoardingInfo)).Methods("GET", "POST", "DELETE")
+	muxApi.Handle("/contributionarea", loadAzGHAuthPage(rtApi.CreateContributionAreas)).Methods("POST")
+	muxApi.Handle("/contributionarea", loadAzGHAuthPage(rtApi.GetContributionAreas)).Methods("GET")
+	muxApi.Handle("/projects/list", loadAzGHAuthPage(rtApi.GetUserProjects))
+	muxApi.Handle("/projects/{id}", loadAzGHAuthPage(rtApi.GetRequestStatusByProject))
+	muxApi.Handle("/projects/{project}/archive/{archive}/private/{private}", loadAzGHAuthPage(rtApi.ArchiveProject))
+	muxApi.Handle("/projects/{project}/private/{private}/archive/{archive}", loadAzGHAuthPage(rtApi.SetVisibility))
+	muxApi.Handle("/allusers", loadAzAuthPage(rtApi.GetAllUserFromActiveDirectory))
+	muxApi.Handle("/allavanadeprojects", loadAzGHAuthPage(rtApi.GetAvanadeProjects))
+
+	mux.HandleFunc("/approvals/project/callback", rtProjects.UpdateApprovalStatusProjects).Methods("POST")
+	mux.HandleFunc("/approvals/community/callback", rtProjects.UpdateApprovalStatusCommunity).Methods("POST")
 	mux.NotFoundHandler = http.HandlerFunc(rtPages.NotFoundHandler)
 
-	//loadAzAuthPage()
+	go checkFailedApprovalRequests()
 
 	port := ev.GetEnvVar("PORT", "8080")
 	fmt.Printf("Now listening on port %v\n", port)
@@ -76,4 +104,16 @@ func loadAzGHAuthPage(f func(w http.ResponseWriter, r *http.Request)) *negroni.N
 		negroni.HandlerFunc(session.IsGHAuthenticated),
 		negroni.Wrap(http.HandlerFunc(f)),
 	)
+}
+
+func checkFailedApprovalRequests() {
+	// TIMER SERVICE
+	freq := ev.GetEnvVar("APPROVALREQUESTS_RETRY_FREQ", "15")
+	freqInt, _ := strconv.ParseInt(freq, 0, 64)
+	if freq > "0" {
+		for range time.NewTicker(time.Duration(freqInt) * time.Minute).C {
+			go rtProjects.ReprocessRequestApproval()
+			go rtCommunity.ReprocessRequestCommunityApproval()
+		}
+	}
 }

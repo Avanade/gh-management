@@ -2,27 +2,22 @@ package routes
 
 import (
 	"encoding/json"
-	session "main/pkg/session"
+	//session "main/pkg/session"
 	"main/pkg/sql"
 	template "main/pkg/template"
 	"net/http"
 	"os"
-
+	//models "main/models"
+	//"fmt"
 	"github.com/gorilla/mux"
 )
 
-func MyProjects(w http.ResponseWriter, r *http.Request) {
-	template.UseTemplate(&w, r, "projects/my", nil)
+func CommunitylistHandler(w http.ResponseWriter, r *http.Request) {
+	template.UseTemplate(&w, r, "community/communitylist", nil)
 }
 
-func GetUserProjects(w http.ResponseWriter, r *http.Request) {
-	// Get email address of the user
-	sessionaz, _ := session.Store.Get(r, "auth-session")
-	iprofile := sessionaz.Values["profile"]
-	profile := iprofile.(map[string]interface{})
-	username := profile["preferred_username"]
+func GetUserCommunitylist(w http.ResponseWriter, r *http.Request) {
 
-	// Connect to database
 	dbConnectionParam := sql.ConnectionParam{
 		ConnectionString: os.Getenv("GHMGMTDB_CONNECTION_STRING"),
 	}
@@ -35,9 +30,8 @@ func GetUserProjects(w http.ResponseWriter, r *http.Request) {
 	defer db.Close()
 
 	// Get project list
-	params := make(map[string]interface{})
-	params["UserPrincipalName"] = username
-	projects, err := db.ExecuteStoredProcedureWithResult("PR_Projects_Select_ByUserPrincipalName", params)
+ 
+	Communities, err := db.ExecuteStoredProcedureWithResult("PR_Communities_select", nil)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -45,19 +39,21 @@ func GetUserProjects(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusOK)
 	w.Header().Set("Content-Type", "application/json")
-	jsonResp, err := json.Marshal(projects)
+	jsonResp, err := json.Marshal(Communities)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+	//fmt.Printf(projects)
 	w.Write(jsonResp)
 }
 
-func GetRequestStatusByProject(w http.ResponseWriter, r *http.Request) {
+
+func GetUserCommunity(w http.ResponseWriter, r *http.Request) {
 	req := mux.Vars(r)
 	id := req["id"]
 
-	// Connect to database
+
 	dbConnectionParam := sql.ConnectionParam{
 		ConnectionString: os.Getenv("GHMGMTDB_CONNECTION_STRING"),
 	}
@@ -69,10 +65,12 @@ func GetRequestStatusByProject(w http.ResponseWriter, r *http.Request) {
 	}
 	defer db.Close()
 
-	// Get project list
-	params := make(map[string]interface{})
-	params["Id"] = id
-	projects, err := db.ExecuteStoredProcedureWithResult("PR_ProjectApprovals_Select_ById", params)
+	param := map[string]interface{}{
+
+		"Id": id,
+	}
+ 
+	Communities, err := db.ExecuteStoredProcedureWithResult("PR_Communities_select_byID", param)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -80,10 +78,12 @@ func GetRequestStatusByProject(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusOK)
 	w.Header().Set("Content-Type", "application/json")
-	jsonResp, err := json.Marshal(projects)
+	jsonResp, err := json.Marshal(Communities)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+	//fmt.Printf(projects)
 	w.Write(jsonResp)
 }
+
