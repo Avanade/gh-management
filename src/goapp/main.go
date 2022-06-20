@@ -5,13 +5,14 @@ import (
 	"log"
 	session "main/pkg/session"
 	rtApi "main/routes/api"
-	rtApis "main/routes/api"
 	rtAzure "main/routes/login/azure"
 	rtGithub "main/routes/login/github"
 	rtPages "main/routes/pages"
 	rtActivities "main/routes/pages/activities"
+	rtAdmin "main/routes/pages/admin"
 	rtCommunity "main/routes/pages/community"
 	rtProjects "main/routes/pages/projects"
+	rtSearch "main/routes/pages/search"
 	"net/http"
 	"strconv"
 	"time"
@@ -41,19 +42,18 @@ func main() {
 	mux.Handle("/activities", loadAzGHAuthPage(rtActivities.ActivitiesHandler))
 	mux.Handle("/activities/new", loadAzGHAuthPage(rtActivities.ActivitiesNewHandler))
 	mux.Handle("/projects/new", loadAzGHAuthPage(rtProjects.ProjectsNewHandler))
+
+	mux.Handle("/search/{searchText}", loadAzGHAuthPage(rtSearch.GetSearchResults))
+	mux.Handle("/search", loadAzGHAuthPage(rtSearch.SearchHandler))
+	mux.Handle("/search/all/", loadAzGHAuthPage(rtSearch.GetAllResults))
+	mux.Handle("/search/name/", loadAzGHAuthPage(rtSearch.GetResultsByName))
+	mux.Handle("/search/description/", loadAzGHAuthPage(rtSearch.GetResultsByDescription))
 	mux.Handle("/community/new", loadAzGHAuthPage(rtCommunity.CommunityHandler))
 	mux.Handle("/community/{id}", loadAzGHAuthPage(rtCommunity.CommunityHandler))
 	mux.Handle("/community/getcommunity/{id}", loadAzGHAuthPage(rtCommunity.GetUserCommunity))
 	mux.Handle("/communities/list", loadAzGHAuthPage(rtCommunity.CommunitylistHandler))
 	mux.Handle("/community", loadAzGHAuthPage(rtCommunity.GetUserCommunitylist))
-	//mux.HandleFunc("/api/community", rtApis.CommunityAPIHandler)
-	mux.Handle("/api/community", loadAzGHAuthPage(rtApis.CommunityAPIHandler))
-	mux.HandleFunc("/api/communitySponsors", rtApis.CommunitySponsorsAPIHandler)
-	mux.HandleFunc("/api/CommunitySponsorsPerCommunityId/{id}", rtApis.CommunitySponsorsPerCommunityId)
-	//mux.Handle("/projects/my", loadAzGHAuthPage(rtProjects.MyProjects))
-	//mux.Handle("/projects", loadAzGHAuthPage(rtProjects.GetUserProjects))
-	//mux.Handle("/projects/{id}", loadAzGHAuthPage(rtProjects.GetRequestStatusByProject))
-	mux.Handle("/api/allusers", loadAzAuthPage(rtApis.GetAllUserFromActiveDirectory))
+
 	mux.Handle("/projects", loadAzGHAuthPage(rtProjects.Projects))
 	mux.Handle("/community/{id}/onboarding", loadAzGHAuthPage(rtCommunity.CommunityOnBoarding))
 	mux.HandleFunc("/login/azure", rtAzure.LoginHandler)
@@ -67,9 +67,16 @@ func main() {
 	muxApi := mux.PathPrefix("/api").Subrouter()
 	muxApi.Handle("/activity", loadAzGHAuthPage(rtApi.CreateActivity)).Methods("POST")
 	muxApi.Handle("/activity", loadAzGHAuthPage(rtApi.GetActivities)).Methods("GET")
+	mux.Handle("/allusers", loadAzAuthPage(rtApi.GetAllUserFromActiveDirectory))
 	muxApi.Handle("/activity/type", loadAzGHAuthPage(rtApi.GetActivityTypes)).Methods("GET")
 	muxApi.Handle("/activity/type", loadAzGHAuthPage(rtApi.CreateActivityType)).Methods("POST")
+	muxApi.Handle("/community", loadAzGHAuthPage(rtApi.CommunityAPIHandler))
+	muxApi.Handle("/communitySponsors", loadAzGHAuthPage(rtApi.CommunitySponsorsAPIHandler))
+	muxApi.Handle("/CommunitySponsorsPerCommunityId/{id}", loadAzGHAuthPage(rtApi.CommunitySponsorsPerCommunityId))
+	muxApi.Handle("/CommunityTagPerCommunityId/{id}", loadAzGHAuthPage(rtApi.CommunityTagPerCommunityId))
 	muxApi.Handle("/community/onboarding/{id}", loadAzGHAuthPage(rtApi.GetCommunityOnBoardingInfo)).Methods("GET", "POST", "DELETE")
+	muxApi.Handle("/community/all", loadAzAuthPage(rtApi.GetCommunities)).Methods("GET")
+	muxApi.Handle("/community/{id}/members", loadAzAuthPage(rtApi.GetCommunityMembers)).Methods("GET")
 	muxApi.Handle("/contributionarea", loadAzGHAuthPage(rtApi.CreateContributionAreas)).Methods("POST")
 	muxApi.Handle("/contributionarea", loadAzGHAuthPage(rtApi.GetContributionAreas)).Methods("GET")
 	muxApi.Handle("/projects/list", loadAzGHAuthPage(rtApi.GetUserProjects))
@@ -78,6 +85,9 @@ func main() {
 	muxApi.Handle("/projects/{project}/private/{private}/archive/{archive}", loadAzGHAuthPage(rtApi.SetVisibility))
 	muxApi.Handle("/allusers", loadAzAuthPage(rtApi.GetAllUserFromActiveDirectory))
 	muxApi.Handle("/allavanadeprojects", loadAzGHAuthPage(rtApi.GetAvanadeProjects))
+
+	muxAdmin := mux.PathPrefix("/admin").Subrouter()
+	muxAdmin.Handle("/members", loadAzGHAuthPage(rtAdmin.ListCommunityMembers))
 
 	mux.HandleFunc("/approvals/project/callback", rtProjects.UpdateApprovalStatusProjects).Methods("POST")
 	mux.HandleFunc("/approvals/community/callback", rtProjects.UpdateApprovalStatusCommunity).Methods("POST")
@@ -113,7 +123,8 @@ func checkFailedApprovalRequests() {
 	freqInt, _ := strconv.ParseInt(freq, 0, 64)
 	if freq > "0" {
 		for range time.NewTicker(time.Duration(freqInt) * time.Minute).C {
-			rtProjects.ReprocessRequestApproval()
+			go rtProjects.ReprocessRequestApproval()
+			go rtCommunity.ReprocessRequestCommunityApproval()
 		}
 	}
 }
