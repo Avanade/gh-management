@@ -3,7 +3,7 @@
 
 <div id="pageTitle">Request a Community</div>
 <div x-data="data()" x-init="onLoad()">
-    <form onsubmit="event.preventDefault()">
+    <form onsubmit="event.preventDefault()" autocomplete="off" >
         <div x-show="!form.id">
             <P>
 
@@ -65,7 +65,7 @@
                 <div x-data="{ data: content }" class="flex flex-col  ">
 
                     <div>
-                        <h3 class="text-lg font-medium leading-6 text-gray-900">Business Sponsors*</h3>
+                        <h3 class="text-lg font-medium leading-6 text-gray-900">Business Sponsors (Please select at least two sponsors )*</h3>
                     </div>
                     <div class="relative mt-1">
                         <div x-html="sponsors.template"></div>
@@ -98,7 +98,7 @@
                     </div>
 
                     <div>
-                        <h3 class="text-lg font-medium leading-6 text-gray-900">Tag</h3>
+                        <h3 class="text-lg font-medium leading-6 text-gray-900">Tag (Please press Enter to insert Tag)</h3>
                     </div>
                     <div> <input type="text" name="tag" id="tag" maxlength="50" @keyup.enter="tag()"
                             class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md border-2">
@@ -145,7 +145,7 @@
 
         <div>
             <div align="right">
-                <button type="submit" class="bg-orange-500  inline-flex justify-center py-2 px-4 rounded-md text-white"
+                <button type="button" class="bg-orange-500  inline-flex justify-center py-2 px-4 rounded-md text-white"
                     :class="!isValid ? 'bg-orange-100' : ''" x-bind:disabled="!isValid" @click="submit()">Submit
                     Community</button>
 
@@ -292,10 +292,10 @@
 
             },
             tag() {
-
-                this.form.tags.push(document.getElementById('tag').value)
+                if ( !!document.getElementById('tag').value.trim()  )
+                {this.form.tags.push(document.getElementById('tag').value)
                 document.getElementById('tag').value = "";
-
+            }
             },
             datapush() {
                 this.form.sponsors.push(this.sponsors.data.filter(i => i.mail == this.sponsors.selected)[0])
