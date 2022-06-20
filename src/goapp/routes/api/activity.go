@@ -31,6 +31,13 @@ type CommunityActivitiesContributionAreasDto struct {
 	ModifiedBy          string
 }
 
+func GetActivities(w http.ResponseWriter, r *http.Request) {
+	result := db.CommunitiesActivities_Select()
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(result)
+}
+
 func CreateActivity(w http.ResponseWriter, r *http.Request) {
 	sessionaz, _ := session.Store.Get(r, "auth-session")
 	iprofile := sessionaz.Values["profile"]

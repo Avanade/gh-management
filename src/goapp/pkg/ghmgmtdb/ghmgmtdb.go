@@ -244,11 +244,11 @@ func UpdateIsArchiveIsPrivate(projectName string, isArchived bool, isPrivate boo
 }
 
 // ACTIVITIES
-func PRActivities_Select() interface{} {
+func CommunitiesActivities_Select() interface{} {
 	db := ConnectDb()
 	defer db.Close()
 
-	result, _ := db.ExecuteStoredProcedureWithResult("PR_Activities_Select", nil)
+	result, _ := db.ExecuteStoredProcedureWithResult("PR_CommunitiesActivities_Select", nil)
 	return result
 }
 
