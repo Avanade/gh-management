@@ -1715,6 +1715,11 @@ select {
   margin-bottom: -0.5rem;
 }
 
+.-my-5 {
+  margin-top: -1.25rem;
+  margin-bottom: -1.25rem;
+}
+
 .mx-10 {
   margin-left: 2.5rem;
   margin-right: 2.5rem;
@@ -1959,12 +1964,20 @@ select {
   height: 3rem;
 }
 
-.h-4 {
-  height: 1rem;
-}
-
 .h-40 {
   height: 10rem;
+}
+
+.h-\[calc\(67vh\)\] {
+  height: calc(67vh);
+}
+
+.h-full {
+  height: 100%;
+}
+
+.h-4 {
+  height: 1rem;
 }
 
 .h-20 {
@@ -2039,16 +2052,20 @@ select {
   width: 2rem;
 }
 
-.w-4 {
-  width: 1rem;
-}
-
 .w-1\/2 {
   width: 50%;
 }
 
+.w-4 {
+  width: 1rem;
+}
+
 .min-w-full {
   min-width: 100%;
+}
+
+.min-w-0 {
+  min-width: 0px;
 }
 
 .max-w-max {
@@ -3207,6 +3224,11 @@ select {
   background-color: rgb(249 250 251 / var(--tw-bg-opacity));
 }
 
+.bg-\[\#fff2eb\] {
+  --tw-bg-opacity: 1;
+  background-color: rgb(255 242 235 / var(--tw-bg-opacity));
+}
+
 .bg-orange-400 {
   --tw-bg-opacity: 1;
   background-color: rgb(251 146 60 / var(--tw-bg-opacity));
@@ -3215,11 +3237,6 @@ select {
 .bg-orange-500 {
   --tw-bg-opacity: 1;
   background-color: rgb(249 115 22 / var(--tw-bg-opacity));
-}
-
-.bg-\[\#fff2eb\] {
-  --tw-bg-opacity: 1;
-  background-color: rgb(255 242 235 / var(--tw-bg-opacity));
 }
 
 .bg-\[rgb\(255\2c 0\2c 0\)\] {
@@ -3561,6 +3578,10 @@ select {
 
 .pr-9 {
   padding-right: 2.25rem;
+}
+
+.pr-8 {
+  padding-right: 2rem;
 }
 
 .text-left {
@@ -4317,6 +4338,31 @@ select {
   content: "hello";
 }
 
+.custom-scrollbar::-webkit-scrollbar {
+  width: 10px;
+  height: 18px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  width: 10px;
+  height: 10px;
+  background-clip: padding-box;
+  background: lightgrey;
+  -webkit-border-radius: 7px;
+  -webkit-box-shadow: inset -1px -1px 0px rgba(0, 0, 0, 0.05),
+    inset 1px 1px 0px rgba(0, 0, 0, 0.05);
+}
+
+.custom-scrollbar::-webkit-scrollbar-button {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+.custom-scrollbar::-webkit-scrollbar-corner {
+  background-color: transparent;
+}
+
 
 .default\:border-solid:default {
   border-style: solid;
@@ -4361,14 +4407,14 @@ select {
   background-color: rgb(249 115 22 / var(--tw-bg-opacity));
 }
 
-.hover\:bg-\[\#FF4300\]:hover {
-  --tw-bg-opacity: 1;
-  background-color: rgb(255 67 0 / var(--tw-bg-opacity));
-}
-
 .hover\:bg-\[\#fff2eb\]:hover {
   --tw-bg-opacity: 1;
   background-color: rgb(255 242 235 / var(--tw-bg-opacity));
+}
+
+.hover\:bg-\[\#FF4300\]:hover {
+  --tw-bg-opacity: 1;
+  background-color: rgb(255 67 0 / var(--tw-bg-opacity));
 }
 
 .hover\:font-bold:hover {
