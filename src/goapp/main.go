@@ -39,9 +39,7 @@ func main() {
 	mux.Handle("/", loadAzAuthPage(rtPages.HomeHandler))
 	mux.Handle("/error/ghlogin", loadAzAuthPage(rtPages.GHLoginRequire))
 	mux.Handle("/projects/new", loadAzGHAuthPage(rtProjects.ProjectsNewHandler))
-	// mux.Handle("/projects/my", loadAzGHAuthPage(rtProjects.MyProjects))
-	// mux.Handle("/projects", loadAzGHAuthPage(rtProjects.GetUserProjects))
-	// mux.Handle("/projects/{id}", loadAzGHAuthPage(rtProjects.GetRequestStatusByProject))
+
 	mux.Handle("/search/{searchText}", loadAzGHAuthPage(rtSearch.GetSearchResults))
 	mux.Handle("/search", loadAzGHAuthPage(rtSearch.SearchHandler))
 	mux.Handle("/search/all/", loadAzGHAuthPage(rtSearch.GetAllResults))
@@ -52,6 +50,7 @@ func main() {
 	mux.Handle("/community/getcommunity/{id}", loadAzGHAuthPage(rtCommunity.GetUserCommunity))
 	mux.Handle("/communities/list", loadAzGHAuthPage(rtCommunity.CommunitylistHandler))
 	mux.Handle("/community", loadAzGHAuthPage(rtCommunity.GetUserCommunitylist))
+
 	mux.Handle("/projects", loadAzGHAuthPage(rtProjects.Projects))
 	mux.Handle("/community/{id}/onboarding", loadAzGHAuthPage(rtCommunity.CommunityOnBoarding))
 	mux.HandleFunc("/login/azure", rtAzure.LoginHandler)
@@ -61,7 +60,7 @@ func main() {
 	mux.HandleFunc("/login/github/callback", rtGithub.GithubCallbackHandler)
 	mux.HandleFunc("/login/github/force", rtGithub.GithubForceSaveHandler)
 	mux.HandleFunc("/logout/github", rtGithub.GitHubLogoutHandler)
-		
+
 	muxApi := mux.PathPrefix("/api").Subrouter()
 	mux.Handle("/allusers", loadAzAuthPage(rtApi.GetAllUserFromActiveDirectory))
 	muxApi.Handle("/activity/type", loadAzGHAuthPage(rtApi.GetActivityTypes)).Methods("GET")
@@ -69,6 +68,7 @@ func main() {
 	muxApi.Handle("/community", loadAzGHAuthPage(rtApi.CommunityAPIHandler))
 	muxApi.Handle("/communitySponsors", loadAzGHAuthPage(rtApi.CommunitySponsorsAPIHandler))
 	muxApi.Handle("/CommunitySponsorsPerCommunityId/{id}", loadAzGHAuthPage(rtApi.CommunitySponsorsPerCommunityId))
+	muxApi.Handle("/CommunityTagPerCommunityId/{id}", loadAzGHAuthPage(rtApi.CommunityTagPerCommunityId))
 	muxApi.Handle("/community/onboarding/{id}", loadAzGHAuthPage(rtApi.GetCommunityOnBoardingInfo)).Methods("GET", "POST", "DELETE")
 	muxApi.Handle("/community/all", loadAzAuthPage(rtApi.GetCommunities)).Methods("GET")
 	muxApi.Handle("/community/{id}/members", loadAzAuthPage(rtApi.GetCommunityMembers)).Methods("GET")

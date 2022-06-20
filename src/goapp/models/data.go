@@ -50,6 +50,7 @@ type TypCommunity struct {
 	Modified     string        `json:"modified"`
 	ModifiedBy   string        `json:"modifiedBy"`
 	Sponsors     []TypSponsors `json:"sponsors"`
+	Tags         []string      `json:"tags"`
 }
 
 type TypCommunitySponsors struct {

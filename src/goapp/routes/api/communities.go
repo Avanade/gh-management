@@ -6,8 +6,8 @@ import (
 	models "main/models"
 	ghmgmt "main/pkg/ghmgmtdb"
 	session "main/pkg/session"
-	comm "main/routes/pages/community"
 	"main/pkg/sql"
+	comm "main/routes/pages/community"
 	"net/http"
 	"os"
 	"strconv"
@@ -63,6 +63,7 @@ func CommunityAPIHandler(w http.ResponseWriter, r *http.Request) {
 				http.Error(w, errIU.Error(), http.StatusInternalServerError)
 				return
 			}
+
 			sponsorsparam := map[string]interface{}{
 
 				"CommunityId":        id,
@@ -71,6 +72,22 @@ func CommunityAPIHandler(w http.ResponseWriter, r *http.Request) {
 			}
 			_, err := db.ExecuteStoredProcedure("dbo.PR_CommunitySponsors_Insert", sponsorsparam)
 			if err != nil {
+				fmt.Println(err)
+
+			}
+
+		}
+
+		for _, t := range body.Tags {
+
+			Tagsparam := map[string]interface{}{
+
+				"CommunityId": id,
+				"Tag ":        t,
+			}
+			_, err := db.ExecuteStoredProcedure("PR_CommunityTags_Insert", Tagsparam)
+			if err != nil {
+
 				fmt.Println(err)
 			}
 
