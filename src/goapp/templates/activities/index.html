@@ -2,17 +2,34 @@
   <div id="pageTitle">
       My Activities
   </div>
-  <div x-data="table({
-    ajax : GetActivities,
-    columns : [
-      { name : 'Date', value : 'Date' },
-      { name : 'Activity', value : 'Name' },
-      { name : 'Community/Project', value : 'CommunityName' },
-      { name : 'Type', value : 'TypeName' },
-      { name : 'Primary Contribution Area', value : 'PrimaryContributionAreaName' }
-    ]
-  })">
-    <div x-html="template"></div>
+  <div class="px-4 sm:px-6 lg:px-8">
+    <div class="sm:flex sm:items-center">
+      <div class="sm:flex-auto">
+        <h1 class="text-xl font-semibold text-gray-900">Recent Activities</h1>
+        <p class="mt-2 text-sm text-gray-700">Activities are contributions to any non-Avanade community. These contributions might include speaking or attending an event or user-group, submitting a blog, participating on a panel, or creating content for that community.</p>
+      </div>
+      <div class="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
+        <a href="/activities/new" type="button" class="inline-flex items-center justify-center rounded-md border border-transparent bg-orange-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 sm:w-auto">+ Add Activity</a>
+      </div>
+    </div>
+    <div class="mt-8 flex flex-col">
+      <div class="-my-2 -mx-4 overflow-x-auto sm:-mx-6 lg:-mx-8">
+        <div class="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
+          <div x-data="table({
+            ajax : GetActivities,
+            columns : [
+              { name : 'Date', value : 'Date' },
+              { name : 'Activity', value : 'Name' },
+              { name : 'Community/Project', value : 'CommunityName' },
+              { name : 'Type', value : 'TypeName' },
+              { name : 'Primary Contribution Area', value : 'PrimaryContributionAreaName' }
+            ]
+          })">
+            <div x-html="template"></div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 
   <script type="text/javascript">
@@ -30,6 +47,10 @@
         ]
       }) => {
       return { 
+        columns : [],
+        data : [],
+        filter : 10,
+        page : 1,
         async init() {
           this.columns = columns
           // SET DATA
@@ -41,8 +62,6 @@
             }
             console.log(this.data)
         },
-        columns : [],
-        data : [],
         initRow(data){
           let html = '';
           this.columns.forEach(col => {
@@ -54,20 +73,7 @@
           });
           return html;
         },
-        template : `<div class="px-4 sm:px-6 lg:px-8">
-                    <div class="sm:flex sm:items-center">
-                      <div class="sm:flex-auto">
-                        <h1 class="text-xl font-semibold text-gray-900">Recent Activities</h1>
-                        <p class="mt-2 text-sm text-gray-700">Activities are contributions to any non-Avanade community. These contributions might include speaking or attending an event or user-group, submitting a blog, participating on a panel, or creating content for that community.</p>
-                      </div>
-                      <div class="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
-                        <a href="/activities/new" type="button" class="inline-flex items-center justify-center rounded-md border border-transparent bg-orange-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 sm:w-auto">+ Add Activity</a>
-                      </div>
-                    </div>
-                    <div class="mt-8 flex flex-col">
-                      <div class="-my-2 -mx-4 overflow-x-auto sm:-mx-6 lg:-mx-8">
-                        <div class="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
-                          <table class="min-w-full divide-y divide-gray-300">
+        template : `<table class="min-w-full divide-y divide-gray-300">
                             <thead>
                               <tr>
                                 <!-- HEADER HERE -->
@@ -83,27 +89,23 @@
                               </template>
                             </tbody>
                           </table>
-                        </div>
-                        <nav class="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6" aria-label="Pagination">
-                          <div class="sm:block">
-                            <p class="text-sm text-gray-700">
-                              Showing
-                              <span class="font-medium">1</span>
-                              to
-                              <span class="font-medium">10</span>
-                              of
-                              <span class="font-medium">20</span>
-                              results
-                            </p>
-                          </div>
-                          <div class="flex justify-between sm:justify-end">
-                            <a href="#" class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"> Previous </a>
-                            <a href="#" class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"> Next </a>
-                          </div>
-                        </nav>
-                      </div>
-                    </div>
-                  </div>`
+                          <!-- <nav class="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6" aria-label="Pagination">
+                            <div class="sm:block">
+                              <p class="text-sm text-gray-700">
+                                Showing
+                                <span class="font-medium">1</span>
+                                to
+                                <span class="font-medium">10</span>
+                                of
+                                <span class="font-medium">20</span>
+                                results
+                              </p>
+                            </div>
+                            <div class="flex justify-between sm:justify-end">
+                              <a href="#" class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"> Previous </a>
+                              <a href="#" class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"> Next </a>
+                            </div>
+                          </nav> -->`
                 }
     }
   </script>
