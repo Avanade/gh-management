@@ -10,6 +10,7 @@ import (
 	rtPages "main/routes/pages"
 	rtCommunity "main/routes/pages/community"
 	rtProjects "main/routes/pages/projects"
+	rtSearch "main/routes/pages/search"
 	"net/http"
 	"strconv"
 	"time"
@@ -37,6 +38,14 @@ func main() {
 	mux.Handle("/", loadAzAuthPage(rtPages.HomeHandler))
 	mux.Handle("/error/ghlogin", loadAzAuthPage(rtPages.GHLoginRequire))
 	mux.Handle("/projects/new", loadAzGHAuthPage(rtProjects.ProjectsNewHandler))
+	mux.Handle("/projects/my", loadAzGHAuthPage(rtProjects.MyProjects))
+	mux.Handle("/projects", loadAzGHAuthPage(rtProjects.GetUserProjects))
+	mux.Handle("/projects/{id}", loadAzGHAuthPage(rtProjects.GetRequestStatusByProject))
+	mux.Handle("/search/{searchText}", loadAzGHAuthPage(rtSearch.GetSearchResults))
+	mux.Handle("/search", loadAzGHAuthPage(rtSearch.SearchHandler))
+	mux.Handle("/search/all/", loadAzGHAuthPage(rtSearch.GetAllResults))
+	mux.Handle("/search/name/", loadAzGHAuthPage(rtSearch.GetResultsByName))
+	mux.Handle("/search/description/", loadAzGHAuthPage(rtSearch.GetResultsByDescription))
 	mux.Handle("/community/new", loadAzGHAuthPage(rtCommunity.CommunityHandler))
 	mux.Handle("/community/{id}", loadAzGHAuthPage(rtCommunity.CommunityHandler))
 	mux.Handle("/community/getcommunity/{id}", loadAzGHAuthPage(rtCommunity.GetUserCommunity))
