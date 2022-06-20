@@ -124,7 +124,7 @@
 <div>
     <div align="right">
         <button type="submit" class="bg-orange-500  inline-flex justify-center py-2 px-4 rounded-md text-white"
-            :class="!isValid ? 'bg-orange-200' : ''" x-bind:disabled="!isValid" @click="submit()">Submit Community</button>
+            :class="!isValid ? 'bg-orange-100' : ''" x-bind:disabled="!isValid" @click="submit()">Submit Community</button>
 
     </div>
 </div>
@@ -184,45 +184,40 @@
             status: "",
             modalText: "Please wait...",
             modalSubText: "Your request is being processed.",
-            showResult(status, title, subtext, show = true) {
-                this.status = status
-                this.modalText = title
-                this.modalSubText = subtext
-                this.showModal = show
-            },onLoad()
+            onLoad()
             {
-                
-                fetch('/community/getcommunity/'  +'{{.Id}}')
-                    .then(r => {
-                        r.json().then(body => {
-                            this.Communitylist = body
-                          
-                            this.form.id =body[0]["Id"]
-                            this.form.name =body[0]["Name"]
-                            this.form.url =body[0]["Url"]
-                            this.form.description =body[0]["Description"]
-                            this.form.notes =body[0]["Notes"]
-                            this.form.isExternal =body[0]["IsExternal"]
-                            this.showSpinner = false
-                        });
+                if(this.form.id){
+                    fetch('/community/getcommunity/'  +'{{.Id}}')
+                        .then(r => {
+                            r.json().then(body => {
+                                this.Communitylist = body
+                            
+                                this.form.id =body[0]["Id"]
+                                this.form.name =body[0]["Name"]
+                                this.form.url =body[0]["Url"]
+                                this.form.description =body[0]["Description"]
+                                this.form.notes =body[0]["Notes"]
+                                this.form.isExternal =body[0]["IsExternal"]
+                                this.showSpinner = false
+                            });
+                        })
+                        .catch(e => {
+                            console.log(e)
                     })
-                    .catch(e => {
-                        console.log(e)
-                })
-
-                fetch('/api/CommunitySponsorsPerCommunityId/'  +'{{.Id}}')
-                    .then(r => {
-                        r.json().then(body => {
-                           for (let index = 0; index < body.length; index++) {
-                              this.form.sponsors.push({displayName:body[index]['UserPrincipalName'],mail:body[index]['UserPrincipalName']})
-                           }
-                            this.showSpinner = false
-                        });
+                    
+                    fetch('/api/CommunitySponsorsPerCommunityId/'  +'{{.Id}}')
+                        .then(r => {
+                            r.json().then(body => {
+                            for (let index = 0; index < body.length; index++) {
+                                this.form.sponsors.push({displayName:body[index]['UserPrincipalName'],mail:body[index]['UserPrincipalName']})
+                            }
+                                this.showSpinner = false
+                            });
+                        })
+                        .catch(e => {
+                            console.log(e)
                     })
-                    .catch(e => {
-                        console.log(e)
-                })
-
+                }
                 
                 this.getUsersList()
 
@@ -230,8 +225,8 @@
           
 
             submit() {
-             
-                this.showResult("submitted", "Processing", "Please wait while processing your request.")
+                var modal = Alpine.store('master').modal
+                modal.update('loading', 'Saving', 'Please wait.', '','')
                  if (!this.form.id  )
                      {
                          this.form.id = 0

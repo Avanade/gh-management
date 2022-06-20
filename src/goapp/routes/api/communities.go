@@ -6,6 +6,7 @@ import (
 	models "main/models"
 	ghmgmt "main/pkg/ghmgmtdb"
 	session "main/pkg/session"
+	comm "main/routes/pages/community"
 	"main/pkg/sql"
 	"net/http"
 	"os"
@@ -65,7 +66,7 @@ func CommunityAPIHandler(w http.ResponseWriter, r *http.Request) {
 			sponsorsparam := map[string]interface{}{
 
 				"CommunityId":        id,
-				"UserPrincipalName ": s.DisplayName,
+				"UserPrincipalName ": s.Mail,
 				"CreatedBy":          username,
 			}
 			_, err := db.ExecuteStoredProcedure("dbo.PR_CommunitySponsors_Insert", sponsorsparam)
@@ -74,7 +75,7 @@ func CommunityAPIHandler(w http.ResponseWriter, r *http.Request) {
 			}
 
 		}
-
+		go comm.RequestCommunityApproval(int64(id))
 	case "GET":
 		param := map[string]interface{}{
 

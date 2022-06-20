@@ -54,7 +54,6 @@ func MyApprovalsHandler(w http.ResponseWriter, r *http.Request) {
 	for _, v := range items {
 		if v["IsApproved"] == nil {
 			homeData.Pending = append(homeData.Pending, itemMapper(v, false))
-			fmt.Println(v.Created)
 		} else {
 			homeData.Approved = append(homeData.Approved, itemMapper(v, true))
 		}

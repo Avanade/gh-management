@@ -125,3 +125,20 @@ type TypCommunityOnBoarding struct {
 	Sponsors    []TypCommunitySponsorsList `json:"Sponsors"`
 	Communities []TypRelatedCommunities    `json:"Communities"`
 }
+
+type TypCommunityApprovals struct {
+	Id						   int64
+	CommunityId                int64
+	CommunityName              string
+	CommunityUrl	           string
+	CommunityDescription       string
+	CommunityNotes             string
+	CommunityTradeAssocId      string
+	CommunityIsExternal        bool
+	RequesterName              string
+	RequesterGivenName         string
+	RequesterSurName           string
+	RequesterUserPrincipalName string
+	ApproverUserPrincipalName  string
+	ApprovalDescription        string
+}
