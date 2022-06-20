@@ -7,6 +7,7 @@ import (
 	ghmgmt "main/pkg/ghmgmtdb"
 	session "main/pkg/session"
 	"main/pkg/sql"
+	comm "main/routes/pages/community"
 	"net/http"
 	"os"
 	"strconv"
@@ -91,6 +92,7 @@ func CommunityAPIHandler(w http.ResponseWriter, r *http.Request) {
 			}
 
 		}
+		go comm.RequestCommunityApproval(int64(id))
 	case "GET":
 		param := map[string]interface{}{
 

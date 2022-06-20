@@ -555,3 +555,100 @@ func Community_Membership_IsMember(CommunityId int64, UserPrincipalName string) 
 	isMember, _ = strconv.ParseBool(isExisting)
 	return
 }
+
+func GetCommunities() interface{} {
+	db := ConnectDb()
+	defer db.Close()
+
+	result, err := db.ExecuteStoredProcedureWithResult("PR_Communities_select", nil)
+	if err != nil {
+		return err
+	}
+	return result
+}
+
+func GetCommunityMembers(id int64) interface{} {
+	db := ConnectDb()
+	defer db.Close()
+
+	param := map[string]interface{}{
+		"CommunityId": id,
+	}
+
+	result, err := db.ExecuteStoredProcedureWithResult("PR_CommunityMembers_Select_ByCommunityId", param)
+	if err != nil {
+		return err
+	}
+	return result
+}
+func PopulateCommunityApproval(id int64) (CommunityApprovals []models.TypCommunityApprovals) {
+	db := ConnectDb()
+	defer db.Close()
+
+	param := map[string]interface{}{
+		"CommunityId": id,
+	}
+	result, _ := db.ExecuteStoredProcedureWithResult("PR_CommunityApprovals_Populate", param)
+
+	for _, v := range result {
+		data := models.TypCommunityApprovals{
+			Id:                         v["Id"].(int64),
+			CommunityId:                  v["CommunityId"].(int64),
+			CommunityName:                v["CommunityName"].(string),
+			CommunityUrl:             v["CommunityUrl"].(string),
+			CommunityDescription:         v["CommunityDescription"].(string),
+			CommunityNotes:         v["CommunityNotes"].(string),
+			CommunityTradeAssocId:         v["CommunityTradeAssocId"].(string),
+			CommunityIsExternal:         v["CommunityIsExternal"].(bool),
+			RequesterName:              v["RequesterName"].(string),
+			RequesterGivenName:         v["RequesterGivenName"].(string),
+			RequesterSurName:           v["RequesterSurName"].(string),
+			RequesterUserPrincipalName: v["RequesterUserPrincipalName"].(string),
+			ApproverUserPrincipalName:  v["ApproverUserPrincipalName"].(string),
+			ApprovalDescription:        v["ApprovalDescription"].(string),
+		}
+		CommunityApprovals = append(CommunityApprovals, data)
+	}
+
+	return
+}
+
+func GetFailedCommunityApprovalRequests() (CommunityApprovals []models.TypCommunityApprovals) {
+	db := ConnectDb()
+	defer db.Close()
+
+	result, _ := db.ExecuteStoredProcedureWithResult("PR_CommunityApprovals_Select_Failed", nil)
+
+	for _, v := range result {
+		data := models.TypCommunityApprovals{
+			Id:                         v["Id"].(int64),
+			CommunityId:                  v["CommunityId"].(int64),
+			CommunityName:                v["CommunityName"].(string),
+			CommunityUrl:             v["CommunityUrl"].(string),
+			CommunityDescription:         v["CommunityDescription"].(string),
+			CommunityNotes:         v["CommunityNotes"].(string),
+			CommunityTradeAssocId:         v["CommunityTradeAssocId"].(string),
+			CommunityIsExternal:         v["CommunityIsExternal"].(bool),
+			RequesterName:              v["RequesterName"].(string),
+			RequesterGivenName:         v["RequesterGivenName"].(string),
+			RequesterSurName:           v["RequesterSurName"].(string),
+			RequesterUserPrincipalName: v["RequesterUserPrincipalName"].(string),
+			ApproverUserPrincipalName:  v["ApproverUserPrincipalName"].(string),
+			ApprovalDescription:        v["ApprovalDescription"].(string),
+		}
+		CommunityApprovals = append(CommunityApprovals, data)
+	}
+
+	return
+}
+
+func CommunityApprovalUpdateGUID(id int64, ApprovalSystemGUID string) {
+	db := ConnectDb()
+	defer db.Close()
+
+	param := map[string]interface{}{
+		"Id":                 id,
+		"ApprovalSystemGUID": ApprovalSystemGUID,
+	}
+	db.ExecuteStoredProcedure("PR_CommunityApproval_Update_ApprovalSystemGUID", param)
+}

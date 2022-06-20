@@ -4,14 +4,15 @@
 <div id="pageTitle">Request a Community</div>
 <div x-data="data()" x-init="onLoad()">
     <form onsubmit="event.preventDefault()">
-        <div  x-show="!form.id">
-        <P> 
-       
-        <h3 class="text-lg font-medium leading-6 text-gray-900"> Community Information</h3>  
-        If you have been unable to find the community you need in the drop-down, please submit your request here so that
-        we
-        can add it. Please ensure you have reviewed the full list before requesting this community for review. ​</P>
-      </div>
+        <div x-show="!form.id">
+            <P>
+
+            <h3 class="text-lg font-medium leading-6 text-gray-900"> Community Information</h3>
+            If you have been unable to find the community you need in the drop-down, please submit your request here so
+            that
+            we
+            can add it. Please ensure you have reviewed the full list before requesting this community for review. ​</P>
+        </div>
         <br>
         <div class="flex flex flex-col md:flex-row ">
             <div class="basis-1/2 md:base-full  md:flex-row mx-3">
@@ -26,12 +27,12 @@
             </div>
             <div class="basis-1/2 md:base-full  md:flex-row mx-3">
                 <div class="flex flex-col  ">
-                    <div class="flex flex-row" >
-                        <div   class="basis-1/2">
-                        <h3 class="text-lg font-medium leading-6 text-gray-900">Community Site URL</h3>
+                    <div class="flex flex-row">
+                        <div class="basis-1/2">
+                            <h3 class="text-lg font-medium leading-6 text-gray-900">Community Site URL</h3>
                         </div>
-                        <div     x-show="form.id"  class="basis-1/2 flex flex-row text-right"  >
-                           ID:   <p x-text="form.id"></p> 
+                        <div x-show="form.id" class="basis-1/2 flex flex-row text-right">
+                            ID: <p x-text="form.id"></p>
                         </div>
                     </div>
                     <div> <input type="text" name="url" id="url" x-model="form.url" maxlength="255"
@@ -39,10 +40,10 @@
                     </div>
                 </div>
             </div>
-          
-                  
-                 
-                
+
+
+
+
         </div>
 
         <div class="max-w-full  md:base-full  md:flex-row   mx-3">
@@ -85,74 +86,75 @@
 
 
                     <div class="  border items-center  ">
-                         
-                     
+
+
                         <template x-for="(sponsor, i) in form.sponsors">
-                            <div style="display: flex; " class="border px-2 py-2" >
-                                <div style="flex-grow: 1;" x-text="sponsor.displayName" > </div>
-                                <div> <button   type="button" class="btn btn-danger btn-small   "
-                                    @click="removeField(sponsor)">&times;</button></div>
-                              </div>
+                            <div style="display: flex; " class="border px-2 py-2">
+                                <div style="flex-grow: 1;" x-text="sponsor.displayName"> </div>
+                                <div> <button type="button" class="btn btn-danger btn-small   "
+                                        @click="removeField(sponsor)">&times;</button></div>
+                            </div>
                         </template>
                     </div>
 
-                <div>
-                    <h3 class="text-lg font-medium leading-6 text-gray-900">Tag</h3>
-                </div>
-                <div> <input type="text" name="tag" id="tag"   maxlength="50" @keyup.enter="tag()"
-                    class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md border-2">
-                </div>
+                    <div>
+                        <h3 class="text-lg font-medium leading-6 text-gray-900">Tag</h3>
+                    </div>
+                    <div> <input type="text" name="tag" id="tag" maxlength="50" @keyup.enter="tag()"
+                            class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md border-2">
+                    </div>
 
 
-                <div class="  border items-center  ">
-                        
-                    
-                    <template x-for="(tag, i) in form.tags">
-                        <div style="display: flex; " class="border px-2 py-2" >
-                            <div style="flex-grow: 1;" x-text="tag" > </div>
-                            <div> <button   type="button" class="btn btn-danger btn-small   "
-                                @click="removetag(tag)">&times;</button></div>
+                    <div class="  border items-center  ">
+
+
+                        <template x-for="(tag, i) in form.tags">
+                            <div style="display: flex; " class="border px-2 py-2">
+                                <div style="flex-grow: 1;" x-text="tag"> </div>
+                                <div> <button type="button" class="btn btn-danger btn-small   "
+                                        @click="removetag(tag)">&times;</button></div>
                             </div>
-                    </template>
+                        </template>
+                    </div>
+
                 </div>
+
+
 
             </div>
-
-            
-    
-         </div>
-        <div class="basis-1/2 md:base-full  md:flex-row mx-3">
-            <div class="flex flex-col  ">
-                <div>
-                    <h3 class="text-lg font-medium leading-6 text-gray-900">Notes</h3>
-                </div>
-                <div> <textarea name="Notes" id="Notes" x-model="form.notes" rows="3" maxlength="255"
-                        class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md  border-2">
+            <div class="basis-1/2 md:base-full  md:flex-row mx-3">
+                <div class="flex flex-col  ">
+                    <div>
+                        <h3 class="text-lg font-medium leading-6 text-gray-900">Notes</h3>
+                    </div>
+                    <div> <textarea name="Notes" id="Notes" x-model="form.notes" rows="3" maxlength="255"
+                            class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md  border-2">
             </textarea> </div>
-            <div class="flex flex-row  mx-3   my-3 ">
-           
-                <input type="checkbox" name="IsExternal" id="IsExternal" x-model="form.isExternal">   
-                This is an external community
-             
-            
-            </div> 
+                    <div class="flex flex-row  mx-3   my-3 ">
+
+                        <input type="checkbox" name="IsExternal" id="IsExternal" x-model="form.isExternal">
+                        This is an external community
+
+
+                    </div>
+                </div>
+            </div>
+
+
+        </div>
+
+        <div>
+            <div align="right">
+                <button type="submit" class="bg-orange-500  inline-flex justify-center py-2 px-4 rounded-md text-white"
+                    :class="!isValid ? 'bg-orange-100' : ''" x-bind:disabled="!isValid" @click="submit()">Submit
+                    Community</button>
+
             </div>
         </div>
-        
-      
-</div>
-
-<div>
-    <div align="right">
-        <button type="submit" class="bg-orange-500  inline-flex justify-center py-2 px-4 rounded-md text-white"
-            :class="!isValid ? 'bg-orange-200' : ''" x-bind:disabled="!isValid" @click="submit()">Submit Community</button>
-
-    </div>
-</div>
-</form>
+    </form>
 
 </div>
- 
+
 
 <script src="/public/components/clsDropdown.js"></script>
 
@@ -166,40 +168,42 @@
                 description: '',
                 notes: '',
                 isExternal: false,
-                sponsors:[ ],
-                tags:[ ],
+                sponsors: [],
+                tags: [],
             },
-            sponsors:{
-                template:'',
-                selected:'',
-                data:[]
+            sponsors: {
+                template: '',
+                selected: '',
+                data: []
             },
-            sponsor:{ displayName: '',
-                mail: '',},
-            async getUsersList(){
+            sponsor: {
+                displayName: '',
+                mail: '',
+            },
+            async getUsersList() {
                 var modal = Alpine.store('master').modal
-                modal.update('loading', 'Loading', 'Please wait', '','')
-             
+                modal.update('loading', 'Loading', 'Please wait', '', '')
 
-                    await fetch('/api/allusers').then(j=>j.json()
-                    .then(data=>{
+
+                await fetch('/api/allusers').then(j => j.json()
+                    .then(data => {
 
                         this.sponsors.data = data
                         modal.visible = false
                     }))
-                    .catch(()=>{
-                        modal.update('error', 'Error', 'Please try again', '','')
+                    .catch(() => {
+                        modal.update('error', 'Error', 'Please try again', '', '')
 
                     })
 
-                    var dd = new clsDropdown()
-                    this.sponsors.template = dd.template(
-                        'ddBusSponsor',
-                        'sponsors.selected',
-                        'sponsors.data',
-                        'displayName',
-                        'mail','mail',
-                        'datapush()')
+                var dd = new clsDropdown()
+                this.sponsors.template = dd.template(
+                    'ddBusSponsor',
+                    'sponsors.selected',
+                    'sponsors.data',
+                    'displayName',
+                    'mail', 'mail',
+                    'datapush()')
             },
 
             showModal: false,
@@ -211,98 +215,100 @@
                 this.modalText = title
                 this.modalSubText = subtext
                 this.showModal = show
-            },async onLoad()
-            {
+            }, async onLoad() {
+
                 spinnercount = 3
-               await fetch('/community/getcommunity/'  +'{{.Id}}')
-                    .then(r => {
-                        r.json().then(body => {
-                            this.Communitylist = body
-                          
-                            this.form.id =body[0]["Id"]
-                            this.form.name =body[0]["Name"]
-                            this.form.url =body[0]["Url"]
-                            this.form.description =body[0]["Description"]
-                            this.form.notes =body[0]["Notes"]
-                            this.form.isExternal =body[0]["IsExternal"]
-                          //  this.showSpinner = false
-                          spinnercount = spinnercount-1
-                        });
-                    })
-                    .catch(e => {
-                        console.log(e)
-                        spinnercount = spinnercount-1
-                })
+                if (this.form.id) {
+                    await fetch('/community/getcommunity/' + '{{.Id}}')
+                        .then(r => {
+                            r.json().then(body => {
+                                this.Communitylist = body
 
-                await fetch('/api/CommunitySponsorsPerCommunityId/'  +'{{.Id}}')
-                    .then(r => {
-                        r.json().then(body => {
-                           for (let index = 0; index < body.length; index++) {
-                              this.form.sponsors.push({displayName:body[index]['UserPrincipalName'],mail:body[index]['UserPrincipalName']})
-                           }
-                         //   this.showSpinner = false
-                         spinnercount = spinnercount-1
-                        });
-                    })
-                    .catch(e => {
-                        console.log(e)
-                        spinnercount = spinnercount-1
-                    }) 
+                                this.form.id = body[0]["Id"]
+                                this.form.name = body[0]["Name"]
+                                this.form.url = body[0]["Url"]
+                                this.form.description = body[0]["Description"]
+                                this.form.notes = body[0]["Notes"]
+                                this.form.isExternal = body[0]["IsExternal"]
+                                //  this.showSpinner = false
+                                spinnercount = spinnercount - 1
+                            });
+                        })
+                        .catch(e => {
+                            console.log(e)
+                            spinnercount = spinnercount - 1
+                        })
 
-                await    fetch('/api/CommunityTagPerCommunityId/'  +'{{.Id}}')
-                    .then(r => {
-                        r.json().then(body => {
-                           for (let index = 0; index < body.length; index++) {
-                              this.form.tags.push( body[index]['Tag'] )
-                      
-                           }
-                          //  this.showSpinner = false
-                          spinnercount = spinnercount-1
-                        });
-                    })
-                    .catch(e => {
-                        console.log(e)
-                        spinnercount = spinnercount-1
-                })
+                    await fetch('/api/CommunitySponsorsPerCommunityId/' + '{{.Id}}')
+                        .then(r => {
+                            r.json().then(body => {
+                                for (let index = 0; index < body.length; index++) {
+                                    this.form.sponsors.push({ displayName: body[index]['UserPrincipalName'], mail: body[index]['UserPrincipalName'] })
+                                }
+                                //   this.showSpinner = false
+                                spinnercount = spinnercount - 1
+                            });
+                        })
+                        .catch(e => {
+                            console.log(e)
+                            spinnercount = spinnercount - 1
+                        })
 
-                if (spinnercount < 1 ){
-                    his.showSpinner = false
+                    await fetch('/api/CommunityTagPerCommunityId/' + '{{.Id}}')
+                        .then(r => {
+                            r.json().then(body => {
+                                for (let index = 0; index < body.length; index++) {
+                                    this.form.tags.push(body[index]['Tag'])
+
+                                }
+                                //  this.showSpinner = false
+                                spinnercount = spinnercount - 1
+                            });
+                        })
+                        .catch(e => {
+                            console.log(e)
+                            spinnercount = spinnercount - 1
+                        })
+
+                    if (spinnercount < 1) {
+                        this.showSpinner = false
+                    }
                 }
-                this.getUsersList()
 
+                this.getUsersList()
             },
-          
+            
+
 
             submit() {
-             
-                this.showResult("submitted", "Processing", "Please wait while processing your request.")
-                 if (!this.form.id  )
-                     {
-                         this.form.id = 0
- 
-                     }
+                var modal = Alpine.store('master').modal
+                modal.update('loading', 'Saving', 'Please wait.', '', '')
+                if (!this.form.id) {
+                    this.form.id = 0
 
-                Alpine.store('master').postData('/api/community', this.form, "Your community has been created.", "Go to communities list", "/communities/list")                
-             
+                }
+
+                Alpine.store('master').postData('/api/community', this.form, "Your community has been created.", "Go to communities list", "/communities/list")
+
             },
             tag() {
-            
+
                 this.form.tags.push(document.getElementById('tag').value)
                 document.getElementById('tag').value = "";
-          
+
             },
             datapush() {
                 this.form.sponsors.push(this.sponsors.data.filter(i => i.mail == this.sponsors.selected)[0])
-                this.sponsors.selected=''
+                this.sponsors.selected = ''
             },
             removeField(sponsors) {
-                this.form.sponsors.splice( this.form.sponsors.indexOf(sponsors), 1);
-             },
-             removetag(tags) {
-                this.form.tags.splice( this.form.tags.indexOf(tags), 1);
-             },
+                this.form.sponsors.splice(this.form.sponsors.indexOf(sponsors), 1);
+            },
+            removetag(tags) {
+                this.form.tags.splice(this.form.tags.indexOf(tags), 1);
+            },
             addNewField() {
-    
+
                 this.fields.push({ id: new Date().getTime() + this.fields.length });
             }
             ,
@@ -314,10 +320,10 @@
 
             get isValid() {
                 if (
-                    ( !!this.form.name &&
-                    !!this.form.url &&
-                    !!this.form.description &&
-                    !!this.form.notes ) &&
+                    (!!this.form.name &&
+                        !!this.form.url &&
+                        !!this.form.description &&
+                        !!this.form.notes) &&
                     this.form.sponsors.length >= 2) {
                     return true
                 } else {
