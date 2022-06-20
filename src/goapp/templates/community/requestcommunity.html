@@ -84,24 +84,43 @@
                     </div>
 
 
-                    <div class="  border items-center   ">
+                    <div class="  border items-center  ">
                          
                      
                         <template x-for="(sponsor, i) in form.sponsors">
-                            <div style="display: flex; " class="border" >
+                            <div style="display: flex; " class="border px-2 py-2" >
                                 <div style="flex-grow: 1;" x-text="sponsor.displayName" > </div>
                                 <div> <button   type="button" class="btn btn-danger btn-small   "
                                     @click="removeField(sponsor)">&times;</button></div>
                               </div>
                         </template>
+                    </div>
+
+                <div>
+                    <h3 class="text-lg font-medium leading-6 text-gray-900">Tag</h3>
+                </div>
+                <div> <input type="text" name="tag" id="tag"   maxlength="50" @keyup.enter="tag()"
+                    class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md border-2">
                 </div>
 
 
+                <div class="  border items-center  ">
+                        
+                    
+                    <template x-for="(tag, i) in form.tags">
+                        <div style="display: flex; " class="border px-2 py-2" >
+                            <div style="flex-grow: 1;" x-text="tag" > </div>
+                            <div> <button   type="button" class="btn btn-danger btn-small   "
+                                @click="removetag(tag)">&times;</button></div>
+                            </div>
+                    </template>
+                </div>
+
             </div>
 
-
-
-        </div>
+            
+    
+         </div>
         <div class="basis-1/2 md:base-full  md:flex-row mx-3">
             <div class="flex flex-col  ">
                 <div>
@@ -119,6 +138,8 @@
             </div> 
             </div>
         </div>
+        
+      
 </div>
 
 <div>
@@ -146,6 +167,7 @@
                 notes: '',
                 isExternal: false,
                 sponsors:[ ],
+                tags:[ ],
             },
             sponsors:{
                 template:'',
@@ -189,10 +211,10 @@
                 this.modalText = title
                 this.modalSubText = subtext
                 this.showModal = show
-            },onLoad()
+            },async onLoad()
             {
-                
-                fetch('/community/getcommunity/'  +'{{.Id}}')
+                spinnercount = 3
+               await fetch('/community/getcommunity/'  +'{{.Id}}')
                     .then(r => {
                         r.json().then(body => {
                             this.Communitylist = body
@@ -203,27 +225,49 @@
                             this.form.description =body[0]["Description"]
                             this.form.notes =body[0]["Notes"]
                             this.form.isExternal =body[0]["IsExternal"]
-                            this.showSpinner = false
+                          //  this.showSpinner = false
+                          spinnercount = spinnercount-1
                         });
                     })
                     .catch(e => {
                         console.log(e)
+                        spinnercount = spinnercount-1
                 })
 
-                fetch('/api/CommunitySponsorsPerCommunityId/'  +'{{.Id}}')
+                await fetch('/api/CommunitySponsorsPerCommunityId/'  +'{{.Id}}')
                     .then(r => {
                         r.json().then(body => {
                            for (let index = 0; index < body.length; index++) {
                               this.form.sponsors.push({displayName:body[index]['UserPrincipalName'],mail:body[index]['UserPrincipalName']})
                            }
-                            this.showSpinner = false
+                         //   this.showSpinner = false
+                         spinnercount = spinnercount-1
                         });
                     })
                     .catch(e => {
                         console.log(e)
+                        spinnercount = spinnercount-1
+                    }) 
+
+                await    fetch('/api/CommunityTagPerCommunityId/'  +'{{.Id}}')
+                    .then(r => {
+                        r.json().then(body => {
+                           for (let index = 0; index < body.length; index++) {
+                              this.form.tags.push( body[index]['Tag'] )
+                      
+                           }
+                          //  this.showSpinner = false
+                          spinnercount = spinnercount-1
+                        });
+                    })
+                    .catch(e => {
+                        console.log(e)
+                        spinnercount = spinnercount-1
                 })
 
-                
+                if (spinnercount < 1 ){
+                    his.showSpinner = false
+                }
                 this.getUsersList()
 
             },
@@ -241,12 +285,21 @@
                 Alpine.store('master').postData('/api/community', this.form, "Your community has been created.", "Go to communities list", "/communities/list")                
              
             },
+            tag() {
+            
+                this.form.tags.push(document.getElementById('tag').value)
+                document.getElementById('tag').value = "";
+          
+            },
             datapush() {
                 this.form.sponsors.push(this.sponsors.data.filter(i => i.mail == this.sponsors.selected)[0])
                 this.sponsors.selected=''
             },
             removeField(sponsors) {
                 this.form.sponsors.splice( this.form.sponsors.indexOf(sponsors), 1);
+             },
+             removetag(tags) {
+                this.form.tags.splice( this.form.tags.indexOf(tags), 1);
              },
             addNewField() {
     

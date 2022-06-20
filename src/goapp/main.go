@@ -47,6 +47,7 @@ func main() {
 	mux.Handle("/api/community", loadAzGHAuthPage(rtApis.CommunityAPIHandler))
 	mux.HandleFunc("/api/communitySponsors", rtApis.CommunitySponsorsAPIHandler)
 	mux.HandleFunc("/api/CommunitySponsorsPerCommunityId/{id}", rtApis.CommunitySponsorsPerCommunityId)
+	mux.HandleFunc("/api/CommunityTagPerCommunityId/{id}", rtApis.CommunityTagPerCommunityId)
 	//mux.Handle("/projects/my", loadAzGHAuthPage(rtProjects.MyProjects))
 	//mux.Handle("/projects", loadAzGHAuthPage(rtProjects.GetUserProjects))
 	//mux.Handle("/projects/{id}", loadAzGHAuthPage(rtProjects.GetRequestStatusByProject))
