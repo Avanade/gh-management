@@ -13,5 +13,5 @@ jobs:
       - uses: actions/checkout@v1
       - uses: azure/sql-action@master
         with:        
-          connection-string: ${{ secrets.APPROVALSYSTEMDB_CONNECTION_STRING }}
+          connection-string: ${{ secrets.APPROVALSYSTEMDB_CONNECTION_STRING_UAT }}
           project-file: 'src/approvalsystem/sqldb/ApprovalSystemDb/ApprovalSystemDb.sqlproj'
