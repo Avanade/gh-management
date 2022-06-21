@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
-      - uses: azure/sql-action@master
+      - uses: azure/sql-action@v1.3
         with:        
           connection-string: ${{ secrets.APPROVALSYSTEMDB_CONNECTION_STRING_UAT }}
           project-file: 'src/approvalsystem/sqldb/ApprovalSystemDb/ApprovalSystemDb.sqlproj'
