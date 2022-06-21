@@ -14,7 +14,7 @@ SELECT
 	PA.[ApprovalDate], PA.[ApprovalRemarks]
     
 FROM 
-	[dbo].[ProjectApprovals] PA
+	ProjectApprovals PA
 	INNER JOIN ApprovalTypes T ON PA.ApprovalTypeId = T.Id
 	INNER JOIN Projects P ON PA.ProjectId = P.Id
 	INNER JOIN Users U1 ON P.CreatedBy = U1.UserPrincipalName
