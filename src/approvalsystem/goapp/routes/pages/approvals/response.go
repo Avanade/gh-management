@@ -187,12 +187,11 @@ func postCallback(itemId string) {
 
 		res := <-ch
 
-		var isCallbackFailed bool
-
-		if res.StatusCode == 200 {
-			isCallbackFailed = false
-		} else {
-			isCallbackFailed = true
+		isCallbackFailed := true
+		if res != nil {
+			if res.StatusCode == 200 {
+				isCallbackFailed = false
+			}
 		}
 		params := map[string]interface{}{
 			"ItemId":           itemId,
@@ -207,7 +206,9 @@ func postCallback(itemId string) {
 func getHttpPostResponseStatus(url string, data interface{}, ch chan *http.Response) {
 	jsonReq, err := json.Marshal(data)
 	res, err := http.Post(url, "application/json", bytes.NewBuffer(jsonReq))
-	handleError(err)
+	if err != nil {
+		ch <- nil
+	}
 	ch <- res
 }
 

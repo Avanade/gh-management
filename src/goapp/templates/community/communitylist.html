@@ -24,11 +24,11 @@
                 template: "",
                 headers: 
                 [
-                    { Name: "Name ", value: "Name" },
-                    { Name: "Description ", value: "Description" },
-                    { Name: "URL ", value: "Url" },
-                    { Name: "Notes ", value: "Notes" },
-                    { Name: "TradeAssocId ", value: "TradeAssocId" },
+                    { name: "Name ", value: "Name" },
+                    { name: "Description ", value: "Description" },
+                    { name: "URL ", value: "Url" },
+                    { name: "Notes ", value: "Notes" },
+                    { name: "TradeAssocId ", value: "TradeAssocId" },
                 ]
                 ,
                 data:[]
@@ -36,6 +36,8 @@
             },
 
             getCommunity() {
+                var modal = Alpine.store('master').modal
+                modal.update('loading', 'Loading', 'Please wait', '', '')
 
                 fetch('/community')
                     .then(r => {
@@ -44,9 +46,10 @@
                             this.tbl.data = body    
                             this.showSpinner = false
                         });
+                        modal.visible=false
                     })
                     .catch(e => {
-                        console.log(e)
+                        modal.update('error', 'Error getting data', 'Please try again', '', '')
                     })
                  var dt = new clsDataTable()
                 this.tbl.template = dt.template(
