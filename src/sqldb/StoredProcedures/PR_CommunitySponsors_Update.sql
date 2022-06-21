@@ -1,13 +1,4 @@
-/****** Object:  StoredProcedure [dbo].[PR_CommunitySponsors_Update]    Script Date: 6/6/2022 4:51:34 PM ******/
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
--- =============================================
--- Author:      <Author, , Name>
--- Create Date: <Create Date, , >
--- Description: <Description, , >
--- =============================================
+
 create  PROCEDURE [dbo].[PR_CommunitySponsors_Update]
 (
     -- Add the parameters for the stored procedure here
