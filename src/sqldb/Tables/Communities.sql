@@ -6,8 +6,11 @@
     [Description] varchar(255) NULL,
     [Notes] varchar(255) NULL,
     [TradeAssocId] varchar(50) NULL,
+    [IsExternal] BIT NOT NULL DEFAULT 0,
+    [ApprovalStatusId] INT NOT NULL DEFAULT 1,
     [Created] DATETIME NOT NULL DEFAULT getdate(), 
     [CreatedBy] VARCHAR(100) NULL, 
     [Modified] DATETIME NOT NULL DEFAULT getdate(), 
     [ModifiedBy] VARCHAR(100) NULL
+    CONSTRAINT FK_ApprovalStatus_Communities FOREIGN KEY (ApprovalStatusId) REFERENCES ApprovalStatus(Id)
 )
