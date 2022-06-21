@@ -1,14 +1,4 @@
-/****** Object:  StoredProcedure [dbo].[PR_CommunitySponsors_Insert]    Script Date: 6/21/2022 3:10:31 PM ******/
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
--- =============================================
--- Author:      <Author, , Name>
--- Create Date: <Create Date, , >
--- Description: <Description, , >
--- =============================================
-ALTER PROCEDURE  [dbo].[PR_CommunitySponsors_Insert]
+Create PROCEDURE  [dbo].[PR_CommunitySponsors_Insert]
 (
     -- Add the parameters for the stored procedure here
 		@CommunityId int,

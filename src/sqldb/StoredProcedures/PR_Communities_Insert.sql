@@ -1,8 +1,4 @@
-/****** Object:  StoredProcedure [dbo].[PR_Communities_Insert]    Script Date: 6/21/2022 2:52:49 PM ******/
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
+
 create PROCEDURE [dbo].[PR_Communities_Insert]
 (
 			@Name varchar(50),
