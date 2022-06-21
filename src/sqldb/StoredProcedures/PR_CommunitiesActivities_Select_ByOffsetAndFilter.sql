@@ -3,7 +3,11 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-CREATE PROCEDURE [dbo].[PR_CommunityActivities_Select]
+CREATE PROCEDURE [dbo].[PR_CommunitiesActivities_Select_ByOffsetAndFilter](
+	@offset int,
+	@filter int,
+	@ var(5)
+)
 AS
 BEGIN
     SET NOCOUNT ON
@@ -28,5 +32,7 @@ BEGIN
 		SELECT * FROM [dbo].[CommunityActivitiesContributionAreas] WHERE IsPrimary = 1
 	  ) AS caca ON caca.CommunityActivityId = ca.Id
 	  LEFT JOIN [dbo].[ContributionAreas] AS car ON car.Id = caca.ContributionAreaId
-	  ORDER BY ca.Modified ASC
+	  ORDER BY ca.Modified ASC 
+	  OFFSET @offset ROWS 
+	  FETCH NEXT @filter ROWS ONLY
 END

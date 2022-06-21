@@ -2065,6 +2065,10 @@ select {
   width: 0.5rem;
 }
 
+.w-20 {
+  width: 5rem;
+}
+
 .min-w-full {
   min-width: 100%;
 }
@@ -3619,6 +3623,10 @@ select {
 
 .pr-0 {
   padding-right: 0px;
+}
+
+.pr-10 {
+  padding-right: 2.5rem;
 }
 
 .text-left {

@@ -7,6 +7,7 @@ import (
 	db "main/pkg/ghmgmtdb"
 	session "main/pkg/session"
 	"net/http"
+	"strconv"
 )
 
 type ActivityDto struct {
@@ -36,7 +37,18 @@ type CommunityActivitiesContributionAreasDto struct {
 }
 
 func GetActivities(w http.ResponseWriter, r *http.Request) {
-	result := db.CommunitiesActivities_Select()
+	var result interface{}
+
+	params := r.URL.Query()
+
+	if params.Has("offset") && params.Has("filter") {
+		filter, _ := strconv.Atoi(params["filter"][0])
+		offset, _ := strconv.Atoi(params["offset"][0])
+		result = db.CommunitiesActivities_Select_ByOffsetAndFilter(offset, filter)
+	} else {
+		result = db.CommunitiesActivities_Select()
+	}
+
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(result)

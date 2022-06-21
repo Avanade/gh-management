@@ -248,7 +248,20 @@ func CommunitiesActivities_Select() interface{} {
 	db := ConnectDb()
 	defer db.Close()
 
-	result, _ := db.ExecuteStoredProcedureWithResult("PR_CommunitiesActivities_Select", nil)
+	result, _ := db.ExecuteStoredProcedureWithResult("PR_CommunityActivities_Select", nil)
+	return result
+}
+
+func CommunitiesActivities_Select_ByOffsetAndFilter(offset, filter int) interface{} {
+	db := ConnectDb()
+	defer db.Close()
+
+	param := map[string]interface{}{
+		"Offset": offset,
+		"Filter": filter,
+	}
+
+	result, _ := db.ExecuteStoredProcedureWithResult("PR_CommunityActivities_Select_ByOffsetAndFilter", param)
 	return result
 }
 
@@ -614,13 +627,13 @@ func PopulateCommunityApproval(id int64) (CommunityApprovals []models.TypCommuni
 	for _, v := range result {
 		data := models.TypCommunityApprovals{
 			Id:                         v["Id"].(int64),
-			CommunityId:                  v["CommunityId"].(int64),
-			CommunityName:                v["CommunityName"].(string),
-			CommunityUrl:             v["CommunityUrl"].(string),
-			CommunityDescription:         v["CommunityDescription"].(string),
-			CommunityNotes:         v["CommunityNotes"].(string),
-			CommunityTradeAssocId:         v["CommunityTradeAssocId"].(string),
-			CommunityIsExternal:         v["CommunityIsExternal"].(bool),
+			CommunityId:                v["CommunityId"].(int64),
+			CommunityName:              v["CommunityName"].(string),
+			CommunityUrl:               v["CommunityUrl"].(string),
+			CommunityDescription:       v["CommunityDescription"].(string),
+			CommunityNotes:             v["CommunityNotes"].(string),
+			CommunityTradeAssocId:      v["CommunityTradeAssocId"].(string),
+			CommunityIsExternal:        v["CommunityIsExternal"].(bool),
 			RequesterName:              v["RequesterName"].(string),
 			RequesterGivenName:         v["RequesterGivenName"].(string),
 			RequesterSurName:           v["RequesterSurName"].(string),
@@ -643,13 +656,13 @@ func GetFailedCommunityApprovalRequests() (CommunityApprovals []models.TypCommun
 	for _, v := range result {
 		data := models.TypCommunityApprovals{
 			Id:                         v["Id"].(int64),
-			CommunityId:                  v["CommunityId"].(int64),
-			CommunityName:                v["CommunityName"].(string),
-			CommunityUrl:             v["CommunityUrl"].(string),
-			CommunityDescription:         v["CommunityDescription"].(string),
-			CommunityNotes:         v["CommunityNotes"].(string),
-			CommunityTradeAssocId:         v["CommunityTradeAssocId"].(string),
-			CommunityIsExternal:         v["CommunityIsExternal"].(bool),
+			CommunityId:                v["CommunityId"].(int64),
+			CommunityName:              v["CommunityName"].(string),
+			CommunityUrl:               v["CommunityUrl"].(string),
+			CommunityDescription:       v["CommunityDescription"].(string),
+			CommunityNotes:             v["CommunityNotes"].(string),
+			CommunityTradeAssocId:      v["CommunityTradeAssocId"].(string),
+			CommunityIsExternal:        v["CommunityIsExternal"].(bool),
 			RequesterName:              v["RequesterName"].(string),
 			RequesterGivenName:         v["RequesterGivenName"].(string),
 			RequesterSurName:           v["RequesterSurName"].(string),
