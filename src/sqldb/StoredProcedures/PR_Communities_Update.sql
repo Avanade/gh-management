@@ -6,6 +6,7 @@ create PROCEDURE [dbo].[PR_Communities_Update]
 			@Description varchar(255),
 			@Notes varchar(255),
 			@TradeAssocId varchar(255),
+            @IsExternal int,
 			@CreatedBy  varchar(50),
 			@ModifiedBy  varchar(50)
 ) AS
@@ -16,6 +17,7 @@ UPDATE [dbo].[Communities]
       ,[Description] = @Description
       ,[Notes] = @Notes
       ,[TradeAssocId] = @TradeAssocId
+      ,IsExternal=@IsExternal
       ,[Created] =GETDATE()
       ,[CreatedBy] = @CreatedBy
       ,[Modified] = GETDATE()
