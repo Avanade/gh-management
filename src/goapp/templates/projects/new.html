@@ -21,7 +21,7 @@
                         <h3 class="text-lg font-medium leading-6 text-gray-900">Project name</h3>
                     </div>
                     <div> <input type="text" name="name" id="name" x-model="form.name" maxlength="50"
-                            class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md border-2">
+                            class="mt-1 focus:ring-orange-500 focus:border-orange-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md border-2">
                     </div>
                     <div>The title should represent what the asset does. Avoid acronyms, code names and the use of the
                         word
@@ -41,7 +41,7 @@
                             <!-- ****** CO-OWNER CB ****** -->
                         <div>
                             <div class="relative mt-1" >
-                                <input id="coowner" name="coowner" @click="coowner.show = !coowner.show" x-model="form.coowner" type="text" class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md border-2" role="combobox" aria-controls="options" aria-expanded="false">
+                                <input id="coowner" name="coowner" @click="coowner.show = !coowner.show" x-model="form.coowner" type="text" class="mt-1 focus:ring-orange-500 focus:border-orange-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md border-2" role="combobox" aria-controls="options" aria-expanded="false">
 
                                 <button x-show="!isCoownerempty" type="button" class="absolute inset-y-0 right-0 flex items-center rounded-r-md px-2 focus:outline-none">
                                 <svg id="clearBtn" class="h-5 w-5 text-gray-400" @click="clearCoowner" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M256 8C119 8 8 119 8 256s111 248 248 248 248-111 248-248S393 8 256 8zm0 448c-110.5 0-200-89.5-200-200S145.5 56 256 56s200 89.5 200 200-89.5 200-200 200zm101.8-262.2L295.6 256l62.2 62.2c4.7 4.7 4.7 12.3 0 17l-22.6 22.6c-4.7 4.7-12.3 4.7-17 0L256 295.6l-62.2 62.2c-4.7 4.7-12.3 4.7-17 0l-22.6-22.6c-4.7-4.7-4.7-12.3 0-17l62.2-62.2-62.2-62.2c-4.7-4.7-4.7-12.3 0-17l22.6-22.6c4.7-4.7 12.3-4.7 17 0l62.2 62.2 62.2-62.2c4.7-4.7 12.3-4.7 17 0l22.6 22.6c4.7 4.7 4.7 12.3 0 17z"/></svg>
@@ -58,7 +58,7 @@
                                         </span>
 
                                         <span class="ml-2 truncate text-gray-500" >
-                                                &nbsp@{{$user.GithubUser}}
+                                                &nbsp@{{$user.GitHubUser}}
                                         </span>
                                         </div>
                                 
@@ -96,7 +96,7 @@
                         <h3 class="text-lg font-medium leading-6 text-gray-900">Project description</h3>
                     </div>
                     <div>
-                        <textarea name="description" id="description" x-model="form.description"  rows="3"  maxlength="1000"    class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md  border-2">
+                        <textarea name="description" id="description" x-model="form.description"  rows="3"  maxlength="1000"    class="mt-1 focus:ring-orange-500 focus:border-orange-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md  border-2">
                         </textarea>
                     </div>
                     <div>Be verbose in the description. Describe what the asset does and how it achieves this. If your
@@ -116,7 +116,7 @@
         <div class="flex items-start">
             <div class="flex items-center h-5">
                 <input id="confirm1" name="confirmAvaIP" type="checkbox"   x-model="form.confirmAvaIP"
-                    class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded">
+                    class="focus:ring-orange-500 h-4 w-4 text-orange-600 border-gray-300 rounded">
             </div>
             <div class="ml-3 text-sm">
                 <p class="text-gray-500">
@@ -130,7 +130,7 @@
         <div class="flex items-start">
             <div class="flex items-center h-5">
                 <input id="confirm2" name="confirmSecIPScan" type="checkbox"   x-model="form.confirmSecIPScan"
-                    class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded">
+                    class="focus:ring-orange-500 h-4 w-4 text-orange-600 border-gray-300 rounded">
             </div>
             <div class="ml-3 text-sm">
 
@@ -149,7 +149,7 @@
             <div align="right">
                 <button type="submit"
                     class="bg-orange-500  inline-flex justify-center py-2 px-4 rounded-md text-white"
-                    :class="!isValid ? 'bg-orange-200' : ''"
+                    :class="!isValid ? 'bg-orange-100' : ''"
                     x-bind:disabled="!isValid"
                     @click="submit()"
                     >Submit
