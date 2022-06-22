@@ -72,7 +72,7 @@ class clsDataTable {
                                         <template x-for="(i,n) in filteredData">
                                             <tr>
                                                 <template x-for="(h,n) in ${headers}">
-                                                <td class="whitespace-nowrap border-b border-gray-200 py-4 pl-4 pr-3 text-sm text-gray-900 sm:pl-6 lg:pl-8">
+                                                <td class="border-b border-gray-200 py-4 pl-4 pr-3 text-sm text-gray-900 sm:pl-6 lg:pl-8">
                                                     <a :href="viewUrlUpdate(i)">
                                                         <span x-text="i[h.value]"></span>
                                                     </a>
