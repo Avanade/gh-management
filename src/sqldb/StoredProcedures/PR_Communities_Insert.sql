@@ -55,6 +55,7 @@ BEGIN
 		@Description ,
 		@Notes ,
 		@TradeAssocId ,
+		@IsExternal,
 		@CreatedBy ,
 		@ModifiedBy
 
