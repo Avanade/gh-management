@@ -654,15 +654,19 @@ func CommunityApprovalUpdateGUID(id int64, ApprovalSystemGUID string) {
 }
 
 // APPROVAL TYPES
-func SelectApprovalTypes() interface{} {
+func SelectApprovalTypes() (interface{}, error) {
 	db := ConnectDb()
 	defer db.Close()
 
-	result, _ := db.ExecuteStoredProcedureWithResult("PR_ApprovalTypes_Select", nil)
-	return result
+	result, err := db.ExecuteStoredProcedureWithResult("PR_ApprovalTypes_Select", nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return result, nil
 }
 
-func SelectApprovalTypeById(id int) models.ApprovalType {
+func SelectApprovalTypeById(id int) (interface{}, error) {
 	db := ConnectDb()
 	defer db.Close()
 
@@ -670,13 +674,47 @@ func SelectApprovalTypeById(id int) models.ApprovalType {
 		"Id": id,
 	}
 
-	result, _ := db.ExecuteStoredProcedureWithResult("PR_ApprovalTypes_Select", param)
-
-	approvalType := models.ApprovalType {
-		Id : result[0]["Id"].(int64),
-		Name : result[0]["Name"].(string),
-		ApproverUserPrincipalName : result[0]["User"]
+	result, err := db.ExecuteStoredProcedureWithResult("PR_ApprovalTypes_Select_ById", param)
+	if err != nil {
+		return nil, err
 	}
 
-	return result
+	return &result[0], nil
+}
+
+func InsertApprovalType(approvalType models.ApprovalType) (int, error) {
+	db := ConnectDb()
+	defer db.Close()
+
+	param := map[string]interface{}{
+		"Name":                      approvalType.Name,
+		"ApproverUserPrincipalName": approvalType.ApproverUserPrincipalName,
+		"IsActive":                  approvalType.IsActive,
+		"CreatedBy":                 approvalType.CreatedBy,
+	}
+
+	result, err := db.ExecuteStoredProcedureWithResult("PR_ApprovalTypes_Insert", param)
+	if err != nil {
+		return 0, err
+	}
+	return int(result[0]["Id"].(int64)), nil
+}
+
+func UpdateApprovalType(approvalType models.ApprovalType) (int, error) {
+	db := ConnectDb()
+	defer db.Close()
+
+	param := map[string]interface{}{
+		"Id":                        approvalType.Id,
+		"Name":                      approvalType.Name,
+		"ApproverUserPrincipalName": approvalType.ApproverUserPrincipalName,
+		"IsActive":                  approvalType.IsActive,
+		"CreatedBy":                 approvalType.CreatedBy,
+	}
+
+	result, err := db.ExecuteStoredProcedureWithResult("PR_ApprovalTypes_Update_ById", param)
+	if err != nil {
+		return 0, err
+	}
+	return int(result[0]["Id"].(int64)), nil
 }

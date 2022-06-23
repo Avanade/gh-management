@@ -2,8 +2,15 @@ package routes
 
 import (
 	"encoding/json"
-	"errors"
+	"fmt"
+	db "main/pkg/ghmgmtdb"
+	session "main/pkg/session"
 	"net/http"
+	"strconv"
+
+	"main/models"
+
+	"github.com/gorilla/mux"
 )
 
 type ApprovalTypeDto struct {
@@ -14,26 +21,41 @@ type ApprovalTypeDto struct {
 }
 
 func GetApprovalTypes(w http.ResponseWriter, r *http.Request) {
-	// result := db.PRActivityTypes_Select()
-	result := ""
+	result, err := db.SelectApprovalTypes()
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+	}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(result)
 }
 
 func GetApprovalTypeById(w http.ResponseWriter, r *http.Request) {
-	// result := db.PRActivityTypes_Select()
-	result := ""
+	vars := mux.Vars(r)
+	id, _ := strconv.Atoi(vars["id"])
+	result, err := db.SelectApprovalTypeById(id)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+	}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(result)
 }
 
 func CreateApprovalType(w http.ResponseWriter, r *http.Request) {
+	sessionaz, _ := session.Store.Get(r, "auth-session")
+	iprofile := sessionaz.Values["profile"]
+	profile := iprofile.(map[string]interface{})
+	username := fmt.Sprint(profile["preferred_username"])
+
 	var approvalTypeDto ApprovalTypeDto
 	json.NewDecoder(r.Body).Decode(&approvalTypeDto)
-	// id, err := db.PRActivityTypes_Insert(activityType.Name)
-	id, err := 0, errors.New("THIS IS ERROR")
+	id, err := db.InsertApprovalType(models.ApprovalType{
+		Name:                      approvalTypeDto.Name,
+		ApproverUserPrincipalName: approvalTypeDto.ApproverUserPrincipalName,
+		IsActive:                  approvalTypeDto.IsActive,
+		CreatedBy:                 username,
+	})
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 	}
@@ -42,13 +64,28 @@ func CreateApprovalType(w http.ResponseWriter, r *http.Request) {
 }
 
 func EditApprovalTypeById(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+
+	sessionaz, _ := session.Store.Get(r, "auth-session")
+	iprofile := sessionaz.Values["profile"]
+	profile := iprofile.(map[string]interface{})
+	username := fmt.Sprint(profile["preferred_username"])
+
 	var approvalTypeDto ApprovalTypeDto
 	json.NewDecoder(r.Body).Decode(&approvalTypeDto)
-	// id, err := db.PRActivityTypes_Insert(activityType.Name)
-	id, err := 0, errors.New("THIS IS ERROR")
+
+	id, _ := strconv.Atoi(vars["id"])
+	approvalTypeId, err := db.UpdateApprovalType(models.ApprovalType{
+		Id:                        id,
+		Name:                      approvalTypeDto.Name,
+		ApproverUserPrincipalName: approvalTypeDto.ApproverUserPrincipalName,
+		IsActive:                  approvalTypeDto.IsActive,
+		CreatedBy:                 username,
+	})
+
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 	}
-	approvalTypeDto.Id = id
+	approvalTypeDto.Id = approvalTypeId
 	json.NewEncoder(w).Encode(approvalTypeDto)
 }

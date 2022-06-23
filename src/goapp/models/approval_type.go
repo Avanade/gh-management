@@ -5,4 +5,8 @@ type ApprovalType struct {
 	Name                      string
 	ApproverUserPrincipalName string
 	IsActive                  bool
+	Created                   string
+	CreatedBy                 string
+	Modified                  string
+	ModifiedBy                string
 }
