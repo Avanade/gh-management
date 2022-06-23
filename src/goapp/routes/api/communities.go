@@ -92,7 +92,9 @@ func CommunityAPIHandler(w http.ResponseWriter, r *http.Request) {
 			}
 
 		}
-		go comm.RequestCommunityApproval(int64(id))
+		if body.Id == 0 {
+			go comm.RequestCommunityApproval(int64(id))
+		}
 	case "GET":
 		param := map[string]interface{}{
 
