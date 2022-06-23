@@ -20,7 +20,7 @@
                     <div>
                         <h3 class="text-lg font-medium leading-6 text-gray-900">Community Name*</h3>
                     </div>
-                    <div> <input type="text" name="name" id="name" x-model="form.name" maxlength="50"
+                    <div> <input type="text" x-model="form.name" maxlength="50"
                             class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md border-2">
                     </div>
                 </div>
@@ -204,7 +204,7 @@
 
                 var dd = new clsDropdown()
                 this.sponsors.template = dd.template(
-                    'ddBusSponsor',
+                    'dd1',
                     'sponsors.selected',
                     'filteredSponsorsData',
                     'displayName',
