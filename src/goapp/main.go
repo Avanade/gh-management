@@ -81,6 +81,12 @@ func main() {
 	muxApi.Handle("/allusers", loadAzAuthPage(rtApi.GetAllUserFromActiveDirectory))
 	muxApi.Handle("/allavanadeprojects", loadAzGHAuthPage(rtApi.GetAvanadeProjects))
 
+	//API FOR APPROVAL TYPES
+	muxApi.HandleFunc("/approval/types", rtApi.CreateApprovalType).Methods("POST")
+	muxApi.HandleFunc("/approval/types/{id}", rtApi.EditApprovalTypeById).Methods("PUT")
+	muxApi.HandleFunc("/approval/types", rtApi.GetApprovalTypes).Methods("GET")
+	muxApi.HandleFunc("/approval/types/{id}", rtApi.GetApprovalTypeById).Methods("GET")
+
 	muxAdmin := mux.PathPrefix("/admin").Subrouter()
 	muxAdmin.Handle("/members", loadAzGHAuthPage(rtAdmin.ListCommunityMembers))
 

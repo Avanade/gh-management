@@ -593,13 +593,13 @@ func PopulateCommunityApproval(id int64) (CommunityApprovals []models.TypCommuni
 	for _, v := range result {
 		data := models.TypCommunityApprovals{
 			Id:                         v["Id"].(int64),
-			CommunityId:                  v["CommunityId"].(int64),
-			CommunityName:                v["CommunityName"].(string),
-			CommunityUrl:             v["CommunityUrl"].(string),
-			CommunityDescription:         v["CommunityDescription"].(string),
-			CommunityNotes:         v["CommunityNotes"].(string),
-			CommunityTradeAssocId:         v["CommunityTradeAssocId"].(string),
-			CommunityIsExternal:         v["CommunityIsExternal"].(bool),
+			CommunityId:                v["CommunityId"].(int64),
+			CommunityName:              v["CommunityName"].(string),
+			CommunityUrl:               v["CommunityUrl"].(string),
+			CommunityDescription:       v["CommunityDescription"].(string),
+			CommunityNotes:             v["CommunityNotes"].(string),
+			CommunityTradeAssocId:      v["CommunityTradeAssocId"].(string),
+			CommunityIsExternal:        v["CommunityIsExternal"].(bool),
 			RequesterName:              v["RequesterName"].(string),
 			RequesterGivenName:         v["RequesterGivenName"].(string),
 			RequesterSurName:           v["RequesterSurName"].(string),
@@ -622,13 +622,13 @@ func GetFailedCommunityApprovalRequests() (CommunityApprovals []models.TypCommun
 	for _, v := range result {
 		data := models.TypCommunityApprovals{
 			Id:                         v["Id"].(int64),
-			CommunityId:                  v["CommunityId"].(int64),
-			CommunityName:                v["CommunityName"].(string),
-			CommunityUrl:             v["CommunityUrl"].(string),
-			CommunityDescription:         v["CommunityDescription"].(string),
-			CommunityNotes:         v["CommunityNotes"].(string),
-			CommunityTradeAssocId:         v["CommunityTradeAssocId"].(string),
-			CommunityIsExternal:         v["CommunityIsExternal"].(bool),
+			CommunityId:                v["CommunityId"].(int64),
+			CommunityName:              v["CommunityName"].(string),
+			CommunityUrl:               v["CommunityUrl"].(string),
+			CommunityDescription:       v["CommunityDescription"].(string),
+			CommunityNotes:             v["CommunityNotes"].(string),
+			CommunityTradeAssocId:      v["CommunityTradeAssocId"].(string),
+			CommunityIsExternal:        v["CommunityIsExternal"].(bool),
 			RequesterName:              v["RequesterName"].(string),
 			RequesterGivenName:         v["RequesterGivenName"].(string),
 			RequesterSurName:           v["RequesterSurName"].(string),
@@ -651,4 +651,32 @@ func CommunityApprovalUpdateGUID(id int64, ApprovalSystemGUID string) {
 		"ApprovalSystemGUID": ApprovalSystemGUID,
 	}
 	db.ExecuteStoredProcedure("PR_CommunityApproval_Update_ApprovalSystemGUID", param)
+}
+
+// APPROVAL TYPES
+func SelectApprovalTypes() interface{} {
+	db := ConnectDb()
+	defer db.Close()
+
+	result, _ := db.ExecuteStoredProcedureWithResult("PR_ApprovalTypes_Select", nil)
+	return result
+}
+
+func SelectApprovalTypeById(id int) models.ApprovalType {
+	db := ConnectDb()
+	defer db.Close()
+
+	param := map[string]interface{}{
+		"Id": id,
+	}
+
+	result, _ := db.ExecuteStoredProcedureWithResult("PR_ApprovalTypes_Select", param)
+
+	approvalType := models.ApprovalType {
+		Id : result[0]["Id"].(int64),
+		Name : result[0]["Name"].(string),
+		ApproverUserPrincipalName : result[0]["User"]
+	}
+
+	return result
 }
