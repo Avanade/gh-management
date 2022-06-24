@@ -666,6 +666,36 @@ func SelectApprovalTypes() (interface{}, error) {
 	return result, nil
 }
 
+func SelectApprovalTypesByFilter(offset, filter int, search string) (interface{}, error) {
+	db := ConnectDb()
+	defer db.Close()
+
+	param := map[string]interface{}{
+		"Offset": offset,
+		"Filter": filter,
+		"Search": search,
+	}
+
+	result, err := db.ExecuteStoredProcedureWithResult("PR_ApprovalTypes_Select_ByFilter", param)
+	if err != nil {
+		return nil, err
+	}
+
+	return result, nil
+}
+
+func SelectTotalApprovalTypes() int {
+	db := ConnectDb()
+	defer db.Close()
+
+	result, _ := db.ExecuteStoredProcedureWithResult("PR_ApprovalTypes_TotalCount", nil)
+	total, err := strconv.Atoi(fmt.Sprint(result[0]["Total"]))
+	if err != nil {
+		return 0
+	}
+	return total
+}
+
 func SelectApprovalTypeById(id int) (interface{}, error) {
 	db := ConnectDb()
 	defer db.Close()

@@ -21,13 +21,35 @@ type ApprovalTypeDto struct {
 }
 
 func GetApprovalTypes(w http.ResponseWriter, r *http.Request) {
-	result, err := db.SelectApprovalTypes()
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
+	var data interface{}
+	var total int
+
+	params := r.URL.Query()
+
+	if params.Has("offset") && params.Has("filter") {
+		filter, _ := strconv.Atoi(params["filter"][0])
+		offset, _ := strconv.Atoi(params["offset"][0])
+		search := params["search"][0]
+		data, _ = db.SelectApprovalTypesByFilter(offset, filter, search)
+	} else {
+		result, err := db.SelectApprovalTypes()
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+		}
+		data = result
 	}
+
+	total = db.SelectTotalApprovalTypes()
+
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(result)
+	json.NewEncoder(w).Encode(struct {
+		Data  interface{} `json:"data"`
+		Total int         `json:"total"`
+	}{
+		Data:  data,
+		Total: total,
+	})
 }
 
 func GetApprovalTypeById(w http.ResponseWriter, r *http.Request) {
