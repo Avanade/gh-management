@@ -1,26 +1,35 @@
 {{ define "content" }}
-<form x-data="approvalTypeForm" class="space-y-8 divide-y divide-gray-200" x-effect="onEffect">
+<form x-data="approvalTypeForm({
+    action : '{{ .Action }}',
+    id : '{{ .Id }}'
+})" class="space-y-8 divide-y divide-gray-200">
     <div class="space-y-8 divide-y divide-gray-200 sm:space-y-5">
         <div>
             <div>
-                <h3 class="text-lg leading-6 font-medium text-gray-900">{{ .Action }} Activity Type</h3>
+                <h3 class="text-lg leading-6 font-medium text-gray-900">{{ .Action }} Approval Type</h3>
                 <!-- <p class="mt-1 max-w-2xl text-sm text-gray-500">Description...</p> -->
             </div>
         </div>
         <div class="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-t sm:border-gray-200 sm:pt-5">
             <label for="Name" class="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2"> Name </label>
             <div class="mt-1 sm:mt-0 sm:col-span-2">
-                <input x-model="form.name" type="text" name="Name" id="Name" autocomplete="given-name" class="max-w-lg block w-full shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:max-w-xs sm:text-sm border-gray-300 rounded-md">
+                <input x-model="form.name" type="text" name="Name" id="Name" autocomplete="given-name" class="block w-full shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm border-gray-300 rounded-md">
             </div>
         </div>
         <div class="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-t sm:border-gray-200 sm:pt-5">
             <label for="approver" class="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2"> Approver </label>
             <div class="mt-1 sm:mt-0 sm:col-span-2">
-                <select id="approver" name="approver" class="max-w-lg block focus:ring-indigo-500 focus:border-indigo-500 w-full shadow-sm sm:max-w-xs sm:text-sm border-gray-300 rounded-md">
-                    <option>United States</option>
-                    <option>Canada</option>
-                    <option>Mexico</option>
-                </select>
+                <div 
+                    x-data="combobox({
+                            ajax: getAllUsers,
+                            id : 'mail',
+                            text : 'mail'
+                        })"
+                    x-modelable = "selected"
+                    x-model = "form.approver"
+                >
+                    <div x-html="template"></div>
+                </div>
             </div>
         </div>
         <div class="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-baseline">
@@ -32,11 +41,11 @@
                 <!-- <p class="text-sm text-gray-500">Description here...</p> -->
                 <div class="mt-4 space-y-4">
                   <div class="flex items-center">
-                    <input  x-model="form.status" value="true" id="active" name="status" type="radio" class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300">
+                    <input  x-model="form.status" value="true" type="radio" class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300">
                     <label for="active" class="ml-3 block text-sm font-medium text-gray-700"> Active </label>
                   </div>
                   <div class="flex items-center">
-                    <input  x-model="form.status" value="false" id="not_active" name="status" type="radio" class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300">
+                    <input  x-model="form.status" value="false" type="radio" class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300">
                     <label for="not_active" class="ml-3 block text-sm font-medium text-gray-700"> Not Active </label>
                   </div>
                 </div>
@@ -44,20 +53,66 @@
             </div>
           </div>
     </div>
+    <div class="pt-5">
+        <div class="flex justify-end">
+            <a href="/admin/approvaltypes" type="button" class="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">Cancel</a>
+            <button @click.prevent="onSubmitHandler" class="ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500">Submit</button>
+        </div>
+    </div>
 </form>
 
+<script src="/public/components/combobox.js"></script>
 <script type="text/javascript">
-    function approvalTypeForm(){
+    async function getAllUsers(){
+        const res = await fetch('/api/allusers')
+
+        const data = await res.json()
+        return data
+    }
+
+    function approvalTypeForm({
+        action = 'view',
+        id = null
+    }){
+
         return {
+            action: '',
+            id: null,
             form : {
                 name : '',
-                approver : '',
+                approver : [],
                 status : true,
             },
-            onEffect(){
-                console.log("NAME", this.form.name)
-                console.log("APPROVER", this.form.approver)
-                console.log("STATUS", this.form.status)
+            async init(){
+                this.action = action,
+                this.id = id
+
+                if (this.action == 'add') return;
+
+                const res = await fetch(`/api/approval/type/${this.id}`)
+                const data = await res.json()
+
+                this.form.name = data.Name;
+                this.form.approver = [{'id' : data.ApproverUserPrincipalName, 'text' : data.ApproverUserPrincipalName}]
+                this.form.status = data.IsActive.toString();
+            },
+            onSubmitHandler(){
+                switch (this.action.toLowerCase()) {
+                    case 'add':
+                        const data = {
+                            name : this.form.name,
+                            approver_user_principal_name : this.form.approver[0].id,
+                            is_active : this.form.status == 'true'
+                        }
+                        console.log(data)
+                        Alpine.store('master').modal.show()
+                        Alpine.store('master').postData("/api/approval/type", data, "Approval type has been added.", "Go to list of approval types", "/admin/approvaltypes")
+                        break;
+                
+                    case 'edit':
+
+                        break;
+                }
             }
         }
     }

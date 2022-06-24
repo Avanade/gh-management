@@ -14,10 +14,10 @@ import (
 )
 
 type ApprovalTypeDto struct {
-	Id                        int    `json:id`
-	Name                      string `json:name`
-	ApproverUserPrincipalName string `json:approver_user_principal_name`
-	IsActive                  bool   `json:is_active`
+	Id                        int    `json:"id"`
+	Name                      string `json:"name"`
+	ApproverUserPrincipalName string `json:"approver_user_principal_name"`
+	IsActive                  bool   `json:"is_active"`
 }
 
 func GetApprovalTypes(w http.ResponseWriter, r *http.Request) {
