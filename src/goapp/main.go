@@ -89,7 +89,9 @@ func main() {
 
 	muxAdmin := mux.PathPrefix("/admin").Subrouter()
 	muxAdmin.Handle("/members", loadAzGHAuthPage(rtAdmin.ListCommunityMembers))
-	muxAdmin.Handle("/approvaltypes", loadAzGHAuthPage(rtAdmin.ApprovalTypes))
+	muxAdmin.Handle("/approvaltypes", loadAzGHAuthPage(rtAdmin.ListApprovalTypes))
+	muxAdmin.Handle("/approvaltypes/add", loadAzGHAuthPage(rtAdmin.ApprovalTypeForm))
+	muxAdmin.Handle("/approvaltypes/{action:view|edit}/{id}", loadAzGHAuthPage(rtAdmin.ApprovalTypeForm))
 
 	mux.HandleFunc("/approvals/project/callback", rtProjects.UpdateApprovalStatusProjects).Methods("POST")
 	mux.HandleFunc("/approvals/community/callback", rtProjects.UpdateApprovalStatusCommunity).Methods("POST")
