@@ -252,13 +252,14 @@ func CommunitiesActivities_Select() interface{} {
 	return result
 }
 
-func CommunitiesActivities_Select_ByOffsetAndFilter(offset, filter int) interface{} {
+func CommunitiesActivities_Select_ByOffsetAndFilter(offset, filter int, search string) interface{} {
 	db := ConnectDb()
 	defer db.Close()
 
 	param := map[string]interface{}{
 		"Offset": offset,
 		"Filter": filter,
+		"Search": search,
 	}
 
 	result, _ := db.ExecuteStoredProcedureWithResult("PR_CommunityActivities_Select_ByOffsetAndFilter", param)
@@ -287,6 +288,18 @@ func CommunitiesActivities_Insert(body models.Activity) (int, error) {
 		return -1, err
 	}
 	return id, nil
+}
+
+func CommunitiesActivities_TotalCount() int {
+	db := ConnectDb()
+	defer db.Close()
+
+	result, _ := db.ExecuteStoredProcedureWithResult("PR_CommunityActivities_TotalCount", nil)
+	total, err := strconv.Atoi(fmt.Sprint(result[0]["Total"]))
+	if err != nil {
+		return 0
+	}
+	return total
 }
 
 func ActivityTypes_Select() interface{} {

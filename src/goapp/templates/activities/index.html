@@ -16,7 +16,9 @@
       <div class="-my-2 -mx-4 overflow-x-auto sm:-mx-6 lg:-mx-8">
         <div class="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
           <div x-data="table({
-            ajax : GetActivities,
+            callback : getActivities,
+            data : 'Data',
+            total : 'Total',
             columns : [
               { name : 'Date', value : 'Date' },
               { name : 'Activity', value : 'Name' },
@@ -32,104 +34,13 @@
     </div>
   </div>
 
+  <script src="/public/components/table.js"></script>
   <script type="text/javascript">
-    async function GetActivities(){
-        const res = await fetch('/api/activity')
+    async function getActivities(e){
+      const res = await fetch(`/api/activity?filter=${e.filter}&offset=${e.page}&search=${e.search}`)
 
-        const data = await res.json()
-        return data
-    }
-      const table = ({
-        ajax = undefined,
-        data = [],
-        columns = [
-          // { Name : 'String', Value : 'String'|0 }
-        ]
-      }) => {
-      return { 
-        columns : [],
-        data : [],
-        search : '',
-        filter : 10,
-        page : 0,
-        async init() {
-          this.columns = columns
-          // SET DATA
-            if(data.length > 0){
-              this.data = data
-            }
-            else {
-              this.data = await ajax()
-            }
-            console.log(this.data)
-        },
-        initRow(data){
-          let html = '';
-          this.columns.forEach(col => {
-            for (const key in data) {
-              if(key === col.value){
-                html = html.concat(`<td class="whitespace-nowrap py-4 px-3 text-sm text-gray-500">${data[key]}</td>`) 
-              }
-            }
-          });
-          return html;
-        },
-        template : `<!-- <nav class="bg-white px-4 py-3 flex items-center justify-between sm:px-6" aria-label="header">
-                      <div class="sm:block">
-                        <div>
-                          <label for="location" class="block text-sm font-medium text-gray-700">Filter</label>
-                          <select id="location" name="location" class="mt-1 block w-20 pl-3 pr-10 py-2 text-base text-center border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
-                            <option>5</option>
-                            <option selected>10</option>
-                            <option>20</option>
-                            <option>50</option>
-                            <option>100</option>
-                          </select>
-                        </div>
-                      </div>
-                      <div class="flex justify-between sm:justify-end">
-                        <div class="sm:col-span-3">
-                          <label for="first-name" class="block text-sm font-medium text-gray-700">Search</label>
-                          <div class="mt-1">
-                            <input type="text" name="first-name" id="first-name" autocomplete="given-name" class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md">
-                          </div>
-                        </div>
-                      </div>
-                    </nav> -->
-                    <table class="min-w-full divide-y divide-gray-300">
-                      <thead>
-                        <tr>
-                          <!-- HEADER HERE -->
-                          <template x-for='item in columns'>
-                            <th scope="col" class="py-3.5 px-3 text-left text-sm font-semibold text-gray-900" x-text="item.name"></th>
-                          </template>
-                        </tr>
-                      </thead>
-                      <tbody class="divide-y divide-gray-200">
-                        <template x-for='item in data'>
-                          <tr x-html="initRow(item)">
-                          </tr>
-                        </template>
-                      </tbody>
-                    </table>
-                    <!-- <nav class="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6" aria-label="Pagination">
-                      <div class="sm:block">
-                        <p class="text-sm text-gray-700">
-                          Showing
-                          <span class="font-medium">1</span>
-                          to
-                          <span class="font-medium">10</span>
-                          of
-                          <span class="font-medium">20</span>
-                          results
-                        </p>
-                      </div>
-                      <div class="flex justify-between sm:justify-end">
-                        <a href="#" class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"> Previous </a>
-                        <a href="#" class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"> Next </a>
-                      </div>
-                    </nav> -->`
-                }
+      const data = await res.json()
+      return data
     }
   </script>
 {{ end }}
