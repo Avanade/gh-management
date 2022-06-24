@@ -11,6 +11,8 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+
+	"github.com/gorilla/mux"
 )
 
 func CommunityAPIHandler(w http.ResponseWriter, r *http.Request) {
@@ -123,6 +125,41 @@ func CommunityAPIHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+}
+
+func GetRequestStatusByCommunity(w http.ResponseWriter, r *http.Request) {
+	req := mux.Vars(r)
+	id := req["id"]
+
+	// Connect to database
+	dbConnectionParam := sql.ConnectionParam{
+		ConnectionString: os.Getenv("GHMGMTDB_CONNECTION_STRING"),
+	}
+
+	db, err := sql.Init(dbConnectionParam)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer db.Close()
+
+	// Get project list
+	params := make(map[string]interface{})
+	params["Id"] = id
+	projects, err := db.ExecuteStoredProcedureWithResult("PR_CommunityApprovals_Select_ById", params)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Header().Set("Content-Type", "application/json")
+	jsonResp, err := json.Marshal(projects)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.Write(jsonResp)
 }
 
 func ConnectDb() *sql.DB {

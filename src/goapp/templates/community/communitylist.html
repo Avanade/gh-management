@@ -5,7 +5,7 @@
 
 <div x-data="myCommunitiesData()" x-init="getCommunity()">
   <div class="flex justify-between">
-    <div>
+    <!-- <div>
       <nav class="flex space-x-4" aria-label="Tabs">
 
         <div @click="switchTo('my')" class="px-3 py-2 font-medium text-sm rounded-md cursor-pointer"
@@ -16,7 +16,7 @@
           x-bind:class="view==='all' ? 'bg-[#fff2eb] text-[#FF5800]':'text-gray-500 hover:text-gray-700'"> All Community
         </div>
       </nav>
-    </div>
+    </div> -->
     <div class="flex">
       <a href="/community/new">
         <button class="bg-[#FF5800] hover:bg-[#FF4300] text-white font-bold py-2 px-4 rounded">
@@ -62,11 +62,16 @@
           <li>
             <div class="px-4 py-4 sm:px-6 hover:bg-gray-50 cursor-pointer"
               x-bind:class="Community.showStatus? 'bg-gray-50':''"
-              @click="Community.showStatus = !Community.showStatus;">
+              @click="Community.showStatus = !Community.showStatus;getCommunityApprovalStatus(Community.Id, index)">
 
               <div class="flex items-center justify-between">
                 <p class="text-sm font-medium text-indigo-600 truncate" x-text=" Community.Name"
                   title="Repository name"></p>
+                  <div class="flex items-center justify-between">
+                    <div class="ml-2 flex-shrink-0 flex">
+                      <p class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full" x-bind:class="Community.ApprovalStatus === 'Approved' ? ' bg-green-100 text-green-800': Community.ApprovalStatus === 'Rejected' ? ' bg-red-100 text-red-800' : ' bg-gray-200 text-gray-800'" x-text="Community.ApprovalStatus"></p>
+                    </div>
+                  </div>
               </div>
               <div class="mt-2 sm:flex sm:justify-between">
                 <div class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
@@ -74,6 +79,8 @@
                     <span x-text="Community.Description"></span>
                   </p>
                 </div>
+                
+                 
                 <div x-show="!Community.showStatus">
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 20 20"
                     stroke="currentColor" stroke-width="2">
@@ -86,6 +93,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" d="M5 15l7-7 7 7" />
                   </svg>
                 </div>
+           
               </div>
             </div>
             <div class="px-4 py-4 sm-px-6 bg-gray-100" style="box-shadow: inset 0px 7px 6px -4px #ccc;"
@@ -97,12 +105,42 @@
                       URL :<span x-text="Community.Url"></span>
                     </p>
                   </div>
-                  <p class="flex items-center text-sm text-gray-500">
+                  <p x-show="Community.Notes" class="flex items-center text-sm text-gray-500">
                     Notes : <span x-text="Community.Notes"></span>
                   </p>
-                  <p class="flex items-center text-sm text-gray-500">
+                  <!-- <p class="flex items-center text-sm text-gray-500">
                     ApprovalStatus : <span x-text="Community.ApprovalStatus"></span>
-                  </p>
+                  </p> -->
+                  <ul role="list" class="divide-y divide-gray-200">
+                    <template x-for="item of Community.approvalStatus">
+                      <li> 
+                        <div class="px-4 py-4 sm:px-6">
+                           
+                          <div class="flex items-center justify-between">
+                            <p class="text-sm font-medium text-gray-800 truncate" x-text="item.ApprovalDescription"></p>
+                            <div class="ml-2 flex-shrink-0 flex">
+                              <p class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full" x-bind:class="item.ApprovalStatus === 'Approved' ? ' bg-green-100 text-green-800': item.ApprovalStatus === 'Rejected' ? ' bg-red-100 text-red-800' : ' bg-gray-200 text-gray-800'" x-text="item.ApprovalStatus"></p>
+                            </div>
+                          </div>
+                          <div class="mt-2 sm:flex ">
+                            <div class="sm:flex w-1/2">
+                              <p class="flex items-center text-sm text-gray-500" x-data="{ approver: 'Approver: ' + item.ApproverUserPrincipalName}" x-text="approver">
+                              </p>
+                            </div>
+                            <div class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
+                              <p x-show="item.ApprovalDate">
+                                Responded on
+                                <time x-data="{date: new Date(item.ApprovalDate)}" x-text="date.toLocaleString('en-US',{dateStyle: 'medium', timeStyle: 'short'})"></time>
+                              </p>
+                            </div>
+                          </div>
+                          <div class="mt-2 sm:flex text-sm text-gray-500 sm:mt-0">
+                            <p x-show="item.ApprovalRemarks" x-data="{ remarks: 'Remarks: ' + item.ApprovalRemarks }" x-text="remarks"></p>
+                          </div>
+                        </div>
+                      </li>
+                    </template>
+                  </ul>
               </div>
             </div>
           </li>
@@ -113,25 +151,25 @@
     <div class="bg-white shadow overflow-hidden sm:rounded-md mt-4"
       x-show="!showSpinner && Communitylist && view==='my'">
       <ul role="list" class="divide-y divide-gray-200">
-        <template x-for="(project, index) in Communitylist">
+        <template x-for="(Community, index) in Communitylist">
           <li>
 
             <div class="flex items-center justify-between">
-              <p class="text-sm font-medium text-indigo-600 truncate" x-text="project.Name" title="Repository name"></p>
+              <p class="text-sm font-medium text-indigo-600 truncate" x-text="Community.Name" title="Repository name"></p>
             </div>
             <div class="mt-2 sm:flex sm:justify-between">
               <div class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
                 <p class="flex items-center text-sm text-gray-500">
-                  <span x-text="project.Description"></span>
+                  <span x-text="Community.Description"></span>
                 </p>
               </div>
-              <div x-show="!project.showStatus">
+              <div x-show="!Community.showStatus">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 20 20"
                   stroke="currentColor" stroke-width="2">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
                 </svg>
               </div>
-              <div x-show="project.showStatus">
+              <div x-show="Community.showStatus">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 20 20"
                   stroke="currentColor" stroke-width="2">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M5 15l7-7 7 7" />
@@ -147,7 +185,7 @@
                     <path
                       d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
                   </svg>
-                  <span x-text="project.CoOwner"></span>
+                  <span x-text="Community.CoOwner"></span>
                 </p>
               </div>
               <div class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
@@ -160,15 +198,15 @@
                 </svg>
                 <p>
                   Created on
-                  <time x-data="{date: new Date(project.Created)}"
+                  <time x-data="{date: new Date(Community.Created)}"
                     x-text="date.toLocaleString('en-US',{dateStyle: 'medium', timeStyle: 'short'})"></time>
                 </p>
               </div>
             </div>
     </div>
     <div class="px-4 py-4 sm-px-6 bg-gray-100" style="box-shadow: inset 0px 7px 6px -4px #ccc;"
-      x-show="project.showStatus" class="transform -translate-x-full duration-300">
-      <div class="flex items-center justify-center h-20" x-show="!project.statusLoaded">
+      x-show="Community.showStatus" class="transform -translate-x-full duration-300">
+      <div class="flex items-center justify-center h-20" x-show="!Community.statusLoaded">
         <svg role="status" class="w-8 h-8 mr-2 text-gray-200 animate-spin dark:text-gray-600 fill-[#FF5800]"
           viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path
@@ -181,9 +219,9 @@
       </div>
       This example requires Tailwind CSS v2.0+
       <div class="bg-gray-50 shadow overflow-hidden sm:rounded-md"
-        x-show="project.statusLoaded && project.approvalStatus">
+        x-show="Community.statusLoaded && Community.approvalStatus">
         <ul role="list" class="divide-y divide-gray-200">
-          <template x-for="item of project.approvalStatus">
+          <template x-for="item of Community.approvalStatus">
             <li>
               <div class="px-4 py-4 sm:px-6">
                 <div class="flex items-center justify-between">
@@ -218,7 +256,7 @@
         </ul>
       </div>
       <div class="overflow-hidden text-sm text-gray-500 sm:mt-0"
-        x-show="project.statusLoaded && !project.approvalStatus">
+        x-show="Community.statusLoaded && !Community.approvalStatus">
         No data found.
       </div>
 
@@ -272,11 +310,11 @@
               this.Communitylist = body
               this.tbl.data = body
               this.showSpinner = false
-
+           
 
             });
             modal.visible = false
-            console.log(this.Communitylist)
+          
           })
           .catch(e => {
             modal.update('error', 'Error getting data', 'Please try again', '', '')
@@ -292,7 +330,19 @@
           '/community/{Id}',
           'Id'
         )
-      }
+      },
+      getCommunityApprovalStatus(id, i) {
+        if(!this.Communitylist[i]["statusLoaded"]) {
+          fetch('/api/communitystatus/' + id)
+        .then(r => {
+          r.json().then(body => {
+            this.Communitylist[i]["approvalStatus"] = body
+            this.Communitylist[i]["statusLoaded"] = true
+         
+          })
+        })
+        }
+      },
     }
   }
 </script>
