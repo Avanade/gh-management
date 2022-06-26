@@ -6,7 +6,8 @@ const combobox = ({
     isMultiple = false,
     isInsertable = false,
     isDisplayItem = false,
-    label = null
+    label = null,
+    defaultValue = []
 }) => {
     return { 
         // STATES
@@ -85,18 +86,16 @@ const combobox = ({
                 this.selected = []
             
             this.selected.push(item)
-            this.$refs.selectedOptions.value = this.selected.map(v => v.text).join()
         },
         removeSelectedItem({id, text}){
             this.selected = this.isMultiple ? [] : this.selected.filter(v => (v.id !== id && v.text !== text))
-            this.$refs.selectedOptions.value = this.selected.map(v => v.text).join()
         },
-        template : `<div @click.outside="isShowOptions=false">
+        template : `<div @click.outside="isShowOptions=false" x-effect="console.log('SET SELECTED : ', selected)">
                         <template x-if="label != null">
                             <label class="block text-sm font-medium text-gray-700" x-text="label"></label>
                         </template>
                         <div class="relative mt-1">
-                            <input x-ref="selectedOptions" type="text" class="w-full rounded-md border border-gray-300 bg-white py-2 pl-3 pr-12 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 sm:text-sm" role="combobox" aria-controls="options" aria-expanded="false" x-on:focusin="onFocusIn" readonly>
+                            <input x-model="selected.map(v => v.text).join()" type="text" class="w-full rounded-md border border-gray-300 bg-white py-2 pl-3 pr-12 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 sm:text-sm" role="combobox" aria-controls="options" aria-expanded="false" x-on:focusin="onFocusIn" readonly>
                             <button x-on:click="onClickOption" type="button" class="absolute inset-y-0 right-0 flex items-center rounded-r-md px-2 focus:outline-none">
                                 <!-- Heroicon name: solid/selector -->
                                 <svg class="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">

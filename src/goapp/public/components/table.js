@@ -3,7 +3,7 @@ const table = ({
     data = '',
     total = 0,
     columns = [
-      // { Name : 'String', Value : 'String'|0 }
+      // { Name : 'String', Value : 'String'|0, Render : function() }
     ]
   }) => {
     return { 
@@ -67,7 +67,7 @@ const table = ({
         this.columns.forEach(col => {
           for (const key in data) {
             if(key === col.value){
-              html = html.concat(`<td class="whitespace-nowrap py-4 px-3 text-sm text-gray-500">${data[key]}</td>`) 
+              html = html.concat(`<td class="whitespace-nowrap py-4 px-3 text-sm text-gray-500">${col.render != undefined ? col.render(data[key]) : data[key]}</td>`)
             }
           }
         });
@@ -106,7 +106,7 @@ const table = ({
                     </thead>
                     <tbody class="divide-y divide-gray-200">
                         <template x-for='item in data'>
-                          <tr x-html="initRow(item)">
+                          <tr x-html="initRow(item)" class="hover:bg-gray-100">
                           </tr>
                         </template>
                         <tr x-show='isLoading' x-transition>

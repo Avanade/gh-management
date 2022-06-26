@@ -739,7 +739,7 @@ func UpdateApprovalType(approvalType models.ApprovalType) (int, error) {
 		"Name":                      approvalType.Name,
 		"ApproverUserPrincipalName": approvalType.ApproverUserPrincipalName,
 		"IsActive":                  approvalType.IsActive,
-		"CreatedBy":                 approvalType.CreatedBy,
+		"ModifiedBy":                approvalType.CreatedBy,
 	}
 
 	result, err := db.ExecuteStoredProcedureWithResult("PR_ApprovalTypes_Update_ById", param)
