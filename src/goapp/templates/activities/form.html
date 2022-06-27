@@ -1,0 +1,200 @@
+{{ define "content" }}
+    <div id="pageTitle">Add an Activity</div>
+
+    <form x-data="activityForm({
+        action : '{{ .Action }}',
+        id : '{{ .Id }}'
+    })" class="space-y-8 divide-y divide-gray-200">
+        <div class="space-y-8 divide-y divide-gray-200 sm:space-y-5">
+            <div>
+                <div>
+                    <h3 class="text-lg leading-6 font-medium text-gray-900">Activity Information​</h3>
+                    <p class="mt-1 max-w-2xl text-sm text-gray-500">Activities are contributions to any non-Avanade community. These contributions might include speaking or attending an event or user-group, submitting a blog, participating on a panel, or creating content for that community.  ​</p>
+                </div>
+                <div class="mt-6 grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
+                    <div class="sm:col-span-3">
+                        <div 
+                            x-data="combobox({
+                                    ajax : getCommunity,
+                                    id : 'Id',
+                                    text : 'Name',
+                                    label : 'Community*'
+                                })"
+                            x-modelable = "selected"
+                            x-model = "form.community"
+                        >
+                            <div x-html="template"></div>
+                        </div>
+                    </div>
+                    <div class="sm:col-span-3">
+                        <label for="date" class="block text-sm font-medium text-gray-700"> Date </label>
+                        <div class="mt-1">
+                            <input x-model="form.date" type="date" name="date" id="date" autocomplete="family-name" class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md">
+                        </div>
+                    </div>
+                    <div class="sm:col-span-6">
+                        <label for="activity_name" class="block text-sm font-medium text-gray-700"> Activity Name* </label>
+                        <div class="mt-1">
+                            <input x-model="form.activity_name" type="text" name="activity_name" id="activity_name" autocomplete="activity_name" class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md">
+                        </div>
+                    </div>
+                    <div class="sm:col-span-3">
+                        <div 
+                            x-data="combobox({
+                                    ajax: getTypes,
+                                    id : 'Id',
+                                    text : 'Name',
+                                    label : 'Type*',
+                                    isInsertable : true
+                                })"
+                            x-modelable = "selected"
+                            x-model = "form.type"
+                        >
+                            <div x-html="template"></div>
+                        </div>
+                    </div>
+                    <div class="sm:col-span-3">
+                        <label for="url" class="block text-sm font-medium text-gray-700"> URL (if applicable) </label>
+                        <div class="mt-1">
+                            <input x-model="form.url" type="text" name="url" id="url" autocomplete="family-name" class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md">
+                        </div>
+                    </div>
+                    <div class="sm:col-span-3">
+                        <div 
+                            x-data="combobox({
+                                    ajax: getContributionAreas,
+                                    id : 'Id',
+                                    text : 'Name',
+                                    label : 'Primary Contribution Area*',
+                                    isInsertable : true
+                                })"
+                            x-modelable = "selected"
+                            x-model = "form.primary_contribution_area"
+                        >
+                            <div x-html="template"></div>
+                        </div>
+                    </div>
+                    <div class="sm:col-span-3">
+                        <div 
+                            x-data="combobox({
+                                    ajax: getContributionAreas,
+                                    id : 'Id',
+                                    text : 'Name',
+                                    label : 'Additional Contribution Areas',
+                                    isMultiple : true,
+                                    isInsertable : true,
+                                    isDisplayItem : true
+                                })"
+                            x-modelable = "selected"
+                            x-model = "form.additional_contribution_areas"
+                        >
+                            <div x-html="template"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="pt-5">
+            <div class="flex justify-end">
+              <button 
+                @click="onSubmit" 
+                type="submit" 
+                form="activity_form"
+                class="ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 disabled:bg-orange-200"
+                x-bind:disabled="!isValid()">
+                    Save
+                </button>
+            </div>
+          </div>
+    </form>
+
+    <script src="/public/components/combobox.js"></script>
+    <script type="text/javascript">
+        function activityForm({action = 'view', id = null}) {
+            return {
+                action : '',
+                id : null,
+                form : {
+                    community : [],
+                    date : '',
+                    activity_name : '',
+                    type : [],
+                    url : '',
+                    primary_contribution_area : [],
+                    additional_contribution_areas : []
+                },
+                async init() {
+                    this.action = action,
+                    this.id = id
+
+                    if (this.action.toLowerCase() == 'add') return;
+
+                    const res = await fetch(`/api/activity/${this.id}`)
+                    const data = await res.json()
+
+                    const date = new Date(data.Date)
+
+                    this.form = {
+                        community : [{ id : data.CommunityId, text : data.CommunityName}],
+                        date : `${date.getFullYear()}-${("0" + date.getMonth()).slice(-2)}-${("0" + date.getDate()).slice(-2)}`,
+                        activity_name : data.Name,
+                        type : [{ id : data.ActivityTypeId, text : data.TypeName}],
+                        url : data.Url,
+                        primary_contribution_area : [{ id : data.PrimaryContributionAreaId, text : data.PrimaryContributionAreaName}],
+                        additional_contribution_areas : []
+                    }
+                },
+                isValid() {
+                    if(
+                        this.form.community.length > 0 &&
+                        this.form.date &&
+                        this.form.activity_name &&
+                        this.form.type.length > 0 &&
+                        this.form.primary_contribution_area.length > 0){
+                            return true
+                    }
+                    return false
+                },
+                onSubmit() {
+                    const data = {
+                        'communityid' : this.form.community[0].id,
+                        'date' : this.form.date,
+                        'name' : this.form.activity_name,
+                        'type' : this.form.type.map(e => { return { id : e.id, name : e.text }})[0],
+                        'url' : this.form.url,
+
+                        'primarycontributionarea' : this.form.primary_contribution_area.map(e => { return { id : e.id, name : e.text }})[0],
+                        'additionalcontributionareas' : this.form.additional_contribution_areas.map(e => { return { id : e.id, name : e.text }})
+                    }
+
+                    console.log(data)
+
+                    Alpine.store('master').modal.show()
+                    Alpine.store('master').postData("/api/activity", data, "Your activity has been added.", "Go to your activity list", "/activities")                
+                }
+            }
+        }
+
+        async function getCommunity(){
+            const res = await fetch('/community')
+
+            const data = await res.json()
+            console.log(data)
+            return data
+        }
+
+        async function getTypes(){
+            const res = await fetch('/api/activity/type')
+
+            const data = await res.json()
+            return data
+        }
+
+        async function getContributionAreas(){
+            const res = await fetch('/api/contributionarea')
+
+            const data =  await res.json()
+            return data
+        }
+        </script>
+{{ end }}
