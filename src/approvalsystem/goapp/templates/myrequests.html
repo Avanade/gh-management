@@ -2,8 +2,9 @@
 
 <script type="text/javascript">
   function initHome(){
+    let redirect = localStorage.getItem("redirectUrl")
+    if(redirect) window.location.href=redirect; localStorage.clear()
     let items = JSON.parse("{{ . }}")
-    console.log(items)
     return {
       pending: items.Pending,
       approved: items.Approved
