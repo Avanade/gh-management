@@ -8,6 +8,8 @@ import (
 	session "main/pkg/session"
 	"net/http"
 	"strconv"
+
+	"github.com/gorilla/mux"
 )
 
 type ActivitiesDto struct {
@@ -131,6 +133,18 @@ func CreateActivity(w http.ResponseWriter, r *http.Request) {
 	}
 
 	fmt.Fprint(w, body)
+}
+
+func GetActivityById(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id, _ := strconv.Atoi(vars["id"])
+	result, err := db.CommunitiesActivities_Select_ById(id)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(result)
 }
 
 func InsertCommunityActivitiesContributionArea(ca ItemDto, caca models.CommunityActivitiesContributionAreas) error {
