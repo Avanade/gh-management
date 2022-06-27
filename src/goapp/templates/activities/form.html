@@ -1,7 +1,10 @@
 {{ define "content" }}
     <div id="pageTitle">Add an Activity</div>
 
-    <form x-data="activityForm()" class="space-y-8 divide-y divide-gray-200">
+    <form x-data="activityForm({
+        action : '{{ .Action }}',
+        id : '{{ .Id }}'
+    })" class="space-y-8 divide-y divide-gray-200">
         <div class="space-y-8 divide-y divide-gray-200 sm:space-y-5">
             <div>
                 <div>
@@ -107,8 +110,10 @@
 
     <script src="/public/components/combobox.js"></script>
     <script type="text/javascript">
-        function activityForm() {
+        function activityForm({action = 'view', id = null}) {
             return {
+                action : '',
+                id : null,
                 form : {
                     community : [],
                     date : '',
@@ -117,6 +122,27 @@
                     url : '',
                     primary_contribution_area : [],
                     additional_contribution_areas : []
+                },
+                async init() {
+                    this.action = action,
+                    this.id = id
+
+                    if (this.action.toLowerCase() == 'add') return;
+
+                    const res = await fetch(`/api/activity/${this.id}`)
+                    const data = await res.json()
+
+                    const date = new Date(data.Date)
+
+                    this.form = {
+                        community : [{ id : data.CommunityId, text : data.CommunityName}],
+                        date : `${date.getFullYear()}-${("0" + date.getMonth()).slice(-2)}-${("0" + date.getDate()).slice(-2)}`,
+                        activity_name : data.Name,
+                        type : [{ id : data.ActivityTypeId, text : data.TypeName}],
+                        url : data.Url,
+                        primary_contribution_area : [{ id : data.PrimaryContributionAreaId, text : data.PrimaryContributionAreaName}],
+                        additional_contribution_areas : []
+                    }
                 },
                 isValid() {
                     if(

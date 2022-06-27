@@ -276,6 +276,22 @@ func CommunitiesActivities_Insert(body models.Activity) (int, error) {
 	return id, nil
 }
 
+func CommunitiesActivities_Select_ById(id int) (interface{}, error) {
+	db := ConnectDb()
+	defer db.Close()
+
+	param := map[string]interface{}{
+		"Id": id,
+	}
+
+	result, err := db.ExecuteStoredProcedureWithResult("PR_CommunityActivities_Select_ById", param)
+	if err != nil {
+		return nil, err
+	}
+
+	return &result[0], nil
+}
+
 func ActivityTypes_Select() interface{} {
 	db := ConnectDb()
 	defer db.Close()
