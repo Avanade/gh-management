@@ -15,7 +15,7 @@ INSERT INTO ProjectApprovals
 	
 SELECT @ProjectId, T.Id, T.ApproverUserPrincipalName, 1, 'For Review - ' + T.[Name], P.CreatedBy, P.CreatedBy
 FROM Projects P, ApprovalTypes T
-WHERE T.ApproverUserPrincipalName IS NOT NULL
+WHERE T.ApproverUserPrincipalName IS NOT NULL AND T.IsActive = 1
 AND P.Id = @ProjectId
 
 UPDATE Projects SET ApprovalStatusId = 2, Modified = GETDATE() WHERE Id = @ProjectId

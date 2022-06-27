@@ -3,7 +3,6 @@
 <script type="text/javascript">
   function initHome(){
     let items = JSON.parse("{{ . }}")
-    console.log(items)
     return {
       pending: items.Pending,
       approved: items.Approved

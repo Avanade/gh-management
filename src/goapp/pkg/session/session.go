@@ -187,7 +187,11 @@ func IsUserAdmin(w http.ResponseWriter, r *http.Request) (bool, error) {
 		return false, err
 	}
 
-	return session.Values["isUserAdmin"].(bool), nil
+	isUserAdmin := false
+	if session.Values["isUserAdmin"] != nil {
+		isUserAdmin = session.Values["isUserAdmin"].(bool)
+	} 
+	return isUserAdmin, nil
 }
 
 type ErrorDetails struct {

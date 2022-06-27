@@ -6,7 +6,7 @@ AS
 BEGIN
 
 SELECT
-	PA.Id, ProjectId, P.[Name] [ProjectName],
+	PA.Id, PA.ProjectId, P.[Name] [ProjectName],
 	P.CoOwner [ProjectCoowner], P.[Description] [ProjectDescription],
 	U1.Name [RequesterName], U1.GivenName [RequesterGivenName], U1.SurName [RequesterSurName], U1.UserPrincipalName [RequesterUserPrincipalName],
 	U2.Name [CoownerName], U2.GivenName [CoownerGivenName], U2.SurName [CoownerSurName], U2.UserPrincipalName [CoownerUserPrincipalName],
@@ -17,7 +17,7 @@ SELECT
 	PA.[ApprovalDate], PA.[ApprovalRemarks]
     
 FROM 
-    [dbo].[ProjectApprovals] PA
+    ProjectApprovals PA
 	INNER JOIN ApprovalTypes T ON PA.ApprovalTypeId = T.Id
 	INNER JOIN Projects P ON PA.ProjectId = P.Id
 	INNER JOIN Users U1 ON P.CreatedBy = U1.UserPrincipalName

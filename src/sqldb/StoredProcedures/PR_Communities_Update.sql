@@ -1,15 +1,12 @@
-/****** Object:  StoredProcedure [dbo].[PR_Projects_Insert]    Script Date: 5/31/2022 9:32:57 PM ******/
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
 create PROCEDURE [dbo].[PR_Communities_Update]
 (
+			@Id int,
 			@Name varchar(50),
 			@Url varchar(255),
 			@Description varchar(255),
 			@Notes varchar(255),
 			@TradeAssocId varchar(255),
+            @IsExternal int,
 			@CreatedBy  varchar(50),
 			@ModifiedBy  varchar(50)
 ) AS
@@ -20,12 +17,13 @@ UPDATE [dbo].[Communities]
       ,[Description] = @Description
       ,[Notes] = @Notes
       ,[TradeAssocId] = @TradeAssocId
+      ,IsExternal=@IsExternal
       ,[Created] =GETDATE()
       ,[CreatedBy] = @CreatedBy
       ,[Modified] = GETDATE()
       ,[ModifiedBy] = @ModifiedBy
- WHERE  [Name] = @Name
- 
- delete from CommunitySponsors where CommunityId = @Id
+ WHERE  [Id] = @Id
 
+ delete from CommunitySponsors where CommunityId = @Id
+  delete from CommunityTags where CommunityId = @Id
 end
