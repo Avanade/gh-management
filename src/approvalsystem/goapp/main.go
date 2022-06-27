@@ -34,6 +34,7 @@ func main() {
 	mux.Handle("/", loadAzAuthPage(rtApprovals.MyRequestsHandler))
 	mux.Handle("/myapprovals", loadAzAuthPage(rtApprovals.MyApprovalsHandler))
 	mux.Handle("/response/{appGuid}/{appModuleGuid}/{itemGuid}/{isApproved}", loadAzAuthPage(rtApprovals.ResponseHandler))
+	mux.HandleFunc("/loginredirect", rtPages.LoginRedirectHandler).Methods("GET")
 	mux.HandleFunc("/login/azure", rtAzure.LoginHandler)
 	mux.HandleFunc("/login/azure/callback", rtAzure.CallbackHandler)
 	mux.HandleFunc("/logout/azure", rtAzure.LogoutHandler)
