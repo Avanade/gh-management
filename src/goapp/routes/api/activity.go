@@ -12,6 +12,11 @@ import (
 	"github.com/gorilla/mux"
 )
 
+type ActivitiesDto struct {
+	Data  interface{} `json: "data"`
+	Total int         `json: "total"`
+}
+
 type ActivityDto struct {
 	Name        string  `json: "name"`
 	Url         string  `json: "url"`
@@ -36,6 +41,31 @@ type CommunityActivitiesContributionAreasDto struct {
 	IsPrimary           bool
 	CreatedBy           string
 	ModifiedBy          string
+}
+
+func GetActivities(w http.ResponseWriter, r *http.Request) {
+	var result ActivitiesDto
+
+	params := r.URL.Query()
+
+	if params.Has("offset") && params.Has("filter") {
+		filter, _ := strconv.Atoi(params["filter"][0])
+		offset, _ := strconv.Atoi(params["offset"][0])
+		search := params["search"][0]
+		result = ActivitiesDto{
+			Data:  db.CommunitiesActivities_Select_ByOffsetAndFilter(offset, filter, search),
+			Total: db.CommunitiesActivities_TotalCount(),
+		}
+	} else {
+		result = ActivitiesDto{
+			Data:  db.CommunitiesActivities_Select(),
+			Total: db.CommunitiesActivities_TotalCount(),
+		}
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(result)
 }
 
 func CreateActivity(w http.ResponseWriter, r *http.Request) {

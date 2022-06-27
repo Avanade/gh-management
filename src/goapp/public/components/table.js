@@ -3,7 +3,11 @@ const table = ({
     data = '',
     total = 0,
     columns = [
+<<<<<<< HEAD
+      // { Name : 'String', Value : 'String'|0 }
+=======
       // { Name : 'String', Value : 'String'|0, Render : function() }
+>>>>>>> 2ba2b46a4b8431d6bc72c2b040bfad838626adf6
     ]
   }) => {
     return { 
@@ -78,6 +82,7 @@ const table = ({
                       <div>
                         <label for="filter" class="block text-sm font-medium text-gray-700">Filter</label>
                         <select @change="onChangeFilterHandler" x-model="filter" id="filter" name="filter" class="mt-1 block w-20 pl-3 pr-10 py-2 text-base text-center border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
+>>>>>>> 2ba2b46a4b8431d6bc72c2b040bfad838626adf6
                           <option>5</option>
                           <option>10</option>
                           <option>20</option>
