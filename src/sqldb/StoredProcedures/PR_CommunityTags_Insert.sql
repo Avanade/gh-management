@@ -1,15 +1,3 @@
--- =======================================================
--- Create Stored Procedure Template for Azure SQL Database
--- =======================================================
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
--- =============================================
--- Author:      <Author, , Name>
--- Create Date: <Create Date, , >
--- Description: <Description, , >
--- =============================================
 CREATE PROCEDURE PR_CommunityTags_Insert
 (
     -- Add the parameters for the stored procedure here
@@ -31,4 +19,4 @@ BEGIN
            (@CommunityId
            ,@Tag)
 END
-GO
+ 

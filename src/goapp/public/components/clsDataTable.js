@@ -40,7 +40,7 @@ class clsDataTable {
                     <div class="m-2">
                         <div class="inline-block min-w-full py-2 align-middle">
                             <div class="shadow-sm ring-1 ring-black ring-opacity-5">
-                            <div class="flex flex-row m-3">
+                            <div class="flex flex-row m-3 pt-3">
                                 <div class="sm:flex-auto">
                                     <h1 class="text-xl font-semibold text-gray-900">${name}</h1>
                                     <p class="mt-2 text-sm text-gray-700">${description}</p>
@@ -52,7 +52,7 @@ class clsDataTable {
                                         className="default:border-solid border-2 border-slate-300 pl-1"
                                         placeholder="Search ${name}"
                                     />
-                                    <button type="button" x-show="showAdd" class="inline-flex items-center justify-center rounded-md border border-transparent bg-orange-200 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 sm:w-auto" @click="window.location.href='${addUrl}'">Add</button>
+                                    <button type="button" x-show="showAdd" class="inline-flex items-center justify-center rounded-md border border-transparent bg-orange-400 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 sm:w-auto" @click="window.location.href='${addUrl}'">Add</button>
                                 </div>
                             </div>
                                 <table id="clsDataTable_${id}" class="min-w-full border-separate" style="border-spacing: 0">
@@ -72,7 +72,7 @@ class clsDataTable {
                                         <template x-for="(i,n) in filteredData">
                                             <tr>
                                                 <template x-for="(h,n) in ${headers}">
-                                                <td class="whitespace-nowrap border-b border-gray-200 py-4 pl-4 pr-3 text-sm text-gray-900 sm:pl-6 lg:pl-8">
+                                                <td class="border-b border-gray-200 py-4 pl-4 pr-3 text-sm text-gray-900 sm:pl-6 lg:pl-8">
                                                     <a :href="viewUrlUpdate(i)">
                                                         <span x-text="i[h.value]"></span>
                                                     </a>

@@ -77,6 +77,7 @@ func main() {
 	muxApi.Handle("/community/onboarding/{id}", loadAzGHAuthPage(rtApi.GetCommunityOnBoardingInfo)).Methods("GET", "POST", "DELETE")
 	muxApi.Handle("/community/all", loadAzAuthPage(rtApi.GetCommunities)).Methods("GET")
 	muxApi.Handle("/community/{id}/members", loadAzAuthPage(rtApi.GetCommunityMembers)).Methods("GET")
+	muxApi.Handle("/communitystatus/{id}", loadAzGHAuthPage(rtApi.GetRequestStatusByCommunity))
 	muxApi.Handle("/contributionarea", loadAzGHAuthPage(rtApi.CreateContributionAreas)).Methods("POST")
 	muxApi.Handle("/contributionarea", loadAzGHAuthPage(rtApi.GetContributionAreas)).Methods("GET")
 	muxApi.Handle("/projects/list", loadAzGHAuthPage(rtApi.GetUserProjects))
@@ -86,8 +87,17 @@ func main() {
 	muxApi.Handle("/allusers", loadAzAuthPage(rtApi.GetAllUserFromActiveDirectory))
 	muxApi.Handle("/allavanadeprojects", loadAzGHAuthPage(rtApi.GetAvanadeProjects))
 
+	//API FOR APPROVAL TYPES
+	muxApi.HandleFunc("/approval/type", rtApi.CreateApprovalType).Methods("POST")
+	muxApi.HandleFunc("/approval/type/{id}", rtApi.EditApprovalTypeById).Methods("PUT")
+	muxApi.HandleFunc("/approval/types", rtApi.GetApprovalTypes).Methods("GET")
+	muxApi.HandleFunc("/approval/type/{id}", rtApi.GetApprovalTypeById).Methods("GET")
+
 	muxAdmin := mux.PathPrefix("/admin").Subrouter()
 	muxAdmin.Handle("/members", loadAzGHAuthPage(rtAdmin.ListCommunityMembers))
+	muxAdmin.Handle("/approvaltypes", loadAzGHAuthPage(rtAdmin.ListApprovalTypes))
+	muxAdmin.Handle("/approvaltype/{action:add}", loadAzGHAuthPage(rtAdmin.ApprovalTypeForm))
+	muxAdmin.Handle("/approvaltype/{action:view|edit}/{id}", loadAzGHAuthPage(rtAdmin.ApprovalTypeForm))
 
 	mux.HandleFunc("/approvals/project/callback", rtProjects.UpdateApprovalStatusProjects).Methods("POST")
 	mux.HandleFunc("/approvals/community/callback", rtProjects.UpdateApprovalStatusCommunity).Methods("POST")

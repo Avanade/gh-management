@@ -3,7 +3,11 @@ const table = ({
     data = '',
     total = 0,
     columns = [
+<<<<<<< HEAD
       // { Name : 'String', Value : 'String'|0 }
+=======
+      // { Name : 'String', Value : 'String'|0, Render : function() }
+>>>>>>> 2ba2b46a4b8431d6bc72c2b040bfad838626adf6
     ]
   }) => {
     return { 
@@ -67,7 +71,7 @@ const table = ({
         this.columns.forEach(col => {
           for (const key in data) {
             if(key === col.value){
-              html = html.concat(`<td class="whitespace-nowrap py-4 px-3 text-sm text-gray-500">${data[key]}</td>`) 
+              html = html.concat(`<td class="whitespace-nowrap py-4 px-3 text-sm text-gray-500">${col.render != undefined ? col.render(data[key]) : data[key]}</td>`)
             }
           }
         });
@@ -77,7 +81,8 @@ const table = ({
                     <div class="sm:block">
                       <div>
                         <label for="filter" class="block text-sm font-medium text-gray-700">Filter</label>
-                        <select @change="onChangeFilterHandler" id="filter" name="filter" class="mt-1 block w-20 pl-3 pr-10 py-2 text-base text-center border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
+                        <select @change="onChangeFilterHandler" x-model="filter" id="filter" name="filter" class="mt-1 block w-20 pl-3 pr-10 py-2 text-base text-center border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
+>>>>>>> 2ba2b46a4b8431d6bc72c2b040bfad838626adf6
                           <option>5</option>
                           <option>10</option>
                           <option>20</option>
@@ -106,7 +111,7 @@ const table = ({
                     </thead>
                     <tbody class="divide-y divide-gray-200">
                         <template x-for='item in data'>
-                          <tr x-html="initRow(item)">
+                          <tr x-html="initRow(item)" class="hover:bg-gray-100">
                           </tr>
                         </template>
                         <tr x-show='isLoading' x-transition>

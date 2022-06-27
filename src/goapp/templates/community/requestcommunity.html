@@ -20,7 +20,7 @@
                     <div>
                         <h3 class="text-lg font-medium leading-6 text-gray-900">Community Name*</h3>
                     </div>
-                    <div> <input type="text" name="name" id="name" x-model="form.name" maxlength="50"
+                    <div> <input type="text" x-model="form.name" maxlength="50"
                             class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md border-2">
                     </div>
                 </div>
@@ -29,7 +29,7 @@
                 <div class="flex flex-col  ">
                     <div class="flex flex-row">
                         <div class="basis-1/2">
-                            <h3 class="text-lg font-medium leading-6 text-gray-900">Community Site URL</h3>
+                            <h3 class="text-lg font-medium leading-6 text-gray-900">Community Site URL*</h3>
                         </div>
                         <div x-show="form.id" class="basis-1/2 flex flex-row text-right">
                             ID: <p x-text="form.id"></p>
@@ -65,7 +65,7 @@
                 <div x-data="{ data: content }" class="flex flex-col  ">
 
                     <div>
-                        <h3 class="text-lg font-medium leading-6 text-gray-900">Business Sponsors (Please select at least two sponsors )*</h3>
+                        <span class="text-lg font-medium leading-6 text-gray-900">Business Sponsors*</span><span class="pl-1 text-xs">(Please select at least two sponsors )</span>
                     </div>
                     <div class="relative mt-1">
                         <div x-html="sponsors.template"></div>
@@ -98,7 +98,7 @@
                     </div>
 
                     <div>
-                        <h3 class="text-lg font-medium leading-6 text-gray-900">Tag (Please press Enter to insert Tag)</h3>
+                        <span class="text-lg font-medium leading-6 text-gray-900">Tag</span><span class="pl-1 text-xs">(Please press Enter to insert Tag)</span>
                     </div>
                     <div> <input type="text" name="tag" id="tag" maxlength="50" @keyup.enter="tag()"
                             class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md border-2">
@@ -145,9 +145,15 @@
 
         <div>
             <div align="right">
+                <button x-show="form.id" type="button" class="bg-purple-500  inline-flex justify-center py-2 px-4 rounded-md text-white"
+                    @click="onBoarding()">
+                    <span>How To Join</span>
+                </button>
                 <button type="button" class="bg-orange-500  inline-flex justify-center py-2 px-4 rounded-md text-white"
-                    :class="!isValid ? 'bg-orange-100' : ''" x-bind:disabled="!isValid" @click="submit()">Submit
-                    Community</button>
+                    :class="!isValid ? 'bg-orange-100' : ''" x-bind:disabled="!isValid" @click="submit()">
+                    <span x-show="!form.id">Submit Community</span>
+                    <span x-show="form.id">Update Community</span>
+                </button>
 
             </div>
         </div>
@@ -176,36 +182,35 @@
                 selected: '',
                 data: []
             },
+            get filteredSponsorsData() {
+                return this.sponsors.data.filter(i => {
+                    return !this.form.sponsors.includes(i)
+                })
+            },
             sponsor: {
                 displayName: '',
                 mail: '',
             },
             async getUsersList() {
-                var modal = Alpine.store('master').modal
-                modal.update('loading', 'Loading', 'Please wait', '', '')
-
-
                 await fetch('/api/allusers').then(j => j.json()
                     .then(data => {
 
                         this.sponsors.data = data
-                        modal.visible = false
                     }))
                     .catch(() => {
-                        modal.update('error', 'Error', 'Please try again', '', '')
+                        Alpine.store('master').modal.update('error', 'Error', 'Please try again', '', '')
 
                     })
 
                 var dd = new clsDropdown()
                 this.sponsors.template = dd.template(
-                    'ddBusSponsor',
+                    'dd1',
                     'sponsors.selected',
-                    'sponsors.data',
+                    'filteredSponsorsData',
                     'displayName',
                     'mail', 'mail',
                     'datapush()')
             },
-
             showModal: false,
             status: "",
             modalText: "Please wait...",
@@ -216,6 +221,8 @@
                 this.modalSubText = subtext
                 this.showModal = show
             }, async onLoad() {
+                var modal = Alpine.store('master').modal
+                modal.update('loading', 'Loading', 'Please wait', '', '')
 
                 spinnercount = 3
                 if (this.form.id) {
@@ -275,7 +282,8 @@
                     }
                 }
 
-                this.getUsersList()
+                await this.getUsersList()
+                modal.visible = false
             },
             
 
@@ -316,14 +324,16 @@
                 return userPrincipalName.includes(this.form.coowner) || githubUser.includes(this.form.coowner) ? true : false
             },
 
-
+            onBoarding(){
+                window.location.href=`/community/${this.form.id}/onboarding`
+            }, 
 
             get isValid() {
                 if (
                     (!!this.form.name &&
                         !!this.form.url &&
-                        !!this.form.description &&
-                        !!this.form.notes) &&
+                        !!this.form.description //&& !!this.form.notes
+                        ) &&
                     this.form.sponsors.length >= 2) {
                     return true
                 } else {
