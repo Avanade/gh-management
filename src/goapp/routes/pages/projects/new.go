@@ -58,7 +58,8 @@ func ProjectsNewHandler(w http.ResponseWriter, r *http.Request) {
 				httpResponseError(w, http.StatusInternalServerError, "There is a problem creating the GitHub repository.")
 			}
 			id := ghmgmtdb.PRProjectsInsert(body, username.(string))
-			go RequestApproval(id)
+			fmt.Println(id)
+			//go RequestApproval(id)
 			w.WriteHeader(http.StatusOK)
 		}
 	}
