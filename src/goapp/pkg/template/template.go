@@ -1,6 +1,7 @@
 package template
 
 import (
+	"os"
 	"fmt"
 	"html/template"
 	"main/models"
@@ -28,13 +29,14 @@ func UseTemplate(w *http.ResponseWriter, r *http.Request, page string, pageData 
 		return err
 	}
 
+	approvalSystemUrl := os.Getenv("APPROVAL_SYSTEM_APP_URL")
 	// Data on master page
 	var menu []models.TypMenu
 	menu = append(menu, models.TypMenu{Name: "Dashboard", Url: "/", IconPath: "/public/icons/dashboard.svg"})
 	menu = append(menu, models.TypMenu{Name: "Projects", Url: "/projects", IconPath: "/public/icons/projects.svg"})
 	menu = append(menu, models.TypMenu{Name: "Communities", Url: "/communities/list", IconPath: "/public/icons/communities.svg"})
 	menu = append(menu, models.TypMenu{Name: "Guidance", Url: "/guidance", IconPath: "/public/icons/guidance.svg"})
-	menu = append(menu, models.TypMenu{Name: "Approvals", Url: "https://uat-approval-system-app.azurewebsites.net", IconPath: "/public/icons/approvals.svg"})
+	menu = append(menu, models.TypMenu{Name: "Approvals", Url: approvalSystemUrl, IconPath: "/public/icons/approvals.svg"})
 	menu = append(menu, models.TypMenu{Name: "Search", Url: "/search", IconPath: "/public/icons/search.svg"})
 	if isAdmin {
 		menu = append(menu, models.TypMenu{Name: "Admin", Url: "/admin/members", IconPath: "/public/icons/lock.svg"})
