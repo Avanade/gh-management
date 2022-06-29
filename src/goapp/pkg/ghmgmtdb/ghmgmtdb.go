@@ -381,6 +381,21 @@ func ContributionAreas_Select() interface{} {
 	return result
 }
 
+func AdditionalContributionAreas_Select(activityId int) interface{} {
+	db := ConnectDb()
+	defer db.Close()
+
+	param := map[string]interface{}{
+		"ActivityId": activityId,
+	}
+
+	result, err := db.ExecuteStoredProcedureWithResult("PR_AdditionalContributionAreas_Select_ByActivityId", param)
+	if err != nil {
+		return err
+	}
+	return result
+}
+
 func ContributionAreas_Insert(name, createdBy string) (int, error) {
 	db := ConnectDb()
 	defer db.Close()
