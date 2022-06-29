@@ -99,18 +99,23 @@
             <div class="px-4 py-4 sm-px-6 bg-gray-100" style="box-shadow: inset 0px 7px 6px -4px #ccc;"
               x-show="Community.showStatus" class="transform -translate-x-full duration-300">
               <div class="bg-gray-50 shadow overflow-hidden sm:rounded-md" >
-            
                   <div>
-                    <p class="flex items-center text-sm text-gray-500">
-                      URL :<span x-text="Community.Url"></span>
+                     <b> URL </b> 
+                  </div>
+                  
+                  <div>  
+                    <p class="flex items-center text-sm text-gray-500 ml-2">
+                
+                     <a :href="Community.Url"><span x-text="Community.Url"/> </a>
                     </p>
                   </div>
-                  <p x-show="Community.Notes" class="flex items-center text-sm text-gray-500">
-                    Notes : <span x-text="Community.Notes"></span>
+                  <div x-show="Community.Notes" >
+                    <b>   Notes </b> 
+                  </div>
+                  <p x-show="Community.Notes" class="flex items-center text-sm text-gray-500 ml-2">
+                    <span x-text="Community.Notes"></span>
                   </p>
-                  <!-- <p class="flex items-center text-sm text-gray-500">
-                    ApprovalStatus : <span x-text="Community.ApprovalStatus"></span>
-                  </p> -->
+                
                   <ul role="list" class="divide-y divide-gray-200">
                     <template x-for="item of Community.approvalStatus">
                       <li> 
