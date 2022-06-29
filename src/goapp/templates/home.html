@@ -1,11 +1,11 @@
 {{ define "content" }}
 <div id="pageTitle">Dashboard</div>
 
-<section aria-labelledby="quick-links-title">
+<section x-data="dashboardData()" aria-labelledby="quick-links-title">
   <div class="rounded-lg bg-gray-200 overflow-hidden shadow divide-y divide-gray-200 sm:divide-y-0 sm:grid sm:grid-cols-2 sm:gap-px">
     <h2 class="sr-only" id="quick-links-title">Quick links</h2>
 
-    <div class="rounded-tl-lg rounded-tr-lg sm:rounded-tr-none relative group bg-white p-6 focus-within:ring-2 focus-within:ring-inset focus-within:ring-cyan-500">
+    <div @click="searchAllProjects()" class="cursor-pointer rounded-tl-lg rounded-tr-lg sm:rounded-tr-none relative group bg-white p-6 focus-within:ring-2 focus-within:ring-inset focus-within:ring-cyan-500">
       <div>
         <span class="rounded-lg inline-flex p-3 bg-teal-50 text-teal-700 ring-4 ring-white">
           <!-- Heroicon name: outline/clock -->
@@ -16,11 +16,11 @@
       </div>
       <div class="mt-8">
         <h3 class="text-lg font-medium">
-          <a href="#" class="focus:outline-none">
+          <div class="focus:outline-none">
             <!-- Extend touch target to entire panel -->
             <span class="absolute inset-0" aria-hidden="true"></span>
             Find a project
-          </a>
+          </div>
         </h3>
         <div class="w-full my-3">
           <label for="search" class="sr-only">Search</label>
@@ -31,7 +31,7 @@
                 <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
               </svg>
             </div>
-            <input id="search" name="search" class="block w-full bg-white border border-gray-300 rounded-md py-2 pl-10 pr-3 text-sm placeholder-gray-500 focus:outline-none focus:text-gray-900 focus:placeholder-gray-400 focus:ring-1 focus:ring-rose-500 focus:border-rose-500 sm:text-sm" placeholder="Search" type="search">
+            <input  @click.stop @keyup.enter="searchAllProjects()" x-model="search" id="search" name="search" class="block w-full bg-white border border-gray-300 rounded-md py-2 pl-10 pr-3 text-sm placeholder-gray-500 focus:outline-none focus:text-gray-900 focus:placeholder-gray-400 focus:ring-1 focus:ring-rose-500 focus:border-rose-500 sm:text-sm" placeholder="Search" type="search">
           </div>
         </div>
         <hr>
@@ -123,7 +123,7 @@
           <a href="#" class="focus:outline-none">
             <!-- Extend touch target to entire panel -->
             <span class="absolute inset-0" aria-hidden="true"></span>
-            Your communities
+            Request Avanade to join a new community
           </a>
         </h3>
         <p class="mt-2 text-sm text-gray-500">Doloribus dolores nostrum quia qui natus officia quod et dolorem. Sit repellendus qui ut at blanditiis et quo et molestiae.</p>
@@ -146,7 +146,7 @@
       </div>
       <div class="mt-8">
         <h3 class="text-lg font-medium">
-          <a href="#" class="focus:outline-none">
+          <a href="/projects" class="focus:outline-none">
             <!-- Extend touch target to entire panel -->
             <span class="absolute inset-0" aria-hidden="true"></span>
             Your projects
@@ -190,4 +190,15 @@
     </div>
   </div>
 </section>
+
+<script>
+  function dashboardData() {
+    return {
+      search: '',
+      searchAllProjects() {
+        window.location.href = '/projects?view=all&search=' + this.search
+      }
+    }
+  }
+</script>
 {{ end }}

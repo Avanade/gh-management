@@ -29,6 +29,7 @@ func InitializeSession() {
 
 func IsAuthenticated(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
 	// Check session if there is saved user profile
+	url := fmt.Sprintf("/loginredirect?redirect=%v",r.URL)
 	session, err := Store.Get(r, "auth-session")
 	if err != nil {
 		c := http.Cookie{
@@ -39,14 +40,14 @@ func IsAuthenticated(w http.ResponseWriter, r *http.Request, next http.HandlerFu
 			Name:   "gh-auth-session",
 			MaxAge: -1}
 		http.SetCookie(w, &cgh)
-		http.Redirect(w, r, "/login/azure", http.StatusTemporaryRedirect)
+		http.Redirect(w, r, url, http.StatusTemporaryRedirect)
 		return
 	}
 
 	if _, ok := session.Values["profile"]; !ok {
 
 		// Asks user to login if there is no saved user profile
-		http.Redirect(w, r, "/login/azure", http.StatusTemporaryRedirect)
+		http.Redirect(w, r, url, http.StatusTemporaryRedirect)
 
 	} else {
 		// If there is a user profile saved
@@ -178,6 +179,20 @@ func RemoveGitHubAccount(w http.ResponseWriter, r *http.Request) error {
 	}
 
 	return nil
+}
+
+// Check if user is an admin
+func IsUserAdmin(w http.ResponseWriter, r *http.Request) (bool, error) {
+	session, err := Store.Get(r, "auth-session")
+	if err != nil {
+		return false, err
+	}
+
+	isUserAdmin := false
+	if session.Values["isUserAdmin"] != nil {
+		isUserAdmin = session.Values["isUserAdmin"].(bool)
+	} 
+	return isUserAdmin, nil
 }
 
 type ErrorDetails struct {

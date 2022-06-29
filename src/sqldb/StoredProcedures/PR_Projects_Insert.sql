@@ -3,6 +3,8 @@
 	@Name varchar(50),
 	@CoOwner varchar(100),
 	@Description varchar(1000),
+	@IsPrivate bit = 1,
+	@IsArchived bit = 0,
 	@ConfirmAvaIP bit,
 	@ConfirmEnabledSecurity bit,
 	@CreatedBy varchar(100)
@@ -14,6 +16,8 @@ INSERT INTO Projects (
 	[Name],
 	CoOwner,
 	[Description],
+	IsPrivate,
+	IsArchived,
 	ConfirmAvaIP,
 	ConfirmEnabledSecurity,
 	Created,
@@ -25,6 +29,8 @@ VALUES (
 	@Name,
 	@CoOwner,
 	@Description,
+	@IsPrivate,
+	@IsArchived,
 	@ConfirmAvaIP,
 	@ConfirmEnabledSecurity,
 	GETDATE(),
@@ -40,3 +46,5 @@ SELECT @Id = Id FROM @ResultTable
 EXEC [PR_UserAccess_Insert] @Id, @CreatedBy
 
 EXEC [PR_UserAccess_Insert] @Id, @CoOwner
+
+SELECT @Id [ItemId]

@@ -3,8 +3,8 @@
 
 <div id="pageTitle">Request a project</div>
 
-<div x-data="data()" x-init="onLoad()">
-    <form onsubmit="event.preventDefault()">
+<div x-data="data()">
+    <form onsubmit="event.preventDefault()" autocomplete="off">
         <p>
             <h3 class="text-lg font-medium leading-6 text-gray-900">Project information</h3>
             All projects start on Avanade’s innersource on GitHub. Once you have identified a business sponsor, and
@@ -21,7 +21,7 @@
                         <h3 class="text-lg font-medium leading-6 text-gray-900">Project name</h3>
                     </div>
                     <div> <input type="text" name="name" id="name" x-model="form.name" maxlength="50"
-                            class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md border-2">
+                            class="mt-1 focus:ring-orange-500 focus:border-orange-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md border-2">
                     </div>
                     <div>The title should represent what the asset does. Avoid acronyms, code names and the use of the
                         word
@@ -41,7 +41,7 @@
                             <!-- ****** CO-OWNER CB ****** -->
                         <div>
                             <div class="relative mt-1" >
-                                <input id="coowner" name="coowner" @click="coowner.show = !coowner.show" x-model="form.coowner" type="text" class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md border-2" role="combobox" aria-controls="options" aria-expanded="false">
+                                <input id="coowner" name="coowner" @click="coowner.show = !coowner.show" x-model="form.coowner" type="text" class="mt-1 focus:ring-orange-500 focus:border-orange-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md border-2" role="combobox" aria-controls="options" aria-expanded="false">
 
                                 <button x-show="!isCoownerempty" type="button" class="absolute inset-y-0 right-0 flex items-center rounded-r-md px-2 focus:outline-none">
                                 <svg id="clearBtn" class="h-5 w-5 text-gray-400" @click="clearCoowner" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M256 8C119 8 8 119 8 256s111 248 248 248 248-111 248-248S393 8 256 8zm0 448c-110.5 0-200-89.5-200-200S145.5 56 256 56s200 89.5 200 200-89.5 200-200 200zm101.8-262.2L295.6 256l62.2 62.2c4.7 4.7 4.7 12.3 0 17l-22.6 22.6c-4.7 4.7-12.3 4.7-17 0L256 295.6l-62.2 62.2c-4.7 4.7-12.3 4.7-17 0l-22.6-22.6c-4.7-4.7-4.7-12.3 0-17l62.2-62.2-62.2-62.2c-4.7-4.7-4.7-12.3 0-17l22.6-22.6c4.7-4.7 12.3-4.7 17 0l62.2 62.2 62.2-62.2c4.7-4.7 12.3-4.7 17 0l22.6 22.6c4.7 4.7 4.7 12.3 0 17z"/></svg>
@@ -58,7 +58,7 @@
                                         </span>
 
                                         <span class="ml-2 truncate text-gray-500" >
-                                                &nbsp@{{$user.GithubUser}}
+                                                &nbsp@{{$user.GitHubUser}}
                                         </span>
                                         </div>
                                 
@@ -96,7 +96,7 @@
                         <h3 class="text-lg font-medium leading-6 text-gray-900">Project description</h3>
                     </div>
                     <div>
-                        <textarea name="description" id="description" x-model="form.description"  rows="3"  maxlength="1000"    class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md  border-2">
+                        <textarea name="description" id="description" x-model="form.description"  rows="3"  maxlength="1000"    class="mt-1 focus:ring-orange-500 focus:border-orange-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md  border-2">
                         </textarea>
                     </div>
                     <div>Be verbose in the description. Describe what the asset does and how it achieves this. If your
@@ -116,7 +116,7 @@
         <div class="flex items-start">
             <div class="flex items-center h-5">
                 <input id="confirm1" name="confirmAvaIP" type="checkbox"   x-model="form.confirmAvaIP"
-                    class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded">
+                    class="focus:ring-orange-500 h-4 w-4 text-orange-600 border-gray-300 rounded">
             </div>
             <div class="ml-3 text-sm">
                 <p class="text-gray-500">
@@ -130,7 +130,7 @@
         <div class="flex items-start">
             <div class="flex items-center h-5">
                 <input id="confirm2" name="confirmSecIPScan" type="checkbox"   x-model="form.confirmSecIPScan"
-                    class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded">
+                    class="focus:ring-orange-500 h-4 w-4 text-orange-600 border-gray-300 rounded">
             </div>
             <div class="ml-3 text-sm">
 
@@ -149,7 +149,7 @@
             <div align="right">
                 <button type="submit"
                     class="bg-orange-500  inline-flex justify-center py-2 px-4 rounded-md text-white"
-                    :class="!isValid ? 'bg-orange-200' : ''"
+                    :class="!isValid ? 'bg-orange-100' : ''"
                     x-bind:disabled="!isValid"
                     @click="submit()"
                     >Submit
@@ -159,45 +159,7 @@
         </div>
     </form>
 
-    <!-- Modal -->
-  <div id="modal" x-show="showModal" class="relative z-10" hidden aria-labelledby="modal-title" role="dialog" aria-modal="true">
-    <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
   
-    <div class="fixed z-10 inset-0 overflow-y-auto">
-      <div class="flex items-end sm:items-center justify-center min-h-full p-4 text-center sm:p-0">
-        <div class="relative bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:max-w-sm sm:w-full sm:p-6">
-          <div>
-            <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100" x-bind:class="status === 'success' ? '':'hidden'">
-              <svg class="h-6 w-6 text-green-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-              </svg>
-            </div>
-            <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100" x-bind:class="status === 'error' ? '':'hidden'">
-              <svg class="h-6 w-6 text-red-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-              </svg>
-            </div>
-            <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full" x-bind:class="status === 'submitted' ? '':'hidden'">
-              <svg role="status" class="inline w-8 h-8 mr-2 text-gray-200 animate-spin dark:text-gray-600" viewBox="0 0 100 101" fill="#ff5800" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="currentColor"/>
-                  <path d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z" fill="currentFill"/>
-              </svg>
-            </div>
-            <div class="mt-3 text-center sm:mt-5">
-              <h3 class="text-lg leading-6 font-medium text-gray-900" x-text="modalText"></h3>
-              <div class="mt-2">
-                <p class="text-sm text-gray-500" x-text="modalSubText"></p>
-              </div>
-            </div>
-            <div class="mt-3 text-center sm:mt-5" @click="showModal = false" x-bind:hidden="status!='success'">
-              <a href="/">Go back to home page</a>
-            </div>
-            <div class="mt-3 text-center sm:mt-5" @click="showModal = false" x-bind:hidden="status!='error'">close</div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
 </div>
 
 <script type="text/javascript">
@@ -210,43 +172,13 @@
                 confirmAvaIP: false,
                 confirmSecIPScan: false
             },
-            showModal: false,
-            status: "",
-            modalText: "Please wait...",
-            modalSubText: "Your request is being processed.",
-            showResult(status, title, subtext, show=true){
-              this.status = status
-              this.modalText = title
-              this.modalSubText = subtext
-              this.showModal = show
-            },
-            onLoad(){
-              document.getElementById("modal").attributes.removeNamedItem("hidden")
-            },
             coowner:{
                 show: false,
             },
             submit(){
-                this.showResult("submitted", "Processing", "Please wait while processing your request.")
-                
-                fetch('/projects/new', {
-                    method: 'POST',
-                    body: JSON.stringify(this.form),
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                })
-                .then(r=>{
-                    // Redirect to Home
-                    if(r.status==200){
-                        this.showResult("success", "Successful", "Your repository has been created.")
-                    } else {
-                        r.text().then(body => this.showResult("error", "Failed", "There is an error processing your request."));
-                    }
-                })
-                .catch(e=>{
-                    this.showResult("error", "Failed", "An error has occured while creating the repository.")
-                })
+                Alpine.store('master').modal.reset()
+                Alpine.store('master').modal.show()
+                Alpine.store('master').postData("/projects/new", this.form, "Your repository has been created.", "Go to your project list", "/projects")                
             },
             showName(userPrincipalName, githubUser){
                 return userPrincipalName.includes(this.form.coowner) || githubUser.includes(this.form.coowner) ? true : false

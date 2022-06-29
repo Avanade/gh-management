@@ -1,0 +1,46 @@
+{{ define "content" }}
+  <div id="pageTitle">
+      My Activities
+  </div>
+  <div class="px-4 sm:px-6 lg:px-8">
+    <div class="sm:flex sm:items-center">
+      <div class="sm:flex-auto">
+        <h1 class="text-xl font-semibold text-gray-900">Recent Activities</h1>
+        <p class="mt-2 text-sm text-gray-700">Activities are contributions to any non-Avanade community. These contributions might include speaking or attending an event or user-group, submitting a blog, participating on a panel, or creating content for that community.</p>
+      </div>
+      <div class="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
+        <a href="/activities/add" type="button" class="inline-flex items-center justify-center rounded-md border border-transparent bg-orange-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 sm:w-auto">+ Add Activity</a>
+      </div>
+    </div>
+    <div class="mt-8 flex flex-col">
+      <div class="-my-2 -mx-4 overflow-x-auto sm:-mx-6 lg:-mx-8">
+        <div class="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
+          <div x-data="table({
+            callback : getActivities,
+            data : 'Data',
+            total : 'Total',
+            columns : [
+              { name : 'Date', value : 'Date' },
+              { name : 'Activity', value : 'Name' },
+              { name : 'Community/Project', value : 'CommunityName' },
+              { name : 'Type', value : 'TypeName' },
+              { name : 'Primary Contribution Area', value : 'PrimaryContributionAreaName' }
+            ]
+          })">
+            <div x-html="template"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/public/components/table.js"></script>
+  <script type="text/javascript">
+    async function getActivities(e){
+      const res = await fetch(`/api/activity?filter=${e.filter}&offset=${e.page}&search=${e.search}`)
+
+      const data = await res.json()
+      return data
+    }
+  </script>
+{{ end }}

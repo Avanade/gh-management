@@ -1,0 +1,285 @@
+{{ define "content" }}
+
+<style>
+#entryList a:hover {
+  background: #FF5800;
+  opacity: 70%;
+  color: black;
+}
+</style>
+
+<div id="pageTitle">Search</div>
+
+<div x-data="SearchData()" x-init="searchResultsTop(), $refs.searchInput.focus()">
+
+        <div>
+          <nav class="flex items-center justify-between space-x-4" aria-label="Tabs">
+
+            <template x-for="i in SearchBySources">
+              <div @click="SelectedSource = i" class="show sm:block px-3 py-2 font-medium text-sm rounded-md cursor-pointer" x-bind:class="SelectedSource == i ? 'bg-[#fff2eb] text-[#FF5800]':'text-gray-500 hover:text-gray-700'"> 
+              <span x-text="i"> </span>
+              </div>
+            </template>
+
+            <!-- Entries Dropdown -->
+            <div class="relative inline-block text-left ">
+
+              <div>
+                <button x-show="showEntryBtn" @click="entryList = !entryList" type="button" class="inline-flex justify-center w-full rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-100 focus:ring-indigo-500" id="menu-button" aria-expanded="true" aria-haspopup="true">
+                  Show entries
+                  <svg class="-mr-1 ml-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                    <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                  </svg>
+                </button>
+              </div>
+
+              <div x-show="entryList" id="entryList" class="origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="menu-button" tabindex="-1">
+                <div class="py-1 w-full" role="none">
+                  <a href="" class="text-gray-700 block px-4 py-2 text-sm" style="a:hover: orange" role="menuitem" tabindex="-1" id="menu-item-0">10</a>
+                  <a href="" class="text-gray-700 block px-4 py-2 text-sm" role="menuitem" tabindex="-1" id="menu-item-1">25</a>
+                  <a href="" class="text-gray-700 block px-4 py-2 text-sm" role="menuitem" tabindex="-1" id="menu-item-2">100</a>
+                </div>
+              </div>
+
+            </div>
+            <!-- END of Entries Dropdown -->
+
+
+            <!--START of ComboBox -->
+                <div class="flex justify-between sm:justify-end ">
+                  <div class="relative flex items-stretch flex-grow focus-within:z-10">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <svg class="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                        <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
+                      </svg>
+                    </div>
+
+                    <input @keyup.enter="getSearchResults()" @input.enter="showClearBtn()" x-ref="searchInput" id="searchList" name="searchList" x-model="form.searchList" type="text" role="input" class="focus:ring-indigo-500 focus:border-indigo-500 block w-full rounded-none rounded-l-md pl-10 sm:text-sm border-gray-300" autocomplete="off">
+
+                    <button @click="$refs.searchInput.value='',$refs.searchInput.focus(), clearBtn=false" x-show="clearBtn" x-ref="clearBtn1" class="absolute inset-y-0 right-0 pr-3 flex items-center focus:pointer-events-auto">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    </button>
+                  </div>
+
+                  <button @click="getSearchResults()" type="button" class="-ml-px relative inline-flex items-center space-x-2 px-4 py-2 border border-gray-300 text-sm font-medium rounded-r-md text-gray-700 bg-gray-50 hover:bg-gray-100 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500" >
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                      <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
+                    </svg>
+
+                    <span>Search</span>
+                  </button>
+
+                </div>
+            <!--END of ComboBox -->
+
+          </nav>
+        </div>
+
+         <br>
+
+      <!-- SPINNER -->
+      <div class="flex items-center justify-center h-40" x-show="showSpinner">
+        <svg role="status" class="w-8 h-8 mr-2 text-gray-200 animate-spin dark:text-gray-600 fill-[#FF5800]" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="currentColor"/>
+          <path d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z" fill="currentFill"/>
+        </svg>
+      </div>
+
+        <!-- START of  ResultsNotFound --> 
+        <div x-show="resultsNotFound" class=" text-center">
+          <svg xmlns="http://www.w3.org/2000/svg" class="mx-auto h-10 w-10 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          {{/* <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+            <path vector-effect="non-scaling-stroke" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h6m-3-3v6m-9 1V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
+          </svg> */}}
+          <h3 class="mt-2 text-sm font-medium text-gray-900">No results found</h3>
+          <p class="mt-1 text-sm text-gray-500">Search another keyword</p>
+          <br>
+        </div>
+        <!-- END of  ResultsNotFound --> 
+
+        <!-- Results Table -->
+        <div x-show="resultsTable" class="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
+          <table id="resultsTable11" class="min-w-full divide-y divide-gray-300">
+            <thead class="bg-gray-50">
+              <tr>
+                <th @click="sort('Source')" scope="col" class="cursor-pointer py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-700 hover:text-gray-700 sm:pl-6 ">Source</th>
+                <th @click="sort('Name')" scope="col" class="cursor-pointer px-3 py-3.5 text-left text-sm font-semibold text-gray-700 ">Name</th>
+                <th @click="sort('Description')" scope="col" class="cursor-pointer px-3 py-3.5 text-left text-sm font-semibold text-gray-700 ">Description</th>
+              </tr>
+            </thead>
+
+            <tbody class="divide-y divide-gray-200 bg-white">
+              <template x-for="(results, n) in FilteredSearchBy" >
+                <tr>
+                  <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-500 sm:pl-6">
+                    <span x-text="results.Source"></span>
+                  </td>
+                  <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500"> 
+                    <span x-text="results.Name"></span>
+                  </td>
+                  <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                    <span x-text="results.Description"> </span>
+                  </td>
+                </tr>
+              </template>
+            </tbody>
+          </table>
+        </div>
+        <!-- END of Results Table -->
+  
+        <br>
+  
+        <!-- PAGINATION -->
+
+        <nav x-show="pagination" class="bg-white  px-4 py-2 flex items-center justify-between border-t border-gray-200 sm:px-6" aria-label="Pagination">
+
+            <div class="show sm:block">
+                <p class="text-sm text-gray-700">
+                    Showing
+                    <span class="font-medium" x-text="SearchBy.row.length">-</span> to 
+                    <span class="font-medium" x-text="SearchBy.row">-</span> of
+                    <span class="font-medium" x-text="SearchBy.length">-</span> results
+                </p>
+            </div>
+
+            <div class="flex justify-between sm:justify-end">
+                <button @click="previousPage" class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-[#FF5800]"> Previous </button>
+
+                <button @click="nextPage" class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-[#FF5800] opacity-0"> Next </button>
+            </div>
+        </nav>
+        <!-- END of PAGINATION -->
+    
+</div>
+
+<script type="text/javascript">
+    function SearchData() {
+              return {
+                showEntryBtn: false,
+                entryList: false,
+                entryBtn: false,
+                clearBtn: false,
+                resultsNotFound: false,
+                resultsTable: false,
+                resultsTableRow: '',
+                pagination: false,
+                SearchBy: [],
+                SearchBySources: [],
+                SelectedSource: 'All',
+                form: {
+                    searchList: ''
+                },
+                searchList:{
+                    data: []
+                },
+                showSpinner: true,
+                searchResultsTop() {
+                  const params = new URLSearchParams(window.location.search);
+                  const name = params.get("search");
+                  this.form.searchList = name
+                  this.getSearchResults()
+                  this.showClearBtn()
+
+                },
+                getSearchResults() {
+                this.resultsNotFound = false
+                this.showSpinner = true
+                this.resultsTable = false
+                  if (!this.form.searchList == '') {
+                    fetch('/search/' + this.form.searchList)
+                    .then(r => {
+                      r.json().then(body => {
+                        this.SearchBy = body
+
+                        if(this.SearchBy <= 0 ){
+                          this.SearchBySources = ['']
+                          this.showSpinner = false
+                          this.pagination = false
+                          this.resultsNotFound = true
+                          return   
+                        }
+                        
+                        this.SearchBySources = ['All']
+                        this.SearchBy.map(i => {
+                        if(!this.SearchBySources.includes(i.Source)){
+                          this.SearchBySources.push(i.Source)
+                        }
+                        this.resultsNotFound = false
+                        this.showSpinner = false
+                        this.pagination = true
+                        this.resultsTable = true
+                        })
+                      })
+                    })
+                  }
+
+                },
+                get FilteredSearchBy(){
+                  if (this.SelectedSource == 'All') {
+                    return this.SearchBy
+                  } else {
+                    return this.SearchBy.filter(i => i.Source == this.SelectedSource)
+                  }
+                },
+                isShowEntriesBtn(){
+                  if (this.SearchBy =  '') {
+                    this.entryBtn == true
+                  } else {
+                    this.entryBtn == false
+                  }
+                },
+                isEntriesClicked() {
+                  return this.entryList ? true : false
+                },
+                showClearBtn() {
+                  if(this.form.searchList == ''){
+                    this.clearBtn = false
+                  } else {
+                    this.clearBtn = true
+                  }
+                },
+
+
+                sortCol:null,
+                sortAsc:false,
+                pageSize: 3,
+                curPage: 1,
+                sort(col) {
+                   if(this.sortCol === col) this.sortAsc = !this.sortAsc;
+                    this.sortCol = col;
+                    this.SearchBy.sort((a, b) => {
+                      if(a[this.sortCol] < b[this.sortCol]) return this.sortAsc?1:-1;
+                      if(a[this.sortCol] > b[this.sortCol]) return this.sortAsc?-1:1;
+                      return 0;
+                    });
+                },
+                previousPage() {
+                  if(this.curPage > 1) this.curPage--;
+                  console.log(this.SearchBy.filter)
+                },
+                nextPage() {
+                  if((this.curPage * this.pageSize) < this.SearchBy.length) this.curPage++;
+                },
+                get pagedResults() {
+                    if(this.SearchBy) {
+                      return this.SearchBy.filter((row, index) => {
+                        let start = (this.curPage-1)*this.pageSize;
+                        let end = this.curPage*this.pageSize;
+                        if(index >= start && index < end) return true;
+                      })
+                    } else return [];
+                  }
+                    
+
+
+
+      }
+    }
+</script>
+
+
+{{ end }}

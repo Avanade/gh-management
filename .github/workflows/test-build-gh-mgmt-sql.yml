@@ -1,0 +1,20 @@
+name: GH Management - SQL Project
+
+on:
+  push:
+    branches:
+      - test
+  workflow_dispatch:
+
+jobs:
+  build-ghmgmt-sqlproj:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+      - uses: azure/sql-action@v1.3
+        with:        
+          connection-string: ${{ secrets.GH_MGMT_CONNECTION_STRING }}
+          project-file: 'src/sqldb/sqldb.sqlproj'

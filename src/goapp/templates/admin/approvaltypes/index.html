@@ -1,0 +1,51 @@
+{{ define "content" }}
+    <div id="pageTitle">
+        Admin Tools
+    </div>
+    <div class="px-4 sm:px-6 lg:px-8">
+        <div class="sm:flex sm:items-center">
+            <div class="sm:flex-auto">
+            <h1 class="text-xl font-semibold text-gray-900">List of Approval Types</h1>
+            <!-- <p class="mt-2 text-sm text-gray-700">Description here...</p> -->
+            </div>
+            <div class="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
+            <a href="/admin/approvaltype/add" class="inline-flex items-center justify-center rounded-md border border-transparent bg-orange-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 sm:w-auto">Add Approval Type</a>
+            </div>
+        </div>
+        <div class="mt-8 flex flex-col">
+            <div class="-my-2 -mx-4 overflow-x-auto sm:-mx-6 lg:-mx-8">
+                <div class="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
+                    <div x-data="table({
+                    callback : getApprovalTypes,
+                    data : 'data',
+                    total : 'total',
+                    columns : [
+                        { name : 'Name', value : 'Name' },
+                        { name : 'Approver', value : 'ApproverUserPrincipalName' },
+                        { name : 'IsActive', value : 'IsActive' },
+                        { 
+                            name : 'View/Edit', 
+                            value : 'Id', 
+                            render : value => renderAction(value)
+                        }
+                    ]
+                    })">
+                        <div x-html="template"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="/public/components/table.js"></script>
+    <script type="text/javascript">
+        function renderAction(value) {
+            return `<a href="/admin/approvaltype/view/${value}">VIEW</a> | <a href="/admin/approvaltype/edit/${value}">EDIT</a>`
+        }
+        async function getApprovalTypes(e){
+            const offset = e.filter * e.page;
+            const res = await fetch(`/api/approval/types?filter=${e.filter}&offset=${offset}&search=${e.search}`)
+            const data = await res.json()
+            return data
+        }
+    </script>
+{{ end }}
