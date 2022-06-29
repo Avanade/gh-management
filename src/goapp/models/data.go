@@ -30,11 +30,16 @@ type TypMenu struct {
 }
 
 type TypNewProjectReqBody struct {
-	Name             string `json:"name"`
-	Coowner          string `json:"coowner"`
-	Description      string `json:"description"`
-	ConfirmAvaIP     bool   `json:"confirmAvaIP"`
-	ConfirmSecIPScan bool   `json:"confirmSecIPScan"`
+	Name                       string `json:"name"`
+	Coowner                    string `json:"coowner"`
+	Description                string `json:"description"`
+	ConfirmAvaIP               bool   `json:"confirmAvaIP"`
+	ConfirmSecIPScan           bool   `json:"confirmSecIPScan"`
+	Newcontribution            string `json:"newcontribution"`
+	OSSsponsor                 string `json:"osssponsor"`
+	Avanadeofferingsassets     string `json:"avanadeofferingsassets"`
+	Willbecommercialversion    string `json:"willbecommercialversion"`
+	OSSContributionInformation string `json:"osscontributionInformation"`
 }
 
 type TypCommunity struct {
@@ -128,10 +133,10 @@ type TypCommunityOnBoarding struct {
 }
 
 type TypCommunityApprovals struct {
-	Id						   int64
+	Id                         int64
 	CommunityId                int64
 	CommunityName              string
-	CommunityUrl	           string
+	CommunityUrl               string
 	CommunityDescription       string
 	CommunityNotes             string
 	CommunityTradeAssocId      string

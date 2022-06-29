@@ -91,12 +91,17 @@ func PRProjectsInsert(body models.TypNewProjectReqBody, user string) (id int64) 
 
 	param := map[string]interface{}{
 
-		"Name":                   body.Name,
-		"CoOwner":                body.Coowner,
-		"Description":            body.Description,
-		"ConfirmAvaIP":           body.ConfirmAvaIP,
-		"ConfirmEnabledSecurity": body.ConfirmSecIPScan,
-		"CreatedBy":              user,
+		"Name":                       body.Name,
+		"CoOwner":                    body.Coowner,
+		"Description":                body.Description,
+		"ConfirmAvaIP":               body.ConfirmAvaIP,
+		"ConfirmEnabledSecurity":     body.ConfirmSecIPScan,
+		"CreatedBy":                  user,
+		"Newcontribution":            body.Newcontribution,
+		"OSSsponsor":                 body.OSSsponsor,
+		"Avanadeofferingsassets":     body.Avanadeofferingsassets,
+		"Willbecommercialversion":    body.Willbecommercialversion,
+		"OSSContributionInformation": body.OSSContributionInformation,
 	}
 	result, err := db.ExecuteStoredProcedureWithResult("dbo.PR_Projects_Insert", param)
 	if err != nil {

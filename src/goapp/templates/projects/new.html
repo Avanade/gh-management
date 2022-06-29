@@ -130,7 +130,7 @@
             </div>
         </div>
         <br>
-        <div class="flex flex flex-col md:flex-row  ">
+        <div class="flex flex flex-col md:flex-row  my-3 ">
             <div class="basis-1/2 md:base-full  md:flex-row   mx-3">
                 <div class="flex flex-col ">
                     <h3 class="text-lg font-medium leading-6 text-gray-900">Legal questions </h3>
@@ -141,7 +141,7 @@
             </div>
 
         </div>
-        <div class="flex flex flex-col md:flex-row  ">
+        <div class="flex flex flex-col md:flex-row  my-3 ">
             <div class="basis-1/2 md:base-full  md:flex-row   mx-3">
                 <div class="flex flex-col pl-2">
                     Is this a new contribution with no prior code development? (i.e., no existing Avanade IP, no
@@ -149,7 +149,7 @@
                 </div>
             </div>
             <div class="basis-1/2">
-                <select name="Q" id="Q">
+                <select  class ="rounded-md"  name="newcontribution" id="newcontribution" x-model="form.newcontribution">
                     <option value="" selected disabled hidden> -- SELECT -- </option>
                     <option value="Yes">Yes</option>
                     <option value="No">No</option>
@@ -157,15 +157,15 @@
                 </select>
             </div>
         </div>
-        <div class="flex flex flex-col md:flex-row  ">
-            <div class="basis-1/2 md:base-full  md:flex-row   mx-3">
+        <div class="flex flex flex-col md:flex-row  my-3 ">
+            <div class="basis-1/2 md:base-full  md:flex-row   mx-3 ">
                 <div class="flex flex-col pl-2">
                     Who is sponsoring this OSS contribution?
                 </div>
             </div>
-            <div class="basis-1/2">
+            <!-- <div class="basis-1/2">
                 <select name="Q" id="Q">
-                    <option value="" selected disabled hidden> -- SELECT -- </option>
+               
                     <option value="Solution Area - Applications and Infrastructure">Solution Area - Applications and Infrastructure</option>
                     <option value="Solution Area - Business Applications">Solution Area - Business Applications</option>
                     <option value="Solution Area - Data & AI">Solution Area - Data & AI</option>
@@ -176,16 +176,32 @@
                     <option value="Office of the CTO">Office of the CTO</option>
                     <option value="[Other - freetype]">[Other - freetype]</option>
                 </select>
-            </div>
+            </div> -->
+              <div class="basis-1/2 md:base-full  md:flex-row   mx-3  ">
+                <div 
+                    x-data="combobox({
+                            ajax: getSponsorOptions,
+                            id : 'id',
+                            text : 'text',
+                          
+                            isInsertable : true,
+                            isDisplayItem : false
+                        })"
+                    x-modelable = "selected"
+                    x-model = "form.sponsorOptions"
+                >
+                    <div x-html="template"></div>
+                </div>
+            </div>   
         </div>
-        <div class="flex flex flex-col md:flex-row  ">
+        <div class="flex flex flex-col md:flex-row my-3  ">
             <div class="basis-1/2 md:base-full  md:flex-row   mx-3">
                 <div class="flex flex-col pl-2">
                     Will Avanade use this contribution in client accounts and/or as part of an Avanade offerings/assets?
                 </div>
             </div>
             <div class="basis-1/2">
-                <select name="Q" id="Q">
+                <select class ="rounded-md"  name="avanadeofferingsassets" id="avanadeofferingsassets" x-model="form.avanadeofferingsassets">
                     <option value="" selected disabled hidden> -- SELECT -- </option>
                     <option value="Yes">Yes</option>
                     <option value="No">No</option>
@@ -193,14 +209,14 @@
                 </select>
             </div>
         </div>
-        <div class="flex flex flex-col md:flex-row  ">
+        <div class="flex flex flex-col md:flex-row my-3  ">
             <div class="basis-1/2 md:base-full  md:flex-row   mx-3">
                 <div class="flex flex-col pl-2">
                     Will there be a commercial version of this contribution?
                 </div>
             </div>
-            <div class="basis-1/2">
-                <select name="Q" id="Q">
+            <div class="basis-1/2" >
+                <select class ="rounded-md" name="willbecommercialversion" id="willbecommercialversion" x-model="form.willbecommercialversion">
                     <option value="" selected disabled hidden> -- SELECT -- </option>
                     <option value="Yes">Yes</option>
                     <option value="No">No</option>
@@ -208,17 +224,18 @@
                 </select>
             </div>
         </div>
-        <div class="flex flex flex-col md:flex-row  ">
+        <div class="flex flex flex-col md:flex-row  my-3 ">
             <div class="basis-1/2 md:base-full  md:flex-row   mx-3">
                 <div class="flex flex-col pl-2">
                     Additional OSS Contribution Information (e.g. planned maintenance/support, etc.)?
                 </div>
             </div>
             <div class="basis-1/2">
-                <input type="text"   maxlength="50"
+                <input type="text"   maxlength="50"  name="osscontributionInformation" id="osscontributionInformation" x-model="form.osscontributionInformation"
                 class="mt-1 focus:ring-orange-500 focus:border-orange-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md border-2">
 
             </div>
+            
         </div>
         <br>
         <p>
@@ -266,7 +283,7 @@
 
 
 </div>
-
+<script src="/public/components/combobox.js"></script>
 <script type="text/javascript">
     function data() {
         return {
@@ -275,12 +292,23 @@
                 coowner: '',
                 description: '',
                 confirmAvaIP: false,
-                confirmSecIPScan: false
+                confirmSecIPScan: false,
+                newcontribution: '',
+                osssponsor:'',
+                avanadeofferingsassets: '',
+                willbecommercialversion : '',
+                osscontributionInformation: '',
+                sponsorOptions:[],
+
             },
             coowner: {
                 show: false,
             },
             submit() {
+                 console.log(this.form)
+                 console.log(this.form.sponsorOptions[0]["text"] )
+                this.form.osssponsor = this.form.sponsorOptions[0]["text"]
+                console.log( this.form.osssponsor)
                 Alpine.store('master').modal.reset()
                 Alpine.store('master').modal.show()
                 Alpine.store('master').postData("/projects/new", this.form, "Your repository has been created.", "Go to your project list", "/projects")
@@ -319,10 +347,28 @@
                     return false
                 }
             }
+           
 
 
         }
-    }
+    
+    } 
+         async function getSponsorOptions(){
+           // const res = await fetch('/api/contributionarea')
+
+    //       // const data =  await res.json()
+             const data = [
+                 {id:"1", text:"Solution Area - Applications and Infrastructure"} ,
+                 {id:"2", text:"Solution Area - Business Applications"} ,
+                 {id:"3", text:"Solution Area - Data & AI"} ,   
+                 {id:"4", text:"Solution Area - Modern Workplace"} , 
+                 {id:"5", text:"Business Group - Advisory"} ,
+                 {id:"6", text:"ITS"} ,
+                 {id:"7", text:"Office of the CTO"} ,
+            ]
+    //         console.log(data)
+             return data
+     }
 
 </script>
 {{ end }}
