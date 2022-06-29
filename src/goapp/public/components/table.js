@@ -1,5 +1,6 @@
 const table = ({
     callback,
+    onRowClick,
     data = '',
     total = 0,
     columns = [
@@ -62,6 +63,14 @@ const table = ({
         this.search = e.target.value;
         this.load();
       },
+      onRowClickHandler(data){
+        if (onRowClick == undefined) {
+          console.log("ROW WAS CLICKED BUT NO EVENT WAS SET \n DATA : ", data);
+          return;
+        }
+
+        onRowClick(data)
+      },
       initRow(data){
         let html = '';
         this.columns.forEach(col => {
@@ -106,7 +115,7 @@ const table = ({
                     </thead>
                     <tbody class="divide-y divide-gray-200">
                         <template x-for='item in data'>
-                          <tr x-html="initRow(item)" class="hover:bg-gray-100">
+                          <tr x-html="initRow(item)" class="hover:bg-gray-100" @click="onRowClickHandler(item)">
                           </tr>
                         </template>
                         <tr x-show='isLoading' x-transition>
