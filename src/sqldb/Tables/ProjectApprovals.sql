@@ -6,7 +6,7 @@
     [ApproverUserPrincipalName] VARCHAR(100) NOT NULL, 
     [ApprovalStatusId] INT NOT NULL, 
     [ApprovalDescription] VARCHAR(500) NULL,
-    [ApproverRemarks] VARCHAR(255) NULL,
+    [ApprovalRemarks] VARCHAR(255) NULL,
     [ApprovalDate] DATETIME NULL, 
     [ApprovalSystemGUID] UNIQUEIDENTIFIER NULL,
     [ApprovalSystemDateSent] DATETIME NULL,

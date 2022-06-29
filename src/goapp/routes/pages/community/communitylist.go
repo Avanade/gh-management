@@ -7,6 +7,7 @@ import (
 	template "main/pkg/template"
 	"net/http"
 	"os"
+
 	//models "main/models"
 	//"fmt"
 	"github.com/gorilla/mux"
@@ -30,7 +31,7 @@ func GetUserCommunitylist(w http.ResponseWriter, r *http.Request) {
 	defer db.Close()
 
 	// Get project list
- 
+
 	Communities, err := db.ExecuteStoredProcedureWithResult("PR_Communities_select", nil)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -48,11 +49,9 @@ func GetUserCommunitylist(w http.ResponseWriter, r *http.Request) {
 	w.Write(jsonResp)
 }
 
-
 func GetUserCommunity(w http.ResponseWriter, r *http.Request) {
 	req := mux.Vars(r)
 	id := req["id"]
-
 
 	dbConnectionParam := sql.ConnectionParam{
 		ConnectionString: os.Getenv("GHMGMTDB_CONNECTION_STRING"),
@@ -69,7 +68,7 @@ func GetUserCommunity(w http.ResponseWriter, r *http.Request) {
 
 		"Id": id,
 	}
- 
+
 	Communities, err := db.ExecuteStoredProcedureWithResult("PR_Communities_select_byID", param)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -86,4 +85,3 @@ func GetUserCommunity(w http.ResponseWriter, r *http.Request) {
 	//fmt.Printf(projects)
 	w.Write(jsonResp)
 }
-

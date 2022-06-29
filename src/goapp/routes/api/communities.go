@@ -6,11 +6,13 @@ import (
 	models "main/models"
 	ghmgmt "main/pkg/ghmgmtdb"
 	session "main/pkg/session"
-	comm "main/routes/pages/community"
 	"main/pkg/sql"
+	comm "main/routes/pages/community"
 	"net/http"
 	"os"
 	"strconv"
+
+	"github.com/gorilla/mux"
 )
 
 func CommunityAPIHandler(w http.ResponseWriter, r *http.Request) {
@@ -63,6 +65,7 @@ func CommunityAPIHandler(w http.ResponseWriter, r *http.Request) {
 				http.Error(w, errIU.Error(), http.StatusInternalServerError)
 				return
 			}
+
 			sponsorsparam := map[string]interface{}{
 
 				"CommunityId":        id,
@@ -72,10 +75,28 @@ func CommunityAPIHandler(w http.ResponseWriter, r *http.Request) {
 			_, err := db.ExecuteStoredProcedure("dbo.PR_CommunitySponsors_Insert", sponsorsparam)
 			if err != nil {
 				fmt.Println(err)
+
 			}
 
 		}
-		go comm.RequestCommunityApproval(int64(id))
+
+		for _, t := range body.Tags {
+
+			Tagsparam := map[string]interface{}{
+
+				"CommunityId": id,
+				"Tag ":        t,
+			}
+			_, err := db.ExecuteStoredProcedure("PR_CommunityTags_Insert", Tagsparam)
+			if err != nil {
+
+				fmt.Println(err)
+			}
+
+		}
+		if body.Id == 0 {
+			go comm.RequestCommunityApproval(int64(id))
+		}
 	case "GET":
 		param := map[string]interface{}{
 
@@ -104,6 +125,41 @@ func CommunityAPIHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+}
+
+func GetRequestStatusByCommunity(w http.ResponseWriter, r *http.Request) {
+	req := mux.Vars(r)
+	id := req["id"]
+
+	// Connect to database
+	dbConnectionParam := sql.ConnectionParam{
+		ConnectionString: os.Getenv("GHMGMTDB_CONNECTION_STRING"),
+	}
+
+	db, err := sql.Init(dbConnectionParam)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer db.Close()
+
+	// Get project list
+	params := make(map[string]interface{})
+	params["Id"] = id
+	projects, err := db.ExecuteStoredProcedureWithResult("PR_CommunityApprovals_Select_ById", params)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Header().Set("Content-Type", "application/json")
+	jsonResp, err := json.Marshal(projects)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.Write(jsonResp)
 }
 
 func ConnectDb() *sql.DB {
