@@ -85,6 +85,11 @@ type TypProjectApprovals struct {
 	ApprovalType               string
 	ApproverUserPrincipalName  string
 	ApprovalDescription        string
+	Newcontribution            string
+	OSSsponsor                 string
+	Avanadeofferingsassets     string
+	Willbecommercialversion    string
+	OSSContributionInformation string
 }
 
 type TypApprovalSystemPost struct {

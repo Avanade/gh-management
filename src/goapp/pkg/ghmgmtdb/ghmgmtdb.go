@@ -146,7 +146,7 @@ func PopulateProjectsApproval(id int64) (ProjectApprovals []models.TypProjectApp
 		"ProjectId": id,
 	}
 	result, _ := db.ExecuteStoredProcedureWithResult("PR_ProjectsApproval_Populate", param)
-
+	fmt.Println(result)
 	for _, v := range result {
 		data := models.TypProjectApprovals{
 			Id:                         v["Id"].(int64),
@@ -166,6 +166,11 @@ func PopulateProjectsApproval(id int64) (ProjectApprovals []models.TypProjectApp
 			ApprovalType:               v["ApprovalType"].(string),
 			ApproverUserPrincipalName:  v["ApproverUserPrincipalName"].(string),
 			ApprovalDescription:        v["ApprovalDescription"].(string),
+			Newcontribution:            v["newcontribution"].(string),
+			OSSsponsor:                 v["OSSsponsor"].(string),
+			Avanadeofferingsassets:     v["Avanadeofferingsassets"].(string),
+			Willbecommercialversion:    v["Willbecommercialversion"].(string),
+			OSSContributionInformation: v["OSSContributionInformation"].(string),
 		}
 		ProjectApprovals = append(ProjectApprovals, data)
 	}

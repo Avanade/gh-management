@@ -305,10 +305,7 @@
                 show: false,
             },
             submit() {
-                 console.log(this.form)
-                 console.log(this.form.sponsorOptions[0]["text"] )
                 this.form.osssponsor = this.form.sponsorOptions[0]["text"]
-                console.log( this.form.osssponsor)
                 Alpine.store('master').modal.reset()
                 Alpine.store('master').modal.show()
                 Alpine.store('master').postData("/projects/new", this.form, "Your repository has been created.", "Go to your project list", "/projects")
@@ -354,9 +351,7 @@
     
     } 
          async function getSponsorOptions(){
-           // const res = await fetch('/api/contributionarea')
 
-    //       // const data =  await res.json()
              const data = [
                  {id:"1", text:"Solution Area - Applications and Infrastructure"} ,
                  {id:"2", text:"Solution Area - Business Applications"} ,
@@ -366,7 +361,7 @@
                  {id:"6", text:"ITS"} ,
                  {id:"7", text:"Office of the CTO"} ,
             ]
-    //         console.log(data)
+
              return data
      }
 
