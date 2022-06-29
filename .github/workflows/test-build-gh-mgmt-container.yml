@@ -1,16 +1,16 @@
-name: Docker - Approval System Container
+name: Test - Docker Container - GH-Management
 
 on:
   push:
     branches:
       - test
     paths:
-      - "src/approvalsystem/goapp/**"
+      - "src/goapp/**"
   workflow_dispatch:
 
 defaults:
   run:
-    working-directory: src/approvalsystem/goapp
+    working-directory: src/goapp
 
 jobs:
   build-goapp-container:
@@ -23,5 +23,5 @@ jobs:
           username: ${{ secrets.ACR_USERNAME }}
           password: ${{ secrets.ACR_PASSWORD }}
       - run: |
-          docker build . -t ${{ secrets.ACR_REGISTRY }}/uat-approval-system-app:${{ github.sha }} -t ${{ secrets.ACR_REGISTRY }}/uat-approval-system-app:latest
-          docker push ${{ secrets.ACR_REGISTRY }}/uat-approval-system-app
+          docker build . -t ${{ secrets.ACR_REGISTRY }}/test-gh-mgmt-app:${{ github.sha }} -t ${{ secrets.ACR_REGISTRY }}/test-gh-mgmt-app:latest
+          docker push ${{ secrets.ACR_REGISTRY }}/test-gh-mgmt-app

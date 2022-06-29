@@ -1,9 +1,9 @@
-name: Docker - GH-Management Container
+name: UAT - Docker Container - GH-Management
 
 on:
   push:
     branches:
-      - test
+      - uat
     paths:
       - "src/goapp/**"
   workflow_dispatch:
