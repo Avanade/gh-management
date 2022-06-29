@@ -244,27 +244,42 @@ func UpdateIsArchiveIsPrivate(projectName string, isArchived bool, isPrivate boo
 }
 
 // ACTIVITIES
-func PRActivities_Select() interface{} {
+func CommunitiesActivities_Select() interface{} {
 	db := ConnectDb()
 	defer db.Close()
 
-	result, _ := db.ExecuteStoredProcedureWithResult("PR_Activities_Select", nil)
+	result, _ := db.ExecuteStoredProcedureWithResult("PR_CommunityActivities_Select", nil)
 	return result
 }
 
-func PRActivities_Insert(name, url, createdBy string, communityId, activityId int) (int, error) {
+func CommunitiesActivities_Select_ByOffsetAndFilter(offset, filter int, search string) interface{} {
 	db := ConnectDb()
 	defer db.Close()
 
 	param := map[string]interface{}{
-		"Name":           name,
-		"Url":            url,
-		"CreatedBy":      createdBy,
-		"CommunityId":    communityId,
-		"ActivityTypeId": activityId,
+		"Offset": offset,
+		"Filter": filter,
+		"Search": search,
 	}
 
-	result, err := db.ExecuteStoredProcedureWithResult("PR_CommunitiesActivities_Insert", param)
+	result, _ := db.ExecuteStoredProcedureWithResult("PR_CommunityActivities_Select_ByOffsetAndFilter", param)
+	return result
+}
+
+func CommunitiesActivities_Insert(body models.Activity) (int, error) {
+	db := ConnectDb()
+	defer db.Close()
+
+	param := map[string]interface{}{
+		"Name":           body.Name,
+		"Url":            body.Url,
+		"Date":           body.Date,
+		"CreatedBy":      body.CreatedBy,
+		"CommunityId":    body.CommunityId,
+		"ActivityTypeId": body.TypeId,
+	}
+
+	result, err := db.ExecuteStoredProcedureWithResult("PR_CommunityActivities_Insert", param)
 	if err != nil {
 		return -1, err
 	}
@@ -275,8 +290,35 @@ func PRActivities_Insert(name, url, createdBy string, communityId, activityId in
 	return id, nil
 }
 
-// ACTIVITIES TYPE
-func PRActivityTypes_Select() interface{} {
+func CommunitiesActivities_TotalCount() int {
+	db := ConnectDb()
+	defer db.Close()
+
+	result, _ := db.ExecuteStoredProcedureWithResult("PR_CommunityActivities_TotalCount", nil)
+	total, err := strconv.Atoi(fmt.Sprint(result[0]["Total"]))
+	if err != nil {
+		return 0
+	}
+	return total
+}
+
+func CommunitiesActivities_Select_ById(id int) (interface{}, error) {
+	db := ConnectDb()
+	defer db.Close()
+
+	param := map[string]interface{}{
+		"Id": id,
+	}
+
+	result, err := db.ExecuteStoredProcedureWithResult("PR_CommunityActivities_Select_ById", param)
+	if err != nil {
+		return nil, err
+	}
+
+	return &result[0], nil
+}
+
+func ActivityTypes_Select() interface{} {
 	db := ConnectDb()
 	defer db.Close()
 
@@ -287,7 +329,7 @@ func PRActivityTypes_Select() interface{} {
 	return result
 }
 
-func PRActivityTypes_Insert(name string) (int, error) {
+func ActivityTypes_Insert(name string) (int, error) {
 	db := ConnectDb()
 	defer db.Close()
 
@@ -306,8 +348,29 @@ func PRActivityTypes_Insert(name string) (int, error) {
 	return id, nil
 }
 
-// CONTRIBUTION AREA
-func PRContributionAreas_Select() interface{} {
+func CommunityActivitiesContributionAreas_Insert(body models.CommunityActivitiesContributionAreas) (int, error) {
+	db := ConnectDb()
+	defer db.Close()
+
+	param := map[string]interface{}{
+		"CommunityActivityId": body.CommunityActivityId,
+		"ContributionAreaId":  body.ContributionAreaId,
+		"IsPrimary":           body.IsPrimary,
+		"CreatedBy":           body.CreatedBy,
+	}
+
+	result, err := db.ExecuteStoredProcedureWithResult("PR_CommunityActivitiesContributionAreas_Insert", param)
+	if err != nil {
+		return -1, err
+	}
+	id, err := strconv.Atoi(fmt.Sprint(result[0]["Id"]))
+	if err != nil {
+		return -1, err
+	}
+	return id, nil
+}
+
+func ContributionAreas_Select() interface{} {
 	db := ConnectDb()
 	defer db.Close()
 
@@ -318,7 +381,7 @@ func PRContributionAreas_Select() interface{} {
 	return result
 }
 
-func PRContributionAreas_Insert(name, createdBy string) (int, error) {
+func ContributionAreas_Insert(name, createdBy string) (int, error) {
 	db := ConnectDb()
 	defer db.Close()
 
