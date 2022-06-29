@@ -58,8 +58,8 @@ func ProjectsNewHandler(w http.ResponseWriter, r *http.Request) {
 				httpResponseError(w, http.StatusInternalServerError, "There is a problem creating the GitHub repository.")
 			}
 			id := ghmgmtdb.PRProjectsInsert(body, username.(string))
-			fmt.Println(id)
-			//go RequestApproval(id)
+
+			go RequestApproval(id)
 			w.WriteHeader(http.StatusOK)
 		}
 	}
@@ -79,6 +79,7 @@ func ReprocessRequestApproval() {
 
 	for _, v := range projectApprovals {
 		go ApprovalSystemRequest(v)
+
 	}
 
 }
@@ -107,6 +108,28 @@ func ApprovalSystemRequest(data models.TypProjectApprovals) error {
 				<td style="font-size:larger">|ProjectDescription|<td>
 			</tr>
 		</table>
+		<table>
+			<tr>
+				<td style="font-weight: bold;">Is this a new contribution with no prior code development? (i.e., no existing Avanade IP, no third-party/OSS code, etc.)<td>
+				<td style="font-size:larger">|Newcontribution|<td>
+			</tr>
+			<tr>
+				<td style="font-weight: bold;">Who is sponsoring this OSS contribution?<td>
+				<td style="font-size:larger">|OSSsponsor|<td>
+			</tr>
+			<tr>
+				<td style="font-weight: bold;">Will Avanade use this contribution in client accounts and/or as part of an Avanade offerings/assets?<td>
+				<td style="font-size:larger">|Avanadeofferingsassets|<td>
+			</tr>
+			<tr>
+				<td style="font-weight: bold;">Will there be a commercial version of this contribution<td>
+				<td style="font-size:larger">|Willbecommercialversion|<td>
+			</tr>
+				<tr>
+				<td style="font-weight: bold;">Additional OSS Contribution Information (e.g. planned maintenance/support, etc.)?<td>
+				<td style="font-size:larger">|OSSContributionInformation|<td>
+			</tr>
+		</table>
 		<p>For more information, send an email to <a href="mailto:|RequesterUserPrincipalName|">|RequesterUserPrincipalName|</a></p>
 		`
 		replacer := strings.NewReplacer("|ApproverUserPrincipalName|", data.ApproverUserPrincipalName,
@@ -116,9 +139,14 @@ func ApprovalSystemRequest(data models.TypProjectApprovals) error {
 			"|CoownerName|", data.CoownerName,
 			"|ProjectDescription|", data.ProjectDescription,
 			"|RequesterUserPrincipalName|", data.RequesterUserPrincipalName,
+
+			"|Newcontribution|", data.Newcontribution,
+			"|OSSsponsor|", data.OSSsponsor,
+			"|Avanadeofferingsassets|", data.Avanadeofferingsassets,
+			"|Willbecommercialversion|", data.Willbecommercialversion,
+			"|OSSContributionInformation|", data.OSSContributionInformation,
 		)
 		body := replacer.Replace(bodyTemplate)
-
 		postParams := models.TypApprovalSystemPost{
 			ApplicationId:       os.Getenv("APPROVAL_SYSTEM_APP_ID"),
 			ApplicationModuleId: os.Getenv("APPROVAL_SYSTEM_APP_MODULE_PROJECTS"),
