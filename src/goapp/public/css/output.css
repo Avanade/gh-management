@@ -1694,6 +1694,11 @@ select {
   margin-bottom: 0.75rem;
 }
 
+.my-8 {
+  margin-top: 2rem;
+  margin-bottom: 2rem;
+}
+
 .-mx-5 {
   margin-left: -1.25rem;
   margin-right: -1.25rem;
@@ -1839,6 +1844,10 @@ select {
 
 .mb-2 {
   margin-bottom: 0.5rem;
+}
+
+.-mr-1 {
+  margin-right: -0.25rem;
 }
 
 .-ml-px {
@@ -2069,6 +2078,10 @@ select {
   width: 50%;
 }
 
+.w-56 {
+  width: 14rem;
+}
+
 .min-w-full {
   min-width: 100%;
 }
@@ -2165,6 +2178,10 @@ select {
 
 .border-separate {
   border-collapse: separate;
+}
+
+.origin-top-right {
+  transform-origin: top right;
 }
 
 .-translate-x-full {
@@ -4054,6 +4071,10 @@ select {
   color: rgb(107 114 128 / var(--tw-placeholder-opacity));
 }
 
+.opacity-0 {
+  opacity: 0;
+}
+
 .bg-blend-normal {
   background-blend-mode: normal;
 }
@@ -4549,6 +4570,10 @@ select {
   text-align: center;
 }
 
+.focus\:pointer-events-auto:focus {
+  pointer-events: auto;
+}
+
 .focus\:border-rose-500:focus {
   --tw-border-opacity: 1;
   border-color: rgb(244 63 94 / var(--tw-border-opacity));
@@ -4711,6 +4736,10 @@ select {
 
 .focus\:ring-offset-0:focus {
   --tw-ring-offset-width: 0px;
+}
+
+.focus\:ring-offset-gray-100:focus {
+  --tw-ring-offset-color: #f3f4f6;
 }
 
 .hover\:focus\:text-center:focus:hover {
