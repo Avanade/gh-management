@@ -5,107 +5,106 @@
         action : '{{ .Action }}',
         id : '{{ .Id }}'
     })" class="space-y-8 divide-y divide-gray-200">
-        <div class="space-y-8 divide-y divide-gray-200 sm:space-y-5">
-            <div>
+        <fieldset x-bind:disabled="action.toLowerCase() == 'view'">
+            <div class="space-y-8 divide-y divide-gray-200 sm:space-y-5">
                 <div>
-                    <h3 class="text-lg leading-6 font-medium text-gray-900">Activity Information​</h3>
-                    <p class="mt-1 max-w-2xl text-sm text-gray-500">Activities are contributions to any non-Avanade community. These contributions might include speaking or attending an event or user-group, submitting a blog, participating on a panel, or creating content for that community.  ​</p>
-                </div>
-                <div class="mt-6 grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
-                    <div class="sm:col-span-3">
-                        <div 
-                            x-data="combobox({
-                                    ajax : getCommunity,
-                                    id : 'Id',
-                                    text : 'Name',
-                                    label : 'Community*'
-                                })"
-                            x-modelable = "selected"
-                            x-model = "form.community"
-                        >
-                            <div x-html="template"></div>
-                        </div>
+                    <div>
+                        <h3 class="text-lg leading-6 font-medium text-gray-900">Activity Information​</h3>
+                        <p class="mt-1 max-w-2xl text-sm text-gray-500">Activities are contributions to any non-Avanade community. These contributions might include speaking or attending an event or user-group, submitting a blog, participating on a panel, or creating content for that community.  ​</p>
                     </div>
-                    <div class="sm:col-span-3">
-                        <label for="date" class="block text-sm font-medium text-gray-700"> Date </label>
-                        <div class="mt-1">
-                            <input x-model="form.date" type="date" name="date" id="date" autocomplete="family-name" class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md">
+                    <div class="mt-6 grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
+                        <div class="sm:col-span-3">
+                            <div 
+                                x-data="combobox({
+                                        ajax : getCommunity,
+                                        id : 'Id',
+                                        text : 'Name',
+                                        label : 'Community*'
+                                    })"
+                                x-modelable = "selected"
+                                x-model = "form.community"
+                            >
+                                <div x-html="template"></div>
+                            </div>
                         </div>
-                    </div>
-                    <div class="sm:col-span-6">
-                        <label for="activity_name" class="block text-sm font-medium text-gray-700"> Activity Name* </label>
-                        <div class="mt-1">
-                            <input x-model="form.activity_name" type="text" name="activity_name" id="activity_name" autocomplete="activity_name" class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md">
+                        <div class="sm:col-span-3">
+                            <label for="date" class="block text-sm font-medium text-gray-700"> Date </label>
+                            <div class="mt-1">
+                                <input x-model="form.date" type="date" name="date" id="date" autocomplete="family-name" class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md">
+                            </div>
                         </div>
-                    </div>
-                    <div class="sm:col-span-3">
-                        <div 
-                            x-data="combobox({
-                                    ajax: getTypes,
-                                    id : 'Id',
-                                    text : 'Name',
-                                    label : 'Type*',
-                                    isInsertable : true
-                                })"
-                            x-modelable = "selected"
-                            x-model = "form.type"
-                        >
-                            <div x-html="template"></div>
+                        <div class="sm:col-span-6">
+                            <label for="activity_name" class="block text-sm font-medium text-gray-700"> Activity Name* </label>
+                            <div class="mt-1">
+                                <input x-model="form.activity_name" type="text" name="activity_name" id="activity_name" autocomplete="activity_name" class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md">
+                            </div>
                         </div>
-                    </div>
-                    <div class="sm:col-span-3">
-                        <label for="url" class="block text-sm font-medium text-gray-700"> URL (if applicable) </label>
-                        <div class="mt-1">
-                            <input x-model="form.url" type="text" name="url" id="url" autocomplete="family-name" class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md">
+                        <div class="sm:col-span-3">
+                            <div 
+                                x-data="combobox({
+                                        ajax: getTypes,
+                                        id : 'Id',
+                                        text : 'Name',
+                                        label : 'Type*',
+                                        isInsertable : true
+                                    })"
+                                x-modelable = "selected"
+                                x-model = "form.type"
+                            >
+                                <div x-html="template"></div>
+                            </div>
                         </div>
-                    </div>
-                    <div class="sm:col-span-3">
-                        <div 
-                            x-data="combobox({
-                                    ajax: getContributionAreas,
-                                    id : 'Id',
-                                    text : 'Name',
-                                    label : 'Primary Contribution Area*',
-                                    isInsertable : true
-                                })"
-                            x-modelable = "selected"
-                            x-model = "form.primary_contribution_area"
-                        >
-                            <div x-html="template"></div>
+                        <div class="sm:col-span-3">
+                            <label for="url" class="block text-sm font-medium text-gray-700"> URL (if applicable) </label>
+                            <div class="mt-1">
+                                <input x-model="form.url" type="text" name="url" id="url" autocomplete="family-name" class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md">
+                            </div>
                         </div>
-                    </div>
-                    <div class="sm:col-span-3">
-                        <div 
-                            x-data="combobox({
-                                    ajax: getContributionAreas,
-                                    id : 'Id',
-                                    text : 'Name',
-                                    label : 'Additional Contribution Areas',
-                                    isMultiple : true,
-                                    isInsertable : true,
-                                    isDisplayItem : true
-                                })"
-                            x-modelable = "selected"
-                            x-model = "form.additional_contribution_areas"
-                        >
-                            <div x-html="template"></div>
+                        <div class="sm:col-span-3">
+                            <div 
+                                x-data="combobox({
+                                        ajax: getContributionAreas,
+                                        id : 'Id',
+                                        text : 'Name',
+                                        label : 'Primary Contribution Area*',
+                                        isInsertable : true
+                                    })"
+                                x-modelable = "selected"
+                                x-model = "form.primary_contribution_area"
+                            >
+                                <div x-html="template"></div>
+                            </div>
+                        </div>
+                        <div class="sm:col-span-3">
+                            <div 
+                                x-data="combobox({
+                                        ajax: getContributionAreas,
+                                        id : 'Id',
+                                        text : 'Name',
+                                        label : 'Additional Contribution Areas',
+                                        isMultiple : true,
+                                        isInsertable : true,
+                                        isDisplayItem : true
+                                    })"
+                                x-modelable = "selected"
+                                x-model = "form.additional_contribution_areas"
+                            >
+                                <div x-html="template"></div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-        <div class="pt-5">
-            <div class="flex justify-end">
-              <button 
-                @click="onSubmit" 
-                type="submit" 
-                form="activity_form"
-                class="ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 disabled:bg-orange-200"
-                x-bind:disabled="!isValid()">
-                    Save
-                </button>
-            </div>
-          </div>
+            <div class="pt-5">
+                <div class="flex justify-end">
+                    <a href="/activities" type="button" class="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">Back</a>
+                    <button 
+                        @click.prevent="onSubmit" 
+                        class="ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 disabled:bg-orange-200"
+                        x-bind:disabled="!isValid()":class="action == 'View' ? 'hidden' : ''">Submit</button>
+                </div>
+              </div>
+        </fieldset>
     </form>
 
     <script src="/public/components/combobox.js"></script>
@@ -129,8 +128,8 @@
 
                     if (this.action.toLowerCase() == 'add') return;
 
-                    const res = await fetch(`/api/activity/${this.id}`)
-                    const data = await res.json()
+                    const data = await getActivityById(this.id)
+                    const additionalContributionAreas= await getAdditionalContributionAreasByActivityId(this.id);
 
                     const date = new Date(data.Date)
 
@@ -141,7 +140,7 @@
                         type : [{ id : data.ActivityTypeId, text : data.TypeName}],
                         url : data.Url,
                         primary_contribution_area : [{ id : data.PrimaryContributionAreaId, text : data.PrimaryContributionAreaName}],
-                        additional_contribution_areas : []
+                        additional_contribution_areas : additionalContributionAreas.map(i => { return {id : i.ContributionAreaId, text : i.Name}})
                     }
                 },
                 isValid() {
@@ -167,8 +166,6 @@
                         'additionalcontributionareas' : this.form.additional_contribution_areas.map(e => { return { id : e.id, name : e.text }})
                     }
 
-                    console.log(data)
-
                     Alpine.store('master').modal.show()
                     Alpine.store('master').postData("/api/activity", data, "Your activity has been added.", "Go to your activity list", "/activities")                
                 }
@@ -179,7 +176,6 @@
             const res = await fetch('/community')
 
             const data = await res.json()
-            console.log(data)
             return data
         }
 
@@ -195,6 +191,16 @@
 
             const data =  await res.json()
             return data
+        }
+        
+        async function getActivityById(id){
+            const res = await fetch(`/api/activity/${id}`)
+            return res.json()
+        }
+
+        async function getAdditionalContributionAreasByActivityId(activityId){
+            const res = await fetch(`/api/contributionarea/activity/${activityId}`)
+            return res.json()
         }
         </script>
 {{ end }}
