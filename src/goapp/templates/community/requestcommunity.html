@@ -3,15 +3,17 @@
 
 <div id="pageTitle">Request a Community</div>
 <div x-data="data()" x-init="onLoad()">
-    <form onsubmit="event.preventDefault()" autocomplete="off" >
+    <form onsubmit="event.preventDefault()" autocomplete="off">
         <div x-show="!form.id">
             <P>
 
-            <h3 class="text-lg font-medium leading-6 text-gray-900"> Community Information</h3>
-            If you have been unable to find the community you need in the drop-down, please submit your request here so
-            that
-            we
-            can add it. Please ensure you have reviewed the full list before requesting this community for review. ​</P>
+                <h3 class="text-lg font-medium leading-6 text-gray-900"> Community Information</h3>
+                If you have been unable to find the community you need in the drop-down, please submit your request here
+                so
+                that
+                we
+                can add it. Please ensure you have reviewed the full list before requesting this community for review. ​
+            </P>
         </div>
         <br>
         <div class="flex flex flex-col md:flex-row ">
@@ -65,7 +67,8 @@
                 <div x-data="{ data: content }" class="flex flex-col  ">
 
                     <div>
-                        <span class="text-lg font-medium leading-6 text-gray-900">Business Sponsors*</span><span class="pl-1 text-xs">(Please select at least two sponsors )</span>
+                        <span class="text-lg font-medium leading-6 text-gray-900">Business Sponsors*</span><span
+                            class="pl-1 text-xs">(Please select at least two sponsors )</span>
                     </div>
                     <div class="relative mt-1">
                         <div x-html="sponsors.template"></div>
@@ -98,25 +101,19 @@
                     </div>
 
                     <div>
-                        <span class="text-lg font-medium leading-6 text-gray-900">Tag</span><span class="pl-1 text-xs">(Please press Enter to insert Tag)</span>
+                        <span class="text-lg font-medium leading-6 text-gray-900">Tag</span><span
+                            class="pl-1 text-xs">(Please press Enter to insert Tag)</span>
                     </div>
-                    <div> <input type="text" name="tag" id="tag" maxlength="50" @keyup.enter="tag()"
-                            class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md border-2">
+                    <div x-data="combobox({
+                                data : [],
+                                id : 'id',
+                                text : 'name',
+                                isInsertable : true,
+                                isMultiple : true,
+                                isDisplayItem : true
+                            })" x-modelable="selected" x-model="form.tags">
+                        <div x-html="template"></div>
                     </div>
-
-
-                    <div class="  border items-center  ">
-
-
-                        <template x-for="(tag, i) in form.tags">
-                            <div style="display: flex; " class="border px-2 py-2">
-                                <div style="flex-grow: 1;" x-text="tag"> </div>
-                                <div> <button type="button" class="btn btn-danger btn-small   "
-                                        @click="removetag(tag)">&times;</button></div>
-                            </div>
-                        </template>
-                    </div>
-
                 </div>
 
 
@@ -145,7 +142,8 @@
 
         <div>
             <div align="right">
-                <button x-show="form.id" type="button" class="bg-purple-500  inline-flex justify-center py-2 px-4 rounded-md text-white"
+                <button x-show="form.id" type="button"
+                    class="bg-purple-500  inline-flex justify-center py-2 px-4 rounded-md text-white"
                     @click="onBoarding()">
                     <span>How To Join</span>
                 </button>
@@ -163,7 +161,7 @@
 
 
 <script src="/public/components/clsDropdown.js"></script>
-
+<script src="/public/components/combobox.js"></script>
 <script type="text/javascript">
     function data() {
         return {
@@ -193,10 +191,10 @@
             },
             async getUsersList() {
                 await fetch('/api/allusers').then(j => j.json()
-                    .then(data => {
+                        .then(data => {
 
-                        this.sponsors.data = data
-                    }))
+                            this.sponsors.data = data
+                        }))
                     .catch(() => {
                         Alpine.store('master').modal.update('error', 'Error', 'Please try again', '', '')
 
@@ -220,7 +218,8 @@
                 this.modalText = title
                 this.modalSubText = subtext
                 this.showModal = show
-            }, async onLoad() {
+            },
+            async onLoad() {
                 var modal = Alpine.store('master').modal
                 modal.update('loading', 'Loading', 'Please wait', '', '')
 
@@ -250,7 +249,10 @@
                         .then(r => {
                             r.json().then(body => {
                                 for (let index = 0; index < body.length; index++) {
-                                    this.form.sponsors.push({ displayName: body[index]['UserPrincipalName'], mail: body[index]['UserPrincipalName'] })
+                                    this.form.sponsors.push({
+                                        displayName: body[index]['UserPrincipalName'],
+                                        mail: body[index]['UserPrincipalName']
+                                    })
                                 }
                                 //   this.showSpinner = false
                                 spinnercount = spinnercount - 1
@@ -265,7 +267,7 @@
                         .then(r => {
                             r.json().then(body => {
                                 for (let index = 0; index < body.length; index++) {
-                                    this.form.tags.push(body[index]['Tag'])
+                                    this.form.tags.push({id : body[index]['Id'], text : body[index]['Tag']})
 
                                 }
                                 //  this.showSpinner = false
@@ -285,7 +287,7 @@
                 await this.getUsersList()
                 modal.visible = false
             },
-            
+
 
 
             submit() {
@@ -296,14 +298,12 @@
 
                 }
 
-                Alpine.store('master').postData('/api/community', this.form, "Your community has been created.", "Go to communities list", "/communities/list")
+                postData = this.form;
+                postData.tags = this.form.tags.map(i => i.text);
 
-            },
-            tag() {
-                if ( !!document.getElementById('tag').value.trim()  )
-                {this.form.tags.push(document.getElementById('tag').value)
-                document.getElementById('tag').value = "";
-            }
+                Alpine.store('master').postData('/api/community', postData, "Your community has been created.",
+                    "Go to communities list", "/communities/list")
+
             },
             datapush() {
                 this.form.sponsors.push(this.sponsors.data.filter(i => i.mail == this.sponsors.selected)[0])
@@ -312,28 +312,27 @@
             removeField(sponsors) {
                 this.form.sponsors.splice(this.form.sponsors.indexOf(sponsors), 1);
             },
-            removetag(tags) {
-                this.form.tags.splice(this.form.tags.indexOf(tags), 1);
-            },
             addNewField() {
 
-                this.fields.push({ id: new Date().getTime() + this.fields.length });
-            }
-            ,
+                this.fields.push({
+                    id: new Date().getTime() + this.fields.length
+                });
+            },
             showName(userPrincipalName, githubUser) {
-                return userPrincipalName.includes(this.form.coowner) || githubUser.includes(this.form.coowner) ? true : false
+                return userPrincipalName.includes(this.form.coowner) || githubUser.includes(this.form.coowner) ? true :
+                    false
             },
 
-            onBoarding(){
-                window.location.href=`/community/${this.form.id}/onboarding`
-            }, 
+            onBoarding() {
+                window.location.href = `/community/${this.form.id}/onboarding`
+            },
 
             get isValid() {
                 if (
                     (!!this.form.name &&
                         !!this.form.url &&
                         !!this.form.description //&& !!this.form.notes
-                        ) &&
+                    ) &&
                     this.form.sponsors.length >= 2) {
                     return true
                 } else {
@@ -344,6 +343,5 @@
 
         }
     }
-
 </script>
 {{ end }}

@@ -8,6 +8,7 @@ import (
 	rtAzure "main/routes/login/azure"
 	rtGithub "main/routes/login/github"
 	rtPages "main/routes/pages"
+	rtActivities "main/routes/pages/activities"
 	rtAdmin "main/routes/pages/admin"
 	rtCommunity "main/routes/pages/community"
 	rtProjects "main/routes/pages/projects"
@@ -38,13 +39,14 @@ func main() {
 	mux.PathPrefix("/public/").Handler(http.StripPrefix("/public/", http.FileServer(http.Dir("./public/"))))
 	mux.Handle("/", loadAzAuthPage(rtPages.HomeHandler))
 	mux.Handle("/error/ghlogin", loadAzAuthPage(rtPages.GHLoginRequire))
+	mux.Handle("/activities", loadAzGHAuthPage(rtActivities.ActivitiesHandler))
+	mux.Handle("/activities/{action:add}", loadAzGHAuthPage(rtActivities.ActivitiesNewHandler))
+	mux.Handle("/activities/{action:edit|view}/{id}", loadAzGHAuthPage(rtActivities.ActivitiesNewHandler))
 	mux.Handle("/projects/new", loadAzGHAuthPage(rtProjects.ProjectsNewHandler))
-
 	mux.Handle("/search/{searchText}", loadAzGHAuthPage(rtSearch.GetSearchResults))
 	mux.Handle("/search", loadAzGHAuthPage(rtSearch.SearchHandler))
 	mux.Handle("/search/all/", loadAzGHAuthPage(rtSearch.GetAllResults))
-	mux.Handle("/search/name/", loadAzGHAuthPage(rtSearch.GetResultsByName))
-	mux.Handle("/search/description/", loadAzGHAuthPage(rtSearch.GetResultsByDescription))
+
 	mux.Handle("/community/new", loadAzGHAuthPage(rtCommunity.CommunityHandler))
 	mux.Handle("/community/{id}", loadAzGHAuthPage(rtCommunity.CommunityHandler))
 	mux.Handle("/community/getcommunity/{id}", loadAzGHAuthPage(rtCommunity.GetUserCommunity))
@@ -53,6 +55,7 @@ func main() {
 
 	mux.Handle("/projects", loadAzGHAuthPage(rtProjects.Projects))
 	mux.Handle("/community/{id}/onboarding", loadAzGHAuthPage(rtCommunity.CommunityOnBoarding))
+	mux.HandleFunc("/loginredirect", rtPages.LoginRedirectHandler).Methods("GET")
 	mux.HandleFunc("/login/azure", rtAzure.LoginHandler)
 	mux.HandleFunc("/login/azure/callback", rtAzure.CallbackHandler)
 	mux.HandleFunc("/logout/azure", rtAzure.LogoutHandler)
@@ -65,6 +68,9 @@ func main() {
 	mux.Handle("/allusers", loadAzAuthPage(rtApi.GetAllUserFromActiveDirectory))
 	muxApi.Handle("/activity/type", loadAzGHAuthPage(rtApi.GetActivityTypes)).Methods("GET")
 	muxApi.Handle("/activity/type", loadAzGHAuthPage(rtApi.CreateActivityType)).Methods("POST")
+	muxApi.Handle("/activity", loadAzGHAuthPage(rtApi.CreateActivity)).Methods("POST")
+	muxApi.Handle("/activity", loadAzGHAuthPage(rtApi.GetActivities)).Methods("GET")
+	muxApi.Handle("/activity/{id}", loadAzGHAuthPage(rtApi.GetActivityById)).Methods("GET")
 	muxApi.Handle("/community", loadAzGHAuthPage(rtApi.CommunityAPIHandler))
 	muxApi.Handle("/communitySponsors", loadAzGHAuthPage(rtApi.CommunitySponsorsAPIHandler))
 	muxApi.Handle("/CommunitySponsorsPerCommunityId/{id}", loadAzGHAuthPage(rtApi.CommunitySponsorsPerCommunityId))
@@ -82,8 +88,17 @@ func main() {
 	muxApi.Handle("/allusers", loadAzAuthPage(rtApi.GetAllUserFromActiveDirectory))
 	muxApi.Handle("/allavanadeprojects", loadAzGHAuthPage(rtApi.GetAvanadeProjects))
 
+	//API FOR APPROVAL TYPES
+	muxApi.HandleFunc("/approval/type", rtApi.CreateApprovalType).Methods("POST")
+	muxApi.HandleFunc("/approval/type/{id}", rtApi.EditApprovalTypeById).Methods("PUT")
+	muxApi.HandleFunc("/approval/types", rtApi.GetApprovalTypes).Methods("GET")
+	muxApi.HandleFunc("/approval/type/{id}", rtApi.GetApprovalTypeById).Methods("GET")
+
 	muxAdmin := mux.PathPrefix("/admin").Subrouter()
 	muxAdmin.Handle("/members", loadAzGHAuthPage(rtAdmin.ListCommunityMembers))
+	muxAdmin.Handle("/approvaltypes", loadAzGHAuthPage(rtAdmin.ListApprovalTypes))
+	muxAdmin.Handle("/approvaltype/{action:add}", loadAzGHAuthPage(rtAdmin.ApprovalTypeForm))
+	muxAdmin.Handle("/approvaltype/{action:view|edit}/{id}", loadAzGHAuthPage(rtAdmin.ApprovalTypeForm))
 
 	mux.HandleFunc("/approvals/project/callback", rtProjects.UpdateApprovalStatusProjects).Methods("POST")
 	mux.HandleFunc("/approvals/community/callback", rtProjects.UpdateApprovalStatusCommunity).Methods("POST")

@@ -2,7 +2,6 @@ package routes
 
 import (
 	"encoding/json"
-	"main/pkg/envvar"
 	ghmgmt "main/pkg/ghmgmtdb"
 	gh "main/pkg/github"
 	session "main/pkg/session"
@@ -133,7 +132,7 @@ func ArchiveProject(w http.ResponseWriter, r *http.Request) {
 func GetAvanadeProjects(w http.ResponseWriter, r *http.Request) {
 	var allRepos []gh.Repo
 
-	o := envvar.GetEnvVar("GH_ORGANIZATIONS", "Avanade")
+	o := os.Getenv("GH_ORGANIZATIONS")
 	organizations := strings.Split(o, " ")
 
 	for _, org := range organizations {
