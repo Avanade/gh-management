@@ -1,4 +1,4 @@
-name: GH Management - SQL Project
+name: UAT - SQL Project - GH Management
 
 on:
   push:

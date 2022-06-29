@@ -1,4 +1,4 @@
-name: Docker - GH-Management Container
+name: Test - Docker Container - GH-Management
 
 on:
   push:
