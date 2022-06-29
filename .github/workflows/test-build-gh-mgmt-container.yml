@@ -23,5 +23,5 @@ jobs:
           username: ${{ secrets.ACR_USERNAME }}
           password: ${{ secrets.ACR_PASSWORD }}
       - run: |
-          docker build . -t ${{ secrets.ACR_REGISTRY }}/uat-gh-mgmt-app:${{ github.sha }} -t ${{ secrets.ACR_REGISTRY }}/uat-gh-mgmt-app:latest
-          docker push ${{ secrets.ACR_REGISTRY }}/uat-gh-mgmt-app
+          docker build . -t ${{ secrets.ACR_REGISTRY }}/test-gh-mgmt-app:${{ github.sha }} -t ${{ secrets.ACR_REGISTRY }}/test-gh-mgmt-app:latest
+          docker push ${{ secrets.ACR_REGISTRY }}/test-gh-mgmt-app
