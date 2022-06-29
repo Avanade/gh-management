@@ -17,6 +17,7 @@
         <div class="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
           <div x-data="table({
             callback : getActivities,
+            onRowClick : onRowClickHandler,
             data : 'Data',
             total : 'Total',
             columns : [
@@ -36,6 +37,9 @@
 
   <script src="/public/components/table.js"></script>
   <script type="text/javascript">
+    async function onRowClickHandler(data){
+      window.location = `/activities/view/${data.Id}`;
+    }
     async function getActivities(e){
       const res = await fetch(`/api/activity?filter=${e.filter}&offset=${e.page}&search=${e.search}`)
 
