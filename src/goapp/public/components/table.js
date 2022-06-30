@@ -14,6 +14,8 @@ const table = ({
       filter : 10,
       page : 0,
       total : 0,
+      showStart : 0,
+      showEnd : 0,
       isLoading : false,
       async init() {
         this.columns = columns;
@@ -23,6 +25,8 @@ const table = ({
         this.isLoading = true;
         this.data = [];
         this.total = 0;
+        this.showStart = 0;
+        this.showEnd = 0;
 
         this.res = await callback({
           filter : this.filter,
@@ -33,6 +37,8 @@ const table = ({
         this.data = this.res[data]
         this.total = this.res[total]
 
+        this.showStart = this.data.length > 0 ? ((this.page * this.filter) + 1) : 0;
+        this.showEnd = (this.page * this.filter) + this.data.length;
         this.isLoading = false;
       },
       nextPageEnabled(){
@@ -141,9 +147,9 @@ const table = ({
                     <div class="sm:block">
                       <p class="text-sm text-gray-700">
                         Showing
-                        <span class="font-medium" x-text="data.length > 0 ? ((page * filter) + 1) : 0"></span>
+                        <span class="font-medium" x-text="showStart"></span>
                         to
-                        <span class="font-medium" x-text="((page * filter) + data.length)"></span>
+                        <span class="font-medium" x-text="showEnd"></span>
                         of
                         <span class="font-medium" x-text="total"></span>
                         results
