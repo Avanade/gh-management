@@ -57,6 +57,7 @@ func ProjectsNewHandler(w http.ResponseWriter, r *http.Request) {
 			if err != nil {
 				httpResponseError(w, http.StatusInternalServerError, "There is a problem creating the GitHub repository.")
 			}
+
 			id := ghmgmtdb.PRProjectsInsert(body, username.(string))
 
 			go RequestApproval(id)
