@@ -7,7 +7,12 @@
 	@IsArchived bit = 0,
 	@ConfirmAvaIP bit,
 	@ConfirmEnabledSecurity bit,
-	@CreatedBy varchar(100)
+	@CreatedBy varchar(100),
+	@Newcontribution varchar(50),
+	@OSSsponsor varchar(50),
+	@Avanadeofferingsassets varchar(50),
+	@Willbecommercialversion varchar(50),
+	@OSSContributionInformation varchar(50)
 ) AS
 
 DECLARE @ResultTable table(Id int);
@@ -23,7 +28,12 @@ INSERT INTO Projects (
 	Created,
 	CreatedBy,
 	Modified,
-	ModifiedBy)
+	ModifiedBy,	
+		Newcontribution,
+	OSSsponsor,
+	Avanadeofferingsassets,
+	Willbecommercialversion,
+	OSSContributionInformation)
 OUTPUT INSERTED.Id INTO @ResultTable
 VALUES (
 	@Name,
@@ -36,7 +46,12 @@ VALUES (
 	GETDATE(),
 	@CreatedBy,
 	GETDATE(),
-	@CreatedBy
+	@CreatedBy,
+	@Newcontribution,
+	@OSSsponsor,
+	@Avanadeofferingsassets,
+	@Willbecommercialversion,
+	@OSSContributionInformation
 )
 
 DECLARE @Id AS int
