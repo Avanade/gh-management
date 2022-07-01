@@ -128,6 +128,9 @@
 
                     if (this.action.toLowerCase() == 'add') return;
 
+                    var modal = Alpine.store('master').modal
+                    modal.update('loading', 'Loading', 'Please wait for a moment.', '', '')
+
                     const data = await getActivityById(this.id)
                     const additionalContributionAreas= await getAdditionalContributionAreasByActivityId(this.id);
 
@@ -142,6 +145,8 @@
                         primary_contribution_area : [{ id : data.PrimaryContributionAreaId, text : data.PrimaryContributionAreaName}],
                         additional_contribution_areas : additionalContributionAreas.map(i => { return {id : i.ContributionAreaId, text : i.Name}})
                     }
+
+                    modal.visible = false;
                 },
                 isValid() {
                     if(
