@@ -107,7 +107,7 @@
     </script>
   </head>
   <body>
-    <div x-data="masterData()" x-init="clearSearchBar()">
+    <div x-data="masterData()" x-init="onLoad()">
       <!-- Off-canvas menu for mobile, show/hide based on off-canvas menu state. -->
       <div class="relative z-40 md:hidden" role="dialog" aria-modal="true">
         <div class="fixed inset-0 bg-gray-600 bg-opacity-75" id="shade"></div>
@@ -523,6 +523,7 @@
         },
 
         onLoad(){
+            this.clearSearchBar()
             document.getElementById("modal").attributes.removeNamedItem("hidden")
             let redirect = localStorage.getItem("redirectUrl")
             if(redirect) window.location.href=redirect; localStorage.clear()

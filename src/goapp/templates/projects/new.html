@@ -3,7 +3,7 @@
 
 <div id="pageTitle">Request a project</div>
 
-<div x-data="data()">
+<div x-data="data()" x-init="onload()" >
     <form onsubmit="event.preventDefault()" autocomplete="off">
         <p>
         <h3 class="text-lg font-medium leading-6 text-gray-900">Project information</h3>
@@ -58,7 +58,7 @@
                             <ul class="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm"
                                 id="options" x-show="coowner.show" role="listbox">
 
-                                {{range $user := .}}
+                                {{range $user := .users}}
                                 <li x-show="showName('{{$user.UserPrincipalName}}', '{{$user.GithubUser}}')"
                                     class="relative cursor-default select-none py-2 pl-3 pr-9 text-gray-900"
                                     id="option-0" role="option"
@@ -305,10 +305,15 @@
                 show: false,
             },
             submit() {
-                this.form.osssponsor = this.form.sponsorOptions[0]["text"]
+                this.form.osssponsor = this.form.sponsorOptions[0]["text"].toString()
+         
                 Alpine.store('master').modal.reset()
                 Alpine.store('master').modal.show()
-                Alpine.store('master').postData("/projects/new", this.form, "Your repository has been created.", "Go to your project list", "/projects")
+                if (!this.form.id)
+                    Alpine.store('master').postData("/projects/new", this.form, "Your repository has been created.", "Go to your project list", "/projects")
+                 else
+                    Alpine.store('master').postData("/projects/" +this.form.id, this.form, "Your repository has been created.", "Go to your project list", "/projects")
+
             },
             showName(userPrincipalName, githubUser) {
                 return userPrincipalName.includes(this.form.coowner) || githubUser.includes(this.form.coowner) ? true : false
@@ -343,6 +348,39 @@
                 } else {
                     return false
                 }
+            } , 
+             async onload() {
+
+                this.form.id = '{{.Id}}'
+                 if (this.form.id) {
+                     await fetch('/api/projects/' + '{{.Id}}')
+                         .then(r => {
+                             r.json().then(body => {
+                                
+                                 // this.Communitylist = body
+                                 this.form.name=body[0]["ProjectName"]
+                                 this.form.coowner=body[0]["ProjectCoowner"]
+                                 this.form.description=body[0]["ProjectDescription"]
+                                 this.form.confirmAvaIP=body[0]["ConfirmAvaIP"]
+                                 this.form.confirmSecIPScan=body[0]["ConfirmEnabledSecurity"]
+                                 this.form.newcontribution=body[0]["newcontribution"]
+                                 this.form.osssponsor=body[0]["OSSsponsor"]
+                                 this.form.sponsorOptions  = [{id:"1", text:[ body[0]["OSSsponsor"]]} ]
+ 
+                                 this.form.avanadeofferingsassets=body[0]["Avanadeofferingsassets"]
+                                 this.form.willbecommercialversion=body[0]["Willbecommercialversion"]
+                                 this.form.osscontributionInformation=body[0]["OSSContributionInformation"]
+                                 
+                             
+                               
+                             });
+                         })
+                         .catch(e => {
+                             console.log(e)
+                             alert("catch")
+                         
+                         })
+                     }
             }
            
 

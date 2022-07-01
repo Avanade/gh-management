@@ -52,7 +52,9 @@
           <li>
             <div class="px-4 py-4 sm:px-6 hover:bg-gray-50 cursor-pointer" x-bind:class="project.showStatus? 'bg-gray-50':''" @click="project.showStatus = !project.showStatus; getProjectApprovalStatus(project.Id, index)">
               <div class="flex items-center justify-between">
-                <p class="text-sm font-medium text-indigo-600 truncate" x-text="project.Name" title="Repository name"></p>
+                <a :href="/projects/+project.Id"> 
+                  <p class="text-sm font-medium text-indigo-600 truncate" x-text="project.Name" title="Repository name">  </p>  
+                </a>
               </div>
               <div class="mt-2 sm:flex sm:justify-between">
                 <div class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
@@ -108,12 +110,12 @@
                       <div class="px-4 py-4 sm:px-6">
                         <div class="flex items-center justify-between">
                           <p class="text-sm font-medium text-gray-800 truncate" x-text="item.ApprovalDescription"></p>
-                          <div class="ml-2 flex-shrink-0 flex">
+                          <div class="ml-2 flex-shrink-0 flex"> 
                             <p class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full" x-bind:class="item.RequestStatus === 'Approved' ? ' bg-green-100 text-green-800': item.RequestStatus === 'Rejected' ? ' bg-red-100 text-red-800' : ' bg-gray-200 text-gray-800'" x-text="item.RequestStatus"></p>
                           </div>
                         </div>
                         <div class="mt-2 sm:flex ">
-                          <div class="sm:flex w-1/2">
+                          <div class="sm:flex w-1/2"> 
                             <p class="flex items-center text-sm text-gray-500" x-data="{ approver: 'Approver: ' + item.ApproverUserPrincipalName}" x-text="approver">
                             </p>
                           </div>
@@ -276,6 +278,7 @@
           r.json().then(body => {
             this.userProjectsList[i]["approvalStatus"] = body
             this.userProjectsList[i]["statusLoaded"] = true
+            console.log(body)
           })
         })
         }

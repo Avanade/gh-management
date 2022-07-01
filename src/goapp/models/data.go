@@ -30,6 +30,7 @@ type TypMenu struct {
 }
 
 type TypNewProjectReqBody struct {
+	Id                         string `json:"id"`
 	Name                       string `json:"name"`
 	Coowner                    string `json:"coowner"`
 	Description                string `json:"description"`

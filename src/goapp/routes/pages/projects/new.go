@@ -46,14 +46,6 @@ func ProjectsNewHandler(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
-		fmt.Println("body")
-		fmt.Println(body)
-		fmt.Println(body.Id)
-		// if body.Id {
-		// 	fmt.Println("Has ID ")
-		// } else {
-		// 	fmt.Println("No ID No entry ")
-		// }
 
 		checkDB := make(chan bool)
 		checkGH := make(chan bool)
