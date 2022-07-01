@@ -4,15 +4,30 @@ const table = ({
     data = '',
     total = 0,
     columns = [
-      // { Name : 'String', Value : 'String'|0, Render : function() }
+      // { 
+      //   name : 'String', 
+      //   value : 'String'|0, 
+      //   render : function(),
+      //   sort : {
+      //     orderby : 'ColumnName' | 'ColumnIndex',
+      //     ordertype : 'ASC' | 'DESC'
+      //   },
+      // }
     ]
   }) => {
     return { 
       columns : [],
       data : [],
+
+      // FILTER
       search : '',
       filter : 10,
       page : 0,
+      
+      // ORDER BY
+      orderby : '',
+      ordertype : '',
+
       total : 0,
       showStart : 0,
       showEnd : 0,
@@ -31,7 +46,9 @@ const table = ({
         this.res = await callback({
           filter : this.filter,
           page : this.page,
-          search : this.search
+          search : this.search,
+          orderby : this.orderby,
+          ordertype : this.ordertype
         })
 
         this.data = this.res[data]
@@ -69,6 +86,12 @@ const table = ({
         this.search = e.target.value;
         this.load();
       },
+      onSortHandler(e){
+        e.ordertype = e.ordertype.toLowerCase() != 'asc' ? 'ASC' : 'DESC';
+        this.ordertype = e.ordertype;
+        this.orderby = e.orderby;
+        this.load();
+      },
       onRowClickHandler(data){
         if (onRowClick == undefined) {
           console.log("ROW WAS CLICKED BUT NO EVENT WAS SET \n DATA : ", data);
@@ -104,22 +127,32 @@ const table = ({
                     <div class="flex justify-between sm:justify-end">
                       <div class="sm:col-span-3">
                         <label for="search" class="block text-sm font-medium text-gray-700">Search</label>
-                        <div class="mt-1">
+                        <div class="mt.-1">
                           <input @keyup.enter="onSearchSubmit" type="text" name="search" id="search" class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md" x-model="search">
                         </div>
                       </div>
                     </div>
                   </nav>
-                  <table class="min-w-full divide-y divide-gray-300">
+                  <table class="min-w-full divide-y divide-gray-300 mt-5">
                     <thead>
                       <tr>
-                        <!-- HEADER HERE -->
                         <template x-for='item in columns'>
-                          <th scope="col" class="py-3.5 px-3 text-left text-sm font-semibold text-gray-900" x-text="item.name"></th>
+                          <th 
+                            scope="col" 
+                            class="py-3.5 px-3 text-left text-sm font-semibold  text-gray-600 border-r border-gray-100 last:border-none">
+                            <span class="flex group justify-between">
+                                <span x-text="item.name"></span>
+                                <template x-if="item.sort != undefined">
+                                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 hover:text-orange-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" @click="onSortHandler(item.sort)">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M8 9l4-4 4 4m0 6l-4 4-4-4" />
+                                  </svg>
+                                </template>
+                            </span>
+                          </th>
                         </template>
                       </tr>
                     </thead>
-                    <tbody class="divide-y divide-gray-200">
+                    <tbody class="divide-y divide-gray-50">
                         <template x-for='item in data'>
                           <tr x-html="initRow(item)" class="hover:bg-gray-100" @click="onRowClickHandler(item)">
                           </tr>
