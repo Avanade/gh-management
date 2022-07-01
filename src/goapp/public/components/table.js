@@ -77,6 +77,9 @@ const table = ({
 
         onRowClick(data)
       },
+      isRowClickable(){
+        return onRowClick != undefined;
+      },
       initRow(data){
         let html = '';
         this.columns.forEach(col => {
@@ -121,7 +124,7 @@ const table = ({
                     </thead>
                     <tbody class="divide-y divide-gray-200">
                         <template x-for='item in data'>
-                          <tr x-html="initRow(item)" class="hover:bg-gray-100" @click="onRowClickHandler(item)">
+                          <tr x-html="initRow(item)" class="hover:bg-gray-100" :class="isRowClickable() ? 'hover:cursor-pointer' : ''" @click="onRowClickHandler(item)">
                           </tr>
                         </template>
                         <tr x-show='isLoading' x-transition>

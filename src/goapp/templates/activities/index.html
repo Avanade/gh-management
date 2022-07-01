@@ -21,7 +21,11 @@
             data : 'Data',
             total : 'Total',
             columns : [
-              { name : 'Date', value : 'Date' },
+              { 
+                name : 'Date', 
+                value : 'Date',
+                render : value => { return new Date(value).toLocaleDateString(); }
+              },
               { name : 'Activity', value : 'Name' },
               { name : 'Community/Project', value : 'CommunityName' },
               { name : 'Type', value : 'TypeName' },
