@@ -26,22 +26,9 @@
                 value : 'Date',
                 render : value => { return new Date(value).toLocaleDateString(); }
               },
-              { 
-                name : 'Activity', 
-                value : 'Name',
-                sort : {
-                  orderby : 'Name',
-                  ordertype : 'ASC'
-                }
-              },
-              { 
-                name : 'Community/Project', 
-                value : 'CommunityName'
-              },
-              { 
-                name : 'Type', 
-                value : 'TypeName'
-              },
+              { name : 'Activity', value : 'Name' },
+              { name : 'Community/Project', value : 'CommunityName' },
+              { name : 'Type', value : 'TypeName' },
               { name : 'Primary Contribution Area', value : 'PrimaryContributionAreaName' }
             ]
           })">
