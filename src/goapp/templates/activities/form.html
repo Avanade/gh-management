@@ -1,5 +1,5 @@
 {{ define "content" }}
-    <div id="pageTitle">Add an Activity</div>
+    <div id="pageTitle">{{ .Action }} an Activity</div>
 
     <form x-data="activityForm({
         action : '{{ .Action }}',
