@@ -13,13 +13,25 @@ import (
 	"net/http"
 	"os"
 	"strings"
+
+	"github.com/gorilla/mux"
+	//"github.com/gorilla/mux"
 )
 
 func ProjectsNewHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "GET":
+
+		//users := db.GetUsersWithGithub()
+		req := mux.Vars(r)
+		id := req["id"]
+
 		users := db.GetUsersWithGithub()
-		template.UseTemplate(&w, r, "projects/new", users)
+		data := map[string]interface{}{
+			"Id":    id,
+			"users": users,
+		}
+		template.UseTemplate(&w, r, "projects/new", data)
 	case "POST":
 		sessionaz, _ := session.Store.Get(r, "auth-session")
 		iprofile := sessionaz.Values["profile"]
@@ -28,11 +40,20 @@ func ProjectsNewHandler(w http.ResponseWriter, r *http.Request) {
 		r.ParseForm()
 
 		var body models.TypNewProjectReqBody
+
 		err := json.NewDecoder(r.Body).Decode(&body)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
+		fmt.Println("body")
+		fmt.Println(body)
+		fmt.Println(body.Id)
+		// if body.Id {
+		// 	fmt.Println("Has ID ")
+		// } else {
+		// 	fmt.Println("No ID No entry ")
+		// }
 
 		checkDB := make(chan bool)
 		checkGH := make(chan bool)
@@ -65,6 +86,44 @@ func ProjectsNewHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 }
+func ProjectsHandler(w http.ResponseWriter, r *http.Request) {
+	req := mux.Vars(r)
+	id := req["id"]
+	fmt.Println(r.Method)
+	switch r.Method {
+	case "GET":
+
+		users := db.GetUsersWithGithub()
+		data := map[string]interface{}{
+			"Id":    id,
+			"users": users,
+		}
+		template.UseTemplate(&w, r, "projects/new", data)
+	case "POST":
+
+		sessionaz, _ := session.Store.Get(r, "auth-session")
+		iprofile := sessionaz.Values["profile"]
+		profile := iprofile.(map[string]interface{})
+		username := profile["preferred_username"]
+		r.ParseForm()
+
+		var body models.TypNewProjectReqBody
+
+		err := json.NewDecoder(r.Body).Decode(&body)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+
+			fmt.Println(err.Error())
+			return
+		}
+
+		ghmgmtdb.PRProjectsUpdate(body, username.(string))
+
+		w.WriteHeader(http.StatusOK)
+	}
+
+}
+
 func RequestApproval(id int64) {
 	projectApprovals := ghmgmtdb.PopulateProjectsApproval(id)
 
