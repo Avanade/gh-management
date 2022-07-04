@@ -107,6 +107,7 @@ func ArchiveProject(w http.ResponseWriter, r *http.Request) {
 	username := profile["preferred_username"]
 
 	req := mux.Vars(r)
+	org := req["org"]
 	project := req["project"]
 	archive := req["archive"]
 	private := req["private"]
@@ -119,7 +120,7 @@ func ArchiveProject(w http.ResponseWriter, r *http.Request) {
 
 	//If project is currently public, set visibility to private
 	if private == "0" {
-		err := gh.SetProjectVisibility(project, "private")
+		err := gh.SetProjectVisibility(project, "private", org)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -197,6 +198,7 @@ func SetVisibility(w http.ResponseWriter, r *http.Request) {
 	username := profile["preferred_username"]
 
 	req := mux.Vars(r)
+	org := req["org"]
 	project := req["project"]
 	archive := req["archive"]
 	private := req["private"]
@@ -213,7 +215,7 @@ func SetVisibility(w http.ResponseWriter, r *http.Request) {
 		if private == "0" {
 			visibility = "public"
 		}
-		err := gh.SetProjectVisibility(project, visibility)
+		err := gh.SetProjectVisibility(project, visibility, org)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
