@@ -21,7 +21,11 @@
             data : 'Data',
             total : 'Total',
             columns : [
-              { name : 'Date', value : 'Date' },
+              { 
+                name : 'Date', 
+                value : 'Date',
+                render : value => { return new Date(value).toLocaleDateString(); }
+              },
               { name : 'Activity', value : 'Name' },
               { name : 'Community/Project', value : 'CommunityName' },
               { name : 'Type', value : 'TypeName' },
@@ -41,7 +45,8 @@
       window.location = `/activities/view/${data.Id}`;
     }
     async function getActivities(e){
-      const res = await fetch(`/api/activity?filter=${e.filter}&offset=${e.page}&search=${e.search}`)
+      const offset = e.filter * e.page;
+      const res = await fetch(`/api/activity?filter=${e.filter}&offset=${offset}&search=${e.search}`)
 
       const data = await res.json()
       return data
