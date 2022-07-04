@@ -96,12 +96,17 @@
 
                 if (this.action.toLowerCase == 'add') return;
 
+                var modal = Alpine.store('master').modal
+                modal.update('loading', 'Loading', 'Please wait for a moment.', '', '')
+
                 const res = await fetch(`/api/approval/type/${this.id}`)
                 const data = await res.json()
 
                 this.form.name = data.Name;
                 this.form.approver = [{'id' : data.ApproverUserPrincipalName, 'text' : data.ApproverUserPrincipalName}]
                 this.form.status = data.IsActive.toString();
+
+                modal.visible = false;
             },
             isValid() {
                 if(

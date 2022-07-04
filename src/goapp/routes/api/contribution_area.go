@@ -3,8 +3,11 @@ package routes
 import (
 	"encoding/json"
 	"net/http"
+	"strconv"
 
 	db "main/pkg/ghmgmtdb"
+
+	"github.com/gorilla/mux"
 )
 
 type ContributionAreaDto struct {
@@ -18,6 +21,16 @@ type ContributionAreaDto struct {
 
 func GetContributionAreas(w http.ResponseWriter, r *http.Request) {
 	result := db.ContributionAreas_Select()
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(result)
+}
+
+func GetContributionAreasByActivityId(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	activityId, _ := strconv.Atoi(vars["id"])
+
+	result := db.AdditionalContributionAreas_Select(activityId)
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(result)

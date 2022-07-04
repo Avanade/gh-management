@@ -91,12 +91,17 @@ func PRProjectsInsert(body models.TypNewProjectReqBody, user string) (id int64) 
 
 	param := map[string]interface{}{
 
-		"Name":                   body.Name,
-		"CoOwner":                body.Coowner,
-		"Description":            body.Description,
-		"ConfirmAvaIP":           body.ConfirmAvaIP,
-		"ConfirmEnabledSecurity": body.ConfirmSecIPScan,
-		"CreatedBy":              user,
+		"Name":                       body.Name,
+		"CoOwner":                    body.Coowner,
+		"Description":                body.Description,
+		"ConfirmAvaIP":               body.ConfirmAvaIP,
+		"ConfirmEnabledSecurity":     body.ConfirmSecIPScan,
+		"CreatedBy":                  user,
+		"Newcontribution":            body.Newcontribution,
+		"OSSsponsor":                 body.OSSsponsor,
+		"Avanadeofferingsassets":     body.Avanadeofferingsassets,
+		"Willbecommercialversion":    body.Willbecommercialversion,
+		"OSSContributionInformation": body.OSSContributionInformation,
 	}
 	result, err := db.ExecuteStoredProcedureWithResult("dbo.PR_Projects_Insert", param)
 	if err != nil {
@@ -141,7 +146,7 @@ func PopulateProjectsApproval(id int64) (ProjectApprovals []models.TypProjectApp
 		"ProjectId": id,
 	}
 	result, _ := db.ExecuteStoredProcedureWithResult("PR_ProjectsApproval_Populate", param)
-
+	fmt.Println(result)
 	for _, v := range result {
 		data := models.TypProjectApprovals{
 			Id:                         v["Id"].(int64),
@@ -161,6 +166,11 @@ func PopulateProjectsApproval(id int64) (ProjectApprovals []models.TypProjectApp
 			ApprovalType:               v["ApprovalType"].(string),
 			ApproverUserPrincipalName:  v["ApproverUserPrincipalName"].(string),
 			ApprovalDescription:        v["ApprovalDescription"].(string),
+			Newcontribution:            v["newcontribution"].(string),
+			OSSsponsor:                 v["OSSsponsor"].(string),
+			Avanadeofferingsassets:     v["Avanadeofferingsassets"].(string),
+			Willbecommercialversion:    v["Willbecommercialversion"].(string),
+			OSSContributionInformation: v["OSSContributionInformation"].(string),
 		}
 		ProjectApprovals = append(ProjectApprovals, data)
 	}
@@ -266,6 +276,21 @@ func CommunitiesActivities_Select_ByOffsetAndFilter(offset, filter int, search s
 	return result
 }
 
+func CommunitiesActivities_Select_ByOffsetAndFilterAndCreatedBy(offset, filter int, search, createdBy string) interface{} {
+	db := ConnectDb()
+	defer db.Close()
+
+	param := map[string]interface{}{
+		"Offset":    offset,
+		"Filter":    filter,
+		"Search":    search,
+		"CreatedBy": createdBy,
+	}
+
+	result, _ := db.ExecuteStoredProcedureWithResult("PR_CommunityActivities_Select_ByOffsetAndFilterAndCreatedBy", param)
+	return result
+}
+
 func CommunitiesActivities_Insert(body models.Activity) (int, error) {
 	db := ConnectDb()
 	defer db.Close()
@@ -295,6 +320,22 @@ func CommunitiesActivities_TotalCount() int {
 	defer db.Close()
 
 	result, _ := db.ExecuteStoredProcedureWithResult("PR_CommunityActivities_TotalCount", nil)
+	total, err := strconv.Atoi(fmt.Sprint(result[0]["Total"]))
+	if err != nil {
+		return 0
+	}
+	return total
+}
+
+func CommunitiesActivities_TotalCount_ByCreatedBy(createdBy string) int {
+	db := ConnectDb()
+	defer db.Close()
+
+	param := map[string]interface{}{
+		"CreatedBy": createdBy,
+	}
+
+	result, _ := db.ExecuteStoredProcedureWithResult("[PR_CommunityActivities_TotalCount_ByCreatedBy]", param)
 	total, err := strconv.Atoi(fmt.Sprint(result[0]["Total"]))
 	if err != nil {
 		return 0
@@ -375,6 +416,21 @@ func ContributionAreas_Select() interface{} {
 	defer db.Close()
 
 	result, err := db.ExecuteStoredProcedureWithResult("PR_ContributionAreas_Select", nil)
+	if err != nil {
+		return err
+	}
+	return result
+}
+
+func AdditionalContributionAreas_Select(activityId int) interface{} {
+	db := ConnectDb()
+	defer db.Close()
+
+	param := map[string]interface{}{
+		"ActivityId": activityId,
+	}
+
+	result, err := db.ExecuteStoredProcedureWithResult("PR_AdditionalContributionAreas_Select_ByActivityId", param)
 	if err != nil {
 		return err
 	}
