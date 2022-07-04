@@ -88,7 +88,6 @@ func PRProjectsInsert(body models.TypNewProjectReqBody, user string) (id int64) 
 	}
 
 	db, _ := sql.Init(cp)
-
 	param := map[string]interface{}{
 
 		"Name":                       body.Name,
@@ -111,6 +110,36 @@ func PRProjectsInsert(body models.TypNewProjectReqBody, user string) (id int64) 
 	return
 }
 
+// PROJECTS
+func PRProjectsUpdate(body models.TypNewProjectReqBody, user string) (id int64) {
+
+	cp := sql.ConnectionParam{
+
+		ConnectionString: os.Getenv("GHMGMTDB_CONNECTION_STRING"),
+	}
+	fmt.Println(body)
+	db, _ := sql.Init(cp)
+	param := map[string]interface{}{
+		"ID":                         body.Id,
+		"Name":                       body.Name,
+		"CoOwner":                    body.Coowner,
+		"Description":                body.Description,
+		"ConfirmAvaIP":               body.ConfirmAvaIP,
+		"ConfirmEnabledSecurity":     body.ConfirmSecIPScan,
+		"ModifiedBy":                 user,
+		"Newcontribution":            body.Newcontribution,
+		"OSSsponsor":                 body.OSSsponsor,
+		"Avanadeofferingsassets":     body.Avanadeofferingsassets,
+		"Willbecommercialversion":    body.Willbecommercialversion,
+		"OSSContributionInformation": body.OSSContributionInformation,
+	}
+	_, err := db.ExecuteStoredProcedure("dbo.PR_Projects_Update", param)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	return
+}
 func Projects_IsExisting(body models.TypNewProjectReqBody) bool {
 
 	cp := sql.ConnectionParam{
@@ -146,7 +175,6 @@ func PopulateProjectsApproval(id int64) (ProjectApprovals []models.TypProjectApp
 		"ProjectId": id,
 	}
 	result, _ := db.ExecuteStoredProcedureWithResult("PR_ProjectsApproval_Populate", param)
-	fmt.Println(result)
 	for _, v := range result {
 		data := models.TypProjectApprovals{
 			Id:                         v["Id"].(int64),
