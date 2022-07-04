@@ -44,11 +44,6 @@ type CommunityActivitiesContributionAreasDto struct {
 }
 
 func GetActivities(w http.ResponseWriter, r *http.Request) {
-	sessionaz, _ := session.Store.Get(r, "auth-session")
-	iprofile := sessionaz.Values["profile"]
-	profile := iprofile.(map[string]interface{})
-	username := fmt.Sprint(profile["preferred_username"])
-
 	var result ActivitiesDto
 
 	params := r.URL.Query()
@@ -58,8 +53,8 @@ func GetActivities(w http.ResponseWriter, r *http.Request) {
 		offset, _ := strconv.Atoi(params["offset"][0])
 		search := params["search"][0]
 		result = ActivitiesDto{
-			Data:  db.CommunitiesActivities_Select_ByOffsetAndFilterAndCreatedBy(offset, filter, search, username),
-			Total: db.CommunitiesActivities_TotalCount_ByCreatedBy(username),
+			Data:  db.CommunitiesActivities_Select_ByOffsetAndFilter(offset, filter, search),
+			Total: db.CommunitiesActivities_TotalCount(),
 		}
 	} else {
 		result = ActivitiesDto{

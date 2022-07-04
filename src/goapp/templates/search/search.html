@@ -1,8 +1,16 @@
 {{ define "content" }}
 
+<style>
+#entryList a:hover {
+  background: #FF5800;
+  opacity: 70%;
+  color: black;
+}
+</style>
+
 <div id="pageTitle">Search</div>
 
-<div x-data="SearchPage()" x-init="searchResultsTop(), $refs.searchInput.focus()">
+<div x-data="SearchData()" x-init="searchResultsTop(), $refs.searchInput.focus()">
 
         <div>
           <nav class="flex items-center justify-between space-x-4" aria-label="Tabs">
@@ -15,26 +23,27 @@
 
             <!-- Entries Dropdown -->
             <div class="relative inline-block text-left ">
-              <div x-show="showEntryBtn">
-                <button  @click="entryList = !entryList" @click.away="entryList=false" type="button" class="inline-flex justify-center w-full rounded-md border border-gray-300 shadow-sm px-2 py-2 bg-white text-sm font-small text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-1 focus:ring-offset-2 focus:ring-offset-gray-100 focus:ring-indigo-500" id="menu-button" aria-expanded="true" aria-haspopup="true">
-                  <span class="text-sm" x-text="'Show ' + pageSize + ' Entries'"></span>
+
+              <div>
+                <button x-show="showEntryBtn" @click="entryList = !entryList" type="button" class="inline-flex justify-center w-full rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-100 focus:ring-indigo-500" id="menu-button" aria-expanded="true" aria-haspopup="true">
+                  Show entries
                   <svg class="-mr-1 ml-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                     <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
                   </svg>
                 </button>
               </div>
 
-              <div x-show="entryList" id="entryList" class="origin-top-right absolute right-0 mt-2 w-15 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="menu-button" tabindex="-1">
+              <div x-show="entryList" id="entryList" class="origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="menu-button" tabindex="-1">
                 <div class="py-1 w-full" role="none">
-                  <a @click="pageSize= 5, isEntriesClicked()" class=" block px-4 py-2 text-sm cursor-pointer hover:bg-[#fff2eb]" role="menuitem" tabindex="-1" id="menu-item-0" x-bind:class="pageSize === 5 ? 'text-[#FF5800]' : ''">5</a>
-                  <a @click="pageSize= 10, isEntriesClicked()" class="block px-4 py-2 text-sm cursor-pointer hover:bg-[#fff2eb]" role="menuitem" tabindex="-1" id="menu-item-0" x-bind:class="pageSize === 10 ? 'text-[#FF5800]' : ''">10</a>
-                  <a @click="pageSize=25, isEntriesClicked()" class="block px-4 py-2 text-sm cursor-pointer hover:bg-[#fff2eb]" role="menuitem" tabindex="-1" id="menu-item-1" x-bind:class="pageSize=== 25 ? 'text-[#FF5800]' : '' ">25</a>
-                  <a @click="pageSize=50, isEntriesClicked()" class="block px-4 py-2 text-sm cursor-pointer hover:bg-[#fff2eb]" role="menuitem" tabindex="-1" id="menu-item-2" x-bind:class="pageSize=== 50 ? 'text-[#FF5800]' : '' ">50</a>
+                  <a href="" class="text-gray-700 block px-4 py-2 text-sm" style="a:hover: orange" role="menuitem" tabindex="-1" id="menu-item-0">10</a>
+                  <a href="" class="text-gray-700 block px-4 py-2 text-sm" role="menuitem" tabindex="-1" id="menu-item-1">25</a>
+                  <a href="" class="text-gray-700 block px-4 py-2 text-sm" role="menuitem" tabindex="-1" id="menu-item-2">100</a>
                 </div>
               </div>
 
             </div>
             <!-- END of Entries Dropdown -->
+
 
             <!--START of ComboBox -->
                 <div class="flex justify-between sm:justify-end ">
@@ -44,9 +53,10 @@
                         <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
                       </svg>
                     </div>
-                    <input  x-model="form.searchList"  @keyup.enter="getSearchResults()" @input.enter="showClearBtn()" x-ref="searchInput"  id="searchList" name="searchList" type="text" role="input" class=" focus:ring-indigo-500 focus:border-indigo-500 block w-full rounded-none rounded-l-md pl-10 sm:text-sm border-gray-300" autocomplete="off" x-bind:class="$refs.searchInput === ' ' ? 'focus:ring-red-500 focus:border-red-500' : 'focus:border-red-500'" >
 
-                    <button @click="$refs.searchInput.value='',$refs.searchInput.focus(), form.searchList = '', clearBtn=false" x-show="clearBtn" x-ref="clearBtn1" class="absolute inset-y-0 right-0 pr-3 flex items-center focus:pointer-events-auto">
+                    <input @keyup.enter="getSearchResults()" @input.enter="showClearBtn()" x-ref="searchInput" id="searchList" name="searchList" x-model="form.searchList" type="text" role="input" class="focus:ring-indigo-500 focus:border-indigo-500 block w-full rounded-none rounded-l-md pl-10 sm:text-sm border-gray-300" autocomplete="off">
+
+                    <button @click="$refs.searchInput.value='',$refs.searchInput.focus(), clearBtn=false" x-show="clearBtn" x-ref="clearBtn1" class="absolute inset-y-0 right-0 pr-3 flex items-center focus:pointer-events-auto">
                       <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
                       </svg>
@@ -60,6 +70,7 @@
 
                     <span>Search</span>
                   </button>
+
                 </div>
             <!--END of ComboBox -->
 
@@ -76,16 +87,19 @@
         </svg>
       </div>
 
-        <!-- START of  No Results Found --> 
+        <!-- START of  ResultsNotFound --> 
         <div x-show="resultsNotFound" class=" text-center">
-          <svg xmlns="http://www.w3.org/2000/svg" class="mx-auto h-8 w-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <svg xmlns="http://www.w3.org/2000/svg" class="mx-auto h-10 w-10 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
             <path stroke-linecap="round" stroke-linejoin="round" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
-          <h3 class="mt-0 text-sm font-medium text-gray-500">No results found</h3>
-          {{/* //<p class="mt-1 text-sm text-gray-500">Search another keyword</p> */}}
+          {{/* <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+            <path vector-effect="non-scaling-stroke" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h6m-3-3v6m-9 1V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
+          </svg> */}}
+          <h3 class="mt-2 text-sm font-medium text-gray-900">No results found</h3>
+          <p class="mt-1 text-sm text-gray-500">Search another keyword</p>
           <br>
         </div>
-        <!-- END of  No Results Found --> 
+        <!-- END of  ResultsNotFound --> 
 
         <!-- Results Table -->
         <div x-show="resultsTable" class="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
@@ -99,7 +113,7 @@
             </thead>
 
             <tbody class="divide-y divide-gray-200 bg-white">
-              <template x-for="(results, n) in FilteredSearchBy" :key="n">
+              <template x-for="(results, n) in FilteredSearchBy" >
                 <tr>
                   <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-500 sm:pl-6">
                     <span x-text="results.Source"></span>
@@ -120,20 +134,22 @@
         <br>
   
         <!-- PAGINATION -->
+
         <nav x-show="pagination" class="bg-white  px-4 py-2 flex items-center justify-between border-t border-gray-200 sm:px-6" aria-label="Pagination">
+
             <div class="show sm:block">
                 <p class="text-sm text-gray-700">
                     Showing
-                    <span class="font-medium" x-text="pageSize">-</span> to 
-                    <span class="font-medium" x-text="SearchBy === null  ? 'false' : SearchBy.length ">-</span> Total of
-                    <span class="font-medium" x-text="SearchBy === null  ? 'false' : SearchBy.length ">-</span> results
+                    <span class="font-medium" x-text="SearchBy.row.length">-</span> to 
+                    <span class="font-medium" x-text="SearchBy.row">-</span> of
+                    <span class="font-medium" x-text="SearchBy.length">-</span> results
                 </p>
             </div>
 
             <div class="flex justify-between sm:justify-end">
-                <button @click="previousPage" class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-[#fff2eb]"> Previous </button>
+                <button @click="previousPage" class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-[#FF5800]"> Previous </button>
 
-                <button @click="nextPage" class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-[#fff2eb]"> Next </button>
+                <button @click="nextPage" class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-[#FF5800] opacity-0"> Next </button>
             </div>
         </nav>
         <!-- END of PAGINATION -->
@@ -141,16 +157,11 @@
 </div>
 
 <script type="text/javascript">
-    function SearchPage() {
+    function SearchData() {
               return {
-                sortCol:null,
-                sortAsc:false,
-                pageSize: 5,
-                curPage: 1,
-                
-                entryBtn: false,
-                entryList: false,
                 showEntryBtn: false,
+                entryList: false,
+                entryBtn: false,
                 clearBtn: false,
                 resultsNotFound: false,
                 resultsTable: false,
@@ -165,79 +176,56 @@
                 searchList:{
                     data: []
                 },
-                showSpinner: false,
+                showSpinner: true,
                 searchResultsTop() {
                   const params = new URLSearchParams(window.location.search);
                   const name = params.get("search");
                   this.form.searchList = name
                   this.getSearchResults()
                   this.showClearBtn()
+
                 },
                 getSearchResults() {
-                  if(this.form.searchList == '') {
-                    this.SearchBySources = ['']
-                    this.showEntryBtn = false
-                    this.resultsTable = false
-                    this.pagination = false
-                    this.showSpinner = false
-                    this.resultsNotFound = true
-                    console.log("Empty or Null Search Box.")
-                    return
-                  }
-
-                  this.showSpinner = true
-                  this.resultsNotFound = false
-                  this.resultsTable = false
+                this.resultsNotFound = false
+                this.showSpinner = true
+                this.resultsTable = false
                   if (!this.form.searchList == '') {
                     fetch('/search/' + this.form.searchList)
                     .then(r => {
                       r.json().then(body => {
                         this.SearchBy = body
-                        //|| this.form.searchList == '' || this.SearchBy == null || this.SearchBy.length == 0
-                        if(this.SearchBy == null){
+
+                        if(this.SearchBy <= 0 ){
                           this.SearchBySources = ['']
-                          this.showEntryBtn = false
                           this.showSpinner = false
                           this.pagination = false
                           this.resultsNotFound = true
-                          console.log('`'+this.form.searchList+'`', "is not found")
-                          console.log('SearchBy is ',this.SearchBy)
                           return   
                         }
-                        history.replaceState(null, null, '/search?search=' + this.form.searchList);
-                        location.replace = '/search?search=' + this.form.searchList
                         
                         this.SearchBySources = ['All']
                         this.SearchBy.map(i => {
                         if(!this.SearchBySources.includes(i.Source)){
                           this.SearchBySources.push(i.Source)
                         }
-
                         this.resultsNotFound = false
                         this.showSpinner = false
-                        this.resultsTable = true
-                        this.showEntryBtn = true
                         this.pagination = true
-
-                        console.log(this.SearchBy, " search by")
-
+                        this.resultsTable = true
                         })
                       })
                     })
                   }
 
-
                 },
                 get FilteredSearchBy(){
                   if (this.SelectedSource == 'All') {
                     return this.SearchBy
-                    console.log("true searchby")
                   } else {
                     return this.SearchBy.filter(i => i.Source == this.SelectedSource)
-                    console.log("false selected source")
                   }
                 },
-                isShowEntriesBtn() {
+                isShowEntriesBtn(){
                   if (this.SearchBy =  '') {
                     this.entryBtn == true
                   } else {
@@ -245,8 +233,6 @@
                   }
                 },
                 isEntriesClicked() {
-                  this.entryList = false
-                  console.log(this.pageSize)
                   return this.entryList ? true : false
                 },
                 showClearBtn() {
@@ -256,6 +242,12 @@
                     this.clearBtn = true
                   }
                 },
+
+
+                sortCol:null,
+                sortAsc:false,
+                pageSize: 3,
+                curPage: 1,
                 sort(col) {
                    if(this.sortCol === col) this.sortAsc = !this.sortAsc;
                     this.sortCol = col;
@@ -267,11 +259,10 @@
                 },
                 previousPage() {
                   if(this.curPage > 1) this.curPage--;
-                  console.log("Previous Clicked")
+                  console.log(this.SearchBy.filter)
                 },
                 nextPage() {
                   if((this.curPage * this.pageSize) < this.SearchBy.length) this.curPage++;
-                  console.log("Next Clicked")
                 },
                 get pagedResults() {
                     if(this.SearchBy) {
@@ -282,7 +273,7 @@
                       })
                     } else return [];
                   }
-
+                    
 
 
 

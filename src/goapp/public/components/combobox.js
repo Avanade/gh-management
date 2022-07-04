@@ -1,8 +1,8 @@
 const combobox = ({
-    ajax,
+    ajax = undefined,
     id,
     text,
-    data,
+    data = [],
     isMultiple = false,
     isInsertable = false,
     isDisplayItem = false,
@@ -30,19 +30,16 @@ const combobox = ({
             this.isInsertable = isInsertable;
             this.isDisplayItem = isDisplayItem;
             // SET DATA
-            if(data != undefined){
+            if(data.length > 0){
                 this.data = data.map((i) => {
                     return {id : i[id], text : i[text]}
                 })
             }
-            else if(ajax != undefined){
+            else {
                 const items = await ajax()
                 this.data = items.map((i) => {
                     return {id : i[id], text : i[text]}
                 })
-            }
-            else {
-                console.log("ERROR : NO SET DATA | PLEASE SET DATA OR AJAX")
             }
             this.options = this.data
         },
