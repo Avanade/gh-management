@@ -304,7 +304,7 @@ func CommunitiesActivities_Select_ByOffsetAndFilter(offset, filter int, search s
 	return result
 }
 
-func CommunitiesActivities_Select_ByOffsetAndFilterAndCreatedBy(offset, filter int, search, createdBy string) interface{} {
+func CommunitiesActivities_Select_ByOffsetAndFilterAndCreatedBy(offset, filter int, orderby, ordertype, search, createdBy string) interface{} {
 	db := ConnectDb()
 	defer db.Close()
 
@@ -312,6 +312,8 @@ func CommunitiesActivities_Select_ByOffsetAndFilterAndCreatedBy(offset, filter i
 		"Offset":    offset,
 		"Filter":    filter,
 		"Search":    search,
+		"OrderType": ordertype,
+		"OrderBy":   orderby,
 		"CreatedBy": createdBy,
 	}
 
@@ -813,14 +815,16 @@ func SelectApprovalTypes() (interface{}, error) {
 	return result, nil
 }
 
-func SelectApprovalTypesByFilter(offset, filter int, search string) (interface{}, error) {
+func SelectApprovalTypesByFilter(offset, filter int, orderby, ordertype, search string) (interface{}, error) {
 	db := ConnectDb()
 	defer db.Close()
 
 	param := map[string]interface{}{
-		"Offset": offset,
-		"Filter": filter,
-		"Search": search,
+		"Offset":    offset,
+		"Filter":    filter,
+		"Search":    search,
+		"OrderBy":   orderby,
+		"OrderType": ordertype,
 	}
 
 	result, err := db.ExecuteStoredProcedureWithResult("PR_ApprovalTypes_Select_ByFilter", param)
