@@ -785,14 +785,16 @@ func SelectApprovalTypes() (interface{}, error) {
 	return result, nil
 }
 
-func SelectApprovalTypesByFilter(offset, filter int, search string) (interface{}, error) {
+func SelectApprovalTypesByFilter(offset, filter int, orderby, ordertype, search string) (interface{}, error) {
 	db := ConnectDb()
 	defer db.Close()
 
 	param := map[string]interface{}{
-		"Offset": offset,
-		"Filter": filter,
-		"Search": search,
+		"Offset":    offset,
+		"Filter":    filter,
+		"Search":    search,
+		"OrderBy":   orderby,
+		"OrderType": ordertype,
 	}
 
 	result, err := db.ExecuteStoredProcedureWithResult("PR_ApprovalTypes_Select_ByFilter", param)
