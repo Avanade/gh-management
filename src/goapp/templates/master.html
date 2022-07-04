@@ -490,7 +490,7 @@
                   <a x-bind:href="$store.master.modal.redirectUrl" x-text="$store.master.modal.actionButtonText" ></a>
                   </a>
                 </div>
-                <div class="mt-3 text-center sm:mt-5 cursor-pointer" @click="$store.master.modal.reset()" x-bind:hidden="$store.master.modal.icon !== 'error' || ($store.master.modal.icon !== 'success' && !(!!$store.master.modal.actionButtonText && !!$store.master.modal.redirectUrl))">Close</div>
+                <div class="mt-3 text-center sm:mt-5 cursor-pointer" @click="$store.master.modal.reset()" x-bind:hidden="$store.master.modal.icon !== 'error' || ($store.master.modal.icon !== 'success' && $store.master.modal.icon !== 'error' && !(!!$store.master.modal.actionButtonText && !!$store.master.modal.redirectUrl))">Close</div>
               </div>
             </div>
           </div>

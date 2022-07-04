@@ -146,7 +146,7 @@ func PopulateProjectsApproval(id int64) (ProjectApprovals []models.TypProjectApp
 		"ProjectId": id,
 	}
 	result, _ := db.ExecuteStoredProcedureWithResult("PR_ProjectsApproval_Populate", param)
-	fmt.Println(result)
+
 	for _, v := range result {
 		data := models.TypProjectApprovals{
 			Id:                         v["Id"].(int64),
