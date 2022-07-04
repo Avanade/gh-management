@@ -24,12 +24,44 @@
               { 
                 name : 'Date', 
                 value : 'Date',
-                render : value => { return new Date(value).toLocaleDateString(); }
+                render : value => { return new Date(value).toLocaleDateString(); },
+                sort : {
+                  orderby : 'Date',
+                  ordertype : 'ASC'
+                }
               },
-              { name : 'Activity', value : 'Name' },
-              { name : 'Community/Project', value : 'CommunityName' },
-              { name : 'Type', value : 'TypeName' },
-              { name : 'Primary Contribution Area', value : 'PrimaryContributionAreaName' }
+              { 
+                name : 'Activity', 
+                value : 'Name',
+                sort : {
+                  orderby : 'Activity',
+                  ordertype : 'ASC'
+                } 
+              },
+              { 
+                name : 'Community/Project', 
+                value : 'CommunityName',
+                sort : {
+                  orderby : 'Community',
+                  ordertype : 'Community'
+                }
+              },
+              { 
+                name : 'Type', 
+                value : 'TypeName',
+                sort : {
+                  orderby : 'Type',
+                  ordertype : 'ASC'
+                }
+              },
+              { 
+                name : 'Primary Contribution Area', 
+                value : 'PrimaryContributionAreaName',
+                sort : {
+                  orderby : 'PrimaryContributionArea',
+                  ordertype : 'ASC'
+              }
+              }
             ]
           })">
             <div x-html="template"></div>

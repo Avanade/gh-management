@@ -276,7 +276,7 @@ func CommunitiesActivities_Select_ByOffsetAndFilter(offset, filter int, search s
 	return result
 }
 
-func CommunitiesActivities_Select_ByOffsetAndFilterAndCreatedBy(offset, filter int, search, createdBy string) interface{} {
+func CommunitiesActivities_Select_ByOffsetAndFilterAndCreatedBy(offset, filter int, orderby, ordertype, search, createdBy string) interface{} {
 	db := ConnectDb()
 	defer db.Close()
 
@@ -284,6 +284,8 @@ func CommunitiesActivities_Select_ByOffsetAndFilterAndCreatedBy(offset, filter i
 		"Offset":    offset,
 		"Filter":    filter,
 		"Search":    search,
+		"OrderType": ordertype,
+		"OrderBy":   orderby,
 		"CreatedBy": createdBy,
 	}
 

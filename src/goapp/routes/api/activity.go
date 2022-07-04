@@ -57,8 +57,10 @@ func GetActivities(w http.ResponseWriter, r *http.Request) {
 		filter, _ := strconv.Atoi(params["filter"][0])
 		offset, _ := strconv.Atoi(params["offset"][0])
 		search := params["search"][0]
+		orderby := params["orderby"][0]
+		ordertype := params["ordertype"][0]
 		result = ActivitiesDto{
-			Data:  db.CommunitiesActivities_Select_ByOffsetAndFilterAndCreatedBy(offset, filter, search, username),
+			Data:  db.CommunitiesActivities_Select_ByOffsetAndFilterAndCreatedBy(offset, filter, orderby, ordertype, search, username),
 			Total: db.CommunitiesActivities_TotalCount_ByCreatedBy(username),
 		}
 	} else {
