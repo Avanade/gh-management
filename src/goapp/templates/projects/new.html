@@ -6,12 +6,12 @@
 <div x-data="data()">
     <form onsubmit="event.preventDefault()" autocomplete="off">
         <p>
-        <h3 class="text-lg font-medium leading-6 text-gray-900">Project information</h3>
-        All projects start on Avanade’s innersource on GitHub. Once you have identified a business sponsor, and
-        submitted
-        your first automated security scan, you can request to move the project to open source. If you open source this
-        application, it will be displayed publicly, so think carefully.
-        </p>
+            <h3 class="text-lg font-medium leading-6 text-gray-900">Project information</h3>
+            All projects start on Avanade’s innersource on GitHub. Once you have identified a business sponsor, and
+            submitted
+            your first automated security scan, you can request to move the project to open source. If you open source this
+            application, it will be displayed publicly, so think carefully.
+            </p>
         <br>
 
         <div class="flex flex flex-col md:flex-row ">
@@ -38,61 +38,44 @@
                     </div>
 
 
-                    <!-- ****** CO-OWNER CB ****** -->
-                    <div>
-                        <div class="relative mt-1">
-                            <input id="coowner" name="coowner" @click="coowner.show = !coowner.show"
-                                x-model="form.coowner" type="text"
-                                class="mt-1 focus:ring-orange-500 focus:border-orange-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md border-2"
-                                role="combobox" aria-controls="options" aria-expanded="false">
+                            <!-- ****** CO-OWNER CB ****** -->
+                        <div>
+                            <div class="relative mt-1" >
+                                <input id="coowner" name="coowner" @click="coowner.show = !coowner.show" x-model="form.coowner" type="text" class="mt-1 focus:ring-orange-500 focus:border-orange-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md border-2" role="combobox" aria-controls="options" aria-expanded="false">
 
-                            <button x-show="!isCoownerempty" type="button"
-                                class="absolute inset-y-0 right-0 flex items-center rounded-r-md px-2 focus:outline-none">
-                                <svg id="clearBtn" class="h-5 w-5 text-gray-400" @click="clearCoowner"
-                                    xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-                                    <path
-                                        d="M256 8C119 8 8 119 8 256s111 248 248 248 248-111 248-248S393 8 256 8zm0 448c-110.5 0-200-89.5-200-200S145.5 56 256 56s200 89.5 200 200-89.5 200-200 200zm101.8-262.2L295.6 256l62.2 62.2c4.7 4.7 4.7 12.3 0 17l-22.6 22.6c-4.7 4.7-12.3 4.7-17 0L256 295.6l-62.2 62.2c-4.7 4.7-12.3 4.7-17 0l-22.6-22.6c-4.7-4.7-4.7-12.3 0-17l62.2-62.2-62.2-62.2c-4.7-4.7-4.7-12.3 0-17l22.6-22.6c4.7-4.7 12.3-4.7 17 0l62.2 62.2 62.2-62.2c4.7-4.7 12.3-4.7 17 0l22.6 22.6c4.7 4.7 4.7 12.3 0 17z" />
-                                </svg>
-                            </button>
+                                <button x-show="!isCoownerempty" type="button" class="absolute inset-y-0 right-0 flex items-center rounded-r-md px-2 focus:outline-none">
+                                <svg id="clearBtn" class="h-5 w-5 text-gray-400" @click="clearCoowner" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M256 8C119 8 8 119 8 256s111 248 248 248 248-111 248-248S393 8 256 8zm0 448c-110.5 0-200-89.5-200-200S145.5 56 256 56s200 89.5 200 200-89.5 200-200 200zm101.8-262.2L295.6 256l62.2 62.2c4.7 4.7 4.7 12.3 0 17l-22.6 22.6c-4.7 4.7-12.3 4.7-17 0L256 295.6l-62.2 62.2c-4.7 4.7-12.3 4.7-17 0l-22.6-22.6c-4.7-4.7-4.7-12.3 0-17l62.2-62.2-62.2-62.2c-4.7-4.7-4.7-12.3 0-17l22.6-22.6c4.7-4.7 12.3-4.7 17 0l62.2 62.2 62.2-62.2c4.7-4.7 12.3-4.7 17 0l22.6 22.6c4.7 4.7 4.7 12.3 0 17z"/></svg>
+                                </button>
 
-                            <ul class="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm"
-                                id="options" x-show="coowner.show" role="listbox">
+                                <ul class="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm" id="options" x-show="coowner.show" role="listbox">
 
-                                {{range $user := .}}
-                                <li x-show="showName('{{$user.UserPrincipalName}}', '{{$user.GithubUser}}')"
-                                    class="relative cursor-default select-none py-2 pl-3 pr-9 text-gray-900"
-                                    id="option-0" role="option"
-                                    @click="form.coowner = '{{$user.UserPrincipalName}}'; coowner.show = !coowner.show"
-                                    tabindex="-1">
-                                    <div class="flex">
+                                        {{range $user := .}}
+                                    <li x-show="showName('{{$user.UserPrincipalName}}', '{{$user.GithubUser}}')" class="relative cursor-default select-none py-2 pl-3 pr-9 text-gray-900" id="option-0" role="option" @click="form.coowner = '{{$user.UserPrincipalName}}'; coowner.show = !coowner.show" tabindex="-1">
+                                        <div class="flex" >
 
                                         <span class="truncate">
-                                            {{$user.UserPrincipalName}}
+                                                {{$user.UserPrincipalName}}
                                         </span>
 
-                                        <span class="ml-2 truncate text-gray-500">
-                                            &nbsp@{{$user.GitHubUser}}
+                                        <span class="ml-2 truncate text-gray-500" >
+                                                &nbsp@{{$user.GitHubUser}}
                                         </span>
-                                    </div>
-
-                                    <span x-show="showCheck('{{$user.UserPrincipalName}}')"
-                                        class="absolute inset-y-0 right-0 flex items-center pr-4 text-indigo-600">
-                                        <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
-                                            fill="currentColor" aria-hidden="true">
-                                            <path fill-rule="evenodd"
-                                                d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                                clip-rule="evenodd" />
+                                        </div>
+                                
+                                        <span x-show="showCheck('{{$user.UserPrincipalName}}')" class="absolute inset-y-0 right-0 flex items-center pr-4 text-indigo-600" >
+                                        <svg  class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" >
+                                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
                                         </svg>
-                                    </span>
+                                        </span>
 
 
-                                </li>
-                                {{ end }}
-
-                            </ul>
+                                    </li>
+                                        {{ end }}  
+                                        
+                                </ul>
+                            </div>
                         </div>
-                    </div>
-                    <!-- END OF CO-OWNER CB... -->
+                                <!-- END OF CO-OWNER CB... -->
 
                     <div>All projects must have two or more owners, to ensure that security alerts can be dealt with
                         promptly. <div>
@@ -113,9 +96,7 @@
                         <h3 class="text-lg font-medium leading-6 text-gray-900">Project description</h3>
                     </div>
                     <div>
-                        <textarea name="description" id="description" x-model="form.description" rows="3"
-                            maxlength="1000"
-                            class="mt-1 focus:ring-orange-500 focus:border-orange-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md  border-2">
+                        <textarea name="description" id="description" x-model="form.description"  rows="3"  maxlength="1000"    class="mt-1 focus:ring-orange-500 focus:border-orange-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md  border-2">
                         </textarea>
                     </div>
                     <div>Be verbose in the description. Describe what the asset does and how it achieves this. If your
@@ -129,119 +110,12 @@
                 </div>
             </div>
         </div>
-        <br>
-        <div class="flex flex flex-col md:flex-row  my-3 ">
-            <div class="basis-1/2 md:base-full  md:flex-row   mx-3">
-                <div class="flex flex-col ">
-                    <h3 class="text-lg font-medium leading-6 text-gray-900">Legal questions </h3>
-                </div>
-            </div>
-            <div class="basis-1/2">
 
-            </div>
-
-        </div>
-        <div class="flex flex flex-col md:flex-row  my-3 ">
-            <div class="basis-1/2 md:base-full  md:flex-row   mx-3">
-                <div class="flex flex-col pl-2">
-                    Is this a new contribution with no prior code development? (i.e., no existing Avanade IP, no
-                    third-party/OSS code, etc.)
-                </div>
-            </div>
-            <div class="basis-1/2">
-                <select  class ="rounded-md"  name="newcontribution" id="newcontribution" x-model="form.newcontribution">
-                    <option value="" selected disabled hidden> -- SELECT -- </option>
-                    <option value="Yes">Yes</option>
-                    <option value="No">No</option>
-                    <option value="unsure">unsure</option>
-                </select>
-            </div>
-        </div>
-        <div class="flex flex flex-col md:flex-row  my-3 ">
-            <div class="basis-1/2 md:base-full  md:flex-row   mx-3 ">
-                <div class="flex flex-col pl-2">
-                    Who is sponsoring this OSS contribution?
-                </div>
-            </div>
-            <!-- <div class="basis-1/2">
-                <select name="Q" id="Q">
-               
-                    <option value="Solution Area - Applications and Infrastructure">Solution Area - Applications and Infrastructure</option>
-                    <option value="Solution Area - Business Applications">Solution Area - Business Applications</option>
-                    <option value="Solution Area - Data & AI">Solution Area - Data & AI</option>
-                    <option value="Solution Area - Modern Workplace">Solution Area - Modern Workplace</option>
-                    <option value="Business Group - Advisory">Business Group - Advisory</option>
-                    <option value="Internal Initiative">Internal Initiative</option>
-                    <option value="ITS">ITS</option>
-                    <option value="Office of the CTO">Office of the CTO</option>
-                    <option value="[Other - freetype]">[Other - freetype]</option>
-                </select>
-            </div> -->
-              <div class="basis-1/2 md:base-full  md:flex-row   mx-3  ">
-                <div 
-                    x-data="combobox({
-                            ajax: getSponsorOptions,
-                            id : 'id',
-                            text : 'text',
-                          
-                            isInsertable : true,
-                            isDisplayItem : false
-                        })"
-                    x-modelable = "selected"
-                    x-model = "form.sponsorOptions"
-                >
-                    <div x-html="template"></div>
-                </div>
-            </div>   
-        </div>
-        <div class="flex flex flex-col md:flex-row my-3  ">
-            <div class="basis-1/2 md:base-full  md:flex-row   mx-3">
-                <div class="flex flex-col pl-2">
-                    Will Avanade use this contribution in client accounts and/or as part of an Avanade offerings/assets?
-                </div>
-            </div>
-            <div class="basis-1/2">
-                <select class ="rounded-md"  name="avanadeofferingsassets" id="avanadeofferingsassets" x-model="form.avanadeofferingsassets">
-                    <option value="" selected disabled hidden> -- SELECT -- </option>
-                    <option value="Yes">Yes</option>
-                    <option value="No">No</option>
-                    <option value="Tobedecided">To be decided</option>
-                </select>
-            </div>
-        </div>
-        <div class="flex flex flex-col md:flex-row my-3  ">
-            <div class="basis-1/2 md:base-full  md:flex-row   mx-3">
-                <div class="flex flex-col pl-2">
-                    Will there be a commercial version of this contribution?
-                </div>
-            </div>
-            <div class="basis-1/2" >
-                <select class ="rounded-md" name="willbecommercialversion" id="willbecommercialversion" x-model="form.willbecommercialversion">
-                    <option value="" selected disabled hidden> -- SELECT -- </option>
-                    <option value="Yes">Yes</option>
-                    <option value="No">No</option>
-                    <option value="Tobedecided">To be decided</option>
-                </select>
-            </div>
-        </div>
-        <div class="flex flex flex-col md:flex-row  my-3 ">
-            <div class="basis-1/2 md:base-full  md:flex-row   mx-3">
-                <div class="flex flex-col pl-2">
-                    Additional OSS Contribution Information (e.g. planned maintenance/support, etc.)?
-                </div>
-            </div>
-            <div class="basis-1/2">
-                <input type="text"   maxlength="50"  name="osscontributionInformation" id="osscontributionInformation" x-model="form.osscontributionInformation"
-                class="mt-1 focus:ring-orange-500 focus:border-orange-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md border-2">
-
-            </div>
-            
-        </div>
         <br>
         <p>
         <div class="flex items-start">
             <div class="flex items-center h-5">
-                <input id="confirm1" name="confirmAvaIP" type="checkbox" x-model="form.confirmAvaIP"
+                <input id="confirm1" name="confirmAvaIP" type="checkbox"   x-model="form.confirmAvaIP"
                     class="focus:ring-orange-500 h-4 w-4 text-orange-600 border-gray-300 rounded">
             </div>
             <div class="ml-3 text-sm">
@@ -255,7 +129,7 @@
         <p>
         <div class="flex items-start">
             <div class="flex items-center h-5">
-                <input id="confirm2" name="confirmSecIPScan" type="checkbox" x-model="form.confirmSecIPScan"
+                <input id="confirm2" name="confirmSecIPScan" type="checkbox"   x-model="form.confirmSecIPScan"
                     class="focus:ring-orange-500 h-4 w-4 text-orange-600 border-gray-300 rounded">
             </div>
             <div class="ml-3 text-sm">
@@ -273,17 +147,21 @@
         </p>
         <div>
             <div align="right">
-                <button type="submit" class="bg-orange-500  inline-flex justify-center py-2 px-4 rounded-md text-white"
-                    :class="!isValid ? 'bg-orange-100' : ''" x-bind:disabled="!isValid" @click="submit()">Submit
+                <button type="submit"
+                    class="bg-orange-500  inline-flex justify-center py-2 px-4 rounded-md text-white"
+                    :class="!isValid ? 'bg-orange-100' : ''"
+                    x-bind:disabled="!isValid"
+                    @click="submit()"
+                    >Submit
                     project</button>
 
             </div>
         </div>
     </form>
 
-
+  
 </div>
-<script src="/public/components/combobox.js"></script>
+
 <script type="text/javascript">
     function data() {
         return {
@@ -292,78 +170,54 @@
                 coowner: '',
                 description: '',
                 confirmAvaIP: false,
-                confirmSecIPScan: false,
-                newcontribution: '',
-                osssponsor:'',
-                avanadeofferingsassets: '',
-                willbecommercialversion : '',
-                osscontributionInformation: '',
-                sponsorOptions:[],
-
+                confirmSecIPScan: false
             },
-            coowner: {
+            coowner:{
                 show: false,
             },
-            submit() {
-                this.form.osssponsor = this.form.sponsorOptions[0]["text"]
+            submit(){
                 Alpine.store('master').modal.reset()
                 Alpine.store('master').modal.show()
-                Alpine.store('master').postData("/projects/new", this.form, "Your repository has been created.", "Go to your project list", "/projects")
+                Alpine.store('master').postData("/projects/new", this.form, "Your repository has been created.", "Go to your project list", "/projects")                
             },
-            showName(userPrincipalName, githubUser) {
+            showName(userPrincipalName, githubUser){
                 return userPrincipalName.includes(this.form.coowner) || githubUser.includes(this.form.coowner) ? true : false
             },
 
 
 
             get isValid() {
-                if (
+                if(
                     !!this.form.name &&
                     !!this.form.coowner &&
                     !!this.form.description &&
                     this.form.confirmAvaIP &&
-                    this.form.confirmSecIPScan) {
-                    return true
+                    this.form.confirmSecIPScan){
+                        return true
                 } else {
                     return false
                 }
             },
 
-            showCheck(userPrincipalName) {
+            showCheck(userPrincipalName){
                 return userPrincipalName.includes(this.form.coowner) == "" ? true : false
             },
 
-            clearCoowner() {
+            clearCoowner(){
                 this.form.coowner = ""
             },
 
-            get isCoownerempty() {
-                if (this.form.coowner == "") {
+            get isCoownerempty(){
+                if(this.form.coowner == "") {
                     return true
                 } else {
                     return false
                 }
             }
-           
 
 
         }
-    
-    } 
-         async function getSponsorOptions(){
-
-             const data = [
-                 {id:"1", text:"Solution Area - Applications and Infrastructure"} ,
-                 {id:"2", text:"Solution Area - Business Applications"} ,
-                 {id:"3", text:"Solution Area - Data & AI"} ,   
-                 {id:"4", text:"Solution Area - Modern Workplace"} , 
-                 {id:"5", text:"Business Group - Advisory"} ,
-                 {id:"6", text:"ITS"} ,
-                 {id:"7", text:"Office of the CTO"} ,
-            ]
-
-             return data
-     }
+    }
 
 </script>
 {{ end }}

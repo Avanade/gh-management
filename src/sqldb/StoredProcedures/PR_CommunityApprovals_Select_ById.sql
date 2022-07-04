@@ -18,11 +18,8 @@ UC.GivenName [RequesterGivenName],
 UC.SurName [RequesterSurName],
 UC.UserPrincipalName [RequesterUserPrincipalName],
 CA.[ApproverUserPrincipalName],
-CA.[ApprovalDescription],
-s.Name [ApprovalStatus]
+CA.[ApprovalDescription]
 FROM CommunityApprovals CA
 INNER JOIN Communities C ON CA.CommunityId = C.Id
 INNER JOIN Users UC ON C.CreatedBy = UC.UserPrincipalName
-INNER JOIN ApprovalStatus S ON S.Id = CA.ApprovalStatusId
 WHERE C.Id = @Id
-

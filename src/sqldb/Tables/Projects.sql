@@ -12,11 +12,6 @@
     [Created] DATETIME NOT NULL DEFAULT getdate(), 
     [CreatedBy] VARCHAR(100) NULL, 
     [Modified] DATETIME NOT NULL DEFAULT getdate(), 
-    [ModifiedBy] VARCHAR(100) NULL,
-    [OSSsponsor] [varchar](50) NULL,
-	[Avanadeofferingsassets] [varchar](50) NULL,
-	[Willbecommercialversion] [varchar](50) NULL,
-	[OSSContributionInformation] [varchar](50) NULL,
-	[Newcontribution] [varchar](50) NULL,
+    [ModifiedBy] VARCHAR(100) NULL
     CONSTRAINT FK_ApprovalStatus_Projects FOREIGN KEY (ApprovalStatusId) REFERENCES ApprovalStatus(Id)
 )
