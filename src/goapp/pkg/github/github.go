@@ -28,7 +28,7 @@ func createClient(token string) *github.Client {
 
 func CreatePrivateGitHubRepository(data models.TypNewProjectReqBody) (*github.Repository, error) {
 	client := createClient(os.Getenv("GH_TOKEN"))
-	owner := envvar.GetEnvVar("GH_PROJECT_OWNER", "ava-innersource")
+	owner := os.Getenv("GH_PROJECT_OWNER")
 	repoRequest := &github.TemplateRepoRequest{
 		Name:        &data.Name,
 		Owner:       &owner,
@@ -36,7 +36,7 @@ func CreatePrivateGitHubRepository(data models.TypNewProjectReqBody) (*github.Re
 		Private:     github.Bool(true),
 	}
 
-	repo, _, err := client.Repositories.CreateFromTemplate(context.Background(), "avanade", "avanade-template", repoRequest)
+	repo, _, err := client.Repositories.CreateFromTemplate(context.Background(), os.Getenv("GH_REPO_TEMPLATE_OWNER"), os.Getenv("GH_REPO_TEMPLATE"), repoRequest)
 	if err != nil {
 		return nil, err
 	}
@@ -47,7 +47,7 @@ func CreatePrivateGitHubRepository(data models.TypNewProjectReqBody) (*github.Re
 
 func AddCollaborator(data models.TypNewProjectReqBody) (*github.Response, error) {
 	client := createClient(os.Getenv("GH_TOKEN"))
-	owner := envvar.GetEnvVar("GH_PROJECT_OWNER", "ava-innersource")
+	owner := os.Getenv("GH_PROJECT_OWNER")
 	opts := &github.RepositoryAddCollaboratorOptions{
 		Permission: "admin",
 	}
@@ -62,9 +62,9 @@ func AddCollaborator(data models.TypNewProjectReqBody) (*github.Response, error)
 	return resp, err
 }
 
-func GetRepository(repoName string) (*github.Repository, error) {
+func GetRepository(repoName string, org string) (*github.Repository, error) {
 	client := createClient(os.Getenv("GH_TOKEN"))
-	owner := envvar.GetEnvVar("GH_PROJECT_OWNER", "ava-innersource")
+	owner := org
 	repo, _, err := client.Repositories.Get(context.Background(), owner, repoName)
 	if err != nil {
 		return nil, err
@@ -73,15 +73,24 @@ func GetRepository(repoName string) (*github.Repository, error) {
 }
 
 func Repo_IsExisting(repoName string) (bool, error) {
-	_, err := GetRepository(repoName)
-	if err != nil {
-		if strings.Contains(err.Error(), "Not Found") {
-			return false, nil
+	exists := false
+	o := os.Getenv("GH_ORGANIZATIONS")
+	organizations := strings.Split(o, " ")
+
+	for _, org := range organizations {
+		_, err := GetRepository(repoName, org)
+		if err != nil {
+			if strings.Contains(err.Error(), "Not Found") {
+				continue
+			} else {
+				return false, err
+			}
+		} else {
+			exists = true
 		}
-		return false, err
 	}
 
-	return true, nil
+	return exists, nil
 }
 
 func GetRepositoriesFromOrganization(org string) ([]Repo, error) {
@@ -122,9 +131,9 @@ func GetRepositoriesFromOrganization(org string) ([]Repo, error) {
 	return repoList, nil
 }
 
-func SetProjectVisibility(projectName string, visibility string) error {
+func SetProjectVisibility(projectName string, visibility string, org string) error {
 	client := &http.Client{}
-	urlPath := fmt.Sprintf("https://api.github.com/repos/%s/%s", envvar.GetEnvVar("GH_PROJECT_OWNER", "Avanade"), projectName)
+	urlPath := fmt.Sprintf("https://api.github.com/repos/%s/%s", org, projectName)
 	postBody, _ := json.Marshal(map[string]string{
 		"visibility": visibility,
 	})

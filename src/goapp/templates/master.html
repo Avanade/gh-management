@@ -340,7 +340,7 @@
                   <div id="pageTitlePlaceholder" class="font-bold text-lg mb-5"></div>
                     <!-- START of SEARCH BAR-->
                     <div  x-show="topSearch" class="w-96">
-                      <div class="relative rounded-md shadow-sm" style="top: -5px">
+                      <div class="relative rounded-md shadow-sm">
                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center  w-full pointer-events-none">
 
                           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
@@ -348,7 +348,7 @@
                           </svg>
 
                         </div>
-                        <input @keyup.enter="search()" @input.enter="showClearBtn()" x-model="searchBar" x-ref="searchInput" type="text" id="text" class="-mt-10 block w-full focus:ring-indigo-500 focus:border-indigo-500 pl-10 sm:text-sm border-gray-300 rounded-md" placeholder="Search: Projects, Communities, People" autocomplete="off">
+                        <input @keyup.enter="search()" @input.enter="showClearBtn()" x-model="searchBar" x-ref="searchInput" type="text" id="text" class=" block w-full focus:ring-indigo-500 focus:border-indigo-500 pl-10 sm:text-sm border-gray-300 rounded-md" placeholder="Search: Projects, Communities, People" autocomplete="off">
 
                         <button @click="clearSearchBar(), $refs.searchInput.focus()" x-show="clearBtn" class="absolute inset-y-0 right-0 pr-3 flex items-center focus:pointer-events-auto">
                           <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -490,7 +490,7 @@
                   <a x-bind:href="$store.master.modal.redirectUrl" x-text="$store.master.modal.actionButtonText" ></a>
                   </a>
                 </div>
-                <div class="mt-3 text-center sm:mt-5 cursor-pointer" @click="$store.master.modal.reset()" x-bind:hidden="$store.master.modal.icon !== 'error' || ($store.master.modal.icon !== 'success' && !(!!$store.master.modal.actionButtonText && !!$store.master.modal.redirectUrl))">Close</div>
+                <div class="mt-3 text-center sm:mt-5 cursor-pointer" @click="$store.master.modal.reset()" x-bind:hidden="$store.master.modal.icon !== 'error' || ($store.master.modal.icon !== 'success' && $store.master.modal.icon !== 'error' && !(!!$store.master.modal.actionButtonText && !!$store.master.modal.redirectUrl))">Close</div>
               </div>
             </div>
           </div>

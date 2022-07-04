@@ -52,7 +52,9 @@
           <li>
             <div class="px-4 py-4 sm:px-6 hover:bg-gray-50 cursor-pointer" x-bind:class="project.showStatus? 'bg-gray-50':''" @click="project.showStatus = !project.showStatus; getProjectApprovalStatus(project.Id, index)">
               <div class="flex items-center justify-between">
-                <p class="text-sm font-medium text-indigo-600 truncate" x-text="project.Name" title="Repository name"></p>
+                <a :href="/projects/+project.Id"> 
+                  <p class="text-sm font-medium text-indigo-600 truncate" x-text="project.Name" title="Repository name">  </p>  
+                </a>
               </div>
               <div class="mt-2 sm:flex sm:justify-between">
                 <div class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
@@ -108,12 +110,12 @@
                       <div class="px-4 py-4 sm:px-6">
                         <div class="flex items-center justify-between">
                           <p class="text-sm font-medium text-gray-800 truncate" x-text="item.ApprovalDescription"></p>
-                          <div class="ml-2 flex-shrink-0 flex">
+                          <div class="ml-2 flex-shrink-0 flex"> 
                             <p class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full" x-bind:class="item.RequestStatus === 'Approved' ? ' bg-green-100 text-green-800': item.RequestStatus === 'Rejected' ? ' bg-red-100 text-red-800' : ' bg-gray-200 text-gray-800'" x-text="item.RequestStatus"></p>
                           </div>
                         </div>
                         <div class="mt-2 sm:flex ">
-                          <div class="sm:flex w-1/2">
+                          <div class="sm:flex w-1/2"> 
                             <p class="flex items-center text-sm text-gray-500" x-data="{ approver: 'Approver: ' + item.ApproverUserPrincipalName}" x-text="approver">
                             </p>
                           </div>
@@ -176,10 +178,10 @@
                         </svg>
                       </button>
                       <ul x-show="project.showOptions" class="absolute z-10 mt-1 max-h-60 right-0 top-1 overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm" id="options" role="listbox">
-                        <li @click="archiveProject(project.repoName, project.archived, project.private)" class="hover:bg-[#fff2eb] relative cursor-pointer select-none py-2 pl-3 pr-9 text-gray-900" id="option-0" role="option" tabindex="-1">
+                        <li @click="archiveProject(project.repoName, project.archived, project.private, project.org)" class="hover:bg-[#fff2eb] relative cursor-pointer select-none py-2 pl-3 pr-9 text-gray-900" id="option-0" role="option" tabindex="-1">
                           <span class="block truncate" x-text="project.archived? 'Unarchive' : 'Archive'">Archive</span>
                         </li>
-                        <li @click="setVisibility(project.repoName, project.archived, project.private)" x-show="!project.archived" class="hover:bg-[#fff2eb] relative cursor-pointer select-none py-2 pl-3 pr-9 text-gray-900" id="option-0" role="option" tabindex="-1">
+                        <li @click="setVisibility(project.repoName, project.archived, project.private, project.org)" x-show="!project.archived" class="hover:bg-[#fff2eb] relative cursor-pointer select-none py-2 pl-3 pr-9 text-gray-900" id="option-0" role="option" tabindex="-1">
                           <span class="block truncate" x-text="project.private? 'Make Public' : 'Make Private'"></span>
                         </li>
                       </ul>
@@ -276,6 +278,7 @@
           r.json().then(body => {
             this.userProjectsList[i]["approvalStatus"] = body
             this.userProjectsList[i]["statusLoaded"] = true
+         
           })
         })
         }
@@ -320,13 +323,13 @@
         }
         
       },
-      archiveProject(projectName, isArchived, isPrivate) {
-        let url = `/api/projects/${projectName}/archive/${isArchived? '0' : '1'}/private/${isPrivate? '1': '0'}`
+      archiveProject(projectName, isArchived, isPrivate, org) {
+        let url = `/api/projects/${projectName}/org/${org}/archive/${isArchived? '0' : '1'}/private/${isPrivate? '1': '0'}`
         Alpine.store('master').modal.show()
         Alpine.store('master').getData(url, `Project has been ${isArchived? 'unarchived.' : 'archived.'}`, "Refresh project list", "/projects?view=all")                
       },
-      setVisibility(projectName, isArchived, isPrivate) {
-        let url = `/api/projects/${projectName}/private/${isPrivate? '0' : '1'}/archive/${isArchived? '1': '0'}`
+      setVisibility(projectName, isArchived, isPrivate, org) {
+        let url = `/api/projects/${projectName}/org/${org}/private/${isPrivate? '0' : '1'}/archive/${isArchived? '1': '0'}`
         Alpine.store('master').modal.show()
         Alpine.store('master').getData(url, `Project has been made ${isPrivate? 'public.' : 'private.'}`, "Refresh project list", "/projects?view=all")                
       }

@@ -96,6 +96,6 @@ func CommunitySponsorsPerCommunityId(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	//fmt.Printf(projects)
+
 	w.Write(jsonResp)
 }
