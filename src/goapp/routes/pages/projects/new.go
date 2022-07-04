@@ -81,7 +81,7 @@ func ProjectsNewHandler(w http.ResponseWriter, r *http.Request) {
 func ProjectsHandler(w http.ResponseWriter, r *http.Request) {
 	req := mux.Vars(r)
 	id := req["id"]
-	fmt.Println(r.Method)
+
 	switch r.Method {
 	case "GET":
 
