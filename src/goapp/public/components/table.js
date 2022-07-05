@@ -32,6 +32,7 @@ const table = ({
       showStart : 0,
       showEnd : 0,
       isLoading : false,
+
       async init() {
         this.columns = columns;
         await this.load();
@@ -54,9 +55,12 @@ const table = ({
         this.data = this.res[data]
         this.total = this.res[total]
 
+        this.isLoading = false;
+
+        if (this.data == null || this.data.length == 0) return;
+
         this.showStart = this.data.length > 0 ? ((this.page * this.filter) + 1) : 0;
         this.showEnd = (this.page * this.filter) + this.data.length;
-        this.isLoading = false;
       },
       nextPageEnabled(){
         return this.page < Math.ceil(this.total/this.filter) - 1
@@ -160,6 +164,11 @@ const table = ({
                           <tr x-html="initRow(item)" class="hover:bg-gray-100" :class="isRowClickable() ? 'hover:cursor-pointer' : ''" @click="onRowClickHandler(item)">
                           </tr>
                         </template>
+                        <tr x-show='data == null || data.length == 0 && !isLoading' x-transition>
+                          <td 
+                            x-bind:colspan='columns.length'>
+                            <p class="text-center my-5">NO RESULT FOUND</p>
+                          </td>
                         <tr x-show='isLoading' x-transition>
                           <td x-bind:colspan='columns.length'>
                             <svg 
