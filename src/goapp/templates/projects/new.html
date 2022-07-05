@@ -365,6 +365,8 @@
                 }
             } , 
              async onload() {
+                var modal = Alpine.store('master').modal
+                modal.update('loading', 'Loading', 'Please wait', '', '')
 
                 this.form.id = '{{.Id}}'
                  if (this.form.id) {
@@ -399,7 +401,7 @@
                      } else {
                     this.mode = 'edit'
                 }
-
+                modal.visible = false
             }
            
 
