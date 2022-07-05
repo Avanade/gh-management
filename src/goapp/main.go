@@ -46,7 +46,7 @@ func main() {
 	mux.Handle("/projects/{id}", loadAzGHAuthPage(rtProjects.ProjectsHandler))
 	mux.Handle("/search/{searchText}/{offSet}/{rowCount}", loadAzGHAuthPage(rtSearch.GetSearchResults))
 	mux.Handle("/search", loadAzGHAuthPage(rtSearch.SearchHandler))
-	mux.Handle("/search/all/", loadAzGHAuthPage(rtSearch.GetAllResults))
+
 
 	mux.Handle("/community/new", loadAzGHAuthPage(rtCommunity.CommunityHandler))
 	mux.Handle("/community/{id}", loadAzGHAuthPage(rtCommunity.CommunityHandler))
