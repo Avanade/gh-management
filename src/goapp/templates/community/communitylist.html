@@ -66,13 +66,13 @@
               <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
           </div>
-          <input x-model="search" @keyup="filterCommunities()" type="text" name="searchTerm" id="searchTerm" class="focus:ring-indigo-500 focus:border-indigo-500 block w-full rounded-md pl-10 sm:text-sm border-gray-300" placeholder="Find a community">
+          <input x-model="search" @keyup="filteredCommunities()" type="text" name="searchTerm" id="searchTerm" class="focus:ring-indigo-500 focus:border-indigo-500 block w-full rounded-md pl-10 sm:text-sm border-gray-300" placeholder="Find a community">
         </div>
       </div>
     </div>
     <div class="bg-white shadow overflow-hidden sm:rounded-md mt-4">
       <ul role="list" class="divide-y divide-gray-200">
-        <template x-for="( Community, index) in filteredCommunityList">
+        <template x-for="( Community, index) in filteredCommunities">
           <li>     
             <div class="px-4 py-4 sm:px-6 hover:bg-gray-50 cursor-pointer" x-bind:class="Community.showStatus? 'bg-gray-50':''"
               @click="Community.showStatus = !Community.showStatus;getCommunityApprovalStatus(Community.Id, index)">
@@ -182,7 +182,6 @@
     return {
       showSpinner: true,
       Communitylist: [],
-      filteredCommunityList: [],
       view: '',
       search: '',
       getCommunity() {
@@ -194,12 +193,6 @@
           .then(r => {
             r.json().then(body => {
               this.Communitylist = body
-              if(!this.search) {
-                this.filteredCommunityList = this.Communitylist
-              }
-              else {
-                this.filteredCommunityList = this.Communitylist.filter(p => p.Name.toLowerCase().includes(this.search.toLowerCase()))
-              }
               this.showSpinner = false   
              
             });
@@ -219,8 +212,13 @@
         })
         }
       },
-      filterCommunities() {
-        this.filteredCommunityList = this.Communitylist.filter(p => p.Name.toLowerCase().includes(this.search.toLowerCase()))
+      get filteredCommunities() {
+        if(!this.search) {
+          return this.Communitylist
+        }
+        else {
+          return this.Communitylist.filter(p => p.Name.toLowerCase().includes(this.search.toLowerCase()))
+        }
       }
     }
   }
