@@ -124,9 +124,9 @@
             <div class="show sm:block">
                 <p class="text-sm text-gray-700">
                     Showing
-                    <span class="font-medium" x-text="pageSize">-</span> to 
-                    <span class="font-medium" x-text="SearchBy === null  ? 'false' : SearchBy.length ">-</span> Total of
-                    <span class="font-medium" x-text="SearchBy === null  ? 'false' : SearchBy.length ">-</span> results
+                    <span class="font-medium" x-text="SearchBy === null  ? 'false' : SearchBy.length ">-</span>  
+                    {{/* to <span class="font-medium" x-text="SearchBy === null  ? 'false' : SearchBy.length ">-</span>  */}}
+                    Total of <span class="font-medium" x-text="SearchBy === null  ? 'false' : SearchBy.length ">-</span> results
                 </p>
             </div>
 
@@ -145,8 +145,9 @@
               return {
                 sortCol:null,
                 sortAsc:false,
+                offSet: 0,
                 pageSize: 5,
-                curPage: 1,
+                //curPage: 1,
                 
                 entryBtn: false,
                 entryList: false,
@@ -184,12 +185,12 @@
                     console.log("Empty or Null Search Box.")
                     return
                   }
-
                   this.showSpinner = true
                   this.resultsNotFound = false
                   this.resultsTable = false
+
                   if (!this.form.searchList == '') {
-                    fetch('/search/' + this.form.searchList)
+                    fetch('/search/' + this.form.searchList + '/' +this.offSet + '/' +this.pageSize)
                     .then(r => {
                       r.json().then(body => {
                         this.SearchBy = body
@@ -218,15 +219,12 @@
                         this.resultsTable = true
                         this.showEntryBtn = true
                         this.pagination = true
-
                         console.log(this.SearchBy, " search by")
 
                         })
                       })
                     })
                   }
-
-
                 },
                 get FilteredSearchBy(){
                   if (this.SelectedSource == 'All') {
@@ -247,6 +245,7 @@
                 isEntriesClicked() {
                   this.entryList = false
                   console.log(this.pageSize)
+                  this.getSearchResults()
                   return this.entryList ? true : false
                 },
                 showClearBtn() {
@@ -266,11 +265,17 @@
                     });
                 },
                 previousPage() {
-                  if(this.curPage > 1) this.curPage--;
+                  {{/* if(this.curPage > 1) this.curPage--; */}}
+                  this.offSet = this.offSet - this.pageSize
+                  this.getSearchResults()
                   console.log("Previous Clicked")
                 },
                 nextPage() {
-                  if((this.curPage * this.pageSize) < this.SearchBy.length) this.curPage++;
+                  {{/* if((this.curPage * this.pageSize) < this.SearchBy.length) this.curPage++; */}}
+
+                    this.offSet = this.offSet + this.pageSize
+                    this.getSearchResults()
+
                   console.log("Next Clicked")
                 },
                 get pagedResults() {
@@ -282,8 +287,6 @@
                       })
                     } else return [];
                   }
-
-
 
 
       }
