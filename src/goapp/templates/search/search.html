@@ -124,14 +124,14 @@
             <div class="show sm:block">
                 <p class="text-sm text-gray-700">
                     Showing
-                    <span class="font-medium" x-text="SearchBy === null  ? 'false' : SearchBy.length ">-</span>  
-                    {{/* to <span class="font-medium" x-text="SearchBy === null  ? 'false' : SearchBy.length ">-</span>  */}}
-                    Total of <span class="font-medium" x-text="SearchBy === null  ? 'false' : SearchBy.length ">-</span> results
+                    <span class="font-medium" x-text="SearchBy === null  ? 'false' : offSet + 1 ">-</span>  
+                    to <span class="font-medium" x-text="SearchBy === null  ? 'false' : offSet + SearchBy.length ">-</span> 
+                    {{/* Total of <span class="font-medium" x-text="SearchBy === null  ? 'false' : SearchBy.length ">-</span> results */}}
                 </p>
             </div>
 
             <div class="flex justify-between sm:justify-end">
-                <button @click="previousPage" class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-[#fff2eb]"> Previous </button>
+                <button @click="offSet <= 1 ? disabled : previousPage" class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-[#fff2eb]"> Previous </button>
 
                 <button @click="nextPage" class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-[#fff2eb]"> Next </button>
             </div>
