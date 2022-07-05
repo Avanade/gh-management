@@ -57,7 +57,8 @@
         }
         async function getApprovalTypes(e){
             const offset = e.filter * e.page;
-            const res = await fetch(`/api/approval/types?filter=${e.filter}&offset=${offset}&search=${e.search}&orderby=${e.orderby}&ordertype=${e.ordertype}`)
+            const search = encodeURIComponent(e.search)
+            const res = await fetch(`/api/approval/types?filter=${e.filter}&offset=${offset}&search=${search}&orderby=${e.orderby}&ordertype=${e.ordertype}`)
             const data = await res.json()
             return data
         }

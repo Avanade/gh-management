@@ -5,6 +5,7 @@
 
 <div x-data="data()" x-init="onload()" >
     <form onsubmit="event.preventDefault()" autocomplete="off">
+        <fieldset x-bind:disabled="mode=='view'"> 
         <p>
         <h3 class="text-lg font-medium leading-6 text-gray-900">Project information</h3>
         All projects start on Avanade’s innersource on GitHub. Once you have identified a business sponsor, and
@@ -266,16 +267,28 @@
             </div>
         </div>
         </p>
+    </fieldset>
         <br>
         <p> Projects will be automatically created in Avanade innersource, and you will receive a Teams notification
             with a link to the project.<br />
             You can also view your projects under the projects tab.
         </p>
         <div>
-            <div align="right">
-                <button type="submit" class="bg-orange-500  inline-flex justify-center py-2 px-4 rounded-md text-white"
-                    :class="!isValid ? 'bg-orange-100' : ''" x-bind:disabled="!isValid" @click="submit()">Submit
-                    project</button>
+            <div align="right">     
+                <button type="button" x-show="mode=='view'"
+                    class="bg-orange-500  inline-flex justify-center py-2 px-4 rounded-md text-white"
+                    :class="!isValid ? 'bg-orange-100' : ''" x-bind:disabled="!isValid" @click="mode='edit'">
+
+                    <span x-show="form.id">Edit Project</span>
+
+                </button>
+                    <button type="submit" x-show="mode!='view'" class="bg-orange-500  inline-flex justify-center py-2 px-4 rounded-md text-white"
+                        :class="!isValid ? 'bg-orange-100' : ''" x-bind:disabled="!isValid" @click="submit()">
+                        
+                        <span x-show="!form.id">Submit  project</span>
+                        <span x-show="form.id">Update project</span>
+    
+                    </button>
 
             </div>
         </div>
@@ -286,7 +299,9 @@
 <script src="/public/components/combobox.js"></script>
 <script type="text/javascript">
     function data() {
-        return {
+        return {        
+            mode:
+                'view',
             form: {
                 name: '',
                 coowner: '',
@@ -350,9 +365,12 @@
                 }
             } , 
              async onload() {
+                var modal = Alpine.store('master').modal
+                modal.update('loading', 'Loading', 'Please wait', '', '')
 
                 this.form.id = '{{.Id}}'
                  if (this.form.id) {
+                    this.mode = 'view'
                      await fetch('/api/projects/' + '{{.Id}}')
                          .then(r => {
                              r.json().then(body => {
@@ -380,7 +398,10 @@
                              alert("catch")
                          
                          })
-                     }
+                     } else {
+                    this.mode = 'edit'
+                }
+                modal.visible = false
             }
            
 

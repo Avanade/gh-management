@@ -117,7 +117,7 @@ func PRProjectsUpdate(body models.TypNewProjectReqBody, user string) (id int64) 
 
 		ConnectionString: os.Getenv("GHMGMTDB_CONNECTION_STRING"),
 	}
-	fmt.Println(body)
+
 	db, _ := sql.Init(cp)
 	param := map[string]interface{}{
 		"ID":                         body.Id,
