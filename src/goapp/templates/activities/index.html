@@ -78,7 +78,8 @@
     }
     async function getActivities(e){
       const offset = e.filter * e.page;
-      const res = await fetch(`/api/activity?filter=${e.filter}&offset=${offset}&search=${e.search}&orderby=${e.orderby}&ordertype=${e.ordertype}`)
+      const search = encodeURIComponent(e.search)
+      const res = await fetch(`/api/activity?filter=${e.filter}&offset=${offset}&search=${search}&orderby=${e.orderby}&ordertype=${e.ordertype}`)
 
       const data = await res.json()
       return data
