@@ -58,9 +58,21 @@
       </div>
     </div>
 
+    <div x-show="!showSpinner && Communitylist">
+      <div class="my-5 flex rounded-md shadow-sm">
+        <div class="relative flex items-stretch flex-grow focus-within:z-10">
+          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 20 20" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+          </div>
+          <input x-model="search" @keyup="filterCommunities()" type="text" name="searchTerm" id="searchTerm" class="focus:ring-indigo-500 focus:border-indigo-500 block w-full rounded-md pl-10 sm:text-sm border-gray-300" placeholder="Find a community">
+        </div>
+      </div>
+    </div>
     <div class="bg-white shadow overflow-hidden sm:rounded-md mt-4">
       <ul role="list" class="divide-y divide-gray-200">
-        <template x-for="( Community, index) in Communitylist">
+        <template x-for="( Community, index) in filteredCommunityList">
           <li>     
             <div class="px-4 py-4 sm:px-6 hover:bg-gray-50 cursor-pointer" x-bind:class="Community.showStatus? 'bg-gray-50':''"
               @click="Community.showStatus = !Community.showStatus;getCommunityApprovalStatus(Community.Id, index)">
@@ -170,20 +182,30 @@
     return {
       showSpinner: true,
       Communitylist: [],
+      filteredCommunityList: [],
       view: '',
       search: '',
       getCommunity() {
-        var modal = Alpine.store('master').modal
+        const queryString = window.location.search;
+        const urlParams = new URLSearchParams(queryString);
+        this.search = urlParams.get('search')
+        
         fetch('/community')
           .then(r => {
             r.json().then(body => {
               this.Communitylist = body
+              if(!this.search) {
+                this.filteredCommunityList = this.Communitylist
+              }
+              else {
+                this.filteredCommunityList = this.Communitylist.filter(p => p.Name.toLowerCase().includes(this.search.toLowerCase()))
+              }
               this.showSpinner = false   
              
             });
           })
           .catch(e => {
-            modal.update('error', 'Error getting data', 'Please try again', '', '')
+            console.log(e)
           })
       },
       getCommunityApprovalStatus(id, i) {
@@ -193,11 +215,13 @@
           r.json().then(body => {
             this.Communitylist[i]["approvalStatus"] = body
             this.Communitylist[i]["statusLoaded"] = true
-         
           })
         })
         }
       },
+      filterCommunities() {
+        this.filteredCommunityList = this.Communitylist.filter(p => p.Name.toLowerCase().includes(this.search.toLowerCase()))
+      }
     }
   }
 </script>
