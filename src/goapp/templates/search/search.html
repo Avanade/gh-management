@@ -131,7 +131,7 @@
             </div>
 
             <div class="flex justify-between sm:justify-end">
-                <button @click="offSet <= 1 ? disabled : previousPage" class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-[#fff2eb]"> Previous </button>
+                <button @click="offSet <= 1 ? 'false' : previousPage" class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-[#fff2eb]"> Previous </button>
 
                 <button @click="nextPage" class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-[#fff2eb]"> Next </button>
             </div>
