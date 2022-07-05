@@ -140,6 +140,7 @@ func ApprovalSystemRequest(data models.TypProjectApprovals) error {
 
 	url := os.Getenv("APPROVAL_SYSTEM_APP_URL")
 	if url != "" {
+		url = url + "/request"
 		ch := make(chan *http.Response)
 		// var res *http.Response
 
