@@ -1,14 +1,14 @@
 package routes
 
 import (
+	"bytes"
+	"encoding/json"
+	"fmt"
 	models "main/models"
 	ghmgmtdb "main/pkg/ghmgmtdb"
 	"net/http"
 	"os"
 	"strings"
-	"fmt"
-	"bytes"
-	"encoding/json"
 )
 
 func handleError(err error) {
@@ -31,7 +31,7 @@ func RequestCommunityApproval(id int64) error {
 
 	for _, v := range communityApprovals {
 		err := ApprovalSystemRequestCommunity(v)
-		if err != nil{
+		if err != nil {
 			return err
 		}
 	}
@@ -47,11 +47,11 @@ func ReprocessRequestCommunityApproval() {
 
 }
 
-
-func ApprovalSystemRequestCommunity (data models.TypCommunityApprovals) error {
+func ApprovalSystemRequestCommunity(data models.TypCommunityApprovals) error {
 
 	url := os.Getenv("APPROVAL_SYSTEM_APP_URL")
 	if url != "" {
+		url = url + "/request"
 		ch := make(chan *http.Response)
 		// var res *http.Response
 
@@ -80,13 +80,13 @@ func ApprovalSystemRequestCommunity (data models.TypCommunityApprovals) error {
 		`
 
 		var isExternal string
-	
+
 		if data.CommunityIsExternal {
 			isExternal = "external"
 		} else {
 			isExternal = "internal"
 		}
-		
+
 		replacer := strings.NewReplacer("|ApproverUserPrincipalName|", data.ApproverUserPrincipalName,
 			"|RequesterName|", data.RequesterName,
 			"|CommunityIsExternal|", isExternal,

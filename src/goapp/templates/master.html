@@ -336,10 +336,10 @@
           <div class="py-6">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
               <div id="content" class="container px-4">
-                <div class="flex justify-between">
-                  <div id="pageTitlePlaceholder" class="font-bold text-lg mb-5"></div>
+                <div class="flex justify-between mb-5">
+                  <div id="pageTitlePlaceholder" class="font-bold text-lg self-center"></div>
                     <!-- START of SEARCH BAR-->
-                    <div  x-show="topSearch" class="w-96">
+                    <div  x-show="topSearch" class="w-96 self-center">
                       <div class="relative rounded-md shadow-sm">
                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center  w-full pointer-events-none">
 
@@ -359,7 +359,7 @@
                       </div>
                     </div>
                     <!-- END of SEARCH BAR -->
-                  <div id="ghAccountPlaceholder"></div>
+                  <div id="ghAccountPlaceholder" class="self-center"></div>
                 </div>
                 {{ if .ProfileGH.LoggedIn }}
                   <div id="ghAccount">
