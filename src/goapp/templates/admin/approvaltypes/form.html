@@ -94,7 +94,7 @@
                 this.action = action,
                 this.id = id
 
-                if (this.action.toLowerCase == 'add') return;
+                if (this.action.toLowerCase() == 'add') return;
 
                 var modal = Alpine.store('master').modal
                 modal.update('loading', 'Loading', 'Please wait for a moment.', '', '')
