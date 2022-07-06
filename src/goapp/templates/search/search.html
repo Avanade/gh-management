@@ -22,12 +22,12 @@
                 </button>
               </div>
 
-              <div x-show="entryList" id="entryList" class="origin-top-right absolute right-0 mt-2 w-15 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="menu-button" tabindex="-1">
-                <div class="py-1 w-full" role="none">
-                  <a @click="pageSize= 5, isEntriesClicked()" class=" block px-4 py-2 text-sm cursor-pointer hover:bg-[#fff2eb]" role="menuitem" tabindex="-1" id="menu-item-0" x-bind:class="pageSize === 5 ? 'text-[#FF5800]' : ''">5</a>
-                  <a @click="pageSize= 10, isEntriesClicked()" class="block px-4 py-2 text-sm cursor-pointer hover:bg-[#fff2eb]" role="menuitem" tabindex="-1" id="menu-item-0" x-bind:class="pageSize === 10 ? 'text-[#FF5800]' : ''">10</a>
-                  <a @click="pageSize=25, isEntriesClicked()" class="block px-4 py-2 text-sm cursor-pointer hover:bg-[#fff2eb]" role="menuitem" tabindex="-1" id="menu-item-1" x-bind:class="pageSize=== 25 ? 'text-[#FF5800]' : '' ">25</a>
-                  <a @click="pageSize=50, isEntriesClicked()" class="block px-4 py-2 text-sm cursor-pointer hover:bg-[#fff2eb]" role="menuitem" tabindex="-1" id="menu-item-2" x-bind:class="pageSize=== 50 ? 'text-[#FF5800]' : '' ">50</a>
+              <div x-show="entryList" id="entryList" class="absolute right-0 mt-2 w-15 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="menu-button" tabindex="-1">
+                <div class="py-1 w-full" >
+                  <button @click="pageSize = 5, isEntriesClicked()" class="w-full py-2 text-sm hover:bg-[#fff2eb]" x-bind:class="pageSize === 5 ? 'text-[#FF5800]' : ''" x-bind:disabled="pageSize == 5" >5</button>
+                  <button @click="pageSize = 10, isEntriesClicked()" class="block px-4 py-2 text-sm hover:bg-[#fff2eb]" x-bind:class="pageSize === 10 ? 'text-[#FF5800]' : '' " x-bind:disabled="pageSize == 10">10</button>
+                  <button @click="pageSize = 25, isEntriesClicked()" class="block px-4 py-2 text-sm hover:bg-[#fff2eb]" x-bind:class="pageSize === 25 ? 'text-[#FF5800]' : '' " x-bind:disabled="pageSize == 25" >25</button>
+                  <button @click="pageSize = 50, isEntriesClicked()" class="block px-4 py-2 text-sm hover:bg-[#fff2eb]" x-bind:class="pageSize === 50 ? 'text-[#FF5800]' : '' " x-bind:disabled="pageSize == 50" >50</button>
                 </div>
               </div>
 
