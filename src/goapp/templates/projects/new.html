@@ -21,7 +21,7 @@
                     <div>
                         <h3 class="text-lg font-medium leading-6 text-gray-900">Project name</h3>
                     </div>
-                    <div> <input type="text" name="name" id="name" x-model="form.name" maxlength="50"
+                    <div> <input type="text" name="name" id="name" x-model="form.name" maxlength="50"  x-bind:disabled="mode=='edit'"
                             class="mt-1 focus:ring-orange-500 focus:border-orange-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md border-2">
                     </div>
                     <div>The title should represent what the asset does. Avoid acronyms, code names and the use of the
@@ -114,7 +114,7 @@
                         <h3 class="text-lg font-medium leading-6 text-gray-900">Project description</h3>
                     </div>
                     <div>
-                        <textarea name="description" id="description" x-model="form.description" rows="3"
+                        <textarea name="description" id="description" x-model="form.description" rows="3"  x-bind:disabled="mode=='edit'"
                             maxlength="1000"
                             class="mt-1 focus:ring-orange-500 focus:border-orange-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md  border-2">
                         </textarea>
@@ -274,24 +274,32 @@
             You can also view your projects under the projects tab.
         </p>
         <div>
-            <div align="right">     
+            <div align="right">
                 <button type="button" x-show="mode=='view'"
                     class="bg-orange-500  inline-flex justify-center py-2 px-4 rounded-md text-white"
                     :class="!isValid ? 'bg-orange-100' : ''" x-bind:disabled="!isValid" @click="mode='edit'">
-
+            
                     <span x-show="form.id">Edit Project</span>
-
+            
                 </button>
-                    <button type="submit" x-show="mode!='view'" class="bg-orange-500  inline-flex justify-center py-2 px-4 rounded-md text-white"
-                        :class="!isValid ? 'bg-orange-100' : ''" x-bind:disabled="!isValid" @click="submit()">
-                        
-                        <span x-show="!form.id">Submit  project</span>
-                        <span x-show="form.id">Update project</span>
-    
-                    </button>
-
+                <button type="submit" x-show="mode!='view'"
+                    class="bg-orange-500  inline-flex justify-center py-2 px-4 rounded-md text-white"
+                    :class="!isValid ? 'bg-orange-100' : ''" x-bind:disabled="!isValid" @click="submit()">
+            
+                    <span x-show="!form.id">Submit project</span>
+                    <span x-show="form.id">Update project</span>
+            
+                </button>
+                <button type="button" x-show="mode!='view'"
+                class="bg-orange-500  inline-flex justify-center py-2 px-4 rounded-md text-white"
+                :class="!isValid ? 'bg-orange-100' : ''" x-bind:disabled="!isValid" @click="onload()">
+        
+                 
+                <span x-show="form.id">Cancel</span>
+        
+            </button>
             </div>
-        </div>
+            </div>
     </form>
 
 
@@ -399,7 +407,7 @@
                          
                          })
                      } else {
-                    this.mode = 'edit'
+                    this.mode = 'new'
                 }
                 modal.visible = false
             }
