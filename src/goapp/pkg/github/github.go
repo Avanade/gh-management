@@ -28,7 +28,7 @@ func createClient(token string) *github.Client {
 
 func CreatePrivateGitHubRepository(data models.TypNewProjectReqBody) (*github.Repository, error) {
 	client := createClient(os.Getenv("GH_TOKEN"))
-	owner := os.Getenv("GH_PROJECT_OWNER")
+	owner := os.Getenv("GH_ORG_INNERSOURCE")
 	repoRequest := &github.TemplateRepoRequest{
 		Name:        &data.Name,
 		Owner:       &owner,
@@ -36,7 +36,7 @@ func CreatePrivateGitHubRepository(data models.TypNewProjectReqBody) (*github.Re
 		Private:     github.Bool(true),
 	}
 
-	repo, _, err := client.Repositories.CreateFromTemplate(context.Background(), os.Getenv("GH_REPO_TEMPLATE_OWNER"), os.Getenv("GH_REPO_TEMPLATE"), repoRequest)
+	repo, _, err := client.Repositories.CreateFromTemplate(context.Background(), os.Getenv("GH_REPO_TEMPLATE"), os.Getenv("GH_REPO_TEMPLATE_NAME"), repoRequest)
 	if err != nil {
 		return nil, err
 	}
@@ -47,7 +47,7 @@ func CreatePrivateGitHubRepository(data models.TypNewProjectReqBody) (*github.Re
 
 func AddCollaborator(data models.TypNewProjectReqBody) (*github.Response, error) {
 	client := createClient(os.Getenv("GH_TOKEN"))
-	owner := os.Getenv("GH_PROJECT_OWNER")
+	owner := os.Getenv("GH_ORG_INNERSOURCE")
 	opts := &github.RepositoryAddCollaboratorOptions{
 		Permission: "admin",
 	}
@@ -74,8 +74,7 @@ func GetRepository(repoName string, org string) (*github.Repository, error) {
 
 func Repo_IsExisting(repoName string) (bool, error) {
 	exists := false
-	o := os.Getenv("GH_ORGANIZATIONS")
-	organizations := strings.Split(o, " ")
+	organizations := []string{os.Getenv("GH_ORG_INNERSOURCE"), os.Getenv("GH_ORG_OPENSOURCE")}
 
 	for _, org := range organizations {
 		_, err := GetRepository(repoName, org)
