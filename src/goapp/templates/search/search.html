@@ -133,7 +133,7 @@
             <div class="flex justify-between sm:justify-end">
                 <button @click="offSet <= 1 ? 'false' : previousPage" class="relative inline-flex items-center px-4 py-2 text-sm font-medium  rounded-md  bg-white " x-bind:disabled="offSet <= 1" x-bind:class="offSet <= 1 ? 'bg-gray-100 text-gray-400 ':'border border-gray-300 text-gray-700 hover:bg-[#fff2eb]' "> Previous </button>
 
-                <button @click="SearchBy.length < pageSize ? 'false' : nextPage " class="ml-3 relative inline-flex items-center px-4 py-2 text-sm font-medium rounded-md bg-white" x-bind:disabled="SearchBy.length < pageSize" x-bind:class="SearchBy.length < pageSize ? 'bg-gray-100 text-gray-400':'border border-gray-300 text-gray-700 hover:bg-[#fff2eb]' " > Next </button>
+                <button @click=" SearchBy.length < pageSize ? 'false' : nextPage " class="ml-3 relative inline-flex items-center px-4 py-2 text-sm font-medium rounded-md bg-white" x-bind:disabled="SearchBy.length < pageSize" x-bind:class="SearchBy.length < pageSize ? 'bg-gray-100 text-gray-400':'border border-gray-300 text-gray-700 hover:bg-[#fff2eb]' " > Next </button>
             </div>
         </nav>
         <!-- END of PAGINATION -->
