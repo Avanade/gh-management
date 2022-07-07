@@ -30,17 +30,12 @@ type TypMenu struct {
 }
 
 type TypNewProjectReqBody struct {
-	Id                         string `json:"id"`
-	Name                       string `json:"name"`
-	Coowner                    string `json:"coowner"`
-	Description                string `json:"description"`
-	ConfirmAvaIP               bool   `json:"confirmAvaIP"`
-	ConfirmSecIPScan           bool   `json:"confirmSecIPScan"`
-	Newcontribution            string `json:"newcontribution"`
-	OSSsponsor                 string `json:"osssponsor"`
-	Avanadeofferingsassets     string `json:"avanadeofferingsassets"`
-	Willbecommercialversion    string `json:"willbecommercialversion"`
-	OSSContributionInformation string `json:"osscontributionInformation"`
+	Id               string `json:"id"`
+	Name             string `json:"name"`
+	Coowner          string `json:"coowner"`
+	Description      string `json:"description"`
+	ConfirmAvaIP     bool   `json:"confirmAvaIP"`
+	ConfirmSecIPScan bool   `json:"confirmSecIPScan"`
 }
 
 type TypCommunity struct {

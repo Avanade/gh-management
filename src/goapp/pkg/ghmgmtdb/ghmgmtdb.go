@@ -90,17 +90,12 @@ func PRProjectsInsert(body models.TypNewProjectReqBody, user string) (id int64) 
 	db, _ := sql.Init(cp)
 	param := map[string]interface{}{
 
-		"Name":                       body.Name,
-		"CoOwner":                    body.Coowner,
-		"Description":                body.Description,
-		"ConfirmAvaIP":               body.ConfirmAvaIP,
-		"ConfirmEnabledSecurity":     body.ConfirmSecIPScan,
-		"CreatedBy":                  user,
-		"Newcontribution":            body.Newcontribution,
-		"OSSsponsor":                 body.OSSsponsor,
-		"Avanadeofferingsassets":     body.Avanadeofferingsassets,
-		"Willbecommercialversion":    body.Willbecommercialversion,
-		"OSSContributionInformation": body.OSSContributionInformation,
+		"Name":                   body.Name,
+		"CoOwner":                body.Coowner,
+		"Description":            body.Description,
+		"ConfirmAvaIP":           body.ConfirmAvaIP,
+		"ConfirmEnabledSecurity": body.ConfirmSecIPScan,
+		"CreatedBy":              user,
 	}
 	result, err := db.ExecuteStoredProcedureWithResult("dbo.PR_Projects_Insert", param)
 	if err != nil {
@@ -120,18 +115,13 @@ func PRProjectsUpdate(body models.TypNewProjectReqBody, user string) (id int64) 
 
 	db, _ := sql.Init(cp)
 	param := map[string]interface{}{
-		"ID":                         body.Id,
-		"Name":                       body.Name,
-		"CoOwner":                    body.Coowner,
-		"Description":                body.Description,
-		"ConfirmAvaIP":               body.ConfirmAvaIP,
-		"ConfirmEnabledSecurity":     body.ConfirmSecIPScan,
-		"ModifiedBy":                 user,
-		"Newcontribution":            body.Newcontribution,
-		"OSSsponsor":                 body.OSSsponsor,
-		"Avanadeofferingsassets":     body.Avanadeofferingsassets,
-		"Willbecommercialversion":    body.Willbecommercialversion,
-		"OSSContributionInformation": body.OSSContributionInformation,
+		"ID":                     body.Id,
+		"Name":                   body.Name,
+		"CoOwner":                body.Coowner,
+		"Description":            body.Description,
+		"ConfirmAvaIP":           body.ConfirmAvaIP,
+		"ConfirmEnabledSecurity": body.ConfirmSecIPScan,
+		"ModifiedBy":             user,
 	}
 	_, err := db.ExecuteStoredProcedure("dbo.PR_Projects_Update", param)
 	if err != nil {
