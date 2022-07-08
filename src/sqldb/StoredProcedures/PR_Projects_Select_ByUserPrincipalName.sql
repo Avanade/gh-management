@@ -21,6 +21,7 @@ SELECT [p].[Id],
        [CreatedBy],
        [Modified],
        [ModifiedBy],
+       [ApprovalStatusId],
        [v].[Name] AS 'Visibility'
   FROM 
        [dbo].[Projects] AS p
