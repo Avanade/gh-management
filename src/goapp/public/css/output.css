@@ -1842,6 +1842,10 @@ select {
   margin-bottom: 0.5rem;
 }
 
+.mt-7 {
+  margin-top: 1.75rem;
+}
+
 .mr-1\.5 {
   margin-right: 0.375rem;
 }

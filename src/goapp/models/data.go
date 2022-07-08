@@ -38,6 +38,15 @@ type TypNewProjectReqBody struct {
 	ConfirmSecIPScan bool   `json:"confirmSecIPScan"`
 }
 
+type TypeMakeProjectPublicReqBody struct {
+	Id                         string `json:"id"`
+	Newcontribution            string `json:"newcontribution"`
+	OSSsponsor                 string `json:"osssponsor"`
+	Avanadeofferingsassets     string `json:"avanadeofferingsassets"`
+	Willbecommercialversion    string `json:"willbecommercialversion"`
+	OSSContributionInformation string `json:"osscontributionInformation"`
+}
+
 type TypCommunity struct {
 	Id           int           `json:"id"`
 	Name         string        `json:"name"`

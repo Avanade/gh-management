@@ -105,7 +105,6 @@ func PRProjectsInsert(body models.TypNewProjectReqBody, user string) (id int64) 
 	return
 }
 
-// PROJECTS
 func PRProjectsUpdate(body models.TypNewProjectReqBody, user string) (id int64) {
 
 	cp := sql.ConnectionParam{
@@ -130,6 +129,32 @@ func PRProjectsUpdate(body models.TypNewProjectReqBody, user string) (id int64) 
 
 	return
 }
+
+func PRProjectsUpdateLegalQuestions(body models.TypeMakeProjectPublicReqBody, user string) {
+
+	cp := sql.ConnectionParam{
+
+		ConnectionString: os.Getenv("GHMGMTDB_CONNECTION_STRING"),
+	}
+
+	db, _ := sql.Init(cp)
+	param := map[string]interface{}{
+		"Id":                         body.Id,
+		"Newcontribution":            body.Newcontribution,
+		"OSSsponsor":                 body.OSSsponsor,
+		"Avanadeofferingsassets":     body.Avanadeofferingsassets,
+		"Willbecommercialversion":    body.Willbecommercialversion,
+		"OSSContributionInformation": body.OSSContributionInformation,
+		"ModifiedBy":                 user,
+	}
+	_, err := db.ExecuteStoredProcedure("PR_Projects_Update_LegalQuestions", param)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	return
+}
+
 func Projects_IsExisting(body models.TypNewProjectReqBody) bool {
 
 	cp := sql.ConnectionParam{

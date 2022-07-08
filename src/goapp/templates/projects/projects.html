@@ -169,7 +169,7 @@
                 </ul>
               </div>
               <div class="overflow-hidden text-sm text-gray-500 sm:mt-0" x-show="project.statusLoaded && !project.approvalStatus">
-                No approval data found for this project. <a class="text-indigo-600" x-bind:href="'/api/project/request/' + project.Id">Click to request</a> to make this project public.
+                No approval data found for this project. <a class="text-indigo-600" x-bind:href="'/projects/makepublic/' + project.Id">Click to request</a> to make this project public.
               </div>
 
             </div>

@@ -1,7 +1,10 @@
 package routes
 
 import (
+	"bytes"
 	"encoding/json"
+	"fmt"
+	models "main/models"
 	ghmgmt "main/pkg/ghmgmtdb"
 	gh "main/pkg/github"
 	session "main/pkg/session"
@@ -9,6 +12,7 @@ import (
 	"net/http"
 	"os"
 	"sort"
+	"strconv"
 	"strings"
 	"sync"
 
@@ -223,4 +227,151 @@ func SetVisibility(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusOK)
+}
+
+func RequestMakePublic(w http.ResponseWriter, r *http.Request) {
+	sessionaz, _ := session.Store.Get(r, "auth-session")
+	iprofile := sessionaz.Values["profile"]
+	profile := iprofile.(map[string]interface{})
+	username := profile["preferred_username"]
+	r.ParseForm()
+
+	var body models.TypeMakeProjectPublicReqBody
+
+	err := json.NewDecoder(r.Body).Decode(&body)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	ghmgmt.PRProjectsUpdateLegalQuestions(body, username.(string))
+
+	id, err := strconv.ParseInt(body.Id, 10, 64)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	go RequestApproval(id)
+}
+
+func RequestApproval(id int64) {
+	projectApprovals := ghmgmt.PopulateProjectsApproval(id)
+
+	for _, v := range projectApprovals {
+		err := ApprovalSystemRequest(v)
+		handleError(err)
+	}
+
+}
+
+func ApprovalSystemRequest(data models.TypProjectApprovals) error {
+
+	url := os.Getenv("APPROVAL_SYSTEM_APP_URL")
+	if url != "" {
+		url = url + "/request"
+		ch := make(chan *http.Response)
+		// var res *http.Response
+
+		bodyTemplate := `<p>Hi |ApproverUserPrincipalName|!</p>
+		<p>|RequesterName| is requesting for a new project and is now pending for |ApprovalType| review.</p>
+		<p>Below are the details:</p>
+		<table>
+			<tr>
+				<td style="font-weight: bold;">Project Name<td>
+				<td style="font-size:larger">|ProjectName|<td>
+			</tr>
+			<tr>
+				<td style="font-weight: bold;">CoOwner<td>
+				<td style="font-size:larger">|CoownerName|<td>
+			</tr>
+			<tr>
+				<td style="font-weight: bold;">Description<td>
+				<td style="font-size:larger">|ProjectDescription|<td>
+			</tr>
+		</table>
+		<table>
+			<tr>
+				<td style="font-weight: bold;">Is this a new contribution with no prior code development? (i.e., no existing Avanade IP, no third-party/OSS code, etc.)<td>
+				<td style="font-size:larger">|Newcontribution|<td>
+			</tr>
+			<tr>
+				<td style="font-weight: bold;">Who is sponsoring this OSS contribution?<td>
+				<td style="font-size:larger">|OSSsponsor|<td>
+			</tr>
+			<tr>
+				<td style="font-weight: bold;">Will Avanade use this contribution in client accounts and/or as part of an Avanade offerings/assets?<td>
+				<td style="font-size:larger">|Avanadeofferingsassets|<td>
+			</tr>
+			<tr>
+				<td style="font-weight: bold;">Will there be a commercial version of this contribution<td>
+				<td style="font-size:larger">|Willbecommercialversion|<td>
+			</tr>
+				<tr>
+				<td style="font-weight: bold;">Additional OSS Contribution Information (e.g. planned maintenance/support, etc.)?<td>
+				<td style="font-size:larger">|OSSContributionInformation|<td>
+			</tr>
+		</table>
+		<p>For more information, send an email to <a href="mailto:|RequesterUserPrincipalName|">|RequesterUserPrincipalName|</a></p>
+		`
+		replacer := strings.NewReplacer("|ApproverUserPrincipalName|", data.ApproverUserPrincipalName,
+			"|RequesterName|", data.RequesterName,
+			"|ApprovalType|", data.ApprovalType,
+			"|ProjectName|", data.ProjectName,
+			"|CoownerName|", data.CoownerName,
+			"|ProjectDescription|", data.ProjectDescription,
+			"|RequesterUserPrincipalName|", data.RequesterUserPrincipalName,
+
+			"|Newcontribution|", data.Newcontribution,
+			"|OSSsponsor|", data.OSSsponsor,
+			"|Avanadeofferingsassets|", data.Avanadeofferingsassets,
+			"|Willbecommercialversion|", data.Willbecommercialversion,
+			"|OSSContributionInformation|", data.OSSContributionInformation,
+		)
+		body := replacer.Replace(bodyTemplate)
+		postParams := models.TypApprovalSystemPost{
+			ApplicationId:       os.Getenv("APPROVAL_SYSTEM_APP_ID"),
+			ApplicationModuleId: os.Getenv("APPROVAL_SYSTEM_APP_MODULE_PROJECTS"),
+			Email:               data.ApproverUserPrincipalName,
+			Subject:             fmt.Sprintf("[GH-Management] New Project For Review - %v", data.ProjectName),
+			Body:                body,
+			RequesterEmail:      data.RequesterUserPrincipalName,
+		}
+
+		go getHttpPostResponseStatus(url, postParams, ch)
+		r := <-ch
+		if r != nil {
+			var res models.TypApprovalSystemPostResponse
+			err := json.NewDecoder(r.Body).Decode(&res)
+			if err != nil {
+				return err
+			}
+
+			ghmgmt.ProjectsApprovalUpdateGUID(data.Id, res.ItemId)
+		}
+	}
+	return nil
+}
+
+func getHttpPostResponseStatus(url string, data interface{}, ch chan *http.Response) {
+	jsonReq, err := json.Marshal(data)
+	res, err := http.Post(url, "application/json; charset=utf-8", bytes.NewBuffer(jsonReq))
+	if err != nil {
+		ch <- nil
+	}
+	ch <- res
+}
+
+func handleError(err error) {
+	if err != nil {
+		fmt.Printf("ERROR: %+v", err)
+	}
+}
+
+func ReprocessRequestApproval() {
+	projectApprovals := ghmgmt.GetFailedProjectApprovalRequests()
+
+	for _, v := range projectApprovals {
+		go ApprovalSystemRequest(v)
+	}
 }
