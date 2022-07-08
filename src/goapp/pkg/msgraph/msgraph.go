@@ -1,8 +1,10 @@
 package msgraph
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"net/url"
 	"os"
@@ -49,7 +51,58 @@ func GetAllUsers() ([]User, error) {
 		}
 	}
 
+	result, err := GetAllGroups()
+
+	if result != nil {
+		return nil, err
+	}
+
 	return users, nil
+}
+
+// Get all users from the active directory
+func GetAllGroups() ([]User, error) {
+	accessToken, err := getToken()
+	if err != nil {
+		return nil, err
+	}
+
+	client := &http.Client{
+		Timeout: time.Second * 10,
+	}
+
+	urlPath := "https://graph.microsoft.com/v1.0/users/38ac8fe1-3b2a-41b8-bcf4-dfff7afb7fa7/checkMemberGroups"
+
+	groupIds := []string{
+		"a50dadf6-0ff8-4bc8-8dd0-c26e84860e95",
+	}
+
+	postBody, _ := json.Marshal(map[string]interface{}{
+		"groupIds": groupIds,
+	})
+
+	reqBody := bytes.NewBuffer(postBody)
+
+	req, err := http.NewRequest("POST", urlPath, reqBody)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Authorization", "Bearer "+accessToken)
+	req.Header.Add("Content-Type", "application/json")
+	response, err := client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer response.Body.Close()
+
+	bodyBytes, err := io.ReadAll(response.Body)
+	if err != nil {
+		fmt.Print(err)
+	}
+	bodyString := string(bodyBytes)
+	fmt.Print(bodyString)
+	return nil, nil
 }
 
 // Get Access Token for the Application
