@@ -1,7 +1,6 @@
 CREATE PROCEDURE [dbo].[PR_Projects_Update_Visibility_ById]
   @Id int,
-	@IsPrivate BIT,
-	@ModifiedBy varchar(50)
+	@IsPrivate BIT
 AS
 
 BEGIN
@@ -14,7 +13,6 @@ BEGIN
 		[dbo].[Projects]
    SET 
 		[IsPrivate] = @IsPrivate,
-		[ModifiedBy] = @ModifiedBy,
 		[Modified] = GETDATE()
  WHERE  
 		[Id] = @Id

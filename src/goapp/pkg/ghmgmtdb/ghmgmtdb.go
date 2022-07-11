@@ -350,14 +350,13 @@ func UpdateIsArchiveIsPrivate(projectName string, isArchived bool, isPrivate boo
 	return nil
 }
 
-func UpdateIsPrivate(id int64, isPrivate bool, username string) error {
+func UpdateIsPrivate(id int64, isPrivate bool) error {
 	db := ConnectDb()
 	defer db.Close()
 
 	param := map[string]interface{}{
-		"Id":         id,
-		"IsPrivate":  isPrivate,
-		"ModifiedBy": username,
+		"Id":        id,
+		"IsPrivate": isPrivate,
 	}
 
 	_, err := db.ExecuteStoredProcedure("PR_Projects_Update_Visibility_ById", param)
