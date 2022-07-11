@@ -11,6 +11,7 @@ import (
 	"golang.org/x/oauth2"
 
 	ghmgmt "main/pkg/ghmgmtdb"
+	"main/pkg/msgraph"
 )
 
 func GithubCallbackHandler(w http.ResponseWriter, r *http.Request) {
@@ -69,6 +70,12 @@ func GithubCallbackHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	session.Values["ghIsValid"] = resultUUG["IsValid"].(bool)
+
+	isDirect, _ := msgraph.IsDirectMember(fmt.Sprintf("%s", azProfile["oid"]))
+	isEnterpriseMember, _ := msgraph.IsGithubEnterpriseMember(fmt.Sprintf("%s", azProfile["oid"]))
+
+	session.Values["ghIsDirect"] = isDirect
+	session.Values["ghIsEnterpriseMember"] = isEnterpriseMember
 
 	err = session.Save(r, w)
 
