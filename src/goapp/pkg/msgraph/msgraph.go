@@ -1,6 +1,7 @@
 package msgraph
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -50,6 +51,98 @@ func GetAllUsers() ([]User, error) {
 	}
 
 	return users, nil
+}
+
+func IsDirectMember(user string) (bool, error) {
+	accessToken, err := getToken()
+	if err != nil {
+		return false, err
+	}
+
+	client := &http.Client{
+		Timeout: time.Second * 10,
+	}
+
+	urlPath := fmt.Sprintf("https://graph.microsoft.com/v1.0/users/%s", user)
+
+	req, err := http.NewRequest("GET", urlPath, nil)
+	if err != nil {
+		return false, err
+	}
+	req.Header.Add("Authorization", "Bearer "+accessToken)
+	response, err := client.Do(req)
+	if err != nil {
+		return false, err
+	}
+	defer response.Body.Close()
+
+	var data struct {
+		UserPrincipalName string `json:"userPrincipalName"`
+	}
+
+	errDecode := json.NewDecoder(response.Body).Decode(&data)
+	if errDecode != nil {
+		fmt.Print(err)
+	}
+
+	// #EXT# It checks if the user principal name is extension or direct.
+	return !strings.Contains(data.UserPrincipalName, "#EXT#"), nil
+}
+
+// Get all users from the active directory
+// string user accepts user id and user principal name
+func IsGithubEnterpriseMember(user string) (bool, error) {
+	accessToken, err := getToken()
+	if err != nil {
+		return false, err
+	}
+
+	client := &http.Client{
+		Timeout: time.Second * 10,
+	}
+
+	urlPath := fmt.Sprintf("https://graph.microsoft.com/v1.0/users/%s/checkMemberGroups", user)
+
+	groupId := os.Getenv("GH_ENTERPRISE_AZURE_AD_GROUP")
+
+	groupIds := []string{
+		groupId,
+	}
+
+	postBody, _ := json.Marshal(map[string]interface{}{
+		"groupIds": groupIds,
+	})
+
+	reqBody := bytes.NewBuffer(postBody)
+
+	req, err := http.NewRequest("POST", urlPath, reqBody)
+	if err != nil {
+		return false, err
+	}
+
+	req.Header.Add("Authorization", "Bearer "+accessToken)
+	req.Header.Add("Content-Type", "application/json")
+	response, err := client.Do(req)
+	if err != nil {
+		return false, err
+	}
+	defer response.Body.Close()
+
+	var data struct {
+		Value []string `json:"value"`
+	}
+
+	errDecode := json.NewDecoder(response.Body).Decode(&data)
+	if errDecode != nil {
+		fmt.Print(err)
+	}
+
+	for _, v := range data.Value {
+		if v == groupId {
+			return true, nil
+		}
+	}
+	return false, nil
 }
 
 // Get Access Token for the Application

@@ -29,7 +29,7 @@ func InitializeSession() {
 
 func IsAuthenticated(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
 	// Check session if there is saved user profile
-	url := fmt.Sprintf("/loginredirect?redirect=%v",r.URL)
+	url := fmt.Sprintf("/loginredirect?redirect=%v", r.URL)
 	session, err := Store.Get(r, "auth-session")
 	if err != nil {
 		c := http.Cookie{
@@ -141,6 +141,9 @@ func GetGitHubUserData(w http.ResponseWriter, r *http.Request) (models.TypGitHub
 			gitHubUser.IsValid = session.Values["ghIsValid"].(bool)
 		}
 
+		gitHubUser.IsDirect = session.Values["ghIsDirect"].(bool)
+		gitHubUser.IsEnterpriseMember = session.Values["ghIsEnterpriseMember"].(bool)
+
 		gitHubUser.AccessToken = fmt.Sprintf("%s", session.Values["ghAccessToken"])
 		gitHubUser.LoggedIn = true
 	} else {
@@ -191,7 +194,7 @@ func IsUserAdmin(w http.ResponseWriter, r *http.Request) (bool, error) {
 	isUserAdmin := false
 	if session.Values["isUserAdmin"] != nil {
 		isUserAdmin = session.Values["isUserAdmin"].(bool)
-	} 
+	}
 	return isUserAdmin, nil
 }
 

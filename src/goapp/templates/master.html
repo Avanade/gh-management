@@ -368,6 +368,41 @@
                       <a href="/logout/github" class="hover:underline">(Logout)</a>
                     </p>
                   </div>
+                  {{ if not .ProfileGH.IsEnterpriseMember}}
+                    {{ if .ProfileGH.IsDirect }}
+                    <div class="bg-yellow-50 p-4 mb-3">
+                      <div class="flex">
+                        <div class="flex-shrink-0">
+                          <svg class="h-5 w-5 text-yellow-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                          </svg>
+                        </div>
+                        <div class="ml-3 flex-1 md:flex md:justify-between">
+                          <p class="text-sm text-yellow-700">Your user account does not have a Visual Studio licence associated with it. You are able to log into GitHub, but to access GitHub Enterprise, you will need to request a Visual Studio licence.</p>
+                          <p class="mt-3 text-sm md:mt-0 md:ml-6">
+                            <a href="https://avanade.sharepoint.com/sites/VisualStudioSubscriptions" class="whitespace-nowrap font-medium text-yellow-700 hover:text-yellow-600">Avanade's Visual Studio request site<span aria-hidden="true">&rarr;</span></a>
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                    {{ else }}
+                    <div class="bg-yellow-50 p-4 mb-3">
+                      <div class="flex">
+                        <div class="flex-shrink-0">
+                          <svg class="h-5 w-5 text-yellow-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                          </svg>
+                        </div>
+                        <div class="ml-3 flex-1 md:flex md:justify-between">
+                          <p class="text-sm text-yellow-700">
+                            Your user account has not been granted access to Avanade's GitHub Enterprise licence. If you have a Visual Studio licence, then open an incognito or private browser window, and 
+                            <a href="https://myaccess.microsoft.com/%40avanade.onmicrosoft.com#/access-packages/e9a49c54-74a8-4471-8aa8-00781df3e39c" class="whitespace-nowrap font-medium text-yellow-700 hover:text-yellow-600">click this link</a> to request access. Enter your @Accenture.com credentials to login. Click Request Access.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                    {{ end }}
+                  {{ end }}
                   {{ if not .ProfileGH.IsValid}}
                   <div class="bg-red-50 p-4 mb-3">
                     <div class="flex">
@@ -403,6 +438,7 @@
                   </div>
                 </div>
                 {{ end }}
+
                 <div class="bg-white p-4 rounded-md">
                   {{ template "content" .Content}}
                 </div>

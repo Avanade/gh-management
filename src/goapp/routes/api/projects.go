@@ -137,8 +137,7 @@ func ArchiveProject(w http.ResponseWriter, r *http.Request) {
 func GetAvanadeProjects(w http.ResponseWriter, r *http.Request) {
 	var allRepos []gh.Repo
 
-	o := os.Getenv("GH_ORGANIZATIONS")
-	organizations := strings.Split(o, " ")
+	organizations := []string{os.Getenv("GH_ORG_INNERSOURCE"), os.Getenv("GH_ORG_OPENSOURCE")}
 
 	for _, org := range organizations {
 		repos, err := gh.GetRepositoriesFromOrganization(org)
