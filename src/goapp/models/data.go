@@ -97,6 +97,7 @@ type TypProjectApprovals struct {
 	Avanadeofferingsassets     string
 	Willbecommercialversion    string
 	OSSContributionInformation string
+	RequestStatus              string
 }
 
 type TypApprovalSystemPost struct {

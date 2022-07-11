@@ -3,9 +3,12 @@ package routes
 import (
 	"encoding/json"
 	models "main/models"
+	ghmgmt "main/pkg/ghmgmtdb"
+	gh "main/pkg/github"
 	"main/pkg/sql"
 	"net/http"
 	"os"
+	"time"
 )
 
 func UpdateApprovalStatusProjects(w http.ResponseWriter, r *http.Request) {
@@ -15,8 +18,8 @@ func UpdateApprovalStatusProjects(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.WriteHeader(http.StatusOK)
-
 }
+
 func UpdateApprovalStatusCommunity(w http.ResponseWriter, r *http.Request) {
 	err := processApprovalProjects(r, "community")
 	if err != nil {
@@ -73,5 +76,33 @@ func processApprovalProjects(r *http.Request, module string) error {
 	if err != nil {
 		return err
 	}
+
+	projectApproval := ghmgmt.GetProjectApprovalByGUID(req.ItemId)
+
+	go checkAllRequests(projectApproval.ProjectId)
 	return nil
+}
+
+func checkAllRequests(id int64) {
+	allApproved := true
+
+	// Check if all requests are approved
+	projectApprovals := ghmgmt.GetProjectApprovalsByProjectId(id)
+	repo := projectApprovals[0].ProjectName
+	for _, a := range projectApprovals {
+		if a.RequestStatus != "Approved" {
+			allApproved = false
+			break
+		}
+	}
+
+	// If all are approved, move repository to OpenSource and make public
+	if allApproved {
+		owner := os.Getenv("GH_ORG_INNERSOURCE")
+		newOwner := os.Getenv("GH_ORG_OPENSOURCE")
+		gh.TransferRepository(repo, owner, newOwner)
+
+		time.Sleep(3 * time.Second)
+		gh.SetProjectVisibility(repo, "private", newOwner)
+	}
 }

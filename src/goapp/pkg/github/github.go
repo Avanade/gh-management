@@ -150,6 +150,17 @@ func SetProjectVisibility(projectName string, visibility string, org string) err
 	return nil
 }
 
+func TransferRepository(repo string, owner string, newOwner string) error {
+	client := createClient(os.Getenv("GH_TOKEN"))
+	opt := github.TransferRequest{NewOwner: newOwner}
+
+	_, _, err := client.Repositories.Transfer(context.Background(), owner, repo, opt)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 type Repo struct {
 	FullName    string           `json:"repoFullName"`
 	Name        string           `json:"repoName"`

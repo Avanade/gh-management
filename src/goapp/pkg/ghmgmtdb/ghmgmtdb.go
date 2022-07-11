@@ -253,6 +253,60 @@ func GetFailedProjectApprovalRequests() (ProjectApprovals []models.TypProjectApp
 	return
 }
 
+func GetProjectApprovalsByProjectId(id int64) (ProjectApprovals []models.TypProjectApprovals) {
+	db := ConnectDb()
+	defer db.Close()
+
+	param := map[string]interface{}{
+		"Id": id,
+	}
+
+	result, _ := db.ExecuteStoredProcedureWithResult("PR_ProjectApprovals_Select_By_ProjectId", param)
+
+	for _, v := range result {
+		data := models.TypProjectApprovals{
+			Id:                        v["Id"].(int64),
+			ProjectId:                 v["ProjectId"].(int64),
+			ProjectName:               v["ProjectName"].(string),
+			ApprovalTypeId:            v["ApprovalTypeId"].(int64),
+			ApprovalType:              v["ApprovalType"].(string),
+			ApproverUserPrincipalName: v["ApproverUserPrincipalName"].(string),
+			ApprovalDescription:       v["ApprovalDescription"].(string),
+			RequestStatus:             v["RequestStatus"].(string),
+		}
+		ProjectApprovals = append(ProjectApprovals, data)
+	}
+
+	return
+}
+
+func GetProjectApprovalByGUID(id string) (ProjectApproval models.TypProjectApprovals) {
+	db := ConnectDb()
+	defer db.Close()
+
+	param := map[string]interface{}{
+		"ApprovalSystemGUID": id,
+	}
+
+	result, _ := db.ExecuteStoredProcedureWithResult("PR_ProjectApprovals_Select_By_ApprovalSystemGUID", param)
+
+	for _, v := range result {
+		data := models.TypProjectApprovals{
+			Id:                        v["Id"].(int64),
+			ProjectId:                 v["ProjectId"].(int64),
+			ProjectName:               v["ProjectName"].(string),
+			ApprovalTypeId:            v["ApprovalTypeId"].(int64),
+			ApprovalType:              v["ApprovalType"].(string),
+			ApproverUserPrincipalName: v["ApproverUserPrincipalName"].(string),
+			ApprovalDescription:       v["ApprovalDescription"].(string),
+			RequestStatus:             v["RequestStatus"].(string),
+		}
+		ProjectApproval = data
+	}
+
+	return
+}
+
 func ProjectsApprovalUpdateGUID(id int64, ApprovalSystemGUID string) {
 	db := ConnectDb()
 	defer db.Close()
