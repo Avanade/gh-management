@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"io"
 	"net/http"
 	"net/url"
 	"os"
@@ -51,30 +50,63 @@ func GetAllUsers() ([]User, error) {
 		}
 	}
 
-	result, err := GetAllGroups()
-
-	if result != nil {
-		return nil, err
-	}
-
 	return users, nil
 }
 
-// Get all users from the active directory
-func GetAllGroups() ([]User, error) {
+func IsDirectMember(user string) (bool, error) {
 	accessToken, err := getToken()
 	if err != nil {
-		return nil, err
+		return false, err
 	}
 
 	client := &http.Client{
 		Timeout: time.Second * 10,
 	}
 
-	urlPath := "https://graph.microsoft.com/v1.0/users/38ac8fe1-3b2a-41b8-bcf4-dfff7afb7fa7/checkMemberGroups"
+	urlPath := fmt.Sprintf("https://graph.microsoft.com/v1.0/users/%s", user)
+
+	req, err := http.NewRequest("GET", urlPath, nil)
+	if err != nil {
+		return false, err
+	}
+	req.Header.Add("Authorization", "Bearer "+accessToken)
+	response, err := client.Do(req)
+	if err != nil {
+		return false, err
+	}
+	defer response.Body.Close()
+
+	var data struct {
+		UserPrincipalName string `json:"userPrincipalName"`
+	}
+
+	errDecode := json.NewDecoder(response.Body).Decode(&data)
+	if errDecode != nil {
+		fmt.Print(err)
+	}
+
+	// #EXT# It checks if the user principal name is extension or direct.
+	return !strings.Contains(data.UserPrincipalName, "#EXT#"), nil
+}
+
+// Get all users from the active directory
+// string user accepts user id and user principal name
+func IsGithubEnterpriseMember(user string) (bool, error) {
+	accessToken, err := getToken()
+	if err != nil {
+		return false, err
+	}
+
+	client := &http.Client{
+		Timeout: time.Second * 10,
+	}
+
+	urlPath := fmt.Sprintf("https://graph.microsoft.com/v1.0/users/%s/checkMemberGroups", user)
+
+	groupId := os.Getenv("GH_ENTERPRISE_AZURE_AD_GROUP")
 
 	groupIds := []string{
-		"a50dadf6-0ff8-4bc8-8dd0-c26e84860e95",
+		groupId,
 	}
 
 	postBody, _ := json.Marshal(map[string]interface{}{
@@ -85,24 +117,32 @@ func GetAllGroups() ([]User, error) {
 
 	req, err := http.NewRequest("POST", urlPath, reqBody)
 	if err != nil {
-		return nil, err
+		return false, err
 	}
 
 	req.Header.Add("Authorization", "Bearer "+accessToken)
 	req.Header.Add("Content-Type", "application/json")
 	response, err := client.Do(req)
 	if err != nil {
-		return nil, err
+		return false, err
 	}
 	defer response.Body.Close()
 
-	bodyBytes, err := io.ReadAll(response.Body)
-	if err != nil {
+	var data struct {
+		Value []string `json:"value"`
+	}
+
+	errDecode := json.NewDecoder(response.Body).Decode(&data)
+	if errDecode != nil {
 		fmt.Print(err)
 	}
-	bodyString := string(bodyBytes)
-	fmt.Print(bodyString)
-	return nil, nil
+
+	for _, v := range data.Value {
+		if v == groupId {
+			return true, nil
+		}
+	}
+	return false, nil
 }
 
 // Get Access Token for the Application
