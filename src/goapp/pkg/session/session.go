@@ -141,8 +141,12 @@ func GetGitHubUserData(w http.ResponseWriter, r *http.Request) (models.TypGitHub
 			gitHubUser.IsValid = session.Values["ghIsValid"].(bool)
 		}
 
-		gitHubUser.IsDirect = session.Values["ghIsDirect"].(bool)
-		gitHubUser.IsEnterpriseMember = session.Values["ghIsEnterpriseMember"].(bool)
+		if _, ok := session.Values["ghIsDirect"]; ok {
+			gitHubUser.IsDirect = session.Values["ghIsDirect"].(bool)
+		}
+		if _, ok := session.Values["ghIsEnterpriseMember"]; ok {
+			gitHubUser.IsEnterpriseMember = session.Values["ghIsEnterpriseMember"].(bool)
+		}
 
 		gitHubUser.AccessToken = fmt.Sprintf("%s", session.Values["ghAccessToken"])
 		gitHubUser.LoggedIn = true
