@@ -1,7 +1,7 @@
 const combobox = ({
     ajax,
-    id,
-    text,
+    id = 'id',
+    text = 'text',
     data,
     isMultiple = false,
     isInsertable = false,

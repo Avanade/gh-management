@@ -92,6 +92,47 @@
                                 <div x-html="template"></div>
                             </div>
                         </div>
+                        <div class="sm:col-span-6 pt-6 sm:pt-5">
+                            <div role="group" aria-labelledby="label-notifications">
+                                <div class="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-baseline">
+                                <div>
+                                    <label class="text-base font-medium text-gray-900">Help</label>
+                                    <p class="text-sm leading-5 text-gray-500">Do you need any help?</p>
+                                    <fieldset class="mt-4">
+                                        <legend class="sr-only">Notification method</legend>
+                                        <div class="space-y-4 sm:flex sm:items-center sm:space-y-0 sm:space-x-10">
+                                        <div class="flex items-center w-1/2">
+                                            <input x-model="showHelpOptions" value="yes" id="sms" name="notification-method" type="radio" class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300">
+                                            <label for="sms" class="ml-3 block text-sm font-medium text-gray-700 w-full"> Yes </label>
+                                        </div>
+                                    
+                                        <div class="flex items-center w-1/2">
+                                            <input x-model="showHelpOptions" value="no" id="push" name="notification-method" type="radio" class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300">
+                                            <label for="push" class="ml-3 block text-sm font-medium text-gray-700 w-full"> No </label>
+                                        </div>
+                                        </div>
+                                    </fieldset>
+                                    </div>
+                                <div class="sm:col-span-2">
+                                    <div 
+                                        x-data="combobox({
+                                                data : [
+                                                    { id : 1, text : 'Sales Opportunity'},
+                                                    { id : 2, text : 'Marketing Opportunity'},
+                                                    { id : 3, text : 'Other'},
+                                                ],
+                                                label : 'Options',
+                                                isDisplayItem : true
+                                            })"
+                                        x-modelable = "selected"
+                                        x-model = "form.help"
+                                        x-bind:class = "showHelpOptions == 'yes' ? 'visible' : 'invisible'"
+                                    >
+                                        <div x-html="template"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -113,6 +154,7 @@
             return {
                 action : '',
                 id : null,
+                showHelpOptions : false,
                 form : {
                     community : [],
                     date : '',
@@ -120,7 +162,8 @@
                     type : [],
                     url : '',
                     primary_contribution_area : [],
-                    additional_contribution_areas : []
+                    additional_contribution_areas : [],
+                    help : []
                 },
                 async init() {
                     this.action = action,
