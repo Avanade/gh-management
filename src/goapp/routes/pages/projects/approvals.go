@@ -97,6 +97,7 @@ func checkAllRequests(id int64) {
 	}
 
 	// If all are approved, move repository to OpenSource and make public
+	const PUBLIC = 3
 	if allApproved {
 		owner := os.Getenv("GH_ORG_INNERSOURCE")
 		newOwner := os.Getenv("GH_ORG_OPENSOURCE")
@@ -105,6 +106,6 @@ func checkAllRequests(id int64) {
 		time.Sleep(3 * time.Second)
 		gh.SetProjectVisibility(repo, "public", newOwner)
 
-		ghmgmt.UpdateIsPrivate(id, false)
+		ghmgmt.UpdateIsPrivate(id, PUBLIC)
 	}
 }

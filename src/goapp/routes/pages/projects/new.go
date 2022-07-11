@@ -71,7 +71,6 @@ func ProjectsNewHandler(w http.ResponseWriter, r *http.Request) {
 
 			_ = ghmgmtdb.PRProjectsInsert(body, username.(string))
 
-			// go RequestApproval(id)
 			w.WriteHeader(http.StatusOK)
 		}
 	}
