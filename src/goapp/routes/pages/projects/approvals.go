@@ -5,6 +5,7 @@ import (
 	models "main/models"
 	ghmgmt "main/pkg/ghmgmtdb"
 	gh "main/pkg/github"
+	session "main/pkg/session"
 	"main/pkg/sql"
 	"net/http"
 	"os"
@@ -79,11 +80,17 @@ func processApprovalProjects(r *http.Request, module string) error {
 
 	projectApproval := ghmgmt.GetProjectApprovalByGUID(req.ItemId)
 
-	go checkAllRequests(projectApproval.ProjectId)
+	// Get email address of the user
+	sessionaz, _ := session.Store.Get(r, "auth-session")
+	iprofile := sessionaz.Values["profile"]
+	profile := iprofile.(map[string]interface{})
+	username := profile["preferred_username"]
+
+	go checkAllRequests(projectApproval.ProjectId, username.(string))
 	return nil
 }
 
-func checkAllRequests(id int64) {
+func checkAllRequests(id int64, username string) {
 	allApproved := true
 
 	// Check if all requests are approved
@@ -103,6 +110,8 @@ func checkAllRequests(id int64) {
 		gh.TransferRepository(repo, owner, newOwner)
 
 		time.Sleep(3 * time.Second)
-		gh.SetProjectVisibility(repo, "private", newOwner)
+		gh.SetProjectVisibility(repo, "public", newOwner)
+
+		ghmgmt.UpdateIsPrivate(id, false, username)
 	}
 }
