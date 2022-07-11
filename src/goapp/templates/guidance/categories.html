@@ -1,0 +1,260 @@
+{{ define "content" }}
+
+
+<div id="pageTitle"> Guidance</div>
+<div x-data="data()">
+    <form onsubmit="event.preventDefault()" autocomplete="off">
+        <div class="flex flex flex-col md:flex-row ">
+            <div class="basis-1/2 md:base-full  md:flex-row mx-3">
+                <div class="flex flex-col  ">
+                    <div>
+                        <h3 class="text-lg font-medium leading-6 text-gray-900">Category</h3>
+                    </div>
+                    <div> <input type="text" name="category" id="category" x-model="form.name" maxlength="50"
+                            class="mt-1 focus:ring-orange-500 focus:border-orange-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md border-2">
+                    </div>
+
+                </div>
+                <div>
+                    <h3 class="text-lg font-medium leading-6 text-gray-900"> <br> </h3>
+                </div>
+            </div>
+        </div>
+        <div class="flex flex flex-col md:flex-row  my-3 ">
+            <div class="basis-1/2 md:base-full  md:flex-row   mx-3">
+                <div class="flex flex-col ">
+                    <h3 class="text-lg font-medium leading-6 text-gray-900">Articles</h3>
+                </div>
+            </div>
+            <div class="basis-1/2">
+            </div>
+        </div>
+
+        <div class="flex flex flex-col md:flex-row  my-3 ">
+            <div class="basis-1/4 md:base-full  md:flex-row   mx-3 ">
+                <div class="flex flex-col pl-2">
+                    Name
+                </div>
+            </div>
+
+            <div class="basis-9/12 md:base-full  md:flex-row   mx-3  ">
+                <div> <input type="text" name="category" id="category" x-model="categoryArticle.name" maxlength="50"
+                        class="mt-1 focus:ring-orange-500 focus:border-orange-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md border-2">
+                </div>
+            </div>
+        </div>
+        <div class="flex flex flex-col md:flex-row  my-3 ">
+            <div class="basis-1/4 md:base-full  md:flex-row   mx-3 ">
+                <div class="flex flex-col pl-2">
+                    Url
+                </div>
+            </div>
+
+            <div class="basis-9/12 md:base-full  md:flex-row   mx-3  ">
+                <div> <input type="text" name="category" id="category" x-model="categoryArticle.url" maxlength="50"
+                        class="mt-1 focus:ring-orange-500 focus:border-orange-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md border-2">
+                </div>
+            </div>
+        </div>
+        <div class="flex flex flex-col md:flex-row  my-3 ">
+            <div class="basis-1/4 md:base-full  md:flex-row   mx-3 ">
+                <div class="flex flex-col pl-2">
+                    Body
+                </div>
+            </div>
+
+            <div class="basis-9/12 md:base-full  md:flex-row   mx-3  ">
+                <div> <input type="text" name="category" id="category" x-model="categoryArticle.body" maxlength="50"
+                        class="mt-1 focus:ring-orange-500 focus:border-orange-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md border-2">
+                </div>
+            </div>
+        </div>
+        <div>
+            <div align="right">
+                <div  x-show="form.id">
+                    <button type="button" x-show="mode=='view'"
+                        class="bg-orange-500  inline-flex justify-center py-2 px-4 rounded-md text-white"
+                        :class="!isValid ? 'bg-orange-100' : ''" x-bind:disabled="!isValid" @click="mode='edit'">
+                
+                        <span x-show="form.id">Edit Project</span>
+                
+                    </button>
+                </div>
+                <button type="submit"  class="bg-orange-500  inline-flex justify-center py-2 px-4 rounded-md text-white"
+                    :class="!isValid ? 'bg-orange-100' : ''" x-bind:disabled="!isValid" @click="submit()">
+
+                    Add Articles
+                    
+                </button>
+                <span x-show="form.id">
+                    <button type="button" x-show="mode=='edit'"
+                        class="bg-orange-500  inline-flex justify-center py-2 px-4 rounded-md text-white"
+                        :class="!isValid ? 'bg-orange-100' : ''" x-bind:disabled="!isValid" @click="onload()">
+
+
+                        <span x-show="form.id">Cancel</span>
+
+                    </button>
+                </span>
+            </div>
+        </div>
+        <div class="bg-white shadow overflow-hidden sm:rounded-md mt-4">
+            <div class="px-4 py-4 sm:px-6 hover:bg-gray-50 cursor-pointer"
+                x-bind:class="form.showStatus? 'bg-gray-50':''"
+                @click="form.showStatus = !form.showStatus; getProjectApprovalStatus(form.Id, index)">
+                <div class="flex flex-row">
+                    <div class="flex basis-1/2">
+                        <p class="text-sm font-medium text-indigo-600 truncate">
+                            Name of article
+                        </p> &nbsp;- &nbsp;
+                        <p class="text-sm font-medium  truncate">
+
+                            description of article
+                        </p>
+                    </div>
+
+                    <div class="basis-auto">
+                        <p class="flex items-center text-sm text-gray-500">URL : www.google.com
+
+                        </p>
+                    </div>
+                </div>
+
+                <div class="mt-2 sm:flex">
+                    <div class="sm:flex w-1/2">
+                        <p class="flex items-center text-sm text-gray-500" title="CoOwner">
+                            <!-- Heroicon name: solid/users -->
+                            <svg class="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg"
+                                viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                <path
+                                    d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
+                            </svg>
+                            <span>test</span>
+                        </p>
+                    </div>
+                    <div class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
+                        <!-- Heroicon name: solid/calendar -->
+                        <svg class="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                            <path fill-rule="evenodd"
+                                d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z"
+                                clip-rule="evenodd" />
+                        </svg>
+                        <p>
+                            Created on
+                            <time x-data="{date: new Date(form.Created)}"
+                                x-text="date.toLocaleString('en-US',{dateStyle: 'medium', timeStyle: 'short'})"></time>
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        <div class="bg-white shadow overflow-hidden sm:rounded-md mt-4">
+            <div class="px-4 py-4 sm:px-6 hover:bg-gray-50 cursor-pointer"
+                x-bind:class="form.showStatus? 'bg-gray-50':''"
+                @click="form.showStatus = !form.showStatus; getProjectApprovalStatus(form.Id, index)">
+                <div class="flex flex-row">
+                    <div class="flex basis-1/2">
+                        <p class="text-sm font-medium text-indigo-600 truncate">
+                            Name of article
+                        </p> &nbsp;- &nbsp;
+                        <p class="text-sm font-medium  truncate">
+
+                            description of article
+                        </p>
+                    </div>
+
+                    <div class="basis-auto">
+                        <p class="flex items-center text-sm text-gray-500">URL : www.yahoo.com
+
+                        </p>
+                    </div>
+                </div>
+
+                <div class="mt-2 sm:flex">
+                    <div class="sm:flex w-1/2">
+                        <p class="flex items-center text-sm text-gray-500" title="CoOwner">
+                            <!-- Heroicon name: solid/users -->
+                            <svg class="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg"
+                                viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                <path
+                                    d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
+                            </svg>
+                            <span>test</span>
+                        </p>
+                    </div>
+                    <div class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
+                        <!-- Heroicon name: solid/calendar -->
+                        <svg class="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                            <path fill-rule="evenodd"
+                                d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z"
+                                clip-rule="evenodd" />
+                        </svg>
+                        <p>
+                            Created on
+                            <!-- <time x-data="{date: new Date(project.Created)}"
+                                x-text="date.toLocaleString('en-US',{dateStyle: 'medium', timeStyle: 'short'})"></time> -->
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </form>
+</div>
+
+<script src="/public/components/clsDropdown.js"></script>
+<script src="/public/components/combobox.js"></script>
+<script type="text/javascript">
+    function data() {
+        return {
+            mode:
+                'view',
+
+            form: {
+                id: '{{.Id}}',
+                name: '',
+                categoryArticles: [],
+            },
+            categoryArticle: {
+
+                name: '',
+                url: '',
+                body: '',
+                categoryId: 0,
+            },
+            submit() {
+                var modal = Alpine.store('master').modal
+                modal.update('loading', 'Saving', 'Please wait.', '', '')
+                if (!this.form.id) {
+                    this.form.id = 0
+
+                }
+                console.log(this.categoryArticle)
+                this.form.categoryArticles.push(this.categoryArticle)
+
+                postData = this.form;
+                console.log(postData)
+                console.log(postData)
+                Alpine.store('master').postData('/api/Category', postData, "Your category has been created.",
+                    "Go to category list", "/guidance")
+
+            },
+
+            get isValid() {
+                if (
+                    (this.form.name
+
+                    )) {
+                    return true
+                } else {
+                    return false
+                }
+            }
+        }
+    }
+
+</script>
+{{ end }}

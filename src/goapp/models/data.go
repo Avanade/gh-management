@@ -154,3 +154,25 @@ type TypCommunityApprovals struct {
 	ApproverUserPrincipalName  string
 	ApprovalDescription        string
 }
+
+type TypCategory struct {
+	Id               int                   `json:"id"`
+	Name             string                `json:"name"`
+	Created          string                `json:"created"`
+	CreatedBy        string                `json:"createdBy"`
+	Modified         string                `json:"modified"`
+	ModifiedBy       string                `json:"modifiedBy"`
+	CategoryArticles []TypCategoryArticles `json:"categoryArticles"`
+}
+
+type TypCategoryArticles struct {
+	Id         int    `json:"id"`
+	Name       string `json:"name"`
+	Url        string `json:"Url"`
+	Body       string `json:"Body"`
+	CategoryId int    `json:"CategoryId"`
+	Created    string `json:"created"`
+	CreatedBy  string `json:"createdBy"`
+	Modified   string `json:"modified"`
+	ModifiedBy string `json:"modifiedBy"`
+}
