@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"main/models"
 	"main/pkg/envvar"
@@ -142,9 +143,12 @@ func SetProjectVisibility(projectName string, visibility string, org string) err
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Authorization", "Bearer "+envvar.GetEnvVar("GH_TOKEN", ""))
 
-	_, err = client.Do(req)
+	resp, err := client.Do(req)
 	if err != nil {
 		return err
+	}
+	if resp.StatusCode == http.StatusUnprocessableEntity {
+		return errors.New("Failed to make repository " + visibility)
 	}
 
 	return nil

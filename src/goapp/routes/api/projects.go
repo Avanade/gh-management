@@ -183,47 +183,47 @@ func GetAvanadeProjects(w http.ResponseWriter, r *http.Request) {
 }
 
 func SetVisibility(w http.ResponseWriter, r *http.Request) {
-	// Check if user is an admin
-	isAdmin, err := session.IsUserAdmin(w, r)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	if !isAdmin {
-		http.Error(w, "Not enough privilege to do the action.", http.StatusForbidden)
-		return
-	}
-
-	sessionaz, _ := session.Store.Get(r, "auth-session")
-	iprofile := sessionaz.Values["profile"]
-	profile := iprofile.(map[string]interface{})
-	username := profile["preferred_username"]
 
 	req := mux.Vars(r)
-	org := req["org"]
 	project := req["project"]
-	archive := req["archive"]
-	private := req["private"]
-
-	err = ghmgmt.UpdateIsArchiveIsPrivate(project, archive == "1", private == "1", username.(string))
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+	projectId := req["projectId"]
+	currentState := req["currentState"]
+	desiredState := req["desiredState"]
+	// isArchived := req["isArchived"]
+	visibilityId := 1 //public
+	if desiredState == "internal" {
+		visibilityId = 2 //internal
 	}
 
-	//If project is currently public, set visibility to private
-	if private == "0" {
-		visibility := "private"
-		if private == "0" {
-			visibility = "public"
-		}
-		err := gh.SetProjectVisibility(project, visibility, org)
+	innersource := os.Getenv("GH_ORG_INNERSOURCE")
+	opensource := os.Getenv("GH_ORG_OPENSOURCE")
+
+	if currentState == "Public" {
+		// Set repo to desired visibility then move to innersource
+		err := gh.SetProjectVisibility(project, desiredState, opensource)
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			http.Error(w, "Failed to make the repository "+desiredState, http.StatusInternalServerError)
+			return
+		}
+
+		gh.TransferRepository(project, opensource, innersource)
+	} else {
+		// Set repo to desired visibility
+		err := gh.SetProjectVisibility(project, desiredState, innersource)
+		if err != nil {
+			http.Error(w, "Failed to make the repository "+desiredState, http.StatusInternalServerError)
 			return
 		}
 	}
+
+	// Update database
+	id, err := strconv.ParseInt(projectId, 10, 64)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	ghmgmt.UpdateProjectVisibilityId(id, int64(visibilityId))
 
 	w.WriteHeader(http.StatusOK)
 }

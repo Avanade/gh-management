@@ -350,7 +350,7 @@ func UpdateIsArchiveIsPrivate(projectName string, isArchived bool, isPrivate boo
 	return nil
 }
 
-func UpdateIsPrivate(id int64, visibilityId int64) error {
+func UpdateProjectVisibilityId(id int64, visibilityId int64) error {
 	db := ConnectDb()
 	defer db.Close()
 

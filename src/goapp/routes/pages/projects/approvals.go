@@ -106,6 +106,6 @@ func checkAllRequests(id int64) {
 		time.Sleep(3 * time.Second)
 		gh.SetProjectVisibility(repo, "public", newOwner)
 
-		ghmgmt.UpdateIsPrivate(id, PUBLIC)
+		ghmgmt.UpdateProjectVisibilityId(id, PUBLIC)
 	}
 }
