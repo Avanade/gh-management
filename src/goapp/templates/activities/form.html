@@ -102,17 +102,17 @@
                                         <legend class="sr-only">Notification method</legend>
                                         <div class="space-y-4 sm:flex sm:items-center sm:space-y-0 sm:space-x-10">
                                         <div class="flex items-center w-1/2">
-                                            <input x-model="showHelpOptions" value="yes" id="sms" name="notification-method" type="radio" class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300">
+                                            <input x-bind:checked="toggleShowOption == 'true'" x-model="toggleShowOption" value="true" id="sms" name="notification-method" type="radio" class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300">
                                             <label for="sms" class="ml-3 block text-sm font-medium text-gray-700 w-full"> Yes </label>
                                         </div>
                                     
                                         <div class="flex items-center w-1/2">
-                                            <input x-model="showHelpOptions" value="no" id="push" name="notification-method" type="radio" class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300">
+                                            <input  x-bind:checked="toggleShowOption == 'false'" x-model="toggleShowOption" value="false" id="push" name="notification-method" type="radio" class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300">
                                             <label for="push" class="ml-3 block text-sm font-medium text-gray-700 w-full"> No </label>
                                         </div>
                                         </div>
                                     </fieldset>
-                                    </div>
+                                </div>
                                 <div class="sm:col-span-2">
                                     <div 
                                         x-data="combobox({
@@ -126,7 +126,8 @@
                                             })"
                                         x-modelable = "selected"
                                         x-model = "form.help"
-                                        x-bind:class = "showHelpOptions == 'yes' ? 'visible' : 'invisible'"
+                                        x-show = "showOption"
+                                        x-transition
                                     >
                                         <div x-html="template"></div>
                                     </div>
@@ -154,7 +155,7 @@
             return {
                 action : '',
                 id : null,
-                showHelpOptions : false,
+                toggleShowOption : 'true',
                 form : {
                     community : [],
                     date : '',
@@ -202,6 +203,11 @@
                     }
                     return false
                 },
+                showOption() {
+                    console.log(this.toggleShowOption)
+                    this.form.help = [];
+                    return this.toggleShowOption == 'true'
+                },
                 onSubmit() {
                     const data = {
                         'communityid' : this.form.community[0].id,
@@ -211,7 +217,8 @@
                         'url' : this.form.url,
 
                         'primarycontributionarea' : this.form.primary_contribution_area.map(e => { return { id : e.id, name : e.text }})[0],
-                        'additionalcontributionareas' : this.form.additional_contribution_areas.map(e => { return { id : e.id, name : e.text }})
+                        'additionalcontributionareas' : this.form.additional_contribution_areas.map(e => { return { id : e.id, name : e.text }}),
+                        'help' : this.form.help
                     }
 
                     Alpine.store('master').modal.show()

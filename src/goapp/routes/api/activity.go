@@ -28,6 +28,8 @@ type ActivityDto struct {
 
 	PrimaryContributionArea     ItemDto   `json: "primarycontributionarea"`
 	AdditionalContributionAreas []ItemDto `json: "additionalcontributionareas"`
+
+	Help ItemDto `json: "help"`
 }
 
 type ItemDto struct {
@@ -114,7 +116,7 @@ func CreateActivity(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// PRIMARY CONTRIBUTION AREA
-	err = InsertCommunityActivitiesContributionArea(body.PrimaryContributionArea, models.CommunityActivitiesContributionAreas{
+	err = insertCommunityActivitiesContributionArea(body.PrimaryContributionArea, models.CommunityActivitiesContributionAreas{
 		CommunityActivityId: communityActivityId,
 		ContributionAreaId:  body.PrimaryContributionArea.Id,
 		IsPrimary:           true,
@@ -127,7 +129,7 @@ func CreateActivity(w http.ResponseWriter, r *http.Request) {
 
 	// ADDITIONAL CONTRIBUTION AREA
 	for _, contributionArea := range body.AdditionalContributionAreas {
-		err = InsertCommunityActivitiesContributionArea(contributionArea, models.CommunityActivitiesContributionAreas{
+		err = insertCommunityActivitiesContributionArea(contributionArea, models.CommunityActivitiesContributionAreas{
 			CommunityActivityId: communityActivityId,
 			ContributionAreaId:  contributionArea.Id,
 			IsPrimary:           false,
@@ -137,6 +139,12 @@ func CreateActivity(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
+	}
+
+	errHelp := processHelp(body.Help, username)
+	if errHelp != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
 	}
 
 	fmt.Fprint(w, body)
@@ -154,7 +162,7 @@ func GetActivityById(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(result)
 }
 
-func InsertCommunityActivitiesContributionArea(ca ItemDto, caca models.CommunityActivitiesContributionAreas) error {
+func insertCommunityActivitiesContributionArea(ca ItemDto, caca models.CommunityActivitiesContributionAreas) error {
 	if ca.Id == 0 {
 		id, err := db.ContributionAreas_Insert(ca.Name, caca.CreatedBy)
 		if err != nil {
@@ -174,5 +182,25 @@ func InsertCommunityActivitiesContributionArea(ca ItemDto, caca models.Community
 		return err
 	}
 
+	return nil
+}
+
+func processHelp(h ItemDto, email string) error {
+	// SAVE HERE...
+	// EMAIL HERE...
+	// Send email to approver
+	emailData := email.TypEmailMessage{
+		To:      email,
+		Subject: req,
+		Body:    "HELLO WORLD",
+	}
+
+	_, err = email.SendEmail(emailData)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// NO ERROR
 	return nil
 }
