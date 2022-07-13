@@ -214,6 +214,7 @@ func PopulateProjectsApproval(id int64) (ProjectApprovals []models.TypProjectApp
 			Avanadeofferingsassets:     v["Avanadeofferingsassets"].(string),
 			Willbecommercialversion:    v["Willbecommercialversion"].(string),
 			OSSContributionInformation: v["OSSContributionInformation"].(string),
+			RequestStatus:              v["RequestStatus"].(string),
 		}
 		ProjectApprovals = append(ProjectApprovals, data)
 	}
