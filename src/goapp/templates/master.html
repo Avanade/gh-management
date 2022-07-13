@@ -97,7 +97,7 @@
                 });
               }
             })
-            .catch(e=>{ console.log(e.response)
+            .catch(e=>{
               var msg = e.response.data ? e.response.data : "An error occured while processing."
               this.modal.update("error", "Failed", msg, "","")
             })

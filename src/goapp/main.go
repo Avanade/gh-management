@@ -86,7 +86,7 @@ func main() {
 	muxApi.Handle("/projects/list", loadAzGHAuthPage(rtApi.GetUserProjects))
 	muxApi.Handle("/projects/{id}", loadAzGHAuthPage(rtApi.GetRequestStatusByProject))
 	muxApi.Handle("/projects/request/public", loadAzGHAuthPage(rtApi.RequestMakePublic))
-	muxApi.Handle("/projects/{project}/org/{org}/archive/{archive}/private/{private}", loadAzGHAuthPage(rtApi.ArchiveProject))
+	muxApi.Handle("/projects/archive/{project}/{projectId}/{state}/{archive}", loadAzGHAuthPage(rtApi.ArchiveProject))
 	muxApi.Handle("/projects/visibility/{project}/{projectId}/{currentState}/{desiredState}/{isArchived}", loadAzGHAuthPage(rtApi.SetVisibility))
 	muxApi.Handle("/allusers", loadAzAuthPage(rtApi.GetAllUserFromActiveDirectory))
 	muxApi.Handle("/allavanadeprojects", loadAzGHAuthPage(rtApi.GetAvanadeProjects))

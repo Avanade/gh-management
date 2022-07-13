@@ -14,7 +14,6 @@ import (
 	"sort"
 	"strconv"
 	"strings"
-	"sync"
 
 	"github.com/gorilla/mux"
 )
@@ -93,44 +92,37 @@ func GetRequestStatusByProject(w http.ResponseWriter, r *http.Request) {
 }
 
 func ArchiveProject(w http.ResponseWriter, r *http.Request) {
-	// Check if user is an admin
-	isAdmin, err := session.IsUserAdmin(w, r)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	if !isAdmin {
-		http.Error(w, "Not enough privilege to do the action.", http.StatusForbidden)
-		return
-	}
-
-	sessionaz, _ := session.Store.Get(r, "auth-session")
-	iprofile := sessionaz.Values["profile"]
-	profile := iprofile.(map[string]interface{})
-	username := profile["preferred_username"]
-
 	req := mux.Vars(r)
-	org := req["org"]
 	project := req["project"]
+	projectId := req["projectId"]
+	state := req["state"]
 	archive := req["archive"]
-	private := req["private"]
 
-	err = ghmgmt.UpdateIsArchiveIsPrivate(project, archive == "1", true, username.(string))
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+	organization := os.Getenv("GH_ORG_INNERSOURCE")
+	if state == "Public" {
+		organization = os.Getenv("GH_ORG_OPENSOURCE")
 	}
 
-	//If project is currently public, set visibility to private
-	if private == "0" {
-		err := gh.SetProjectVisibility(project, "private", org)
+	if archive == "1" {
+		err := gh.ArchiveProject(project, archive == "1", organization)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-	}
+	} else {
+		isArchived, err := gh.IsArchived(project, organization)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
 
+		if isArchived {
+			http.Error(w, "Repository is still archived. Unarchive the repo on GitHub and try again.", http.StatusBadRequest)
+			return
+		}
+	}
+	id, _ := strconv.ParseInt(projectId, 10, 64)
+	ghmgmt.UpdateProjectIsArchived(id, archive == "1")
 	w.WriteHeader(http.StatusOK)
 }
 
@@ -155,22 +147,22 @@ func GetAvanadeProjects(w http.ResponseWriter, r *http.Request) {
 		return strings.ToLower(allRepos[i].Name) < strings.ToLower(allRepos[j].Name)
 	})
 
-	var wg = &sync.WaitGroup{}
+	// var wg = &sync.WaitGroup{}
 
-	for i, project := range allRepos {
-		wg.Add(1)
-		go func(i int, p gh.Repo) {
-			rec := ghmgmt.GetProjectByName(p.Name)
-			if len(rec) == 0 {
-				p.IsArchived = false
-			} else {
-				allRepos[i].IsArchived = rec[0]["IsArchived"].(bool)
-			}
-			wg.Done()
-		}(i, project)
-	}
+	// for i, project := range allRepos {
+	// 	wg.Add(1)
+	// 	go func(i int, p gh.Repo) {
+	// 		rec := ghmgmt.GetProjectByName(p.Name)
+	// 		if len(rec) == 0 {
+	// 			p.IsArchived = false
+	// 		} else {
+	// 			allRepos[i].IsArchived = rec[0]["IsArchived"].(bool)
+	// 		}
+	// 		wg.Done()
+	// 	}(i, project)
+	// }
 
-	wg.Wait()
+	// wg.Wait()
 
 	w.WriteHeader(http.StatusOK)
 	w.Header().Set("Content-Type", "application/json")
@@ -189,7 +181,7 @@ func SetVisibility(w http.ResponseWriter, r *http.Request) {
 	projectId := req["projectId"]
 	currentState := req["currentState"]
 	desiredState := req["desiredState"]
-	// isArchived := req["isArchived"]
+	isArchived := req["isArchived"]
 	visibilityId := 1 //public
 	if desiredState == "internal" {
 		visibilityId = 2 //internal
@@ -199,6 +191,10 @@ func SetVisibility(w http.ResponseWriter, r *http.Request) {
 	opensource := os.Getenv("GH_ORG_OPENSOURCE")
 
 	if currentState == "Public" {
+		if isArchived == "1" {
+			gh.ArchiveProject(project, false, opensource)
+		}
+
 		// Set repo to desired visibility then move to innersource
 		err := gh.SetProjectVisibility(project, desiredState, opensource)
 		if err != nil {
@@ -208,6 +204,9 @@ func SetVisibility(w http.ResponseWriter, r *http.Request) {
 
 		gh.TransferRepository(project, opensource, innersource)
 	} else {
+		if isArchived == "1" {
+			gh.ArchiveProject(project, false, innersource)
+		}
 		// Set repo to desired visibility
 		err := gh.SetProjectVisibility(project, desiredState, innersource)
 		if err != nil {
