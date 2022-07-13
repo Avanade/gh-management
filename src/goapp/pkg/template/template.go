@@ -44,9 +44,9 @@ func UseTemplate(w *http.ResponseWriter, r *http.Request, page string, pageData 
 	}
 
 	var externalLinks []models.TypMenu
-	externalLinks = append(externalLinks, models.TypMenu{Name: "Tech Community Calendar", Url: "/#", IconPath: "/public/icons/calendar.svg"})
-	externalLinks = append(externalLinks, models.TypMenu{Name: "Stack Overflow at Avanade", Url: "/#", IconPath: "/public/icons/questionmark.svg"})
-	externalLinks = append(externalLinks, models.TypMenu{Name: "Open Innovation Meetup", Url: "/#", IconPath: "/public/icons/microphone.svg"})
+	externalLinks = append(externalLinks, models.TypMenu{Name: "Tech Community Calendar", Url: "https://techcommunitycalendar.com/", IconPath: "/public/icons/calendar.svg"})
+	externalLinks = append(externalLinks, models.TypMenu{Name: "Stack Overflow at Avanade", Url: "https://avanade.stackenterprise.co/", IconPath: "/public/icons/questionmark.svg"})
+	externalLinks = append(externalLinks, models.TypMenu{Name: "Open Innovation Meetup", Url: "https://opentechmeetup.com/", IconPath: "/public/icons/microphone.svg"})
 	masterPageData := models.TypHeaders{Menu: menu, ExternalLinks: externalLinks, Page: getUrlPath(r.URL.Path)}
 
 	data := models.TypPageData{
