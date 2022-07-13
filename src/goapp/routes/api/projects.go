@@ -147,23 +147,6 @@ func GetAvanadeProjects(w http.ResponseWriter, r *http.Request) {
 		return strings.ToLower(allRepos[i].Name) < strings.ToLower(allRepos[j].Name)
 	})
 
-	// var wg = &sync.WaitGroup{}
-
-	// for i, project := range allRepos {
-	// 	wg.Add(1)
-	// 	go func(i int, p gh.Repo) {
-	// 		rec := ghmgmt.GetProjectByName(p.Name)
-	// 		if len(rec) == 0 {
-	// 			p.IsArchived = false
-	// 		} else {
-	// 			allRepos[i].IsArchived = rec[0]["IsArchived"].(bool)
-	// 		}
-	// 		wg.Done()
-	// 	}(i, project)
-	// }
-
-	// wg.Wait()
-
 	w.WriteHeader(http.StatusOK)
 	w.Header().Set("Content-Type", "application/json")
 	jsonResp, err := json.Marshal(allRepos)
@@ -249,8 +232,10 @@ func RequestApproval(id int64) {
 	projectApprovals := ghmgmt.PopulateProjectsApproval(id)
 
 	for _, v := range projectApprovals {
-		err := ApprovalSystemRequest(v)
-		handleError(err)
+		if v.RequestStatus == "New" {
+			err := ApprovalSystemRequest(v)
+			handleError(err)
+		}
 	}
 
 }
