@@ -75,7 +75,7 @@
                       <li x-show="project.Visibility !== 'Internal' && !project.IsArchived" @click="setVisibility(project.Name,project.Id,project.Visibility,'internal',project.IsArchived)" class="hover:bg-[#fff2eb] relative cursor-pointer select-none py-2 pl-3 pr-9 text-gray-900" id="option-0" role="option" tabindex="-1">
                         <span class="block truncate">Make Internal</span>
                       </li>
-                      <li x-show="project.Visibility !== 'Public' && project.IsArchived && ((project.ApprovalStatusId===1) || (project.ApprovalStatusId===5))" @click="goto('/projects/makepublic/' + project.Id)" class="hover:bg-[#fff2eb] relative cursor-pointer select-none py-2 pl-3 pr-9 text-gray-900" id="option-0" role="option" tabindex="-1">
+                      <li x-show="project.Visibility !== 'Public' && !project.IsArchived && ((project.ApprovalStatusId===1) || (project.ApprovalStatusId===5))" @click="goto('/projects/makepublic/' + project.Id)" class="hover:bg-[#fff2eb] relative cursor-pointer select-none py-2 pl-3 pr-9 text-gray-900" id="option-0" role="option" tabindex="-1">
                         <span class="block truncate">Make Public</span>
                       </li>
                     </ul>
