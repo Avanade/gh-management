@@ -181,7 +181,6 @@ func SetVisibility(w http.ResponseWriter, r *http.Request) {
 	projectId := req["projectId"]
 	currentState := req["currentState"]
 	desiredState := req["desiredState"]
-	isArchived := req["isArchived"]
 	visibilityId := 1 //public
 	if desiredState == "internal" {
 		visibilityId = 2 //internal
@@ -191,10 +190,6 @@ func SetVisibility(w http.ResponseWriter, r *http.Request) {
 	opensource := os.Getenv("GH_ORG_OPENSOURCE")
 
 	if currentState == "Public" {
-		if isArchived == "1" {
-			gh.ArchiveProject(project, false, opensource)
-		}
-
 		// Set repo to desired visibility then move to innersource
 		err := gh.SetProjectVisibility(project, desiredState, opensource)
 		if err != nil {
@@ -204,9 +199,6 @@ func SetVisibility(w http.ResponseWriter, r *http.Request) {
 
 		gh.TransferRepository(project, opensource, innersource)
 	} else {
-		if isArchived == "1" {
-			gh.ArchiveProject(project, false, innersource)
-		}
 		// Set repo to desired visibility
 		err := gh.SetProjectVisibility(project, desiredState, innersource)
 		if err != nil {

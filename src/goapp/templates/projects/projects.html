@@ -69,10 +69,10 @@
                       <li @click="archiveProject(project.Name,project.Id,project.Visibility,project.IsArchived)" class="hover:bg-[#fff2eb] relative cursor-pointer select-none py-2 pl-3 pr-9 text-gray-900" id="option-0" role="option" tabindex="-1">
                         <span class="block truncate" x-text="project.IsArchived? 'Unarchive' : 'Archive'">Archive</span>
                       </li>
-                      <li x-show="project.Visibility !== 'Private' && !project.IsArchived" @click="setVisibility(project.Name,project.Id,project.Visibility,'private',project.IsArchived)" class="hover:bg-[#fff2eb] relative cursor-pointer select-none py-2 pl-3 pr-9 text-gray-900" id="option-0" role="option" tabindex="-1">
+                      <li x-show="project.Visibility !== 'Private' && !project.IsArchived" @click="setVisibility(project.Name,project.Id,project.Visibility,'private')" class="hover:bg-[#fff2eb] relative cursor-pointer select-none py-2 pl-3 pr-9 text-gray-900" id="option-0" role="option" tabindex="-1">
                         <span class="block truncate">Make Private</span>
                       </li>
-                      <li x-show="project.Visibility !== 'Internal' && !project.IsArchived" @click="setVisibility(project.Name,project.Id,project.Visibility,'internal',project.IsArchived)" class="hover:bg-[#fff2eb] relative cursor-pointer select-none py-2 pl-3 pr-9 text-gray-900" id="option-0" role="option" tabindex="-1">
+                      <li x-show="project.Visibility !== 'Internal' && !project.IsArchived" @click="setVisibility(project.Name,project.Id,project.Visibility,'internal')" class="hover:bg-[#fff2eb] relative cursor-pointer select-none py-2 pl-3 pr-9 text-gray-900" id="option-0" role="option" tabindex="-1">
                         <span class="block truncate">Make Internal</span>
                       </li>
                       <li x-show="project.Visibility !== 'Public' && !project.IsArchived && ((project.ApprovalStatusId===1) || (project.ApprovalStatusId===5))" @click="goto('/projects/makepublic/' + project.Id)" class="hover:bg-[#fff2eb] relative cursor-pointer select-none py-2 pl-3 pr-9 text-gray-900" id="option-0" role="option" tabindex="-1">
@@ -347,8 +347,8 @@
         Alpine.store('master').modal.show()
         Alpine.store('master').getData(url, `Project has been ${isArchived? 'unarchived.' : 'archived.'}`, "Refresh project list", "/projects")                
       },
-      setVisibility(projectName, projectId, currentState, desiredState, isArchived) {
-        let url = `/api/projects/visibility/${projectName}/${projectId}/${currentState}/${desiredState}/${isArchived? '0' : '1'}`
+      setVisibility(projectName, projectId, currentState, desiredState) {
+        let url = `/api/projects/visibility/${projectName}/${projectId}/${currentState}/${desiredState}`
         Alpine.store('master').modal.show()
         Alpine.store('master').getData(url, `Project has been made ${desiredState}`, "Refresh project list", "/projects")                
       },
