@@ -23,14 +23,15 @@ func CategoryAPIHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		fmt.Println(err)
-		fmt.Println(body)
+
 		return
 	}
-	fmt.Println(body)
+
 	cp := sql.ConnectionParam{
 
 		ConnectionString: os.Getenv("GHMGMTDB_CONNECTION_STRING"),
 	}
+
 	db, _ := sql.Init(cp)
 	switch r.Method {
 	case "POST":
@@ -47,13 +48,12 @@ func CategoryAPIHandler(w http.ResponseWriter, r *http.Request) {
 			fmt.Println(err)
 		}
 		id, _ := strconv.Atoi(fmt.Sprint(result[0]["Id"]))
-		fmt.Println("id")
-		fmt.Println(id)
+
 		if err != nil {
 			fmt.Println(err)
 		}
 		for _, c := range body.CategoryArticles {
-			fmt.Println(c)
+
 			CategoryArticles := map[string]interface{}{
 
 				"Id":          0,
@@ -64,8 +64,7 @@ func CategoryAPIHandler(w http.ResponseWriter, r *http.Request) {
 				"CreatedBy":   username,
 				"ModifiedBy":  username,
 			}
-			fmt.Println("CategoryArticles")
-			fmt.Println(CategoryArticles)
+
 			_, err := db.ExecuteStoredProcedure("dbo.PR_CategoryArticles_Insert", CategoryArticles)
 			if err != nil {
 				fmt.Println(err)
@@ -104,7 +103,7 @@ func CategoryListAPIHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	fmt.Println(Communities)
+
 	w.WriteHeader(http.StatusOK)
 	w.Header().Set("Content-Type", "application/json")
 	jsonResp, err := json.Marshal(Communities)
@@ -149,4 +148,41 @@ func GetCategoryArticlesById(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.Write(jsonResp)
+}
+
+func CategoryArticlesUpdate(w http.ResponseWriter, r *http.Request) {
+	sessionaz, _ := session.Store.Get(r, "auth-session")
+	iprofile := sessionaz.Values["profile"]
+	profile := iprofile.(map[string]interface{})
+	username := profile["preferred_username"]
+	var body models.TypCategoryArticles
+	err := json.NewDecoder(r.Body).Decode(&body)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		fmt.Println(err)
+
+		return
+	}
+
+	cp := sql.ConnectionParam{
+
+		ConnectionString: os.Getenv("GHMGMTDB_CONNECTION_STRING"),
+	}
+	db, _ := sql.Init(cp)
+	param := map[string]interface{}{
+		"Id":         body.Id,
+		"Name":       body.Name,
+		"Url":        body.Url,
+		"Body":       body.Body,
+		"CategoryId": body.CategoryId,
+		"CreatedBy":  username,
+		"ModifiedBy": username,
+	}
+
+	_, err2 := db.ExecuteStoredProcedure("dbo.PR_CategoryArticles_Update", param)
+	if err2 != nil {
+		fmt.Println(err)
+		return
+	}
+
 }

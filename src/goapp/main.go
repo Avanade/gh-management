@@ -49,12 +49,12 @@ func main() {
 	mux.Handle("/search", loadAzGHAuthPage(rtSearch.SearchHandler))
 
 	mux.Handle("/guidance", loadAzGHAuthPage(rtGuidance.GuidanceHandler))
-	mux.Handle("/categories", loadAzGHAuthPage(rtGuidance.CategoriesHandler))
+	mux.Handle("/guidance/new", loadAzGHAuthPage(rtGuidance.CategoriesHandler))
+	mux.Handle("/guidance/Article/{id}", loadAzGHAuthPage(rtGuidance.ArticleHandler))
 	mux.Handle("/community/new", loadAzGHAuthPage(rtCommunity.CommunityHandler))
 	mux.Handle("/community/{id}", loadAzGHAuthPage(rtCommunity.CommunityHandler))
 	mux.Handle("/community/getcommunity/{id}", loadAzGHAuthPage(rtCommunity.GetUserCommunity))
 	mux.Handle("/communities/list", loadAzGHAuthPage(rtCommunity.CommunitylistHandler))
-	mux.Handle("/community", loadAzGHAuthPage(rtCommunity.GetUserCommunitylist))
 	mux.Handle("/community", loadAzGHAuthPage(rtCommunity.GetUserCommunitylist))
 
 	mux.Handle("/projects", loadAzGHAuthPage(rtProjects.Projects))
@@ -89,6 +89,7 @@ func main() {
 	muxApi.Handle("/Category", loadAzGHAuthPage(rtApi.CategoryAPIHandler))
 	muxApi.Handle("/Category/list", loadAzGHAuthPage(rtApi.CategoryListAPIHandler))
 	muxApi.Handle("/CategoryArticlesById/{id}", loadAzGHAuthPage(rtApi.GetCategoryArticlesById))
+	muxApi.Handle("/CategoryArticlesUpdate", loadAzGHAuthPage(rtApi.CategoryArticlesUpdate))
 	muxApi.Handle("/projects/list", loadAzGHAuthPage(rtApi.GetUserProjects))
 	muxApi.Handle("/projects/{id}", loadAzGHAuthPage(rtApi.GetRequestStatusByProject))
 	muxApi.Handle("/projects/{project}/org/{org}/archive/{archive}/private/{private}", loadAzGHAuthPage(rtApi.ArchiveProject))
@@ -104,6 +105,7 @@ func main() {
 
 	muxAdmin := mux.PathPrefix("/admin").Subrouter()
 	muxAdmin.Handle("/members", loadAzGHAuthPage(rtAdmin.ListCommunityMembers))
+	muxAdmin.Handle("/guidance", loadAzGHAuthPage(rtGuidance.GuidanceHandler))
 	muxAdmin.Handle("/approvaltypes", loadAzGHAuthPage(rtAdmin.ListApprovalTypes))
 	muxAdmin.Handle("/approvaltype/{action:add}", loadAzGHAuthPage(rtAdmin.ApprovalTypeForm))
 	muxAdmin.Handle("/approvaltype/{action:view|edit}/{id}", loadAzGHAuthPage(rtAdmin.ApprovalTypeForm))

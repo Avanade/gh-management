@@ -8,11 +8,13 @@
 
     </div>
     <div class="flex">
-      <a href="/categories">
-        <button class="bg-[#FF5800] hover:bg-[#FF4300] text-white font-bold py-2 px-4 rounded">
-          New Category
-        </button>
-      </a>
+      <div x-show="{{.IsAdmin}}">
+        <a href="/guidance/new">
+          <button class="bg-[#FF5800] hover:bg-[#FF4300] text-white font-bold py-2 px-4 rounded">
+            New Article
+          </button>
+        </a>
+      </div>
     </div>
   </div>
   <div class="my-5 flex rounded-md shadow-sm">
@@ -29,7 +31,7 @@
     </div>
   </div>
   <b>
-    <p>Category name</p>
+    <p class="text-blue-600">Category name</p>
   </b>
 
   <div class="bg-white shadow overflow-hidden sm:rounded-md mt-4">
@@ -44,13 +46,8 @@
             @click="category.showStatus = !category.showStatus;getcategoryApprovalStatus(category.Id, index)"> -->
 
             <div class="flex items-center justify-between">
-              <a :href="/category/ +category.Id ">
-                <p class="text-sm font-medium text-indigo-600 truncate" x-text=" category.Name" title="Repository name">
-                </p>
-              </a>
-
-            </div>
-            <div class="mt-2 sm:flex sm:justify-between">
+              <p class="text-sm font-medium text-indigo-600 truncate" x-text=" category.Name" title="Repository name">
+              </p>
               <div x-show="!category.showStatus">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 20 20"
                   stroke="currentColor" stroke-width="2">
@@ -65,38 +62,54 @@
               </div>
 
             </div>
+
           </div>
           <div class="px-4 py-4 sm-px-6 bg-gray-100" style="box-shadow: inset 0px 7px 6px -4px #ccc;"
             x-show="category.showStatus" class="transform -translate-x-full duration-300">
             <div class="bg-gray-50 shadow overflow-hidden sm:rounded-md">
-           
 
-        
+
+
               <ul role="list" class="divide-y divide-gray-200">
-                <template x-for="item of category.approvalStatus">
+                <template x-for="item of category.articles">
                   <li>
-                    
+
                     <div class="px-4 py-4 sm:px-6">
-                      <div class="mt-2 sm:flex ">
+                      <div class="mt-2 sm:flex flex justify-between">
                         <div class="sm:flex">
                           <b>
-                            <p class="flex items-center text-sm text-gray-500" x-data="{ Name: 'Name: ' + item.Name}" x-text="Name">
+                            <p class="flex items-center text-sm text-red-500" x-data="{ Name:  item.Name}"
+                              x-text="Name">
                             </p>
-                          </b> -  
-                            <p   x-data="{ Body: '  ' + item.Body}" x-text="Body">
-                          </p>
-                         
+                          </b>
+
+
                         </div>
-                      
+                        <div x-show="{{.IsAdmin}}">
+                          <p class="flex items-center text-sm text-gray-500  font-bold cursor-pointer"
+                            @click="openLink(item.CategoryId)">
+                            Edit
+                          </p>
+                        </div>
                       </div>
-                      
+
+
+                      <div>
+
+
+                      </div>
                       <div class="mt-2 sm:flex ">
-                        <div>  
-                          <p class="flex items-center text-sm text-gray-500">
-                            <a :href="item.URL"><span x-text="item.URL"/> </a>
+                        <div class="flex items-center text-sm text-blue-500">
+                          <p >
+                            <a :href="item.URL" ><span x-text="item.URL" /> </a>
                           </p>
                         </div>
-                         
+
+                      </div>
+                     
+                      <div class="  py-3 flex items-center text-sm text-blue-500">
+                        <p x-data="{ Body: '  ' + item.Body}" x-text="Body">
+                        </p>
                       </div>
                     </div>
                   </li>
@@ -137,7 +150,7 @@
             r.json().then(body => {
               this.CategoryList = body
               this.showSpinner = false
-              console.log(this.CategoryList)
+            
             });
           })
           .catch(e => {
@@ -153,28 +166,22 @@
         }
       },
       getCategoryArticlesById(id, i) {
-        console.log(id)
-        console.log(i)
-        fetch('/api/CategoryArticlesById/' + id)
-            .then(r => {
-              r.json().then(body => {
-                this.CategoryList[i]["approvalStatus"] = body
-                this.CategoryList[i]["statusLoaded"] = true
-                console.log(  body)
-              })
-            })
+
+
         if (!this.CategoryList[i]["statusLoaded"]) {
           fetch('/api/CategoryArticlesById/' + id)
             .then(r => {
               r.json().then(body => {
-                this.CategoryList[i]["approvalStatus"] = body
+                this.CategoryList[i]["articles"] = body
                 this.CategoryList[i]["statusLoaded"] = true
-                console.log(  body)
+            
               })
             })
 
-           
+
         }
+      }, openLink(link) {
+        window.open("/guidance/Article/" + link, '_blank').focus();
       }
     }
   }
