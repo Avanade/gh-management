@@ -130,103 +130,7 @@
                     <div class="flex flex-col ">
                     </div>
                 </div>
-            </div>
-            
-            <!-- <div class="flex flex flex-col md:flex-row  my-3 ">
-                <div class="basis-1/2 md:base-full  md:flex-row   mx-3">
-                    <div class="flex flex-col ">
-                        <h3 class="text-lg font-medium leading-6 text-gray-900">Legal questions </h3>
-                    </div>
-                </div>
-                <div class="basis-1/2">
-
-                </div>
-
-            </div>
-            <div class="flex flex flex-col md:flex-row  my-3 ">
-                <div class="basis-1/2 md:base-full  md:flex-row   mx-3">
-                    <div class="flex flex-col pl-2">
-                        Is this a new contribution with no prior code development? (i.e., no existing Avanade IP, no
-                        third-party/OSS code, etc.)
-                    </div>
-                </div>
-                <div class="basis-1/2">
-                    <select class="rounded-md" name="newcontribution" id="newcontribution"
-                        x-model="form.newcontribution">
-                        <option value="" selected disabled hidden> -- SELECT -- </option>
-                        <option value="Yes">Yes</option>
-                        <option value="No">No</option>
-                        <option value="unsure">unsure</option>
-                    </select>
-                </div>
-            </div>
-            <div class="flex flex flex-col md:flex-row  my-3 ">
-                <div class="basis-1/2 md:base-full  md:flex-row   mx-3 ">
-                    <div class="flex flex-col pl-2">
-                        Who is sponsoring this OSS contribution?
-                    </div>
-                </div>
-                <div class="basis-1/2 md:base-full  md:flex-row   mx-3  ">
-                    <div x-data="combobox({
-                            ajax: getSponsorOptions,
-                            id : 'id',
-                            text : 'text',
-                          
-                            isInsertable : true,
-                            isDisplayItem : false
-                        })" x-modelable="selected" x-model="form.sponsorOptions">
-                        <div x-html="template"></div>
-                    </div>
-                </div>
-            </div>
-            <div class="flex flex flex-col md:flex-row my-3  ">
-                <div class="basis-1/2 md:base-full  md:flex-row   mx-3">
-                    <div class="flex flex-col pl-2">
-                        Will Avanade use this contribution in client accounts and/or as part of an Avanade
-                        offerings/assets?
-                    </div>
-                </div>
-                <div class="basis-1/2">
-                    <select class="rounded-md" name="avanadeofferingsassets" id="avanadeofferingsassets"
-                        x-model="form.avanadeofferingsassets">
-                        <option value="" selected disabled hidden> -- SELECT -- </option>
-                        <option value="Yes">Yes</option>
-                        <option value="No">No</option>
-                        <option value="Tobedecided">To be decided</option>
-                    </select>
-                </div>
-            </div>
-            <div class="flex flex flex-col md:flex-row my-3  ">
-                <div class="basis-1/2 md:base-full  md:flex-row   mx-3">
-                    <div class="flex flex-col pl-2">
-                        Will there be a commercial version of this contribution?
-                    </div>
-                </div>
-                <div class="basis-1/2">
-                    <select class="rounded-md" name="willbecommercialversion" id="willbecommercialversion"
-                        x-model="form.willbecommercialversion">
-                        <option value="" selected disabled hidden> -- SELECT -- </option>
-                        <option value="Yes">Yes</option>
-                        <option value="No">No</option>
-                        <option value="Tobedecided">To be decided</option>
-                    </select>
-                </div>
-            </div>
-            <div class="flex flex flex-col md:flex-row  my-3 ">
-                <div class="basis-1/2 md:base-full  md:flex-row   mx-3">
-                    <div class="flex flex-col pl-2">
-                        Additional OSS Contribution Information (e.g. planned maintenance/support, etc.)?
-                    </div>
-                </div>
-                <div class="basis-1/2">
-                    <input type="text" maxlength="50" name="osscontributionInformation" id="osscontributionInformation"
-                        x-model="form.osscontributionInformation"
-                        class="mt-1 focus:ring-orange-500 focus:border-orange-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md border-2">
-
-                </div>
-
-            </div> -->
-            
+            </div>          
             
             <div class="flex items-start mt-5 ml-3">
                 <div class="flex items-center h-5">
@@ -307,19 +211,11 @@
                 description: '',
                 confirmAvaIP: false,
                 confirmSecIPScan: false,
-                // newcontribution: '',
-                // osssponsor: '',
-                // avanadeofferingsassets: '',
-                // willbecommercialversion: '',
-                // osscontributionInformation: '',
-                // sponsorOptions: [],
-
             },
             coowner: {
                 show: false,
             },
             submit() {
-                // this.form.osssponsor = this.form.sponsorOptions[0]["text"].toString()
                 Alpine.store('master').modal.reset()
                 Alpine.store('master').modal.show()
                 if (!this.form.id)
@@ -373,19 +269,11 @@
                         .then(r => {
                             r.json().then(body => {
 
-                                // this.Communitylist = body
                                 this.form.name = body[0]["ProjectName"]
                                 this.form.coowner = body[0]["ProjectCoowner"]
                                 this.form.description = body[0]["ProjectDescription"]
                                 this.form.confirmAvaIP = body[0]["ConfirmAvaIP"]
                                 this.form.confirmSecIPScan = body[0]["ConfirmEnabledSecurity"]
-                                // this.form.newcontribution = body[0]["newcontribution"]
-                                // this.form.osssponsor = body[0]["OSSsponsor"]
-                                // this.form.sponsorOptions = [{ id: "1", text: [body[0]["OSSsponsor"]] }]
-
-                                // this.form.avanadeofferingsassets = body[0]["Avanadeofferingsassets"]
-                                // this.form.willbecommercialversion = body[0]["Willbecommercialversion"]
-                                // this.form.osscontributionInformation = body[0]["OSSContributionInformation"]
                             });
                         })
                         .catch(e => {
@@ -399,19 +287,5 @@
             }
         }
     }
-    // async function getSponsorOptions() {
-    //     const data = [
-    //         { id: "1", text: "Solution Area - Applications and Infrastructure" },
-    //         { id: "2", text: "Solution Area - Business Applications" },
-    //         { id: "3", text: "Solution Area - Data & AI" },
-    //         { id: "4", text: "Solution Area - Modern Workplace" },
-    //         { id: "5", text: "Business Group - Advisory" },
-    //         { id: "6", text: "ITS" },
-    //         { id: "7", text: "Office of the CTO" },
-    //     ]
-
-    //     return data
-    // }
-
 </script>
 {{ end }}
