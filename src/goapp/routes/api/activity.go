@@ -194,6 +194,7 @@ func processHelp(h ItemDto) error {
 		Body:    h.Name,
 	}
 
+	// Added comment - checked if cz-customizable will work with signed off
 	res, err := email.SendEmail(emailData)
 	if err != nil {
 		return err
