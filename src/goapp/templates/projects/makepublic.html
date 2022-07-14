@@ -1,0 +1,171 @@
+{{ define "content" }}
+
+
+<div id="pageTitle">Request</div>
+
+<div x-data="data()">
+    <form onsubmit="event.preventDefault()" autocomplete="off">
+        <fieldset>
+            <h3 class="text-lg font-medium leading-6 text-gray-900">Make Project Public</h3>
+            <p class="mt-1 text-sm text-gray-500">
+            Before a project becomes public, it needs to undergo intellectual property, legal and security approvals. Answer the following questions to proceed with the request.
+            </p>
+            <div class="flex flex flex-col md:flex-row mt-7">
+                <div class="basis-1/2 md:base-full  md:flex-row mx-3 self-center">
+                    <div class="flex flex-col pl-2 ml-3 mt-1 text-sm text-gray-900">
+                        Is this a new contribution with no prior code development? (i.e., no existing Avanade IP, no
+                        third-party/OSS code, etc.)
+                    </div>
+                </div>
+                <div class="basis-1/2 self-center">
+                    <select class="rounded-md ml-3 mt-1 text-sm text-gray-900 border-gray-300" name="newcontribution" id="newcontribution"
+                        x-model="form.newcontribution">
+                        <option value="" selected disabled hidden> -- SELECT -- </option>
+                        <option value="Yes">Yes</option>
+                        <option value="No">No</option>
+                        <option value="unsure">Unsure</option>
+                    </select>
+                </div>
+            </div>
+            <div class="flex flex flex-col md:flex-row mt-5">
+                <div class="basis-1/2 md:base-full md:flex-row mx-3 self-center">
+                    <div class="flex flex-col pl-2 ml-3 mt-1 text-sm text-gray-900">
+                        Who is sponsoring this OSS contribution?
+                    </div>
+                </div>
+                <div class="basis-1/2 md:base-full  md:flex-row mx-3 self-center">
+                    <div class="ml-3" x-data="combobox({
+                            ajax: getSponsorOptions,
+                            id : 'id',
+                            text : 'text',
+                          
+                            isInsertable : true,
+                            isDisplayItem : false
+                        })" x-modelable="selected" x-model="form.sponsorOptions">
+                        <div x-html="template"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="flex flex flex-col md:flex-row my-3 mt-5">
+                <div class="basis-1/2 md:base-full md:flex-row mx-3 self-center">
+                    <div class="flex flex-col pl-2 ml-3 mt-1 text-sm text-gray-900">
+                        Will Avanade use this contribution in client accounts and/or as part of an Avanade
+                        offerings/assets?
+                    </div>
+                </div>
+                <div class="basis-1/2 self-center">
+                    <select class="rounded-md ml-3 mt-1 text-sm text-gray-900 border-gray-300" name="avanadeofferingsassets" id="avanadeofferingsassets"
+                        x-model="form.avanadeofferingsassets">
+                        <option value="" selected disabled hidden> -- SELECT -- </option>
+                        <option value="Yes">Yes</option>
+                        <option value="No">No</option>
+                        <option value="Tobedecided">To be decided</option>
+                    </select>
+                </div>
+            </div>
+            <div class="flex flex flex-col md:flex-row my-3 mt-5">
+                <div class="basis-1/2 md:base-full  md:flex-row mx-3 self-center">
+                    <div class="flex flex-col pl-2 ml-3 mt-1 text-sm text-gray-900">
+                        Will there be a commercial version of this contribution?
+                    </div>
+                </div>
+                <div class="basis-1/2 self-center">
+                    <select class="rounded-md ml-3 mt-1 text-sm text-gray-900 border-gray-300" name="willbecommercialversion" id="willbecommercialversion"
+                        x-model="form.willbecommercialversion">
+                        <option value="" selected disabled hidden> -- SELECT -- </option>
+                        <option value="Yes">Yes</option>
+                        <option value="No">No</option>
+                        <option value="Tobedecided">To be decided</option>
+                    </select>
+                </div>
+            </div>
+            <div class="flex flex flex-col md:flex-row  my-3 mt-5">
+                <div class="basis-1/2 md:base-full md:flex-row mx-3 self-center">
+                    <div class="flex flex-col pl-2 ml-3 mt-1 text-sm text-gray-900">
+                        Additional OSS Contribution Information (e.g. planned maintenance/support, etc.)?
+                    </div>
+                </div>
+                <div class="basis-1/2 md:base-full md:flex-row mx-3 self-center">
+                    <div class="ml-3">
+                        <div class="mt-1">
+                            <input type="text" maxlength="50" name="osscontributionInformation" id="osscontributionInformation"
+                                x-model="form.osscontributionInformation"
+                                class="mt-1 block w-full shadow-sm text-sm border-gray-300 rounded-md text-gray-900 py-2 pl-3 pr-12">
+                        </div>
+                    </div>
+                </div>
+            </div>  
+        </fieldset>
+        <div class="flex mt-7 justify-end">
+            <div align="right">
+                <button type="submit"
+                    class="bg-orange-500  inline-flex justify-center py-2 px-4 rounded-md text-white"
+                    :class="!isValid ? 'bg-orange-100' : ''" x-bind:disabled="!isValid" @click="submit()">
+                    <span>Submit</span>
+                </button>  
+            </div>
+            <div class="ml-3">
+                <button type="button"
+                    class="bg-orange-500  inline-flex justify-center py-2 px-4 rounded-md text-white" @click="goto('/projects')">
+                    <span>Cancel</span>
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script src="/public/components/combobox.js"></script>
+
+<script type="text/javascript">
+    function data() {
+        let path = window.location.pathname
+        return {
+            form: {
+                id: path.replace('/projects/makepublic/',''),
+                newcontribution: '',
+                osssponsor: '',
+                avanadeofferingsassets: '',
+                willbecommercialversion: '',
+                osscontributionInformation: '',
+                sponsorOptions: [],
+            },
+            submit() {
+                Alpine.store('master').modal.reset()
+                Alpine.store('master').modal.show()
+                Alpine.store('master').postData("/api/projects/request/public", this.form, "Your request has been submitted.", "Go to your project list", "/projects")
+            },
+            get isValid() {
+                if(this.form.sponsorOptions.length>0) {
+                    this.form.osssponsor = this.form.sponsorOptions[0]["text"].toString()
+                }
+                if (
+                    !!this.form.newcontribution &&
+                    !!this.form.osssponsor &&
+                    !!this.form.avanadeofferingsassets &&
+                    !!this.form.willbecommercialversion) {
+                    return true
+                } else {
+                    return false
+                }
+            },
+            goto(url) {
+                window.location.href = url
+            }
+        }
+    }
+    async function getSponsorOptions() {
+        const data = [
+            { id: "1", text: "Solution Area - Applications and Infrastructure" },
+            { id: "2", text: "Solution Area - Business Applications" },
+            { id: "3", text: "Solution Area - Data & AI" },
+            { id: "4", text: "Solution Area - Modern Workplace" },
+            { id: "5", text: "Business Group - Advisory" },
+            { id: "6", text: "ITS" },
+            { id: "7", text: "Office of the CTO" },
+        ]
+
+        return data
+    }
+
+</script>
+{{ end }}

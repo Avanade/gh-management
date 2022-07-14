@@ -41,6 +41,27 @@
               this.redirectUrl = "/"
             }
           },
+          confirmationModal: {
+            visible: false,
+            title: "Confirmation",
+            message: "Do you want to continue?",
+            funcHolder: () => { },
+            proceed() {
+              this.visible = false
+              this.funcHolder()
+            },
+            hide() {
+              this.visible = false
+            },
+            show() {
+              this.visible = true
+            },
+            update(title, message, f) {
+              this.title = title
+              this.message = message
+              this.funcHolder = f
+            }
+          },
           postData(endpoint, body, successMessage, actionButtonText, redirectUrl) {
             axios.post(endpoint, body,
             {
@@ -59,7 +80,7 @@
               }
             })
             .catch(e=>{
-              var msg = e.response.data.error ? e.response.data.error : "An error occured while processing."
+              var msg = e.response.data ? e.response.data : "An error occured while processing."
               this.modal.update("error", "Failed", msg, "","")
             })
           },
@@ -98,7 +119,7 @@
               }
             })
             .catch(e=>{
-              var msg = e.response.data.error ? e.response.data.error : "An error occured while processing."
+              var msg = e.response.data ? e.response.data : "An error occured while processing."
               this.modal.update("error", "Failed", msg, "","")
             })
           }
@@ -534,6 +555,37 @@
           </div>
         </div>
       </div>
+
+      <!-- Confirmation Modal -->
+      <div id="confirmationModal" x-show="$store.master.confirmationModal.visible" hidden class="relative z-10" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
+
+        <div class="fixed z-10 inset-0 overflow-y-auto">
+          <div class="flex items-end sm:items-center justify-center min-h-full p-4 text-center sm:p-0">
+            <div class="relative bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:max-w-lg sm:w-full sm:p-6">
+              <div class="sm:flex sm:items-start">
+                <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-yellow-100 sm:mx-0 sm:h-10 sm:w-10">
+                  <!-- Heroicon name: outline/exclamation -->
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
+                  <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title" x-text="$store.master.confirmationModal.title"></h3>
+                  <div class="mt-2">
+                    <p class="text-sm text-gray-500" x-text="$store.master.confirmationModal.message"></p>
+                  </div>
+                </div>
+              </div>
+              <div class="mt-5 sm:mt-4 sm:ml-10 sm:pl-4 sm:flex">
+                <button @click="$store.master.confirmationModal.proceed()" type="button" class="inline-flex justify-center w-full rounded-md border border-transparent shadow-sm px-4 py-2 bg-[#FF5800] text-base font-medium text-white hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:w-auto sm:text-sm">Proceed</button>
+                <button @click="$store.master.confirmationModal.hide()" type="button" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 px-4 py-2 bg-white text-base font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">Cancel</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
     </div>
 
   <script type="text/javascript">
@@ -562,6 +614,7 @@
         onLoad(){
           this.clearSearchBar()
           document.getElementById("modal").attributes.removeNamedItem("hidden")
+          document.getElementById("confirmationModal").attributes.removeNamedItem("hidden")
           let redirect = localStorage.getItem("redirectUrl")
           if(redirect) window.location.href=redirect; localStorage.clear()
         },
