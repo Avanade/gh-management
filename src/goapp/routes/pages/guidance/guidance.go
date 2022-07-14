@@ -36,7 +36,7 @@ func GuidanceHandler(w http.ResponseWriter, r *http.Request) {
 }
 func CategoriesHandler(w http.ResponseWriter, r *http.Request) {
 
-	template.UseTemplate(&w, r, "/guidance/Categories", nil)
+	template.UseTemplate(&w, r, "/guidance/categories", nil)
 }
 func ArticleHandler(w http.ResponseWriter, r *http.Request) {
 	req := mux.Vars(r)
