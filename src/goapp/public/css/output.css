@@ -1866,6 +1866,10 @@ select {
   margin-top: 1.75rem;
 }
 
+.-mt-10 {
+  margin-top: -2.5rem;
+}
+
 .box-border {
   box-sizing: border-box;
 }
@@ -2190,6 +2194,10 @@ select {
 
 .border-separate {
   border-collapse: separate;
+}
+
+.origin-top-right {
+  transform-origin: top right;
 }
 
 .-translate-x-full {
