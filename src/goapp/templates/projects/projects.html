@@ -344,13 +344,28 @@
       },
       archiveProject(projectName, projectId, visibility, isArchived) {
         let url = `/api/projects/archive/${projectName}/${projectId}/${visibility}/${isArchived? '0': '1'}`
-        Alpine.store('master').modal.show()
-        Alpine.store('master').getData(url, `Project has been ${isArchived? 'unarchived.' : 'archived.'}`, "Refresh project list", "/projects")                
+
+        let f = () => {
+          Alpine.store('master').modal.show()
+          Alpine.store('master').getData(url, `Project has been ${isArchived? 'unarchived.' : 'archived.'}`, "Refresh project list", "/projects")                
+        }
+
+        let title = isArchived ? "Unarchive project" : "Archive Project"
+        let message = isArchived ? "Before you proceed, you have to manually unarchive your project on GitHub." : "If you wish to unarchive the project in the future, you have to do it manually on GitHub."
+        Alpine.store('master').confirmationModal.update(title, message, f)
+        Alpine.store('master').confirmationModal.show()
       },
       setVisibility(projectName, projectId, currentState, desiredState) {
         let url = `/api/projects/visibility/${projectName}/${projectId}/${currentState}/${desiredState}`
-        Alpine.store('master').modal.show()
-        Alpine.store('master').getData(url, `Project has been made ${desiredState}`, "Refresh project list", "/projects")                
+        let f = () => {
+          Alpine.store('master').modal.show()
+          Alpine.store('master').getData(url, `Project has been made ${desiredState}`, "Refresh project list", "/projects")                
+        }
+
+        let title = "Confirmation"
+        let message = currentState === "Public" ? `Your project will be moved to innersource and project visibility will be ${desiredState}.` : `You are about to change your project's visibility to ${desiredState}.`
+        Alpine.store('master').confirmationModal.update(title, message, f)
+        Alpine.store('master').confirmationModal.show()
       },
       goto(url) {
         window.location.href = url
