@@ -4,9 +4,11 @@ import (
 	"encoding/json"
 	"fmt"
 	models "main/models"
+	email "main/pkg/email"
 	db "main/pkg/ghmgmtdb"
 	session "main/pkg/session"
 	"net/http"
+	"os"
 	"strconv"
 
 	"github.com/gorilla/mux"
@@ -90,6 +92,12 @@ func CreateActivity(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	errHelp := processHelp(body.Help)
+	if errHelp != nil {
+		http.Error(w, errHelp.Error(), http.StatusBadRequest)
+		return
+	}
+
 	// CHECK ACTIVITY TYPE IF EXIST / INSERT IF NOT EXIST
 	if body.Type.Id == 0 {
 		id, err := db.ActivityTypes_Insert(body.Type.Name)
@@ -141,12 +149,6 @@ func CreateActivity(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	errHelp := processHelp(body.Help, username)
-	if errHelp != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-
 	fmt.Fprint(w, body)
 }
 
@@ -185,21 +187,19 @@ func insertCommunityActivitiesContributionArea(ca ItemDto, caca models.Community
 	return nil
 }
 
-func processHelp(h ItemDto, email string) error {
-	// SAVE HERE...
-	// EMAIL HERE...
-	// Send email to approver
+func processHelp(h ItemDto) error {
 	emailData := email.TypEmailMessage{
-		To:      email,
-		Subject: req,
-		Body:    "HELLO WORLD",
+		To:      os.Getenv("EMAIL_SUPPORT"),
+		Subject: h.Name,
+		Body:    h.Name,
 	}
 
-	_, err = email.SendEmail(emailData)
+	res, err := email.SendEmail(emailData)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+		return err
 	}
+
+	fmt.Println(res)
 
 	// NO ERROR
 	return nil

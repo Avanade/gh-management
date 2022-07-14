@@ -121,8 +121,7 @@
                                                     { id : 2, text : 'Marketing Opportunity'},
                                                     { id : 3, text : 'Other'},
                                                 ],
-                                                label : 'Options',
-                                                isDisplayItem : true
+                                                label : 'Options'
                                             })"
                                         x-modelable = "selected"
                                         x-model = "form.help"
@@ -218,7 +217,7 @@
 
                         'primarycontributionarea' : this.form.primary_contribution_area.map(e => { return { id : e.id, name : e.text }})[0],
                         'additionalcontributionareas' : this.form.additional_contribution_areas.map(e => { return { id : e.id, name : e.text }}),
-                        'help' : this.form.help
+                        'help' : this.form.help.map(e => { return { id : e.id, name : e.text }})[0]
                     }
 
                     Alpine.store('master').modal.show()
