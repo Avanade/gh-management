@@ -47,7 +47,7 @@ func main() {
 	mux.Handle("/projects/{id}", loadAzGHAuthPage(rtProjects.ProjectsHandler))
 	mux.Handle("/search/{searchText}/{offSet}/{rowCount}", loadAzGHAuthPage(rtSearch.GetSearchResults))
 	mux.Handle("/search", loadAzGHAuthPage(rtSearch.SearchHandler))
-	mux.Handle("/admin/index", loadAzGHAuthPage(rtAdmin.AdminIndex))
+
 
 	mux.Handle("/guidance", loadAzGHAuthPage(rtGuidance.GuidanceHandler))
 	mux.Handle("/guidance/new", loadAzGHAuthPage(rtGuidance.CategoriesHandler))
@@ -105,6 +105,7 @@ func main() {
 	muxApi.HandleFunc("/approval/type/{id}", rtApi.GetApprovalTypeById).Methods("GET")
 
 	muxAdmin := mux.PathPrefix("/admin").Subrouter()
+	muxAdmin.Handle("/", loadAzGHAuthPage(rtAdmin.AdminIndex))
 	muxAdmin.Handle("/members", loadAzGHAuthPage(rtAdmin.ListCommunityMembers))
 	muxAdmin.Handle("/guidance", loadAzGHAuthPage(rtGuidance.GuidanceHandler))
 	muxAdmin.Handle("/approvaltypes", loadAzGHAuthPage(rtAdmin.ListApprovalTypes))
