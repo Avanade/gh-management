@@ -32,12 +32,16 @@ type TypMenu struct {
 }
 
 type TypNewProjectReqBody struct {
+	Id               string `json:"id"`
+	Name             string `json:"name"`
+	Coowner          string `json:"coowner"`
+	Description      string `json:"description"`
+	ConfirmAvaIP     bool   `json:"confirmAvaIP"`
+	ConfirmSecIPScan bool   `json:"confirmSecIPScan"`
+}
+
+type TypeMakeProjectPublicReqBody struct {
 	Id                         string `json:"id"`
-	Name                       string `json:"name"`
-	Coowner                    string `json:"coowner"`
-	Description                string `json:"description"`
-	ConfirmAvaIP               bool   `json:"confirmAvaIP"`
-	ConfirmSecIPScan           bool   `json:"confirmSecIPScan"`
 	Newcontribution            string `json:"newcontribution"`
 	OSSsponsor                 string `json:"osssponsor"`
 	Avanadeofferingsassets     string `json:"avanadeofferingsassets"`
@@ -93,6 +97,7 @@ type TypProjectApprovals struct {
 	Avanadeofferingsassets     string
 	Willbecommercialversion    string
 	OSSContributionInformation string
+	RequestStatus              string
 }
 
 type TypApprovalSystemPost struct {

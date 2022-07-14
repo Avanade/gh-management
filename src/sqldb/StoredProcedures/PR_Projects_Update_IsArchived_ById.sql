@@ -1,8 +1,6 @@
-CREATE PROCEDURE [dbo].[PR_Projects_Update_VisibilityByName]
-  @Name varchar(50),
-	@IsArchived BIT,
-	@IsPrivate BIT,
-	@ModifiedBy varchar(50)
+CREATE PROCEDURE [dbo].[PR_Projects_Update_IsArchived_ById]
+  @Id Int,
+	@IsArchived BIT
 AS
 
 BEGIN
@@ -15,9 +13,7 @@ BEGIN
 		[dbo].[Projects]
    SET 
 		[IsArchived] = @IsArchived,
-		[IsPrivate] = @IsPrivate,
-		[ModifiedBy] = @ModifiedBy,
 		[Modified] = GETDATE()
  WHERE  
-		[Name] = @Name
+		[Id] = @Id
 END

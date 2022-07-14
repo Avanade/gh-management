@@ -9,21 +9,23 @@ BEGIN
 	SET NOCOUNT ON;
 
     -- Insert statements for procedure here
-SELECT [Id],
-       [Name],
+SELECT [p].[Id],
+       [p].[Name],
        [CoOwner],
        [Description],
        [ConfirmAvaIP],
        [ConfirmEnabledSecurity],
        [ApprovalStatusId],
-       [IsPrivate],
        [IsArchived],
        [Created],
        [CreatedBy],
        [Modified],
-       [ModifiedBy]
+       [ModifiedBy],
+       [ApprovalStatusId],
+       [v].[Name] AS 'Visibility'
   FROM 
-       [dbo].[Projects]
+       [dbo].[Projects] AS p
+  LEFT JOIN [dbo].[Visibility] AS v ON p.VisibilityId = v.Id
   WHERE  
        [CreatedBy] = @UserPrincipalName
   ORDER BY [Created] DESC
