@@ -247,6 +247,12 @@ func GetFailedProjectApprovalRequests() (ProjectApprovals []models.TypProjectApp
 			ApprovalType:               v["ApprovalType"].(string),
 			ApproverUserPrincipalName:  v["ApproverUserPrincipalName"].(string),
 			ApprovalDescription:        v["ApprovalDescription"].(string),
+			Newcontribution:            v["newcontribution"].(string),
+			OSSsponsor:                 v["OSSsponsor"].(string),
+			Avanadeofferingsassets:     v["Avanadeofferingsassets"].(string),
+			Willbecommercialversion:    v["Willbecommercialversion"].(string),
+			OSSContributionInformation: v["OSSContributionInformation"].(string),
+			RequestStatus:              v["RequestStatus"].(string),
 		}
 		ProjectApprovals = append(ProjectApprovals, data)
 	}

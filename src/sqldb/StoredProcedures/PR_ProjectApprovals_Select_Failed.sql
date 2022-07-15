@@ -11,7 +11,14 @@ SELECT
 	PA.ApproverUserPrincipalName,
 	PA.ApprovalDescription,
 	S.Name [RequestStatus],
-	PA.[ApprovalDate], PA.[ApprovalRemarks]
+	PA.[ApprovalDate], PA.[ApprovalRemarks],
+	p.[ConfirmAvaIP],
+	p.[ConfirmEnabledSecurity],
+	p.[newcontribution], 
+	p.[OSSsponsor], 
+	p.[Avanadeofferingsassets],
+	p.[Willbecommercialversion], 
+	p.[OSSContributionInformation]
     
 FROM 
 	ProjectApprovals PA
