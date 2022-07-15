@@ -18,6 +18,6 @@
 	[OSSContributionInformation] [varchar](50) NULL,
 	[Newcontribution] [varchar](50) NULL,
     [VisibilityId] INT NOT NULL DEFAULT 1
-    CONSTRAINT FK_ApprovalStatus_Projects FOREIGN KEY (ApprovalStatusId) REFERENCES ApprovalStatus(Id)
+    CONSTRAINT FK_ApprovalStatus_Projects FOREIGN KEY (ApprovalStatusId) REFERENCES ApprovalStatus(Id),
     CONSTRAINT FK_Projects_Visibility FOREIGN KEY (VisibilityId) REFERENCES Visibility(Id)
 )
