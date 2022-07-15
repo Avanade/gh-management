@@ -4,9 +4,11 @@ import (
 	"encoding/json"
 	"fmt"
 	models "main/models"
+	email "main/pkg/email"
 	db "main/pkg/ghmgmtdb"
 	session "main/pkg/session"
 	"net/http"
+	"os"
 	"strconv"
 
 	"github.com/gorilla/mux"
@@ -28,6 +30,13 @@ type ActivityDto struct {
 
 	PrimaryContributionArea     ItemDto   `json: "primarycontributionarea"`
 	AdditionalContributionAreas []ItemDto `json: "additionalcontributionareas"`
+
+	Help HelpDto `json: "help"`
+}
+
+type HelpDto struct {
+	ItemDto
+	Details string `json:"details"`
 }
 
 type ItemDto struct {
@@ -89,7 +98,7 @@ func CreateActivity(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// CHECK ACTIVITY TYPE IF EXIST / INSERT IF NOT EXIST
-	if body.Type.Id == 0 {
+	if body.Type.Id != 0 {
 		id, err := db.ActivityTypes_Insert(body.Type.Name)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
@@ -113,8 +122,16 @@ func CreateActivity(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if body.Help.Id != 0 {
+		errHelp := processHelp(communityActivityId, username, body.Help)
+		if errHelp != nil {
+			http.Error(w, errHelp.Error(), http.StatusBadRequest)
+			return
+		}
+	}
+
 	// PRIMARY CONTRIBUTION AREA
-	err = InsertCommunityActivitiesContributionArea(body.PrimaryContributionArea, models.CommunityActivitiesContributionAreas{
+	err = insertCommunityActivitiesContributionArea(body.PrimaryContributionArea, models.CommunityActivitiesContributionAreas{
 		CommunityActivityId: communityActivityId,
 		ContributionAreaId:  body.PrimaryContributionArea.Id,
 		IsPrimary:           true,
@@ -127,7 +144,7 @@ func CreateActivity(w http.ResponseWriter, r *http.Request) {
 
 	// ADDITIONAL CONTRIBUTION AREA
 	for _, contributionArea := range body.AdditionalContributionAreas {
-		err = InsertCommunityActivitiesContributionArea(contributionArea, models.CommunityActivitiesContributionAreas{
+		err = insertCommunityActivitiesContributionArea(contributionArea, models.CommunityActivitiesContributionAreas{
 			CommunityActivityId: communityActivityId,
 			ContributionAreaId:  contributionArea.Id,
 			IsPrimary:           false,
@@ -154,7 +171,7 @@ func GetActivityById(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(result)
 }
 
-func InsertCommunityActivitiesContributionArea(ca ItemDto, caca models.CommunityActivitiesContributionAreas) error {
+func insertCommunityActivitiesContributionArea(ca ItemDto, caca models.CommunityActivitiesContributionAreas) error {
 	if ca.Id == 0 {
 		id, err := db.ContributionAreas_Insert(ca.Name, caca.CreatedBy)
 		if err != nil {
@@ -174,5 +191,27 @@ func InsertCommunityActivitiesContributionArea(ca ItemDto, caca models.Community
 		return err
 	}
 
+	return nil
+}
+
+func processHelp(activityId int, username string, h HelpDto) error {
+	// INSERT
+	_, err := db.CommunityActivitiesHelpTypes_Insert(activityId, h.Id, h.Details)
+	if err != nil {
+		return err
+	}
+	// SEND EMAIL
+	emailData := email.TypEmailMessage{
+		To:      os.Getenv("EMAIL_SUPPORT"),
+		Subject: h.Name,
+		Body:    fmt.Sprintf("<p><b>FROM</b> : %s</p> \n<p><b>TYPE</b> : %s</p> \n<p><b>DETAILS</b> : %s</p>", username, h.Name, h.Details),
+	}
+
+	_, errEmail := email.SendEmail(emailData)
+	if errEmail != nil {
+		return errEmail
+	}
+
+	// NO ERROR
 	return nil
 }

@@ -1,11 +1,12 @@
 const combobox = ({
     ajax,
-    id,
-    text,
+    id = 'id',
+    text = 'text',
     data,
     isMultiple = false,
     isInsertable = false,
     isDisplayItem = false,
+    displaySearch = true,
     label = null
 }) => {
     return { 
@@ -23,12 +24,14 @@ const combobox = ({
         isShowOptions : false,
         isInsertable : false,
         isDisplayItem : false,
+        displaySearch : true,
         label : '',
         // INITIALIZED
         async init() {
             this.label = label;
             this.isInsertable = isInsertable;
             this.isDisplayItem = isDisplayItem;
+            this.displaySearch = displaySearch;
             // SET DATA
             if(data != undefined){
                 this.data = data.map((i) => {
@@ -105,7 +108,11 @@ const combobox = ({
                                 </svg>
                             </button>
                             <ul x-show="isShowOptions" class="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm" id="options" role="listbox">
-                            <li class="p-3"><input x-ref="filter" type="text" class="w-full rounded-md border border-gray-300 bg-white py-2 pl-3 pr-12 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 sm:text-sm" role="combobox" aria-controls="options" aria-expanded="false" @input.debounce="onInputHandler" @keyup.enter='onInsertItem'></li>
+                            <template x-if='displaySearch'>
+                                <li class="p-3">
+                                    <input x-ref="filter" type="text" class="w-full rounded-md border border-gray-300 bg-white py-2 pl-3 pr-12 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 sm:text-sm" role="combobox" aria-controls="options" aria-expanded="false" @input.debounce="onInputHandler" @keyup.enter='onInsertItem'>
+                                </li>
+                            </template>
                             <template x-for='item in options' :key="item.id">
                                 <!--
                                 Combobox option, manage highlight styles based on mouseenter/mouseleave and keyboard navigation.
