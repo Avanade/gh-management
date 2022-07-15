@@ -31,7 +31,12 @@ type ActivityDto struct {
 	PrimaryContributionArea     ItemDto   `json: "primarycontributionarea"`
 	AdditionalContributionAreas []ItemDto `json: "additionalcontributionareas"`
 
-	Help ItemDto `json: "help"`
+	Help HelpDto `json: "help"`
+}
+
+type HelpDto struct {
+	ItemDto
+	Details string `json:"details"`
 }
 
 type ItemDto struct {
@@ -92,14 +97,8 @@ func CreateActivity(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	errHelp := processHelp(body.Help)
-	if errHelp != nil {
-		http.Error(w, errHelp.Error(), http.StatusBadRequest)
-		return
-	}
-
 	// CHECK ACTIVITY TYPE IF EXIST / INSERT IF NOT EXIST
-	if body.Type.Id == 0 {
+	if body.Type.Id != 0 {
 		id, err := db.ActivityTypes_Insert(body.Type.Name)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
@@ -121,6 +120,14 @@ func CreateActivity(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
+	}
+
+	if body.Help.Id != 0 {
+		errHelp := processHelp(communityActivityId, username, body.Help)
+		if errHelp != nil {
+			http.Error(w, errHelp.Error(), http.StatusBadRequest)
+			return
+		}
 	}
 
 	// PRIMARY CONTRIBUTION AREA
@@ -187,20 +194,23 @@ func insertCommunityActivitiesContributionArea(ca ItemDto, caca models.Community
 	return nil
 }
 
-func processHelp(h ItemDto) error {
-	emailData := email.TypEmailMessage{
-		To:      os.Getenv("EMAIL_SUPPORT"),
-		Subject: h.Name,
-		Body:    h.Name,
-	}
-
-	// Added comment - checked if cz-customizable will work with signed off
-	res, err := email.SendEmail(emailData)
+func processHelp(activityId int, username string, h HelpDto) error {
+	// INSERT
+	_, err := db.CommunityActivitiesHelpTypes_Insert(activityId, h.Id, h.Details)
 	if err != nil {
 		return err
 	}
+	// SEND EMAIL
+	emailData := email.TypEmailMessage{
+		To:      os.Getenv("EMAIL_SUPPORT"),
+		Subject: h.Name,
+		Body:    fmt.Sprintf("FROM : %s \nTYPE : %s \nDETAILS : %s", username, h.Name, h.Details),
+	}
 
-	fmt.Println(res)
+	_, errEmail := email.SendEmail(emailData)
+	if errEmail != nil {
+		return errEmail
+	}
 
 	// NO ERROR
 	return nil

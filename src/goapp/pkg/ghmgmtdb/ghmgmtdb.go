@@ -389,6 +389,28 @@ func CommunitiesActivities_Select_ById(id int) (interface{}, error) {
 	return &result[0], nil
 }
 
+func CommunityActivitiesHelpTypes_Insert(activityId int, helpTypeId int, details string) (int, error) {
+	db := ConnectDb()
+	defer db.Close()
+
+	param := map[string]interface{}{
+		"ActivityActivityId": activityId,
+		"HelpTypeId":         helpTypeId,
+		"Details":            details,
+	}
+
+	result, err := db.ExecuteStoredProcedureWithResult("PR_CommunityActivitiesHelpTypes_Insert", param)
+	if err != nil {
+		return -1, err
+	}
+
+	id, err := strconv.Atoi(fmt.Sprint(result[0]["Id"]))
+	if err != nil {
+		return -1, err
+	}
+	return id, nil
+}
+
 func ActivityTypes_Select() interface{} {
 	db := ConnectDb()
 	defer db.Close()
