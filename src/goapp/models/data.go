@@ -32,12 +32,16 @@ type TypMenu struct {
 }
 
 type TypNewProjectReqBody struct {
+	Id               string `json:"id"`
+	Name             string `json:"name"`
+	Coowner          string `json:"coowner"`
+	Description      string `json:"description"`
+	ConfirmAvaIP     bool   `json:"confirmAvaIP"`
+	ConfirmSecIPScan bool   `json:"confirmSecIPScan"`
+}
+
+type TypeMakeProjectPublicReqBody struct {
 	Id                         string `json:"id"`
-	Name                       string `json:"name"`
-	Coowner                    string `json:"coowner"`
-	Description                string `json:"description"`
-	ConfirmAvaIP               bool   `json:"confirmAvaIP"`
-	ConfirmSecIPScan           bool   `json:"confirmSecIPScan"`
 	Newcontribution            string `json:"newcontribution"`
 	OSSsponsor                 string `json:"osssponsor"`
 	Avanadeofferingsassets     string `json:"avanadeofferingsassets"`
@@ -93,6 +97,7 @@ type TypProjectApprovals struct {
 	Avanadeofferingsassets     string
 	Willbecommercialversion    string
 	OSSContributionInformation string
+	RequestStatus              string
 }
 
 type TypApprovalSystemPost struct {
@@ -155,4 +160,26 @@ type TypCommunityApprovals struct {
 	RequesterUserPrincipalName string
 	ApproverUserPrincipalName  string
 	ApprovalDescription        string
+}
+
+type TypCategory struct {
+	Id               int                   `json:"id"`
+	Name             string                `json:"name"`
+	Created          string                `json:"created"`
+	CreatedBy        string                `json:"createdBy"`
+	Modified         string                `json:"modified"`
+	ModifiedBy       string                `json:"modifiedBy"`
+	CategoryArticles []TypCategoryArticles `json:"categoryArticles"`
+}
+
+type TypCategoryArticles struct {
+	Id         int    `json:"id"`
+	Name       string `json:"name"`
+	Url        string `json:"Url"`
+	Body       string `json:"Body"`
+	CategoryId int    `json:"CategoryId"`
+	Created    string `json:"created"`
+	CreatedBy  string `json:"createdBy"`
+	Modified   string `json:"modified"`
+	ModifiedBy string `json:"modifiedBy"`
 }

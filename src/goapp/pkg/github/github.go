@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"main/models"
 	"main/pkg/envvar"
@@ -72,6 +73,15 @@ func GetRepository(repoName string, org string) (*github.Repository, error) {
 	return repo, nil
 }
 
+func IsArchived(repoName string, org string) (bool, error) {
+	repo, err := GetRepository(repoName, org)
+	if err != nil {
+		return false, err
+	}
+
+	return repo.GetArchived(), nil
+}
+
 func Repo_IsExisting(repoName string) (bool, error) {
 	exists := false
 	organizations := []string{os.Getenv("GH_ORG_INNERSOURCE"), os.Getenv("GH_ORG_OPENSOURCE")}
@@ -123,6 +133,7 @@ func GetRepositoriesFromOrganization(org string) ([]Repo, error) {
 			Description: repo.GetDescription(),
 			Private:     repo.GetPrivate(),
 			Created:     repo.GetCreatedAt(),
+			IsArchived:  repo.GetArchived(),
 		}
 		repoList = append(repoList, r)
 	}
@@ -142,11 +153,45 @@ func SetProjectVisibility(projectName string, visibility string, org string) err
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Authorization", "Bearer "+envvar.GetEnvVar("GH_TOKEN", ""))
 
+	resp, err := client.Do(req)
+	if err != nil {
+		return err
+	}
+	if resp.StatusCode == http.StatusUnprocessableEntity {
+		return errors.New("Failed to make repository " + visibility)
+	}
+
+	return nil
+}
+
+func ArchiveProject(projectName string, archive bool, org string) error {
+	client := &http.Client{}
+	urlPath := fmt.Sprintf("https://api.github.com/repos/%s/%s", org, projectName)
+	postBody, _ := json.Marshal(map[string]bool{
+		"archived": archive,
+	})
+	reqBody := bytes.NewBuffer(postBody)
+
+	req, err := http.NewRequest(http.MethodPatch, urlPath, reqBody)
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", "Bearer "+envvar.GetEnvVar("GH_TOKEN", ""))
+
 	_, err = client.Do(req)
 	if err != nil {
 		return err
 	}
 
+	return nil
+}
+
+func TransferRepository(repo string, owner string, newOwner string) error {
+	client := createClient(os.Getenv("GH_TOKEN"))
+	opt := github.TransferRequest{NewOwner: newOwner}
+
+	_, _, err := client.Repositories.Transfer(context.Background(), owner, repo, opt)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 

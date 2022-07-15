@@ -1,8 +1,7 @@
 {{ define "content" }}
 
 
-<div id="pageTitle">Admin Tools</div>
-
+<div id="pageTitle" >Admin Tools</div>
 <div x-data="communityMembersListData()" x-init="getCommunities()">
   <div>
     <!-- SPINNER -->
@@ -109,7 +108,19 @@
             }
           )
         }
+      },
+      isClicked(menuName){
+        switch(menuName) {
+          case 1:
+            window.location.href = '/admin/members'
+            break
+          case 2:
+            window.location.href = '/admin/members'
+            break
+        }
       }
+
+
     }
   }
 </script>

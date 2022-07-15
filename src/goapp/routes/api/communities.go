@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"strings"
 
 	"github.com/gorilla/mux"
 )
@@ -38,7 +39,7 @@ func CommunityAPIHandler(w http.ResponseWriter, r *http.Request) {
 	case "POST":
 		param := map[string]interface{}{
 
-			"Name":         body.Name,
+			"Name":         strings.TrimSpace(body.Name),
 			"Url":          body.Url,
 			"Description":  body.Description,
 			"Notes":        body.Notes,

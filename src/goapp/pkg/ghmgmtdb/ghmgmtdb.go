@@ -90,17 +90,12 @@ func PRProjectsInsert(body models.TypNewProjectReqBody, user string) (id int64) 
 	db, _ := sql.Init(cp)
 	param := map[string]interface{}{
 
-		"Name":                       body.Name,
-		"CoOwner":                    body.Coowner,
-		"Description":                body.Description,
-		"ConfirmAvaIP":               body.ConfirmAvaIP,
-		"ConfirmEnabledSecurity":     body.ConfirmSecIPScan,
-		"CreatedBy":                  user,
-		"Newcontribution":            body.Newcontribution,
-		"OSSsponsor":                 body.OSSsponsor,
-		"Avanadeofferingsassets":     body.Avanadeofferingsassets,
-		"Willbecommercialversion":    body.Willbecommercialversion,
-		"OSSContributionInformation": body.OSSContributionInformation,
+		"Name":                   body.Name,
+		"CoOwner":                body.Coowner,
+		"Description":            body.Description,
+		"ConfirmAvaIP":           body.ConfirmAvaIP,
+		"ConfirmEnabledSecurity": body.ConfirmSecIPScan,
+		"CreatedBy":              user,
 	}
 	result, err := db.ExecuteStoredProcedureWithResult("dbo.PR_Projects_Insert", param)
 	if err != nil {
@@ -110,7 +105,6 @@ func PRProjectsInsert(body models.TypNewProjectReqBody, user string) (id int64) 
 	return
 }
 
-// PROJECTS
 func PRProjectsUpdate(body models.TypNewProjectReqBody, user string) (id int64) {
 
 	cp := sql.ConnectionParam{
@@ -120,18 +114,13 @@ func PRProjectsUpdate(body models.TypNewProjectReqBody, user string) (id int64) 
 
 	db, _ := sql.Init(cp)
 	param := map[string]interface{}{
-		"ID":                         body.Id,
-		"Name":                       body.Name,
-		"CoOwner":                    body.Coowner,
-		"Description":                body.Description,
-		"ConfirmAvaIP":               body.ConfirmAvaIP,
-		"ConfirmEnabledSecurity":     body.ConfirmSecIPScan,
-		"ModifiedBy":                 user,
-		"Newcontribution":            body.Newcontribution,
-		"OSSsponsor":                 body.OSSsponsor,
-		"Avanadeofferingsassets":     body.Avanadeofferingsassets,
-		"Willbecommercialversion":    body.Willbecommercialversion,
-		"OSSContributionInformation": body.OSSContributionInformation,
+		"ID":                     body.Id,
+		"Name":                   body.Name,
+		"CoOwner":                body.Coowner,
+		"Description":            body.Description,
+		"ConfirmAvaIP":           body.ConfirmAvaIP,
+		"ConfirmEnabledSecurity": body.ConfirmSecIPScan,
+		"ModifiedBy":             user,
 	}
 	_, err := db.ExecuteStoredProcedure("dbo.PR_Projects_Update", param)
 	if err != nil {
@@ -140,6 +129,32 @@ func PRProjectsUpdate(body models.TypNewProjectReqBody, user string) (id int64) 
 
 	return
 }
+
+func PRProjectsUpdateLegalQuestions(body models.TypeMakeProjectPublicReqBody, user string) {
+
+	cp := sql.ConnectionParam{
+
+		ConnectionString: os.Getenv("GHMGMTDB_CONNECTION_STRING"),
+	}
+
+	db, _ := sql.Init(cp)
+	param := map[string]interface{}{
+		"Id":                         body.Id,
+		"Newcontribution":            body.Newcontribution,
+		"OSSsponsor":                 body.OSSsponsor,
+		"Avanadeofferingsassets":     body.Avanadeofferingsassets,
+		"Willbecommercialversion":    body.Willbecommercialversion,
+		"OSSContributionInformation": body.OSSContributionInformation,
+		"ModifiedBy":                 user,
+	}
+	_, err := db.ExecuteStoredProcedure("PR_Projects_Update_LegalQuestions", param)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	return
+}
+
 func Projects_IsExisting(body models.TypNewProjectReqBody) bool {
 
 	cp := sql.ConnectionParam{
@@ -199,6 +214,7 @@ func PopulateProjectsApproval(id int64) (ProjectApprovals []models.TypProjectApp
 			Avanadeofferingsassets:     v["Avanadeofferingsassets"].(string),
 			Willbecommercialversion:    v["Willbecommercialversion"].(string),
 			OSSContributionInformation: v["OSSContributionInformation"].(string),
+			RequestStatus:              v["RequestStatus"].(string),
 		}
 		ProjectApprovals = append(ProjectApprovals, data)
 	}
@@ -231,8 +247,68 @@ func GetFailedProjectApprovalRequests() (ProjectApprovals []models.TypProjectApp
 			ApprovalType:               v["ApprovalType"].(string),
 			ApproverUserPrincipalName:  v["ApproverUserPrincipalName"].(string),
 			ApprovalDescription:        v["ApprovalDescription"].(string),
+			Newcontribution:            v["newcontribution"].(string),
+			OSSsponsor:                 v["OSSsponsor"].(string),
+			Avanadeofferingsassets:     v["Avanadeofferingsassets"].(string),
+			Willbecommercialversion:    v["Willbecommercialversion"].(string),
+			OSSContributionInformation: v["OSSContributionInformation"].(string),
+			RequestStatus:              v["RequestStatus"].(string),
 		}
 		ProjectApprovals = append(ProjectApprovals, data)
+	}
+
+	return
+}
+
+func GetProjectApprovalsByProjectId(id int64) (ProjectApprovals []models.TypProjectApprovals) {
+	db := ConnectDb()
+	defer db.Close()
+
+	param := map[string]interface{}{
+		"Id": id,
+	}
+
+	result, _ := db.ExecuteStoredProcedureWithResult("PR_ProjectApprovals_Select_By_ProjectId", param)
+
+	for _, v := range result {
+		data := models.TypProjectApprovals{
+			Id:                        v["Id"].(int64),
+			ProjectId:                 v["ProjectId"].(int64),
+			ProjectName:               v["ProjectName"].(string),
+			ApprovalTypeId:            v["ApprovalTypeId"].(int64),
+			ApprovalType:              v["ApprovalType"].(string),
+			ApproverUserPrincipalName: v["ApproverUserPrincipalName"].(string),
+			ApprovalDescription:       v["ApprovalDescription"].(string),
+			RequestStatus:             v["RequestStatus"].(string),
+		}
+		ProjectApprovals = append(ProjectApprovals, data)
+	}
+
+	return
+}
+
+func GetProjectApprovalByGUID(id string) (ProjectApproval models.TypProjectApprovals) {
+	db := ConnectDb()
+	defer db.Close()
+
+	param := map[string]interface{}{
+		"ApprovalSystemGUID": id,
+	}
+
+	result, _ := db.ExecuteStoredProcedureWithResult("PR_ProjectApprovals_Select_By_ApprovalSystemGUID", param)
+
+	for _, v := range result {
+		data := models.TypProjectApprovals{
+			Id:                        v["Id"].(int64),
+			ProjectId:                 v["ProjectId"].(int64),
+			ProjectName:               v["ProjectName"].(string),
+			ApprovalTypeId:            v["ApprovalTypeId"].(int64),
+			ApprovalType:              v["ApprovalType"].(string),
+			ApproverUserPrincipalName: v["ApproverUserPrincipalName"].(string),
+			ApprovalDescription:       v["ApprovalDescription"].(string),
+			RequestStatus:             v["RequestStatus"].(string),
+		}
+		ProjectApproval = data
 	}
 
 	return
@@ -262,18 +338,33 @@ func GetProjectByName(projectName string) []map[string]interface{} {
 	return result
 }
 
-func UpdateIsArchiveIsPrivate(projectName string, isArchived bool, isPrivate bool, username string) error {
+func UpdateProjectIsArchived(id int64, isArchived bool) error {
 	db := ConnectDb()
 	defer db.Close()
 
 	param := map[string]interface{}{
-		"Name":       projectName,
+		"Id":         id,
 		"IsArchived": isArchived,
-		"IsPrivate":  isPrivate,
-		"ModifiedBy": username,
 	}
 
-	_, err := db.ExecuteStoredProcedure("PR_Projects_Update_VisibilityByName", param)
+	_, err := db.ExecuteStoredProcedure("PR_Projects_Update_IsArchived_ById", param)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func UpdateProjectVisibilityId(id int64, visibilityId int64) error {
+	db := ConnectDb()
+	defer db.Close()
+
+	param := map[string]interface{}{
+		"Id":           id,
+		"VisibilityId": visibilityId,
+	}
+
+	_, err := db.ExecuteStoredProcedure("PR_Projects_Update_Visibility_ById", param)
 	if err != nil {
 		return err
 	}
