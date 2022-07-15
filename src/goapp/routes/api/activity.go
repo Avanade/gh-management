@@ -204,7 +204,7 @@ func processHelp(activityId int, username string, h HelpDto) error {
 	emailData := email.TypEmailMessage{
 		To:      os.Getenv("EMAIL_SUPPORT"),
 		Subject: h.Name,
-		Body:    fmt.Sprintf("FROM : %s \nTYPE : %s \nDETAILS : %s", username, h.Name, h.Details),
+		Body:    fmt.Sprintf("<p><b>FROM</b> : %s</p> \n<p><b>TYPE</b> : %s</p> \n<p><b>DETAILS</b> : %s</p>", username, h.Name, h.Details),
 	}
 
 	_, errEmail := email.SendEmail(emailData)
