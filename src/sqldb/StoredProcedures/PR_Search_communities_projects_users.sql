@@ -3,7 +3,7 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 
-ALTER Procedure [dbo].[PR_Search_communities_projects_users]
+Create Procedure [dbo].[PR_Search_communities_projects_users]
 
 @searchText varchar (100),
 @offSet int = 0,
