@@ -107,7 +107,7 @@ func main() {
 	muxApi.HandleFunc("/approval/type/{id}", rtApi.GetApprovalTypeById).Methods("GET")
 
 	muxAdmin := mux.PathPrefix("/admin").Subrouter()
-	muxAdmin.Handle("/", loadAzGHAuthPage(rtAdmin.AdminIndex))
+	muxAdmin.Handle("", loadAzGHAuthPage(rtAdmin.AdminIndex))
 	muxAdmin.Handle("/members", loadAzGHAuthPage(rtAdmin.ListCommunityMembers))
 	muxAdmin.Handle("/guidance", loadAzGHAuthPage(rtGuidance.GuidanceHandler))
 	muxAdmin.Handle("/approvaltypes", loadAzGHAuthPage(rtAdmin.ListApprovalTypes))
