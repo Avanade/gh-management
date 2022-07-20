@@ -39,7 +39,7 @@ func UseTemplate(w *http.ResponseWriter, r *http.Request, page string, pageData 
 	menu = append(menu, models.TypMenu{Name: "Guidance", Url: "/guidance", IconPath: "/public/icons/guidance.svg"})
 	menu = append(menu, models.TypMenu{Name: "Approvals", Url: approvalSystemUrl, IconPath: "/public/icons/approvals.svg"})
 	if isAdmin {
-		menu = append(menu, models.TypMenu{Name: "Admin", Url: "/admin/members", IconPath: "/public/icons/lock.svg"})
+		menu = append(menu, models.TypMenu{Name: "Admin", Url: "/admin", IconPath: "/public/icons/lock.svg"})
 	}
 
 	var externalLinks []models.TypMenu
