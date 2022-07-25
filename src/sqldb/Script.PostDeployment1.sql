@@ -38,3 +38,17 @@ IF NOT EXISTS (SELECT Id FROM ApprovalTypes WHERE Id = 3)
 INSERT INTO ApprovalTypes (Id, [Name]) VALUES (3, 'Security')
 
 SET IDENTITY_INSERT ApprovalTypes OFF
+
+
+SET IDENTITY_INSERT Visibility ON
+
+IF NOT EXISTS (SELECT Id FROM Visibility WHERE Id = 1)
+INSERT INTO Visibility (Id, [Name]) VALUES (1, 'Private')
+
+IF NOT EXISTS (SELECT Id FROM Visibility WHERE Id = 2)
+INSERT INTO Visibility (Id, [Name]) VALUES (2, 'Internal')
+
+IF NOT EXISTS (SELECT Id FROM Visibility WHERE Id = 3)
+INSERT INTO Visibility (Id, [Name]) VALUES (3, 'Public')
+
+SET IDENTITY_INSERT Visibility OFF
