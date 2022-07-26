@@ -179,7 +179,7 @@
     </div>
 
     <!-- LIST OF AVANADE PROJECTS -->
-    <div x-show="!showSpinner && userProjectsList && view==='all'">
+    <div x-show="!showSpinner && allProjectsList && view==='all'">
       <div class="my-5 flex rounded-md shadow-sm">
         <div class="relative flex items-stretch flex-grow focus-within:z-10">
           <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -191,7 +191,7 @@
         </div>
       </div>
     </div>
-    <div class="bg-white shadow overflow-hidden sm:rounded-md mt-4" x-show="!showSpinner && userProjectsList && view==='all'">
+    <div class="bg-white shadow overflow-hidden sm:rounded-md mt-4" x-show="!showSpinner && allProjectsList && view==='all'">
       <ul role="list" class="divide-y divide-gray-100">
         <template x-for="(project, index) in filteredAllProjects">
           <li>
