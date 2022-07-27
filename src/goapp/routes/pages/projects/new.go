@@ -58,8 +58,7 @@ func ProjectsNewHandler(w http.ResponseWriter, r *http.Request) {
 		if existsDb || existsGH {
 			if existsDb {
 				httpResponseError(w, http.StatusBadRequest, "The project name is existing in the database.")
-			}
-			if existsGH {
+			} else if existsGH {
 				httpResponseError(w, http.StatusBadRequest, "The project name is existing in Github.")
 			}
 		} else {
@@ -121,14 +120,11 @@ func handleError(err error) {
 }
 
 func httpResponseError(w http.ResponseWriter, code int, errorMessage string) {
-	msg := TypErrorJsonReturn{
-		Error: errorMessage,
-	}
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-Type", "text/html")
 	w.WriteHeader(code)
-	jsonResponse, err := json.Marshal(msg)
+	response, err := json.Marshal(errorMessage)
 	handleError(err)
-	w.Write(jsonResponse)
+	w.Write(response)
 }
 
 type TypErrorJsonReturn struct {
