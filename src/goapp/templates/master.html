@@ -224,6 +224,7 @@
                       class="text-sm font-medium text-gray-500 group-hover:text-gray-700"
                     >
                       <a href=""> View profile </a> | <a href="/logout/azure">Logout</a>
+                      
                     </p>
                   </div>
                 </div>
@@ -306,7 +307,8 @@
                   <p
                     class="text-xs font-medium text-gray-500 group-hover:text-gray-700"
                   >
-                    <a href="***REMOVED***">View profile </a> | <a href="/logout/azure">Logout</a>
+                    <a @click="isUserDomain()" class="cursor-pointer"> View Profile</a> | <a href="/logout/azure">Logout</a>
+                    <span x-text="profileDomain"> </span>  
                   </p>
                 </div>
               </div>
@@ -595,6 +597,26 @@
         topSearch: true,
         searchBar: '',
         clearBtn: false,
+
+        profile:{
+          name:'{{.Profile.name}}',
+          username:'{{.Profile.preferred_username}}'
+        },
+        get profileDomain() {
+          var domain = this.profile.username.split('@')[1]
+          return domain
+        },
+        get profileUrl() {
+          return 'https://people.' + this.profileDomain
+        },
+        isUserDomain() {
+          if(this.profileDomain === 'avanade.com') {
+            window.location.href = '***REMOVED***'
+          } else { 
+            window.location.href = '***REMOVED***'
+          }
+
+        },
         showClearBtn() {
           console.log(this.searchBar)
           if(this.searchBar == ''){
