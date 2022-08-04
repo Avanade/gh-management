@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="shortcut icon" href="data:image/x-icon;," type="image/x-icon"> 
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script defer src="/public/js/axios.min.js"></script>
+    <link rel="stylesheet" href="/public/css/output.css" />
+    <title>GH-Management</title>
+
+    <!-- Global Store -->
+    <script>
+      document.addEventListener('alpine:init', () => {
+        Alpine.store('master', {
+          modal: {
+            visible: false,
+            icon: "loading",
+            text: "Please wait...",
+            subText: "Your request is being processed.",
+            actionButtonText: "Go back to home page",
+            redirectUrl: "/",
+            show() {
+              this.visible = true
+            },
+            update(icon, text, subtext, actionButtonText, redirectUrl) {
+              this.visible = true
+              this.icon = icon
+              this.text = text
+              this.subText = subtext
+              this.actionButtonText = actionButtonText
+              this.redirectUrl = redirectUrl
+            },
+            reset() {
+              this.visible = false
+              this.icon = "loading"
+              this.text = "Please wait..."
+              this.subText = "Your request is being processed."
+              this.actionButtonText = "Go back to home page"
+              this.redirectUrl = "/"
+            }
+          },
+          confirmationModal: {
+            visible: false,
+            title: "Confirmation",
+            message: "Do you want to continue?",
+            funcHolder: () => { },
+            proceed() {
+              this.visible = false
+              this.funcHolder()
+            },
+            hide() {
+              this.visible = false
+            },
+            show() {
+              this.visible = true
+            },
+            update(title, message, f) {
+              this.title = title
+              this.message = message
+              this.funcHolder = f
+            }
+          },
+          postData(endpoint, body, successMessage, actionButtonText, redirectUrl) {
+            axios.post(endpoint, body,
+            {
+              headers: {
+                  'Content-Type': 'application/json'
+              },
+            })
+            .then( r => {
+              if(r.status === 200) {
+                this.modal.update('success','Success',successMessage, actionButtonText, redirectUrl)
+              }
+              else {
+                r.text().then(body => {
+                    this.modal.update("error", "Failed", body, "", "")
+                });
+              }
+            })
+            .catch(e=>{
+              var msg = e.response.data ? e.response.data : "An error occured while processing."
+              this.modal.update("error", "Failed", msg, "","")
+            })
+          },
+          putData(endpoint, body, successMessage, actionButtonText, redirectUrl) {
+            axios.put(endpoint, body,
+            {
+              headers: {
+                  'Content-Type': 'application/json'
+              },
+            })
+            .then( r => {
+              if(r.status === 200) {
+                this.modal.update('success','Success',successMessage, actionButtonText, redirectUrl)
+              }
+              else {
+                r.text().then(body => {
+                    this.modal.update("error", "Failed", body, "", "")
+                });
+              }
+            })
+            .catch(e=>{
+              var msg = e.response.data.error ? e.response.data.error : "An error occured while processing."
+              this.modal.update("error", "Failed", msg, "","")
+            })
+          },
+          getData(endpoint, successMessage, actionButtonText, redirectUrl) {
+            axios.get(endpoint)
+            .then( r => {
+              if(r.status === 200) {
+                this.modal.update('success','Success',successMessage, actionButtonText, redirectUrl)
+              }
+              else {
+                r.text().then(body => {
+                    this.modal.update("error", "Failed", body, "", "")
+                });
+              }
+            })
+            .catch(e=>{
+              var msg = e.response.data ? e.response.data : "An error occured while processing."
+              this.modal.update("error", "Failed", msg, "","")
+            })
+          }
+        })
+      })
+    </script>
+  </head>
+  <body>
+    <div x-data="masterData()" x-init="onLoad()">
+      <!-- Off-canvas menu for mobile, show/hide based on off-canvas menu state. -->
+      <div class="relative z-40 md:hidden" role="dialog" aria-modal="true">
+        <div class="fixed inset-0 bg-gray-600 bg-opacity-75" id="shade"></div>
+        <div class="fixed inset-0 flex z-40" id="sidebar">
+          <div class="relative flex-1 flex flex-col max-w-xs w-full bg-white">
+            <div class="absolute top-0 right-0 -mr-12 pt-2">
+              <button
+                id="close-sidebar"
+                type="button"
+                data-menu-active="true"
+                class="ml-1 flex items-center justify-center h-10 w-10 rounded-full focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white"
+              >
+                <span class="sr-only">Close sidebar</span>
+                <svg
+                  class="h-6 w-6 text-white"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke-width="2"
+                  stroke="currentColor"
+                  aria-hidden="true"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
+            </div>
+
+            <div class="flex-1 h-0 pt-5 pb-4 overflow-y-auto">
+              <div class="flex-shrink-0 flex items-center px-4">
+                <img
+                  class="h-8 w-auto"
+                  src="/public/ava-logo.png"
+                  alt="Workflow"
+                />
+              </div>
+              <div class="pl-4 text-sm pb-7">Open Technology</div>
+              <nav class="mt-5 px-2 space-y-1">
+              {{ $page := .Header.Page}}
+              {{ range $menu := .Header.Menu }}
+              <a
+                href="{{ $menu.Url }}"
+                {{ if eq $menu.Name $page  }}
+                class="bg-gray-100 text-gray-900 group flex items-center px-2 py-2 text-base font-medium rounded-md"
+                {{ else }}
+                class="text-gray-600 hover:bg-gray-50 hover:text-gray-900 group flex items-center px-2 py-2 text-base font-medium rounded-md"
+                {{ end }}
+              >
+                <img src="{{ $menu.IconPath }}" class="mr-4 h-6 w-6"/>
+                {{ $menu.Name }}
+              </a>
+              {{ end }}
+              <div class="flex-grow border-t border-gray-400"></div>
+              <p class="text-base font-medium text-black">External Links</p>
+              {{ range $link := .Header.ExternalLinks }}
+              <a
+                href="{{ $link.Url }}"
+                class="text-gray-600 hover:bg-gray-50 hover:text-gray-900 group flex items-center px-2 py-2 text-base font-medium rounded-md"
+              >
+                <img src="{{ $link.IconPath }}" class="mr-4 h-6 w-6"/>
+                {{ $link.Name }}
+              </a>
+              {{ end }}
+            </nav>
+            </div>
+            <div class="flex-shrink-0 flex border-t border-gray-200 p-4">
+              <!-- <a href="#" class="flex-shrink-0 group block"> -->
+                <div class="flex items-center">
+                  <div>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      class="h-12 w-12 text-gray-700"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                    >
+                      <path
+                        fill-rule="evenodd"
+                        d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-6-3a2 2 0 11-4 0 2 2 0 014 0zm-2 4a5 5 0 00-4.546 2.916A5.986 5.986 0 0010 16a5.986 5.986 0 004.546-2.084A5 5 0 0010 11z"
+                        clip-rule="evenodd"
+                      />
+                    </svg>
+                  </div>
+                  <div class="ml-3">
+                    <p
+                      class="text-base font-medium text-gray-700 group-hover:text-gray-900"
+                    >
+                      {{ .Profile.name }}
+                    </p>
+                    <p
+                      class="text-sm font-medium text-gray-500 group-hover:text-gray-700"
+                    >
+                      <a href=""> View profile </a> | <a href="/logout/azure">Logout</a>
+                      
+                    </p>
+                  </div>
+                </div>
+              <!-- </a> -->
+            </div>
+          </div>
+
+          <div class="flex-shrink-0 w-14">
+          </div>
+        </div>
+      </div>
+
+      <!-- Static sidebar for desktop -->
+      <div class="hidden md:flex md:w-72 md:flex-col md:fixed md:inset-y-0">
+        <div
+          class="flex-1 flex flex-col min-h-0 border-r border-gray-200 bg-white"
+        >
+          <div class="flex-1 flex flex-col pt-5 pb-4 overflow-y-auto">
+            <div class="flex items-center flex-shrink-0 px-4">
+              <a href="***REMOVED***">
+              <img
+                class="h-8 w-auto"
+                src="/public/ava-logo.png"
+                alt="Avanade"
+              />
+              </a>
+            </div>
+            <div class="pl-4 text-sm pb-7"><a href="***REMOVED***">Open Technology</a></div>
+            <nav class="mt-5 px-2 space-y-1">
+              {{ $page := .Header.Page}}
+              {{ range $menu := .Header.Menu }}
+              <a
+                href="{{ $menu.Url }}"
+                {{ if eq $menu.Name $page  }}
+                class="bg-gray-100 text-gray-900 group flex items-center px-2 py-2 text-base font-medium rounded-md"
+                {{ else }}
+                class="text-gray-600 hover:bg-gray-50 hover:text-gray-900 group flex items-center px-2 py-2 text-base font-medium rounded-md"
+                {{ end }}
+              >
+                <img src="{{ $menu.IconPath }}" class="mr-4 h-6 w-6"/>
+                {{ $menu.Name }}
+              </a>
+              {{ end }}
+              <div class="flex-grow border-t border-gray-400"></div>
+              <p class="text-base font-medium text-black">External Links</p>
+              {{ range $link := .Header.ExternalLinks }}
+              <a
+                href="{{ $link.Url }}"
+                class="text-gray-600 hover:bg-gray-50 hover:text-gray-900 group flex items-center px-2 py-2 text-base font-medium rounded-md"
+              >
+                <img src="{{ $link.IconPath }}" class="mr-4 h-6 w-6"/>
+                {{ $link.Name }}
+              </a>
+              {{ end }}
+            </nav>
+          </div>
+          <div class="flex-shrink-0 flex border-t border-gray-200 p-4">
+            <!-- <a href="#" class="flex-shrink-0 w-full group block"> -->
+              <div class="flex items-center">
+                <div>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="h-12 w-12 text-gray-700"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path
+                      fill-rule="evenodd"
+                      d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-6-3a2 2 0 11-4 0 2 2 0 014 0zm-2 4a5 5 0 00-4.546 2.916A5.986 5.986 0 0010 16a5.986 5.986 0 004.546-2.084A5 5 0 0010 11z"
+                      clip-rule="evenodd"
+                    />
+                  </svg>
+                </div>
+                <div class="ml-3">
+                  <p
+                    class="text-sm font-medium text-gray-700 group-hover:text-gray-900"
+                  >
+                    {{ .Profile.name }}
+                  </p>
+                  <p
+                    class="text-xs font-medium text-gray-500 group-hover:text-gray-700"
+                  >
+                    <a @click="isUserDomain()" class="cursor-pointer"> View Profile</a> | <a href="/logout/azure">Logout</a>
+                  </p>
+                </div>
+              </div>
+            <!-- </a> -->
+          </div>
+        </div>
+      </div>
+      <div class="md:pl-72 flex flex-col flex-1 min-h-screen bg-gray-100">
+        <div
+          class="sticky top-0 z-10 md:hidden pl-1 pt-1 sm:pl-3 sm:pt-3 bg-white"
+        >
+          <div class="flex">
+            <div>
+              <button
+                id="show-sidebar"
+                type="button"
+                class="-ml-0.5 -mt-0.5 h-12 w-12 inline-flex items-center justify-center rounded-md text-gray-500 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500"
+              >
+                <span class="sr-only">Open sidebar</span>
+                <svg
+                  class="h-6 w-6"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke-width="2"
+                  stroke="currentColor"
+                  aria-hidden="true"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M4 6h16M4 12h16M4 18h16"
+                  />
+                </svg>
+              </button>
+            </div>
+            <div>
+              <div class="flex items-center flex-shrink-0 px-4">
+                  <img
+                    class="h-8 w-auto"
+                    src="/public/ava-logo.png"
+                    alt="Avanade"
+                  />
+                </div>
+                <div class="pl-4 text-sm pb-2">Open Technology</div>
+            </div>
+          </div>
+        </div>
+        <main class="flex-1">
+          <div class="py-6">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
+              <div id="content" class="container px-4">
+                <div class="flex justify-between mb-5">
+                  <div id="pageTitlePlaceholder" class="font-bold text-lg self-center"></div>
+                    <!-- START of SEARCH BAR-->
+                    <div  x-show="topSearch" class="w-96 self-center">
+                      <div class="relative rounded-md shadow-sm">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center  w-full pointer-events-none">
+
+                          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
+                          </svg>
+
+                        </div>
+                        <input @keyup.enter="search()" @input.enter="showClearBtn()" x-model="searchBar" x-ref="searchInput" type="text" id="text" class=" block w-full focus:ring-indigo-500 focus:border-indigo-500 pl-10 sm:text-sm border-gray-300 rounded-md" placeholder="Search: Projects, Communities, People" autocomplete="off">
+
+                        <button @click="clearSearchBar(), $refs.searchInput.focus()" x-show="clearBtn" class="absolute inset-y-0 right-0 pr-3 flex items-center focus:pointer-events-auto">
+                          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                        </button>
+
+                      </div>
+                    </div>
+                    <!-- END of SEARCH BAR -->
+                  <div id="ghAccountPlaceholder" class="self-center"></div>
+                </div>
+                {{ if .ProfileGH.LoggedIn }}
+                  <div id="ghAccount">
+                    <p class="text text-right">
+                      Logged in to GitHub as <b>{{ .ProfileGH.Username }}.</b>
+                      <a href="/logout/github" class="hover:underline">(Logout)</a>
+                    </p>
+                  </div>
+                  {{ if not .ProfileGH.IsEnterpriseMember}}
+                    <template x-if="profileDomain == 'avanade.com'">
+                      <div class="bg-yellow-50 p-4 mb-3">
+                        <div class="flex">
+                          <div class="flex-shrink-0">
+                            <svg class="h-5 w-5 text-yellow-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                              <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                            </svg>
+                          </div>
+                          <div class="ml-3 flex-1 md:flex md:justify-between">
+                            <p class="text-sm text-yellow-700">Your user account does not have a Visual Studio licence associated with it. You are able to log into GitHub, but to access GitHub Enterprise, you will need to request a Visual Studio licence.</p>
+                            <p class="mt-3 text-sm md:mt-0 md:ml-6">
+                              <a href="https://avanade.sharepoint.com/sites/VisualStudioSubscriptions" class="whitespace-nowrap font-medium text-yellow-700 hover:text-yellow-600">Avanade's Visual Studio request site<span aria-hidden="true">&rarr;</span></a>
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </template>
+                    <template x-if="profileDomain == 'accenture.com'">
+                      <div class="bg-yellow-50 p-4 mb-3">
+                        <div class="flex">
+                          <div class="flex-shrink-0">
+                            <svg class="h-5 w-5 text-yellow-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                              <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                            </svg>
+                          </div>
+                          <div class="ml-3 flex-1 md:flex md:justify-between">
+                            <p class="text-sm text-yellow-700">
+                              Your user account has not been granted access to Avanade's GitHub Enterprise licence. If you have a Visual Studio licence, then open an incognito or private browser window, and 
+                              <a href="https://myaccess.microsoft.com/%40avanade.onmicrosoft.com#/access-packages/e9a49c54-74a8-4471-8aa8-00781df3e39c" class="whitespace-nowrap font-medium text-yellow-700 hover:text-yellow-600">click this link</a> to request access. Enter your @Accenture.com credentials to login. Click Request Access.
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </template>
+                  {{ end }}
+                  {{ if not .ProfileGH.IsValid}}
+                  <div class="bg-red-50 p-4 mb-3">
+                    <div class="flex">
+                      <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-red-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                          <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                        </svg>
+                      </div>
+                      <div class="ml-3 flex-1 md:flex md:justify-between">
+                        <p class="text-sm text-red-700">Logged in to Github as <b>{{ .ProfileGH.Username }}</b> which is different from the associated Github account.</p>
+                        <p class="mt-3 text-sm md:mt-0 md:ml-6">
+                          <a href="/login/github/force" class="whitespace-nowrap font-medium text-red-700 hover:text-red-600">Associate this new Github account.<span aria-hidden="true">&rarr;</span></a>
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  {{ end}}
+                {{ else }}
+                <div class="bg-blue-50 p-4 mb-3">
+                  <div class="flex">
+                    <div class="flex-shrink-0">
+                      <svg class="h-5 w-5 text-blue-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                      </svg>
+                    </div>
+                    <div class="ml-3 flex-1 md:flex md:justify-between">
+                      <p class="text-sm text-blue-700">Your GitHub account is not currently connected.
+                        To request a new project you need to associate your GitHub account - if you already have one, please use that, rather than creating a new one.</p>
+                      <p class="mt-3 text-sm md:mt-0 md:ml-6">
+                        <a href="/login/github" class="whitespace-nowrap font-medium text-blue-700 hover:text-blue-600">Associate GitHub Account<span aria-hidden="true">&rarr;</span></a>
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                {{ end }}
+
+                <div class="bg-white p-4 rounded-md">
+                  {{ template "content" .Content}}
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
+        <footer class="bg-gray-200">
+          <div
+            class="max-w-7xl mx-auto py-2 px-4 overflow-hidden"
+          >
+            <nav
+              class="-mx-5 -my-2 flex flex-wrap justify-center text-sm"
+              aria-label="Footer"
+            >
+              <div class="px-5 py-2 ">
+                <a href="***REMOVED***" class="text-gray-500 hover:text-gray-900">
+                  Privacy Policy
+                </a>
+              </div>
+
+              <div class="px-5 py-2">
+                <a href="***REMOVED***" class="text-gray-500 hover:text-gray-900">
+                  Terms of Use
+                </a>
+              </div>
+
+              <div class="px-5 py-2">
+                <a href="https://avanade.github.io/code-of-conduct/" class="text-gray-500 hover:text-gray-900">
+                  Open Source Code of Conduct
+                </a>
+              </div>
+
+              <div class="px-5 py-2">
+                <a href="***REMOVED***" class="text-gray-500 hover:text-gray-900">
+                  Open Source Policy
+                </a>
+              </div>
+
+              <div class="px-5 py-2">
+                <a href="***REMOVED***" class="text-gray-500 hover:text-gray-900 text-sm">
+                  Trade Association Policy
+                </a>
+              </div>
+
+            </nav>
+            <p class="mt-6 text-center text-gray-400 text-xs">
+              &copy; 2022 Avanade, Inc. All rights reserved.
+            </p>
+          </div>
+        </footer>
+      </div>
+
+      <!-- Modal -->
+      <div id="modal" x-show="$store.master.modal.visible" class="relative z-10" hidden aria-labelledby="modal-title" role="dialog" aria-modal="true">
+        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
+      
+        <div class="fixed z-10 inset-0 overflow-y-auto">
+          <div class="flex items-end sm:items-center justify-center min-h-full p-4 text-center sm:p-0">
+            <div class="relative bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:max-w-sm sm:w-full sm:p-6">
+              <div>
+                <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100" x-bind:class="$store.master.modal.icon === 'success' ? '':'hidden'">
+                  <svg class="h-6 w-6 text-green-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+                <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100" x-bind:class="$store.master.modal.icon === 'error' ? '':'hidden'">
+                  <svg class="h-6 w-6 text-red-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                  </svg>
+                </div>
+                <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full" x-bind:class="$store.master.modal.icon === 'loading' ? '':'hidden'">
+                  <svg role="status" class="inline w-8 h-8 mr-2 text-gray-200 animate-spin dark:text-gray-600" viewBox="0 0 100 101" fill="#ff5800" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="currentColor"/>
+                      <path d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z" fill="currentFill"/>
+                  </svg>
+                </div>
+                <div class="mt-3 text-center sm:mt-5">
+                  <h3 class="text-lg leading-6 font-medium text-gray-900" x-text="$store.master.modal.text"></h3>
+                  <div class="mt-2">
+                    <p class="text-sm text-gray-500" x-text="$store.master.modal.subText"></p>
+                  </div>
+                </div>
+                <div class="mt-3 text-center sm:mt-5" x-bind:hidden="$store.master.modal.icon !== 'success'" >
+                  <a x-bind:href="$store.master.modal.redirectUrl" x-text="$store.master.modal.actionButtonText" ></a>
+                  </a>
+                </div>
+                <div class="mt-3 text-center sm:mt-5 cursor-pointer" @click="$store.master.modal.reset()" x-bind:hidden="$store.master.modal.icon !== 'error' || ($store.master.modal.icon !== 'success' && $store.master.modal.icon !== 'error' && !(!!$store.master.modal.actionButtonText && !!$store.master.modal.redirectUrl))">Close</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Confirmation Modal -->
+      <div id="confirmationModal" x-show="$store.master.confirmationModal.visible" hidden class="relative z-10" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
+
+        <div class="fixed z-10 inset-0 overflow-y-auto">
+          <div class="flex items-end sm:items-center justify-center min-h-full p-4 text-center sm:p-0">
+            <div class="relative bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:max-w-lg sm:w-full sm:p-6">
+              <div class="sm:flex sm:items-start">
+                <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-yellow-100 sm:mx-0 sm:h-10 sm:w-10">
+                  <!-- Heroicon name: outline/exclamation -->
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
+                  <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title" x-text="$store.master.confirmationModal.title"></h3>
+                  <div class="mt-2">
+                    <p class="text-sm text-gray-500" x-text="$store.master.confirmationModal.message"></p>
+                  </div>
+                </div>
+              </div>
+              <div class="mt-5 sm:mt-4 sm:ml-10 sm:pl-4 sm:flex">
+                <button @click="$store.master.confirmationModal.proceed()" type="button" class="inline-flex justify-center w-full rounded-md border border-transparent shadow-sm px-4 py-2 bg-[#FF5800] text-base font-medium text-white hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:w-auto sm:text-sm">Proceed</button>
+                <button @click="$store.master.confirmationModal.hide()" type="button" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 px-4 py-2 bg-white text-base font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">Cancel</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  <script type="text/javascript">
+    function masterData() {
+      return {
+        topSearch: true,
+        searchBar: '',
+        clearBtn: false,
+
+        profile:{
+          name:'{{.Profile.name}}',
+          username:'{{.Profile.preferred_username}}'
+        },
+        get profileDomain() {
+          var domain = this.profile.username.split('@')[1]
+          return domain
+        },
+        get profileUrl() {
+          return 'https://people.' + this.profileDomain
+        },
+        isUserDomain() {
+          if(this.profileDomain === 'avanade.com') {
+            window.location.href = '***REMOVED***'
+          } else { 
+            window.location.href = '***REMOVED***'
+          }
+
+        },
+        showClearBtn() {
+          console.log(this.searchBar)
+          if(this.searchBar == ''){
+            this.clearBtn = false
+          } else {
+            this.clearBtn = true
+          }
+        },
+        clearSearchBar() {
+          this.searchBar = ''
+          this.clearBtn = false
+        },
+        search() {
+          this.topSearch = false,
+          window.location.href = '/search?search=' + this.searchBar
+          //
+        },
+        onLoad(){
+          this.clearSearchBar()
+          document.getElementById("modal").attributes.removeNamedItem("hidden")
+          document.getElementById("confirmationModal").attributes.removeNamedItem("hidden")
+          let redirect = localStorage.getItem("redirectUrl")
+          if(redirect) window.location.href=redirect; localStorage.clear()
+        },
+      }
+    }
+  </script>
+  </body>
+  <script src="/public/js/scripts.js"></script>
+</html>

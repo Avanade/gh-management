@@ -1,0 +1,61 @@
+stateDiagram-v2
+    [*] --> New
+    state New {
+        [*] --> Incomplete
+        Incomplete --> DataComplete : FormSubmission
+    }
+    New --> InReview
+    state InReview {
+        [*] --> AwaitingLegalReview
+        AwaitingLegalReview --> AwaitingResponse : LegalQuestionsRaised
+        AwaitingResponse --> AwaitingLegalReview : LegalResponsesProvided
+        AwaitingLegalReview --> OutcomeProvided : LegalOutcomeProvided
+        state legal_if_state <<choice>>
+        OutcomeProvided --> legal_if_state
+        legal_if_state --> LegalApproved: if LegalOutcome == approve
+        legal_if_state --> LegalRejected : if LegalOutcome == reject
+        LegalApproved --> [*]
+        LegalRejected --> [*]
+        --
+        [*] --> AwaitingIPScan
+        AwaitingIPScan --> IpScanComplete
+        state ip_if_state <<choice>>
+        IpScanComplete --> ip_if_state
+        ip_if_state --> IpApproved: if ScanOutcome == no_findings
+        ip_if_state --> AwaitingIpReview: if ScanOutcome == inconclusive
+        ip_if_state --> IpRejected: if ScanOutcome == findings
+        AwaitingIpReview --> AwaitingIpResponse : LegalQuestionsRaised
+        AwaitingIpResponse --> AwaitingIpReview : LegalResponsesProvided
+        AwaitingIpReview --> IpOutcomeProvided : LegalOutcomeProvided
+        state legal_ip_if_state <<choice>>
+        IpOutcomeProvided --> legal_ip_if_state
+        legal_ip_if_state --> IpApproved: if LegalOutcome == approve
+        legal_ip_if_state --> IpRejected : if LegalOutcome == reject
+        AwaitingIpReview --> AwaitingIPScan: Dependencies modified
+        IpRejected --> AwaitingIPScan: Dependencies modified
+        IpApproved --> AwaitingIPScan: Dependencies modified
+        IpRejected --> [*]
+        IpApproved --> [*]
+        --
+        [*] --> AwaitingSecurityScan
+        AwaitingSecurityScan --> SecurityScanComplete
+        state security_if_state <<choice>>
+        SecurityScanComplete --> security_if_state
+        security_if_state --> SecurityApproved: if no_findings
+        security_if_state --> SecurityRejected: if inconclusive
+        security_if_state --> SecurityRejected: if security findings
+        SecurityApproved --> AwaitingSecurityScan: Code updates identified
+        SecurityRejected --> AwaitingSecurityScan: Code updates identified
+        SecurityApproved --> [*]
+        SecurityRejected --> [*]
+    }
+    state inreview_if_state <<choice>>
+    InReview --> inreview_if_state
+    inreview_if_state --> Rejected: One or more check failed
+    inreview_if_state --> Approved: All checks pass
+    Approved --> NonCompliant: Periodic IP or security scan raises noncompliance
+    NonCompliant --> Retired: Noncompliance not mitigated
+    NonCompliant --> Approved: Compliance issue resolved
+    Approved --> Retired: Repository no longer required
+    Rejected --> [*]
+    Retired --> [*]

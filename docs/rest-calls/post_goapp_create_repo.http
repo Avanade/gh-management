@@ -1,0 +1,3 @@
+POST https://ava-github-dev.azurewebsites.net/api/create_private_repo?state={{$dotenv STATE}}&new_repo_name=gh_test&new_repo_description=xyz HTTP/1.1
+User-Agent: vs-code-user-query
+content-type: application/json

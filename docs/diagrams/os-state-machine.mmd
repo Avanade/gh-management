@@ -1,0 +1,32 @@
+stateDiagram-v2
+    [*] --> InnerSource
+    state InnerSource {
+        state InnerSource.Active {
+            [*] --> Internal
+            Internal --> Private
+            Private --> Internal
+        }
+        InnerSource.Active --> InnerSource.Retired
+        state InnerSource.Retired {
+            [*] --> IS.Archived
+            [*] --> IS.Deleted
+            IS.Deleted --> [*]
+            IS.Archived --> [*]
+        }
+    }
+    InnerSource --> OpenSource: Review process completed
+    state OpenSource {
+        [*] --> Public
+        Public --> OS.Private : For legal hold only
+        OS.Private --> Public : When legal hold is complete
+        Public --> OS.Retired
+        state OS.Retired {
+            [*] --> OS.Archived
+            [*] --> OS.Deleted
+            OS.Deleted --> [*]
+            OS.Archived --> [*]
+        }
+    }
+    OpenSource --> InnerSource: By exception only
+    OpenSource --> [*]
+            

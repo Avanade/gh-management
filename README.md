@@ -9,6 +9,8 @@
 [![Incubating InnerSource](https://img.shields.io/badge/Incubating-Ava--Maturity-%23FF5800?labelColor=yellow)](https://avanade.github.io/maturity-model/)
 
 ## Overview
+<!-- TODO: Update overview -->
+
 This project contains a PowerApp, which is the main entry point for the application. Backend functionality is provided through a Go application, which handles associations with GitHub, and events (including leavers.)
 
 Microsoft has an excellent [GitHub management portal](https://github.com/microsoft/opensource-portal) to allow for self-service at scale - but this provides significantly more functionality than some organizations require.
@@ -29,7 +31,7 @@ This repository allows for basic self-service and automation of common workflows
 gh-management is available under the [MIT Licence](./LICENCE).
 
 ## Solutions Referenced
-
+<!-- TODO: Update referenced solutions -->
 - [Microsoft PowerApps](https://docs.microsoft.com/en-us/powerapps/WT.mc_id=AI-MVP-5004204)
 - [Microsoft PowerAutomate](https://docs.microsoft.com/en-us/power-automate/?WT.mc_id=AI-MVP-5004204)
 
