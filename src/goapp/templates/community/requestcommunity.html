@@ -1,110 +1,101 @@
 {{ define "content" }}
 
 
-<div id="pageTitle">Request a Community</div>
+
 <div x-data="data()" x-init="onLoad()">
+    <div id="pageTitle" x-show="!form.id">Community</div>
+
     <form onsubmit="event.preventDefault()" autocomplete="off">
-        <div x-show="!form.id">
-            <P>
-
+        <fieldset x-bind:disabled="mode=='view'">
+            <div x-show="!form.id">
+                <P>
                 <h3 class="text-lg font-medium leading-6 text-gray-900"> Community Information</h3>
-                If you have been unable to find the community you need in the drop-down, please submit your request here
-                so
-                that
-                we
-                can add it. Please ensure you have reviewed the full list before requesting this community for review. ​
-            </P>
-        </div>
-        <br>
-        <div class="flex flex flex-col md:flex-row ">
-            <div class="basis-1/2 md:base-full  md:flex-row mx-3">
-                <div class="flex flex-col  ">
-                    <div>
-                        <h3 class="text-lg font-medium leading-6 text-gray-900">Community Name*</h3>
-                    </div>
-                    <div> <input type="text" x-model="form.name" maxlength="50"
-                            class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md border-2">
-                    </div>
-                </div>
+                <p class="mt-1 text-sm text-gray-500">
+                    If you have been unable to find the community you need in the drop-down, please submit your request
+                    here
+                    so
+                    that
+                    we
+                    can add it. Please ensure you have reviewed the full list before requesting this community for
+                    review. ​
+                </p>
+                </P>
             </div>
-            <div class="basis-1/2 md:base-full  md:flex-row mx-3">
-                <div class="flex flex-col  ">
-                    <div class="flex flex-row">
-                        <div class="basis-1/2">
-                            <h3 class="text-lg font-medium leading-6 text-gray-900">Community Site URL*</h3>
+            <div class="flex flex flex-col md:flex-row ">
+                <div class="basis-1/2 md:base-full  md:flex-row mx-3">
+                    <div class="mt-4 flex flex-col  ">
+                        <div>
+                            <h3 class="block text-sm font-medium text-gray-700">Community Name*</h3>
                         </div>
-                        <div x-show="form.id" class="basis-1/2 flex flex-row text-right">
-                            ID: <p x-text="form.id"></p>
+                        <div> <input type="text" x-model="form.name" maxlength="50" :disabled="mode=='view'"
+                                class="mt-1 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md">
                         </div>
                     </div>
-                    <div> <input type="text" name="url" id="url" x-model="form.url" maxlength="255"
-                            class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md border-2">
-                    </div>
                 </div>
-            </div>
-
-
-
-
-        </div>
-
-        <div class="max-w-full  md:base-full  md:flex-row   mx-3">
-            <!-- <div class="flex flex-col  bg-green-100 max-w-full"> -->
-            <div>
-                <div class="max-w-full   ">
-                    <h3 class="text-lg font-medium leading-6 ">Community Description*</h3>
-                </div>
-                <div class="  bg-gray-200">
-                    <textarea name="description" id="description" x-model="form.description" rows="3" maxlength="255"
-                        class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md  border-2  width: 100%">
-                        </textarea>
-                </div>
-            </div>
-        </div>
-
-        <div class="flex flex flex-col md:flex-row ">
-            <div class="basis-1/2 md:base-full  md:flex-row mx-3">
-                <div x-data="{ data: content }" class="flex flex-col  ">
-
-                    <div>
-                        <span class="text-lg font-medium leading-6 text-gray-900">Business Sponsors*</span><span
-                            class="pl-1 text-xs">(Please select at least two sponsors )</span>
-                    </div>
-                    <div class="relative mt-1">
-                        <div x-html="sponsors.template"></div>
-                        <!-- <input type="text" name="UserPrincipalName" id="UserPrincipalName"
-                            placeholder="UserPrincipalName" maxlength="50" autocomplete="false"
-                            @keyup.enter="datapush()"
-                            class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md border-2">
-                        <button type="button"
-                            class="absolute inset-y-0 right-0 flex items-center rounded-r-md px-2 focus:outline-none">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20"
-                                fill="currentColor">
-                                <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
-                                    clip-rule="evenodd" />
-                            </svg>
-                        </button> -->
-
-                    </div>
-
-
-                    <div class="  border items-center  ">
-
-
-                        <template x-for="(sponsor, i) in form.sponsors">
-                            <div style="display: flex; " class="border px-2 py-2">
-                                <div style="flex-grow: 1;" x-text="sponsor.displayName"> </div>
-                                <div> <button type="button" class="btn btn-danger btn-small   "
-                                        @click="removeField(sponsor)">&times;</button></div>
+                <div class="basis-1/2 md:base-full  md:flex-row mx-3">
+                    <div class="flex flex-col  ">
+                        <div class="mt-4 flex flex-row">
+                            <div class="basis-1/2">
+                                <h3 class="block text-sm font-medium text-gray-700">Community Site URL*</h3>
                             </div>
-                        </template>
+                            <div x-show="form.id" class="basis-1/2 flex flex-row text-right">
+                                ID: <p x-text="form.id"></p>
+                            </div>
+                        </div>
+                        <div> <input type="text" name="url" id="url" x-model="form.url" maxlength="255"
+                                :disabled="mode=='view'"
+                                class="mt-1 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md">
+                        </div>
                     </div>
+                </div>
 
-                    <div>
-                        <span class="text-lg font-medium leading-6 text-gray-900">Tag</span><span
-                            class="pl-1 text-xs">(Please press Enter to insert Tag)</span>
+
+
+
+            </div>
+
+            <div class="max-w-full  md:base-full  md:flex-row   mx-3">
+                <!-- <div class="flex flex-col  bg-green-100 max-w-full"> -->
+                <div>
+                    <div class="max-w-full   ">
+                        <h3 class="mt-4 block text-sm font-medium text-gray-700">Community Description*</h3>
                     </div>
-                    <div x-data="combobox({
+                    <div class="  bg-gray-200">
+                        <textarea name="description" id="description" x-model="form.description" rows="3"
+                            maxlength="255" :disabled="mode=='view'"
+                            class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md width: 100%">
+                        </textarea>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex flex flex-col md:flex-row ">
+                <div class="basis-1/2 md:base-full  md:flex-row mx-3">
+                    <div x-data="{ data: content }" class="flex flex-col  ">
+
+                        <div>
+                            <span class="mt-4 block text-sm font-medium text-gray-700">Business Sponsors*</span><span
+                                class="pl-1 text-xs">(Please select at least two sponsors )</span>
+                        </div>
+                        <div class="relative mt-1">
+                            <div x-html="sponsors.template"></div>
+                        </div>
+                        <div class="items-center">
+                            <template x-for="(sponsor, i) in form.sponsors">
+                                <div style="display: flex; " class="border px-2 py-2">
+                                    <div style="flex-grow: 1;" x-text="sponsor.displayName"> </div>
+                                    <div x-show="mode!='view'"> <button type="button"
+                                            class="btn btn-danger btn-small   "
+                                            @click="removeField(sponsor)">&times;</button></div>
+                                </div>
+                            </template>
+                        </div>
+
+                        <div>
+                            <span class="mt-4 block text-sm font-medium text-gray-700">Tag</span><span
+                                class="pl-1 text-xs">(Please press Enter to insert Tag)</span>
+                        </div>
+                        <div x-data="combobox({
                                 data : [],
                                 id : 'id',
                                 text : 'name',
@@ -112,49 +103,71 @@
                                 isMultiple : true,
                                 isDisplayItem : true
                             })" x-modelable="selected" x-model="form.tags">
-                        <div x-html="template"></div>
+                            <div x-html="template"></div>
+                        </div>
+
+                    </div>
+
+
+
+                </div>
+                <div class="basis-1/2 md:base-full  md:flex-row mx-3">
+                    <div class="flex flex-col  ">
+                        <div class="mt-4">
+                            <h3 class="block text-sm font-medium text-gray-700">Notes</h3>
+                        </div>
+                        <div>
+                            <textarea name="Notes" id="Notes" x-model="form.notes" rows="3" maxlength="255"
+                                class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
+                        </textarea>
+                        </div>
+                        <div class="flex flex-row mx-1 my-3 items-center">
+
+                            <input type="checkbox" name="IsExternal" id="IsExternal" x-model="form.isExternal"
+                                class="mr-2" :disabled="mode=='view'">
+                            This is an external community
+
+
+                        </div>
                     </div>
                 </div>
 
 
-
             </div>
-            <div class="basis-1/2 md:base-full  md:flex-row mx-3">
-                <div class="flex flex-col  ">
-                    <div>
-                        <h3 class="text-lg font-medium leading-6 text-gray-900">Notes</h3>
-                    </div>
-                    <div> <textarea name="Notes" id="Notes" x-model="form.notes" rows="3" maxlength="255"
-                            class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md  border-2">
-            </textarea> </div>
-                    <div class="flex flex-row  mx-3   my-3 ">
-
-                        <input type="checkbox" name="IsExternal" id="IsExternal" x-model="form.isExternal">
-                        This is an external community
-
-
-                    </div>
-                </div>
-            </div>
-
-
-        </div>
-
+        </fieldset>
         <div>
             <div align="right">
-                <button x-show="form.id" type="button"
+                <span x-show="form.id" >
+                <button  type="button"  x-show="mode!='edit'"
                     class="bg-purple-500  inline-flex justify-center py-2 px-4 rounded-md text-white"
                     @click="onBoarding()">
-                    <span>How To Join</span>
+                    <span >How To Join</span>
                 </button>
-                <button type="button" class="bg-orange-500  inline-flex justify-center py-2 px-4 rounded-md text-white"
+                    </span>
+                <button type="button" x-show="mode=='view'"
+                    class="bg-orange-500  inline-flex justify-center py-2 px-4 rounded-md text-white"
+                    :class="!isValid ? 'bg-orange-100' : ''" x-bind:disabled="!isValid" @click="mode='edit'">
+
+                    <span x-show="form.id">Edit Community</span>
+
+                </button>
+                <button type="button" x-show="mode!='view'"
+                    class="bg-orange-500  inline-flex justify-center py-2 px-4 rounded-md text-white"
                     :class="!isValid ? 'bg-orange-100' : ''" x-bind:disabled="!isValid" @click="submit()">
                     <span x-show="!form.id">Submit Community</span>
                     <span x-show="form.id">Update Community</span>
-                </button>
 
+                </button>
+            </button>
+            <button type="button" x-show="mode=='edit'"
+                class="bg-orange-500  inline-flex justify-center py-2 px-4 rounded-md text-white"
+                :class="!isValid ? 'bg-orange-100' : ''" x-bind:disabled="!isValid" @click="onLoad()">
+            Cancel
+
+            </button>
             </div>
         </div>
+
     </form>
 
 </div>
@@ -165,6 +178,9 @@
 <script type="text/javascript">
     function data() {
         return {
+            mode:
+                'view',
+
             form: {
                 id: '{{.Id}}',
                 name: '',
@@ -191,10 +207,10 @@
             },
             async getUsersList() {
                 await fetch('/api/allusers').then(j => j.json()
-                        .then(data => {
+                    .then(data => {
 
-                            this.sponsors.data = data
-                        }))
+                        this.sponsors.data = data
+                    }))
                     .catch(() => {
                         Alpine.store('master').modal.update('error', 'Error', 'Please try again', '', '')
 
@@ -220,11 +236,13 @@
                 this.showModal = show
             },
             async onLoad() {
+
                 var modal = Alpine.store('master').modal
                 modal.update('loading', 'Loading', 'Please wait', '', '')
 
                 spinnercount = 3
                 if (this.form.id) {
+                    this.mode = 'view'
                     await fetch('/community/getcommunity/' + '{{.Id}}')
                         .then(r => {
                             r.json().then(body => {
@@ -267,7 +285,7 @@
                         .then(r => {
                             r.json().then(body => {
                                 for (let index = 0; index < body.length; index++) {
-                                    this.form.tags.push({id : body[index]['Id'], text : body[index]['Tag']})
+                                    this.form.tags.push({ id: body[index]['Id'], text: body[index]['Tag'] })
 
                                 }
                                 //  this.showSpinner = false
@@ -282,6 +300,9 @@
                     if (spinnercount < 1) {
                         this.showSpinner = false
                     }
+                }
+                else {
+                    this.mode = 'edit'
                 }
 
                 await this.getUsersList()

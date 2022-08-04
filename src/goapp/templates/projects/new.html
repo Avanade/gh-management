@@ -3,221 +3,289 @@
 
 <div id="pageTitle">Request a project</div>
 
-<div x-data="data()">
+<div x-data="data()" x-init="onload()">
     <form onsubmit="event.preventDefault()" autocomplete="off">
-        <p>
+        <fieldset x-bind:disabled="mode=='view'">
             <h3 class="text-lg font-medium leading-6 text-gray-900">Project information</h3>
+            <p class="mt-1 text-sm text-gray-500">
             All projects start on Avanade’s innersource on GitHub. Once you have identified a business sponsor, and
             submitted
-            your first automated security scan, you can request to move the project to open source. If you open source this
+            your first automated security scan, you can request to move the project to open source. If you open source
+            this
             application, it will be displayed publicly, so think carefully.
             </p>
-        <br>
+            <br>
 
-        <div class="flex flex flex-col md:flex-row ">
-            <div class="basis-1/2 md:base-full  md:flex-row mx-3">
-                <div class="flex flex-col  ">
-                    <div>
-                        <h3 class="text-lg font-medium leading-6 text-gray-900">Project name</h3>
-                    </div>
-                    <div> <input type="text" name="name" id="name" x-model="form.name" maxlength="50"
-                            class="mt-1 focus:ring-orange-500 focus:border-orange-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md border-2">
-                    </div>
-                    <div>The title should represent what the asset does. Avoid acronyms, code names and the use of the
-                        word
-                        &#39;Avanade&#39;. <br></div>
-                </div>
-                <div>
-                    <h3 class="text-lg font-medium leading-6 text-gray-900"> <br> </h3>
-                </div>
-            </div>
-            <div class="basis-1/2 md:base-full md:flex-row mx-3">
-                <div class="flex flex-col ...">
-                    <div>
-                        <h3 class="text-lg font-medium leading-6 text-gray-900">Project co-owner</h3>
-                    </div>
-
-
-                            <!-- ****** CO-OWNER CB ****** -->
+            <div class="flex flex flex-col md:flex-row ">
+                <div class="basis-1/2 md:base-full  md:flex-row mx-3">
+                    <div class="flex flex-col  ">
                         <div>
-                            <div class="relative mt-1" >
-                                <input id="coowner" name="coowner" @click="coowner.show = !coowner.show" x-model="form.coowner" type="text" class="mt-1 focus:ring-orange-500 focus:border-orange-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md border-2" role="combobox" aria-controls="options" aria-expanded="false">
+                            <h3 class="block text-sm font-medium text-gray-700">Project Name</h3>
+                        </div>
+                        <div> <input type="text" name="name" id="name" x-model="form.name" maxlength="50"
+                                x-bind:disabled="mode=='edit'"
+                                class="mt-1 focus:ring-orange-500 focus:border-orange-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md border-2">
+                        </div>
+                        <div class="mt-1 text-sm text-gray-500">The title should represent what the asset does. Avoid acronyms, code names and the use of
+                            the
+                            word
+                            &#39;Avanade&#39;. <br></div>
+                    </div>
+                </div>
+                <div class="basis-1/2 md:base-full md:flex-row mx-3">
+                    <div class="flex flex-col ...">
+                        <div>
+                            <h3 class="block text-sm font-medium text-gray-700">Project Co-owner</h3>
+                        </div>
 
-                                <button x-show="!isCoownerempty" type="button" class="absolute inset-y-0 right-0 flex items-center rounded-r-md px-2 focus:outline-none">
-                                <svg id="clearBtn" class="h-5 w-5 text-gray-400" @click="clearCoowner" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M256 8C119 8 8 119 8 256s111 248 248 248 248-111 248-248S393 8 256 8zm0 448c-110.5 0-200-89.5-200-200S145.5 56 256 56s200 89.5 200 200-89.5 200-200 200zm101.8-262.2L295.6 256l62.2 62.2c4.7 4.7 4.7 12.3 0 17l-22.6 22.6c-4.7 4.7-12.3 4.7-17 0L256 295.6l-62.2 62.2c-4.7 4.7-12.3 4.7-17 0l-22.6-22.6c-4.7-4.7-4.7-12.3 0-17l62.2-62.2-62.2-62.2c-4.7-4.7-4.7-12.3 0-17l22.6-22.6c4.7-4.7 12.3-4.7 17 0l62.2 62.2 62.2-62.2c4.7-4.7 12.3-4.7 17 0l22.6 22.6c4.7 4.7 4.7 12.3 0 17z"/></svg>
+
+                        <!-- ****** CO-OWNER CB ****** -->
+                        <div>
+                            <div class="relative mt-1">
+                                <input id="coowner" name="coowner" @click="coowner.show = !coowner.show"
+                                    x-model="form.coowner" type="text"
+                                    class="mt-1 focus:ring-orange-500 focus:border-orange-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md border-2"
+                                    role="combobox" aria-controls="options" aria-expanded="false">
+
+                                <button x-show="!isCoownerempty" type="button"
+                                    class="absolute inset-y-0 right-0 flex items-center rounded-r-md px-2 focus:outline-none">
+                                    <svg id="clearBtn" class="h-5 w-5 text-gray-400" @click="clearCoowner"
+                                        xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+                                        <path
+                                            d="M256 8C119 8 8 119 8 256s111 248 248 248 248-111 248-248S393 8 256 8zm0 448c-110.5 0-200-89.5-200-200S145.5 56 256 56s200 89.5 200 200-89.5 200-200 200zm101.8-262.2L295.6 256l62.2 62.2c4.7 4.7 4.7 12.3 0 17l-22.6 22.6c-4.7 4.7-12.3 4.7-17 0L256 295.6l-62.2 62.2c-4.7 4.7-12.3 4.7-17 0l-22.6-22.6c-4.7-4.7-4.7-12.3 0-17l62.2-62.2-62.2-62.2c-4.7-4.7-4.7-12.3 0-17l22.6-22.6c4.7-4.7 12.3-4.7 17 0l62.2 62.2 62.2-62.2c4.7-4.7 12.3-4.7 17 0l22.6 22.6c4.7 4.7 4.7 12.3 0 17z" />
+                                    </svg>
                                 </button>
 
-                                <ul class="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm" id="options" x-show="coowner.show" role="listbox">
+                                <ul class="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm"
+                                    id="options" x-show="coowner.show" role="listbox">
 
-                                        {{range $user := .}}
-                                    <li x-show="showName('{{$user.UserPrincipalName}}', '{{$user.GithubUser}}')" class="relative cursor-default select-none py-2 pl-3 pr-9 text-gray-900" id="option-0" role="option" @click="form.coowner = '{{$user.UserPrincipalName}}'; coowner.show = !coowner.show" tabindex="-1">
-                                        <div class="flex" >
+                                    {{range $user := .users}}
+                                    <li x-show="showName('{{$user.UserPrincipalName}}', '{{$user.GithubUser}}')"
+                                        class="relative cursor-default select-none py-2 pl-3 pr-9 text-gray-900"
+                                        id="option-0" role="option"
+                                        @click="form.coowner = '{{$user.UserPrincipalName}}'; coowner.show = !coowner.show"
+                                        tabindex="-1">
+                                        <div class="flex">
 
-                                        <span class="truncate">
+                                            <span class="truncate">
                                                 {{$user.UserPrincipalName}}
-                                        </span>
+                                            </span>
 
-                                        <span class="ml-2 truncate text-gray-500" >
+                                            <span class="ml-2 truncate text-gray-500">
                                                 &nbsp@{{$user.GitHubUser}}
-                                        </span>
+                                            </span>
                                         </div>
-                                
-                                        <span x-show="showCheck('{{$user.UserPrincipalName}}')" class="absolute inset-y-0 right-0 flex items-center pr-4 text-indigo-600" >
-                                        <svg  class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" >
-                                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
-                                        </svg>
+
+                                        <span x-show="showCheck('{{$user.UserPrincipalName}}')"
+                                            class="absolute inset-y-0 right-0 flex items-center pr-4 text-indigo-600">
+                                            <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
+                                                fill="currentColor" aria-hidden="true">
+                                                <path fill-rule="evenodd"
+                                                    d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                                    clip-rule="evenodd" />
+                                            </svg>
                                         </span>
 
 
                                     </li>
-                                        {{ end }}  
-                                        
+                                    {{ end }}
+
                                 </ul>
                             </div>
                         </div>
-                                <!-- END OF CO-OWNER CB... -->
+                        <!-- END OF CO-OWNER CB... -->
 
-                    <div>All projects must have two or more owners, to ensure that security alerts can be dealt with
-                        promptly. <div>
-                            <h3 class="text-lg font-medium leading-6 text-gray-900"> <br> </h3>
+                        <div class="mt-1 text-sm text-gray-500">All projects must have two or more owners, to ensure that security alerts can be dealt with
+                            promptly. <div>
+                                <h3 class="text-lg font-medium leading-6 text-gray-900"> <br> </h3>
+                            </div>
                         </div>
                     </div>
+
                 </div>
+
 
             </div>
 
-
-        </div>
-
-        <div class="flex flex flex-col md:flex-row  ">
-            <div class="basis-1/2 md:base-full  md:flex-row   mx-3">
-                <div class="flex flex-col ">
-                    <div>
-                        <h3 class="text-lg font-medium leading-6 text-gray-900">Project description</h3>
-                    </div>
-                    <div>
-                        <textarea name="description" id="description" x-model="form.description"  rows="3"  maxlength="1000"    class="mt-1 focus:ring-orange-500 focus:border-orange-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md  border-2">
+            <div class="flex flex flex-col md:flex-row  ">
+                <div class="basis-1/2 md:base-full  md:flex-row   mx-3">
+                    <div class="flex flex-col ">
+                        <div>
+                            <h3 class="block text-sm font-medium text-gray-700">Project description</h3>
+                        </div>
+                        <div>
+                            <textarea name="description" id="description" x-model="form.description" rows="3"
+                                x-bind:disabled="mode=='edit'" maxlength="1000"
+                                class="mt-1 focus:ring-orange-500 focus:border-orange-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md  border-2">
                         </textarea>
+                        </div>
+                        <div class="mt-1 text-sm text-gray-500">Be verbose in the description. Describe what the asset does and how it achieves this. If
+                            your
+                            improves an existing product or approach then be sure to explicitly state how it does this.
+                            Provide
+                            information on business value and potential effort saving or avoidance.</div>
                     </div>
-                    <div>Be verbose in the description. Describe what the asset does and how it achieves this. If your
-                        improves an existing product or approach then be sure to explicitly state how it does this.
-                        Provide
-                        information on business value and potential effort saving or avoidance.</div>
+                </div>
+                <div class="basis-1/2 md:base-full  md:flex-row   mx-3">
+                    <div class="flex flex-col ">
+                    </div>
+                </div>
+            </div>          
+            
+            <div class="flex items-start mt-5 ml-3">
+                <div class="flex items-center h-5">
+                    <input id="confirm1" name="confirmAvaIP" type="checkbox" x-model="form.confirmAvaIP"
+                        class="focus:ring-orange-500 h-4 w-4 text-orange-600 border-gray-300 rounded">
+                </div>
+                <div class="ml-3 text-sm">
+                    <p class="text-gray-900">
+                        I confirm that this project is Avanade owned intellectual property, or the legal team have
+                        approved
+                        this project.
+                    </p>
                 </div>
             </div>
-            <div class="basis-1/2 md:base-full  md:flex-row   mx-3">
-                <div class="flex flex-col ">
+
+            <div class="flex items-start mt-1 ml-3">
+                <div class="flex items-center h-5">
+                    <input id="confirm2" name="confirmSecIPScan" type="checkbox" x-model="form.confirmSecIPScan"
+                        class="focus:ring-orange-500 h-4 w-4 text-orange-600 border-gray-300 rounded">
+                </div>
+                <div class="ml-3 text-sm">
+
+                    <p class="text-gray-900">I confirm that I will keep automated security and intellectual property
+                        scans
+                        enabled.
+                    </p>
                 </div>
             </div>
-        </div>
-
+            
+        </fieldset>
         <br>
-        <p>
-        <div class="flex items-start">
-            <div class="flex items-center h-5">
-                <input id="confirm1" name="confirmAvaIP" type="checkbox"   x-model="form.confirmAvaIP"
-                    class="focus:ring-orange-500 h-4 w-4 text-orange-600 border-gray-300 rounded">
-            </div>
-            <div class="ml-3 text-sm">
-                <p class="text-gray-500">
-                    I confirm that this project is Avanade owned intellectual property, or the legal team have approved
-                    this project.
-                </p>
-            </div>
-        </div>
-        </p>
-        <p>
-        <div class="flex items-start">
-            <div class="flex items-center h-5">
-                <input id="confirm2" name="confirmSecIPScan" type="checkbox"   x-model="form.confirmSecIPScan"
-                    class="focus:ring-orange-500 h-4 w-4 text-orange-600 border-gray-300 rounded">
-            </div>
-            <div class="ml-3 text-sm">
-
-                <p class="text-gray-500">I confirm that I will keep automated security and intellectual property scans
-                    enabled.
-                </p>
-            </div>
-        </div>
-        </p>
-        <br>
-        <p> Projects will be automatically created in Avanade innersource, and you will receive a Teams notification
+        <p class="ml-3 mt-1 text-sm text-gray-900"> Projects will be automatically created in Avanade innersource, and you will receive a Teams notification
             with a link to the project.<br />
             You can also view your projects under the projects tab.
         </p>
         <div>
             <div align="right">
-                <button type="submit"
+                <button type="button" x-show="mode=='view'"
                     class="bg-orange-500  inline-flex justify-center py-2 px-4 rounded-md text-white"
-                    :class="!isValid ? 'bg-orange-100' : ''"
-                    x-bind:disabled="!isValid"
-                    @click="submit()"
-                    >Submit
-                    project</button>
+                    :class="!isValid ? 'bg-orange-100' : ''" x-bind:disabled="!isValid" @click="mode='edit'">
 
+                    <span x-show="form.id">Edit Project</span>
+
+                </button>
+                <button type="submit" x-show="mode!='view'"
+                    class="bg-orange-500  inline-flex justify-center py-2 px-4 rounded-md text-white"
+                    :class="!isValid ? 'bg-orange-100' : ''" x-bind:disabled="!isValid" @click="submit()">
+
+                    <span x-show="!form.id">Submit project</span>
+                    <span x-show="form.id">Update project</span>
+
+                </button>  
+                <span x-show="form.id">
+                <button type="button" x-show="mode=='edit'"
+                    class="bg-orange-500  inline-flex justify-center py-2 px-4 rounded-md text-white"
+                    :class="!isValid ? 'bg-orange-100' : ''" x-bind:disabled="!isValid" @click="onload()">
+
+
+                    <span x-show="form.id">Cancel</span>
+
+                </button>
+            </span>
             </div>
         </div>
     </form>
 
-  
-</div>
 
+</div>
+<script src="/public/components/combobox.js"></script>
 <script type="text/javascript">
     function data() {
         return {
+            mode:
+                'view',
             form: {
                 name: '',
                 coowner: '',
                 description: '',
                 confirmAvaIP: false,
-                confirmSecIPScan: false
+                confirmSecIPScan: false,
             },
-            coowner:{
+            coowner: {
                 show: false,
             },
-            submit(){
+            submit() {
                 Alpine.store('master').modal.reset()
                 Alpine.store('master').modal.show()
-                Alpine.store('master').postData("/projects/new", this.form, "Your repository has been created.", "Go to your project list", "/projects")                
+                if (!this.form.id)
+                    Alpine.store('master').postData("/projects/new", this.form, "Your repository has been created.", "Go to your project list", "/projects")
+                else
+                    Alpine.store('master').postData("/projects/" + this.form.id, this.form, "Your repository has been created.", "Go to your project list", "/projects")
+
             },
-            showName(userPrincipalName, githubUser){
+            showName(userPrincipalName, githubUser) {
                 return userPrincipalName.includes(this.form.coowner) || githubUser.includes(this.form.coowner) ? true : false
             },
 
 
 
             get isValid() {
-                if(
+                if (
                     !!this.form.name &&
                     !!this.form.coowner &&
                     !!this.form.description &&
                     this.form.confirmAvaIP &&
-                    this.form.confirmSecIPScan){
-                        return true
-                } else {
-                    return false
-                }
-            },
-
-            showCheck(userPrincipalName){
-                return userPrincipalName.includes(this.form.coowner) == "" ? true : false
-            },
-
-            clearCoowner(){
-                this.form.coowner = ""
-            },
-
-            get isCoownerempty(){
-                if(this.form.coowner == "") {
+                    this.form.confirmSecIPScan) {
                     return true
                 } else {
                     return false
                 }
+            },
+
+            showCheck(userPrincipalName) {
+                return userPrincipalName.includes(this.form.coowner) == "" ? true : false
+            },
+
+            clearCoowner() {
+                this.form.coowner = ""
+            },
+
+            get isCoownerempty() {
+                if (this.form.coowner == "") {
+                    return true
+                } else {
+                    return false
+                }
+            },
+            async onload() {
+                var modal = Alpine.store('master').modal
+                modal.update('loading', 'Loading', 'Please wait', '', '')
+
+                this.form.id = '{{.Id}}'
+                if (this.form.id) {
+                    this.mode = 'view'
+                    await fetch('/api/projects/' + '{{.Id}}')
+                        .then(r => {
+                            r.json().then(body => {
+
+                                this.form.name = body[0]["ProjectName"]
+                                this.form.coowner = body[0]["ProjectCoowner"]
+                                this.form.description = body[0]["ProjectDescription"]
+                                this.form.confirmAvaIP = body[0]["ConfirmAvaIP"]
+                                this.form.confirmSecIPScan = body[0]["ConfirmEnabledSecurity"]
+                            });
+                        })
+                        .catch(e => {
+                            console.log(e)
+                            alert("catch")
+                        })
+                } else {
+                    this.mode = 'new'
+                }
+                modal.visible = false
             }
-
-
         }
     }
-
 </script>
 {{ end }}

@@ -45,7 +45,7 @@ func GetUserCommunitylist(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	//fmt.Printf(projects)
+
 	w.Write(jsonResp)
 }
 
@@ -82,6 +82,6 @@ func GetUserCommunity(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	//fmt.Printf(projects)
+
 	w.Write(jsonResp)
 }

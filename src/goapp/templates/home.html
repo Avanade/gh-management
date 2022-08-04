@@ -61,7 +61,7 @@
             Request a project
           </a>
         </h3>
-        <p class="mt-2 text-sm text-gray-500">Doloribus dolores nostrum quia qui natus officia quod et dolorem. Sit repellendus qui ut at blanditiis et quo et molestiae.</p>
+        <p class="mt-2 text-sm text-gray-500">Request a new repository in Avanade Innersource</p>
       </div>
       <span class="pointer-events-none absolute top-6 right-6 text-gray-300 group-hover:text-gray-400" aria-hidden="true">
         <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
@@ -70,7 +70,7 @@
       </span>
     </div>
 
-    <div class="relative group bg-white p-6 focus-within:ring-2 focus-within:ring-inset focus-within:ring-cyan-500">
+    <div @click="searchACommunity()" class="relative group bg-white p-6 focus-within:ring-2 focus-within:ring-inset focus-within:ring-cyan-500">
       <div>
         <span class="rounded-lg inline-flex p-3 bg-sky-50 text-sky-700 ring-4 ring-white">
           <!-- Heroicon name: outline/users -->
@@ -96,7 +96,7 @@
                 <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
               </svg>
             </div>
-            <input id="search" name="search" class="block w-full bg-white border border-gray-300 rounded-md py-2 pl-10 pr-3 text-sm placeholder-gray-500 focus:outline-none focus:text-gray-900 focus:placeholder-gray-400 focus:ring-1 focus:ring-rose-500 focus:border-rose-500 sm:text-sm" placeholder="Search" type="search">
+            <input id="search" @click.stop @keyup.enter="searchACommunity()" x-model="searchCommunity" name="search" class="block w-full bg-white border border-gray-300 rounded-md py-2 pl-10 pr-3 text-sm placeholder-gray-500 focus:outline-none focus:text-gray-900 focus:placeholder-gray-400 focus:ring-1 focus:ring-rose-500 focus:border-rose-500 sm:text-sm" placeholder="Search" type="search">
           </div>
         </div>
         <hr>
@@ -120,13 +120,13 @@
       </div>
       <div class="mt-8">
         <h3 class="text-lg font-medium">
-          <a href="#" class="focus:outline-none">
+          <a href="mailto:ospo@avanade.com" class="focus:outline-none">
             <!-- Extend touch target to entire panel -->
             <span class="absolute inset-0" aria-hidden="true"></span>
             Request Avanade to join a new community
           </a>
         </h3>
-        <p class="mt-2 text-sm text-gray-500">Doloribus dolores nostrum quia qui natus officia quod et dolorem. Sit repellendus qui ut at blanditiis et quo et molestiae.</p>
+        <p class="mt-2 text-sm text-gray-500"></p>
       </div>
       <span class="pointer-events-none absolute top-6 right-6 text-gray-300 group-hover:text-gray-400" aria-hidden="true">
         <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
@@ -152,7 +152,7 @@
             Your projects
           </a>
         </h3>
-        <p class="mt-2 text-sm text-gray-500">Doloribus dolores nostrum quia qui natus officia quod et dolorem. Sit repellendus qui ut at blanditiis et quo et molestiae.</p>
+        <p class="mt-2 text-sm text-gray-500">View all projects you requested and its approval status.</p>
       </div>
       <span class="pointer-events-none absolute top-6 right-6 text-gray-300 group-hover:text-gray-400" aria-hidden="true">
         <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
@@ -174,13 +174,13 @@
       </div>
       <div class="mt-8">
         <h3 class="text-lg font-medium">
-          <a href="#" class="focus:outline-none">
+          <a href="/communities/list" class="focus:outline-none">
             <!-- Extend touch target to entire panel -->
             <span class="absolute inset-0" aria-hidden="true"></span>
             Your communities
           </a>
         </h3>
-        <p class="mt-2 text-sm text-gray-500">Doloribus dolores nostrum quia qui natus officia quod et dolorem. Sit repellendus qui ut at blanditiis et quo et molestiae.</p>
+        <p class="mt-2 text-sm text-gray-500">View all communities.</p>
       </div>
       <span class="pointer-events-none absolute top-6 right-6 text-gray-300 group-hover:text-gray-400" aria-hidden="true">
         <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
@@ -195,8 +195,12 @@
   function dashboardData() {
     return {
       search: '',
+      searchCommunity: '',
       searchAllProjects() {
         window.location.href = '/projects?view=all&search=' + this.search
+      },
+      searchACommunity() {
+        window.location.href = '/communities/list?search=' + this.searchCommunity
       }
     }
   }

@@ -30,7 +30,9 @@ func GetApprovalTypes(w http.ResponseWriter, r *http.Request) {
 		filter, _ := strconv.Atoi(params["filter"][0])
 		offset, _ := strconv.Atoi(params["offset"][0])
 		search := params["search"][0]
-		data, _ = db.SelectApprovalTypesByFilter(offset, filter, search)
+		orderby := params["orderby"][0]
+		ordertype := params["ordertype"][0]
+		data, _ = db.SelectApprovalTypesByFilter(offset, filter, orderby, ordertype, search)
 	} else {
 		result, err := db.SelectApprovalTypes()
 		if err != nil {

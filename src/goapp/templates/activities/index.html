@@ -17,14 +17,51 @@
         <div class="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
           <div x-data="table({
             callback : getActivities,
+            onRowClick : onRowClickHandler,
             data : 'Data',
             total : 'Total',
             columns : [
-              { name : 'Date', value : 'Date' },
-              { name : 'Activity', value : 'Name' },
-              { name : 'Community/Project', value : 'CommunityName' },
-              { name : 'Type', value : 'TypeName' },
-              { name : 'Primary Contribution Area', value : 'PrimaryContributionAreaName' }
+              { 
+                name : 'Date', 
+                value : 'Date',
+                render : value => { return new Date(value).toLocaleDateString(); },
+                sort : {
+                  orderby : 'Date',
+                  ordertype : 'ASC'
+                }
+              },
+              { 
+                name : 'Activity', 
+                value : 'Name',
+                sort : {
+                  orderby : 'Activity',
+                  ordertype : 'ASC'
+                } 
+              },
+              { 
+                name : 'Community/Project', 
+                value : 'CommunityName',
+                sort : {
+                  orderby : 'Community',
+                  ordertype : 'Community'
+                }
+              },
+              { 
+                name : 'Type', 
+                value : 'TypeName',
+                sort : {
+                  orderby : 'Type',
+                  ordertype : 'ASC'
+                }
+              },
+              { 
+                name : 'Primary Contribution Area', 
+                value : 'PrimaryContributionAreaName',
+                sort : {
+                  orderby : 'PrimaryContributionArea',
+                  ordertype : 'ASC'
+              }
+              }
             ]
           })">
             <div x-html="template"></div>
@@ -36,8 +73,13 @@
 
   <script src="/public/components/table.js"></script>
   <script type="text/javascript">
+    async function onRowClickHandler(data){
+      window.location = `/activities/view/${data.Id}`;
+    }
     async function getActivities(e){
-      const res = await fetch(`/api/activity?filter=${e.filter}&offset=${e.page}&search=${e.search}`)
+      const offset = e.filter * e.page;
+      const search = encodeURIComponent(e.search)
+      const res = await fetch(`/api/activity?filter=${e.filter}&offset=${offset}&search=${search}&orderby=${e.orderby}&ordertype=${e.ordertype}`)
 
       const data = await res.json()
       return data

@@ -3,7 +3,7 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-ALTER PROCEDURE [dbo].[PR_ApprovalTypes_Update_ById] 
+Create PROCEDURE [dbo].[PR_ApprovalTypes_Update_ById] 
 (
 	@Id INT,
 	@Name VARCHAR(50),

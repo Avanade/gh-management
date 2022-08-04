@@ -1,7 +1,6 @@
 package routes
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 	models "main/models"
@@ -11,15 +10,25 @@ import (
 	session "main/pkg/session"
 	template "main/pkg/template"
 	"net/http"
-	"os"
 	"strings"
+
+	"github.com/gorilla/mux"
 )
 
 func ProjectsNewHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "GET":
+
+		//users := db.GetUsersWithGithub()
+		req := mux.Vars(r)
+		id := req["id"]
+
 		users := db.GetUsersWithGithub()
-		template.UseTemplate(&w, r, "projects/new", users)
+		data := map[string]interface{}{
+			"Id":    id,
+			"users": users,
+		}
+		template.UseTemplate(&w, r, "projects/new", data)
 	case "POST":
 		sessionaz, _ := session.Store.Get(r, "auth-session")
 		iprofile := sessionaz.Values["profile"]
@@ -28,6 +37,7 @@ func ProjectsNewHandler(w http.ResponseWriter, r *http.Request) {
 		r.ParseForm()
 
 		var body models.TypNewProjectReqBody
+
 		err := json.NewDecoder(r.Body).Decode(&body)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
@@ -48,107 +58,59 @@ func ProjectsNewHandler(w http.ResponseWriter, r *http.Request) {
 		if existsDb || existsGH {
 			if existsDb {
 				httpResponseError(w, http.StatusBadRequest, "The project name is existing in the database.")
-			}
-			if existsGH {
+			} else if existsGH {
 				httpResponseError(w, http.StatusBadRequest, "The project name is existing in Github.")
 			}
 		} else {
 			_, err = githubAPI.CreatePrivateGitHubRepository(body)
 			if err != nil {
+				fmt.Println(err)
 				httpResponseError(w, http.StatusInternalServerError, "There is a problem creating the GitHub repository.")
 			}
-			id := ghmgmtdb.PRProjectsInsert(body, username.(string))
-			go RequestApproval(id)
+
+			_ = ghmgmtdb.PRProjectsInsert(body, username.(string))
+
 			w.WriteHeader(http.StatusOK)
 		}
 	}
 }
-func RequestApproval(id int64) {
-	projectApprovals := ghmgmtdb.PopulateProjectsApproval(id)
 
-	for _, v := range projectApprovals {
-		err := ApprovalSystemRequest(v)
-		handleError(err)
-	}
+func ProjectsHandler(w http.ResponseWriter, r *http.Request) {
+	req := mux.Vars(r)
+	id := req["id"]
 
-}
+	switch r.Method {
+	case "GET":
 
-func ReprocessRequestApproval() {
-	projectApprovals := ghmgmtdb.GetFailedProjectApprovalRequests()
+		users := db.GetUsersWithGithub()
+		data := map[string]interface{}{
+			"Id":    id,
+			"users": users,
+		}
+		template.UseTemplate(&w, r, "projects/new", data)
+	case "POST":
 
-	for _, v := range projectApprovals {
-		go ApprovalSystemRequest(v)
-	}
+		sessionaz, _ := session.Store.Get(r, "auth-session")
+		iprofile := sessionaz.Values["profile"]
+		profile := iprofile.(map[string]interface{})
+		username := profile["preferred_username"]
+		r.ParseForm()
 
-}
+		var body models.TypNewProjectReqBody
 
-func ApprovalSystemRequest(data models.TypProjectApprovals) error {
+		err := json.NewDecoder(r.Body).Decode(&body)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
 
-	url := os.Getenv("APPROVAL_SYSTEM_APP_URL")
-	if url != "" {
-		ch := make(chan *http.Response)
-		// var res *http.Response
-
-		bodyTemplate := `<p>Hi |ApproverUserPrincipalName|!</p>
-		<p>|RequesterName| is requesting for a new project and is now pending for |ApprovalType| review.</p>
-		<p>Below are the details:</p>
-		<table>
-			<tr>
-				<td style="font-weight: bold;">Project Name<td>
-				<td style="font-size:larger">|ProjectName|<td>
-			</tr>
-			<tr>
-				<td style="font-weight: bold;">CoOwner<td>
-				<td style="font-size:larger">|CoownerName|<td>
-			</tr>
-			<tr>
-				<td style="font-weight: bold;">Description<td>
-				<td style="font-size:larger">|ProjectDescription|<td>
-			</tr>
-		</table>
-		<p>For more information, send an email to <a href="mailto:|RequesterUserPrincipalName|">|RequesterUserPrincipalName|</a></p>
-		`
-		replacer := strings.NewReplacer("|ApproverUserPrincipalName|", data.ApproverUserPrincipalName,
-			"|RequesterName|", data.RequesterName,
-			"|ApprovalType|", data.ApprovalType,
-			"|ProjectName|", data.ProjectName,
-			"|CoownerName|", data.CoownerName,
-			"|ProjectDescription|", data.ProjectDescription,
-			"|RequesterUserPrincipalName|", data.RequesterUserPrincipalName,
-		)
-		body := replacer.Replace(bodyTemplate)
-
-		postParams := models.TypApprovalSystemPost{
-			ApplicationId:       os.Getenv("APPROVAL_SYSTEM_APP_ID"),
-			ApplicationModuleId: os.Getenv("APPROVAL_SYSTEM_APP_MODULE_PROJECTS"),
-			Email:               data.ApproverUserPrincipalName,
-			Subject:             fmt.Sprintf("[GH-Management] New Project For Review - %v", data.ProjectName),
-			Body:                body,
-			RequesterEmail:      data.RequesterUserPrincipalName,
+			fmt.Println(err.Error())
+			return
 		}
 
-		go getHttpPostResponseStatus(url, postParams, ch)
-		r := <-ch
-		if r != nil {
-			var res models.TypApprovalSystemPostResponse
-			err := json.NewDecoder(r.Body).Decode(&res)
-			if err != nil {
-				return err
-			}
+		ghmgmtdb.PRProjectsUpdate(body, username.(string))
 
-			ghmgmtdb.ProjectsApprovalUpdateGUID(data.Id, res.ItemId)
-		}
+		w.WriteHeader(http.StatusOK)
 	}
-	return nil
-}
 
-func getHttpPostResponseStatus(url string, data interface{}, ch chan *http.Response) {
-	jsonReq, err := json.Marshal(data)
-	res, err := http.Post(url, "application/json; charset=utf-8", bytes.NewBuffer(jsonReq))
-	if err != nil {
-		ch <- nil
-	}
-	ch <- res
 }
 
 func handleError(err error) {
@@ -158,14 +120,11 @@ func handleError(err error) {
 }
 
 func httpResponseError(w http.ResponseWriter, code int, errorMessage string) {
-	msg := TypErrorJsonReturn{
-		Error: errorMessage,
-	}
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-Type", "text/html")
 	w.WriteHeader(code)
-	jsonResponse, err := json.Marshal(msg)
+	response, err := json.Marshal(errorMessage)
 	handleError(err)
-	w.Write(jsonResponse)
+	w.Write(response)
 }
 
 type TypErrorJsonReturn struct {

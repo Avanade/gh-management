@@ -41,6 +41,27 @@
               this.redirectUrl = "/"
             }
           },
+          confirmationModal: {
+            visible: false,
+            title: "Confirmation",
+            message: "Do you want to continue?",
+            funcHolder: () => { },
+            proceed() {
+              this.visible = false
+              this.funcHolder()
+            },
+            hide() {
+              this.visible = false
+            },
+            show() {
+              this.visible = true
+            },
+            update(title, message, f) {
+              this.title = title
+              this.message = message
+              this.funcHolder = f
+            }
+          },
           postData(endpoint, body, successMessage, actionButtonText, redirectUrl) {
             axios.post(endpoint, body,
             {
@@ -59,7 +80,7 @@
               }
             })
             .catch(e=>{
-              var msg = e.response.data.error ? e.response.data.error : "An error occured while processing."
+              var msg = e.response.data ? e.response.data : "An error occured while processing."
               this.modal.update("error", "Failed", msg, "","")
             })
           },
@@ -98,7 +119,7 @@
               }
             })
             .catch(e=>{
-              var msg = e.response.data.error ? e.response.data.error : "An error occured while processing."
+              var msg = e.response.data ? e.response.data : "An error occured while processing."
               this.modal.update("error", "Failed", msg, "","")
             })
           }
@@ -107,7 +128,7 @@
     </script>
   </head>
   <body>
-    <div x-data="masterData()" x-init="clearSearchBar()">
+    <div x-data="masterData()" x-init="onLoad()">
       <!-- Off-canvas menu for mobile, show/hide based on off-canvas menu state. -->
       <div class="relative z-40 md:hidden" role="dialog" aria-modal="true">
         <div class="fixed inset-0 bg-gray-600 bg-opacity-75" id="shade"></div>
@@ -202,7 +223,8 @@
                     <p
                       class="text-sm font-medium text-gray-500 group-hover:text-gray-700"
                     >
-                      View profile | <a href="/logout/azure">Logout</a>
+                      <a href=""> View profile </a> | <a href="/logout/azure">Logout</a>
+                      
                     </p>
                   </div>
                 </div>
@@ -222,13 +244,15 @@
         >
           <div class="flex-1 flex flex-col pt-5 pb-4 overflow-y-auto">
             <div class="flex items-center flex-shrink-0 px-4">
+              <a href="***REMOVED***">
               <img
                 class="h-8 w-auto"
                 src="/public/ava-logo.png"
                 alt="Avanade"
               />
+              </a>
             </div>
-            <div class="pl-4 text-sm pb-7">Open Technology</div>
+            <div class="pl-4 text-sm pb-7"><a href="***REMOVED***">Open Technology</a></div>
             <nav class="mt-5 px-2 space-y-1">
               {{ $page := .Header.Page}}
               {{ range $menu := .Header.Menu }}
@@ -283,7 +307,7 @@
                   <p
                     class="text-xs font-medium text-gray-500 group-hover:text-gray-700"
                   >
-                    View profile | <a href="/logout/azure">Logout</a>
+                    <a @click="isUserDomain()" class="cursor-pointer"> View Profile</a> | <a href="/logout/azure">Logout</a>
                   </p>
                 </div>
               </div>
@@ -336,11 +360,11 @@
           <div class="py-6">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
               <div id="content" class="container px-4">
-                <div class="flex justify-between">
-                  <div id="pageTitlePlaceholder" class="font-bold text-lg mb-5"></div>
+                <div class="flex justify-between mb-5">
+                  <div id="pageTitlePlaceholder" class="font-bold text-lg self-center"></div>
                     <!-- START of SEARCH BAR-->
-                    <div  x-show="topSearch" class=" w-96 ">
-                      <div class=" my-8 relative rounded-md shadow-sm ">
+                    <div  x-show="topSearch" class="w-96 self-center">
+                      <div class="relative rounded-md shadow-sm">
                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center  w-full pointer-events-none">
 
                           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
@@ -348,9 +372,9 @@
                           </svg>
 
                         </div>
-                        <input @keyup.enter="search" @input.enter="showClearBtn()" x-model="searchBar" type="text" id="text" class="block w-full focus:ring-indigo-500 focus:border-indigo-500 pl-10 sm:text-sm border-gray-300 rounded-md" placeholder="Search: Projects, Communities, People" autocomplete="off">
+                        <input @keyup.enter="search()" @input.enter="showClearBtn()" x-model="searchBar" x-ref="searchInput" type="text" id="text" class=" block w-full focus:ring-indigo-500 focus:border-indigo-500 pl-10 sm:text-sm border-gray-300 rounded-md" placeholder="Search: Projects, Communities, People" autocomplete="off">
 
-                        <button @click="clearSearchBar()" x-show="clearBtn" class="absolute inset-y-0 right-0 pr-3 flex items-center focus:pointer-events-auto">
+                        <button @click="clearSearchBar(), $refs.searchInput.focus()" x-show="clearBtn" class="absolute inset-y-0 right-0 pr-3 flex items-center focus:pointer-events-auto">
                           <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
                           </svg>
@@ -359,7 +383,7 @@
                       </div>
                     </div>
                     <!-- END of SEARCH BAR -->
-                  <div id="ghAccountPlaceholder"></div>
+                  <div id="ghAccountPlaceholder" class="self-center"></div>
                 </div>
                 {{ if .ProfileGH.LoggedIn }}
                   <div id="ghAccount">
@@ -368,6 +392,42 @@
                       <a href="/logout/github" class="hover:underline">(Logout)</a>
                     </p>
                   </div>
+                  {{ if not .ProfileGH.IsEnterpriseMember}}
+                    <template x-if="profileDomain == 'avanade.com'">
+                      <div class="bg-yellow-50 p-4 mb-3">
+                        <div class="flex">
+                          <div class="flex-shrink-0">
+                            <svg class="h-5 w-5 text-yellow-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                              <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                            </svg>
+                          </div>
+                          <div class="ml-3 flex-1 md:flex md:justify-between">
+                            <p class="text-sm text-yellow-700">Your user account does not have a Visual Studio licence associated with it. You are able to log into GitHub, but to access GitHub Enterprise, you will need to request a Visual Studio licence.</p>
+                            <p class="mt-3 text-sm md:mt-0 md:ml-6">
+                              <a href="https://avanade.sharepoint.com/sites/VisualStudioSubscriptions" class="whitespace-nowrap font-medium text-yellow-700 hover:text-yellow-600">Avanade's Visual Studio request site<span aria-hidden="true">&rarr;</span></a>
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </template>
+                    <template x-if="profileDomain == 'accenture.com'">
+                      <div class="bg-yellow-50 p-4 mb-3">
+                        <div class="flex">
+                          <div class="flex-shrink-0">
+                            <svg class="h-5 w-5 text-yellow-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                              <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                            </svg>
+                          </div>
+                          <div class="ml-3 flex-1 md:flex md:justify-between">
+                            <p class="text-sm text-yellow-700">
+                              Your user account has not been granted access to Avanade's GitHub Enterprise licence. If you have a Visual Studio licence, then open an incognito or private browser window, and 
+                              <a href="https://myaccess.microsoft.com/%40avanade.onmicrosoft.com#/access-packages/e9a49c54-74a8-4471-8aa8-00781df3e39c" class="whitespace-nowrap font-medium text-yellow-700 hover:text-yellow-600">click this link</a> to request access. Enter your @Accenture.com credentials to login. Click Request Access.
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </template>
+                  {{ end }}
                   {{ if not .ProfileGH.IsValid}}
                   <div class="bg-red-50 p-4 mb-3">
                     <div class="flex">
@@ -403,6 +463,7 @@
                   </div>
                 </div>
                 {{ end }}
+
                 <div class="bg-white p-4 rounded-md">
                   {{ template "content" .Content}}
                 </div>
@@ -419,31 +480,31 @@
               aria-label="Footer"
             >
               <div class="px-5 py-2 ">
-                <a href="#" class="text-gray-500 hover:text-gray-900">
+                <a href="***REMOVED***" class="text-gray-500 hover:text-gray-900">
                   Privacy Policy
                 </a>
               </div>
 
               <div class="px-5 py-2">
-                <a href="#" class="text-gray-500 hover:text-gray-900">
+                <a href="***REMOVED***" class="text-gray-500 hover:text-gray-900">
                   Terms of Use
                 </a>
               </div>
 
               <div class="px-5 py-2">
-                <a href="#" class="text-gray-500 hover:text-gray-900">
+                <a href="https://avanade.github.io/code-of-conduct/" class="text-gray-500 hover:text-gray-900">
                   Open Source Code of Conduct
                 </a>
               </div>
 
               <div class="px-5 py-2">
-                <a href="#" class="text-gray-500 hover:text-gray-900">
+                <a href="***REMOVED***" class="text-gray-500 hover:text-gray-900">
                   Open Source Policy
                 </a>
               </div>
 
               <div class="px-5 py-2">
-                <a href="#" class="text-gray-500 hover:text-gray-900 text-sm">
+                <a href="***REMOVED***" class="text-gray-500 hover:text-gray-900 text-sm">
                   Trade Association Policy
                 </a>
               </div>
@@ -490,12 +551,43 @@
                   <a x-bind:href="$store.master.modal.redirectUrl" x-text="$store.master.modal.actionButtonText" ></a>
                   </a>
                 </div>
-                <div class="mt-3 text-center sm:mt-5 cursor-pointer" @click="$store.master.modal.reset()" x-bind:hidden="$store.master.modal.icon !== 'error' || ($store.master.modal.icon !== 'success' && !(!!$store.master.modal.actionButtonText && !!$store.master.modal.redirectUrl))">Close</div>
+                <div class="mt-3 text-center sm:mt-5 cursor-pointer" @click="$store.master.modal.reset()" x-bind:hidden="$store.master.modal.icon !== 'error' || ($store.master.modal.icon !== 'success' && $store.master.modal.icon !== 'error' && !(!!$store.master.modal.actionButtonText && !!$store.master.modal.redirectUrl))">Close</div>
               </div>
             </div>
           </div>
         </div>
       </div>
+
+      <!-- Confirmation Modal -->
+      <div id="confirmationModal" x-show="$store.master.confirmationModal.visible" hidden class="relative z-10" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
+
+        <div class="fixed z-10 inset-0 overflow-y-auto">
+          <div class="flex items-end sm:items-center justify-center min-h-full p-4 text-center sm:p-0">
+            <div class="relative bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:max-w-lg sm:w-full sm:p-6">
+              <div class="sm:flex sm:items-start">
+                <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-yellow-100 sm:mx-0 sm:h-10 sm:w-10">
+                  <!-- Heroicon name: outline/exclamation -->
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
+                  <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title" x-text="$store.master.confirmationModal.title"></h3>
+                  <div class="mt-2">
+                    <p class="text-sm text-gray-500" x-text="$store.master.confirmationModal.message"></p>
+                  </div>
+                </div>
+              </div>
+              <div class="mt-5 sm:mt-4 sm:ml-10 sm:pl-4 sm:flex">
+                <button @click="$store.master.confirmationModal.proceed()" type="button" class="inline-flex justify-center w-full rounded-md border border-transparent shadow-sm px-4 py-2 bg-[#FF5800] text-base font-medium text-white hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:w-auto sm:text-sm">Proceed</button>
+                <button @click="$store.master.confirmationModal.hide()" type="button" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 px-4 py-2 bg-white text-base font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">Cancel</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
     </div>
 
   <script type="text/javascript">
@@ -504,6 +596,26 @@
         topSearch: true,
         searchBar: '',
         clearBtn: false,
+
+        profile:{
+          name:'{{.Profile.name}}',
+          username:'{{.Profile.preferred_username}}'
+        },
+        get profileDomain() {
+          var domain = this.profile.username.split('@')[1]
+          return domain
+        },
+        get profileUrl() {
+          return 'https://people.' + this.profileDomain
+        },
+        isUserDomain() {
+          if(this.profileDomain === 'avanade.com') {
+            window.location.href = '***REMOVED***'
+          } else { 
+            window.location.href = '***REMOVED***'
+          }
+
+        },
         showClearBtn() {
           console.log(this.searchBar)
           if(this.searchBar == ''){
@@ -520,14 +632,14 @@
           this.topSearch = false,
           window.location.href = '/search?search=' + this.searchBar
           //
-        }
-
+        },
         onLoad(){
-            document.getElementById("modal").attributes.removeNamedItem("hidden")
-            let redirect = localStorage.getItem("redirectUrl")
-            if(redirect) window.location.href=redirect; localStorage.clear()
-          },
-
+          this.clearSearchBar()
+          document.getElementById("modal").attributes.removeNamedItem("hidden")
+          document.getElementById("confirmationModal").attributes.removeNamedItem("hidden")
+          let redirect = localStorage.getItem("redirectUrl")
+          if(redirect) window.location.href=redirect; localStorage.clear()
+        },
       }
     }
   </script>

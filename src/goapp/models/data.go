@@ -8,13 +8,15 @@ type TypPageData struct {
 }
 
 type TypGitHubUser struct {
-	LoggedIn    bool
-	Id          int    `json:"id"`
-	Username    string `json:"login"`
-	NodeId      string `json:"node_id"`
-	AvatarUrl   string `json:"avatar_url"`
-	AccessToken string
-	IsValid     bool
+	LoggedIn           bool
+	Id                 int    `json:"id"`
+	Username           string `json:"login"`
+	NodeId             string `json:"node_id"`
+	AvatarUrl          string `json:"avatar_url"`
+	AccessToken        string
+	IsValid            bool
+	IsDirect           bool
+	IsEnterpriseMember bool
 }
 
 type TypHeaders struct {
@@ -30,11 +32,21 @@ type TypMenu struct {
 }
 
 type TypNewProjectReqBody struct {
+	Id               string `json:"id"`
 	Name             string `json:"name"`
 	Coowner          string `json:"coowner"`
 	Description      string `json:"description"`
 	ConfirmAvaIP     bool   `json:"confirmAvaIP"`
 	ConfirmSecIPScan bool   `json:"confirmSecIPScan"`
+}
+
+type TypeMakeProjectPublicReqBody struct {
+	Id                         string `json:"id"`
+	Newcontribution            string `json:"newcontribution"`
+	OSSsponsor                 string `json:"osssponsor"`
+	Avanadeofferingsassets     string `json:"avanadeofferingsassets"`
+	Willbecommercialversion    string `json:"willbecommercialversion"`
+	OSSContributionInformation string `json:"osscontributionInformation"`
 }
 
 type TypCommunity struct {
@@ -80,6 +92,12 @@ type TypProjectApprovals struct {
 	ApprovalType               string
 	ApproverUserPrincipalName  string
 	ApprovalDescription        string
+	Newcontribution            string
+	OSSsponsor                 string
+	Avanadeofferingsassets     string
+	Willbecommercialversion    string
+	OSSContributionInformation string
+	RequestStatus              string
 }
 
 type TypApprovalSystemPost struct {
@@ -128,10 +146,10 @@ type TypCommunityOnBoarding struct {
 }
 
 type TypCommunityApprovals struct {
-	Id						   int64
+	Id                         int64
 	CommunityId                int64
 	CommunityName              string
-	CommunityUrl	           string
+	CommunityUrl               string
 	CommunityDescription       string
 	CommunityNotes             string
 	CommunityTradeAssocId      string
@@ -142,4 +160,26 @@ type TypCommunityApprovals struct {
 	RequesterUserPrincipalName string
 	ApproverUserPrincipalName  string
 	ApprovalDescription        string
+}
+
+type TypCategory struct {
+	Id               int                   `json:"id"`
+	Name             string                `json:"name"`
+	Created          string                `json:"created"`
+	CreatedBy        string                `json:"createdBy"`
+	Modified         string                `json:"modified"`
+	ModifiedBy       string                `json:"modifiedBy"`
+	CategoryArticles []TypCategoryArticles `json:"categoryArticles"`
+}
+
+type TypCategoryArticles struct {
+	Id         int    `json:"id"`
+	Name       string `json:"name"`
+	Url        string `json:"Url"`
+	Body       string `json:"Body"`
+	CategoryId int    `json:"CategoryId"`
+	Created    string `json:"created"`
+	CreatedBy  string `json:"createdBy"`
+	Modified   string `json:"modified"`
+	ModifiedBy string `json:"modifiedBy"`
 }

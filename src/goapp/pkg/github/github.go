@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"main/models"
 	"main/pkg/envvar"
@@ -28,7 +29,7 @@ func createClient(token string) *github.Client {
 
 func CreatePrivateGitHubRepository(data models.TypNewProjectReqBody) (*github.Repository, error) {
 	client := createClient(os.Getenv("GH_TOKEN"))
-	owner := envvar.GetEnvVar("GH_PROJECT_OWNER", "ava-innersource")
+	owner := os.Getenv("GH_ORG_INNERSOURCE")
 	repoRequest := &github.TemplateRepoRequest{
 		Name:        &data.Name,
 		Owner:       &owner,
@@ -36,7 +37,7 @@ func CreatePrivateGitHubRepository(data models.TypNewProjectReqBody) (*github.Re
 		Private:     github.Bool(true),
 	}
 
-	repo, _, err := client.Repositories.CreateFromTemplate(context.Background(), "avanade", "avanade-template", repoRequest)
+	repo, _, err := client.Repositories.CreateFromTemplate(context.Background(), os.Getenv("GH_REPO_TEMPLATE"), os.Getenv("GH_REPO_TEMPLATE_NAME"), repoRequest)
 	if err != nil {
 		return nil, err
 	}
@@ -47,7 +48,7 @@ func CreatePrivateGitHubRepository(data models.TypNewProjectReqBody) (*github.Re
 
 func AddCollaborator(data models.TypNewProjectReqBody) (*github.Response, error) {
 	client := createClient(os.Getenv("GH_TOKEN"))
-	owner := envvar.GetEnvVar("GH_PROJECT_OWNER", "ava-innersource")
+	owner := os.Getenv("GH_ORG_INNERSOURCE")
 	opts := &github.RepositoryAddCollaboratorOptions{
 		Permission: "admin",
 	}
@@ -62,9 +63,9 @@ func AddCollaborator(data models.TypNewProjectReqBody) (*github.Response, error)
 	return resp, err
 }
 
-func GetRepository(repoName string) (*github.Repository, error) {
+func GetRepository(repoName string, org string) (*github.Repository, error) {
 	client := createClient(os.Getenv("GH_TOKEN"))
-	owner := envvar.GetEnvVar("GH_PROJECT_OWNER", "ava-innersource")
+	owner := org
 	repo, _, err := client.Repositories.Get(context.Background(), owner, repoName)
 	if err != nil {
 		return nil, err
@@ -72,16 +73,33 @@ func GetRepository(repoName string) (*github.Repository, error) {
 	return repo, nil
 }
 
-func Repo_IsExisting(repoName string) (bool, error) {
-	_, err := GetRepository(repoName)
+func IsArchived(repoName string, org string) (bool, error) {
+	repo, err := GetRepository(repoName, org)
 	if err != nil {
-		if strings.Contains(err.Error(), "Not Found") {
-			return false, nil
-		}
 		return false, err
 	}
 
-	return true, nil
+	return repo.GetArchived(), nil
+}
+
+func Repo_IsExisting(repoName string) (bool, error) {
+	exists := false
+	organizations := []string{os.Getenv("GH_ORG_INNERSOURCE"), os.Getenv("GH_ORG_OPENSOURCE")}
+
+	for _, org := range organizations {
+		_, err := GetRepository(repoName, org)
+		if err != nil {
+			if strings.Contains(err.Error(), "Not Found") {
+				continue
+			} else {
+				return false, err
+			}
+		} else {
+			exists = true
+		}
+	}
+
+	return exists, nil
 }
 
 func GetRepositoriesFromOrganization(org string) ([]Repo, error) {
@@ -115,6 +133,7 @@ func GetRepositoriesFromOrganization(org string) ([]Repo, error) {
 			Description: repo.GetDescription(),
 			Private:     repo.GetPrivate(),
 			Created:     repo.GetCreatedAt(),
+			IsArchived:  repo.GetArchived(),
 		}
 		repoList = append(repoList, r)
 	}
@@ -122,11 +141,34 @@ func GetRepositoriesFromOrganization(org string) ([]Repo, error) {
 	return repoList, nil
 }
 
-func SetProjectVisibility(projectName string, visibility string) error {
+func SetProjectVisibility(projectName string, visibility string, org string) error {
 	client := &http.Client{}
-	urlPath := fmt.Sprintf("https://api.github.com/repos/%s/%s", envvar.GetEnvVar("GH_PROJECT_OWNER", "Avanade"), projectName)
+	urlPath := fmt.Sprintf("https://api.github.com/repos/%s/%s", org, projectName)
 	postBody, _ := json.Marshal(map[string]string{
 		"visibility": visibility,
+	})
+	reqBody := bytes.NewBuffer(postBody)
+
+	req, err := http.NewRequest(http.MethodPatch, urlPath, reqBody)
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", "Bearer "+envvar.GetEnvVar("GH_TOKEN", ""))
+
+	resp, err := client.Do(req)
+	if err != nil {
+		return err
+	}
+	if resp.StatusCode == http.StatusUnprocessableEntity {
+		return errors.New("Failed to make repository " + visibility)
+	}
+
+	return nil
+}
+
+func ArchiveProject(projectName string, archive bool, org string) error {
+	client := &http.Client{}
+	urlPath := fmt.Sprintf("https://api.github.com/repos/%s/%s", org, projectName)
+	postBody, _ := json.Marshal(map[string]bool{
+		"archived": archive,
 	})
 	reqBody := bytes.NewBuffer(postBody)
 
@@ -139,6 +181,17 @@ func SetProjectVisibility(projectName string, visibility string) error {
 		return err
 	}
 
+	return nil
+}
+
+func TransferRepository(repo string, owner string, newOwner string) error {
+	client := createClient(os.Getenv("GH_TOKEN"))
+	opt := github.TransferRequest{NewOwner: newOwner}
+
+	_, _, err := client.Repositories.Transfer(context.Background(), owner, repo, opt)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 

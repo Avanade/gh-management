@@ -42,6 +42,5 @@ func CommunityTagPerCommunityId(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	//fmt.Printf(projects)
 	w.Write(jsonResp)
 }
