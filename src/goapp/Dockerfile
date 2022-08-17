@@ -1,4 +1,4 @@
-FROM golang:1.18.2-stretch
+FROM golang:1.18.5-buster
 
 # Set the Current Working Directory inside the container
 WORKDIR /goapp
