@@ -210,6 +210,8 @@
                     .then(data => {
 
                         this.sponsors.data = data
+
+                        console.log(this.sponsors);
                     }))
                     .catch(() => {
                         Alpine.store('master').modal.update('error', 'Error', 'Please try again', '', '')
@@ -272,7 +274,9 @@
                                     this.form.sponsors.push({
                                         displayName: body[index]['UserPrincipalName'],
                                         mail: body[index]['UserPrincipalName']
+
                                     })
+
                                 }
                                 //   this.showSpinner = false
                                 spinnercount = spinnercount - 1
