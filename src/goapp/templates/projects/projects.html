@@ -1,22 +1,22 @@
 {{ define "content" }}
 
 
-<div id="pageTitle">Projects</div>
+<div id="pageTitle">Repositories</div>
 
-<div x-data="myProjectsData()" x-init="getPageDetails();">
+<div x-data="myRepositoriesData()" x-init="getPageDetails();">
   <div class="flex justify-between">
     <div>
     <nav class="flex space-x-4" aria-label="Tabs">
 
-      <div @click="switchTo('my')" class="px-3 py-2 font-medium text-sm rounded-md cursor-pointer" x-bind:class="view==='my' ? 'bg-[#fff2eb] text-[#FF5800]':'text-gray-500 hover:text-gray-700'"> Your Projects </div>
+      <div @click="switchTo('my')" class="px-3 py-2 font-medium text-sm rounded-md cursor-pointer" x-bind:class="view==='my' ? 'bg-[#fff2eb] text-[#FF5800]':'text-gray-500 hover:text-gray-700'"> Your Repositories </div>
 
-      <div @click="switchTo('all')" class="px-3 py-2 font-medium text-sm rounded-md cursor-pointer" x-bind:class="view==='all' ? 'bg-[#fff2eb] text-[#FF5800]':'text-gray-500 hover:text-gray-700'"> All Projects </div>
+      <div @click="switchTo('all')" class="px-3 py-2 font-medium text-sm rounded-md cursor-pointer" x-bind:class="view==='all' ? 'bg-[#fff2eb] text-[#FF5800]':'text-gray-500 hover:text-gray-700'"> All Repositories </div>
     </nav>
   </div>
     <div class="flex">
-      <a href="/projects/new">
+      <a href="/repositories/new">
         <button class="bg-[#FF5800] hover:bg-[#FF4300] text-white font-bold py-2 px-4 rounded">
-          Request a Project
+          Request a Repository
         </button>
       </a>
     </div>
@@ -31,7 +31,7 @@
     </div>
 
     <!-- IF THE USER HAS NO PROJECTS -->
-    <div class="h-40" x-show="!showSpinner && !userProjectsList && view==='my'">
+    <div class="h-40" x-show="!showSpinner && !userRepositoriesList && view==='my'">
       <div class="flex items-center justify-center mt-20">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
           <path stroke-linecap="round" stroke-linejoin="round" d="M17 14v6m-3-3h6M6 10h2a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v2a2 2 0 002 2zm10 0h2a2 2 0 002-2V6a2 2 0 00-2-2h-2a2 2 0 00-2 2v2a2 2 0 002 2zM6 20h2a2 2 0 002-2v-2a2 2 0 00-2-2H6a2 2 0 00-2 2v2a2 2 0 002 2z" />
@@ -41,41 +41,41 @@
         <p class="text-lg font-large text-gray-600 truncate mt-5"> It's empty here.</p>
       </div>
       <div class="flex items-center justify-center">
-        <p class="text-sm font-medim text-gray-600 truncate"> Request a project and build something awesome.</p>
+        <p class="text-sm font-medim text-gray-600 truncate"> Request a repository and build something awesome.</p>
       </div>
     </div>
 
     <!-- LIST OF USER'S PROJECTS -->
-    <div class="bg-white shadow overflow-hidden sm:rounded-md mt-4" x-show="!showSpinner && userProjectsList && view==='my'">
+    <div class="bg-white shadow overflow-hidden sm:rounded-md mt-4" x-show="!showSpinner && userRepositoriesList && view==='my'">
       <ul role="list" class="divide-y divide-gray-200">
-        <template x-for="(project, index) in userProjectsList">
+        <template x-for="(repository, index) in userRepositoriesList">
           <li>
-            <div class="px-4 py-4 sm:px-6 hover:bg-gray-50 cursor-pointer" x-bind:class="project.showStatus? 'bg-gray-50':''" @click="project.showStatus = !project.showStatus; getProjectApprovalStatus(project.Id, index)">
+            <div class="px-4 py-4 sm:px-6 hover:bg-gray-50 cursor-pointer" x-bind:class="repository.showStatus? 'bg-gray-50':''" @click="repository.showStatus = !repository.showStatus; getRepositoryApprovalStatus(repository.Id, index)">
               <div class="flex items-center justify-between">
                 <div>
-                  <a :href="/projects/+project.Id"> 
-                    <span class="text-sm font-medium truncate" x-bind:class="project.IsArchived? 'text-gray-600' : 'text-indigo-600'" x-text="project.Name" title="Repository name">  </span>
-                    <span class="text-sm font-medium text-gray-400 truncate" x-show="project.IsArchived">(Archived)</span>
+                  <a :href="/repositories/+repository.Id"> 
+                    <span class="text-sm font-medium truncate" x-bind:class="repository.IsArchived? 'text-gray-600' : 'text-indigo-600'" x-text="repository.Name" title="Repository name">  </span>
+                    <span class="text-sm font-medium text-gray-400 truncate" x-show="repository.IsArchived">(Archived)</span>
                   </a>
                 </div>
-                <div @click.stop @click.outside="closeUserProjectOptions(-1)">
+                <div @click.stop @click.outside="closeUserRepositoryOptions(-1)">
                   <div class="relative mt-1">
-                    <button @click="project.showOptions = !project.showOptions; closeUserProjectOptions(index);" type="button" class="absolute inset-y-0 right-0 flex items-center rounded-r-md px-2 focus:outline-none">
+                    <button @click="repository.showOptions = !repository.showOptions; closeUserRepositoryOptions(index);" type="button" class="absolute inset-y-0 right-0 flex items-center rounded-r-md px-2 focus:outline-none">
                       <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z" />
                       </svg>
                     </button>
-                    <ul x-show="project.showOptions" class="absolute z-10 mt-1 max-h-60 right-0 top-1 overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm" id="options" role="listbox">
-                      <li @click="archiveProject(project.Name,project.Id,project.Visibility,project.IsArchived)" class="hover:bg-[#fff2eb] relative cursor-pointer select-none py-2 pl-3 pr-9 text-gray-900" id="option-0" role="option" tabindex="-1">
-                        <span class="block truncate" x-text="project.IsArchived? 'Unarchive' : 'Archive'">Archive</span>
+                    <ul x-show="repository.showOptions" class="absolute z-10 mt-1 max-h-60 right-0 top-1 overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm" id="options" role="listbox">
+                      <li @click="archiveRepository(repository.Name,repository.Id,repository.Visibility,repository.IsArchived)" class="hover:bg-[#fff2eb] relative cursor-pointer select-none py-2 pl-3 pr-9 text-gray-900" id="option-0" role="option" tabindex="-1">
+                        <span class="block truncate" x-text="repository.IsArchived? 'Unarchive' : 'Archive'">Archive</span>
                       </li>
-                      <li x-show="project.Visibility !== 'Private' && !project.IsArchived" @click="setVisibility(project.Name,project.Id,project.Visibility,'private')" class="hover:bg-[#fff2eb] relative cursor-pointer select-none py-2 pl-3 pr-9 text-gray-900" id="option-0" role="option" tabindex="-1">
+                      <li x-show="repository.Visibility !== 'Private' && !repository.IsArchived" @click="setVisibility(repository.Name,repository.Id,repository.Visibility,'private')" class="hover:bg-[#fff2eb] relative cursor-pointer select-none py-2 pl-3 pr-9 text-gray-900" id="option-0" role="option" tabindex="-1">
                         <span class="block truncate">Make Private</span>
                       </li>
-                      <li x-show="project.Visibility !== 'Internal' && !project.IsArchived" @click="setVisibility(project.Name,project.Id,project.Visibility,'internal')" class="hover:bg-[#fff2eb] relative cursor-pointer select-none py-2 pl-3 pr-9 text-gray-900" id="option-0" role="option" tabindex="-1">
+                      <li x-show="repository.Visibility !== 'Internal' && !repository.IsArchived" @click="setVisibility(repository.Name,repository.Id,repository.Visibility,'internal')" class="hover:bg-[#fff2eb] relative cursor-pointer select-none py-2 pl-3 pr-9 text-gray-900" id="option-0" role="option" tabindex="-1">
                         <span class="block truncate">Make Internal</span>
                       </li>
-                      <li x-show="project.Visibility !== 'Public' && !project.IsArchived && ((project.ApprovalStatusId===1) || (project.ApprovalStatusId===5))" @click="goto('/projects/makepublic/' + project.Id)" class="hover:bg-[#fff2eb] relative cursor-pointer select-none py-2 pl-3 pr-9 text-gray-900" id="option-0" role="option" tabindex="-1">
+                      <li x-show="repository.Visibility !== 'Public' && !repository.IsArchived && ((repository.ApprovalStatusId===1) || (repository.ApprovalStatusId===5))" @click="goto('/repositories/makepublic/' + repository.Id)" class="hover:bg-[#fff2eb] relative cursor-pointer select-none py-2 pl-3 pr-9 text-gray-900" id="option-0" role="option" tabindex="-1">
                         <span class="block truncate">Make Public</span>
                       </li>
                     </ul>
@@ -86,15 +86,15 @@
               <div class="mt-2 sm:flex sm:justify-between">
                 <div class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
                   <p class="flex items-center text-sm text-gray-500">
-                    <span x-text="project.Description"></span>
+                    <span x-text="repository.Description"></span>
                   </p>
                 </div>
-                <!-- <div x-show="!project.showStatus">
+                <!-- <div x-show="!repository.showStatus">
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 20 20" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
                   </svg>
                 </div>
-                <div x-show="project.showStatus">
+                <div x-show="repository.showStatus">
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 20 20" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M5 15l7-7 7 7" />
                   </svg>
@@ -106,7 +106,7 @@
                     <svg class="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                       <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
                     </svg>
-                    <span x-text="project.CoOwner"></span>
+                    <span x-text="repository.CoOwner"></span>
                   </p>
                 </div> -->
                 <div class="sm:flex w-1/2">
@@ -114,7 +114,7 @@
                       <svg xmlns="http://www.w3.org/2000/svg" class="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" fill="none" viewBox="0 0 20 20" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M18 18l2-1v-2.5" />
                       </svg>
-                      <span x-text="project.Visibility"></span>
+                      <span x-text="repository.Visibility"></span>
                     </p>
                   </div>
                 <div class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
@@ -124,22 +124,22 @@
                   </svg>
                   <p>
                     Created on
-                    <time x-data="{date: new Date(project.Created)}" x-text="date.toLocaleString('en-US',{dateStyle: 'medium', timeStyle: 'short'})"></time>
+                    <time x-data="{date: new Date(repository.Created)}" x-text="date.toLocaleString('en-US',{dateStyle: 'medium', timeStyle: 'short'})"></time>
                   </p>
                 </div>
               </div>
             </div>
-            <div class="px-4 py-4 sm-px-6 bg-gray-100" style="box-shadow: inset 0px 7px 6px -4px #ccc;" x-show="project.showStatus" class="transform -translate-x-full duration-300">
-              <div class="flex items-center justify-center h-20" x-show="!project.statusLoaded">
+            <div class="px-4 py-4 sm-px-6 bg-gray-100" style="box-shadow: inset 0px 7px 6px -4px #ccc;" x-show="repository.showStatus" class="transform -translate-x-full duration-300">
+              <div class="flex items-center justify-center h-20" x-show="!repository.statusLoaded">
                 <svg role="status" class="w-8 h-8 mr-2 text-gray-200 animate-spin dark:text-gray-600 fill-[#FF5800]" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="currentColor"/>
                   <path d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z" fill="currentFill"/>
                 </svg>
               </div>
               <!-- This example requires Tailwind CSS v2.0+ -->
-              <div class="bg-gray-50 shadow overflow-hidden sm:rounded-md" x-show="project.statusLoaded && project.approvalStatus">
+              <div class="bg-gray-50 shadow overflow-hidden sm:rounded-md" x-show="repository.statusLoaded && repository.approvalStatus">
                 <ul role="list" class="divide-y divide-gray-200">
-                  <template x-for="item of project.approvalStatus">
+                  <template x-for="item of repository.approvalStatus">
                     <li>
                       <div class="px-4 py-4 sm:px-6">
                         <div class="flex items-center justify-between">
@@ -168,8 +168,8 @@
                   </template>
                 </ul>
               </div>
-              <div class="overflow-hidden text-sm text-gray-500 sm:mt-0" x-show="project.statusLoaded && !project.approvalStatus">
-                No approval data found for this project. <a class="text-indigo-600" x-bind:href="'/projects/makepublic/' + project.Id">Click to request</a> to make this project public.
+              <div class="overflow-hidden text-sm text-gray-500 sm:mt-0" x-show="repository.statusLoaded && !repository.approvalStatus">
+                No approval data found for this repository. <a class="text-indigo-600" x-bind:href="'/repositories/makepublic/' + repository.Id">Click to request</a> to make this repository public.
               </div>
 
             </div>
@@ -179,7 +179,7 @@
     </div>
 
     <!-- LIST OF AVANADE PROJECTS -->
-    <div x-show="!showSpinner && allProjectsList && view==='all'">
+    <div x-show="!showSpinner && allRepositoriesList && view==='all'">
       <div class="my-5 flex rounded-md shadow-sm">
         <div class="relative flex items-stretch flex-grow focus-within:z-10">
           <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -187,25 +187,25 @@
               <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
           </div>
-          <input x-model="search" @keyup="filterAllProject()" type="text" name="searchTerm" id="searchTerm" class="focus:ring-indigo-500 focus:border-indigo-500 block w-full rounded-md pl-10 sm:text-sm border-gray-300" placeholder="Find a project">
+          <input x-model="search" @keyup="filterAllRepository()" type="text" name="searchTerm" id="searchTerm" class="focus:ring-indigo-500 focus:border-indigo-500 block w-full rounded-md pl-10 sm:text-sm border-gray-300" placeholder="Find a repository">
         </div>
       </div>
     </div>
-    <div class="bg-white shadow overflow-hidden sm:rounded-md mt-4" x-show="!showSpinner && allProjectsList && view==='all'">
+    <div class="bg-white shadow overflow-hidden sm:rounded-md mt-4" x-show="!showSpinner && allRepositoriesList && view==='all'">
       <ul role="list" class="divide-y divide-gray-100">
-        <template x-for="(project, index) in filteredAllProjects">
+        <template x-for="(repository, index) in filteredAllRepositories">
           <li>
-            <div class="px-4 py-4 sm:px-6 hover:bg-gray-50 cursor-pointer" @click="openLink(project.repoLink)">
+            <div class="px-4 py-4 sm:px-6 hover:bg-gray-50 cursor-pointer" @click="openLink(repository.repoLink)">
               <div class="flex items-center justify-between">
                 <div>
-                  <span class="text-sm font-medium truncate" x-bind:class="project.archived? 'text-gray-600' : 'text-indigo-600'" x-text="project.repoFullName" title="Repository name"></span>
-                  <span class="text-sm font-medium text-gray-400 truncate" x-show="project.archived">(Archived)</span>
+                  <span class="text-sm font-medium truncate" x-bind:class="repository.archived? 'text-gray-600' : 'text-indigo-600'" x-text="repository.repoFullName" title="Repository name"></span>
+                  <span class="text-sm font-medium text-gray-400 truncate" x-show="repository.archived">(Archived)</span>
                 </div>
               </div>
               <div class="mt-2 sm:flex sm:justify-between">
                 <div class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
                   <p class="flex items-center text-sm text-gray-500">
-                    <span x-text="project.description"></span>
+                    <span x-text="repository.description"></span>
                   </p>
                 </div>
               </div>
@@ -215,7 +215,7 @@
                     <svg xmlns="http://www.w3.org/2000/svg" class="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" fill="none" viewBox="0 0 20 20" stroke="currentColor" stroke-width="2">
                       <path stroke-linecap="round" stroke-linejoin="round" d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M18 18l2-1v-2.5" />
                     </svg>
-                    <span x-text="project.private? 'Private' : 'Public'"></span>
+                    <span x-text="repository.private? 'Private' : 'Public'"></span>
                   </p>
                 </div>
                 <div class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
@@ -224,7 +224,7 @@
                   </svg>
                   <p>
                     Created on
-                    <time x-data="{date: new Date(project.created)}" x-text="date.toLocaleString('en-US',{dateStyle: 'medium', timeStyle: 'short'})"></time>
+                    <time x-data="{date: new Date(repository.created)}" x-text="date.toLocaleString('en-US',{dateStyle: 'medium', timeStyle: 'short'})"></time>
                   </p>
                 </div>
               </div>
@@ -238,22 +238,22 @@
 </div>
 
 <script>
-  function myProjectsData() {
+  function myRepositoriesData() {
     return {
       showSpinner: true,
       view: '',
       search: '',
-      userProjectsList: [],
-      allProjectsList: [],
-      filteredAllProjects: [],
+      userRepositoriesList: [],
+      allRepositoriesList: [],
+      filteredAllRepositories: [],
       currentSelected: -1,
-      getUserProjects() {
-        if (!this.userProjectsList || this.userProjectsList.length === 0) {
+      getUserRepositories() {
+        if (!this.userRepositoriesList || this.userRepositoriesList.length === 0) {
           this.showSpinner = true
-          fetch('/api/projects/list')
+          fetch('/api/repositories/list')
           .then(r => {
             r.json().then(body => {
-              this.userProjectsList = body
+              this.userRepositoriesList = body
               this.showSpinner = false
             });
           })
@@ -262,18 +262,18 @@
           })
         }
       },
-      getAllProjects() {
-        if (!this.allProjectsList || this.allProjectsList.length === 0) {
+      getAllRepositories() {
+        if (!this.allRepositoriesList || this.allRepositoriesList.length === 0) {
           this.showSpinner = true
-          fetch('/api/allavanadeprojects')
+          fetch('/api/allavanaderepositories')
           .then(r => {
             r.json().then(body => {
-              this.allProjectsList = body
+              this.allRepositoriesList = body
               if(!this.search) {
-                this.filteredAllProjects = this.allProjectsList
+                this.filteredAllRepositories = this.allRepositoriesList
               }
               else {
-                this.filteredAllProjects = this.allProjectsList.filter(p => p.repoFullName.toLowerCase().includes(this.search.toLowerCase()))
+                this.filteredAllRepositories = this.allRepositoriesList.filter(p => p.repoFullName.toLowerCase().includes(this.search.toLowerCase()))
               }
               this.showSpinner = false
             });
@@ -283,13 +283,13 @@
           })
         }
       },
-      getProjectApprovalStatus(id, i) {
-        if(!this.userProjectsList[i]["statusLoaded"]) {
-          fetch('/api/projects/' + id)
+      getRepositoryApprovalStatus(id, i) {
+        if(!this.userRepositoriesList[i]["statusLoaded"]) {
+          fetch('/api/repositories/' + id)
         .then(r => {
           r.json().then(body => {
-            this.userProjectsList[i]["approvalStatus"] = body
-            this.userProjectsList[i]["statusLoaded"] = true
+            this.userRepositoriesList[i]["approvalStatus"] = body
+            this.userRepositoriesList[i]["statusLoaded"] = true
          
           })
         })
@@ -303,25 +303,25 @@
         this.search = urlParams.get('search')
         
         if(this.view === 'my') {
-          this.getUserProjects()
+          this.getUserRepositories()
         }
         else {
-          this.getAllProjects()
+          this.getAllRepositories()
         }
       },
       switchTo(tab) {
         switch(tab) {
           case 'my':
             this.view = tab
-            this.getUserProjects()
+            this.getUserRepositories()
             break
           case 'all':
             this.view = tab
-            this.getAllProjects()
+            this.getAllRepositories()
         }
       },
-      filterAllProject() {
-        this.filteredAllProjects = this.allProjectsList.filter(p => p.repoFullName.toLowerCase().includes(this.search.toLowerCase()))
+      filterAllRepository() {
+        this.filteredAllRepositories = this.allRepositoriesList.filter(p => p.repoFullName.toLowerCase().includes(this.search.toLowerCase()))
       },
       openLink(link) {
         window.open(link, '_blank').focus();
@@ -329,41 +329,41 @@
       closeOptions(newSelected) {
         if (newSelected !== this.currentSelected) {
           if (this.currentSelected > -1) {
-            this.filteredAllProjects[this.currentSelected].showOptions = false
+            this.filteredAllRepositories[this.currentSelected].showOptions = false
           }
           this.currentSelected = newSelected
         }
       },
-      closeUserProjectOptions(newSelected) {
+      closeUserRepositoryOptions(newSelected) {
         if (newSelected !== this.currentSelected) {
           if (this.currentSelected > -1) {
-            this.userProjectsList[this.currentSelected].showOptions = false
+            this.userRepositoriesList[this.currentSelected].showOptions = false
           }
           this.currentSelected = newSelected
         }
       },
-      archiveProject(projectName, projectId, visibility, isArchived) {
-        let url = `/api/projects/archive/${projectName}/${projectId}/${visibility}/${isArchived? '0': '1'}`
+      archiveRepository(repositoryName, repositoryId, visibility, isArchived) {
+        let url = `/api/repositories/archive/${repositoryName}/${repositoryId}/${visibility}/${isArchived? '0': '1'}`
 
         let f = () => {
           Alpine.store('master').modal.show()
-          Alpine.store('master').getData(url, `Project has been ${isArchived? 'unarchived.' : 'archived.'}`, "Refresh project list", "/projects")                
+          Alpine.store('master').getData(url, `Repository has been ${isArchived? 'unarchived.' : 'archived.'}`, "Refresh repository list", "/repositories")                
         }
 
-        let title = isArchived ? "Unarchive project" : "Archive Project"
-        let message = isArchived ? "Before you proceed, you have to manually unarchive your project on GitHub." : "If you wish to unarchive the project in the future, you have to do it manually on GitHub."
+        let title = isArchived ? "Unarchive repository" : "Archive repository"
+        let message = isArchived ? "Before you proceed, you have to manually unarchive your repository on GitHub." : "If you wish to unarchive the repository in the future, you have to do it manually on GitHub."
         Alpine.store('master').confirmationModal.update(title, message, f)
         Alpine.store('master').confirmationModal.show()
       },
-      setVisibility(projectName, projectId, currentState, desiredState) {
-        let url = `/api/projects/visibility/${projectName}/${projectId}/${currentState}/${desiredState}`
+      setVisibility(repositoryName, repositoryId, currentState, desiredState) {
+        let url = `/api/repositories/visibility/${repositoryName}/${repositoryId}/${currentState}/${desiredState}`
         let f = () => {
           Alpine.store('master').modal.show()
-          Alpine.store('master').getData(url, `Project has been made ${desiredState}`, "Refresh project list", "/projects")                
+          Alpine.store('master').getData(url, `Repository has been made ${desiredState}`, "Refresh repository list", "/repositories")                
         }
 
         let title = "Confirmation"
-        let message = currentState === "Public" ? `Your project will be moved to innersource and project visibility will be ${desiredState}.` : `You are about to change your project's visibility to ${desiredState}.`
+        let message = currentState === "Public" ? `Your repository will be moved to innersource and repository visibility will be ${desiredState}.` : `You are about to change your repository's visibility to ${desiredState}.`
         Alpine.store('master').confirmationModal.update(title, message, f)
         Alpine.store('master').confirmationModal.show()
       },
