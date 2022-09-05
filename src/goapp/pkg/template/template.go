@@ -33,7 +33,7 @@ func UseTemplate(w *http.ResponseWriter, r *http.Request, page string, pageData 
 	// Data on master page
 	var menu []models.TypMenu
 	menu = append(menu, models.TypMenu{Name: "Dashboard", Url: "/", IconPath: "/public/icons/dashboard.svg"})
-	menu = append(menu, models.TypMenu{Name: "Projects", Url: "/projects", IconPath: "/public/icons/projects.svg"})
+	menu = append(menu, models.TypMenu{Name: "Repositories", Url: "/repositories", IconPath: "/public/icons/projects.svg"})
 	menu = append(menu, models.TypMenu{Name: "Communities", Url: "/communities/list", IconPath: "/public/icons/communities.svg"})
 	menu = append(menu, models.TypMenu{Name: "Activities", Url: "/activities", IconPath: "/public/icons/activity.svg"})
 	menu = append(menu, models.TypMenu{Name: "Guidance", Url: "/guidance", IconPath: "/public/icons/guidance.svg"})
