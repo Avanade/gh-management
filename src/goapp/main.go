@@ -50,7 +50,6 @@ func main() {
 	mux.Handle("/search/{searchText}/{offSet}/{rowCount}", loadAzGHAuthPage(rtSearch.GetSearchResults))
 	mux.Handle("/search", loadAzGHAuthPage(rtSearch.SearchHandler))
 
-
 	mux.Handle("/guidance", loadAzGHAuthPage(rtGuidance.GuidanceHandler))
 	mux.Handle("/guidance/new", loadAzGHAuthPage(rtGuidance.CategoriesHandler))
 	mux.Handle("/guidance/Article/{id}", loadAzGHAuthPage(rtGuidance.ArticleHandler))
@@ -91,6 +90,7 @@ func main() {
 	muxApi.Handle("/Category", loadAzGHAuthPage(rtApi.CategoryAPIHandler))
 	muxApi.Handle("/Category/list", loadAzGHAuthPage(rtApi.CategoryListAPIHandler))
 	muxApi.Handle("/CategoryArticlesById/{id}", loadAzGHAuthPage(rtApi.GetCategoryArticlesById))
+	muxApi.Handle("/CategoryArticlesByArticlesID/{id}", loadAzGHAuthPage(rtApi.GetCategoryArticlesByArticlesID))
 	muxApi.Handle("/CategoryArticlesUpdate", loadAzGHAuthPage(rtApi.CategoryArticlesUpdate))
 	muxApi.Handle("/projects/list", loadAzGHAuthPage(rtApi.GetUserProjects))
 	muxApi.Handle("/projects/{id}", loadAzGHAuthPage(rtApi.GetRequestStatusByProject))

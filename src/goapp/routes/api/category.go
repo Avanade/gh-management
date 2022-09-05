@@ -115,6 +115,7 @@ func CategoryListAPIHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write(jsonResp)
 
 }
+
 func GetCategoryArticlesById(w http.ResponseWriter, r *http.Request) {
 	req := mux.Vars(r)
 	id := req["id"]
@@ -150,6 +151,40 @@ func GetCategoryArticlesById(w http.ResponseWriter, r *http.Request) {
 	w.Write(jsonResp)
 }
 
+func GetCategoryArticlesByArticlesID(w http.ResponseWriter, r *http.Request) {
+	req := mux.Vars(r)
+	id := req["id"]
+
+	// Connect to database
+	dbConnectionParam := sql.ConnectionParam{
+		ConnectionString: os.Getenv("GHMGMTDB_CONNECTION_STRING"),
+	}
+
+	db, err := sql.Init(dbConnectionParam)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer db.Close()
+
+	// Get project list
+	params := make(map[string]interface{})
+	params["Id"] = id
+	CategoryArticles, err := db.ExecuteStoredProcedureWithResult("PR_CategoryArticles_select_ByArticlesID", params)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Header().Set("Content-Type", "application/json")
+	jsonResp, err := json.Marshal(CategoryArticles)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.Write(jsonResp)
+}
 func CategoryArticlesUpdate(w http.ResponseWriter, r *http.Request) {
 	sessionaz, _ := session.Store.Get(r, "auth-session")
 	iprofile := sessionaz.Values["profile"]

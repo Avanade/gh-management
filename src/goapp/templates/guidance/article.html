@@ -180,7 +180,7 @@
                 if (this.form.id) {
                     this.mode = 'view'
                     console.log('/api/CategoryArticlesById/' + '{{.Id}}')
-                    await fetch('/api/CategoryArticlesById/' + '{{.Id}}')
+                    await fetch('/api/CategoryArticlesByArticlesID/' + '{{.Id}}')
                         .then(r => {
                             r.json().then(body => {
                                 this.form.id = body[0]["Id"]
@@ -195,7 +195,7 @@
                             console.log(e)
 
                         })
-
+ 
                     modal.visible = false
                 }
 
