@@ -179,6 +179,9 @@
                 {{ else }}
                 class="text-gray-600 hover:bg-gray-50 hover:text-gray-900 group flex items-center px-2 py-2 text-base font-medium rounded-md"
                 {{ end }}
+                {{ if $menu.External }}
+                target="_blank"
+                {{ end }}
               >
                 <img src="{{ $menu.IconPath }}" class="mr-4 h-6 w-6"/>
                 {{ $menu.Name }}
@@ -190,6 +193,9 @@
               <a
                 href="{{ $link.Url }}"
                 class="text-gray-600 hover:bg-gray-50 hover:text-gray-900 group flex items-center px-2 py-2 text-base font-medium rounded-md"
+                {{ if $link.External }}
+                target="_blank"
+                {{ end }}
               >
                 <img src="{{ $link.IconPath }}" class="mr-4 h-6 w-6"/>
                 {{ $link.Name }}
@@ -263,6 +269,9 @@
                 {{ else }}
                 class="text-gray-600 hover:bg-gray-50 hover:text-gray-900 group flex items-center px-2 py-2 text-base font-medium rounded-md"
                 {{ end }}
+                {{ if $menu.External }}
+                target="_blank"
+                {{ end }}
               >
                 <img src="{{ $menu.IconPath }}" class="mr-4 h-6 w-6"/>
                 {{ $menu.Name }}
@@ -274,6 +283,9 @@
               <a
                 href="{{ $link.Url }}"
                 class="text-gray-600 hover:bg-gray-50 hover:text-gray-900 group flex items-center px-2 py-2 text-base font-medium rounded-md"
+                {{ if $link.External }}
+                target="_blank"
+                {{ end }}
               >
                 <img src="{{ $link.IconPath }}" class="mr-4 h-6 w-6"/>
                 {{ $link.Name }}
