@@ -90,12 +90,13 @@ func PRProjectsInsert(body models.TypNewProjectReqBody, user string) (id int64) 
 	db, _ := sql.Init(cp)
 	param := map[string]interface{}{
 
-		"Name":                   body.Name,
-		"CoOwner":                body.Coowner,
-		"Description":            body.Description,
-		"ConfirmAvaIP":           body.ConfirmAvaIP,
-		"ConfirmEnabledSecurity": body.ConfirmSecIPScan,
-		"CreatedBy":              user,
+		"Name":                    body.Name,
+		"CoOwner":                 body.Coowner,
+		"Description":             body.Description,
+		"ConfirmAvaIP":            body.ConfirmAvaIP,
+		"ConfirmEnabledSecurity":  body.ConfirmSecIPScan,
+		"ConfirmNotClientProject": body.ConfirmNotClientProject,
+		"CreatedBy":               user,
 	}
 	result, err := db.ExecuteStoredProcedureWithResult("dbo.PR_Projects_Insert", param)
 	if err != nil {
@@ -114,13 +115,14 @@ func PRProjectsUpdate(body models.TypNewProjectReqBody, user string) (id int64) 
 
 	db, _ := sql.Init(cp)
 	param := map[string]interface{}{
-		"ID":                     body.Id,
-		"Name":                   body.Name,
-		"CoOwner":                body.Coowner,
-		"Description":            body.Description,
-		"ConfirmAvaIP":           body.ConfirmAvaIP,
-		"ConfirmEnabledSecurity": body.ConfirmSecIPScan,
-		"ModifiedBy":             user,
+		"ID":                      body.Id,
+		"Name":                    body.Name,
+		"CoOwner":                 body.Coowner,
+		"Description":             body.Description,
+		"ConfirmAvaIP":            body.ConfirmAvaIP,
+		"ConfirmEnabledSecurity":  body.ConfirmSecIPScan,
+		"ConfirmNotClientProject": body.ConfirmNotClientProject,
+		"ModifiedBy":              user,
 	}
 	_, err := db.ExecuteStoredProcedure("dbo.PR_Projects_Update", param)
 	if err != nil {
