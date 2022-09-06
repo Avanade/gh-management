@@ -159,6 +159,18 @@
                     </p>
                 </div>
             </div>
+
+            <div class="flex items-start mt-1 ml-3">
+                <div class="flex items-center h-5">
+                    <input id="confirm3" name="confirmNotClientProject" type="checkbox" x-model="form.confirmNotClientProject"
+                        class="focus:ring-orange-500 h-4 w-4 text-orange-600 border-gray-300 rounded">
+                </div>
+                <div class="ml-3 text-sm">
+
+                    <p class="text-gray-900">I confirm this repository is not going to be used to deliver a client project.
+                    </p>
+                </div>
+            </div>
             
         </fieldset>
         <br>
@@ -166,6 +178,18 @@
             with a link to the repository.<br />
             You can also view your repository under the repositories tab.
         </p>
+
+        <div class="bg-red-50 p-4 my-4">
+            <div class="flex justify-center">
+                <div class="ml-3 flex text-center max-w-4xl">
+                    <p class="text-sm text-red-700">
+                        Before any innersource code can be used on other projects, as the asset owner you must follow 
+                        <a class="text-blue-700" target="_blank" href="***REMOVED***">Avanade's guidelines</a>
+                        , covering export compliance, OSS scans, IP reviews, security and data privacy.
+                    </p>
+                </div>
+            </div>
+        </div>
         <div>
             <div align="right">
                 <button type="button" x-show="mode=='view'"
@@ -211,6 +235,7 @@
                 description: '',
                 confirmAvaIP: false,
                 confirmSecIPScan: false,
+                confirmNotClientProject: false,
             },
             coowner: {
                 show: false,
@@ -236,7 +261,8 @@
                     !!this.form.coowner &&
                     !!this.form.description &&
                     this.form.confirmAvaIP &&
-                    this.form.confirmSecIPScan) {
+                    this.form.confirmSecIPScan &&
+                    this.form.confirmNotClientProject) {
                     return true
                 } else {
                     return false
@@ -274,6 +300,7 @@
                                 this.form.description = body[0]["ProjectDescription"]
                                 this.form.confirmAvaIP = body[0]["ConfirmAvaIP"]
                                 this.form.confirmSecIPScan = body[0]["ConfirmEnabledSecurity"]
+                                this.form.confirmNotClientProject = body[0]["ConfirmNotClientProject"]
                             });
                         })
                         .catch(e => {
