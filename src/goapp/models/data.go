@@ -29,6 +29,7 @@ type TypMenu struct {
 	Name     string
 	Url      string
 	IconPath string
+	External bool
 }
 
 type TypNewProjectReqBody struct {
