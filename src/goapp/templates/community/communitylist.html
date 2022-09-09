@@ -78,7 +78,7 @@
               @click="Community.showStatus = !Community.showStatus;getCommunityApprovalStatus(Community.Id, index)">
             
               <div class="flex items-center justify-between">
-                <a :href="/community/ +Community.Id ">
+                <a @click.stop="window.location=`/community/${Community.Id}`">
                   <p class="text-sm font-medium text-indigo-600 truncate" x-text=" Community.Name" title="Repository name"></p>
                 </a>
                 <div class="flex items-center justify-between">
