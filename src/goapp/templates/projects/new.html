@@ -58,7 +58,7 @@
 
                                 <ul class="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm"
                                     id="options" x-show="coowner.show" role="listbox">
-
+                                    <div class="italic text-sm text-gray-500 p-3">Only users with associated GH account are displayed</div>
                                     {{range $user := .users}}
                                     <li x-show="showName('{{$user.UserPrincipalName}}', '{{$user.GithubUser}}')"
                                         class="relative cursor-default select-none py-2 pl-3 pr-9 text-gray-900"
@@ -96,7 +96,7 @@
                         <!-- END OF CO-OWNER CB... -->
 
                         <div class="mt-1 text-sm text-gray-500">All repositories must have two or more owners, to ensure that security alerts can be dealt with
-                            promptly. <div>
+                            promptly.<div>
                                 <h3 class="text-lg font-medium leading-6 text-gray-900"> <br> </h3>
                             </div>
                         </div>
