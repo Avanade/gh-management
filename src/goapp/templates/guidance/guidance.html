@@ -5,7 +5,8 @@
 <div x-data="guidanceData()" x-init="getcategory()">
   <div class="flex justify-between">
     <div>
-
+      <p class="mt-2 text-sm text-gray-700"> Articles, information, and instructions for InnerSource, Open Source, and
+        connecting with communities at Avanade.</p>
     </div>
     <div class="flex">
       <div x-show="{{.IsAdmin}}">
@@ -31,7 +32,7 @@
     </div>
   </div>
   <b>
-    <p class="text-blue-600">Category name</p>
+    <p class="text-lg text-blue-600">Category name</p>
   </b>
 
   <div class="bg-white shadow overflow-hidden sm:rounded-md mt-4">
@@ -41,13 +42,28 @@
           <div class="px-4 py-4 sm:px-6 hover:bg-gray-50 cursor-pointer"
             x-bind:class="category.showStatus? 'bg-gray-50':''"
             @click="category.showStatus = !category.showStatus;getCategoryArticlesById(category.Id, index) ">
-            <!-- <div class="px-4 py-4 sm:px-6 hover:bg-gray-50 cursor-pointer"
-            x-bind:class="category.showStatus? 'bg-gray-50':''"
-            @click="category.showStatus = !category.showStatus;getcategoryApprovalStatus(category.Id, index)"> -->
-
-            <div class="flex items-center justify-between">
-              <p class="text-sm font-medium text-indigo-600 truncate" x-text=" category.Name" title="Repository name">
+            <div class="flex items-center justify-between right-0 ">
+              <p class="mt-3 text-lg font-medium text-indigo-600 truncate" x-text=" category.Name"
+                title="Repository name">
               </p>
+              <div></div>
+
+              <div class="flex items-center justify-between right-0">
+                <div class="ml-2 flex-shrink-0 flex">
+
+                  <a :href="/guidance/+category.Id">
+                    <p class="flex items-center text-sm text-gray-500  font-bold cursor-pointer">
+                      Edit
+                    </p>
+                  </a>
+                </div>
+              </div>
+
+            </div>
+            <div class="flex items-center justify-between">
+
+              <div></div>
+
               <div x-show="!category.showStatus">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 20 20"
                   stroke="currentColor" stroke-width="2">
@@ -67,15 +83,12 @@
           <div class="px-4 py-4 sm-px-6 bg-gray-100" style="box-shadow: inset 0px 7px 6px -4px #ccc;"
             x-show="category.showStatus" class="transform -translate-x-full duration-300">
             <div class="bg-gray-50 shadow overflow-hidden sm:rounded-md">
-
-
-
               <ul role="list" class="divide-y divide-gray-200">
                 <template x-for="item of category.articles">
                   <li>
 
                     <div class="px-4 py-4 sm:px-6">
-                      <div class="mt-2 sm:flex flex justify-between">
+                      <div class="sm:flex flex justify-between">
                         <div class="sm:flex">
                           <b>
                             <p class="flex items-center text-sm text-black-500" x-data="{ Name:  item.Name }"
@@ -88,7 +101,7 @@
                         <div x-show="{{.IsAdmin}}">
                           <p class="flex items-center text-sm text-gray-500  font-bold cursor-pointer"
                             @click="openLink(item.Id)">
-                            Edit  
+                            Edit
                           </p>
                         </div>
                       </div>
@@ -100,15 +113,15 @@
                       </div>
                       <div class="mt-2 sm:flex ">
                         <div class="flex items-center text-sm text-blue-500">
-                          <p >
-                            <a :href="item.URL" ><span x-text="item.URL" /> </a>
+                          <p>
+                            <a :href="item.URL"><span x-text="item.URL" /> </a>
                           </p>
                         </div>
 
                       </div>
-                     
+
                       <div class=" pr-2 py-3 flex items-center text-sm text-black-500 min-w-full whitespace-pre-wrap">
-                        <p x-data="{ Body: '  ' + item.Body}" x-text="Body">
+                        <p x-data="{ Body:  item.Body}" x-text="Body">
                         </p>
                       </div>
                     </div>
@@ -150,7 +163,7 @@
             r.json().then(body => {
               this.CategoryList = body
               this.showSpinner = false
-            
+
             });
           })
           .catch(e => {
@@ -174,7 +187,7 @@
               r.json().then(body => {
                 this.CategoryList[i]["articles"] = body
                 this.CategoryList[i]["statusLoaded"] = true
-            
+
               })
             })
 
@@ -182,6 +195,10 @@
         }
       }, openLink(link) {
         window.open("/guidance/Article/" + link, '_blank').focus();
+      },
+
+      openCategoryLink(link) {
+        window.open("/guidance/Category/" + link, '_blank').focus();
       }
     }
   }
