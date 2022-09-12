@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 	session "main/pkg/session"
@@ -14,6 +15,7 @@ import (
 	rtGuidance "main/routes/pages/guidance"
 	rtProjects "main/routes/pages/projects"
 	rtSearch "main/routes/pages/search"
+	reports "main/routes/timerjobs"
 	"net/http"
 	"strconv"
 	"time"
@@ -117,6 +119,13 @@ func main() {
 	muxApi.HandleFunc("/approvals/community/callback", rtProjects.UpdateApprovalStatusCommunity).Methods("POST")
 	mux.NotFoundHandler = http.HandlerFunc(rtPages.NotFoundHandler)
 
+	o, err := strconv.Atoi(ev.GetEnvVar("SUMMARY_REPORT_TRIGGER", "9"))
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+	offset := time.Duration(o) * time.Hour
+	ctx := context.Background()
+	go reports.ScheduleJob(ctx, offset, reports.DailySummaryReport)
 	go checkFailedApprovalRequests()
 
 	port := ev.GetEnvVar("PORT", "8080")
