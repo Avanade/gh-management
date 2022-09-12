@@ -3,6 +3,7 @@ package routes
 import (
 
 	//session "main/pkg/session"
+
 	template "main/pkg/template"
 	"net/http"
 
@@ -37,6 +38,25 @@ func GuidanceHandler(w http.ResponseWriter, r *http.Request) {
 func CategoriesHandler(w http.ResponseWriter, r *http.Request) {
 
 	template.UseTemplate(&w, r, "/guidance/categories", nil)
+}
+func CategoryUpdateHandler(w http.ResponseWriter, r *http.Request) {
+
+	req := mux.Vars(r)
+	id := req["id"]
+	isAdmin, err := session.IsUserAdmin(w, r)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if !isAdmin {
+		http.Error(w, "Not enough privilege to do the action.", http.StatusForbidden)
+		return
+	}
+	data := map[string]interface{}{
+		"Id": id,
+	}
+	template.UseTemplate(&w, r, "/guidance/categoryupdate", data)
 }
 func ArticleHandler(w http.ResponseWriter, r *http.Request) {
 	req := mux.Vars(r)
