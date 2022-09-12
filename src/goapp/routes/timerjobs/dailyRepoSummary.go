@@ -45,6 +45,7 @@ func DailySummaryReport() {
 	e := time.Now()
 	s := e.AddDate(0, 0, -1)
 	o := os.Getenv("GH_ORG_INNERSOURCE")
+	recipient := os.Getenv("EMAIL_SUMMARY_REPORT")
 
 	r, err := ghmgmt.GetRequestedReposByDateRange(s, e)
 	if err != nil {
@@ -79,7 +80,7 @@ func DailySummaryReport() {
 	m := email.TypEmailMessage{
 		Subject: "Requested Repositories",
 		Body:    body,
-		To:      "ismael.r.ibuan@accenture.com",
+		To:      recipient,
 	}
 
 	email.SendEmail(m)
