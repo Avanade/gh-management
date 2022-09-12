@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"main/models"
 	"main/pkg/sql"
-	"strconv"
-
 	"os"
+	"strconv"
+	"time"
 )
 
 func GetUsersWithGithub() interface{} {
@@ -374,6 +374,33 @@ func UpdateProjectVisibilityId(id int64, visibilityId int64) error {
 	return nil
 }
 
+func GetRequestedReposByDateRange(start time.Time, end time.Time) ([]models.TypBasicRepo, error) {
+	var RequestedRepos []models.TypBasicRepo
+	db := ConnectDb()
+	defer db.Close()
+
+	param := map[string]interface{}{
+		"Start": start.Format("2006-01-02"),
+		"End":   end.Format("2006-01-02"),
+	}
+
+	result, err := db.ExecuteStoredProcedureWithResult("PR_Projects_Select_By_DateRange", param)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, v := range result {
+		data := models.TypBasicRepo{
+			Name:        v["Name"].(string),
+			Requestor:   v["CreatedBy"].(string),
+			Description: v["Description"].(string),
+		}
+		RequestedRepos = append(RequestedRepos, data)
+	}
+
+	return RequestedRepos, nil
+}
+
 // ACTIVITIES
 func CommunitiesActivities_Select() interface{} {
 	db := ConnectDb()
@@ -602,7 +629,7 @@ func ContributionAreas_Insert(name, createdBy string) (int, error) {
 	return id, nil
 }
 
-//USERS
+// USERS
 func Users_Get_GHUser(UserPrincipalName string) (GHUser string) {
 
 	cp := sql.ConnectionParam{
