@@ -1743,16 +1743,6 @@ select {
   margin-bottom: 1rem;
 }
 
-.mx-4 {
-  margin-left: 1rem;
-  margin-right: 1rem;
-}
-
-.mx-0 {
-  margin-left: 0px;
-  margin-right: 0px;
-}
-
 .mt-1 {
   margin-top: 0.25rem;
 }
@@ -2131,6 +2121,10 @@ select {
   max-width: 100%;
 }
 
+.max-w-4xl {
+  max-width: 56rem;
+}
+
 .max-w-lg {
   max-width: 32rem;
 }
@@ -2141,14 +2135,6 @@ select {
 
 .max-w-md {
   max-width: 28rem;
-}
-
-.max-w-4xl {
-  max-width: 56rem;
-}
-
-.max-w-3xl {
-  max-width: 48rem;
 }
 
 .flex-1 {
@@ -4065,6 +4051,11 @@ select {
 .text-orange-600 {
   --tw-text-opacity: 1;
   color: rgb(234 88 12 / var(--tw-text-opacity));
+}
+
+.text-\[\#ff5800\] {
+  --tw-text-opacity: 1;
+  color: rgb(255 88 0 / var(--tw-text-opacity));
 }
 
 .underline {
