@@ -175,13 +175,14 @@ type TypCategory struct {
 }
 
 type TypCategoryArticles struct {
-	Id         int    `json:"id"`
-	Name       string `json:"name"`
-	Url        string `json:"Url"`
-	Body       string `json:"Body"`
-	CategoryId int    `json:"CategoryId"`
-	Created    string `json:"created"`
-	CreatedBy  string `json:"createdBy"`
-	Modified   string `json:"modified"`
-	ModifiedBy string `json:"modifiedBy"`
+	Id           int    `json:"id"`
+	Name         string `json:"name"`
+	Url          string `json:"Url"`
+	Body         string `json:"Body"`
+	CategoryId   int    `json:"CategoryId"`
+	CategoryName string `json:"CategoryName"`
+	Created      string `json:"created"`
+	CreatedBy    string `json:"createdBy"`
+	Modified     string `json:"modified"`
+	ModifiedBy   string `json:"modifiedBy"`
 }

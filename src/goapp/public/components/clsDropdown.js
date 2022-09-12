@@ -24,7 +24,7 @@ class clsDropdown {
                     <li class="relative cursor-default select-none py-2 pl-3 pr-9 text-gray-900" :key="n" role="option" @click="${model}=i.${value}; ${id}_show = !${id}_show; ${onClickAction}" tabindex="-1">
                             <div class="flex" >
                                 <span class="truncate" x-text="i.${text}"></span>
-                                <span class="ml-2 truncate text-gray-500" x-show="!!i.${subText}" x-text="'&nbsp@'+i.${subText}"></span>
+                                <span class="ml-2 truncate text-gray-500" x-show="!!i.${subText}" x-text="'&nbsp'+i.${subText}"></span>
                             </div>
                     
                             <span x-show="${model}==i.${value}" class="absolute inset-y-0 right-0 flex items-center pr-4 text-indigo-600" >
