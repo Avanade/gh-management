@@ -59,6 +59,7 @@ func main() {
 	mux.Handle("/community/getcommunity/{id}", loadAzGHAuthPage(rtCommunity.GetUserCommunity))
 	mux.Handle("/communities/list", loadAzGHAuthPage(rtCommunity.CommunitylistHandler))
 	mux.Handle("/community", loadAzGHAuthPage(rtCommunity.GetUserCommunitylist))
+	mux.Handle("/communityapprover", loadAzGHAuthPage(rtCommunity.CommunityApproverHandler))
 
 	mux.Handle("/community/{id}/onboarding", loadAzGHAuthPage(rtCommunity.CommunityOnBoarding))
 	mux.HandleFunc("/loginredirect", rtPages.LoginRedirectHandler).Methods("GET")

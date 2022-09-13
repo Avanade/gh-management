@@ -5,6 +5,7 @@
     [Created] DATETIME NOT NULL DEFAULT getdate(), 
     [CreatedBy] VARCHAR(100) NULL, 
     [Modified] DATETIME NOT NULL DEFAULT getdate(), 
-    [ModifiedBy] VARCHAR(100) NULL
+    [ModifiedBy] VARCHAR(100) NULL,
+	[Disabled] [bit] NULL,
     CONSTRAINT [FK_CommunityApproversList_Users] FOREIGN KEY (ApproverUserPrincipalName) REFERENCES Users(UserPrincipalName)
 )

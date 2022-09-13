@@ -85,3 +85,7 @@ func GetUserCommunity(w http.ResponseWriter, r *http.Request) {
 
 	w.Write(jsonResp)
 }
+
+// func CommunityApproverHandler(w http.ResponseWriter, r *http.Request) {
+// 	template.UseTemplate(&w, r, "community/communityapprovers", nil)
+// }
