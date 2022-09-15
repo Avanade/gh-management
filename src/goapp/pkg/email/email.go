@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"net/http"
 	"os"
-	"text/template"
 )
 
 func SendEmail(msg TypEmailMessage) (*http.Response, error) {
@@ -22,20 +21,6 @@ func SendEmail(msg TypEmailMessage) (*http.Response, error) {
 		return nil, err
 	}
 	return resp, nil
-}
-
-func ComposeEmail(data TypEmailData) (string, error) {
-	t, err := template.ParseFiles("templates/email.html", "templates/buttons.html")
-	if err != nil {
-		return "", err
-	}
-
-	buf := new(bytes.Buffer)
-	if err = t.Execute(buf, data); err != nil {
-		return "", err
-	}
-
-	return buf.String(), nil
 }
 
 type TypEmailMessage struct {

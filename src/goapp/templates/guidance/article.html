@@ -11,11 +11,27 @@
                         <div>
                             <h3 class="text-lg font-medium leading-6 text-gray-900">Category</h3>
                         </div>
-                        <div> <input type="text" name="category" id="category" x-model="form.CategoryName"
-                                maxlength="50" disabled
-                                class="mt-1 focus:ring-orange-500 focus:border-orange-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md border-2">
-                                
+                        <span
+                        class="pl-1 text-xs">(Please press Enter to insert Category)</span>
+                        <div>
+                            <div x-data="combobox({
+                                    ajax: getnames,
+                                    id : 'Id',
+                                    text : 'Name',
+                                    isInsertable : true,
+                                  
+                                    searchTag : null,
+                                    searchPlaceholder : null
+                                 
+                                })" x-modelable="selected" x-model="form.CategoryNames" >
+                                <div x-html="template"></div>
+                            </div>
                         </div>
+                       <!-- <div> <input type="text" name="category" id="category" x-model="form.CategoryName"
+                                maxlength="50"  
+                                class="mt-1 focus:ring-orange-500 focus:border-orange-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md border-2">
+
+                        </div>  -->
 
                     </div>
                     <div>
@@ -56,6 +72,7 @@
                 <div class="basis-9/12 md:base-full  md:flex-row   mx-3  ">
                     <div> <input type="text" name="category" id="category" x-model="form.url" maxlength="100"
                             class="mt-1 focus:ring-orange-500 focus:border-orange-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md border-2">
+                            <p class="text-black-500" >Please add http:// or https:// to the URL</p>
                     </div>
                 </div>
             </div>
@@ -81,7 +98,7 @@
                         class="bg-orange-500  inline-flex justify-center py-2 px-4 rounded-md text-white"
                         @click="mode='edit'">
 
-                       Edit Article
+                        Edit Article
 
                     </button>
                 </div>
@@ -93,16 +110,16 @@
                         <span x-show="form.id">Update Article</span>
 
                     </button>
-              
-                <span x-show="form.id">
-                    <button type="button" x-show="mode=='edit'"
-                        class="bg-orange-500  inline-flex justify-center py-2 px-4 rounded-md text-white"
-                        @click="onLoad()">
-                        <span x-show="form.id">Cancel</span>
 
-                    </button>
-                </span>
-              </div>
+                    <span x-show="form.id">
+                        <button type="button" x-show="mode=='edit'"
+                            class="bg-orange-500  inline-flex justify-center py-2 px-4 rounded-md text-white"
+                            @click="onLoad()">
+                            <span x-show="form.id">Cancel</span>
+
+                        </button>
+                    </span>
+                </div>
             </div>
         </div>
 
@@ -121,12 +138,14 @@
             form: {
                 id: '{{.Id}}',
                 name: '',
+                names: [],
                 url: '',
                 body: '',
                 categoryId: 0,
                 CategoryName: '',
-                categoryArticles:[]
-            },
+                CategoryNames: [],
+                categoryArticles: []
+            },  
             categoryArticle: {
                 id: '{{.Id}}',
                 name: '',
@@ -134,21 +153,24 @@
                 body: '',
                 categoryId: 0,
                 CategoryName: ''
-            },
+            }, 
             submit() {
                 var modal = Alpine.store('master').modal
-                modal.update('loading', 'Saving', 'Please wait.', '', '')
+               // modal.update('loading', 'Saving', 'Please wait.', '', '')
                 if (!this.form.id) {
                     this.form.id = 0
 
                 }
-              
-                this.form.categoryArticles.push(this.categoryArticle)
 
+                this.form.categoryArticles.push(this.categoryArticle)
+                this.form.CategoryName = this.form.CategoryNames[0]["text"].toString()
+                this.form.categoryId =Number( this.form.CategoryNames[0]["id"].toString())
+                console.log( this.form.categoryId )
                 postData = this.form;
-              
-                Alpine.store('master').postData('/api/CategoryArticlesUpdate', postData, "Your category has been created.",
-                    "Go to category list", "/guidance")
+                console.log( "postData")
+                console.log( postData)
+                 Alpine.store('master').postData('/api/CategoryArticlesUpdate', postData, "Your category has been created.",
+                      "Go to category list", "/guidance")
 
             },
 
@@ -177,28 +199,45 @@
             async onLoad() {
                 var modal = Alpine.store('master').modal
                 modal.update('loading', 'Loading', 'Please wait', '', '')
+                if (this.form.id) {
+                    this.mode = 'view'
+                
+                    await fetch('/api/CategoryArticlesByArticlesID/' + '{{.Id}}')
+                        .then(r => {
+                            r.json().then(body => {
+                                this.form.id = body[0]["Id"]
+                                this.form.name = body[0]["Name"]
+                                this.form.url = body[0]["URL"]
+                                this.form.body = body[0]["Body"]
+                                this.form.CategoryName = body[0]["CategoryName"]
+                                this.form.categoryId = body[0]["CategoryId"]
+                                console.log(this.form)
+                                this.form.CategoryNames.push({id:this.form.id ,text:this.form.CategoryName})
+                                
+                            })
+                        }).catch(e => {
+                            console.log(e)
 
-                console.log('/api/CategoryArticlesById/' + '{{.Id}}')
-                await fetch('/api/CategoryArticlesById/' + '{{.Id}}')
-                    .then(r => {
-                        r.json().then(body => {
-                            this.form.id = body[0]["Id"]
-                            this.form.name = body[0]["Name"]
-                            this.form.url = body[0]["URL"]
-                            this.form.body = body[0]["Body"]
-                            this.form.CategoryName = body[0]["CategoryName"]
-                            this.form.categoryId = body[0]["CategoryId"]
-                            console.log( this.form)
                         })
-                    }).catch(e => {
-                        console.log(e)
+ 
+                    modal.visible = false
+                }
 
-                    })
 
-                modal.visible = false
+                else {
+                    this.mode = 'edit'
+                }
             }
         }
     }
+    async function getnames() {
 
+        const res = await fetch('/api/Category/list')
+
+        const data = await res.json()
+        return data
+
+
+    }
 </script>
 {{ end }}

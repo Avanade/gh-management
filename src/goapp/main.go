@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 	session "main/pkg/session"
@@ -14,6 +15,7 @@ import (
 	rtGuidance "main/routes/pages/guidance"
 	rtProjects "main/routes/pages/projects"
 	rtSearch "main/routes/pages/search"
+	reports "main/routes/timerjobs"
 	"net/http"
 	"strconv"
 	"time"
@@ -52,6 +54,7 @@ func main() {
 
 	mux.Handle("/guidance", loadAzGHAuthPage(rtGuidance.GuidanceHandler))
 	mux.Handle("/guidance/new", loadAzGHAuthPage(rtGuidance.CategoriesHandler))
+	mux.Handle("/guidance/{id}", loadAzGHAuthPage(rtGuidance.CategoryUpdateHandler))
 	mux.Handle("/guidance/Article/{id}", loadAzGHAuthPage(rtGuidance.ArticleHandler))
 	mux.Handle("/community/new", loadAzGHAuthPage(rtCommunity.CommunityHandler))
 	mux.Handle("/community/{id}", loadAzGHAuthPage(rtCommunity.CommunityHandler))
@@ -89,7 +92,12 @@ func main() {
 	muxApi.Handle("/contributionarea/activity/{id}", loadAzGHAuthPage(rtApi.GetContributionAreasByActivityId)).Methods("GET")
 	muxApi.Handle("/Category", loadAzGHAuthPage(rtApi.CategoryAPIHandler))
 	muxApi.Handle("/Category/list", loadAzGHAuthPage(rtApi.CategoryListAPIHandler))
+	muxApi.Handle("/Category/update", loadAzGHAuthPage(rtApi.CategoryUpdate))
+	muxApi.Handle("/Category/{id}", loadAzGHAuthPage(rtApi.GetCategoryByID))
+
+	//muxApi.Handle("/CategoryArticlesAdd", loadAzGHAuthPage(rtApi.CategoryAddAPIHandler))
 	muxApi.Handle("/CategoryArticlesById/{id}", loadAzGHAuthPage(rtApi.GetCategoryArticlesById))
+	muxApi.Handle("/CategoryArticlesByArticlesID/{id}", loadAzGHAuthPage(rtApi.GetCategoryArticlesByArticlesID))
 	muxApi.Handle("/CategoryArticlesUpdate", loadAzGHAuthPage(rtApi.CategoryArticlesUpdate))
 	muxApi.Handle("/repositories/list", loadAzGHAuthPage(rtApi.GetUserProjects))
 	muxApi.Handle("/repositories/{id}", loadAzGHAuthPage(rtApi.GetRequestStatusByProject))
@@ -117,6 +125,13 @@ func main() {
 	muxApi.HandleFunc("/approvals/community/callback", rtProjects.UpdateApprovalStatusCommunity).Methods("POST")
 	mux.NotFoundHandler = http.HandlerFunc(rtPages.NotFoundHandler)
 
+	o, err := strconv.Atoi(ev.GetEnvVar("SUMMARY_REPORT_TRIGGER", "9"))
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+	offset := time.Duration(o) * time.Hour
+	ctx := context.Background()
+	go reports.ScheduleJob(ctx, offset, reports.DailySummaryReport)
 	go checkFailedApprovalRequests()
 
 	port := ev.GetEnvVar("PORT", "8080")
