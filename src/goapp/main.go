@@ -54,6 +54,7 @@ func main() {
 	mux.Handle("/guidance/new", loadAzGHAuthPage(rtGuidance.CategoriesHandler))
 	mux.Handle("/guidance/Article/{id}", loadAzGHAuthPage(rtGuidance.ArticleHandler))
 	mux.Handle("/community/new", loadAzGHAuthPage(rtCommunity.CommunityHandler))
+	mux.Handle("/community/my", loadAzGHAuthPage(rtCommunity.GetMyCommunitylist))
 	mux.Handle("/community/{id}", loadAzGHAuthPage(rtCommunity.CommunityHandler))
 	mux.Handle("/community/getcommunity/{id}", loadAzGHAuthPage(rtCommunity.GetUserCommunity))
 	mux.Handle("/communities/list", loadAzGHAuthPage(rtCommunity.CommunitylistHandler))
