@@ -88,6 +88,36 @@
   </div>
   </div>
 
+
+    <div class="hover:shadow-red-100/50 sm:rounded-tr-none relative group bg-white p-6 focus-within:ring-2 focus-within:ring-inset hover:bg-gray-100">
+  <div class="group-shadow group-hover:shadow-indigo-500/40">
+    <div>
+      <span class="rounded-lg inline-flex p-3 bg-blue-50 text-blue-700 ring-4 ring-white">
+        <!-- Heroicon name: outline/clock -->
+<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+  <path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
+</svg>
+
+      </span>
+    </div>
+    <div class="mt-8">
+      <h3 class="text-lg font-medium ">
+        <a @click="isClicked(4)" class="cursor-pointer focus:outline-none">
+          <!-- Extend touch target to entire panel -->
+          <span class="absolute inset-0" aria-hidden="true"></span>
+          Community Approvers
+        </a>
+      </h3>
+      <p class="mt-2 text-sm text-gray-500">Manage approvers for each community approval type</p>
+    </div>
+    <span class="pointer-events-none absolute top-6 right-6 text-gray-300 group-hover:text-gray-400" aria-hidden="true">
+      <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+        <path d="M20 4h1a1 1 0 00-1-1v1zm-1 12a1 1 0 102 0h-2zM8 3a1 1 0 000 2V3zM3.293 19.293a1 1 0 101.414 1.414l-1.414-1.414zM19 4v12h2V4h-2zm1-1H8v2h12V3zm-.707.293l-16 16 1.414 1.414 16-16-1.414-1.414z" />
+      </svg>
+    </span>
+  </div>
+  </div>
+
 <!--END of Admin Redirects-->
 
 
@@ -106,6 +136,9 @@
             break
           case 3:
             window.location.href = '/admin/approvaltypes'
+            break
+          case 4:
+            window.location.href = '/admin/communityapprovers'
             break
         }
       },
