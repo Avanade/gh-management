@@ -10,10 +10,11 @@ import (
 	session "main/pkg/session"
 	"main/pkg/sql"
 	"net/http"
+	"net/url"
 	"os"
-	"sort"
 	"strconv"
 	"strings"
+	"sync"
 
 	"github.com/gorilla/mux"
 )
@@ -126,30 +127,36 @@ func ArchiveProject(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
-func GetAvanadeProjects(w http.ResponseWriter, r *http.Request) {
-	var allRepos []gh.Repo
+func GetAllRepositories(w http.ResponseWriter, r *http.Request) {
 
-	organizations := []string{os.Getenv("GH_ORG_INNERSOURCE"), os.Getenv("GH_ORG_OPENSOURCE")}
+	params := r.URL.Query()
+	search := params["search"][0]
+	offset, _ := strconv.Atoi(params["offset"][0])
 
-	for _, org := range organizations {
-		repos, err := gh.GetRepositoriesFromOrganization(org)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-
-		if repos != nil {
-			allRepos = append(allRepos, repos...)
+	// Get repository list
+	data := ghmgmt.Projects_Select_ByOffsetAndFilter(offset, search)
+	s, _ := json.Marshal(data)
+	var list []Repo
+	err := json.Unmarshal(s, &list)
+	for i, repo := range list {
+		if repo.RepositorySource == "GitHub" {
+			org := os.Getenv("GH_ORG_INNERSOURCE")
+			if repo.Visibility == "Public" {
+				org = os.Getenv("GH_ORG_OPENSOURCE")
+			}
+			list[i].TFSProjectReference = fmt.Sprintf("http://github.com/%s/%s", url.QueryEscape(org), url.QueryEscape(repo.Name))
+		} else {
+			continue
 		}
 	}
-
-	sort.Slice(allRepos[:], func(i, j int) bool {
-		return strings.ToLower(allRepos[i].Name) < strings.ToLower(allRepos[j].Name)
-	})
+	result := RepositoryList{
+		Data:  list,
+		Total: ghmgmt.Projectss_TotalCount_BySearchTerm(search),
+	}
 
 	w.WriteHeader(http.StatusOK)
 	w.Header().Set("Content-Type", "application/json")
-	jsonResp, err := json.Marshal(allRepos)
+	jsonResp, err := json.Marshal(result)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -226,6 +233,61 @@ func RequestMakePublic(w http.ResponseWriter, r *http.Request) {
 	}
 
 	go RequestApproval(id)
+}
+
+func ImportReposToDatabase(w http.ResponseWriter, r *http.Request) {
+	var allRepos []gh.Repo
+
+	organizations := []string{os.Getenv("GH_ORG_INNERSOURCE"), os.Getenv("GH_ORG_OPENSOURCE")}
+
+	for _, org := range organizations {
+		repos, err := gh.GetRepositoriesFromOrganization(org)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		if repos != nil {
+			allRepos = append(allRepos, repos...)
+		}
+	}
+
+	var wg sync.WaitGroup
+
+	for _, repo := range allRepos {
+		wg.Add(1)
+
+		go func(repo gh.Repo) {
+			defer wg.Done()
+			e := ghmgmt.Projects_IsExisting(models.TypNewProjectReqBody{Name: repo.Name})
+
+			if !e {
+				visibilityId := 3
+				if repo.Visibility == "private" {
+					visibilityId = 1
+				} else if repo.Visibility == "internal" {
+					visibilityId = 2
+				}
+
+				param := map[string]interface{}{
+
+					"Name":         repo.Name,
+					"Description":  repo.Description,
+					"IsArchived":   repo.IsArchived,
+					"VisibilityId": visibilityId,
+					"Created":      repo.Created.Format("2006-01-02 15:04:05"),
+				}
+
+				err := ghmgmt.ProjectInsertByImport(param)
+				if err != nil {
+					http.Error(w, err.Error(), http.StatusInternalServerError)
+				}
+			}
+
+		}(repo)
+	}
+	wg.Wait()
+	w.WriteHeader(http.StatusOK)
 }
 
 func RequestApproval(id int64) {
@@ -349,4 +411,20 @@ func ReprocessRequestApproval() {
 	for _, v := range projectApprovals {
 		go ApprovalSystemRequest(v)
 	}
+}
+
+type RepositoryList struct {
+	Data  []Repo `json:"data"`
+	Total int    `json:"total"`
+}
+
+type Repo struct {
+	Id                  int    `json:"Id"`
+	Name                string `json:"Name"`
+	Description         string `json:"Description"`
+	IsArchived          bool   `json:"IsArchived"`
+	Created             string `json:"Created"`
+	RepositorySource    string `json:"RepositorySource"`
+	TFSProjectReference string `json:"TFSProjectReference"`
+	Visibility          string `json:"Visibility"`
 }

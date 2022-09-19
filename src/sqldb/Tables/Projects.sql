@@ -1,9 +1,9 @@
 ﻿CREATE TABLE [dbo].[Projects]
 (
 	[Id] INT NOT NULL PRIMARY KEY IDENTITY, 
-    [Name] VARCHAR(50) NOT NULL, 
+    [Name] VARCHAR(100) NOT NULL, 
     [CoOwner] VARCHAR(100) NULL, 
-    [Description] VARCHAR(1000) NULL, 
+    [Description] VARCHAR(MAX) NULL, 
     [ConfirmAvaIP] BIT NOT NULL DEFAULT 0, 
     [ConfirmEnabledSecurity] BIT NOT NULL DEFAULT 0, 
     [ConfirmNotClientProject] BIT NOT NULL DEFAULT 0, 
@@ -18,7 +18,13 @@
 	[Willbecommercialversion] [varchar](50) NULL,
 	[OSSContributionInformation] [varchar](50) NULL,
 	[Newcontribution] [varchar](50) NULL,
-    [VisibilityId] INT NOT NULL DEFAULT 1
+    [VisibilityId] INT NOT NULL DEFAULT 1,
+    [RepositorySource] VARCHAR(15) DEFAULT 'GitHub',
+    [AssetCode] VARCHAR(50) NULL,
+    [TFSProjectReference] VARCHAR(1000) NULL,
+    [AssetUrl] VARCHAR(1000) NULL,
+    [MaturityRating] VARCHAR(20) NULL,
+    [ECATTReference] VARCHAR(1000) NULL
     CONSTRAINT FK_ApprovalStatus_Projects FOREIGN KEY (ApprovalStatusId) REFERENCES ApprovalStatus(Id),
     CONSTRAINT FK_Projects_Visibility FOREIGN KEY (VisibilityId) REFERENCES Visibility(Id)
 )
