@@ -245,6 +245,8 @@
             
             },
             async onLoad() {
+                var modal = Alpine.store('master').modal
+                modal.update('loading', 'Loading', 'Please wait', '', '')
                 this.form.id = 0;
                 this.form.name = "";
                 this.form.disabled = "false";
@@ -255,6 +257,7 @@
                 this.formUpdate.disabled = "false";
                 await this.getUsersList()
                 await this.getCommunityApprover()
+                modal.visible = false
 
             },
             get getapprovers() {
