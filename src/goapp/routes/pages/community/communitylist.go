@@ -2,6 +2,8 @@ package routes
 
 import (
 	"encoding/json"
+	"fmt"
+
 	//session "main/pkg/session"
 	"main/pkg/sql"
 	template "main/pkg/template"
@@ -14,8 +16,14 @@ import (
 )
 
 func CommunitylistHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("CommunitylistHandler")
 	template.UseTemplate(&w, r, "community/communitylist", nil)
 }
+
+// func CommunityApproverHandler(w http.ResponseWriter, r *http.Request) {
+// 	fmt.Println("CommunityApproverHandler")
+// 	template.UseTemplate(&w, r, "community/communityapprovers", nil)
+// }
 
 func GetUserCommunitylist(w http.ResponseWriter, r *http.Request) {
 
@@ -85,7 +93,3 @@ func GetUserCommunity(w http.ResponseWriter, r *http.Request) {
 
 	w.Write(jsonResp)
 }
-
-// func CommunityApproverHandler(w http.ResponseWriter, r *http.Request) {
-// 	template.UseTemplate(&w, r, "community/communityapprovers", nil)
-// }

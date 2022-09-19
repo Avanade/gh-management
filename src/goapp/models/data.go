@@ -184,3 +184,12 @@ type TypCategoryArticles struct {
 	Modified     string `json:"modified"`
 	ModifiedBy   string `json:"modifiedBy"`
 }
+type TypCommunityApprovers struct {
+	Id                        int    `json:"id"`
+	ApproverUserPrincipalName string `json:"name"`
+	Disabled                  bool   `json:"disabled"`
+	Created                   string `json:"created"`
+	CreatedBy                 string `json:"createdBy"`
+	Modified                  string `json:"modified"`
+	ModifiedBy                string `json:"modifiedBy"`
+}
