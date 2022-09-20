@@ -12,8 +12,14 @@ import (
 )
 
 func CommunitylistHandler(w http.ResponseWriter, r *http.Request) {
+//	fmt.Println("CommunitylistHandler")
 	template.UseTemplate(&w, r, "community/communitylist", nil)
 }
+
+// func CommunityApproverHandler(w http.ResponseWriter, r *http.Request) {
+// 	fmt.Println("CommunityApproverHandler")
+// 	template.UseTemplate(&w, r, "community/communityapprovers", nil)
+// }
 
 func GetUserCommunitylist(w http.ResponseWriter, r *http.Request) {
 

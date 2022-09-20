@@ -1,0 +1,291 @@
+{{ define "content" }}
+
+
+<div id="pageTitle"> Admin Community Approver </div>
+<div x-data="data()" x-init="onLoad()">
+    <form onsubmit="event.preventDefault()" autocomplete="off">
+        <div class="border px-2 py-2">
+            <fieldset>
+
+                <div class="flex flex flex-col md:flex-row ">
+                    <div class="basis-1/2 md:base-full  md:flex-row mx-3 grow  ">
+                        <div class="flex flex-col   ">
+                            <div>
+                                <h3 class="text-lg font-medium leading-6 text-gray-900">Quick Add</h3>
+                            </div>
+                            <div class="grow ">
+                                <table style="width:100%">
+                                    <tr>
+                                        <td style="width:20%" class="text-base font-small leading-6 text-gray-900">
+                                            Approver Name :
+                                        </td>
+                                        <td>
+                                            <div x-html="approver.template"></div>
+                                        </td>
+                                        <td align="right ">
+                                            <button type="button"
+                                                class="bg-orange-500  inline-flex justify-center py-2 px-4 rounded-md text-white"
+                                                @click="submit()">
+                                                Add Approver
+                                            </button>
+                                        </td>
+                                    </tr>
+
+                                </table>
+
+                            </div>
+
+                            <div>
+                                <h3 class="text-lg font-medium leading-6 text-gray-900"> <br> </h3>
+                            </div>
+
+                        </div>
+                    </div>
+
+                </div>
+            </fieldset>
+
+        </div>
+        <br>
+        <div x-show="getapprovers">
+            <div class="px-4 py-4 sm:px-6 hover:bg-gray-50 cursor-pointer border px-2 py-2" style="display: flex; ">
+                <div style="flex-grow: 1;" x-data="{ display: 'ID' }" x-text="display">ID</div>
+                <div style="flex-grow: 1;" x-data="{ display: 'Name  ' }" x-text="display"> Name </div>
+                <div style="flex-grow: 1;" x-data="{ display: '   Disabled' }" x-text="display"> </div>
+
+            </div>
+            <template x-for="(appro, i) in getapprovers">
+
+                <div class="px-4 py-4 sm:px-6 hover:bg-gray-50 cursor-pointer border px-2 py-2" style="display: flex; ">
+                    <div style="flex-grow: 1;" x-text="appro.Id"> </div>
+                    <div style="flex-grow: 1;" x-text="appro.ApproverUserPrincipalName"> </div>
+                    <div style="flex-grow: 2;">
+
+                        <input type="checkbox" name="Disabled" id="Disabled" x-model="appro.Disabled "
+                            x-text="appro.Disabled"
+                            @click="update2(appro.Id , appro.ApproverUserPrincipalName ,appro.Disabled )">
+                        <span x-text="appro.Disabled"> </span>
+                    </div>
+
+
+                </div>
+            </template>
+        </div>
+    </form>
+</div>
+
+<script src="/public/components/clsDropdown.js"></script>
+<script src="/public/components/combobox.js"></script>
+<script type="text/javascript">
+    function data() {
+        return {
+            mode:
+                'view',
+            form: {
+                id: '{{.Id}}',
+                name: '',
+                disabled: false,
+                approver: [],
+                approvers: [],
+            },
+            approver: {
+                template: '',
+                selected: '',
+                data: []
+            },
+            formUpdate: {
+                id: '{{.Id}}',
+                name: '',
+                disabled: false
+            }
+            ,
+            approvers: {
+                id: '{{.Id}}',
+                approverUserPrincipalName: '',
+                disabled: false,
+                approver: [],
+                approvers: [],
+            },
+            categoryArticle: {
+                id: '{{.Id}}',
+                name: '',
+                url: '',
+                body: '',
+                categoryId: 0,
+                CategoryName: ''
+            },
+            get filteredapproverData() {
+                return this.approver.data.filter(i => {
+                    return !this.form.approver.includes(i)
+                })
+            }
+            ,
+            async getUsersList() {
+
+
+                await fetch('/api/allusers').then(j => j.json()
+                    .then(data => {
+
+                        this.approver.data = data
+
+                      
+                    }))
+                    .catch(() => {
+                        Alpine.store('master').modal.update('error', 'Error', 'Please try again', '', '')
+
+                    })
+
+                var dd = new clsDropdown()
+                this.approver.template = dd.template(
+                    'dd1',
+                    'approver.selected',
+                    'filteredapproverData',
+                    'displayName',
+                    'mail', 'mail',
+                    'datapush()')
+            },
+            submit() {
+                if (this.approver.selected != "") {
+                    var modal = Alpine.store('master').modal
+                    modal.update('loading', 'Saving', 'Please wait.', '', '')
+                    if (!this.form.id) {
+                        this.form.id = 0
+
+                    }
+
+                    postData = this.form;
+                    Alpine.store('master').postData('/api/communityapprovers/update', postData, "Your communityapprovers has been Updated.",
+                        "update communityapprovers")
+                }
+
+
+            },
+            submit2(id) {
+                if (this.approver.selected != "") {
+                    var modal = Alpine.store('master').modal
+                    modal.update('loading', 'Saving', 'Please wait.', '', '')
+                    if (!this.form.id) {
+                        this.form.id = 0
+
+                    }
+             
+                    postData = this.form;
+                    Alpine.store('master').postData('/api/communityapprovers/update', postData, "Your communityapprovers has been Updated.",
+                        "update communityapprovers")
+                }
+
+
+            },
+            update2(id, ApproverUserPrincipalName, disabled) {
+                if (disabled == true) { this.formUpdate.disabled = false }
+                else { this.formUpdate.disabled = true }
+                this.formUpdate.id = id
+                this.formUpdate.name = ApproverUserPrincipalName
+                postData2 = this.formUpdate;
+                Alpine.store('master').postData('/api/communityapprovers/update', postData2, "Your communityapprovers has been Updated.",
+                    "update communityapprovers")
+              
+            }
+            ,
+            async GetformUpdate(id) {
+
+                this.approver.selected = "";
+
+                this.mode = "Edit"
+
+                await fetch('/api/communityapprovers/GetCommunityApproversList/' + id)
+                    .then(r => {
+                        r.json().then(body => {
+                            this.formUpdate.id = body[0]["Id"]
+                            this.formUpdate.disabled = true // (body[0]["Disabled"]==='false')
+                            this.formUpdate.name = body[0]["ApproverUserPrincipalName"]
+
+                            this.approver.selected = this.form.name
+                        });
+                    }).then(
+
+
+                )
+                    .catch(e => {
+
+                    })
+
+            },
+            get isValid() {
+                if (
+                    (this.form.name
+
+                    )) {
+                    return true
+                } else {
+                    return false
+                }
+            }, getCommunityApprover() {
+
+
+                fetch('/api/communityapprovers/GetCommunityApproversList')
+                    .then(r => {
+                        r.json().then(body => {
+                            this.approvers = body
+
+                            this.showSpinner = false
+
+                        });
+                    })
+                    .catch(e => {
+                        console.log(e)
+                    })
+
+            },
+            datapush() {
+                this.form.approver.push(this.approver.data.filter(i => i.mail == this.approver.selected)[0])
+
+                this.form.name = this.approver.selected
+
+            
+            },
+            async onLoad() {
+                var modal = Alpine.store('master').modal
+                modal.update('loading', 'Loading', 'Please wait', '', '')
+                this.form.id = 0;
+                this.form.name = "";
+                this.form.disabled = "false";
+                this.approver.selected = "";
+                this.mode = "view"
+                this.formUpdate.id = 0;
+                this.formUpdate.name = "";
+                this.formUpdate.disabled = "false";
+                await this.getUsersList()
+                await this.getCommunityApprover()
+                modal.visible = false
+
+            },
+            get getapprovers() {
+
+                return this.approvers
+
+            }
+        }
+    }
+    async function getnames() {
+
+        const res = await fetch('/api/Category/list')
+
+        const data = await res.json()
+
+        return data
+
+
+    }
+    async function getnames() {
+
+        const res = await fetch('/api/Category/list')
+
+        const data = await res.json()
+    
+        return data
+
+
+    }
+</script>
+{{ end }}
