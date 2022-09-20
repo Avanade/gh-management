@@ -22,7 +22,8 @@ SELECT [p].[Id],
        [Modified],
        [ModifiedBy],
        [ApprovalStatusId],
-       [v].[Name] AS 'Visibility'
+       [v].[Name] AS 'Visibility',
+       [p].[RepositorySource]
   FROM 
        [dbo].[Projects] AS p
   LEFT JOIN [dbo].[Visibility] AS v ON p.VisibilityId = v.Id
