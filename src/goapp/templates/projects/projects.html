@@ -168,8 +168,8 @@
     </div>
 
     <!-- LIST OF AVANADE PROJECTS -->
-    <div x-show="!showSpinner && allRepositoriesList && view==='all'">
-      <div class="my-5 flex flex-col rounded-md shadow-sm">
+    <div x-show="!showSpinner && view==='all'">
+      <div class="my-5 flex flex-col rounded-md">
         <div class="relative flex items-stretch flex-grow focus-within:z-10">
           <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 20 20" stroke="currentColor" stroke-width="2">
@@ -178,11 +178,18 @@
           </div>
           <input x-model="search" @keyup.enter="searchAllRepositories()" type="text" name="searchTerm" id="searchTerm" class="focus:ring-indigo-500 focus:border-indigo-500 block w-full rounded-md pl-10 sm:text-sm border-gray-300" placeholder="Find a repository">
         </div>
-        <div class="italic text-sm pl-1">
+        <div class="italic text-sm pl-1" x-show="allRepositoriesList !== null">
           Before you use any innersource asset or tool, please make sure you read the following <a href="***REMOVED***" target="_blank" class="text-[#ff5800]">InnerSource general legal guidelines</a>
         </div>
       </div>
     </div>
+    <!-- no repo found -->
+    <div class="my-5 flex flex-col rounded-md text-sm">
+      <div x-show="allRepositoriesList === null && !showSpinner">
+        No repository found.
+      </div>
+    </div>
+    <!-- list  -->
     <div class="bg-white shadow overflow-hidden sm:rounded-md mt-4" x-show="!showSpinner && allRepositoriesList && view==='all'">
       <ul role="list" class="divide-y divide-gray-100">
         <template x-for="(repository, index) in allRepositoriesList">
@@ -293,8 +300,8 @@
           r.json().then(body => {
             this.allRepositoriesList = body.data
             this.total = body.total
-            this.showStart = this.allRepositoriesList.length > 0 ? ((this.page * 15) + 1) : 0;
-            this.showEnd = (15 * this.page) + this.allRepositoriesList.length;
+            this.showStart = this.allRepositoriesList?.length > 0 ? ((this.page * 15) + 1) : 0;
+            this.showEnd = (15 * this.page) + this.allRepositoriesList?.length;
             this.showSpinner = false
           });
         })
