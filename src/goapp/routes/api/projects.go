@@ -134,7 +134,7 @@ func GetAllRepositories(w http.ResponseWriter, r *http.Request) {
 	offset, _ := strconv.Atoi(params["offset"][0])
 
 	// Get repository list
-	data := ghmgmt.Projects_Select_ByOffsetAndFilter(offset, search)
+	data := ghmgmt.Repos_Select_ByOffsetAndFilter(offset, search)
 	s, _ := json.Marshal(data)
 	var list []Repo
 	err := json.Unmarshal(s, &list)
@@ -151,7 +151,7 @@ func GetAllRepositories(w http.ResponseWriter, r *http.Request) {
 	}
 	result := RepositoryList{
 		Data:  list,
-		Total: ghmgmt.Projectss_TotalCount_BySearchTerm(search),
+		Total: ghmgmt.Repos_TotalCount_BySearchTerm(search),
 	}
 
 	w.WriteHeader(http.StatusOK)

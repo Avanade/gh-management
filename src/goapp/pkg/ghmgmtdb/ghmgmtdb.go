@@ -355,7 +355,7 @@ func GetProjectByName(projectName string) []map[string]interface{} {
 	return result
 }
 
-func Projects_Select_ByOffsetAndFilter(offset int, search string) []map[string]interface{} {
+func Repos_Select_ByOffsetAndFilter(offset int, search string) []map[string]interface{} {
 	db := ConnectDb()
 	defer db.Close()
 
@@ -368,7 +368,7 @@ func Projects_Select_ByOffsetAndFilter(offset int, search string) []map[string]i
 	return result
 }
 
-func Projectss_TotalCount_BySearchTerm(search string) int {
+func Repos_TotalCount_BySearchTerm(search string) int {
 	db := ConnectDb()
 	defer db.Close()
 
