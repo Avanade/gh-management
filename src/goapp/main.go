@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 	session "main/pkg/session"
@@ -14,6 +15,7 @@ import (
 	rtGuidance "main/routes/pages/guidance"
 	rtProjects "main/routes/pages/projects"
 	rtSearch "main/routes/pages/search"
+	reports "main/routes/timerjobs"
 	"net/http"
 	"strconv"
 	"time"
@@ -43,10 +45,10 @@ func main() {
 	mux.Handle("/activities", loadAzGHAuthPage(rtActivities.ActivitiesHandler))
 	mux.Handle("/activities/{action:add}", loadAzGHAuthPage(rtActivities.ActivitiesNewHandler))
 	mux.Handle("/activities/{action:edit|view}/{id}", loadAzGHAuthPage(rtActivities.ActivitiesNewHandler))
-	mux.Handle("/projects", loadAzGHAuthPage(rtProjects.Projects))
-	mux.Handle("/projects/new", loadAzGHAuthPage(rtProjects.ProjectsNewHandler))
-	mux.Handle("/projects/{id}", loadAzGHAuthPage(rtProjects.ProjectsHandler))
-	mux.Handle("/projects/makepublic/{id}", loadAzGHAuthPage(rtProjects.MakePublic))
+	mux.Handle("/repositories", loadAzGHAuthPage(rtProjects.Projects))
+	mux.Handle("/repositories/new", loadAzGHAuthPage(rtProjects.ProjectsNewHandler))
+	mux.Handle("/repositories/{id}", loadAzGHAuthPage(rtProjects.ProjectsHandler))
+	mux.Handle("/repositories/makepublic/{id}", loadAzGHAuthPage(rtProjects.MakePublic))
 	mux.Handle("/search/{searchText}/{offSet}/{rowCount}", loadAzGHAuthPage(rtSearch.GetSearchResults))
 	mux.Handle("/search", loadAzGHAuthPage(rtSearch.SearchHandler))
 
@@ -55,6 +57,7 @@ func main() {
 	mux.Handle("/guidance/{id}", loadAzGHAuthPage(rtGuidance.CategoryUpdateHandler))
 	mux.Handle("/guidance/Article/{id}", loadAzGHAuthPage(rtGuidance.ArticleHandler))
 	mux.Handle("/community/new", loadAzGHAuthPage(rtCommunity.CommunityHandler))
+	mux.Handle("/community/my", loadAzGHAuthPage(rtCommunity.GetMyCommunitylist))
 	mux.Handle("/community/{id}", loadAzGHAuthPage(rtCommunity.CommunityHandler))
 	mux.Handle("/community/getcommunity/{id}", loadAzGHAuthPage(rtCommunity.GetUserCommunity))
 	mux.Handle("/communities/list", loadAzGHAuthPage(rtCommunity.CommunitylistHandler))
@@ -96,13 +99,13 @@ func main() {
 	muxApi.Handle("/CategoryArticlesById/{id}", loadAzGHAuthPage(rtApi.GetCategoryArticlesById))
 	muxApi.Handle("/CategoryArticlesByArticlesID/{id}", loadAzGHAuthPage(rtApi.GetCategoryArticlesByArticlesID))
 	muxApi.Handle("/CategoryArticlesUpdate", loadAzGHAuthPage(rtApi.CategoryArticlesUpdate))
-	muxApi.Handle("/projects/list", loadAzGHAuthPage(rtApi.GetUserProjects))
-	muxApi.Handle("/projects/{id}", loadAzGHAuthPage(rtApi.GetRequestStatusByProject))
-	muxApi.Handle("/projects/request/public", loadAzGHAuthPage(rtApi.RequestMakePublic))
-	muxApi.Handle("/projects/archive/{project}/{projectId}/{state}/{archive}", loadAzGHAuthPage(rtApi.ArchiveProject))
-	muxApi.Handle("/projects/visibility/{project}/{projectId}/{currentState}/{desiredState}", loadAzGHAuthPage(rtApi.SetVisibility))
+	muxApi.Handle("/repositories/list", loadAzGHAuthPage(rtApi.GetUserProjects))
+	muxApi.Handle("/repositories/{id}", loadAzGHAuthPage(rtApi.GetRequestStatusByProject))
+	muxApi.Handle("/repositories/request/public", loadAzGHAuthPage(rtApi.RequestMakePublic))
+	muxApi.Handle("/repositories/archive/{project}/{projectId}/{state}/{archive}", loadAzGHAuthPage(rtApi.ArchiveProject))
+	muxApi.Handle("/repositories/visibility/{project}/{projectId}/{currentState}/{desiredState}", loadAzGHAuthPage(rtApi.SetVisibility))
 	muxApi.Handle("/allusers", loadAzAuthPage(rtApi.GetAllUserFromActiveDirectory))
-	muxApi.Handle("/allavanadeprojects", loadAzGHAuthPage(rtApi.GetAvanadeProjects))
+	muxApi.Handle("/allavanaderepositories", loadAzGHAuthPage(rtApi.GetAvanadeProjects))
 
 	//API FOR APPROVAL TYPES
 	muxApi.HandleFunc("/approval/type", rtApi.CreateApprovalType).Methods("POST")
@@ -127,6 +130,13 @@ func main() {
 	muxApi.HandleFunc("/communityapprovers/GetCommunityApproversList/{id}", rtCommunity.GetCommunityApproversById)
 	mux.NotFoundHandler = http.HandlerFunc(rtPages.NotFoundHandler)
 
+	o, err := strconv.Atoi(ev.GetEnvVar("SUMMARY_REPORT_TRIGGER", "9"))
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+	offset := time.Duration(o) * time.Hour
+	ctx := context.Background()
+	go reports.ScheduleJob(ctx, offset, reports.DailySummaryReport)
 	go checkFailedApprovalRequests()
 
 	port := ev.GetEnvVar("PORT", "8080")

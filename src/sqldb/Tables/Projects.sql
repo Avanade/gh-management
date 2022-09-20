@@ -6,6 +6,7 @@
     [Description] VARCHAR(1000) NULL, 
     [ConfirmAvaIP] BIT NOT NULL DEFAULT 0, 
     [ConfirmEnabledSecurity] BIT NOT NULL DEFAULT 0, 
+    [ConfirmNotClientProject] BIT NOT NULL DEFAULT 0, 
     [ApprovalStatusId] INT DEFAULT 1,
     [IsArchived] BIT NOT NULL DEFAULT 0,
     [Created] DATETIME NOT NULL DEFAULT getdate(), 

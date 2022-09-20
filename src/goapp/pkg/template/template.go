@@ -32,20 +32,20 @@ func UseTemplate(w *http.ResponseWriter, r *http.Request, page string, pageData 
 	approvalSystemUrl := os.Getenv("APPROVAL_SYSTEM_APP_URL")
 	// Data on master page
 	var menu []models.TypMenu
-	menu = append(menu, models.TypMenu{Name: "Dashboard", Url: "/", IconPath: "/public/icons/dashboard.svg"})
-	menu = append(menu, models.TypMenu{Name: "Projects", Url: "/projects", IconPath: "/public/icons/projects.svg"})
-	menu = append(menu, models.TypMenu{Name: "Communities", Url: "/communities/list", IconPath: "/public/icons/communities.svg"})
-	menu = append(menu, models.TypMenu{Name: "Activities", Url: "/activities", IconPath: "/public/icons/activity.svg"})
-	menu = append(menu, models.TypMenu{Name: "Guidance", Url: "/guidance", IconPath: "/public/icons/guidance.svg"})
-	menu = append(menu, models.TypMenu{Name: "Approvals", Url: approvalSystemUrl, IconPath: "/public/icons/approvals.svg"})
+	menu = append(menu, models.TypMenu{Name: "Dashboard", Url: "/", IconPath: "/public/icons/dashboard.svg", External: false})
+	menu = append(menu, models.TypMenu{Name: "Repositories", Url: "/repositories", IconPath: "/public/icons/projects.svg", External: false})
+	menu = append(menu, models.TypMenu{Name: "Communities", Url: "/communities/list", IconPath: "/public/icons/communities.svg", External: false})
+	menu = append(menu, models.TypMenu{Name: "Activities", Url: "/activities", IconPath: "/public/icons/activity.svg", External: false})
+	menu = append(menu, models.TypMenu{Name: "Guidance", Url: "/guidance", IconPath: "/public/icons/guidance.svg", External: false})
+	menu = append(menu, models.TypMenu{Name: "Approvals", Url: approvalSystemUrl, IconPath: "/public/icons/approvals.svg", External: true})
 	if isAdmin {
-		menu = append(menu, models.TypMenu{Name: "Admin", Url: "/admin", IconPath: "/public/icons/lock.svg"})
+		menu = append(menu, models.TypMenu{Name: "Admin", Url: "/admin", IconPath: "/public/icons/lock.svg", External: false})
 	}
 
 	var externalLinks []models.TypMenu
-	externalLinks = append(externalLinks, models.TypMenu{Name: "Tech Community Calendar", Url: "https://techcommunitycalendar.com/", IconPath: "/public/icons/calendar.svg"})
-	externalLinks = append(externalLinks, models.TypMenu{Name: "Stack Overflow at Avanade", Url: "https://avanade.stackenterprise.co/", IconPath: "/public/icons/questionmark.svg"})
-	externalLinks = append(externalLinks, models.TypMenu{Name: "Open Innovation Meetup", Url: "https://opentechmeetup.com/", IconPath: "/public/icons/microphone.svg"})
+	externalLinks = append(externalLinks, models.TypMenu{Name: "Tech Community Calendar", Url: "https://techcommunitycalendar.com/", IconPath: "/public/icons/calendar.svg", External: true})
+	externalLinks = append(externalLinks, models.TypMenu{Name: "Stack Overflow at Avanade", Url: "https://avanade.stackenterprise.co/", IconPath: "/public/icons/questionmark.svg", External: true})
+	externalLinks = append(externalLinks, models.TypMenu{Name: "Open Innovation Meetup", Url: "https://opentechmeetup.com/", IconPath: "/public/icons/microphone.svg", External: true})
 	masterPageData := models.TypHeaders{Menu: menu, ExternalLinks: externalLinks, Page: getUrlPath(r.URL.Path)}
 
 	data := models.TypPageData{

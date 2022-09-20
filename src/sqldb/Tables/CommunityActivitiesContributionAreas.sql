@@ -1,6 +1,6 @@
 CREATE TABLE [dbo].[CommunityActivitiesContributionAreas]
 (
-  [Id] INT NOT NULL PRIMARY KEY,
+  [Id] INT NOT NULL PRIMARY KEY IDENTITY,
   [CommunityActivityId] INT NOT NULL,
   [ContributionAreaId] INT NOT NULL,
   [IsPrimary] BIT NOT NULL DEFAULT 0,

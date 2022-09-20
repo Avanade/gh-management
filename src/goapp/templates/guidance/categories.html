@@ -89,15 +89,6 @@
         </div>
         <div>
             <div align="right">
-                <div x-show="form.id">
-                    <button type="button" x-show="mode=='view'"
-                        class="bg-orange-500  inline-flex justify-center py-2 px-4 rounded-md text-white"
-                        :class="!isValid ? 'bg-orange-100' : ''" x-bind:disabled="!isValid" @click="mode='edit'">
-
-                        <span x-show="form.id">Edit Project</span>
-
-                    </button>
-                </div>
                 <button type="button" class="bg-orange-500  inline-flex justify-center py-2 px-4 rounded-md text-white"
                     :class="!isValid ? 'bg-orange-100' : ''" x-bind:disabled="!isValid" @click="submit()">
 

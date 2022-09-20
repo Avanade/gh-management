@@ -46,7 +46,9 @@
                                         id : 'Id',
                                         text : 'Name',
                                         label : 'Type*',
-                                        isInsertable : true
+                                        isInsertable : true,
+                                        searchTag : 'If the activity type is not on the list, type it in the box and press enter.',
+                                        searchPlaceholder : 'Search or add a new item'
                                     })"
                                 x-modelable = "selected"
                                 x-model = "form.type"
@@ -167,7 +169,7 @@
                 toggleShowOption : 'false',
                 form : {
                     community : [],
-                    date : '',
+                    date : new Date().toISOString().split('T')[0],
                     activity_name : '',
                     type : [],
                     url : '',
@@ -216,7 +218,6 @@
                     return false
                 },
                 showOption() {
-                    console.log(this.toggleShowOption)
                     this.form.help = [];
                     this.form.helpDetails = "";
                     return this.toggleShowOption == 'true'

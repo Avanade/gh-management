@@ -1,16 +1,16 @@
 {{ define "content" }}
 
 
-<div id="pageTitle">Request a project</div>
+<div id="pageTitle">Request a repository</div>
 
 <div x-data="data()" x-init="onload()">
     <form onsubmit="event.preventDefault()" autocomplete="off">
         <fieldset x-bind:disabled="mode=='view'">
-            <h3 class="text-lg font-medium leading-6 text-gray-900">Project information</h3>
+            <h3 class="text-lg font-medium leading-6 text-gray-900">Repository information</h3>
             <p class="mt-1 text-sm text-gray-500">
-            All projects start on Avanade’s innersource on GitHub. Once you have identified a business sponsor, and
+            All repositories start on Avanade’s innersource on GitHub. Once you have identified a business sponsor, and
             submitted
-            your first automated security scan, you can request to move the project to open source. If you open source
+            your first automated security scan, you can request to move the repository to open source. If you open source
             this
             application, it will be displayed publicly, so think carefully.
             </p>
@@ -20,7 +20,7 @@
                 <div class="basis-1/2 md:base-full  md:flex-row mx-3">
                     <div class="flex flex-col  ">
                         <div>
-                            <h3 class="block text-sm font-medium text-gray-700">Project Name</h3>
+                            <h3 class="block text-sm font-medium text-gray-700">Repository Name</h3>
                         </div>
                         <div> <input type="text" name="name" id="name" x-model="form.name" maxlength="50"
                                 x-bind:disabled="mode=='edit'"
@@ -35,7 +35,7 @@
                 <div class="basis-1/2 md:base-full md:flex-row mx-3">
                     <div class="flex flex-col ...">
                         <div>
-                            <h3 class="block text-sm font-medium text-gray-700">Project Co-owner</h3>
+                            <h3 class="block text-sm font-medium text-gray-700">Repository Co-owner</h3>
                         </div>
 
 
@@ -58,7 +58,7 @@
 
                                 <ul class="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm"
                                     id="options" x-show="coowner.show" role="listbox">
-
+                                    <div class="italic text-sm text-gray-500 p-3">Only users with associated GH account are displayed</div>
                                     {{range $user := .users}}
                                     <li x-show="showName('{{$user.UserPrincipalName}}', '{{$user.GithubUser}}')"
                                         class="relative cursor-default select-none py-2 pl-3 pr-9 text-gray-900"
@@ -95,8 +95,8 @@
                         </div>
                         <!-- END OF CO-OWNER CB... -->
 
-                        <div class="mt-1 text-sm text-gray-500">All projects must have two or more owners, to ensure that security alerts can be dealt with
-                            promptly. <div>
+                        <div class="mt-1 text-sm text-gray-500">All repositories must have two or more owners, to ensure that security alerts can be dealt with
+                            promptly.<div>
                                 <h3 class="text-lg font-medium leading-6 text-gray-900"> <br> </h3>
                             </div>
                         </div>
@@ -111,7 +111,7 @@
                 <div class="basis-1/2 md:base-full  md:flex-row   mx-3">
                     <div class="flex flex-col ">
                         <div>
-                            <h3 class="block text-sm font-medium text-gray-700">Project description</h3>
+                            <h3 class="block text-sm font-medium text-gray-700">Repository description</h3>
                         </div>
                         <div>
                             <textarea name="description" id="description" x-model="form.description" rows="3"
@@ -139,9 +139,9 @@
                 </div>
                 <div class="ml-3 text-sm">
                     <p class="text-gray-900">
-                        I confirm that this project is Avanade owned intellectual property, or the legal team have
+                        I confirm that this repository is Avanade owned intellectual property, or the legal team have
                         approved
-                        this project.
+                        this repository.
                     </p>
                 </div>
             </div>
@@ -159,28 +159,52 @@
                     </p>
                 </div>
             </div>
+
+            <div class="flex items-start mt-1 ml-3">
+                <div class="flex items-center h-5">
+                    <input id="confirm3" name="confirmNotClientProject" type="checkbox" x-model="form.confirmNotClientProject"
+                        class="focus:ring-orange-500 h-4 w-4 text-orange-600 border-gray-300 rounded">
+                </div>
+                <div class="ml-3 text-sm">
+
+                    <p class="text-gray-900">I confirm this repository is not going to be used to deliver a client project.
+                    </p>
+                </div>
+            </div>
             
         </fieldset>
         <br>
-        <p class="ml-3 mt-1 text-sm text-gray-900"> Projects will be automatically created in Avanade innersource, and you will receive a Teams notification
-            with a link to the project.<br />
-            You can also view your projects under the projects tab.
+        <p class="ml-3 mt-1 text-sm text-gray-900"> Repositories will be automatically created in Avanade innersource, and you will receive a Teams notification
+            with a link to the repository.<br />
+            You can also view your repository under the repositories tab.
         </p>
+
+        <div class="bg-red-50 p-4 my-4">
+            <div class="flex justify-center">
+                <div class="ml-3 flex text-center max-w-4xl">
+                    <p class="text-sm text-red-700">
+                        Before any innersource code can be used on other projects, as the asset owner you must follow 
+                        <a class="text-blue-700" target="_blank" href="***REMOVED***">Avanade's guidelines</a>
+                        , covering export compliance, OSS scans, IP reviews, security and data privacy.
+                    </p>
+                </div>
+            </div>
+        </div>
         <div>
             <div align="right">
                 <button type="button" x-show="mode=='view'"
                     class="bg-orange-500  inline-flex justify-center py-2 px-4 rounded-md text-white"
                     :class="!isValid ? 'bg-orange-100' : ''" x-bind:disabled="!isValid" @click="mode='edit'">
 
-                    <span x-show="form.id">Edit Project</span>
+                    <span x-show="form.id">Edit Repository</span>
 
                 </button>
                 <button type="submit" x-show="mode!='view'"
                     class="bg-orange-500  inline-flex justify-center py-2 px-4 rounded-md text-white"
                     :class="!isValid ? 'bg-orange-100' : ''" x-bind:disabled="!isValid" @click="submit()">
 
-                    <span x-show="!form.id">Submit project</span>
-                    <span x-show="form.id">Update project</span>
+                    <span x-show="!form.id">Submit</span>
+                    <span x-show="form.id">Update repository</span>
 
                 </button>  
                 <span x-show="form.id">
@@ -211,6 +235,7 @@
                 description: '',
                 confirmAvaIP: false,
                 confirmSecIPScan: false,
+                confirmNotClientProject: false,
             },
             coowner: {
                 show: false,
@@ -219,9 +244,9 @@
                 Alpine.store('master').modal.reset()
                 Alpine.store('master').modal.show()
                 if (!this.form.id)
-                    Alpine.store('master').postData("/projects/new", this.form, "Your repository has been created.", "Go to your project list", "/projects")
+                    Alpine.store('master').postData("/repositories/new", this.form, "Your repository has been created.", "Go to your repository list", "/repositories")
                 else
-                    Alpine.store('master').postData("/projects/" + this.form.id, this.form, "Your repository has been created.", "Go to your project list", "/projects")
+                    Alpine.store('master').postData("/repositories/" + this.form.id, this.form, "Your repository has been created.", "Go to your repository list", "/repositories")
 
             },
             showName(userPrincipalName, githubUser) {
@@ -236,7 +261,8 @@
                     !!this.form.coowner &&
                     !!this.form.description &&
                     this.form.confirmAvaIP &&
-                    this.form.confirmSecIPScan) {
+                    this.form.confirmSecIPScan &&
+                    this.form.confirmNotClientProject) {
                     return true
                 } else {
                     return false
@@ -265,7 +291,7 @@
                 this.form.id = '{{.Id}}'
                 if (this.form.id) {
                     this.mode = 'view'
-                    await fetch('/api/projects/' + '{{.Id}}')
+                    await fetch('/api/repositories/' + '{{.Id}}')
                         .then(r => {
                             r.json().then(body => {
 
@@ -274,6 +300,7 @@
                                 this.form.description = body[0]["ProjectDescription"]
                                 this.form.confirmAvaIP = body[0]["ConfirmAvaIP"]
                                 this.form.confirmSecIPScan = body[0]["ConfirmEnabledSecurity"]
+                                this.form.confirmNotClientProject = body[0]["ConfirmNotClientProject"]
                             });
                         })
                         .catch(e => {

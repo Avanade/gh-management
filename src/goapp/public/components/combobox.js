@@ -7,7 +7,9 @@ const combobox = ({
     isInsertable = false,
     isDisplayItem = false,
     displaySearch = true,
-    label = null
+    label = null,
+    searchTag = null,
+    searchPlaceholder = null
 }) => {
     return { 
         // STATES
@@ -25,6 +27,8 @@ const combobox = ({
         isInsertable : false,
         isDisplayItem : false,
         displaySearch : true,
+        searchTag : null,
+        searchPlaceholder : null,
         label : '',
         // INITIALIZED
         async init() {
@@ -32,6 +36,8 @@ const combobox = ({
             this.isInsertable = isInsertable;
             this.isDisplayItem = isDisplayItem;
             this.displaySearch = displaySearch;
+            this.searchTag = searchTag;
+            this.searchPlaceholder = searchPlaceholder;
             // SET DATA
             if(data != undefined){
                 this.data = data.map((i) => {
@@ -110,7 +116,10 @@ const combobox = ({
                             <ul x-show="isShowOptions" class="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm" id="options" role="listbox">
                             <template x-if='displaySearch'>
                                 <li class="p-3">
-                                    <input x-ref="filter" type="text" class="w-full rounded-md border border-gray-300 bg-white py-2 pl-3 pr-12 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 sm:text-sm" role="combobox" aria-controls="options" aria-expanded="false" @input.debounce="onInputHandler" @keyup.enter='onInsertItem'>
+                                <input x-ref="filter" type="text" :placeholder="searchPlaceholder" class="w-full rounded-md border border-gray-300 bg-white py-2 pl-3 pr-12 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 sm:text-sm" role="combobox" aria-controls="options" aria-expanded="false" @input.debounce="onInputHandler" @keyup.enter='onInsertItem'>
+                                    <template x-if="searchTag != null">
+                                        <small class="text-gray-700" x-text="searchTag"></small>
+                                    </template>
                                 </li>
                             </template>
                             <template x-for='item in options' :key="item.id">

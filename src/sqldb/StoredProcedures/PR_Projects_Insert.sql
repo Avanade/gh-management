@@ -6,6 +6,7 @@
 	@IsArchived bit = 0,
 	@ConfirmAvaIP bit,
 	@ConfirmEnabledSecurity bit,
+	@ConfirmNotClientProject bit,
 	@CreatedBy varchar(100)
 ) AS
 
@@ -18,6 +19,7 @@ INSERT INTO Projects (
 	IsArchived,
 	ConfirmAvaIP,
 	ConfirmEnabledSecurity,
+	ConfirmNotClientProject,
 	Created,
 	CreatedBy,
 	Modified,
@@ -30,6 +32,7 @@ VALUES (
 	@IsArchived,
 	@ConfirmAvaIP,
 	@ConfirmEnabledSecurity,
+	@ConfirmNotClientProject,
 	GETDATE(),
 	@CreatedBy,
 	GETDATE(),
