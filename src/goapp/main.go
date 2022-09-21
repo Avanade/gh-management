@@ -94,6 +94,7 @@ func main() {
 	muxApi.Handle("/Category/list", loadAzGHAuthPage(rtApi.CategoryListAPIHandler))
 	muxApi.Handle("/Category/update", loadAzGHAuthPage(rtApi.CategoryUpdate))
 	muxApi.Handle("/Category/{id}", loadAzGHAuthPage(rtApi.GetCategoryByID))
+	muxApi.Handle("/importGitHubReposToDatabase", loadAzAuthPage(rtApi.ImportReposToDatabase))
 
 	//muxApi.Handle("/CategoryArticlesAdd", loadAzGHAuthPage(rtApi.CategoryAddAPIHandler))
 	muxApi.Handle("/CategoryArticlesById/{id}", loadAzGHAuthPage(rtApi.GetCategoryArticlesById))
@@ -105,7 +106,7 @@ func main() {
 	muxApi.Handle("/repositories/archive/{project}/{projectId}/{state}/{archive}", loadAzGHAuthPage(rtApi.ArchiveProject))
 	muxApi.Handle("/repositories/visibility/{project}/{projectId}/{currentState}/{desiredState}", loadAzGHAuthPage(rtApi.SetVisibility))
 	muxApi.Handle("/allusers", loadAzAuthPage(rtApi.GetAllUserFromActiveDirectory))
-	muxApi.Handle("/allavanaderepositories", loadAzGHAuthPage(rtApi.GetAvanadeProjects))
+	muxApi.Handle("/allrepositories", loadAzAuthPage(rtApi.GetAllRepositories))
 
 	//API FOR APPROVAL TYPES
 	muxApi.HandleFunc("/approval/type", rtApi.CreateApprovalType).Methods("POST")

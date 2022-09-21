@@ -106,6 +106,21 @@ func PRProjectsInsert(body models.TypNewProjectReqBody, user string) (id int64) 
 	return
 }
 
+func ProjectInsertByImport(param map[string]interface{}) error {
+	cp := sql.ConnectionParam{
+
+		ConnectionString: os.Getenv("GHMGMTDB_CONNECTION_STRING"),
+	}
+
+	db, _ := sql.Init(cp)
+
+	_, err := db.ExecuteStoredProcedure("dbo.PR_Projects_Insert", param)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func PRProjectsUpdate(body models.TypNewProjectReqBody, user string) (id int64) {
 
 	cp := sql.ConnectionParam{
@@ -338,6 +353,35 @@ func GetProjectByName(projectName string) []map[string]interface{} {
 	result, _ := db.ExecuteStoredProcedureWithResult("PR_Projects_Select_ByName", param)
 
 	return result
+}
+
+func Repos_Select_ByOffsetAndFilter(offset int, search string) []map[string]interface{} {
+	db := ConnectDb()
+	defer db.Close()
+
+	param := map[string]interface{}{
+		"Offset": offset,
+		"Search": search,
+	}
+
+	result, _ := db.ExecuteStoredProcedureWithResult("PR_Repositories_Select_ByOffsetAndFilter", param)
+	return result
+}
+
+func Repos_TotalCount_BySearchTerm(search string) int {
+	db := ConnectDb()
+	defer db.Close()
+
+	param := map[string]interface{}{
+		"search": search,
+	}
+
+	result, _ := db.ExecuteStoredProcedureWithResult("PR_Repositories_TotalCount_BySearchTerm", param)
+	total, err := strconv.Atoi(fmt.Sprint(result[0]["Total"]))
+	if err != nil {
+		return 0
+	}
+	return total
 }
 
 func UpdateProjectIsArchived(id int64, isArchived bool) error {
