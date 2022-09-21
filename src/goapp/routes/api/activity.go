@@ -98,7 +98,7 @@ func CreateActivity(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// CHECK ACTIVITY TYPE IF EXIST / INSERT IF NOT EXIST
-	if body.Type.Id != 0 {
+	if body.Type.Id == 0 {
 		id, err := db.ActivityTypes_Insert(body.Type.Name)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)

@@ -179,6 +179,9 @@
                 {{ else }}
                 class="text-gray-600 hover:bg-gray-50 hover:text-gray-900 group flex items-center px-2 py-2 text-base font-medium rounded-md"
                 {{ end }}
+                {{ if $menu.External }}
+                target="_blank"
+                {{ end }}
               >
                 <img src="{{ $menu.IconPath }}" class="mr-4 h-6 w-6"/>
                 {{ $menu.Name }}
@@ -190,6 +193,9 @@
               <a
                 href="{{ $link.Url }}"
                 class="text-gray-600 hover:bg-gray-50 hover:text-gray-900 group flex items-center px-2 py-2 text-base font-medium rounded-md"
+                {{ if $link.External }}
+                target="_blank"
+                {{ end }}
               >
                 <img src="{{ $link.IconPath }}" class="mr-4 h-6 w-6"/>
                 {{ $link.Name }}
@@ -263,6 +269,9 @@
                 {{ else }}
                 class="text-gray-600 hover:bg-gray-50 hover:text-gray-900 group flex items-center px-2 py-2 text-base font-medium rounded-md"
                 {{ end }}
+                {{ if $menu.External }}
+                target="_blank"
+                {{ end }}
               >
                 <img src="{{ $menu.IconPath }}" class="mr-4 h-6 w-6"/>
                 {{ $menu.Name }}
@@ -274,6 +283,9 @@
               <a
                 href="{{ $link.Url }}"
                 class="text-gray-600 hover:bg-gray-50 hover:text-gray-900 group flex items-center px-2 py-2 text-base font-medium rounded-md"
+                {{ if $link.External }}
+                target="_blank"
+                {{ end }}
               >
                 <img src="{{ $link.IconPath }}" class="mr-4 h-6 w-6"/>
                 {{ $link.Name }}
@@ -372,7 +384,7 @@
                           </svg>
 
                         </div>
-                        <input @keyup.enter="search()" @input.enter="showClearBtn()" x-model="searchBar" x-ref="searchInput" type="text" id="text" class=" block w-full focus:ring-indigo-500 focus:border-indigo-500 pl-10 sm:text-sm border-gray-300 rounded-md" placeholder="Search: Projects, Communities, People" autocomplete="off">
+                        <input @keyup.enter="search()" @input.enter="showClearBtn()" x-model="searchBar" x-ref="searchInput" type="text" id="text" class=" block w-full focus:ring-indigo-500 focus:border-indigo-500 pl-10 sm:text-sm border-gray-300 rounded-md" placeholder="Search: Repositories, Communities, People" autocomplete="off">
 
                         <button @click="clearSearchBar(), $refs.searchInput.focus()" x-show="clearBtn" class="absolute inset-y-0 right-0 pr-3 flex items-center focus:pointer-events-auto">
                           <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -455,7 +467,7 @@
                     </div>
                     <div class="ml-3 flex-1 md:flex md:justify-between">
                       <p class="text-sm text-blue-700">Your GitHub account is not currently connected.
-                        To request a new project you need to associate your GitHub account - if you already have one, please use that, rather than creating a new one.</p>
+                        To request a new repository you need to associate your GitHub account - if you already have one, please use that, rather than creating a new one.</p>
                       <p class="mt-3 text-sm md:mt-0 md:ml-6">
                         <a href="/login/github" class="whitespace-nowrap font-medium text-blue-700 hover:text-blue-600">Associate GitHub Account<span aria-hidden="true">&rarr;</span></a>
                       </p>

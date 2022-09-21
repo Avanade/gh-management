@@ -6,6 +6,7 @@
 		@Description varchar(1000),
 		@ConfirmAvaIP bit,
 		@ConfirmEnabledSecurity bit,
+		@ConfirmNotClientProject bit,
 		@ModifiedBy varchar(100)
 )
 AS
@@ -23,6 +24,7 @@ UPDATE
 		[Description] = @Description,
 		[ConfirmAvaIP] = @ConfirmAvaIP,
 		[ConfirmEnabledSecurity] = @ConfirmEnabledSecurity,
+		[ConfirmNotClientProject] = @ConfirmNotClientProject,
 		[Modified] = GETDATE(),
 		[ModifiedBy] = @ModifiedBy
  WHERE  
