@@ -51,7 +51,7 @@
             <div class="px-4 py-4 sm:px-6 hover:bg-gray-50 cursor-pointer border px-2 py-2" style="display: flex; ">
                 <div style="flex-grow: 1;" x-data="{ display: 'ID' }" x-text="display">ID</div>
                 <div style="flex-grow: 1;" x-data="{ display: 'Name  ' }" x-text="display"> Name </div>
-                <div style="flex-grow: 1;" x-data="{ display: '   Disabled' }" x-text="display"> </div>
+                <div style="flex-grow: 1;" x-data="{ display: '   Status' }" x-text="display"> </div>
 
             </div>
             <template x-for="(appro, i) in getapprovers">
@@ -60,11 +60,18 @@
                     <div style="flex-grow: 1;" x-text="appro.Id"> </div>
                     <div style="flex-grow: 1;" x-text="appro.ApproverUserPrincipalName"> </div>
                     <div style="flex-grow: 2;">
-
-                        <input type="checkbox" name="Disabled" id="Disabled" x-model="appro.Disabled "
-                            x-text="appro.Disabled"
-                            @click="update2(appro.Id , appro.ApproverUserPrincipalName ,appro.Disabled )">
-                        <span x-text="appro.Disabled"> </span>
+                        <input type="checkbox" x-data="{ enable: appro.Disabled ? false  : true }" 
+                        name="Disabled" id="Disabled" x-model="enable"
+                        x-text="enable"
+                        @click="update2(appro.Id , appro.ApproverUserPrincipalName ,enable)">
+                        <!-- <input type="checkbox" name="Disabled" id="Disabled" x-model="!appro.Disabled"
+                            x-text="!appro.Disabled"
+                            @click="update2(appro.Id , appro.ApproverUserPrincipalName ,appro.Disabled )"> -->
+                         <!-- <span x-data="{ display: '   Status' }"  x-text="appro.Disabled"> </span>  -->
+                          <span x-text="appro.Disabled ? 'Inactive' : 'Active'"></span>
+                          
+                       <!-- <span  > Active</span></template>
+                        <span  > Inactiv</span> -->
                     </div>
 
 
@@ -177,8 +184,9 @@
 
             },
             update2(id, ApproverUserPrincipalName, disabled) {
-                if (disabled == true) { this.formUpdate.disabled = false }
-                else { this.formUpdate.disabled = true }
+             
+                if (disabled == true) { this.formUpdate.disabled = true }
+                else { this.formUpdate.disabled = false }
                 this.formUpdate.id = id
                 this.formUpdate.name = ApproverUserPrincipalName
                 postData2 = this.formUpdate;
