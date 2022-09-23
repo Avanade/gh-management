@@ -257,12 +257,12 @@
                 modal.update('loading', 'Loading', 'Please wait', '', '')
                 this.form.id = 0;
                 this.form.name = "";
-                this.form.disabled = "false";
+                this.form.disabled = false;
                 this.approver.selected = "";
                 this.mode = "view"
                 this.formUpdate.id = 0;
                 this.formUpdate.name = "";
-                this.formUpdate.disabled = "false";
+                this.formUpdate.disabled = false;
                 await this.getUsersList()
                 await this.getCommunityApprover()
                 modal.visible = false
