@@ -69,7 +69,9 @@
                                         id : 'Id',
                                         text : 'Name',
                                         label : 'Primary Contribution Area*',
-                                        isInsertable : true
+                                        isInsertable : true,
+                                        searchTag : 'If the contribution area is not on the list, type it in the box and press enter.',
+                                        searchPlaceholder : 'Search or add a new item'
                                     })"
                                 x-modelable = "selected"
                                 x-model = "form.primary_contribution_area"
@@ -86,7 +88,9 @@
                                         label : 'Additional Contribution Areas',
                                         isMultiple : true,
                                         isInsertable : true,
-                                        isDisplayItem : true
+                                        isDisplayItem : true,
+                                        searchTag : 'If the contribution area is not on the list, type it in the box and press enter.',
+                                        searchPlaceholder : 'Search or add a new item'
                                     })"
                                 x-modelable = "selected"
                                 x-model = "form.additional_contribution_areas"
