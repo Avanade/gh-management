@@ -59,7 +59,7 @@
                 <div class="px-4 py-4 sm:px-6 hover:bg-gray-50 cursor-pointer border px-2 py-2" style="display: flex; ">
                     <div style="flex-grow: 1;" x-text="appro.Id"> </div>
                     <div style="flex-grow: 1;" x-text="appro.ApproverUserPrincipalName"> </div>
-                    <div style="flex-grow: 2;">
+                    <div style="flex-grow: 2; align-self: start;">
                         <input type="checkbox" x-data="{ enable: appro.Disabled ? false  : true }" 
                         name="Disabled" id="Disabled" x-model="enable"
                         x-text="enable"
@@ -162,7 +162,7 @@
 
                     postData = this.form;
                     Alpine.store('master').postData('/api/communityapprovers/update', postData, "Your communityapprovers has been Updated.",
-                        "update communityapprovers")
+                        "Close")
                 }
 
 
@@ -191,7 +191,7 @@
                 this.formUpdate.name = ApproverUserPrincipalName
                 postData2 = this.formUpdate;
                 Alpine.store('master').postData('/api/communityapprovers/update', postData2, "Your communityapprovers has been Updated.",
-                    "update communityapprovers")
+                    "Close")
               
             }
             ,
