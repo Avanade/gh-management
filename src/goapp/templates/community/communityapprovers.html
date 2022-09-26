@@ -46,20 +46,33 @@
             </fieldset>
 
         </div>
-        <br>
+   
+        <div class="my-5 flex rounded-md shadow-sm">
+            <div class="relative flex items-stretch flex-grow focus-within:z-10">
+              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 20 20"
+                  stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              </div>
+              <input  x-model="search" @keyup="getapprovers" type="text" name="searchTerm" id="searchTerm"
+                class="focus:ring-indigo-500 focus:border-indigo-500 block w-full rounded-md pl-10 sm:text-sm border-gray-300"
+                placeholder="Find a approver">
+            </div>
+          </div>
         <div x-show="getapprovers">
             <div class="px-4 py-4 sm:px-6 hover:bg-gray-50 cursor-pointer border px-2 py-2" style="display: flex; ">
-                <div style="flex-grow: 1;" x-data="{ display: 'ID' }" x-text="display">ID</div>
-                <div style="flex-grow: 1;" x-data="{ display: 'Name  ' }" x-text="display"> Name </div>
-                <div style="flex-grow: 1;" x-data="{ display: '   Status' }" x-text="display"> </div>
+                <div style="flex-grow: 1;"  class=" w-1/12"    x-data="{ display: 'ID  ' }" x-text="display">  </div>
+                <div style="flex-grow: 1;"  class="  w-9/12" x-data="{ display: 'Name  ' }" x-text="display">   </div>
+                <div style="flex-grow: 1;" class=" w-2/12"  x-data="{ display: '   Status' }" x-text="display"> </div>
 
             </div>
             <template x-for="(appro, i) in getapprovers">
 
                 <div class="px-4 py-4 sm:px-6 hover:bg-gray-50 cursor-pointer border px-2 py-2" style="display: flex; ">
-                    <div style="flex-grow: 1;" x-text="appro.Id"> </div>
-                    <div style="flex-grow: 1;" x-text="appro.ApproverUserPrincipalName"> </div>
-                    <div style="flex-grow: 2; align-self: start;">
+                    <div style="flex-grow: 1;" class="  w-1/12"  x-text="appro.Id"> </div>
+                    <div style="flex-grow: 1 ;" class="  w-9/12" x-text="appro.ApproverUserPrincipalName" > </div>
+                    <div style="flex-grow: 2; align-self: start;" class="  w-2/12" >
                         <input type="checkbox" x-data="{ enable: appro.Disabled ? false  : true }" 
                         name="Disabled" id="Disabled" x-model="enable"
                         x-text="enable"
@@ -85,7 +98,8 @@
 <script src="/public/components/combobox.js"></script>
 <script type="text/javascript">
     function data() {
-        return {
+        return {   
+            search: '',
             mode:
                 'view',
             form: {
@@ -269,8 +283,16 @@
 
             },
             get getapprovers() {
-
+                if (!this.search) {
+                    console.log(this.search)
                 return this.approvers
+                }
+                else {
+                    console.log("getapprovers")
+                    console.log(this.search)
+                return this.approvers.filter(p => p.ApproverUserPrincipalName.toLowerCase().includes(this.search.toLowerCase()))
+        }
+             //   return this.approvers
 
             }
         }
