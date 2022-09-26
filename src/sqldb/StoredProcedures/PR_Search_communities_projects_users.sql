@@ -13,7 +13,8 @@ as
 
 SELECT
 	'Users' [Source],[Name],
-	 UserPrincipalName [Description]
+	 UserPrincipalName [Description],
+	 Users.GitHubId [Id]
 FROM [dbo].[Users]
 WHERE [Name] LIKE '%'+@searchText+'%'
 OR [UserPrincipalName] LIKE '%'+@searchText+'%'
@@ -23,16 +24,21 @@ UNION
 
 SELECT 
 	'Projects' [Source], [Name],
-	CoOwner [Description]
+	case
+		when [CreatedBy] IS NULL then [RepositorySource]
+		else [RepositorySource] + ' - ' + [CreatedBy]
+	end [Description],
+	Projects.Id [ID]
 FROM [dbo].[Projects]
 WHERE [Name] LIKE '%'+@searchText+'%'
-OR [CoOwner] LIKE '%'+@searchText+'%'
+OR [CreatedBy] LIKE '%'+@searchText+'%'
 
 UNION
 
 SELECT 
 	'Communities' [Source],[Name],
-	 [Description]
+	[Description],
+	Communities.[Id]
 FROM [dbo].[Communities]
 WHERE [Name] LIKE '%'+@searchText+'%'
 OR [Description] LIKE '%'+@searchText+'%'
