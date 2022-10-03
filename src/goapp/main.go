@@ -37,7 +37,7 @@ func main() {
 			cspbuilder.DefaultSrc: {"'self'"},
 			cspbuilder.ScriptSrc:  {"'self'", "'unsafe-inline'", "'unsafe-eval'"},
 			cspbuilder.StyleSrc:   {"'self'", "'unsafe-inline'"},
-			cspbuilder.ConnectSrc: {"'self'", "graph.microsoft.com", "login.microsoftonline.com"},
+			cspbuilder.ConnectSrc: {"'self'", "graph.microsoft.com", "login.microsoftonline.com", "api.github.com", os.Getenv("EMAIL_ENDPOINT")},
 			cspbuilder.FrameSrc:   {"'self'", "login.microsoftonline.com"},
 			cspbuilder.ImgSrc:     {"'self'", "data:"},
 		},
