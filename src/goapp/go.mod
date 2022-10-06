@@ -10,6 +10,7 @@ require (
 	github.com/joho/godotenv v1.4.0
 	github.com/microsoft/go-mssqldb v0.13.2
 	github.com/qmuntal/stateless v1.5.3
+	github.com/unrolled/secure v1.13.0
 )
 
 require (
@@ -26,7 +27,6 @@ require (
 	github.com/gorilla/securecookie v1.1.1 // indirect
 	github.com/kylelemons/godebug v1.1.0 // indirect
 	github.com/pkg/browser v0.0.0-20210115035449-ce105d075bb4 // indirect
-	github.com/unrolled/secure v1.13.0 // indirect
 	golang.org/x/sys v0.0.0-20211216021012-1d35b9e2eb4e // indirect
 	golang.org/x/text v0.3.7 // indirect
 )
