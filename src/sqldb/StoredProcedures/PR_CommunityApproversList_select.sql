@@ -1,4 +1,4 @@
-create PROCEDURE [dbo].[PR_CommunityApproversList_select]
+CREATE PROCEDURE [dbo].[PR_CommunityApproversList_select]
 AS
 BEGIN
  SELECT [Id]

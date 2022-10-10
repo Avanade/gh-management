@@ -1,4 +1,4 @@
-﻿Create PROCEDURE [dbo].[PR_CommunityMembers_Select_ByCommunityId]
+﻿CREATE PROCEDURE [dbo].[PR_CommunityMembers_Select_ByCommunityId]
 (
   @CommunityId INT
 )

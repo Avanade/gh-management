@@ -1,10 +1,3 @@
-/****** Object:  StoredProcedure [dbo].[PR_ActivityTypes_Insert]    Script Date: 6/16/2022 3:45:40 PM ******/
-SET ANSI_NULLS ON
-GO
-
-SET QUOTED_IDENTIFIER ON
-GO
-
 CREATE PROCEDURE [dbo].[PR_ActivityTypes_Insert] 
 (
 	@Name VARCHAR(100)
@@ -21,5 +14,3 @@ BEGIN
 	END
 	SELECT @Id Id
 END
-GO
-

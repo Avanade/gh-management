@@ -1,12 +1,12 @@
-﻿Create PROCEDURE [dbo].[PR_Users_Update]
+﻿CREATE PROCEDURE [dbo].[PR_Users_Update]
 (
-        @UserPrincipalName varchar(100),
-        @GivenName varchar(50),
-        @SurName varchar(50),
-        @JobTitle varchar(50),
+        @UserPrincipalName VARCHAR(100),
+        @GivenName VARCHAR(50),
+        @SurName VARCHAR(50),
+        @JobTitle VARCHAR(50),
         @GitHubId VARCHAR(100),
-        @GitHubUser varchar(100),
-        @ModifiedBy varchar(100)
+        @GitHubUser VARCHAR(100),
+        @ModifiedBy VARCHAR(100)
 )
 AS
 BEGIN

@@ -1,8 +1,7 @@
-create PROCEDURE [dbo].[PR_Communities_select_byID]
-@Id int
-as 
-begin
-
+CREATE PROCEDURE [dbo].[PR_Communities_select_byID]
+@Id INT
+AS 
+BEGIN
 SELECT [Id]
       ,[Name]
       ,[Url]
@@ -15,7 +14,5 @@ SELECT [Id]
       ,[Modified]
       ,[ModifiedBy]
   FROM [dbo].[Communities]
-  where [Id] = @Id
-
-
-end
+  WHERE [Id] = @id
+END

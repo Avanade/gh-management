@@ -1,15 +1,10 @@
-/****** Object:  StoredProcedure [dbo].[PR_CommunityActivities_Select_ByOffsetAndFilterAndCreatedBy]    Script Date: 04/07/2022 11:07:07 pm ******/
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
 CREATE PROCEDURE [dbo].[PR_CommunityActivities_Select_ByOffsetAndFilterAndCreatedBy](
-	@Offset int = 0,
-	@Filter int = 10,
-	@Search varchar(50) = '',
-	@OrderBy varchar(50) = 'Date',
-	@OrderType varchar(5) = 'ASC',
-	@CreatedBy varchar(50)
+	@Offset INT = 0,
+	@Filter INT = 10,
+	@Search VARCHAR(50) = '',
+	@OrderBy VARCHAR(50) = 'Date',
+	@OrderType VARCHAR(5) = 'ASC',
+	@CreatedBy VARCHAR(50)
 )
 AS
 BEGIN

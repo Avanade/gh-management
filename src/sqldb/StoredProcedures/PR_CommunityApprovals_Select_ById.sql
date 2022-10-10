@@ -1,6 +1,6 @@
 CREATE PROCEDURE [dbo].[PR_CommunityApprovals_Select_ById]
 (
-	@Id int
+	@Id INT
 )
 AS
 

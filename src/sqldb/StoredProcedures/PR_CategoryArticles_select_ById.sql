@@ -1,10 +1,8 @@
 
 CREATE PROCEDURE [dbo].[PR_CategoryArticles_select_ById]
-@Id int
-as 
-begin
- 
-
+@Id INT
+AS 
+BEGIN
 SELECT CA.[Id]
       ,CA.[Name]
 	  ,CA.[URL]
@@ -15,9 +13,6 @@ SELECT CA.[Id]
       ,CA.[Modified]
       ,CA.[ModifiedBy]
 	  ,C.[Name] [CategoryName]
-  FROM [dbo].[CategoryArticles] CA inner join Category C on CA.CategoryId = c.Id
-  where CategoryId = @Id
-
- 
-
-end
+  FROM [dbo].[CategoryArticles] CA INNER JOIN Category C ON CA.CategoryId = c.Id
+  WHERE CategoryId = @Id
+END

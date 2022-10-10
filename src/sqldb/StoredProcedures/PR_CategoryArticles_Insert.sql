@@ -1,13 +1,13 @@
 
 CREATE PROCEDURE [dbo].[PR_CategoryArticles_Insert]
 (
-			@Name varchar(100),
-			@Url varchar(100),
-			@Body varchar(2000),
-			@CategoryId int,
-            @CreatedBy varchar(50),
-            @ModifiedBy varchar(50),
-			@Id  int =null
+			@Name VARCHAR(100),
+			@Url VARCHAR(100),
+			@Body VARCHAR(2000),
+			@CategoryId INT,
+            @CreatedBy VARCHAR(50),
+            @ModifiedBy VARCHAR(50),
+			@Id  INT = NULL
 ) AS
 BEGIN
 	DECLARE @returnID AS INT
@@ -39,9 +39,9 @@ BEGIN
 
 
  				SELECT @returnID Id
-	end
-	else
-	begin
+	END
+	ELSE
+	BEGIN
 	EXEC	  [dbo].[PR_CategoryArticles_Update] 	
 			@Id   ,
 			@Name  ,
@@ -53,8 +53,8 @@ BEGIN
 			
 
 	SELECT @Id Id
-	end
-end
+	END
+END
  
 
 

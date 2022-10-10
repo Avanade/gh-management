@@ -1,7 +1,5 @@
 CREATE PROCEDURE [dbo].[PR_CommunityApprovals_Select_Failed]
-
 AS
-
 SELECT
 CA.Id,
 C.Id [CommunityId],

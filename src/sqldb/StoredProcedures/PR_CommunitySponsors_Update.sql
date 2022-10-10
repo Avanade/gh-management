@@ -1,10 +1,10 @@
 
-create  PROCEDURE [dbo].[PR_CommunitySponsors_Update]
+CREATE PROCEDURE [dbo].[PR_CommunitySponsors_Update]
 (
     -- Add the parameters for the stored procedure here
-		@CommunityId int,
-		@UserPrincipalName varchar(100),
-		@CreatedBy varchar(50) 
+		@CommunityId INT,
+		@UserPrincipalName VARCHAR(100),
+		@CreatedBy VARCHAR(50) 
 )
 AS
 BEGIN

@@ -1,15 +1,10 @@
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
+CREATE PROCEDURE [dbo].[PR_Search_communities_projects_users]
 
-Create Procedure [dbo].[PR_Search_communities_projects_users]
+@searchText VARCHAR (100),
+@offSet INT = 0,
+@rowCount INT = 0
 
-@searchText varchar (100),
-@offSet int = 0,
-@rowCount int = 0
-
-as 
+AS 
 
 SELECT
 	'Users' [Source],[Name],
@@ -24,10 +19,10 @@ UNION
 
 SELECT 
 	'Projects' [Source], [Name],
-	case
-		when [CreatedBy] IS NULL then [RepositorySource]
-		else [RepositorySource] + ' - ' + [CreatedBy]
-	end [Description],
+	CASE
+		WHEN [CreatedBy] IS NULL THEN [RepositorySource]
+		ELSE [RepositorySource] + ' - ' + [CreatedBy]
+	END [Description],
 	Projects.Id [ID]
 FROM [dbo].[Projects]
 WHERE [Name] LIKE '%'+@searchText+'%'

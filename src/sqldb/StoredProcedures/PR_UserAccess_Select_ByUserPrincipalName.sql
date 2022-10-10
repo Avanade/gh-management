@@ -1,6 +1,6 @@
 ﻿CREATE PROCEDURE PR_UserAccess_Select_ByUserPrincipalName
 (
-	@UserPrincipalName varchar(100)
+	@UserPrincipalName VARCHAR(100)
 )
 AS
 BEGIN

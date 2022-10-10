@@ -1,11 +1,11 @@
 
-create PROCEDURE [dbo].[PR_CommunityApproversList_Update]
+CREATE PROCEDURE [dbo].[PR_CommunityApproversList_Update]
 (
-			@Id int,
-            @ApproverUserPrincipalName varchar(100),
-			@Disabled bit,
-            @CreatedBy varchar(50),
-            @ModifiedBy varchar(50)
+			@Id INT,
+            @ApproverUserPrincipalName VARCHAR(100),
+			@Disabled BIT,
+            @CreatedBy VARCHAR(50),
+            @ModifiedBy VARCHAR(50)
 ) AS
 BEGIN
  
@@ -17,5 +17,4 @@ UPDATE [dbo].[CommunityApproversList]
       ,[ModifiedBy] =@ModifiedBy
       ,[Disabled] = @Disabled
  WHERE  [Id] = @Id
- 
-end
+END

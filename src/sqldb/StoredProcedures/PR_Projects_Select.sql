@@ -1,4 +1,4 @@
-﻿Create PROCEDURE [dbo].[PR_Projects_Select]
+﻿CREATE PROCEDURE [dbo].[PR_Projects_Select]
 
 AS
 BEGIN

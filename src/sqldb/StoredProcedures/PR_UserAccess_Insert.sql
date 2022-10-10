@@ -1,8 +1,8 @@
 ﻿CREATE PROCEDURE PR_UserAccess_Insert
 	-- Add the parameters for the stored procedure here
 ( 
-            @ProjectId int
-           ,@UserPrincipalName varchar(100)
+            @ProjectId INT
+           ,@UserPrincipalName VARCHAR(100)
 
 )
 AS

@@ -1,14 +1,14 @@
-create PROCEDURE [dbo].[PR_Communities_Update]
+CREATE PROCEDURE [dbo].[PR_Communities_Update]
 (
-			@Id int,
-			@Name varchar(50),
-			@Url varchar(255),
-			@Description varchar(255),
-			@Notes varchar(255),
-			@TradeAssocId varchar(255),
-            @IsExternal int,
-			@CreatedBy  varchar(50),
-			@ModifiedBy  varchar(50)
+			@Id INT,
+			@Name VARCHAR(50),
+			@Url VARCHAR(255),
+			@Description VARCHAR(255),
+			@Notes VARCHAR(255),
+			@TradeAssocId VARCHAR(255),
+            @IsExternal INT,
+			@CreatedBy  VARCHAR(50),
+			@ModifiedBy  VARCHAR(50)
 ) AS
 BEGIN
 UPDATE [dbo].[Communities]
@@ -24,6 +24,6 @@ UPDATE [dbo].[Communities]
       ,[ModifiedBy] = @ModifiedBy
  WHERE  [Id] = @Id
 
- delete from CommunitySponsors where CommunityId = @Id
-  delete from CommunityTags where CommunityId = @Id
-end
+DELETE FROM CommunitySponsors WHERE CommunityId = @Id
+DELETE FROM CommunityTags WHERE CommunityId = @Id
+END

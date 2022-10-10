@@ -1,9 +1,5 @@
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
 CREATE PROCEDURE [dbo].[PR_Repositories_TotalCount_BySearchTerm] (
-	@search varchar(50) = ''
+	@search VARCHAR(50) = ''
 )
 AS
 BEGIN

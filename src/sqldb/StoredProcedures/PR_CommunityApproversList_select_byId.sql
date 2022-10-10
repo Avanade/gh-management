@@ -1,7 +1,7 @@
 
-create PROCEDURE [dbo].[PR_CommunityApproversList_select_byId]
+CREATE PROCEDURE [dbo].[PR_CommunityApproversList_select_byId]
 (
-			@Id int 
+    @Id INT
 ) AS
 BEGIN
  SELECT [Id]

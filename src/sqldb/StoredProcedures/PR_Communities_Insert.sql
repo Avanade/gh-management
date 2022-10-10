@@ -1,15 +1,15 @@
 
-create PROCEDURE [dbo].[PR_Communities_Insert]
+CREATE PROCEDURE [dbo].[PR_Communities_Insert]
 (
-			@Name varchar(50),
-			@Url varchar(255),
-			@Description varchar(255),
-			@Notes varchar(255),
-			@TradeAssocId varchar(255),
-			@IsExternal int,
-			@CreatedBy  varchar(50),
-			@ModifiedBy  varchar(50) ,
-			@Id  int =null
+			@Name VARCHAR(50),
+			@Url VARCHAR(255),
+			@Description VARCHAR(255),
+			@Notes VARCHAR(255),
+			@TradeAssocId VARCHAR(255),
+			@IsExternal INT,
+			@CreatedBy  VARCHAR(50),
+			@ModifiedBy  VARCHAR(50) ,
+			@Id  INT = NULL
 ) AS
 BEGIN
 	DECLARE @returnID AS INT
@@ -45,9 +45,9 @@ BEGIN
 
 
  				SELECT @returnID Id
-	end
-	else
-	begin
+	END
+	ELSE
+	BEGIN
 	EXEC	  [dbo].[PR_Communities_Update]
 		@Id ,
 		@Name ,
@@ -60,5 +60,5 @@ BEGIN
 		@ModifiedBy
 
 	SELECT @Id Id
-	end
-end
+	END
+END

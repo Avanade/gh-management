@@ -1,7 +1,6 @@
-create PROCEDURE [dbo].[PR_Communities_select]
-as 
-begin
-
+CREATE PROCEDURE [dbo].[PR_Communities_select]
+AS
+BEGIN
 SELECT c.[Id]
       ,c.[Name]
       ,c.[Url]
@@ -17,7 +16,4 @@ SELECT c.[Id]
 	  ,t.Name "ApprovalStatus"
   FROM [dbo].[Communities] c
   	INNER JOIN ApprovalStatus T ON c.ApprovalStatusId = T.Id
-
-
-
-end
+END

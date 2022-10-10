@@ -1,6 +1,6 @@
 ﻿CREATE PROCEDURE PR_UserAccess_Select_ByProjectId
 (
-	@ProjectId Int
+	@ProjectId INT
 )
 AS
 BEGIN

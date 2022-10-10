@@ -1,6 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[PR_Users_Select_ByUserPrincipalName]
 (
-	@UserPrincipalName varchar(100)
+	@UserPrincipalName VARCHAR(100)
 )
 AS
 BEGIN

@@ -1,5 +1,5 @@
-create PROCEDURE  [dbo].[PR_CommunitySponsors_Select_By_CommunityId]
- @CommunityId int
+CREATE PROCEDURE  [dbo].[PR_CommunitySponsors_Select_By_CommunityId]
+ @CommunityId INT
 AS
 BEGIN
     -- SET NOCOUNT ON added to prevent extra result sets from

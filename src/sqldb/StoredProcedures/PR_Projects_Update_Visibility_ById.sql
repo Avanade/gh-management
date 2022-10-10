@@ -1,6 +1,6 @@
 CREATE PROCEDURE [dbo].[PR_Projects_Update_Visibility_ById]
-  @Id Int,
-	@VisibilityId Int
+  @Id INT,
+	@VisibilityId INT
 AS
 
 BEGIN

@@ -1,26 +1,26 @@
 ﻿CREATE PROCEDURE [dbo].[PR_Projects_Insert]
 (
-	@Name varchar(50),
-	@CoOwner varchar(100) = NULL,
-	@Description varchar(1000),
-	@IsArchived bit = 0,
-	@ConfirmAvaIP bit = 0,
-	@ConfirmEnabledSecurity bit = 0,
-	@ConfirmNotClientProject bit = 0,
-	@CreatedBy varchar(100) = NULL,
-	@VisibilityId int = 1,
-	@AssetCode varchar(50) = NULL,
-	@TFSProjectReference varchar(150) = NULL,
-	@AssetUrl varchar(150) = NULL,
-	@MaturityRating varchar(20) = NULL,
-	@ECATTReference varchar(150) = NULL,
+	@Name VARCHAR(50),
+	@CoOwner VARCHAR(100) = NULL,
+	@Description VARCHAR(1000),
+	@IsArchived BIT = 0,
+	@ConfirmAvaIP BIT = 0,
+	@ConfirmEnabledSecurity BIT = 0,
+	@ConfirmNotClientProject BIT = 0,
+	@CreatedBy VARCHAR(100) = NULL,
+	@VisibilityId INT = 1,
+	@AssetCode VARCHAR(50) = NULL,
+	@TFSProjectReference VARCHAR(150) = NULL,
+	@AssetUrl VARCHAR(150) = NULL,
+	@MaturityRating VARCHAR(20) = NULL,
+	@ECATTReference VARCHAR(150) = NULL,
 	@Created DATETIME = NULL
 ) AS
 
-IF @Created is null
+IF @Created IS NULL
 	SET @Created = getdate()
 
-DECLARE @ResultTable table(Id int);
+DECLARE @ResultTable TABLE(Id INT);
 
 INSERT INTO Projects (
 	[Name],
@@ -61,7 +61,7 @@ VALUES (
 	@ECATTReference
 )
 
-DECLARE @Id AS int
+DECLARE @Id AS INT
 
 SELECT @Id = Id FROM @ResultTable
 

@@ -1,11 +1,11 @@
 
-create PROCEDURE  [dbo].[PR_CommunityApproversList_Insert]
+CREATE PROCEDURE  [dbo].[PR_CommunityApproversList_Insert]
 (
-	@ApproverUserPrincipalName varchar(100),
-	@Disabled bit = 0,
-	@CreatedBy varchar(50),
-	@ModifiedBy varchar(50),
-	@Id  int =null
+	@ApproverUserPrincipalName VARCHAR(100),
+	@Disabled BIT = 0,
+	@CreatedBy VARCHAR(50),
+	@ModifiedBy VARCHAR(50),
+	@Id  INT = NULL
 
 	 
           
@@ -14,9 +14,9 @@ AS
 BEGIN   
     SET NOCOUNT ON 
 	DECLARE @returnID AS INT
-	   select @id= id from  CommunityApproversList where ApproverUserPrincipalName = @ApproverUserPrincipalName
+	   SELECT @id= id FROM  CommunityApproversList WHERE ApproverUserPrincipalName = @ApproverUserPrincipalName
 
-	IF ( @Id= 0  OR @Id is null )
+	IF ( @Id = 0  OR @Id IS NULL )
 	BEGIN
 
 INSERT INTO [dbo].[CommunityApproversList]
@@ -36,13 +36,13 @@ INSERT INTO [dbo].[CommunityApproversList]
 
 			SET @returnID = SCOPE_IDENTITY()
 			SELECT @returnID Id
-	end
+	END
 	ELSE 
-	begin 
+	BEGIN 
 	 EXEC	[dbo].[PR_CommunityApproversList_Update] @Id , @ApproverUserPrincipalName,@Disabled  ,@CreatedBy ,@ModifiedBy
 
 	SELECT @Id Id
-	end
+	END
 END
 
  
