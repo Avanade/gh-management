@@ -43,6 +43,7 @@ func main() {
 		PermissionsPolicy:     "fullscreen=(), geolocation=()", // Permissions-Policy
 		STSSeconds:            31536000,                        // Strict-Transport-Security
 		STSIncludeSubdomains:  true,                            // Strict-Transport-Security
+		IsDevelopment:         true,
 	})
 
 	// Set environment variables
@@ -123,6 +124,7 @@ func main() {
 	muxApi.Handle("/repositories/visibility/{project}/{projectId}/{currentState}/{desiredState}", loadAzGHAuthPage(rtApi.SetVisibility))
 	muxApi.Handle("/allusers", loadAzAuthPage(rtApi.GetAllUserFromActiveDirectory))
 	muxApi.Handle("/allrepositories", loadAzAuthPage(rtApi.GetAllRepositories))
+	muxApi.Handle("/getActiveApprovalTypes", loadAzGHAuthPage(rtApi.GetActiveApprovalTypes))
 
 	//API FOR APPROVAL TYPES
 	muxApi.HandleFunc("/approval/type", rtApi.CreateApprovalType).Methods("POST")

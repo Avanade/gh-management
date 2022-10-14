@@ -113,3 +113,13 @@ func EditApprovalTypeById(w http.ResponseWriter, r *http.Request) {
 	approvalTypeDto.Id = approvalTypeId
 	json.NewEncoder(w).Encode(approvalTypeDto)
 }
+
+func GetActiveApprovalTypes(w http.ResponseWriter, r *http.Request) {
+	var data interface{}
+
+	data = db.GetAllActiveApprovers()
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(data)
+}
