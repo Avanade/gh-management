@@ -7,12 +7,13 @@ import (
 	template "main/pkg/template"
 	"net/http"
 	"os"
+
 	//models "main/models"
 	"github.com/gorilla/mux"
 )
 
 func CommunitylistHandler(w http.ResponseWriter, r *http.Request) {
-//	fmt.Println("CommunitylistHandler")
+	//	fmt.Println("CommunitylistHandler")
 	template.UseTemplate(&w, r, "community/communitylist", nil)
 }
 
@@ -22,7 +23,10 @@ func CommunitylistHandler(w http.ResponseWriter, r *http.Request) {
 // }
 
 func GetUserCommunitylist(w http.ResponseWriter, r *http.Request) {
-
+	sessionaz, _ := session.Store.Get(r, "auth-session")
+	iprofile := sessionaz.Values["profile"]
+	profile := iprofile.(map[string]interface{})
+	username := profile["preferred_username"]
 	dbConnectionParam := sql.ConnectionParam{
 		ConnectionString: os.Getenv("GHMGMTDB_CONNECTION_STRING"),
 	}
@@ -35,8 +39,12 @@ func GetUserCommunitylist(w http.ResponseWriter, r *http.Request) {
 	defer db.Close()
 
 	// Get project list
+	param := map[string]interface{}{
 
-	Communities, err := db.ExecuteStoredProcedureWithResult("PR_Communities_select", nil)
+		"CreatedBy": username,
+	}
+
+	Communities, err := db.ExecuteStoredProcedureWithResult("PR_Communities_select", param)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
