@@ -673,6 +673,17 @@ func ContributionAreas_Insert(name, createdBy string) (int, error) {
 	return id, nil
 }
 
+func GetAllActiveApprovers() interface{} {
+	db := ConnectDb()
+	defer db.Close()
+
+	result, err := db.ExecuteStoredProcedureWithResult("PR_ApprovalTypes_SelectAllActive", nil)
+	if err != nil {
+		return err
+	}
+	return result
+}
+
 // USERS
 func Users_Get_GHUser(UserPrincipalName string) (GHUser string) {
 

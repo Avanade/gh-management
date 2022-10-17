@@ -73,7 +73,7 @@
                       <li x-show="repository.Visibility !== 'Internal' && !repository.IsArchived" @click="setVisibility(repository.Name,repository.Id,repository.Visibility,'internal')" class="hover:bg-[#fff2eb] relative cursor-pointer select-none py-2 pl-3 pr-9 text-gray-900" id="option-0" role="option" tabindex="-1">
                         <span class="block truncate">Make Internal</span>
                       </li>
-                      <li x-show="repository.Visibility !== 'Public' && !repository.IsArchived && ((repository.ApprovalStatusId===1) || (repository.ApprovalStatusId===5))" @click="goto('/repositories/makepublic/' + repository.Id)" class="hover:bg-[#fff2eb] relative cursor-pointer select-none py-2 pl-3 pr-9 text-gray-900" id="option-0" role="option" tabindex="-1">
+                      <li x-show="repository.Visibility !== 'Public' && !repository.IsArchived && ((repository.ApprovalStatusId===1) || (repository.ApprovalStatusId===5)) && hasApprovers" @click="goto('/repositories/makepublic/' + repository.Id)" class="hover:bg-[#fff2eb] relative cursor-pointer select-none py-2 pl-3 pr-9 text-gray-900" id="option-0" role="option" tabindex="-1">
                         <span class="block truncate">Make Public</span>
                       </li>
                     </ul>
@@ -158,7 +158,12 @@
                 </ul>
               </div>
               <div class="overflow-hidden text-sm text-gray-500 sm:mt-0" x-show="repository.statusLoaded && !repository.approvalStatus">
-                No approval data found for this repository. <a class="text-indigo-600" x-bind:href="'/repositories/makepublic/' + repository.Id">Click to request</a> to make this repository public.
+                <span x-show="hasApprovers">
+                  No approval data found for this repository. <a class="text-indigo-600" x-bind:href="'/repositories/makepublic/' + repository.Id">Click to request</a> to make this repository public.
+                </span>
+                <span x-show="!hasApprovers">
+                  There are no approvers set to review requests to make a repository public. You may contact the app admin to resolve this issue.
+                </span>
               </div>
 
             </div>
@@ -278,6 +283,7 @@
       showStart: 0,
       showEnd: 0,
       page: 0,
+      hasApprovers: false,
       getUserRepositories() {
         if (!this.userRepositoriesList || this.userRepositoriesList.length === 0) {
           this.showSpinner = true
@@ -327,6 +333,15 @@
         let v = urlParams.get('view')
         this.view = v ? v : 'my'
         this.search = urlParams.get('search')
+
+        fetch('/api/getActiveApprovalTypes')
+          .then(r => {
+            r.json().then(body => {
+              if(body.length > 0) {
+                this.hasApprovers = true;
+              }
+            })
+          })
         
         if(this.view === 'my') {
           this.getUserRepositories()
