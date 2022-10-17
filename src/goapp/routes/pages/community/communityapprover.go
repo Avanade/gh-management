@@ -87,6 +87,36 @@ func GetCommunityApproversList(w http.ResponseWriter, r *http.Request) {
 	w.Write(jsonResp)
 }
 
+func GetAllActiveCommunityApprovers(w http.ResponseWriter, r *http.Request) {
+
+	dbConnectionParam := sql.ConnectionParam{
+		ConnectionString: os.Getenv("GHMGMTDB_CONNECTION_STRING"),
+	}
+
+	db, err := sql.Init(dbConnectionParam)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer db.Close()
+
+	approvers, err := db.ExecuteStoredProcedureWithResult("PR_CommunityApproversList_SelectAllActive", nil)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Header().Set("Content-Type", "application/json")
+	jsonResp, err := json.Marshal(approvers)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Write(jsonResp)
+}
+
 func CommunityApproversListUpdate(w http.ResponseWriter, r *http.Request) {
 	sessionaz, _ := session.Store.Get(r, "auth-session")
 	iprofile := sessionaz.Values["profile"]
@@ -108,6 +138,7 @@ func CommunityApproversListUpdate(w http.ResponseWriter, r *http.Request) {
 		ConnectionString: os.Getenv("GHMGMTDB_CONNECTION_STRING"),
 	}
 	db, _ := sql.Init(cp)
+	defer db.Close()
 
 	param1 := map[string]interface{}{
 

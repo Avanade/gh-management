@@ -337,7 +337,7 @@
         fetch('/api/getActiveApprovalTypes')
           .then(r => {
             r.json().then(body => {
-              if(body.length > 0) {
+              if(body && body.length > 0) {
                 this.hasApprovers = true;
               }
             })

@@ -43,6 +43,7 @@ func main() {
 		PermissionsPolicy:     "fullscreen=(), geolocation=()", // Permissions-Policy
 		STSSeconds:            31536000,                        // Strict-Transport-Security
 		STSIncludeSubdomains:  true,                            // Strict-Transport-Security
+		IsDevelopment:         false,
 	})
 
 	// Set environment variables
@@ -145,6 +146,7 @@ func main() {
 	muxApi.HandleFunc("/approvals/community/callback", rtProjects.UpdateApprovalStatusCommunity).Methods("POST")
 	muxApi.HandleFunc("/communityapprovers/update", rtCommunity.CommunityApproversListUpdate)
 	muxApi.HandleFunc("/communityapprovers/GetCommunityApproversList", rtCommunity.GetCommunityApproversList)
+	muxApi.HandleFunc("/communityapprovers/GetAllActiveCommunityApprovers", rtCommunity.GetAllActiveCommunityApprovers)
 	muxApi.HandleFunc("/communityapprovers/GetCommunityApproversList/{id}", rtCommunity.GetCommunityApproversById)
 	mux.NotFoundHandler = http.HandlerFunc(rtPages.NotFoundHandler)
 
