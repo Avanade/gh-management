@@ -1,4 +1,5 @@
 CREATE PROCEDURE [dbo].[PR_Communities_select]
+@CreatedBy as varchar(100)=''
 AS
 BEGIN
 SELECT c.[Id]
@@ -16,4 +17,8 @@ SELECT c.[Id]
 	  ,t.Name "ApprovalStatus"
   FROM [dbo].[Communities] c
   	INNER JOIN ApprovalStatus T ON c.ApprovalStatusId = T.Id
+  where 
+	c.ApprovalStatusId =5
+	or
+	c.[CreatedBy] = @CreatedBy 
 END
