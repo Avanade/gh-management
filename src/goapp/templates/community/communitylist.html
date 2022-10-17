@@ -3,7 +3,7 @@
 
 <div id="pageTitle">Community List</div>
 
-<div x-data="myCommunitiesData()" x-init="switchTo('my')">
+<div x-data="myCommunitiesData()" x-init="getActiveApprovers(); switchTo('my');">
   
   <div class="flex justify-between">
   <div>
@@ -20,7 +20,7 @@
     </div>
     <div class="flex">
       <a href="/community/new">
-        <button class="bg-[#FF5800] hover:bg-[#FF4300] text-white font-bold py-2 px-4 rounded">
+        <button class="bg-[#FF5800] hover:bg-[#FF4300] text-white font-bold py-2 px-4 rounded" x-show="hasApprovers">
           Request a Community
         </button>
       </a>
@@ -69,6 +69,9 @@
           </div>
           <input x-model="search" type="text" name="searchTerm" id="searchTerm" class="focus:ring-indigo-500 focus:border-indigo-500 block w-full rounded-md pl-10 sm:text-sm border-gray-300" placeholder="Find a community">
         </div>
+      </div>
+      <div class="my-5 flex rounded-md text-sm text-gray-600" x-show="!hasApprovers">
+        Requesting for a new community has been disabled as there aren't any approvers set by the admin to review requests. Contact the admin to resolve the issue.
       </div>
     </div>
     <div class="bg-white shadow overflow-hidden sm:rounded-md mt-4">
@@ -185,6 +188,7 @@
       Communitylist: [],
       view: '',
       search: '',
+      hasApprovers: false,
       getCommunity() {
         this.showSpinner = true
         this.Communitylist = []
@@ -220,6 +224,16 @@
         .finally(()=>{            
           this.showSpinner = false
         })
+      },
+      getActiveApprovers() {
+        fetch('/api/communityapprovers/GetAllActiveCommunityApprovers')
+          .then(r => {
+            r.json().then(body => {
+              if (body && body.length > 0) {
+                this.hasApprovers = true;
+              }
+            })
+          })
       },
       getCommunityApprovalStatus(id, i) {
         if(!this.Communitylist[i]["statusLoaded"]) {

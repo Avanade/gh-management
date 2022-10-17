@@ -2,7 +2,7 @@
 
 
 
-<div x-data="data()" x-init="onLoad()">
+<div x-data="data()" x-init="getActiveApprovers();">
     <div id="pageTitle" x-show="!form.id">Community</div>
 
     <form onsubmit="event.preventDefault()" autocomplete="off">
@@ -178,6 +178,18 @@
 <script type="text/javascript">
     function data() {
         return {
+            getActiveApprovers() {
+                fetch('/api/communityapprovers/GetAllActiveCommunityApprovers')
+                .then(r => {
+                    r.json().then(body => {
+                    if (!body || body.length < 1) {
+                        window.location.href='/communities/list';
+                    } else {
+                        this.onLoad();
+                    }
+                    })
+                })
+            },
             mode:
                 'view',
 

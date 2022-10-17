@@ -1851,6 +1851,10 @@ select {
   margin-top: 1.75rem;
 }
 
+.mt-0 {
+  margin-top: 0px;
+}
+
 .mr-1\.5 {
   margin-right: 0.375rem;
 }
@@ -1865,10 +1869,6 @@ select {
 
 .-ml-px {
   margin-left: -1px;
-}
-
-.mt-0 {
-  margin-top: 0px;
 }
 
 .box-border {
