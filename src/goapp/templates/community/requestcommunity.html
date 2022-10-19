@@ -263,8 +263,7 @@
                     fetch('/community/getcommunity/' + '{{.Id}}')
                         .then(r => {
                             r.json().then(body => {
-                                this.Communitylist = body[0]
-                                if(!this.hasApprovers && this.Communitylist.CreatedBy !== '{{.Email}}') {
+                                if(body[0]['ApprovalStatusId'] !== 5 && body[0]['CreatedBy'] !== '{{.Email}}') {
                                     window.location.href='/communities/list';
                                 }
                                 else {
