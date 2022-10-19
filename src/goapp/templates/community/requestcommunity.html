@@ -177,22 +177,30 @@
 <script src="/public/components/combobox.js"></script>
 <script type="text/javascript">
     function data() {
+        var modal = Alpine.store('master').modal
         return {
+            mode: 'view',
+            hasApprovers: false,
             getActiveApprovers() {
+                modal.update('loading', 'Loading', 'Please wait', '', '')
+
                 fetch('/api/communityapprovers/GetAllActiveCommunityApprovers')
                 .then(r => {
                     r.json().then(body => {
                     if (!body || body.length < 1) {
-                        window.location.href='/communities/list';
+                        if(this.mode !== 'view') {
+                            window.location.href='/communities/list';
+                        } else {
+                            this.hasApprovers = false;
+                            this.onLoad();
+                        }
                     } else {
+                        this.hasApprovers = true;
                         this.onLoad();
                     }
                     })
                 })
             },
-            mode:
-                'view',
-
             form: {
                 id: '{{.Id}}',
                 name: '',
@@ -222,8 +230,6 @@
                     .then(data => {
 
                         this.sponsors.data = data
-
-                        console.log(this.sponsors);
                     }))
                     .catch(() => {
                         Alpine.store('master').modal.update('error', 'Error', 'Please try again', '', '')
@@ -251,27 +257,29 @@
             },
             async onLoad() {
 
-                var modal = Alpine.store('master').modal
-                modal.update('loading', 'Loading', 'Please wait', '', '')
-
                 spinnercount = 3
                 if (this.form.id) {
                     this.mode = 'view'
-                    await fetch('/community/getcommunity/' + '{{.Id}}')
+                    fetch('/community/getcommunity/' + '{{.Id}}')
                         .then(r => {
                             r.json().then(body => {
-                                this.Communitylist = body
+                                this.Communitylist = body[0]
+                                if(!this.hasApprovers && this.Communitylist.CreatedBy !== '{{.Email}}') {
+                                    window.location.href='/communities/list';
+                                }
+                                else {
+                                    this.form.id = body[0]["Id"]
+                                    this.form.name = body[0]["Name"]
+                                    this.form.url = body[0]["Url"]
+                                    this.form.description = body[0]["Description"]
+                                    this.form.notes = body[0]["Notes"]
+                                    this.form.isExternal = body[0]["IsExternal"]
+                                    spinnercount = spinnercount - 1
+                                    if (spinnercount < 1) {
+                                        modal.visible = false
+                                    }
+                                }
 
-                                this.form.id = body[0]["Id"]
-                                this.form.name = body[0]["Name"]
-                                this.form.url = body[0]["Url"]
-                                this.form.description = body[0]["Description"]
-                                this.form.notes = body[0]["Notes"]
-                                this.form.isExternal = body[0]["IsExternal"]
-                                this.form.tags =[]
-                                this.form.sponsors =[]
-                                //  this.showSpinner = false
-                                spinnercount = spinnercount - 1
                             });
                         })
                         .catch(e => {
@@ -279,19 +287,20 @@
                             spinnercount = spinnercount - 1
                         })
 
-                    await fetch('/api/CommunitySponsorsPerCommunityId/' + '{{.Id}}')
+                    fetch('/api/CommunitySponsorsPerCommunityId/' + '{{.Id}}')
                         .then(r => {
                             r.json().then(body => {
                                 for (let index = 0; index < body.length; index++) {
                                     this.form.sponsors.push({
                                         displayName: body[index]['UserPrincipalName'],
                                         mail: body[index]['UserPrincipalName']
-
                                     })
-
                                 }
-                                //   this.showSpinner = false
+                                console.log(this.form)
                                 spinnercount = spinnercount - 1
+                                if (spinnercount < 1) {
+                                    modal.visible = false
+                                }
                             });
                         })
                         .catch(e => {
@@ -299,32 +308,29 @@
                             spinnercount = spinnercount - 1
                         })
 
-                    await fetch('/api/CommunityTagPerCommunityId/' + '{{.Id}}')
+                    fetch('/api/CommunityTagPerCommunityId/' + '{{.Id}}')
                         .then(r => {
                             r.json().then(body => {
                                 for (let index = 0; index < body.length; index++) {
                                     this.form.tags.push({ id: body[index]['Id'], text: body[index]['Tag'] })
 
                                 }
-                                //  this.showSpinner = false
                                 spinnercount = spinnercount - 1
+                                if (spinnercount < 1) {
+                                    modal.visible = false
+                                }
                             });
                         })
                         .catch(e => {
                             console.log(e)
                             spinnercount = spinnercount - 1
                         })
-
-                    if (spinnercount < 1) {
-                        this.showSpinner = false
-                    }
                 }
                 else {
                     this.mode = 'edit'
                 }
 
                 await this.getUsersList()
-                modal.visible = false
             },
 
 
