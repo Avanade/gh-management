@@ -13,6 +13,7 @@ SELECT [Id]
       ,[CreatedBy]
       ,[Modified]
       ,[ModifiedBy]
+      ,[ApprovalStatusId]
   FROM [dbo].[Communities]
   WHERE [Id] = @id
 END
