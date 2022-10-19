@@ -146,7 +146,7 @@
                     </span>
                 <button type="button" x-show="mode=='view'"
                     class="bg-orange-500  inline-flex justify-center py-2 px-4 rounded-md text-white"
-                    :class="!isValid ? 'bg-orange-100' : ''" x-bind:disabled="!isValid" @click="mode='edit'">
+                    :class="!isValid ? 'bg-orange-100' : ''" x-bind:disabled="!isValid && ('{{.Email}}' === communityCreatedBy)" @click="mode='edit'">
 
                     <span x-show="form.id">Edit Community</span>
 
@@ -181,6 +181,7 @@
         return {
             mode: 'view',
             hasApprovers: false,
+            communityCreatedBy: '',
             getActiveApprovers() {
                 modal.update('loading', 'Loading', 'Please wait', '', '')
 
@@ -267,6 +268,7 @@
                                     window.location.href='/communities/list';
                                 }
                                 else {
+                                    this.communityCreatedBy = body[0]['CreatedBy']
                                     this.form.id = body[0]["Id"]
                                     this.form.name = body[0]["Name"]
                                     this.form.url = body[0]["Url"]
@@ -289,13 +291,14 @@
                     fetch('/api/CommunitySponsorsPerCommunityId/' + '{{.Id}}')
                         .then(r => {
                             r.json().then(body => {
-                                for (let index = 0; index < body.length; index++) {
-                                    this.form.sponsors.push({
-                                        displayName: body[index]['UserPrincipalName'],
-                                        mail: body[index]['UserPrincipalName']
-                                    })
+                                if(body){
+                                    for (let index = 0; index < body.length; index++) {
+                                        this.form.sponsors.push({
+                                            displayName: body[index]['UserPrincipalName'],
+                                            mail: body[index]['UserPrincipalName']
+                                        })
+                                    }
                                 }
-                                console.log(this.form)
                                 spinnercount = spinnercount - 1
                                 if (spinnercount < 1) {
                                     modal.visible = false
@@ -310,9 +313,11 @@
                     fetch('/api/CommunityTagPerCommunityId/' + '{{.Id}}')
                         .then(r => {
                             r.json().then(body => {
-                                for (let index = 0; index < body.length; index++) {
-                                    this.form.tags.push({ id: body[index]['Id'], text: body[index]['Tag'] })
-
+                                if(body) {
+                                    for (let index = 0; index < body.length; index++) {
+                                        this.form.tags.push({ id: body[index]['Id'], text: body[index]['Tag'] })
+    
+                                    }
                                 }
                                 spinnercount = spinnercount - 1
                                 if (spinnercount < 1) {
