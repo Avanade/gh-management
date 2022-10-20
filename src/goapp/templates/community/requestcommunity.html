@@ -146,7 +146,7 @@
                     </span>
                 <button type="button" x-show="mode=='view'"
                     class="bg-orange-500  inline-flex justify-center py-2 px-4 rounded-md text-white"
-                    :class="!isValid ? 'bg-orange-100' : ''" x-bind:disabled="!isValid && ('{{.Email}}' === communityCreatedBy)" @click="mode='edit'">
+                    :class="!isValid ? 'bg-orange-100' : ''" x-bind:disabled="!isValid && ('{{.Email}}' !== communityCreatedBy)" @click="mode='edit'">
 
                     <span x-show="form.id">Edit Community</span>
 
