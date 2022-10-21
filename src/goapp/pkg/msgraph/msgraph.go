@@ -103,7 +103,7 @@ func IsGithubEnterpriseMember(user string) (bool, error) {
 
 	urlPath := fmt.Sprintf("https://graph.microsoft.com/v1.0/users/%s/checkMemberGroups", user)
 
-	groupId := os.Getenv("GH_ENTERPRISE_AZURE_AD_GROUP")
+	groupId := os.Getenv("GH_AZURE_AD_GROUP")
 
 	groupIds := []string{
 		groupId,
