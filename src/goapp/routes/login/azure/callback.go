@@ -11,6 +11,7 @@ import (
 
 	auth "main/pkg/authentication"
 	ghmgmt "main/pkg/ghmgmtdb"
+	"main/pkg/msgraph"
 	session "main/pkg/session"
 )
 
@@ -73,7 +74,7 @@ func CallbackHandler(w http.ResponseWriter, r *http.Request) {
 	session.Values["profile"] = profile
 	session.Values["refresh_token"] = token.RefreshToken
 	session.Values["expiry"] = token.Expiry.UTC().Format("2006-01-02 15:04:05")
-	isAdmin := ghmgmt.IsUserAdmin(userPrincipalName)
+	isAdmin, _ := msgraph.IsUserAdmin(fmt.Sprintf("%s", profile["oid"]))
 	session.Values["isUserAdmin"] = isAdmin
 	errS := session.Save(r, w)
 

@@ -145,6 +145,81 @@ func IsGithubEnterpriseMember(user string) (bool, error) {
 	return false, nil
 }
 
+func IsUserAdmin(user string) (bool, error) {
+	accessToken, err := getToken()
+	if err != nil {
+		return false, err
+	}
+
+	client := &http.Client{
+		Timeout: time.Second * 10,
+	}
+
+	groupName := os.Getenv("GH_AZURE_AD_ADMIN_GROUP")
+	urlPath := fmt.Sprintf("https://graph.microsoft.com/v1.0/groups?$filter=startswith(displayName,'%s')", groupName)
+
+	req, err := http.NewRequest("GET", urlPath, nil)
+	if err != nil {
+		return false, err
+	}
+
+	req.Header.Add("Authorization", "Bearer "+accessToken)
+	req.Header.Add("Content-Type", "application/json")
+	response, err := client.Do(req)
+	if err != nil {
+		return false, err
+	}
+	defer response.Body.Close()
+
+	var groupList ADGroupsResponse
+
+	err = json.NewDecoder(response.Body).Decode(&groupList)
+	if err != nil {
+		return false, err
+	}
+
+	urlPath = fmt.Sprintf("https://graph.microsoft.com/v1.0/users/%s/checkMemberGroups", user)
+
+	groupIds := []string{
+		groupList.Value[0].Id,
+	}
+
+	postBody, _ := json.Marshal(map[string]interface{}{
+		"groupIds": groupIds,
+	})
+
+	reqBody := bytes.NewBuffer(postBody)
+
+	req, err = http.NewRequest("POST", urlPath, reqBody)
+	if err != nil {
+		return false, err
+	}
+
+	req.Header.Add("Authorization", "Bearer "+accessToken)
+	req.Header.Add("Content-Type", "application/json")
+	response2, err := client.Do(req)
+	if err != nil {
+		return false, err
+	}
+	defer response2.Body.Close()
+
+	var data struct {
+		Value []string `json:"value"`
+	}
+
+	err = json.NewDecoder(response2.Body).Decode(&data)
+	if err != nil {
+		return false, err
+	}
+
+	for _, v := range data.Value {
+		if v == groupList.Value[0].Id {
+			return true, nil
+		}
+	}
+	return false, nil
+}
+
 // Get Access Token for the Application
 func getToken() (string, error) {
 
@@ -197,4 +272,13 @@ type ListUSersResponse struct {
 type User struct {
 	Name  string `json:"displayName"`
 	Email string `json:"mail"`
+}
+
+type ADGroupsResponse struct {
+	Value []ADGroup `json:"value"`
+}
+
+type ADGroup struct {
+	Id   string `json:"id"`
+	Name string `json:"displayName"`
 }
