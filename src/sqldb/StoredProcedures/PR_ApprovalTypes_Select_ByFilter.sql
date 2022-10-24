@@ -1,14 +1,9 @@
-/****** Object:  StoredProcedure [dbo].[PR_ApprovalTypes_Select_ByFilter]    Script Date: 04/07/2022 9:45:25 pm ******/
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
 CREATE PROCEDURE [dbo].[PR_ApprovalTypes_Select_ByFilter](
-	@Offset int = 0,
-	@Filter int = 0,
-	@Search varchar(50) = '',
-	@OrderBy varchar(50) = 'Name',
-	@OrderType varchar(5) = 'ASC'
+	@Offset INT = 0,
+	@Filter INT = 0,
+	@Search VARCHAR(50) = '',
+	@OrderBy VARCHAR(50) = 'Name',
+	@OrderType VARCHAR(5) = 'ASC'
 )
 AS
 BEGIN

@@ -1,15 +1,14 @@
-create PROCEDURE [dbo].[PR_CategoryArticles_Update]
+CREATE PROCEDURE [dbo].[PR_CategoryArticles_Update]
 (
-			@Id int,
-            @Name varchar(100),
-			@Url varchar(100),
-			@Body varchar(2000),
-			@CategoryId int,
-            @CreatedBy varchar(50),
-            @ModifiedBy varchar(50)
+			@Id INT,
+            @Name VARCHAR(100),
+			@Url VARCHAR(100),
+			@Body VARCHAR(2000),
+			@CategoryId INT,
+            @CreatedBy VARCHAR(50),
+            @ModifiedBy VARCHAR(50)
 ) AS
 BEGIN
- 
 UPDATE [dbo].[CategoryArticles]
    SET [Name] = @Name
       ,[Url] =  @Url
@@ -20,6 +19,4 @@ UPDATE [dbo].[CategoryArticles]
       ,[Modified] =  GETDATE()
       ,[ModifiedBy] =@ModifiedBy
  WHERE  [Id] = @Id
- 
- 
-end
+END

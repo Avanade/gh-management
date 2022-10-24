@@ -1,6 +1,6 @@
 
-create PROCEDURE  [dbo].[PR_CommunityTags_Select_By_CommunityId]
- @CommunityId int
+CREATE PROCEDURE  [dbo].[PR_CommunityTags_Select_By_CommunityId]
+ @CommunityId INT
 AS
 BEGIN
     -- SET NOCOUNT ON added to prevent extra result sets from
@@ -12,5 +12,5 @@ BEGIN
       ,[CommunityId]
       ,[Tag]
   FROM [dbo].[CommunityTags]
-  where [CommunityId] = @CommunityId
+  WHERE [CommunityId] = @CommunityId
 END

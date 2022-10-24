@@ -1,8 +1,8 @@
 ﻿CREATE PROCEDURE PR_UserAccess_Update
 (	   
-        @Id int,
-        @ProjectId int,
-        @UserPrincipalName varchar(100),
+        @Id INT,
+        @ProjectId INT,
+        @UserPrincipalName VARCHAR(100),
         @IsActive BIT 
 
 )

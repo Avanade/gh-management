@@ -1,4 +1,4 @@
-create PROCEDURE PR_Communities_Select_Related
+CREATE PROCEDURE PR_Communities_Select_Related
 
 	@CommunityId INT
 

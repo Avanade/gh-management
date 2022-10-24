@@ -1,10 +1,6 @@
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
 CREATE PROCEDURE [dbo].[PR_AdditionalContributionAreas_Select_ByActivityId]
 (
-	@ActivityId int
+	@ActivityId INT
 )
 AS
 BEGIN
@@ -18,4 +14,3 @@ FROM
 	WHERE
 		caca.CommunityActivityId = 43 AND caca.IsPrimary = 0
 END
-GO

@@ -134,6 +134,7 @@ func GetRepositoriesFromOrganization(org string) ([]Repo, error) {
 			Private:     repo.GetPrivate(),
 			Created:     repo.GetCreatedAt(),
 			IsArchived:  repo.GetArchived(),
+			Visibility:  repo.GetVisibility(),
 		}
 		repoList = append(repoList, r)
 	}
@@ -204,4 +205,5 @@ type Repo struct {
 	Private     bool             `json:"private"`
 	Created     github.Timestamp `json:"created"`
 	IsArchived  bool             `json:"archived"`
+	Visibility  string           `json:"visibility"`
 }

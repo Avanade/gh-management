@@ -10,6 +10,7 @@ import (
 	session "main/pkg/session"
 	template "main/pkg/template"
 	"net/http"
+	"regexp"
 	"strings"
 
 	"github.com/gorilla/mux"
@@ -41,6 +42,11 @@ func ProjectsNewHandler(w http.ResponseWriter, r *http.Request) {
 		err := json.NewDecoder(r.Body).Decode(&body)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		if !isRepoNameValid(body.Name) {
+			httpResponseError(w, http.StatusBadRequest, "Invalid repository name.")
 			return
 		}
 
@@ -125,6 +131,17 @@ func httpResponseError(w http.ResponseWriter, code int, errorMessage string) {
 	response, err := json.Marshal(errorMessage)
 	handleError(err)
 	w.Write(response)
+}
+
+func isRepoNameValid(value string) bool {
+	regex := regexp.MustCompile(`^([a-zA-Z0-9\-\_]|\.{3,}|\.{1,}[a-zA-Z0-9\-\_])([a-zA-Z0-9\-\_\.]+)?`)
+	matched := regex.FindAllString(value, 1)
+
+	if matched == nil {
+		return false
+	}
+
+	return matched[0] == value
 }
 
 type TypErrorJsonReturn struct {

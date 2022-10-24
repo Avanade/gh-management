@@ -3,23 +3,24 @@
 
 <div id="pageTitle">Community List</div>
 
-<div x-data="myCommunitiesData()" x-init="getCommunity()">
+<div x-data="myCommunitiesData()" x-init="getActiveApprovers(); switchTo('my');">
+  
   <div class="flex justify-between">
   <div>
       <nav class="flex space-x-4" aria-label="Tabs">
 
-          <!-- <div @click="switchTo('my')" class="px-3 py-2 font-medium text-sm rounded-md cursor-pointer"
-          x-bind:class="view==='my' ? 'bg-[#fff2eb] text-[#FF5800]':'text-gray-500 hover:text-gray-700'"> Community
+          <div @click="switchTo('my')" class="px-3 py-2 font-medium text-sm rounded-md cursor-pointer"
+          x-bind:class="view==='my' ? 'bg-[#fff2eb] text-[#FF5800]':'text-gray-500 hover:text-gray-700'"> My Joined Communities
         </div>
 
         <div @click="switchTo('all')" class="px-3 py-2 font-medium text-sm rounded-md cursor-pointer"
-          x-bind:class="view==='all' ? 'bg-[#fff2eb] text-[#FF5800]':'text-gray-500 hover:text-gray-700'"> All Community
-        </div> -->
+          x-bind:class="view==='all' ? 'bg-[#fff2eb] text-[#FF5800]':'text-gray-500 hover:text-gray-700'"> All Communities
+        </div>
       </nav>
     </div>
     <div class="flex">
       <a href="/community/new">
-        <button class="bg-[#FF5800] hover:bg-[#FF4300] text-white font-bold py-2 px-4 rounded">
+        <button class="bg-[#FF5800] hover:bg-[#FF4300] text-white font-bold py-2 px-4 rounded" x-show="hasApprovers">
           Request a Community
         </button>
       </a>
@@ -66,8 +67,11 @@
               <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
           </div>
-          <input x-model="search" @keyup="filteredCommunities()" type="text" name="searchTerm" id="searchTerm" class="focus:ring-indigo-500 focus:border-indigo-500 block w-full rounded-md pl-10 sm:text-sm border-gray-300" placeholder="Find a community">
+          <input x-model="search" type="text" name="searchTerm" id="searchTerm" class="focus:ring-indigo-500 focus:border-indigo-500 block w-full rounded-md pl-10 sm:text-sm border-gray-300" placeholder="Find a community">
         </div>
+      </div>
+      <div class="my-5 flex rounded-md text-sm text-gray-600" x-show="!hasApprovers">
+        Requesting for a new community has been disabled as there aren't any approvers set by the admin to review requests. Contact the admin to resolve the issue.
       </div>
     </div>
     <div class="bg-white shadow overflow-hidden sm:rounded-md mt-4">
@@ -78,7 +82,7 @@
               @click="Community.showStatus = !Community.showStatus;getCommunityApprovalStatus(Community.Id, index)">
             
               <div class="flex items-center justify-between">
-                <a :href="/community/ +Community.Id ">
+                <a @click.stop="window.location=`/community/${Community.Id}`">
                   <p class="text-xl font-medium text-indigo-600 truncate" x-text=" Community.Name" title="Repository name">  test</p>
                 </a>
                 <div class="flex items-center justify-between">
@@ -119,7 +123,7 @@
                     <div class="text-sm font-medium text-gray-800"> URL </div>
                     <div>  
                       <p class="flex items-center text-sm text-gray-500">
-                        <a :href="Community.Url"><span x-text="Community.Url"/> </a>
+                        <a :href="Community.Url"><span x-text="Community.Url"> </a>
                       </p>
                     </div>
                     <div x-show="Community.Notes"  class="text-sm font-medium text-gray-800 pt-2">
@@ -184,7 +188,10 @@
       Communitylist: [],
       view: '',
       search: '',
+      hasApprovers: false,
       getCommunity() {
+        this.showSpinner = true
+        this.Communitylist = []
         const queryString = window.location.search;
         const urlParams = new URLSearchParams(queryString);
         this.search = urlParams.get('search')
@@ -193,12 +200,39 @@
           .then(r => {
             r.json().then(body => {
               this.Communitylist = body
-              this.showSpinner = false   
-             
             });
           })
           .catch(e => {
             console.log(e)
+          })
+          .finally(()=>{            
+            this.showSpinner = false
+          })
+      },
+      getMyCommunity() {
+        this.showSpinner = true
+        this.Communitylist = []
+        fetch('/community/my')
+        .then(r => {
+          r.json().then(body => {
+            this.Communitylist = body
+          });
+        })
+        .catch(e => {
+          console.log(e)
+        })
+        .finally(()=>{            
+          this.showSpinner = false
+        })
+      },
+      getActiveApprovers() {
+        fetch('/api/communityapprovers/GetAllActiveCommunityApprovers')
+          .then(r => {
+            r.json().then(body => {
+              if (body && body.length > 0) {
+                this.hasApprovers = true;
+              }
+            })
           })
       },
       getCommunityApprovalStatus(id, i) {
@@ -220,7 +254,18 @@
         else {
           return this.Communitylist.filter(p => p.Name.toLowerCase().includes(this.search.toLowerCase()))
         }
-      }
+      },
+      switchTo(tab) {
+        switch(tab) {
+          case 'my':
+            this.view = tab
+            this.getMyCommunity()
+            break
+          case 'all':
+            this.view = tab
+            this.getCommunity()
+        }
+      },
     }
   }
 </script>

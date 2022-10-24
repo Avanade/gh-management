@@ -1,13 +1,13 @@
 ﻿CREATE PROCEDURE PR_Projects_Update
 (
-		@Id Int,
-		@Name varchar(50),
-		@CoOwner varchar(100),
-		@Description varchar(1000),
-		@ConfirmAvaIP bit,
-		@ConfirmEnabledSecurity bit,
-		@ConfirmNotClientProject bit,
-		@ModifiedBy varchar(100)
+		@Id INT,
+		@Name VARCHAR(50),
+		@CoOwner VARCHAR(100),
+		@Description VARCHAR(1000),
+		@ConfirmAvaIP BIT,
+		@ConfirmEnabledSecurity BIT,
+		@ConfirmNotClientProject BIT,
+		@ModifiedBy VARCHAR(100)
 )
 AS
 BEGIN

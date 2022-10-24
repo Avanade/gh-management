@@ -17,10 +17,12 @@ import (
 	rtSearch "main/routes/pages/search"
 	reports "main/routes/timerjobs"
 	"net/http"
+	"os"
 	"strconv"
 	"time"
 
 	"github.com/gorilla/mux"
+	"github.com/unrolled/secure"
 
 	ev "main/pkg/envvar"
 
@@ -29,6 +31,21 @@ import (
 )
 
 func main() {
+	secureMiddleware := secure.New(secure.Options{
+		SSLRedirect:           true,                                            // Strict-Transport-Security
+		SSLHost:               os.Getenv("SSL_HOST"),                           // Strict-Transport-Security
+		SSLProxyHeaders:       map[string]string{"X-Forwarded-Proto": "https"}, // Strict-Transport-Security
+		FrameDeny:             true,                                            // X-FRAME-OPTIONS
+		ContentTypeNosniff:    true,                                            // X-Content-Type-Options
+		BrowserXssFilter:      true,
+		ReferrerPolicy:        "strict-origin", // Referrer-Policy
+		ContentSecurityPolicy: os.Getenv("CONTENT_SECURITY_POLICY"),
+		PermissionsPolicy:     "fullscreen=(), geolocation=()", // Permissions-Policy
+		STSSeconds:            31536000,                        // Strict-Transport-Security
+		STSIncludeSubdomains:  true,                            // Strict-Transport-Security
+		IsDevelopment:         false,
+	})
+
 	// Set environment variables
 	err := godotenv.Load()
 	if err != nil {
@@ -57,11 +74,11 @@ func main() {
 	mux.Handle("/guidance/{id}", loadAzGHAuthPage(rtGuidance.CategoryUpdateHandler))
 	mux.Handle("/guidance/Article/{id}", loadAzGHAuthPage(rtGuidance.ArticleHandler))
 	mux.Handle("/community/new", loadAzGHAuthPage(rtCommunity.CommunityHandler))
+	mux.Handle("/community/my", loadAzGHAuthPage(rtCommunity.GetMyCommunitylist))
 	mux.Handle("/community/{id}", loadAzGHAuthPage(rtCommunity.CommunityHandler))
 	mux.Handle("/community/getcommunity/{id}", loadAzGHAuthPage(rtCommunity.GetUserCommunity))
 	mux.Handle("/communities/list", loadAzGHAuthPage(rtCommunity.CommunitylistHandler))
 	mux.Handle("/community", loadAzGHAuthPage(rtCommunity.GetUserCommunitylist))
-
 	mux.Handle("/community/{id}/onboarding", loadAzGHAuthPage(rtCommunity.CommunityOnBoarding))
 	mux.HandleFunc("/loginredirect", rtPages.LoginRedirectHandler).Methods("GET")
 	mux.HandleFunc("/login/azure", rtAzure.LoginHandler)
@@ -94,6 +111,7 @@ func main() {
 	muxApi.Handle("/Category/list", loadAzGHAuthPage(rtApi.CategoryListAPIHandler))
 	muxApi.Handle("/Category/update", loadAzGHAuthPage(rtApi.CategoryUpdate))
 	muxApi.Handle("/Category/{id}", loadAzGHAuthPage(rtApi.GetCategoryByID))
+	muxApi.Handle("/importGitHubReposToDatabase", loadAzAuthPage(rtApi.ImportReposToDatabase))
 
 	//muxApi.Handle("/CategoryArticlesAdd", loadAzGHAuthPage(rtApi.CategoryAddAPIHandler))
 	muxApi.Handle("/CategoryArticlesById/{id}", loadAzGHAuthPage(rtApi.GetCategoryArticlesById))
@@ -105,7 +123,8 @@ func main() {
 	muxApi.Handle("/repositories/archive/{project}/{projectId}/{state}/{archive}", loadAzGHAuthPage(rtApi.ArchiveProject))
 	muxApi.Handle("/repositories/visibility/{project}/{projectId}/{currentState}/{desiredState}", loadAzGHAuthPage(rtApi.SetVisibility))
 	muxApi.Handle("/allusers", loadAzAuthPage(rtApi.GetAllUserFromActiveDirectory))
-	muxApi.Handle("/allavanaderepositories", loadAzGHAuthPage(rtApi.GetAvanadeProjects))
+	muxApi.Handle("/allrepositories", loadAzAuthPage(rtApi.GetAllRepositories))
+	muxApi.Handle("/getActiveApprovalTypes", loadAzGHAuthPage(rtApi.GetActiveApprovalTypes))
 
 	//API FOR APPROVAL TYPES
 	muxApi.HandleFunc("/approval/type", rtApi.CreateApprovalType).Methods("POST")
@@ -118,11 +137,17 @@ func main() {
 	muxAdmin.Handle("/members", loadAzGHAuthPage(rtAdmin.ListCommunityMembers))
 	muxAdmin.Handle("/guidance", loadAzGHAuthPage(rtGuidance.GuidanceHandler))
 	muxAdmin.Handle("/approvaltypes", loadAzGHAuthPage(rtAdmin.ListApprovalTypes))
+	muxAdmin.Handle("/communityapprovers", loadAzGHAuthPage(rtCommunity.CommunityApproverHandler))
 	muxAdmin.Handle("/approvaltype/{action:add}", loadAzGHAuthPage(rtAdmin.ApprovalTypeForm))
 	muxAdmin.Handle("/approvaltype/{action:view|edit}/{id}", loadAzGHAuthPage(rtAdmin.ApprovalTypeForm))
 
 	muxApi.HandleFunc("/approvals/project/callback", rtProjects.UpdateApprovalStatusProjects).Methods("POST")
 	muxApi.HandleFunc("/approvals/community/callback", rtProjects.UpdateApprovalStatusCommunity).Methods("POST")
+	muxApi.HandleFunc("/approvals/community/callback", rtProjects.UpdateApprovalStatusCommunity).Methods("POST")
+	muxApi.HandleFunc("/communityapprovers/update", rtCommunity.CommunityApproversListUpdate)
+	muxApi.HandleFunc("/communityapprovers/GetCommunityApproversList", rtCommunity.GetCommunityApproversList)
+	muxApi.HandleFunc("/communityapprovers/GetAllActiveCommunityApprovers", rtCommunity.GetAllActiveCommunityApprovers)
+	muxApi.HandleFunc("/communityapprovers/GetCommunityApproversList/{id}", rtCommunity.GetCommunityApproversById)
 	mux.NotFoundHandler = http.HandlerFunc(rtPages.NotFoundHandler)
 
 	o, err := strconv.Atoi(ev.GetEnvVar("SUMMARY_REPORT_TRIGGER", "9"))
@@ -133,6 +158,9 @@ func main() {
 	ctx := context.Background()
 	go reports.ScheduleJob(ctx, offset, reports.DailySummaryReport)
 	go checkFailedApprovalRequests()
+
+	mux.Use(secureMiddleware.Handler)
+	http.Handle("/", mux)
 
 	port := ev.GetEnvVar("PORT", "8080")
 	fmt.Printf("Now listening on port %v\n", port)

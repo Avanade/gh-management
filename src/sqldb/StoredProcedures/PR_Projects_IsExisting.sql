@@ -1,5 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[PR_Projects_IsExisting]
-	@Name varchar(50)
+	@Name VARCHAR(50)
 AS
 
 IF EXISTS (
@@ -9,10 +9,10 @@ IF EXISTS (
 )
 	BEGIN
 		SELECT '1' AS Result
-		Return 1
+		RETURN 1
 	END
 ELSE
 	BEGIN
 		SELECT '0' AS Result
-		Return 0
+		RETURN 0
 	END

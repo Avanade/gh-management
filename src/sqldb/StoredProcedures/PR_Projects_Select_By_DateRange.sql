@@ -1,7 +1,7 @@
-﻿Create PROCEDURE [dbo].[PR_Projects_Select_By_DateRange]
+﻿CREATE PROCEDURE [dbo].[PR_Projects_Select_By_DateRange]
 (
-  @Start datetime,
-  @End datetime
+  @Start DATETIME,
+  @End DATETIME
 )
 
 AS

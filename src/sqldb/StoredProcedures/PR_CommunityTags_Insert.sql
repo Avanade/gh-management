@@ -1,8 +1,8 @@
 CREATE PROCEDURE PR_CommunityTags_Insert
 (
     -- Add the parameters for the stored procedure here
-			@CommunityId int,
-			@Tag varchar(20)
+			@CommunityId INT,
+			@Tag VARCHAR(20)
             
 )
 AS

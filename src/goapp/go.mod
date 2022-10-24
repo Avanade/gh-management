@@ -10,6 +10,7 @@ require (
 	github.com/joho/godotenv v1.4.0
 	github.com/microsoft/go-mssqldb v0.13.2
 	github.com/qmuntal/stateless v1.5.3
+	github.com/unrolled/secure v1.13.0
 )
 
 require (

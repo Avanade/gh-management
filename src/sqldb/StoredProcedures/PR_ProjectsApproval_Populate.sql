@@ -1,5 +1,5 @@
 CREATE PROCEDURE [dbo].[PR_ProjectsApproval_Populate]
-    @ProjectId int
+    @ProjectId INT
 AS
 
 INSERT INTO ProjectApprovals
@@ -20,4 +20,4 @@ AND P.Id = @ProjectId
 
 UPDATE Projects SET ApprovalStatusId = 2, Modified = GETDATE() WHERE Id = @ProjectId
 
-exec PR_ProjectApprovals_Select_ById @ProjectId
+EXEC PR_ProjectApprovals_Select_ById @ProjectId

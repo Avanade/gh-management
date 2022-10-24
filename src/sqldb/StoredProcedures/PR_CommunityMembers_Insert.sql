@@ -4,7 +4,6 @@ CREATE PROCEDURE PR_CommunityMembers_Insert
 	@UserPrincipalName VARCHAR(100)
 
 AS
-
 IF NOT EXISTS (SELECT Id FROM CommunityMembers WHERE CommunityId = @CommunityId AND UserPrincipalName = @UserPrincipalName)
 BEGIN
 	INSERT INTO CommunityMembers (CommunityId, UserPrincipalName)

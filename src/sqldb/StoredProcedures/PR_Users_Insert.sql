@@ -1,10 +1,10 @@
 ﻿CREATE PROCEDURE [dbo].[PR_Users_Insert]
 (
-			@UserPrincipalName varchar(100)
-           ,@Name varchar(100)
-           ,@GivenName varchar(100) = NULL
-           ,@SurName varchar(100) = NULL
-           ,@JobTitle varchar(100) = NULL
+			@UserPrincipalName VARCHAR(100)
+           ,@Name VARCHAR(100)
+           ,@GivenName VARCHAR(100) = NULL
+           ,@SurName VARCHAR(100) = NULL
+           ,@JobTitle VARCHAR(100) = NULL
 )
 AS
 BEGIN
@@ -13,7 +13,7 @@ BEGIN
 	SET NOCOUNT ON;
 
     -- Insert statements for procedure here
-	IF NOT EXISTS (SELECT UserPrincipalName From Users WHERE UserPrincipalName = @UserPrincipalName)
+	IF NOT EXISTS (SELECT UserPrincipalName FROM Users WHERE UserPrincipalName = @UserPrincipalName)
 	BEGIN
 		INSERT INTO [dbo].[Users]
 			(

@@ -1,9 +1,4 @@
-/****** Object:  StoredProcedure [dbo].[PR_ApprovalTypes_Update_ById]    Script Date: 6/26/2022 4:28:13 PM ******/
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-Create PROCEDURE [dbo].[PR_ApprovalTypes_Update_ById] 
+CREATE PROCEDURE [dbo].[PR_ApprovalTypes_Update_ById] 
 (
 	@Id INT,
 	@Name VARCHAR(50),

@@ -1,9 +1,9 @@
-Create PROCEDURE  [dbo].[PR_CommunitySponsors_Insert]
+CREATE PROCEDURE  [dbo].[PR_CommunitySponsors_Insert]
 (
     -- Add the parameters for the stored procedure here
-		@CommunityId int,
-		@UserPrincipalName varchar(100),
-		@CreatedBy varchar(50)
+		@CommunityId INT,
+		@UserPrincipalName VARCHAR(100),
+		@CreatedBy VARCHAR(50)
  
 )
 AS
@@ -15,8 +15,6 @@ DECLARE @count AS INT
 	SET @count = (select MAX([CommunityId]) from [CommunitySponsors] where [UserPrincipalName] = @UserPrincipalName and[CommunityId]= @CommunityId)
 	IF @count IS NULL
  BEGIN
-
-
     -- Insert statements for procedure here
 INSERT INTO [dbo].[CommunitySponsors]
            ([CommunityId]
@@ -33,5 +31,4 @@ INSERT INTO [dbo].[CommunitySponsors]
            ,GETDATE()
            ,@CreatedBy)
  END
-
 END

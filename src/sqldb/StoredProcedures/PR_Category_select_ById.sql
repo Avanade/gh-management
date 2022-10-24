@@ -1,8 +1,7 @@
-
-create PROCEDURE [dbo].[PR_Category_select_ById]
-@Id int
-as 
-begin
+CREATE PROCEDURE [dbo].[PR_Category_select_ById]
+@Id INT
+AS
+BEGIN
  
 
 SELECT [Id]
@@ -12,9 +11,5 @@ SELECT [Id]
       ,[Modified]
       ,[ModifiedBy]
   FROM [dbo].[Category]
-  where [Id] = @Id
-
-
-
-
-end
+  WHERE [Id] = @Id
+END

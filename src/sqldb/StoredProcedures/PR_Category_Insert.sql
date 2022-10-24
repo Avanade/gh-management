@@ -1,18 +1,18 @@
 
-create PROCEDURE  [dbo].[PR_Category_Insert]
+CREATE PROCEDURE  [dbo].[PR_Category_Insert]
 (
-	@Name varchar(50),
-	@CreatedBy  varchar(50),
-	@ModifiedBy  varchar(50) ,
-	@Id  int =null
+	@Name VARCHAR(50),
+	@CreatedBy  VARCHAR(50),
+	@ModifiedBy  VARCHAR(50) ,
+	@Id  INT = NULL
 )
 AS
 BEGIN   
     SET NOCOUNT ON 
 	DECLARE @returnID AS INT
-	   select @id= id from  [Category] where name = @Name
+	   SELECT @id= id FROM  [Category] WHERE NAME = @Name
 	  
-	IF (@Id=0  OR @Id is null )
+	IF (@Id=0  OR @Id IS NULL )
 	BEGIN
 			INSERT INTO [dbo].[Category]
 					   ([Name] ,
@@ -30,11 +30,11 @@ BEGIN
 
 			SET @returnID = SCOPE_IDENTITY()
 			SELECT @returnID Id
-	end
+	END
 	ELSE 
-	begin 
+	BEGIN 
 	 EXEC	[dbo].[PR_Category_Update] @Id , @Name  ,@CreatedBy ,@ModifiedBy
 
 	SELECT @Id Id
-	end
+	END
 END

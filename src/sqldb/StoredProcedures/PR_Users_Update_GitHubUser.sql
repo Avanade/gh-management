@@ -1,9 +1,9 @@
 CREATE PROCEDURE [dbo].[PR_Users_Update_GitHubUser]
 (
-        @UserPrincipalName varchar(100),
-        @GitHubId varchar(100),
-        @GitHubUser varchar(100),
-        @Force bit = 0
+        @UserPrincipalName VARCHAR(100),
+        @GitHubId VARCHAR(100),
+        @GitHubUser VARCHAR(100),
+        @Force BIT = 0
 )
 AS
 BEGIN

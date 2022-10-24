@@ -1,6 +1,6 @@
 CREATE PROCEDURE [dbo].[PR_ProjectApprovals_Select_ById]
 (
-	@Id int
+	@Id INT
 )
 AS
 BEGIN

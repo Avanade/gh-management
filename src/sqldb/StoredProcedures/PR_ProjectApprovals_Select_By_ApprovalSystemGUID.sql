@@ -4,7 +4,6 @@ CREATE PROCEDURE [dbo].[PR_ProjectApprovals_Select_By_ApprovalSystemGUID]
 )
 AS
 BEGIN
-
   SELECT
     PA.Id, PA.ProjectId,
     P.[Name] [ProjectName],

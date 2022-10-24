@@ -1,8 +1,3 @@
-/****** Object:  StoredProcedure [dbo].[PR_CommunitiesActivities_Select]    Script Date: 6/20/2022 11:44:43 PM ******/
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
 CREATE PROCEDURE [dbo].[PR_CommunityActivities_Select]
 AS
 BEGIN

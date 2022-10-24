@@ -1,8 +1,6 @@
-create PROCEDURE [dbo].[PR_CategoryArticles_select]
-as 
-begin
- 
-
+CREATE PROCEDURE [dbo].[PR_CategoryArticles_select]
+AS
+BEGIN
 SELECT [Id]
       ,[Name]
       ,[Created]
@@ -10,8 +8,4 @@ SELECT [Id]
       ,[Modified]
       ,[ModifiedBy]
   FROM [dbo].[CategoryArticles]
-
-
-
-
-end
+END

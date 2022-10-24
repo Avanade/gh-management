@@ -1,6 +1,6 @@
-﻿Create PROCEDURE [dbo].[PR_Projects_Select_ByUserPrincipalName]
+﻿CREATE PROCEDURE [dbo].[PR_Projects_Select_ByUserPrincipalName]
 (
-	@UserPrincipalName varchar(100)
+	@UserPrincipalName VARCHAR(100)
 )
 AS
 BEGIN
@@ -22,7 +22,8 @@ SELECT [p].[Id],
        [Modified],
        [ModifiedBy],
        [ApprovalStatusId],
-       [v].[Name] AS 'Visibility'
+       [v].[Name] AS 'Visibility',
+       [p].[RepositorySource]
   FROM 
        [dbo].[Projects] AS p
   LEFT JOIN [dbo].[Visibility] AS v ON p.VisibilityId = v.Id
