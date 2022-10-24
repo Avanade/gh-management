@@ -12,6 +12,43 @@ import (
 	"time"
 )
 
+func GetAzGroupIdByName(groupName string) (string, error) {
+	accessToken, err := getToken()
+	if err != nil {
+		return "", err
+	}
+
+	client := &http.Client{
+		Timeout: time.Second * 10,
+	}
+
+	urlPath := fmt.Sprintf("https://graph.microsoft.com/v1.0/groups?$search=\"displayName:%s\"", groupName)
+
+	req, err := http.NewRequest("GET", urlPath, nil)
+	if err != nil {
+		return "", err
+	}
+	req.Header.Add("Authorization", "Bearer "+accessToken)
+	req.Header.Add("ConsistencyLevel", "eventual")
+	response, err := client.Do(req)
+	if err != nil {
+		return "", err
+	}
+	defer response.Body.Close()
+
+	var listGroupResponse ADGroupsResponse
+	err = json.NewDecoder(response.Body).Decode(&listGroupResponse)
+	if err != nil {
+		return "", err
+	}
+
+	if len(listGroupResponse.Value) == 0 {
+		return "", fmt.Errorf("No group found")
+	}
+
+	return listGroupResponse.Value[0].Id, nil
+}
+
 // Get all users from the active directory
 func GetAllUsers() ([]User, error) {
 	accessToken, err := getToken()
@@ -103,7 +140,10 @@ func IsGithubEnterpriseMember(user string) (bool, error) {
 
 	urlPath := fmt.Sprintf("https://graph.microsoft.com/v1.0/users/%s/checkMemberGroups", user)
 
-	groupId := os.Getenv("GH_AZURE_AD_GROUP")
+	groupId, err := GetAzGroupIdByName(os.Getenv("GH_AZURE_AD_GROUP"))
+	if err != nil {
+		return false, err
+	}
 
 	groupIds := []string{
 		groupId,
@@ -155,33 +195,15 @@ func IsUserAdmin(user string) (bool, error) {
 		Timeout: time.Second * 10,
 	}
 
-	groupName := os.Getenv("GH_AZURE_AD_ADMIN_GROUP")
-	urlPath := fmt.Sprintf("https://graph.microsoft.com/v1.0/groups?$filter=startswith(displayName,'%s')", groupName)
+	urlPath := fmt.Sprintf("https://graph.microsoft.com/v1.0/users/%s/checkMemberGroups", user)
 
-	req, err := http.NewRequest("GET", urlPath, nil)
+	groupId, err := GetAzGroupIdByName(os.Getenv("GH_AZURE_AD_ADMIN_GROUP"))
 	if err != nil {
 		return false, err
 	}
-
-	req.Header.Add("Authorization", "Bearer "+accessToken)
-	req.Header.Add("Content-Type", "application/json")
-	response, err := client.Do(req)
-	if err != nil {
-		return false, err
-	}
-	defer response.Body.Close()
-
-	var groupList ADGroupsResponse
-
-	err = json.NewDecoder(response.Body).Decode(&groupList)
-	if err != nil {
-		return false, err
-	}
-
-	urlPath = fmt.Sprintf("https://graph.microsoft.com/v1.0/users/%s/checkMemberGroups", user)
 
 	groupIds := []string{
-		groupList.Value[0].Id,
+		groupId,
 	}
 
 	postBody, _ := json.Marshal(map[string]interface{}{
@@ -190,7 +212,7 @@ func IsUserAdmin(user string) (bool, error) {
 
 	reqBody := bytes.NewBuffer(postBody)
 
-	req, err = http.NewRequest("POST", urlPath, reqBody)
+	req, err := http.NewRequest("POST", urlPath, reqBody)
 	if err != nil {
 		return false, err
 	}
@@ -213,7 +235,7 @@ func IsUserAdmin(user string) (bool, error) {
 	}
 
 	for _, v := range data.Value {
-		if v == groupList.Value[0].Id {
+		if v == groupId {
 			return true, nil
 		}
 	}
