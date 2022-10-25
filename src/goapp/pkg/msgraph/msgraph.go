@@ -49,6 +49,48 @@ func GetAzGroupIdByName(groupName string) (string, error) {
 	return listGroupResponse.Value[0].Id, nil
 }
 
+// Search user by name and mail
+func SearchUser(search string) ([]User, error) {
+	accessToken, err := getToken()
+	if err != nil {
+		return nil, err
+	}
+
+	client := &http.Client{
+		Timeout: time.Second * 10,
+	}
+
+	urlPath := fmt.Sprintf("https://graph.microsoft.com/v1.0/users?$search=\"displayName:%s\" OR \"mail:%s\"", search, search)
+
+	req, err := http.NewRequest("GET", urlPath, nil)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Add("Authorization", "Bearer "+accessToken)
+	req.Header.Add("ConsistencyLevel", "eventual")
+	response, err := client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer response.Body.Close()
+
+	var listUsersResponse ListUSersResponse
+	err = json.NewDecoder(response.Body).Decode(&listUsersResponse)
+	if err != nil {
+		return nil, err
+	}
+
+	// Remove users without email address
+	var users []User
+	for _, user := range listUsersResponse.Value {
+		if user.Email != "" {
+			users = append(users, user)
+		}
+	}
+
+	return users, nil
+}
+
 // Get all users from the active directory
 func GetAllUsers() ([]User, error) {
 	accessToken, err := getToken()
