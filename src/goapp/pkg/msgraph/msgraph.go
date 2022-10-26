@@ -60,7 +60,7 @@ func SearchUsers(search string) ([]User, error) {
 		Timeout: time.Second * 10,
 	}
 
-	urlPath := fmt.Sprintf(`https://graph.microsoft.com/v1.0/users?$search="displayName:%s" OR "mail:%s`, search, search)
+	urlPath := fmt.Sprintf(`https://graph.microsoft.com/v1.0/users?$search="displayName:%s" OR "mail:%s"`, search, search)
 
 	req, err := http.NewRequest("GET", urlPath, nil)
 	if err != nil {
