@@ -133,13 +133,13 @@ func main() {
 	muxApi.HandleFunc("/approval/type/{id}", rtApi.GetApprovalTypeById).Methods("GET")
 
 	muxAdmin := mux.PathPrefix("/admin").Subrouter()
-	muxAdmin.Handle("", loadAzGHAuthPage(rtAdmin.AdminIndex))
-	muxAdmin.Handle("/members", loadAzGHAuthPage(rtAdmin.ListCommunityMembers))
-	muxAdmin.Handle("/guidance", loadAzGHAuthPage(rtGuidance.GuidanceHandler))
-	muxAdmin.Handle("/approvaltypes", loadAzGHAuthPage(rtAdmin.ListApprovalTypes))
-	muxAdmin.Handle("/communityapprovers", loadAzGHAuthPage(rtCommunity.CommunityApproverHandler))
-	muxAdmin.Handle("/approvaltype/{action:add}", loadAzGHAuthPage(rtAdmin.ApprovalTypeForm))
-	muxAdmin.Handle("/approvaltype/{action:view|edit}/{id}", loadAzGHAuthPage(rtAdmin.ApprovalTypeForm))
+	muxAdmin.Handle("", loadAdminPage(rtAdmin.AdminIndex))
+	muxAdmin.Handle("/members", loadAdminPage(rtAdmin.ListCommunityMembers))
+	muxAdmin.Handle("/guidance", loadAdminPage(rtGuidance.GuidanceHandler))
+	muxAdmin.Handle("/approvaltypes", loadAdminPage(rtAdmin.ListApprovalTypes))
+	muxAdmin.Handle("/communityapprovers", loadAdminPage(rtCommunity.CommunityApproverHandler))
+	muxAdmin.Handle("/approvaltype/{action:add}", loadAdminPage(rtAdmin.ApprovalTypeForm))
+	muxAdmin.Handle("/approvaltype/{action:view|edit}/{id}", loadAdminPage(rtAdmin.ApprovalTypeForm))
 
 	muxApi.HandleFunc("/approvals/project/callback", rtProjects.UpdateApprovalStatusProjects).Methods("POST")
 	muxApi.HandleFunc("/approvals/community/callback", rtProjects.UpdateApprovalStatusCommunity).Methods("POST")
@@ -180,6 +180,14 @@ func loadAzGHAuthPage(f func(w http.ResponseWriter, r *http.Request)) *negroni.N
 	return negroni.New(
 		negroni.HandlerFunc(session.IsAuthenticated),
 		negroni.HandlerFunc(session.IsGHAuthenticated),
+		negroni.Wrap(http.HandlerFunc(f)),
+	)
+}
+
+func loadAdminPage(f func(w http.ResponseWriter, r *http.Request)) *negroni.Negroni {
+	return negroni.New(
+		negroni.HandlerFunc(session.IsAuthenticated),
+		negroni.HandlerFunc(session.IsUserAdminMW),
 		negroni.Wrap(http.HandlerFunc(f)),
 	)
 }
