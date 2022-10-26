@@ -6,7 +6,7 @@
 		@OSSsponsor VARCHAR(50),
 		@Avanadeofferingsassets VARCHAR(50),
 		@Willbecommercialversion VARCHAR(50),
-		@OSSContributionInformation VARCHAR(50)
+		@OSSContributionInformation VARCHAR(1000)
 )
 AS
 BEGIN
