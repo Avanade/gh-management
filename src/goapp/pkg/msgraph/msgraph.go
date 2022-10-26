@@ -50,7 +50,7 @@ func GetAzGroupIdByName(groupName string) (string, error) {
 }
 
 // Search user by name and mail
-func SearchUser(search string) ([]User, error) {
+func SearchUsers(search string) ([]User, error) {
 	accessToken, err := getToken()
 	if err != nil {
 		return nil, err
@@ -60,7 +60,7 @@ func SearchUser(search string) ([]User, error) {
 		Timeout: time.Second * 10,
 	}
 
-	urlPath := fmt.Sprintf("https://graph.microsoft.com/v1.0/users?$search=\"displayName:%s\" OR \"mail:%s\"", search, search)
+	urlPath := fmt.Sprintf(`https://graph.microsoft.com/v1.0/users?$search="displayName:%s" OR "mail:%s`, search, search)
 
 	req, err := http.NewRequest("GET", urlPath, nil)
 	if err != nil {
