@@ -16,7 +16,7 @@
     [OSSsponsor] [varchar](50) NULL,
 	[Avanadeofferingsassets] [varchar](50) NULL,
 	[Willbecommercialversion] [varchar](50) NULL,
-	[OSSContributionInformation] [varchar](50) NULL,
+	[OSSContributionInformation] [varchar](1000) NULL,
 	[Newcontribution] [varchar](50) NULL,
     [VisibilityId] INT NOT NULL DEFAULT 1,
     [RepositorySource] VARCHAR(15) DEFAULT 'GitHub',
