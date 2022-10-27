@@ -12,6 +12,7 @@ import (
 
 	"main/models"
 	auth "main/pkg/authentication"
+	"main/pkg/msgraph"
 
 	"github.com/gorilla/sessions"
 	"golang.org/x/oauth2"
@@ -209,6 +210,28 @@ func IsUserAdmin(w http.ResponseWriter, r *http.Request) (bool, error) {
 		isUserAdmin = session.Values["isUserAdmin"].(bool)
 	}
 	return isUserAdmin, nil
+}
+
+// Get user photo
+func GetUserPhoto(w http.ResponseWriter, r *http.Request) (bool, string, error) {
+	session, err := Store.Get(r, "auth-session")
+	if err != nil {
+		return false, "", err
+	}
+
+	if session.Values["userHasPhoto"] != nil {
+		return session.Values["userHasPhoto"].(bool), fmt.Sprintf("%s", session.Values["userPhoto"]), nil
+	} else {
+		token := fmt.Sprintf("%s", session.Values["access_token"])
+		hasPhoto, userPhoto, err := msgraph.GetUserPhoto(token)
+		if err != nil {
+			return false, "", err
+		}
+		session.Values["userHasPhoto"] = hasPhoto
+		session.Values["userPhoto"] = userPhoto
+		session.Save(r, w)
+		return hasPhoto, userPhoto, nil
+	}
 }
 
 type ErrorDetails struct {

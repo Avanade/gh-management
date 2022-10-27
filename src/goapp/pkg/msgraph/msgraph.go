@@ -2,8 +2,10 @@ package msgraph
 
 import (
 	"bytes"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"net/url"
 	"os"
@@ -240,6 +242,37 @@ func IsUserAdmin(user string) (bool, error) {
 		}
 	}
 	return false, nil
+}
+
+func GetUserPhoto(token string) (bool, string, error) {
+	client := &http.Client{
+		Timeout: time.Second * 10,
+	}
+
+	urlPath := "https://graph.microsoft.com/v1.0/me/photos/64x64/$value"
+
+	req, err := http.NewRequest("GET", urlPath, nil)
+	if err != nil {
+		return false, "", err
+	}
+
+	req.Header.Add("Authorization", "Bearer "+token)
+	req.Header.Add("Content-Type", "application/json")
+	response, err := client.Do(req)
+	if err != nil {
+		return false, "", err
+	}
+	defer response.Body.Close()
+	if response.StatusCode == http.StatusNotFound {
+		return false, "", nil
+	}
+
+	userPhotoBytes, err := io.ReadAll(response.Body)
+	if err != nil {
+		return false, "", err
+	}
+	userPhotoBase64 := base64.StdEncoding.EncodeToString(userPhotoBytes)
+	return true, userPhotoBase64, nil
 }
 
 // Get Access Token for the Application
