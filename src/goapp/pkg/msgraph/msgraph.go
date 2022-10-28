@@ -244,19 +244,24 @@ func IsUserAdmin(user string) (bool, error) {
 	return false, nil
 }
 
-func GetUserPhoto(token string) (bool, string, error) {
+func GetUserPhoto(user string) (bool, string, error) {
+	accessToken, err := getToken()
+	if err != nil {
+		return false, "", err
+	}
+
 	client := &http.Client{
 		Timeout: time.Second * 10,
 	}
 
-	urlPath := "https://graph.microsoft.com/v1.0/me/photos/64x64/$value"
+	urlPath := fmt.Sprintf("https://graph.microsoft.com/v1.0/users/%s/photos/64x64/$value", user)
 
 	req, err := http.NewRequest("GET", urlPath, nil)
 	if err != nil {
 		return false, "", err
 	}
 
-	req.Header.Add("Authorization", "Bearer "+token)
+	req.Header.Add("Authorization", "Bearer "+accessToken)
 	req.Header.Add("Content-Type", "application/json")
 	response, err := client.Do(req)
 	if err != nil {

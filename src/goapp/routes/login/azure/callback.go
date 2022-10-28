@@ -76,7 +76,7 @@ func CallbackHandler(w http.ResponseWriter, r *http.Request) {
 	session.Values["expiry"] = token.Expiry.UTC().Format("2006-01-02 15:04:05")
 	isAdmin, _ := msgraph.IsUserAdmin(fmt.Sprintf("%s", profile["oid"]))
 	session.Values["isUserAdmin"] = isAdmin
-	hasPhoto, userPhoto, err := msgraph.GetUserPhoto(token.AccessToken)
+	hasPhoto, userPhoto, err := msgraph.GetUserPhoto(fmt.Sprintf("%s", profile["oid"]))
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
