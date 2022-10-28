@@ -76,13 +76,13 @@ func CallbackHandler(w http.ResponseWriter, r *http.Request) {
 	session.Values["expiry"] = token.Expiry.UTC().Format("2006-01-02 15:04:05")
 	isAdmin, _ := msgraph.IsUserAdmin(fmt.Sprintf("%s", profile["oid"]))
 	session.Values["isUserAdmin"] = isAdmin
-	// hasPhoto, userPhoto, err := msgraph.GetUserPhoto(token.AccessToken)
-	// if err != nil {
-	// 	http.Error(w, err.Error(), http.StatusInternalServerError)
-	// 	return
-	// }
-	// session.Values["userHasPhoto"] = hasPhoto
-	// session.Values["userPhoto"] = userPhoto
+	hasPhoto, userPhoto, err := msgraph.GetUserPhoto(token.AccessToken)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	session.Values["userHasPhoto"] = hasPhoto
+	session.Values["userPhoto"] = userPhoto
 	errS := session.Save(r, w)
 
 	// Insert Azure User
