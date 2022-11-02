@@ -158,7 +158,7 @@ func main() {
 	go reports.ScheduleJob(ctx, offset, reports.DailySummaryReport)
 	go checkFailedApprovalRequests()
 
-	// mux.Use(secureMiddleware.Handler)
+	//mux.Use(secureMiddleware.Handler)
 	http.Handle("/", mux)
 
 	port := ev.GetEnvVar("PORT", "8080")

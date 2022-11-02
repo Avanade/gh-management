@@ -77,10 +77,24 @@
                             <span class="mt-4 block text-sm font-medium text-gray-700">Business Sponsors*</span><span
                                 class="pl-1 text-xs">(Please select at least two sponsors )</span>
                         </div>
-                        <div class="relative mt-1">
-                            <div x-html="sponsors.template"></div>
+                        <div class="mt-1 sm:mt-0 sm:col-span-2">
+                            <div x-data="combobox({
+                                        searchCallback: getAllUsers,
+                                        searchTag: 'Start typing to query list of users',
+                                        searchPlaceholder: 'Input name or email',
+                                        id : 'mail',
+                                        text : 'mail',
+                                        isMultiple : 'true',
+                                        isDisplayItem : 'true'
+                                    })" 
+                                    x-modelable="selected" x-model="form.sponsors">
+                                <div x-html="template"></div>
+                            </div>
                         </div>
-                        <div class="items-center">
+                        <!-- <div class="relative mt-1">
+                            <div x-html="sponsors.template"></div>
+                        </div> -->
+                        <!-- <div class="items-center">
                             <template x-for="(sponsor, i) in form.sponsors">
                                 <div style="display: flex; " class="border px-2 py-2">
                                     <div style="flex-grow: 1;" x-text="sponsor.displayName"> </div>
@@ -89,13 +103,13 @@
                                             @click="removeField(sponsor)">&times;</button></div>
                                 </div>
                             </template>
-                        </div>
+                        </div> -->
 
                         <div>
                             <span class="mt-4 block text-sm font-medium text-gray-700">Tag</span><span
                                 class="pl-1 text-xs">(Please press Enter to insert Tag)</span>
                         </div>
-                        <div x-data="combobox({
+                        <!-- <div x-data="combobox({
                                 data : [],
                                 id : 'id',
                                 text : 'name',
@@ -104,7 +118,7 @@
                                 isDisplayItem : true
                             })" x-modelable="selected" x-model="form.tags">
                             <div x-html="template"></div>
-                        </div>
+                        </div> -->
 
                     </div>
 
@@ -137,16 +151,17 @@
         </fieldset>
         <div>
             <div align="right">
-                <span x-show="form.id" >
-                <button  type="button"  x-show="mode!='edit'"
-                    class="bg-purple-500  inline-flex justify-center py-2 px-4 rounded-md text-white"
-                    @click="onBoarding()">
-                    <span >How To Join</span>
-                </button>
-                    </span>
+                <span x-show="form.id">
+                    <button type="button" x-show="mode!='edit'"
+                        class="bg-purple-500  inline-flex justify-center py-2 px-4 rounded-md text-white"
+                        @click="onBoarding()">
+                        <span>How To Join</span>
+                    </button>
+                </span>
                 <button type="button" x-show="mode=='view'"
                     class="bg-orange-500  inline-flex justify-center py-2 px-4 rounded-md text-white"
-                    :class="!isValid ? 'bg-orange-100' : ''" x-bind:disabled="!isValid && ('{{.Email}}' !== communityCreatedBy)" @click="mode='edit'">
+                    :class="!isValid ? 'bg-orange-100' : ''"
+                    x-bind:disabled="!isValid && ('{{.Email}}' !== communityCreatedBy)" @click="mode='edit'">
 
                     <span x-show="form.id">Edit Community</span>
 
@@ -158,13 +173,13 @@
                     <span x-show="form.id">Update Community</span>
 
                 </button>
-            </button>
-            <button type="button" x-show="mode=='edit'"
-                class="bg-orange-500  inline-flex justify-center py-2 px-4 rounded-md text-white"
-                :class="!isValid ? 'bg-orange-100' : ''" x-bind:disabled="!isValid" @click="onLoad()">
-            Cancel
+                </button>
+                <button type="button" x-show="mode=='edit'"
+                    class="bg-orange-500  inline-flex justify-center py-2 px-4 rounded-md text-white"
+                    :class="!isValid ? 'bg-orange-100' : ''" x-bind:disabled="!isValid" @click="onLoad()">
+                    Cancel
 
-            </button>
+                </button>
             </div>
         </div>
 
@@ -172,11 +187,27 @@
 
 </div>
 
-
 <script src="/public/components/clsDropdown.js"></script>
 <script src="/public/components/combobox.js"></script>
 <script type="text/javascript">
+    async function getAllUsers(data) {
+        console.log("test")
+        if (data == undefined) {
+            return []
+        }
+
+        const { search } = data;
+        if (search === null || search.trim() === "") {
+            return []
+        }
+
+        const res = await fetch(`/api/search/users/${search}`)
+        const users = await res.json()
+        return users
+    }
+
     function data() {
+
         var modal = Alpine.store('master').modal
         return {
             mode: 'view',
@@ -184,23 +215,24 @@
             communityCreatedBy: '',
             getActiveApprovers() {
                 modal.update('loading', 'Loading', 'Please wait', '', '')
+                //this.form.sponsorss = [{ 'id': data.ApproverUserPrincipalName, 'text': data.ApproverUserPrincipalName }]
 
                 fetch('/api/communityapprovers/GetAllActiveCommunityApprovers')
-                .then(r => {
-                    r.json().then(body => {
-                    if (!body || body.length < 1) {
-                        if(this.mode !== 'view') {
-                            window.location.href='/communities/list';
-                        } else {
-                            this.hasApprovers = false;
-                            this.onLoad();
-                        }
-                    } else {
-                        this.hasApprovers = true;
-                        this.onLoad();
-                    }
+                    .then(r => {
+                        r.json().then(body => {
+                            if (!body || body.length < 1) {
+                                if (this.mode !== 'view') {
+                                    window.location.href = '/communities/list';
+                                } else {
+                                    this.hasApprovers = false;
+                                    this.onLoad();
+                                }
+                            } else {
+                                this.hasApprovers = true;
+                                this.onLoad();
+                            }
+                        })
                     })
-                })
             },
             form: {
                 id: '{{.Id}}',
@@ -210,7 +242,12 @@
                 notes: '',
                 isExternal: false,
                 sponsors: [],
+                sponsorss: [],
                 tags: [],
+            },
+            sponsorss: {
+                id: '',
+                text:'',
             },
             sponsors: {
                 template: '',
@@ -226,7 +263,13 @@
                 displayName: '',
                 mail: '',
             },
+            async init(){
+                this.form.sponsorss = [{'id' : data.ApproverUserPrincipalName, 'text' : data.ApproverUserPrincipalName}]
+             
+            }
+            ,
             async getUsersList() {
+
                 await fetch('/api/allusers').then(j => j.json()
                     .then(data => {
 
@@ -264,8 +307,8 @@
                     fetch('/community/getcommunity/' + '{{.Id}}')
                         .then(r => {
                             r.json().then(body => {
-                                if(body[0]['ApprovalStatusId'] !== 5 && body[0]['CreatedBy'] !== '{{.Email}}') {
-                                    window.location.href='/communities/list';
+                                if (body[0]['ApprovalStatusId'] !== 5 && body[0]['CreatedBy'] !== '{{.Email}}') {
+                                    window.location.href = '/communities/list';
                                 }
                                 else {
                                     this.communityCreatedBy = body[0]['CreatedBy']
@@ -291,7 +334,7 @@
                     fetch('/api/CommunitySponsorsPerCommunityId/' + '{{.Id}}')
                         .then(r => {
                             r.json().then(body => {
-                                if(body){
+                                if (body) {
                                     for (let index = 0; index < body.length; index++) {
                                         this.form.sponsors.push({
                                             displayName: body[index]['UserPrincipalName'],
@@ -313,10 +356,10 @@
                     fetch('/api/CommunityTagPerCommunityId/' + '{{.Id}}')
                         .then(r => {
                             r.json().then(body => {
-                                if(body) {
+                                if (body) {
                                     for (let index = 0; index < body.length; index++) {
                                         this.form.tags.push({ id: body[index]['Id'], text: body[index]['Tag'] })
-    
+
                                     }
                                 }
                                 spinnercount = spinnercount - 1
@@ -376,7 +419,7 @@
             onBoarding() {
                 window.location.href = `/community/${this.form.id}/onboarding`
             },
-
+         
             get isValid() {
                 if (
                     (!!this.form.name &&

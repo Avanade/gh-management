@@ -211,6 +211,20 @@ func IsUserAdmin(w http.ResponseWriter, r *http.Request) (bool, error) {
 	return isUserAdmin, nil
 }
 
+// Get user photo
+func GetUserPhoto(w http.ResponseWriter, r *http.Request) (bool, string, error) {
+	session, err := Store.Get(r, "auth-session")
+	if err != nil {
+		return false, "", err
+	}
+
+	if session.Values["userHasPhoto"] != nil {
+		return session.Values["userHasPhoto"].(bool), fmt.Sprintf("%s", session.Values["userPhoto"]), nil
+	} else {
+		return false, "", nil
+	}
+}
+
 type ErrorDetails struct {
 	Error            string `json:"error"`
 	ErrorDescription string `json:"error_description"`

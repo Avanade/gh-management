@@ -5,6 +5,8 @@ type TypPageData struct {
 	Profile   interface{}
 	ProfileGH TypGitHubUser
 	Content   interface{}
+	HasPhoto  bool
+	UserPhoto string
 }
 
 type TypGitHubUser struct {
