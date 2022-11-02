@@ -29,6 +29,11 @@ func UseTemplate(w *http.ResponseWriter, r *http.Request, page string, pageData 
 		return err
 	}
 
+	hasPhoto, userPhoto, err := session.GetUserPhoto(*w, r)
+	if err != nil {
+		return err
+	}
+
 	approvalSystemUrl := os.Getenv("APPROVAL_SYSTEM_APP_URL")
 	// Data on master page
 	var menu []models.TypMenu
@@ -52,7 +57,9 @@ func UseTemplate(w *http.ResponseWriter, r *http.Request, page string, pageData 
 		Header:    masterPageData,
 		Profile:   sessionaz.Values["profile"],
 		ProfileGH: sessiongh,
-		Content:   pageData}
+		Content:   pageData,
+		HasPhoto:  hasPhoto,
+		UserPhoto: userPhoto}
 
 	tmpl := template.Must(
 		template.ParseFiles("templates/master.html",
