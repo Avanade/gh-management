@@ -64,8 +64,6 @@ const combobox = ({
         },
         // EVENT HANDLER
         onInputHandler(e) {
-            console.log(" 66 ")
-            console.log(e)
             this.setOptions(e.target.value)
         },
         onFocusIn() {
@@ -102,24 +100,15 @@ const combobox = ({
         },
         // METHODS
         async setOptions(value){
-            console.log(searchCallback)
-            console.log("setOptions")
-            console.log("searchCallback")
-            console.log(this.searchCallback)
-          this.searchPlaceholder = searchCallback
             if(searchCallback != undefined) {
-            
-                const result = await this.searchCallback({search:value})
-          
-                console.log("setOption 107 ")
+                const result = await searchCallback({search:value})
+                
                 if (result == null){
                     this.options = []
-                    console.log("setOption 1010 ")
                     return
                 }
 
                 this.options = result.map((i) => {
-                    console.log("setOption 113 ")
                     return {id : i[id], text : i[text]}
                 })
                 return

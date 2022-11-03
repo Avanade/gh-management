@@ -85,17 +85,17 @@
                                         id : 'mail',
                                         text : 'mail',
                                         isMultiple : 'true',
-                                        isDisplayItem : 'true'
+                                      
                                     })" 
-                                    x-modelable="selected" x-model="form.sponsors">
+                                    x-modelable="selected" x-model="form.sponsr">
                                 <div x-html="template"></div>
                             </div>
                         </div>
                         <!-- <div class="relative mt-1">
                             <div x-html="sponsors.template"></div>
                         </div> -->
-                        <!-- <div class="items-center">
-                            <template x-for="(sponsor, i) in form.sponsors">
+                        <div class="items-center">
+                            <template x-for="(sponsor, i) in form.sponsr">
                                 <div style="display: flex; " class="border px-2 py-2">
                                     <div style="flex-grow: 1;" x-text="sponsor.displayName"> </div>
                                     <div x-show="mode!='view'"> <button type="button"
@@ -103,13 +103,13 @@
                                             @click="removeField(sponsor)">&times;</button></div>
                                 </div>
                             </template>
-                        </div> -->
+                        </div> 
 
                         <div>
                             <span class="mt-4 block text-sm font-medium text-gray-700">Tag</span><span
                                 class="pl-1 text-xs">(Please press Enter to insert Tag)</span>
                         </div>
-                        <!-- <div x-data="combobox({
+                        <div x-data="combobox({
                                 data : [],
                                 id : 'id',
                                 text : 'name',
@@ -118,7 +118,7 @@
                                 isDisplayItem : true
                             })" x-modelable="selected" x-model="form.tags">
                             <div x-html="template"></div>
-                        </div> -->
+                        </div> 
 
                     </div>
 
@@ -203,6 +203,10 @@
 
         const res = await fetch(`/api/search/users/${search}`)
         const users = await res.json()
+
+        console.log("test")
+        console.log("test2")
+        console.log(users)
         return users
     }
 
@@ -242,13 +246,10 @@
                 notes: '',
                 isExternal: false,
                 sponsors: [],
-                sponsorss: [],
+                sponsr: [],
                 tags: [],
             },
-            sponsorss: {
-                id: '',
-                text:'',
-            },
+    
             sponsors: {
                 template: '',
                 selected: '',
@@ -336,7 +337,12 @@
                             r.json().then(body => {
                                 if (body) {
                                     for (let index = 0; index < body.length; index++) {
-                                        this.form.sponsors.push({
+                                            this.form.sponsors.push({
+                                                displayName: body[index]['UserPrincipalName'],
+                                                mail: body[index]['UserPrincipalName']
+                                            })
+
+                                        this.form.sponsr.push({
                                             displayName: body[index]['UserPrincipalName'],
                                             mail: body[index]['UserPrincipalName']
                                         })
@@ -393,6 +399,18 @@
 
                 postData = this.form;
                 postData.tags = this.form.tags.map(i => i.text);
+         
+                for (const key of Object.keys( this.form.sponsr)) {
+                 
+                    postData.sponsors.push(  {displayName:  this.form.sponsr[key].id,
+                                            mail:  this.form.sponsr[key].id});
+                   
+                }
+            
+
+                console.log(postData);
+         
+                  
 
                 Alpine.store('master').postData('/api/community', postData, "Your community has been created.",
                     "Go to communities list", "/communities/list")
@@ -426,7 +444,7 @@
                         !!this.form.url &&
                         !!this.form.description //&& !!this.form.notes
                     ) &&
-                    this.form.sponsors.length >= 2) {
+                    this.form.sponsr.length >= 2) {
                     return true
                 } else {
                     return false
