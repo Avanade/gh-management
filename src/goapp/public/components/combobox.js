@@ -1,5 +1,6 @@
 const combobox = ({
     ajax,
+    searchCallback,
     id = 'id',
     text = 'text',
     data,
@@ -38,6 +39,12 @@ const combobox = ({
             this.displaySearch = displaySearch;
             this.searchTag = searchTag;
             this.searchPlaceholder = searchPlaceholder;
+            this.searchCallback = searchCallback;
+            console.log("searchCallback 43")
+            console.log(this.searchCallback)
+            console.log(searchCallback)
+            console.log("data")
+            console.log(data)
             // SET DATA
             if(data != undefined){
                 this.data = data.map((i) => {
@@ -51,13 +58,15 @@ const combobox = ({
                 })
             }
             else {
-                console.log("ERROR : NO SET DATA | PLEASE SET DATA OR AJAX")
+                console.log("INFO : NO INITIAL DATA SET")
             }
             this.options = this.data
         },
         // EVENT HANDLER
         onInputHandler(e) {
-            this.options = this.data.filter((v, i) => { return v.text.toLowerCase().includes(e.target.value.toLowerCase())})
+            console.log(" 66 ")
+            console.log(e)
+            this.setOptions(e.target.value)
         },
         onFocusIn() {
             this.isShowOptions = true
@@ -92,6 +101,32 @@ const combobox = ({
             return this.selected.some(v => v.id === id)
         },
         // METHODS
+        async setOptions(value){
+            console.log(searchCallback)
+            console.log("setOptions")
+            console.log("searchCallback")
+            console.log(this.searchCallback)
+          this.searchPlaceholder = searchCallback
+            if(searchCallback != undefined) {
+            
+                const result = await this.searchCallback({search:value})
+          
+                console.log("setOption 107 ")
+                if (result == null){
+                    this.options = []
+                    console.log("setOption 1010 ")
+                    return
+                }
+
+                this.options = result.map((i) => {
+                    console.log("setOption 113 ")
+                    return {id : i[id], text : i[text]}
+                })
+                return
+            }
+
+            this.options = this.data.filter((v, i) => { return v.text.toLowerCase().includes(value.toLowerCase())})
+        },
         insertSelectedItem(item){
             if(!isMultiple)
                 this.selected = []
@@ -116,7 +151,7 @@ const combobox = ({
                             <ul x-show="isShowOptions" class="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm" id="options" role="listbox">
                             <template x-if='displaySearch'>
                                 <li class="p-3">
-                                <input x-ref="filter" type="text" :placeholder="searchPlaceholder" class="w-full rounded-md border border-gray-300 bg-white py-2 pl-3 pr-12 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 sm:text-sm" role="combobox" aria-controls="options" aria-expanded="false" @input.debounce="onInputHandler" @keyup.enter='onInsertItem'>
+                                <input x-ref="filter" type="text" :placeholder="searchPlaceholder" class="w-full rounded-md border border-gray-300 bg-white py-2 pl-3 pr-12 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 sm:text-sm" role="combobox" aria-controls="options" aria-expanded="false" @input.debounce.1000ms="onInputHandler" @keyup.enter='onInsertItem'>
                                     <template x-if="searchTag != null">
                                         <small class="text-gray-700" x-text="searchTag"></small>
                                     </template>
