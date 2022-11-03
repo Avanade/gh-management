@@ -1,6 +1,7 @@
 const combobox = ({
     ajax,
     searchCallback,
+    onChangeCallback,
     id = 'id',
     text = 'text',
     data,
@@ -86,6 +87,10 @@ const combobox = ({
             this.options = this.data;
         },
         onSelectOption(item){
+            if(onChangeCallback != undefined){
+                onChangeCallback(item)
+            }
+
             if(this.selected.find(v => v.id === item.id)) {
                 this.removeSelectedItem(item)
                 return;
