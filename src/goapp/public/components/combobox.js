@@ -1,6 +1,7 @@
 const combobox = ({
     ajax,
     searchCallback,
+    onChangeCallback,
     id = 'id',
     text = 'text',
     data,
@@ -39,7 +40,7 @@ const combobox = ({
             this.displaySearch = displaySearch;
             this.searchTag = searchTag;
             this.searchPlaceholder = searchPlaceholder;
-            this.searchCallback = searchCallback;
+
             // SET DATA
             if(data != undefined){
                 this.data = data.map((i) => {
@@ -81,6 +82,10 @@ const combobox = ({
             this.options = this.data;
         },
         onSelectOption(item){
+            if(onChangeCallback != undefined){
+                onChangeCallback(item)
+            }
+
             if(this.selected.find(v => v.id === item.id)) {
                 this.removeSelectedItem(item)
                 return;
@@ -96,7 +101,7 @@ const combobox = ({
         // METHODS
         async setOptions(value){
             if(searchCallback != undefined) {
-                const result = await this.searchCallback({search:value})
+                const result = await searchCallback({search:value})
                 
                 if (result == null){
                     this.options = []

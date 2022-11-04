@@ -77,11 +77,26 @@
                             <span class="mt-4 block text-sm font-medium text-gray-700">Business Sponsors*</span><span
                                 class="pl-1 text-xs">(Please select at least two sponsors )</span>
                         </div>
-                        <div class="relative mt-1">
-                            <div x-html="sponsors.template"></div>
+                        <div class="mt-1 sm:mt-0 sm:col-span-2">
+                            <div x-data="combobox({
+                               
+                                        searchCallback: getAllUsers,
+                                        searchTag: 'Start typing to query list of users',
+                                        searchPlaceholder: 'Input name or email',
+                                        id : 'mail',
+                                        text : 'mail',
+                                        isMultiple : 'true',
+                                        isDisplayItem : 'true'
+                                    })" 
+                                    x-modelable="selected" x-model="form.sponsors">
+                                <div x-html="template"></div>
+                            </div>
                         </div>
-                        <div class="items-center">
-                            <template x-for="(sponsor, i) in form.sponsors">
+                        <!-- <div class="relative mt-1">
+                            <div x-html="sponsors.template"></div>
+                        </div> -->
+                        <!-- <div class="items-center">
+                            <template x-for="(sponsor, i) in form.sponsr">
                                 <div style="display: flex; " class="border px-2 py-2">
                                     <div style="flex-grow: 1;" x-text="sponsor.displayName"> </div>
                                     <div x-show="mode!='view'"> <button type="button"
@@ -89,7 +104,7 @@
                                             @click="removeField(sponsor)">&times;</button></div>
                                 </div>
                             </template>
-                        </div>
+                        </div>  -->
 
                         <div>
                             <span class="mt-4 block text-sm font-medium text-gray-700">Tag</span><span
@@ -104,7 +119,7 @@
                                 isDisplayItem : true
                             })" x-modelable="selected" x-model="form.tags">
                             <div x-html="template"></div>
-                        </div>
+                        </div> 
 
                     </div>
 
@@ -137,16 +152,17 @@
         </fieldset>
         <div>
             <div align="right">
-                <span x-show="form.id" >
-                <button  type="button"  x-show="mode!='edit'"
-                    class="bg-purple-500  inline-flex justify-center py-2 px-4 rounded-md text-white"
-                    @click="onBoarding()">
-                    <span >How To Join</span>
-                </button>
-                    </span>
+                <span x-show="form.id">
+                    <button type="button" x-show="mode!='edit'"
+                        class="bg-purple-500  inline-flex justify-center py-2 px-4 rounded-md text-white"
+                        @click="onBoarding()">
+                        <span>How To Join</span>
+                    </button>
+                </span>
                 <button type="button" x-show="mode=='view'"
                     class="bg-orange-500  inline-flex justify-center py-2 px-4 rounded-md text-white"
-                    :class="!isValid ? 'bg-orange-100' : ''" x-bind:disabled="!isValid && ('{{.Email}}' !== communityCreatedBy)" @click="mode='edit'">
+                    :class="!isValid ? 'bg-orange-100' : ''"
+                    x-bind:disabled="!isValid && ('{{.Email}}' !== communityCreatedBy)" @click="mode='edit'">
 
                     <span x-show="form.id">Edit Community</span>
 
@@ -158,13 +174,13 @@
                     <span x-show="form.id">Update Community</span>
 
                 </button>
-            </button>
-            <button type="button" x-show="mode=='edit'"
-                class="bg-orange-500  inline-flex justify-center py-2 px-4 rounded-md text-white"
-                :class="!isValid ? 'bg-orange-100' : ''" x-bind:disabled="!isValid" @click="onLoad()">
-            Cancel
+                </button>
+                <button type="button" x-show="mode=='edit'"
+                    class="bg-orange-500  inline-flex justify-center py-2 px-4 rounded-md text-white"
+                    :class="!isValid ? 'bg-orange-100' : ''" x-bind:disabled="!isValid" @click="onLoad()">
+                    Cancel
 
-            </button>
+                </button>
             </div>
         </div>
 
@@ -172,11 +188,36 @@
 
 </div>
 
-
 <script src="/public/components/clsDropdown.js"></script>
 <script src="/public/components/combobox.js"></script>
 <script type="text/javascript">
+    function updateCombo(data) {
+ 
+        this.form.sponsor.push( 
+             {displayName:  data.id,
+                mail:  data.id}
+        );
+       
+    }
+    async function getAllUsers(data) {
+ 
+        if (data == undefined) {
+            return []
+        }
+
+        const { search } = data;
+        if (search === null || search.trim() === "") {
+            return []
+        }
+
+        const res = await fetch(`/api/search/users/${search}`)
+        const users = await res.json()
+
+        return users
+    }
+
     function data() {
+
         var modal = Alpine.store('master').modal
         return {
             mode: 'view',
@@ -184,23 +225,24 @@
             communityCreatedBy: '',
             getActiveApprovers() {
                 modal.update('loading', 'Loading', 'Please wait', '', '')
+                //this.form.sponsorss = [{ 'id': data.ApproverUserPrincipalName, 'text': data.ApproverUserPrincipalName }]
 
                 fetch('/api/communityapprovers/GetAllActiveCommunityApprovers')
-                .then(r => {
-                    r.json().then(body => {
-                    if (!body || body.length < 1) {
-                        if(this.mode !== 'view') {
-                            window.location.href='/communities/list';
-                        } else {
-                            this.hasApprovers = false;
-                            this.onLoad();
-                        }
-                    } else {
-                        this.hasApprovers = true;
-                        this.onLoad();
-                    }
+                    .then(r => {
+                        r.json().then(body => {
+                            if (!body || body.length < 1) {
+                                if (this.mode !== 'view') {
+                                    window.location.href = '/communities/list';
+                                } else {
+                                    this.hasApprovers = false;
+                                    this.onLoad();
+                                }
+                            } else {
+                                this.hasApprovers = true;
+                                this.onLoad();
+                            }
+                        })
                     })
-                })
             },
             form: {
                 id: '{{.Id}}',
@@ -210,8 +252,10 @@
                 notes: '',
                 isExternal: false,
                 sponsors: [],
+             //   sponsr: [],
                 tags: [],
             },
+    
             sponsors: {
                 template: '',
                 selected: '',
@@ -226,7 +270,10 @@
                 displayName: '',
                 mail: '',
             },
+            
+           
             async getUsersList() {
+
                 await fetch('/api/allusers').then(j => j.json()
                     .then(data => {
 
@@ -264,8 +311,8 @@
                     fetch('/community/getcommunity/' + '{{.Id}}')
                         .then(r => {
                             r.json().then(body => {
-                                if(body[0]['ApprovalStatusId'] !== 5 && body[0]['CreatedBy'] !== '{{.Email}}') {
-                                    window.location.href='/communities/list';
+                                if (body[0]['ApprovalStatusId'] !== 5 && body[0]['CreatedBy'] !== '{{.Email}}') {
+                                    window.location.href = '/communities/list';
                                 }
                                 else {
                                     this.communityCreatedBy = body[0]['CreatedBy']
@@ -291,12 +338,15 @@
                     fetch('/api/CommunitySponsorsPerCommunityId/' + '{{.Id}}')
                         .then(r => {
                             r.json().then(body => {
-                                if(body){
+                                if (body) {
                                     for (let index = 0; index < body.length; index++) {
-                                        this.form.sponsors.push({
+                                         this.form.sponsors.push({
                                             displayName: body[index]['UserPrincipalName'],
-                                            mail: body[index]['UserPrincipalName']
-                                        })
+                                            mail: body[index]['UserPrincipalName'],
+                                            id: body[index]['UserPrincipalName'],
+                                            text: body[index]['UserPrincipalName'],
+                                         })
+                                             
                                     }
                                 }
                                 spinnercount = spinnercount - 1
@@ -313,10 +363,10 @@
                     fetch('/api/CommunityTagPerCommunityId/' + '{{.Id}}')
                         .then(r => {
                             r.json().then(body => {
-                                if(body) {
+                                if (body) {
                                     for (let index = 0; index < body.length; index++) {
                                         this.form.tags.push({ id: body[index]['Id'], text: body[index]['Tag'] })
-    
+
                                     }
                                 }
                                 spinnercount = spinnercount - 1
@@ -334,7 +384,7 @@
                     this.mode = 'edit'
                     modal.visible = false
                 }
-
+         
                 await this.getUsersList()
             },
 
@@ -350,7 +400,21 @@
 
                 postData = this.form;
                 postData.tags = this.form.tags.map(i => i.text);
-
+                listsponsors =this.form.sponsors;
+          
+                postData.sponsors=[];
+                for (const key of Object.keys(listsponsors)) {
+                
+                     postData.sponsors.push( 
+                        {
+                            displayName:  listsponsors[key].id ,
+                             mail: listsponsors[key].id,
+                             id: listsponsors[key].id,
+                            text : listsponsors[key].id}
+                     );
+          
+                    }
+             
                 Alpine.store('master').postData('/api/community', postData, "Your community has been created.",
                     "Go to communities list", "/communities/list")
 
@@ -376,7 +440,7 @@
             onBoarding() {
                 window.location.href = `/community/${this.form.id}/onboarding`
             },
-
+         
             get isValid() {
                 if (
                     (!!this.form.name &&
