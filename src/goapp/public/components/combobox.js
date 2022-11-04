@@ -40,12 +40,7 @@ const combobox = ({
             this.displaySearch = displaySearch;
             this.searchTag = searchTag;
             this.searchPlaceholder = searchPlaceholder;
-            this.searchCallback = searchCallback;
-            console.log("searchCallback 43")
-            console.log(this.searchCallback)
-            console.log(searchCallback)
-            console.log("data")
-            console.log(data)
+
             // SET DATA
             if(data != undefined){
                 this.data = data.map((i) => {

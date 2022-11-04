@@ -74,7 +74,7 @@
         Requesting for a new community has been disabled as there aren't any approvers set by the admin to review requests. Contact the admin to resolve the issue.
       </div>
     </div>
-    <div class="bg-white shadow overflow-hidden sm:rounded-md mt-4">
+    <div class="bg-white shadow overflow-hidden sm:rounded-md mt-4" x-show="filteredCommunities">
       <ul role="list" class="divide-y divide-gray-200">
         <template x-for="( Community, index) in filteredCommunities">
           <li>     

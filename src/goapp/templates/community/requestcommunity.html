@@ -79,22 +79,23 @@
                         </div>
                         <div class="mt-1 sm:mt-0 sm:col-span-2">
                             <div x-data="combobox({
+                               
                                         searchCallback: getAllUsers,
                                         searchTag: 'Start typing to query list of users',
                                         searchPlaceholder: 'Input name or email',
                                         id : 'mail',
                                         text : 'mail',
                                         isMultiple : 'true',
-                                      
+                                        isDisplayItem : 'true'
                                     })" 
-                                    x-modelable="selected" x-model="form.sponsr">
+                                    x-modelable="selected" x-model="form.sponsors">
                                 <div x-html="template"></div>
                             </div>
                         </div>
                         <!-- <div class="relative mt-1">
                             <div x-html="sponsors.template"></div>
                         </div> -->
-                        <div class="items-center">
+                        <!-- <div class="items-center">
                             <template x-for="(sponsor, i) in form.sponsr">
                                 <div style="display: flex; " class="border px-2 py-2">
                                     <div style="flex-grow: 1;" x-text="sponsor.displayName"> </div>
@@ -103,7 +104,7 @@
                                             @click="removeField(sponsor)">&times;</button></div>
                                 </div>
                             </template>
-                        </div> 
+                        </div>  -->
 
                         <div>
                             <span class="mt-4 block text-sm font-medium text-gray-700">Tag</span><span
@@ -190,8 +191,16 @@
 <script src="/public/components/clsDropdown.js"></script>
 <script src="/public/components/combobox.js"></script>
 <script type="text/javascript">
+    function updateCombo(data) {
+ 
+        this.form.sponsor.push( 
+             {displayName:  data.id,
+                mail:  data.id}
+        );
+       
+    }
     async function getAllUsers(data) {
-        console.log("test")
+ 
         if (data == undefined) {
             return []
         }
@@ -204,9 +213,6 @@
         const res = await fetch(`/api/search/users/${search}`)
         const users = await res.json()
 
-        console.log("test")
-        console.log("test2")
-        console.log(users)
         return users
     }
 
@@ -246,7 +252,7 @@
                 notes: '',
                 isExternal: false,
                 sponsors: [],
-                sponsr: [],
+             //   sponsr: [],
                 tags: [],
             },
     
@@ -264,11 +270,8 @@
                 displayName: '',
                 mail: '',
             },
-            async init(){
-                this.form.sponsorss = [{'id' : data.ApproverUserPrincipalName, 'text' : data.ApproverUserPrincipalName}]
-             
-            }
-            ,
+            
+           
             async getUsersList() {
 
                 await fetch('/api/allusers').then(j => j.json()
@@ -337,15 +340,13 @@
                             r.json().then(body => {
                                 if (body) {
                                     for (let index = 0; index < body.length; index++) {
-                                            this.form.sponsors.push({
-                                                displayName: body[index]['UserPrincipalName'],
-                                                mail: body[index]['UserPrincipalName']
-                                            })
-
-                                        this.form.sponsr.push({
+                                         this.form.sponsors.push({
                                             displayName: body[index]['UserPrincipalName'],
-                                            mail: body[index]['UserPrincipalName']
-                                        })
+                                            mail: body[index]['UserPrincipalName'],
+                                            id: body[index]['UserPrincipalName'],
+                                            text: body[index]['UserPrincipalName'],
+                                         })
+                                             
                                     }
                                 }
                                 spinnercount = spinnercount - 1
@@ -383,7 +384,7 @@
                     this.mode = 'edit'
                     modal.visible = false
                 }
-
+         
                 await this.getUsersList()
             },
 
@@ -399,19 +400,21 @@
 
                 postData = this.form;
                 postData.tags = this.form.tags.map(i => i.text);
-         
-                for (const key of Object.keys( this.form.sponsr)) {
-                 
-                    postData.sponsors.push(  {displayName:  this.form.sponsr[key].id,
-                                            mail:  this.form.sponsr[key].id});
-                   
-                }
-            
-
-                console.log(postData);
-         
-                  
-
+                listsponsors =this.form.sponsors;
+          
+                postData.sponsors=[];
+                for (const key of Object.keys(listsponsors)) {
+                
+                     postData.sponsors.push( 
+                        {
+                            displayName:  listsponsors[key].id ,
+                             mail: listsponsors[key].id,
+                             id: listsponsors[key].id,
+                            text : listsponsors[key].id}
+                     );
+          
+                    }
+             
                 Alpine.store('master').postData('/api/community', postData, "Your community has been created.",
                     "Go to communities list", "/communities/list")
 
@@ -444,7 +447,7 @@
                         !!this.form.url &&
                         !!this.form.description //&& !!this.form.notes
                     ) &&
-                    this.form.sponsr.length >= 2) {
+                    this.form.sponsors.length >= 2) {
                     return true
                 } else {
                     return false
