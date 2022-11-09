@@ -197,3 +197,8 @@ type TypCommunityApprovers struct {
 	Modified                  string `json:"modified"`
 	ModifiedBy                string `json:"modifiedBy"`
 }
+
+type TypRelatedCommunities struct {
+	ParentCommunityId  int `json:"ParentCommunityId"`
+	RelatedCommunityId int `json:"RelatedCommunityId"`
+}
