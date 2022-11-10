@@ -25,7 +25,7 @@ const markdownEditor = ({
                             </button>
                         </li>
                         <li>
-                            <button @click="activeTab = 'preview'" class="px-3 py-2 font-medium text-sm rounded-md"
+                            <button @click="() => {activeTab = 'preview'; preview()}" class="px-3 py-2 font-medium text-sm rounded-md"
                                 :class="activeTab === 'preview' ? 'bg-[#fff2eb] text-[#FF5800]':'text-gray-500 hover:text-gray-700'">
                                 Preview
                             </button>
