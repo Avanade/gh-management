@@ -1,15 +1,21 @@
 const markdownEditor = ({
     defaultTab = 'write',
-    disabledTab = false
+    disabledTab = false,
+    caption = null,
+    placeholder = null
 }) => {
     return {
         activeTab : '', // 'write' | 'preview',
         disabledTab : false,
         body : '',
         markdown : '',
+        caption : '',
+        placeholder : '',
         async init() {
             this.activeTab = defaultTab
             this.disabledTab = disabledTab
+            this.caption = caption
+            this.placeholder = placeholder
         },
         preview() { 
             this.markdown = window.marked(this.body) 
@@ -32,10 +38,11 @@ const markdownEditor = ({
                         </li>
                     </ul>
                 </nav>
-                <div class="py-6 w-full">
+                <div class="pb-6 pt-1 w-full">
                     <div x-show="activeTab === 'write'">
                         <div>
-                            <textarea title="content" class="mt-1 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md h-44"
+                            <span x-show="caption != null" class="pl-1 text-xs" x-text="caption"></span>
+                            <textarea :placeholder="placeholder" title="content" class="mt-1 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md h-44"
                                 x-model="body" x-on:input.change="preview"></textarea>
                         </div>
                     </div>
