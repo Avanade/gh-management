@@ -1,6 +1,7 @@
 const markdownEditor = ({
     defaultTab = 'write',
     disabledTab = false,
+    overflowPreview = 'scroll', // scroll|auto
     caption = null,
     placeholder = null
 }) => {
@@ -11,12 +12,13 @@ const markdownEditor = ({
         markdown : '',
         caption : '',
         placeholder : '',
+        overflowPreview : '',
         async init() {
             this.activeTab = defaultTab
             this.disabledTab = disabledTab
             this.caption = caption
             this.placeholder = placeholder
-
+            this.overflowPreview = overflowPreview
             this.$watch('body', e => this.markdown = window.marked(e))
         },
         template : `<div class="w-full">
@@ -46,7 +48,8 @@ const markdownEditor = ({
                                         x-model="body"></textarea>
                                 </div>
                             </div>
-                            <div x-show="activeTab === 'preview'" class="w-full border border-gray-300 rounded-md p-3 h-44 overflow-y-auto">
+                            <div x-show="activeTab === 'preview'" class="w-full border border-gray-300 rounded-md p-3"
+                                :class="{ 'overflow-y-auto h-44' : overflowPreview === 'scroll'}">
                                 <div x-html="markdown" class="preview prose max-w-none prose-img:rounded-md">
                                 </div>
                             </div>
