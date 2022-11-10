@@ -143,11 +143,12 @@ type TypCommunitySponsorsList struct {
 }
 
 type TypCommunityOnBoarding struct {
-	Id          int64                      `json:"Id"`
-	Name        string                     `json:"Name"`
-	Url         string                     `json:"Url"`
-	Sponsors    []TypCommunitySponsorsList `json:"Sponsors"`
-	Communities []TypRelatedCommunities    `json:"Communities"`
+	Id                     int64                      `json:"Id"`
+	Name                   string                     `json:"Name"`
+	Url                    string                     `json:"Url"`
+	OnBoardingInstructions string                     `json:"OnBoardingInstructions"`
+	Sponsors               []TypCommunitySponsorsList `json:"Sponsors"`
+	Communities            []TypRelatedCommunities    `json:"Communities"`
 }
 
 type TypCommunityApprovals struct {
