@@ -148,14 +148,14 @@
                 </div>
                 
             </div>
-            <div class="flex flex flex-col md:flex-row ">
+            <div  x-show="mode!='view'" class="flex flex flex-col md:flex-row ">
                 <div class="basis-1/2 md:base-full  md:flex-row mx-3">
                     <div x-data="{ data: content }" class="flex flex-col  ">
 
                        
 
                         <div>
-                            <span class="mt-4 block text-sm font-medium text-gray-700">Related to internal</span> 
+                            <span class="mt-4 block text-sm font-medium text-gray-700">Releated Internal Communities</span> 
                         </div>
                         
                             <div 
@@ -185,7 +185,7 @@
                        
 
                         <div>
-                            <span class="mt-4 block text-sm font-medium text-gray-700">Related to external</span> 
+                            <span class="mt-4 block text-sm font-medium text-gray-700">Related External Communities</span> 
                         </div>
                         
                             <div 
