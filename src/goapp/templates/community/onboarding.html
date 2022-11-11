@@ -5,20 +5,17 @@
 <div x-data="data()" x-init="onLoad()" class="m-5" x-show="community.loaded">
     <div class="font-bold text-xl my-3 border-b-2 border-gray-300 border-solid"><span x-text="community.Name"></span></div>
     <div class="flex flex-row m-5">
-        <div class="basis-9/12">
-            <div class="mb-3">
-                <span x-text="community.Name"></span> has a specific set of steps you must follow to apply to become part of the community. 
-            </div>
-            <ol class="list-decimal mx-10 mb-3">
-                <li>Visit <a :href="community.Url" class="text-orange-500"><span x-text="community.Name"></span></a></li>
-                <li>You will need to specify that you are an employee of Avanade when filling out the application</li>
-                <li>Please notify our Open-Source Community Lead, Chris Lloyd-Jones clj@avanade.com once you have submitted your application</li>
-            </ol>
-            <div class="mb-3">
-                Please be advised that applications often take 3 to 4 weeks to be fully approved by <span x-text="community.Name"></span>.
-            </div>
-            <div class="mb-3">
-                If you have any questions, please contact the business sponsor for this community.    
+        <div class="basis-9/12 p-3">
+            <div 
+                x-data="markdownEditor({
+                    disabledTab: true,
+                    defaultTab: 'preview',
+                    overflowPreview: 'auto'
+                })"
+                x-modelable = "body"
+                x-model = "community.OnBoardingInstructions"
+            >
+                <div x-html="template"></div>
             </div>
             <div class="text-center border-top border-2 border-gray-300 border-solid p-5">
                 <div x-show="!isMember">
@@ -91,6 +88,8 @@
     </div>
 </div>
 
+<script src="/public/components/markdownEditor.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/marked@2.1.3/marked.min.js"></script>
 <script type="text/javascript">
     function data(){
         return {
@@ -98,6 +97,7 @@
                 Id:"{{.Id}}",
                 Name: '',
                 Url: '',
+                OnBoardingInstructions: '',
                 Sponsors:[
                     {Name: '', GivenName: '', SurName: '', Email: ''}
                 ],

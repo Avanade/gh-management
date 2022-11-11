@@ -39,15 +39,16 @@ func CommunityAPIHandler(w http.ResponseWriter, r *http.Request) {
 	case "POST":
 		param := map[string]interface{}{
 
-			"Name":         strings.TrimSpace(body.Name),
-			"Url":          body.Url,
-			"Description":  body.Description,
-			"Notes":        body.Notes,
-			"TradeAssocId": body.TradeAssocId,
-			"IsExternal":   body.IsExternal,
-			"CreatedBy":    username,
-			"ModifiedBy":   username,
-			"Id":           body.Id,
+			"Name":                   strings.TrimSpace(body.Name),
+			"Url":                    body.Url,
+			"Description":            body.Description,
+			"Notes":                  body.Notes,
+			"TradeAssocId":           body.TradeAssocId,
+			"IsExternal":             body.IsExternal,
+			"OnBoardingInstructions": body.OnBoardingInstructions,
+			"CreatedBy":              username,
+			"ModifiedBy":             username,
+			"Id":                     body.Id,
 		}
 
 		result, err := db.ExecuteStoredProcedureWithResult("dbo.PR_Communities_Insert", param)
@@ -190,15 +191,16 @@ func MyCommunityAPIHandler(w http.ResponseWriter, r *http.Request) {
 	case "POST":
 		param := map[string]interface{}{
 
-			"Name":         strings.TrimSpace(body.Name),
-			"Url":          body.Url,
-			"Description":  body.Description,
-			"Notes":        body.Notes,
-			"TradeAssocId": body.TradeAssocId,
-			"IsExternal":   body.IsExternal,
-			"CreatedBy":    username,
-			"ModifiedBy":   username,
-			"Id":           body.Id,
+			"Name":                   strings.TrimSpace(body.Name),
+			"Url":                    body.Url,
+			"Description":            body.Description,
+			"Notes":                  body.Notes,
+			"TradeAssocId":           body.TradeAssocId,
+			"IsExternal":             body.IsExternal,
+			"OnBoardingInstructions": body.OnBoardingInstructions,
+			"CreatedBy":              username,
+			"ModifiedBy":             username,
+			"Id":                     body.Id,
 		}
 
 		result, err := db.ExecuteStoredProcedureWithResult("dbo.PR_Communities_Insert", param)

@@ -54,21 +54,22 @@ type TypeMakeProjectPublicReqBody struct {
 }
 
 type TypCommunity struct {
-	Id                  int                   `json:"id"`
-	Name                string                `json:"name"`
-	Url                 string                `json:"url"`
-	Description         string                `json:"description"`
-	Notes               string                `json:"notes"`
-	TradeAssocId        string                `json:"tradeAssocId"`
-	IsExternal          bool                  `json:"isExternal"`
-	Created             string                `json:"created"`
-	CreatedBy           string                `json:"createdBy"`
-	Modified            string                `json:"modified"`
-	ModifiedBy          string                `json:"modifiedBy"`
-	Sponsors            []TypSponsors         `json:"sponsors"`
-	Tags                []string              `json:"tags"`
-	CommunitiesExternal []TypRelatedCommunity `json:"communitiesExternal"`
-	CommunitiesInternal []TypRelatedCommunity `json:"communitiesInternal"`
+	Id                     int                   `json:"id"`
+	Name                   string                `json:"name"`
+	Url                    string                `json:"url"`
+	Description            string                `json:"description"`
+	Notes                  string                `json:"notes"`
+	TradeAssocId           string                `json:"tradeAssocId"`
+	IsExternal             bool                  `json:"isExternal"`
+	OnBoardingInstructions string                `json:"onBoardingInstructions"`
+	Created                string                `json:"created"`
+	CreatedBy              string                `json:"createdBy"`
+	Modified               string                `json:"modified"`
+	ModifiedBy             string                `json:"modifiedBy"`
+	Sponsors               []TypSponsors         `json:"sponsors"`
+	Tags                   []string              `json:"tags"`
+	CommunitiesExternal    []TypRelatedCommunity `json:"communitiesExternal"`
+	CommunitiesInternal    []TypRelatedCommunity `json:"communitiesInternal"`
 }
 
 type TypCommunitySponsors struct {
@@ -144,11 +145,12 @@ type TypCommunitySponsorsList struct {
 }
 
 type TypCommunityOnBoarding struct {
-	Id          int64                      `json:"Id"`
-	Name        string                     `json:"Name"`
-	Url         string                     `json:"Url"`
-	Sponsors    []TypCommunitySponsorsList `json:"Sponsors"`
-	Communities []TypRelatedCommunities    `json:"Communities"`
+	Id                     int64                      `json:"Id"`
+	Name                   string                     `json:"Name"`
+	Url                    string                     `json:"Url"`
+	OnBoardingInstructions string                     `json:"OnBoardingInstructions"`
+	Sponsors               []TypCommunitySponsorsList `json:"Sponsors"`
+	Communities            []TypRelatedCommunities    `json:"Communities"`
 }
 
 type TypCommunityApprovals struct {

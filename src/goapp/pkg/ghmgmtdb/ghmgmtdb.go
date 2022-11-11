@@ -829,9 +829,10 @@ func Community_Info(CommunityId int64) (data models.TypCommunityOnBoarding, err 
 	}
 
 	data = models.TypCommunityOnBoarding{
-		Id:   result[0]["Id"].(int64),
-		Name: result[0]["Name"].(string),
-		Url:  result[0]["Url"].(string),
+		Id:                     result[0]["Id"].(int64),
+		Name:                   result[0]["Name"].(string),
+		OnBoardingInstructions: result[0]["OnBoardingInstructions"].(string),
+		Url:                    result[0]["Url"].(string),
 	}
 
 	return
