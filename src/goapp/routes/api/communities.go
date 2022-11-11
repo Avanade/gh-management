@@ -348,25 +348,10 @@ func GetRequestStatusByCommunity(w http.ResponseWriter, r *http.Request) {
 func GetCommunitiesIsexternal(w http.ResponseWriter, r *http.Request) {
 	req := mux.Vars(r)
 	isexternal := req["isexternal"]
-	// fmt.Println("GetCommunitiesIsexternal")
-
-	// sessionaz, _ := session.Store.Get(r, "auth-session")
-	// fmt.Println("a")
-	// iprofile := sessionaz.Values["profile"]
-	// fmt.Println("b")
-	// profile := iprofile.(map[string]interface{})
-	// fmt.Println("c")
-	// username := profile["preferred_username"]
-	// fmt.Println("d")
-	// var body models.TypCommunity
-	// err := json.NewDecoder(r.Body).Decode(&body)
-	// if err != nil {
-	// 	http.Error(w, err.Error(), http.StatusBadRequest)
-	// 	fmt.Println(err)
-	// 	fmt.Println(body)
-	// 	return
-	// }
-
+	sessionaz, _ := session.Store.Get(r, "auth-session")
+	iprofile := sessionaz.Values["profile"]
+	profile := iprofile.(map[string]interface{})
+	username := profile["preferred_username"]
 	dbConnectionParam := sql.ConnectionParam{
 		ConnectionString: os.Getenv("GHMGMTDB_CONNECTION_STRING"),
 	}
@@ -381,7 +366,7 @@ func GetCommunitiesIsexternal(w http.ResponseWriter, r *http.Request) {
 	param := map[string]interface{}{
 
 		"isexternal":        isexternal,
-		"UserPrincipalName": "dennis.delamida@accenture.com",
+		"UserPrincipalName": username,
 	}
 
 	Communities, err := db.ExecuteStoredProcedureWithResult("PR_Communities_Isexternal", param)
