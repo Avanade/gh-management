@@ -8,7 +8,6 @@ import (
 	"net/http"
 	"os"
 
-	//models "main/models"
 	"github.com/gorilla/mux"
 )
 
