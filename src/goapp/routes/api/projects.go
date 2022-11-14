@@ -47,9 +47,28 @@ func GetUserProjects(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	s, _ := json.Marshal(projects)
+	var list []Repo
+	err = json.Unmarshal(s, &list)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	for i, repo := range list {
+		if repo.RepositorySource == "GitHub" {
+			org := os.Getenv("GH_ORG_INNERSOURCE")
+			if repo.Visibility == "Public" {
+				org = os.Getenv("GH_ORG_OPENSOURCE")
+			}
+			list[i].TFSProjectReference = fmt.Sprintf("https://github.com/%s/%s", url.QueryEscape(org), url.QueryEscape(repo.Name))
+		} else {
+			continue
+		}
+	}
+
 	w.WriteHeader(http.StatusOK)
 	w.Header().Set("Content-Type", "application/json")
-	jsonResp, err := json.Marshal(projects)
+	jsonResp, err := json.Marshal(list)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -138,13 +157,17 @@ func GetAllRepositories(w http.ResponseWriter, r *http.Request) {
 	s, _ := json.Marshal(data)
 	var list []Repo
 	err := json.Unmarshal(s, &list)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 	for i, repo := range list {
 		if repo.RepositorySource == "GitHub" {
 			org := os.Getenv("GH_ORG_INNERSOURCE")
 			if repo.Visibility == "Public" {
 				org = os.Getenv("GH_ORG_OPENSOURCE")
 			}
-			list[i].TFSProjectReference = fmt.Sprintf("http://github.com/%s/%s", url.QueryEscape(org), url.QueryEscape(repo.Name))
+			list[i].TFSProjectReference = fmt.Sprintf("https://github.com/%s/%s", url.QueryEscape(org), url.QueryEscape(repo.Name))
 		} else {
 			continue
 		}
@@ -414,17 +437,24 @@ func ReprocessRequestApproval() {
 }
 
 type RepositoryList struct {
-	Data  []Repo `json:"data"`
-	Total int    `json:"total"`
+	Data  []Repo     `json:"data"`
+	Total int        `json:"total"`
 }
 
 type Repo struct {
-	Id                  int    `json:"Id"`
-	Name                string `json:"Name"`
-	Description         string `json:"Description"`
-	IsArchived          bool   `json:"IsArchived"`
-	Created             string `json:"Created"`
-	RepositorySource    string `json:"RepositorySource"`
-	TFSProjectReference string `json:"TFSProjectReference"`
-	Visibility          string `json:"Visibility"`
-}
+	Id                     int    `json:"Id"`
+	Name                   string `json:"Name"`
+	Description            string `json:"Description"`
+	IsArchived             bool   `json:"IsArchived"`
+	Created                string `json:"Created"`
+	RepositorySource       string `json:"RepositorySource"`
+	TFSProjectReference    string `json:"TFSProjectReference"`
+	Visibility             string `json:"Visibility"`
+	ApprovalStatus         bool   `json:"ApprovalStatus"`
+	CoOwner                string `json:CoOwner`
+	ConfirmAvaIP           bool   `json:ConfirmAvaIP`
+	ConfirmEnabledSecurity bool   `json:ConfirmEnabledSecurity`
+	CreatedBy              string `json:CreatedBy`
+	Modified               string `json:Modified`
+	ModifiedBy             string `json: ModifiedBy`
+}  
