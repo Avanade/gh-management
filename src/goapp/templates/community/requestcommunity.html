@@ -116,7 +116,7 @@
                                 text : 'name',
                                 isInsertable : true,
                                 isMultiple : true,
-                                isDisplayItem : true
+                                isDisplayItem : true 
                             })" x-modelable="selected" x-model="form.tags">
                             <div x-html="template"></div>
                         </div> 
@@ -146,8 +146,69 @@
                         </div>
                     </div>
                 </div>
+                
+            </div>
+            <div  x-show="mode!='view'" class="flex flex flex-col md:flex-row ">
+                <div class="basis-1/2 md:base-full  md:flex-row mx-3">
+                    <div x-data="{ data: content }" class="flex flex-col  ">
+
+                       
+
+                        <div>
+                            <span class="mt-4 block text-sm font-medium text-gray-700">Releated Internal Communities</span> 
+                        </div>
+                        
+                            <div 
+                                x-data="combobox({
+                                        ajax : getCommunitiesinternals,
+                                        id : 'id',
+                                        text : 'name',
+                                     
+                                        isMultiple : 'true',
+                                        isDisplayItem : 'true'
+                                    })"
+                                x-modelable = "selected"
+                                x-model = "form.communitiesInternal"
+                            >
+                                <div x-html="template"></div>
+                            </div>
+                      
+
+                    </div>
 
 
+
+                </div>
+                <div class="basis-1/2 md:base-full  md:flex-row mx-3">
+                    <div x-data="{ data: content }" class="flex flex-col  ">
+
+                       
+
+                        <div>
+                            <span class="mt-4 block text-sm font-medium text-gray-700">Related External Communities</span> 
+                        </div>
+                        
+                            <div 
+                                x-data="combobox({
+                                        ajax : getCommunitiesisexternals,
+                                        id : 'id',
+                                        text : 'name',
+                                       
+                                        isMultiple : 'true',
+                                        isDisplayItem : 'true'
+                                    })"
+                                x-modelable = "selected"
+                                x-model = "form.communitiesExternal"
+                            >
+                                <div x-html="template"></div>
+                            </div>
+                      
+
+                    </div>
+
+
+
+                </div>
             </div>
             <div x-show="mode!='view'" class="mt-5 sm:col-span-6 pt-2 sm:pt-2 border-t-2 border-gray-100">
                 <h3 class="text-lg font-medium pb-3 leading-6 text-gray-900">Onboarding Instructions</h3>
@@ -212,7 +273,24 @@
                 mail:  data.id}
         );
        
+    } 
+
+    async function getCommunitiesisexternals(){
+ 
+            const res = await fetch('/api/community/getCommunitiesisexternal/1')
+
+            const data = await res.json()
+           
+            return data
     }
+    async function getCommunitiesinternals(){
+ 
+        const res = await fetch('/api/community/getCommunitiesisexternal/0')
+
+        const data = await res.json()
+     
+        return data
+        }
     async function getAllUsers(data) {
  
         if (data == undefined) {
@@ -269,6 +347,8 @@
                 sponsors: [],
              //   sponsr: [],
                 tags: [],
+                communitiesExternal: [],
+                communitiesInternal: [],
             },
     
             sponsors: {
@@ -320,7 +400,7 @@
             },
             async onLoad() {
 
-                spinnercount = 3
+                spinnercount = 4
                 if (this.form.id) {
                     this.mode = 'view'
                     fetch('/community/getcommunity/' + '{{.Id}}')
@@ -351,7 +431,43 @@
                             spinnercount = spinnercount - 1
                         })
 
-                    fetch('/api/CommunitySponsorsPerCommunityId/' + '{{.Id}}')
+                    fetch('/api/relatedcommunity/' + '{{.Id}}')
+                        .then(r => {
+                            r.json().then(body => {
+                                if (body) {
+                                    for (let index = 0; index < body.length; index++) {
+                                        if (body[index]['IsExternal']){
+                                         this.form.communitiesExternal.push({
+                                            
+                                            id: body[index]['ParentCommunityId'],
+                                            text: body[index]['Name'],
+                                            parentCommunityId : body[index]['ParentCommunityId'],
+                                            RelatedCommunityId: body[index]['RelatedCommunityId'],
+                                         })
+                                        }
+                                        else{
+                                            this.form.communitiesInternal.push({
+                                            
+                                            id: body[index]['ParentCommunityId'],
+                                            text: body[index]['Name'],
+                                            parentCommunityId : body[index]['ParentCommunityId'],
+                                            RelatedCommunityId: body[index]['RelatedCommunityId'],
+                                         })
+                                        }
+                                             
+                                    }
+                                }
+                                spinnercount = spinnercount - 1
+                                if (spinnercount < 1) {
+                                    modal.visible = false
+                                }
+                            });
+                        })
+                        .catch(e => {
+                            console.log(e)
+                            spinnercount = spinnercount - 1
+                        })
+                        fetch('/api/CommunitySponsorsPerCommunityId/' + '{{.Id}}')
                         .then(r => {
                             r.json().then(body => {
                                 if (body) {
@@ -377,6 +493,26 @@
                         })
 
                     fetch('/api/CommunityTagPerCommunityId/' + '{{.Id}}')
+                        .then(r => {
+                            r.json().then(body => {
+                                if (body) {
+                                    for (let index = 0; index < body.length; index++) {
+                                        this.form.tags.push({ id: body[index]['Id'], text: body[index]['Tag'] })
+
+                                    }
+                                }
+                                spinnercount = spinnercount - 1
+                                if (spinnercount < 1) {
+                                    modal.visible = false
+                                }
+                            });
+                        })
+                        .catch(e => {
+                            console.log(e)
+                            spinnercount = spinnercount - 1
+                        })
+
+                        fetch('/api/CommunityTagPerCommunityId/' + '{{.Id}}')
                         .then(r => {
                             r.json().then(body => {
                                 if (body) {
@@ -426,11 +562,42 @@
                             displayName:  listsponsors[key].id ,
                              mail: listsponsors[key].id,
                              id: listsponsors[key].id,
-                            text : listsponsors[key].id}
+                            text : listsponsors[key].id
+                        }
                      );
           
                     }
-             
+
+                listExternal =this.form.communitiesExternal;
+                postData.communitiesExternal=[];
+                for (const key of Object.keys(listExternal)) {
+                
+                     postData.communitiesExternal.push( 
+                        {
+                            ParentCommunityId:  listExternal[key].id,
+                            RelatedCommunityId: listExternal[key].id
+                        }
+                             
+                     );
+          
+                    }
+
+
+                listInternal =this.form.communitiesInternal;
+         
+                postData.communitiesInternal=[];
+                for (const key of Object.keys(listInternal)) {
+                
+                     postData.communitiesInternal.push( 
+                        {
+                            ParentCommunityId:  listInternal[key].id,
+                            RelatedCommunityId: listInternal[key].id
+                        }
+                             
+                     );
+          
+                    }
+                 
                 Alpine.store('master').postData('/api/community', postData, "Your community has been created.",
                     "Go to communities list", "/communities/list")
 
