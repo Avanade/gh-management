@@ -58,7 +58,7 @@
                     </template>
                 </div>
             </div>
-            <div class="mb-3" x-show="community.Communities.filter(i=>{return !i.IsExternal}).length>0">
+            <!-- <div class="mb-3" x-show="community.Communities.filter(i=>{return !i.IsExternal}).length>0">
                 <div class="font-bold">Related Internal Commmunities</div>
                 <div class="ml-2">
                     <template x-for="i in community.Communities.filter(i=>{return !i.IsExternal})">
@@ -83,6 +83,34 @@
                         </div>
                     </template>
                 </div>
+            </div> -->
+          
+                <div class="mb-3" x-show="CommunitiesExternals.length > 1">
+                    <div class="font-bold">Related External Commmunities</div>
+                    <div class="ml-2">
+                        <template x-for="i in CommunitiesExternals">
+                            <div class="mb-2 text-[#FF5800]">
+                
+                                <a x-show="i.text"><span x-text="i.text"></a></span>
+                            </div>
+                    </div>
+                    </template>
+                </div>
+              
+            </div>
+            <div class="mb-3"  >
+                <div class="mb-3" x-show="CommunitiesInternals.length > 1">
+                <div class="font-bold">Related Internal Commmunities</div>
+                <div class="ml-2">
+                    <template x-for="i in CommunitiesInternals">
+                        <div class="mb-2 text-[#FF5800]">
+                            <div>  
+                                  <a x-show="i.text"><span x-text="i.text"></a></span>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+           
             </div>
         </div>
     </div>
@@ -104,8 +132,22 @@
                 Communities:[
                     {Name: '', Url:'', IsExternal: false}
                 ],
-                loaded:false
+                loaded:false,
+                CommunitiesExternal: [],
+                CommunitiesInternal: [],
+             
+                
             },
+            CommunitiesExternals: [{
+                id: '{{.Id}}',
+                text: '',
+                 
+            }],
+            CommunitiesInternals: [{
+                id: '{{.Id}}',
+                text: '',
+                 
+            }],
             isMember: false,
             getSponsorName(i){
                 return (!!i.GivenName && !!i.SurName) ?  `${i.GivenName} ${i.SurName}` : i.Name
@@ -155,8 +197,68 @@
                     modal.update('error', 'Error', 'Please try again', '','')
                 })
             },
+             getCommunity(){
+                fetch('/api/relatedcommunity/' + '{{.Id}}')
+                         .then(r => {
+                             r.json().then(body => {
+                                 if (body) {
+                                     for (let index = 0; index < body.length; index++) {
+                                         if (body[index]['IsExternal']){
+
+                                        //   this.community.CommunitiesExternal.push({
+                                            
+                                        //      id: body[index]['ParentCommunityId'],
+                                        //      text: body[index]['Name'],
+                                        //      parentCommunityId : body[index]['ParentCommunityId'],
+                                        //      RelatedCommunityId: body[index]['RelatedCommunityId'],
+                                        //   })
+                                          console.log( body[index]['Name'])
+                                          this.CommunitiesExternals.push({
+                                            
+                                            id: body[index]['ParentCommunityId'],
+                                            text: body[index]['Name'],
+                                           
+                                         })
+                                         }
+                                         else{
+                                        //      this.community.CommunitiesInternal.push({
+                                          
+                                        //      id: body[index]['ParentCommunityId'],
+                                        //      text: body[index]['Name'],
+                                        //      parentCommunityId : body[index]['ParentCommunityId'],
+                                        //      RelatedCommunityId: body[index]['RelatedCommunityId'],
+                                        //   })
+
+                                      
+                                          this.CommunitiesInternals.push({
+                                            
+                                            id: body[index]['ParentCommunityId'],
+                                            text: body[index]['Name'],
+                                           
+                                         })
+                                         }
+                                             
+                                     }
+                                     console.log(  "this.CommunitiesInternals.length")
+                                   console.log(  this.CommunitiesInternals.length)
+                                   console.log(  "this.CommunitiesInternals.length")
+                                   console.log(  this.CommunitiesInternals.length)
+                                 }
+                               
+                               
+                             });
+                         })
+                         .catch(e => {
+                             console.log(e)
+                           
+                         })
+
+             
+            },
             onLoad(){
                 this.getCommunityInfo(this.community.Id)
+                this. getCommunity()
+                 
             }
         }
     }
