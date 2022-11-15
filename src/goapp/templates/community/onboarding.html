@@ -3,18 +3,15 @@
 <div id="pageTitle">Community Onboarding Instructions</div>
 
 <div x-data="data()" x-init="onLoad()" class="m-5" x-show="community.loaded">
-    <div class="font-bold text-xl my-3 border-b-2 border-gray-300 border-solid"><span x-text="community.Name"></span></div>
+    <div class="font-bold text-xl my-3 border-b-2 border-gray-300 border-solid"><span x-text="community.Name"></span>
+    </div>
     <div class="flex flex-row m-5">
         <div class="basis-9/12 p-3">
-            <div 
-                x-data="markdownEditor({
+            <div x-data="markdownEditor({
                     disabledTab: true,
                     defaultTab: 'preview',
                     overflowPreview: 'auto'
-                })"
-                x-modelable = "body"
-                x-model = "community.OnBoardingInstructions"
-            >
+                })" x-modelable="body" x-model="community.OnBoardingInstructions">
                 <div x-html="template"></div>
             </div>
             <div class="text-center border-top border-2 border-gray-300 border-solid p-5">
@@ -28,8 +25,7 @@
                     px-5 py-2
                     text-sm font-medium text-white shadow-sm
                     focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2
-                    sm:w-auto"
-                    @click="alreadyMember()">I am already a member</button>
+                    sm:w-auto" @click="alreadyMember()">I am already a member</button>
                 </div>
                 <div x-show="isMember">
                     <div>You are already a member of this community.</div>
@@ -41,8 +37,7 @@
                     px-5 py-2
                     text-sm font-medium text-white shadow-sm
                     focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2
-                    sm:w-auto"
-                    @click="removeMember()">Remove</button>
+                    sm:w-auto" @click="removeMember()">Remove</button>
                 </div>
             </div>
         </div>
@@ -58,31 +53,34 @@
                     </template>
                 </div>
             </div>
-            <div class="mb-3" x-show="community.Communities.filter(i=>{return !i.IsExternal}).length>0">
-                <div class="font-bold">Related Internal Commmunities</div>
-                <div class="ml-2">
-                    <template x-for="i in community.Communities.filter(i=>{return !i.IsExternal})">
-                        <div class="mb-2">
-                            <div>
-                                <a x-show="i.Url" :href="i.Url" class="text-orange-500"><span x-text="i.Name"></a></span>
-                                <a x-show="!i.Url"><span x-text="i.Name"></a></span>
-                            </div>
-                        </div>
-                    </template>
-                </div>
-            </div>
-            <div class="mb-3" x-show="community.Communities.filter(i=>{return i.IsExternal}).length>0">
+
+
+            <div class="mb-3" x-show="CommunitiesExternals.length > 1">
                 <div class="font-bold">Related External Commmunities</div>
                 <div class="ml-2">
-                    <template x-for="i in community.Communities.filter(i=>{return i.IsExternal})">
-                        <div class="mb-2">
+                    <template x-for="i in CommunitiesExternals">
+                        <div class="mb-2 text-[#FF5800]">
+
+                            <a x-show="i.text"><span x-text="i.text"></a></span>
+                        </div>
+                </div>
+                </template>
+            </div>
+
+        </div>
+        <div class="mb-3">
+            <div class="mb-3" x-show="CommunitiesInternals.length > 1">
+                <div class="font-bold">Related Internal Commmunities</div>
+                <div class="ml-2">
+                    <template x-for="i in CommunitiesInternals">
+                        <div class="mb-2 text-[#FF5800]">
                             <div>
-                                <a x-show="i.Url" :href="i.Url" class="text-orange-500"><span x-text="i.Name"></a></span>
-                                <a x-show="!i.Url"><span x-text="i.Name"></a></span>
+                                <a x-show="i.text"><span x-text="i.text"></a></span>
                             </div>
                         </div>
                     </template>
                 </div>
+
             </div>
         </div>
     </div>
@@ -91,72 +89,123 @@
 <script src="/public/components/markdownEditor.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/marked@2.1.3/marked.min.js"></script>
 <script type="text/javascript">
-    function data(){
+    function data() {
         return {
-            community:{
-                Id:"{{.Id}}",
+            community: {
+                Id: "{{.Id}}",
                 Name: '',
                 Url: '',
                 OnBoardingInstructions: '',
-                Sponsors:[
-                    {Name: '', GivenName: '', SurName: '', Email: ''}
+                Sponsors: [
+                    { Name: '', GivenName: '', SurName: '', Email: '' }
                 ],
-                Communities:[
-                    {Name: '', Url:'', IsExternal: false}
+                Communities: [
+                    { Name: '', Url: '', IsExternal: false }
                 ],
-                loaded:false
+                loaded: false,
+                CommunitiesExternal: [],
+                CommunitiesInternal: [],
+
+
             },
+            CommunitiesExternals: [{
+                id: '{{.Id}}',
+                text: '',
+
+            }],
+            CommunitiesInternals: [{
+                id: '{{.Id}}',
+                text: '',
+
+            }],
             isMember: false,
-            getSponsorName(i){
-                return (!!i.GivenName && !!i.SurName) ?  `${i.GivenName} ${i.SurName}` : i.Name
+            getSponsorName(i) {
+                return (!!i.GivenName && !!i.SurName) ? `${i.GivenName} ${i.SurName}` : i.Name
             },
-            alreadyMember(){
+            alreadyMember() {
                 var modal = Alpine.store('master').modal
-                modal.update('loading', 'Processing', 'Adding you to our database.', '','')
+                modal.update('loading', 'Processing', 'Adding you to our database.', '', '')
                 fetch(`/api/community/onboarding/${this.community.Id}`, {
                     method: 'POST'
                 })
-                .then(()=>{
-                    modal.update('success', 'Success', 'Your name has been added to our database', '','')
-                    this.getCommunityInfo(this.community.Id)
-                })
-                .catch(()=>{
-                    modal.update('error', 'Error', 'Please try again', '','')
-                })
+                    .then(() => {
+                        modal.update('success', 'Success', 'Your name has been added to our database', '', '')
+                        this.getCommunityInfo(this.community.Id)
+                    })
+                    .catch(() => {
+                        modal.update('error', 'Error', 'Please try again', '', '')
+                    })
             },
-            removeMember(){
+            removeMember() {
                 var modal = Alpine.store('master').modal
-                modal.update('loading', 'Processing', 'Removing you from our database.', '','')
+                modal.update('loading', 'Processing', 'Removing you from our database.', '', '')
                 fetch(`/api/community/onboarding/${this.community.Id}`, {
                     method: 'DELETE'
                 })
-                .then(()=>{
-                    modal.update('success', 'Success', 'Your name has been removed from our database', '','')
-                    this.getCommunityInfo(this.community.Id)
-                })
-                .catch(()=>{
-                    modal.update('error', 'Error', 'Please try again', '','')
-                })
+                    .then(() => {
+                        modal.update('success', 'Success', 'Your name has been removed from our database', '', '')
+                        this.getCommunityInfo(this.community.Id)
+                    })
+                    .catch(() => {
+                        modal.update('error', 'Error', 'Please try again', '', '')
+                    })
             },
-            getCommunityInfo(id){
+            getCommunityInfo(id) {
                 var modal = Alpine.store('master').modal
                 this.community.loaded = false
-                modal.update('loading', 'Loading', 'Please wait', '','')
-                fetch(`/api/community/onboarding/${this.community.Id}`).then(j=>j.json()
-                .then(data => {
-                    if (!data.Community.Sponsors) data.Community.Sponsors = []
-                    if (!data.Community.Communities) data.Community.Communities = []
-                    this.community = data.Community
-                    this.isMember = data.IsMember
-                    modal.visible = false
-                    this.community.loaded = true
-                }))
-                .catch(()=>{
-                    modal.update('error', 'Error', 'Please try again', '','')
-                })
+                modal.update('loading', 'Loading', 'Please wait', '', '')
+                fetch(`/api/community/onboarding/${this.community.Id}`).then(j => j.json()
+                    .then(data => {
+                        if (!data.Community.Sponsors) data.Community.Sponsors = []
+                        if (!data.Community.Communities) data.Community.Communities = []
+                        this.community = data.Community
+                        this.isMember = data.IsMember
+                        modal.visible = false
+                        this.community.loaded = true
+                    }))
+                    .catch(() => {
+                        modal.update('error', 'Error', 'Please try again', '', '')
+                    })
             },
-            onLoad(){
+            getCommunity() {
+                fetch('/api/relatedcommunity/' + '{{.Id}}')
+                    .then(r => {
+                        r.json().then(body => {
+                            if (body) {
+                                for (let index = 0; index < body.length; index++) {
+                                    if (body[index]['IsExternal']) {
+                                         this.CommunitiesExternals.push({
+                                            id: body[index]['ParentCommunityId'],
+                                            text: body[index]['Name'],
+                                        })
+                                    }
+                                    else {
+                                        this.CommunitiesInternals.push({
+
+                                            id: body[index]['ParentCommunityId'],
+                                            text: body[index]['Name'],
+
+                                        })
+                                    }
+
+                                }
+                               
+                            }
+
+
+                        });
+                    })
+                    .catch(e => {
+                        console.log(e)
+
+                    })
+
+
+            },
+            onLoad() {
                 this.getCommunityInfo(this.community.Id)
+                this.getCommunity()
+
             }
         }
     }
