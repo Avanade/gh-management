@@ -60,6 +60,7 @@ const combobox = ({
         },
         // EVENT HANDLER
         onInputHandler(e) {
+            console.log(e.target.value)
             this.setOptions(e.target.value)
         },
         onFocusIn() {
@@ -69,6 +70,7 @@ const combobox = ({
             this.isShowOptions = !this.isShowOptions
         },
         onInsertItem(e){
+            console.log(e.target.value)
             if (!this.isInsertable)
                 return
 
