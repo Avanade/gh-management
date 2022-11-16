@@ -334,7 +334,6 @@
                 this.showModal = show
             },
             async onLoad() {
-                console.log(this.mode)
                 spinnercount = 4
                 if (this.form.id) {
                     this.mode = 'view'
@@ -362,7 +361,6 @@
                             });
                         })
                         .catch(e => {
-                            console.log(e)
                             spinnercount = spinnercount - 1
                         })
 
@@ -376,7 +374,7 @@
                                         if (body[index]['IsExternal']){
                                          this.form.communitiesExternal.push({
                                             
-                                            id: body[index]['ParentCommunityId'],
+                                            id: body[index]['RelatedCommunityId'],
                                             text: body[index]['Name'],
                                             parentCommunityId : body[index]['ParentCommunityId'],
                                             RelatedCommunityId: body[index]['RelatedCommunityId'],
@@ -385,7 +383,7 @@
                                         else{
                                             this.form.communitiesInternal.push({
                                             
-                                            id: body[index]['ParentCommunityId'],
+                                            id: body[index]['RelatedCommunityId'],
                                             text: body[index]['Name'],
                                             parentCommunityId : body[index]['ParentCommunityId'],
                                             RelatedCommunityId: body[index]['RelatedCommunityId'],
@@ -401,7 +399,6 @@
                             });
                         })
                         .catch(e => {
-                            console.log(e)
                             spinnercount = spinnercount - 1
                         })
                         fetch('/api/CommunitySponsorsPerCommunityId/' + '{{.Id}}')
@@ -426,7 +423,6 @@
                             });
                         })
                         .catch(e => {
-                            console.log(e)
                             spinnercount = spinnercount - 1
                         })
 
@@ -447,7 +443,6 @@
                             });
                         })
                         .catch(e => {
-                            console.log(e)
                             spinnercount = spinnercount - 1
                         })
                 }
@@ -494,7 +489,7 @@
           
                     }
 
-                listExternal =this.form.communitiesExternal;
+                const listExternal =this.form.communitiesExternal;
                 postData.communitiesExternal=[];
                 for (const key of Object.keys(listExternal)) {
                 
@@ -509,7 +504,7 @@
                     }
 
 
-                listInternal =this.form.communitiesInternal;
+                const listInternal =this.form.communitiesInternal;
          
                 postData.communitiesInternal=[];
                 for (const key of Object.keys(listInternal)) {
@@ -523,7 +518,6 @@
                      );
           
                     }
-                 
                 Alpine.store('master').postData('/api/community', postData, "Your community has been created.",
                     "Go to communities list", "/communities/list")
 
