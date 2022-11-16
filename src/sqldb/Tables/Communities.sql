@@ -8,7 +8,7 @@
     [TradeAssocId] varchar(50) NULL,
     [IsExternal] BIT NOT NULL DEFAULT 0,
     [ApprovalStatusId] INT NOT NULL DEFAULT 1,
-    [OnBoardingInstructions] [varchar](max) NULL,
+    [OnBoardingInstructions] VARCHAR(MAX) NULL,
     [Created] DATETIME NOT NULL DEFAULT getdate(), 
     [CreatedBy] VARCHAR(100) NULL, 
     [Modified] DATETIME NOT NULL DEFAULT getdate(), 
