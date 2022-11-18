@@ -43,7 +43,7 @@ func main() {
 		PermissionsPolicy:     "fullscreen=(), geolocation=()", // Permissions-Policy
 		STSSeconds:            31536000,                        // Strict-Transport-Security
 		STSIncludeSubdomains:  true,                            // Strict-Transport-Security
-		IsDevelopment:         false,
+		IsDevelopment:         true,
 	})
 
 	// Set environment variables
