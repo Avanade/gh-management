@@ -217,7 +217,7 @@
             const res = await fetch('/api/community/getCommunitiesisexternal/1')
             const data = await res.json()
 
-            return data
+            return data.filter(item=>{return item.id != {{.Id}}})
     }
     async function getCommunitiesinternals(){
  
