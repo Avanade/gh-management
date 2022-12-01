@@ -13,7 +13,7 @@
                         class="pl-1 text-xs">(Please press Enter to insert Category)</span>
                     </div>
                     <div>
-                        <div x-data="combobox({
+                        <div id="NowBtn" x-data="combobox({
                                 ajax: getnames,
                                 id : 'Id',
                                 text : 'Name',
@@ -134,6 +134,12 @@
                 categoryId: 0,
             },
             submit() {
+
+                if(this.form.names[0]["text"].toString() = '') {
+                    console.log("dtgfhhdgrh" + "dfghdfghdf")
+                    return
+                }
+
                 var modal = Alpine.store('master').modal
                 modal.update('loading', 'Saving', 'Please wait.', '', '')
                 if (!this.form.id) {
