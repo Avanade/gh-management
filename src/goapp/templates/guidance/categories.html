@@ -12,7 +12,7 @@
                         <span
                         class="pl-1 text-xs">(Please press Enter to insert Category)</span>
                     </div>
-                    <div>
+                    <div class="focus:ring-red-500 focus:border-red-500">
                         <div id="NowBtn" x-data="combobox({
                                 ajax: getnames,
                                 id : 'Id',
@@ -135,8 +135,8 @@
             },
             submit() {
 
-                if(this.form.names[0]["text"].toString() = '') {
-                    console.log("dtgfhhdgrh" + "dfghdfghdf")
+                if(this.form.names[0]["text"].toString() === '') {
+                    this.form.combobox;               
                     return
                 }
 
