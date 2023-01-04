@@ -1,10 +1,10 @@
 CREATE PROCEDURE [dbo].[PR_CommunityActivities_Select_ByOffsetAndFilterAndCreatedBy](
-	@Offset INT = 0,
-	@Filter INT = 10,
-	@Search VARCHAR(50) = '',
-	@OrderBy VARCHAR(50) = 'Date',
-	@OrderType VARCHAR(5) = 'ASC',
-	@CreatedBy VARCHAR(50)
+	@Offset int = 0,
+	@Filter int = 10,
+	@Search varchar(50) = '',
+	@OrderBy varchar(50) = 'Date',
+	@OrderType varchar(5) = 'ASC',
+	@CreatedBy varchar(50)
 )
 AS
 BEGIN
@@ -32,10 +32,10 @@ BEGIN
 	  LEFT JOIN [dbo].[ContributionAreas] AS car ON car.Id = caca.ContributionAreaId
 	  WHERE
 		(
-			ca.Name LIKE '%'+@search+'%' OR
-			c.Name LIKE '%'+@search+'%' OR
-			a.Name LIKE '%'+@search+'%' OR
-			car.Name LIKE '%'+@search+'%'
+			ca.Name LIKE '%'+@Search+'%' OR
+			c.Name LIKE '%'+@Search+'%' OR
+			a.Name LIKE '%'+@Search+'%' OR
+			car.Name LIKE '%'+@Search+'%'
 		) AND ca.CreatedBy = @CreatedBy
 	  ORDER BY
 		CASE WHEN @OrderType='ASC' THEN
