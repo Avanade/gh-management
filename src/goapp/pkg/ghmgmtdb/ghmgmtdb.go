@@ -521,12 +521,13 @@ func CommunitiesActivities_TotalCount() int {
 	return total
 }
 
-func CommunitiesActivities_TotalCount_ByCreatedBy(createdBy string) int {
+func CommunitiesActivities_TotalCount_ByCreatedBy(createdBy, search string) int {
 	db := ConnectDb()
 	defer db.Close()
 
 	param := map[string]interface{}{
 		"CreatedBy": createdBy,
+		"Search": search,
 	}
 
 	result, _ := db.ExecuteStoredProcedureWithResult("[PR_CommunityActivities_TotalCount_ByCreatedBy]", param)

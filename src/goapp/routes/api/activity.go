@@ -70,7 +70,7 @@ func GetActivities(w http.ResponseWriter, r *http.Request) {
 		ordertype := params["ordertype"][0]
 		result = ActivitiesDto{
 			Data:  db.CommunitiesActivities_Select_ByOffsetAndFilterAndCreatedBy(offset, filter, orderby, ordertype, search, username),
-			Total: db.CommunitiesActivities_TotalCount_ByCreatedBy(username),
+			Total: db.CommunitiesActivities_TotalCount_ByCreatedBy(username, search),
 		}
 	} else {
 		result = ActivitiesDto{
