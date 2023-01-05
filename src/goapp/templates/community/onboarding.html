@@ -161,9 +161,6 @@
                 var modal = Alpine.store('master').modal
                 this.community.loaded = false
                 modal.update('loading', 'Loading', 'Please wait', '', '')
-
-                console.log(">>>>>")
-
                 fetch(`/api/community/onboarding/${this.community.Id}`).then(j => j.json()
                     .then(data => {
                         if (!data.Community.Sponsors) data.Community.Sponsors = []
@@ -177,7 +174,6 @@
                         if(this.community.OnBoardingInstructions === '' || this.community.OnBoardingInstructions === null) {
                             modal.visible = false
                             this.isNoOnBoarding = true
-                            {{/* this.community.loaded = true */}}
                             modal.update('error', 'No OnBoarding Instructions', 'Please Add OnBoarding Instructions', '', '')
                             return
                         }
