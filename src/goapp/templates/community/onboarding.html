@@ -5,9 +5,14 @@
 <div x-data="data()" x-init="onLoad()" >
     <div x-show="isNoOnBoarding" class="text-[#FF5800] m-5"> 
         <span>No Onboarding Instructions</span>
-        <br>
-        <span @click="window.location.href=`/community/${community.Id}`"
-              class="cursor-pointer">< Back</span>
+        <br><br>
+        {{/* <span @click="window.location.href=`/community/${community.Id}`"
+              class="cursor-pointer">< Back</span> */}}
+        <button type="button"
+            class="bg-orange-500  inline-flex justify-center py-2 px-4 rounded-md text-white font-bold place-content-center"
+            @click="window.location.href=`/community/${community.Id}`">
+            Back
+        </button>
     </div>
     <div class="m-5" x-show="community.loaded">
     <div class="font-bold text-xl my-3 border-b-2 border-gray-300 border-solid"><span x-text="community.Name"></span>
@@ -179,7 +184,7 @@
                         if(this.community.OnBoardingInstructions === '' || this.community.OnBoardingInstructions === null) {
                             modal.visible = false
                             this.isNoOnBoarding = true
-                            modal.update('error', 'OnBoarding Instructions Not Found', 'This community has no OnBoarding Instructions', '', '')
+                            modal.update('error', 'Not Found', 'This community has no onboarding Instructions', '', '')
                             return
                         }
                         modal.update('error', 'Error', 'Please try again', '', '')
