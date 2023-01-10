@@ -2,7 +2,19 @@
 
 <div id="pageTitle">Community Onboarding Instructions</div>
 
-<div x-data="data()" x-init="onLoad()" class="m-5" x-show="community.loaded">
+<div x-data="data()" x-init="onLoad()" class="place-content-center place-items-center">
+    <div x-show="isNoOnBoarding" class="text-[#FF5800] m-5 place-items-center"> 
+        <span>No Onboarding Instructions</span>
+        <br><br>
+        {{/* <span @click="window.location.href=`/community/${community.Id}`"
+              class="cursor-pointer">< Back</span> */}}
+        <button type="button"
+            class="bg-orange-500  inline-flex justify-center py-2 px-4 rounded-md text-white font-bold "
+            @click="window.location.href=`/community/${community.Id}`">
+            Back
+        </button>
+    </div>
+    <div class="m-5" x-show="community.loaded">
     <div class="font-bold text-xl my-3 border-b-2 border-gray-300 border-solid"><span x-text="community.Name"></span>
     </div>
     <div class="flex flex-row m-5">
@@ -88,6 +100,8 @@
     </div>
 </div>
 
+</div>
+
 <script src="/public/components/markdownEditor.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/marked@2.1.3/marked.min.js"></script>
 <script type="text/javascript">
@@ -121,6 +135,7 @@
 
             }],
             isMember: false,
+            isNoOnBoarding:false,
             getSponsorName(i) {
                 return (!!i.GivenName && !!i.SurName) ? `${i.GivenName} ${i.SurName}` : i.Name
             },
@@ -166,6 +181,12 @@
                         this.community.loaded = true
                     }))
                     .catch(() => {
+                        if(this.community.OnBoardingInstructions === '' || this.community.OnBoardingInstructions === null) {
+                            modal.visible = false
+                            this.isNoOnBoarding = true
+                            modal.update('error', 'Not Found', 'This community has no onboarding instructions', '', '')
+                            return
+                        }
                         modal.update('error', 'Error', 'Please try again', '', '')
                     })
             },
@@ -207,7 +228,6 @@
             onLoad() {
                 this.getCommunityInfo(this.community.Id)
                 this.getCommunity()
-
             }
         }
     }
