@@ -3,7 +3,7 @@
 <div id="pageTitle">Community Onboarding Instructions</div>
 
 <div x-data="data()" x-init="onLoad()" class="place-content-center place-items-center">
-    <div x-show="isNoOnBoarding" class="text-[#FF5800] m-5 "> 
+    <div x-show="isNoOnBoarding" class="text-[#FF5800] m-5 place-items-center"> 
         <span>No Onboarding Instructions</span>
         <br><br>
         {{/* <span @click="window.location.href=`/community/${community.Id}`"
@@ -184,7 +184,7 @@
                         if(this.community.OnBoardingInstructions === '' || this.community.OnBoardingInstructions === null) {
                             modal.visible = false
                             this.isNoOnBoarding = true
-                            modal.update('error', 'Not Found', 'This community has no onboarding Instructions', '', '')
+                            modal.update('error', 'Not Found', 'This community has no onboarding instructions', '', '')
                             return
                         }
                         modal.update('error', 'Error', 'Please try again', '', '')
