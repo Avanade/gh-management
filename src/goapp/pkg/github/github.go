@@ -52,21 +52,19 @@ func AddCollaborator(data models.TypNewProjectReqBody, requestor string) (*githu
 	opts := &github.RepositoryAddCollaboratorOptions{
 		Permission: "admin",
 	}
-
 	if data.Coowner != requestor {
 		GHUser := ghmgmt.Users_Get_GHUser(requestor)
-		client.Repositories.AddCollaborator(context.Background(), owner, data.Name, GHUser, opts)
-		fmt.Printf("----->" + "CoOwner and Requestor NOT the same...")
+		_, resp, err := client.Repositories.AddCollaborator(context.Background(), owner, data.Name, GHUser, opts)
+		if err != nil {
+			return nil, err
+		}
+		return resp, err
 	}
-
-	GHUser2 := ghmgmt.Users_Get_GHUser(data.Coowner)
-	_, resp, err := client.Repositories.AddCollaborator(context.Background(), owner, data.Name, GHUser2, opts)
+	GHUser := ghmgmt.Users_Get_GHUser(data.Coowner)
+	_, resp, err := client.Repositories.AddCollaborator(context.Background(), owner, data.Name, GHUser, opts)
 	if err != nil {
 		return nil, err
 	}
-
-	fmt.Printf(requestor + " " + data.Coowner)
-
 	return resp, err
 }
 
