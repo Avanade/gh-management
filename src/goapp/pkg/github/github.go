@@ -42,7 +42,10 @@ func CreatePrivateGitHubRepository(data models.TypNewProjectReqBody, requestor s
 		return nil, err
 	}
 
-	AddCollaborator(data, requestor)
+	_, err = AddCollaborator(data, requestor)
+	if err != nil {
+		return nil, err
+	}
 	return repo, nil
 }
 
