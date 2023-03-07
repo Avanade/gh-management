@@ -15,6 +15,7 @@ import (
 
 	"github.com/google/go-github/v42/github"
 	"golang.org/x/oauth2"
+
 )
 
 func createClient(token string) *github.Client {
@@ -27,7 +28,7 @@ func createClient(token string) *github.Client {
 	return github.NewClient(tc)
 }
 
-func CreatePrivateGitHubRepository(data models.TypNewProjectReqBody) (*github.Repository, error) {
+func CreatePrivateGitHubRepository(data models.TypNewProjectReqBody, requestor string) (*github.Repository, error) {
 	client := createClient(os.Getenv("GH_TOKEN"))
 	owner := os.Getenv("GH_ORG_INNERSOURCE")
 	repoRequest := &github.TemplateRepoRequest{
@@ -42,25 +43,39 @@ func CreatePrivateGitHubRepository(data models.TypNewProjectReqBody) (*github.Re
 		return nil, err
 	}
 
-	AddCollaborator(data)
+	AddCollaborator(data, requestor)
 	return repo, nil
 }
 
-func AddCollaborator(data models.TypNewProjectReqBody) (*github.Response, error) {
+func AddCollaborator(data models.TypNewProjectReqBody, requestor string) (*github.Response, error) {
 	client := createClient(os.Getenv("GH_TOKEN"))
 	owner := os.Getenv("GH_ORG_INNERSOURCE")
 	opts := &github.RepositoryAddCollaboratorOptions{
 		Permission: "admin",
 	}
 
-	GHUser := ghmgmt.Users_Get_GHUser(data.Coowner)
 
-	_, resp, err := client.Repositories.AddCollaborator(context.Background(), owner, data.Name, GHUser, opts)
+
+	fmt.Printf(requestor + " " + data.Coowner)
+	if (data.Coowner != requestor) {
+	GHUser := ghmgmt.Users_Get_GHUser(requestor)
+
+	client.Repositories.AddCollaborator(context.Background(), owner, data.Name, GHUser, opts)
+
+	}
+
+
+
+	GHUser2 := ghmgmt.Users_Get_GHUser(data.Coowner)
+
+	_, resp, err := client.Repositories.AddCollaborator(context.Background(), owner, data.Name, GHUser2, opts)
 	if err != nil {
 		return nil, err
 	}
 
 	return resp, err
+
+
 }
 
 func GetRepository(repoName string, org string) (*github.Repository, error) {

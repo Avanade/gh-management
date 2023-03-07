@@ -302,9 +302,6 @@
                 }
             },
             async onload() {
-                console.log("testing testing....")
-                console.log("User---> " + '{{.Profile.preferred_username}}' + " Hey")
-
                 var modal = Alpine.store('master').modal
                 modal.update('loading', 'Loading', 'Please wait', '', '')
 
@@ -330,6 +327,8 @@
                 } else {
                     this.mode = 'new'
                 }
+                console.log("GitHubUser---> " + `{{.GitHubUser}}` )
+
                 modal.visible = false
             }
         }
