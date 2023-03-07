@@ -218,9 +218,8 @@ func OrganizationsIsMember(token string, GHUser string) (bool, bool, error) {
 	return OrgInnerSourceIsMember, OrgOuterSourceIsMember, err
 }
 
-func Organizationsinvitaion(token string, username string, org string) *github.Invitation {
+func OrganizationInvitation(token string, username string, org string) *github.Invitation {
 	client := createClient(token)
-	OrgSource := os.Getenv(org)
 	Email := ""
 	Role := "direct_member"
 	teamid := []int64{}
@@ -228,7 +227,7 @@ func Organizationsinvitaion(token string, username string, org string) *github.I
 	intid2 := user.ID
 	options := *&github.CreateOrgInvitationOptions{InviteeID: intid2, Email: &Email, Role: &Role, TeamID: teamid}
 
-	invite, _, _ := client.Organizations.CreateOrgInvitation(context.Background(), OrgSource, &options)
+	invite, _, _ := client.Organizations.CreateOrgInvitation(context.Background(), org, &options)
 
 	return invite
 }

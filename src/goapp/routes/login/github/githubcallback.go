@@ -130,11 +130,11 @@ func CheckMembership(ghusername string, id *int64) {
 	token := os.Getenv("GH_TOKEN")
 	inner, outer, _ := githubAPI.OrganizationsIsMember(token, ghusername)
 	if !inner {
-		githubAPI.Organizationsinvitaion(token, ghusername, "GH_ORG_INNERSOURCE")
+		githubAPI.OrganizationInvitation(token, ghusername, os.Getenv("GH_ORG_INNERSOURCE"))
 
 	}
 	if !outer {
-		githubAPI.Organizationsinvitaion(token, ghusername, "GH_ORG_OPENSOURCE")
+		githubAPI.OrganizationInvitation(token, ghusername, os.Getenv("GH_ORG_OPENSOURCE"))
 
 	}
 }
