@@ -14,7 +14,6 @@ import (
 
 	ghmgmt "main/pkg/ghmgmtdb"
 	"main/pkg/msgraph"
-	"reflect"
 )
 
 func GithubCallbackHandler(w http.ResponseWriter, r *http.Request) {
@@ -65,7 +64,7 @@ func GithubCallbackHandler(w http.ResponseWriter, r *http.Request) {
 	userPrincipalName := fmt.Sprintf("%s", azProfile["preferred_username"])
 	ghId := strconv.FormatFloat(p["id"].(float64), 'f', 0, 64)
 	ghUser := fmt.Sprintf("%s", p["login"])
-	id, err := strconv.ParseInt(ghId, 10, 64))
+	id, err := strconv.ParseInt(ghId, 10, 64)
 	resultUUG, errUUG := ghmgmt.UpdateUserGithub(userPrincipalName, ghId, ghUser, 0)
 	if errUUG != nil {
 		http.Error(w, errUUG.Error(), http.StatusInternalServerError)
@@ -131,11 +130,11 @@ func CheckMembership(ghusername string, id *int64) {
 	token := os.Getenv("GH_TOKEN")
 	inner, outer, _ := githubAPI.OrganizationsIsMember(token, ghusername)
 	if !inner {
-		githubAPI.OrganizationsinvitaionInner(token, ghusername)
+		githubAPI.Organizationsinvitaion(token, ghusername, "GH_ORG_INNERSOURCE")
 
 	}
 	if !outer {
-		githubAPI.OrganizationsinvitaionOuter(token, ghusername)
+		githubAPI.Organizationsinvitaion(token, ghusername, "GH_ORG_OPENSOURCE")
 
 	}
 }
