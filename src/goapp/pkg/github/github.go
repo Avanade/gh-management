@@ -57,11 +57,10 @@ func AddCollaborator(data models.TypNewProjectReqBody, requestor string) (*githu
 	}
 	if data.Coowner != requestor {
 		GHUser := ghmgmt.Users_Get_GHUser(requestor)
-		_, resp, err := client.Repositories.AddCollaborator(context.Background(), owner, data.Name, GHUser, opts)
+		_, _, err := client.Repositories.AddCollaborator(context.Background(), owner, data.Name, GHUser, opts)
 		if err != nil {
 			return nil, err
 		}
-		return resp, err
 	}
 	GHUser := ghmgmt.Users_Get_GHUser(data.Coowner)
 	_, resp, err := client.Repositories.AddCollaborator(context.Background(), owner, data.Name, GHUser, opts)
