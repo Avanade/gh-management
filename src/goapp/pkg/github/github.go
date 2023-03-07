@@ -214,3 +214,27 @@ type Repo struct {
 	IsArchived  bool             `json:"archived"`
 	Visibility  string           `json:"visibility"`
 }
+
+func OrganizationsIsMember(token string, GHUser string) (bool, bool, error) {
+	client := createClient(token)
+	OrgInnerSource := os.Getenv("GH_ORG_INNERSOURCE")
+	OrgInnerSourceIsMember, _, err := client.Organizations.IsMember(context.Background(), OrgInnerSource, GHUser)
+
+	OrgOuterSource := os.Getenv("GH_ORG_OPENSOURCE")
+	OrgOuterSourceIsMember, _, err := client.Organizations.IsMember(context.Background(), OrgOuterSource, GHUser)
+	return OrgInnerSourceIsMember, OrgOuterSourceIsMember, err
+}
+
+func OrganizationInvitation(token string, username string, org string) *github.Invitation {
+	client := createClient(token)
+	Email := ""
+	Role := "direct_member"
+	teamid := []int64{}
+	user, _, _ := client.Users.Get(context.Background(), username)
+	intid2 := user.ID
+	options := *&github.CreateOrgInvitationOptions{InviteeID: intid2, Email: &Email, Role: &Role, TeamID: teamid}
+
+	invite, _, _ := client.Organizations.CreateOrgInvitation(context.Background(), org, &options)
+
+	return invite
+}

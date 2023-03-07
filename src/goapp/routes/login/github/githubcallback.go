@@ -4,8 +4,10 @@ import (
 	"encoding/json"
 	"fmt"
 	auth "main/pkg/authentication"
+	githubAPI "main/pkg/github"
 	session "main/pkg/session"
 	"net/http"
+	"os"
 	"strconv"
 
 	"golang.org/x/oauth2"
@@ -57,13 +59,12 @@ func GithubCallbackHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-
 	// Save and Validate github account
 	azProfile := sessionaz.Values["profile"].(map[string]interface{})
 	userPrincipalName := fmt.Sprintf("%s", azProfile["preferred_username"])
 	ghId := strconv.FormatFloat(p["id"].(float64), 'f', 0, 64)
 	ghUser := fmt.Sprintf("%s", p["login"])
-
+	id, err := strconv.ParseInt(ghId, 10, 64)
 	resultUUG, errUUG := ghmgmt.UpdateUserGithub(userPrincipalName, ghId, ghUser, 0)
 	if errUUG != nil {
 		http.Error(w, errUUG.Error(), http.StatusInternalServerError)
@@ -76,6 +77,8 @@ func GithubCallbackHandler(w http.ResponseWriter, r *http.Request) {
 
 	session.Values["ghIsDirect"] = isDirect
 	session.Values["ghIsEnterpriseMember"] = isEnterpriseMember
+
+	CheckMembership(ghUser, &id)
 
 	err = session.Save(r, w)
 
@@ -121,4 +124,17 @@ func GithubForceSaveHandler(w http.ResponseWriter, r *http.Request) {
 	err = session.Save(r, w)
 
 	http.Redirect(w, r, "/", http.StatusSeeOther)
+}
+
+func CheckMembership(ghusername string, id *int64) {
+	token := os.Getenv("GH_TOKEN")
+	inner, outer, _ := githubAPI.OrganizationsIsMember(token, ghusername)
+	if !inner {
+		githubAPI.OrganizationInvitation(token, ghusername, os.Getenv("GH_ORG_INNERSOURCE"))
+
+	}
+	if !outer {
+		githubAPI.OrganizationInvitation(token, ghusername, os.Getenv("GH_ORG_OPENSOURCE"))
+
+	}
 }
