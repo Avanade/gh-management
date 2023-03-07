@@ -14,6 +14,7 @@ import (
 	"strings"
 
 	"github.com/google/go-github/v42/github"
+	//	githubv "github.com/google/go-github/v50/github"
 	"golang.org/x/oauth2"
 )
 
@@ -206,4 +207,43 @@ type Repo struct {
 	Created     github.Timestamp `json:"created"`
 	IsArchived  bool             `json:"archived"`
 	Visibility  string           `json:"visibility"`
+}
+
+func OrganizationsIsMember(token string, GHUser string) (bool, bool, error) {
+	client := createClient(token)
+	OrgInnerSource := os.Getenv("GH_ORG_INNERSOURCE")
+	OrgInnerSourceIsMember, _, err := client.Organizations.IsMember(context.Background(), OrgInnerSource, GHUser)
+
+	OrgOuterSource := os.Getenv("GH_ORG_OPENSOURCE")
+	OrgOuterSourceIsMember, _, err := client.Organizations.IsMember(context.Background(), OrgOuterSource, GHUser)
+	return OrgInnerSourceIsMember, OrgOuterSourceIsMember, err
+}
+
+func OrganizationsinvitaionInner(token string, username string) *github.Invitation {
+	client := createClient(token)
+	OrgInnerSource := os.Getenv("GH_ORG_INNERSOURCE")
+	Email := ""
+	Role := "direct_member"
+	teamid := []int64{}
+	user, _, _ := client.Users.Get(context.Background(), username)
+	intid2 := user.ID
+	options := *&github.CreateOrgInvitationOptions{InviteeID: intid2, Email: &Email, Role: &Role, TeamID: teamid}
+
+	innerinvite, _, _ := client.Organizations.CreateOrgInvitation(context.Background(), OrgInnerSource, &options)
+
+	return innerinvite
+}
+
+func OrganizationsinvitaionOuter(token string, username string) *github.Invitation {
+	client := createClient(token)
+	OrgOuterSource := os.Getenv("GH_ORG_OPENSOURCE")
+	Email := ""
+	Role := "direct_member"
+	teamid := []int64{}
+	user, _, _ := client.Users.Get(context.Background(), username)
+	intid := user.ID
+	optionsOuter := *&github.CreateOrgInvitationOptions{InviteeID: intid, Email: &Email, Role: &Role, TeamID: teamid}
+	outerinvite, _, _ := client.Organizations.CreateOrgInvitation(context.Background(), OrgOuterSource, &optionsOuter)
+
+	return outerinvite
 }
