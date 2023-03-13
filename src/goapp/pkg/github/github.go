@@ -280,13 +280,12 @@ func EmailAdmin(admin string, adminemail string, reponame string, outisideCollab
 	Collablist = Collablist + " </table  > <p>"
 	body := fmt.Sprintf("<p>Hello %s ,  </p>  \n<p>This is to inform you that your Github repository <b> %s </b> has %o outside collaborator/s. </p> %s  This email was sent to the admins of the repository.  </p> \n <p>OSPO</p>", admin, link, len(outisideCollab), Collablist)
 
-	fmt.Println(outisideCollab)
 	m := email.TypEmailMessage{
 		Subject: "GitHub Repo Collaborators Scan",
 		Body:    body,
 		To:      adminemail,
 	}
-	fmt.Println(Collablist)
+
 	email.SendEmail(m)
 	fmt.Printf(" GitHub Repo Collaborators Scan on %s was sent.", e)
 }
