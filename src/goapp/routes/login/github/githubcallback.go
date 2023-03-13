@@ -12,6 +12,7 @@ import (
 
 	"golang.org/x/oauth2"
 
+	db "main/pkg/ghmgmtdb"
 	ghmgmt "main/pkg/ghmgmtdb"
 	"main/pkg/msgraph"
 )
@@ -137,4 +138,71 @@ func CheckMembership(ghusername string, id *int64) {
 		githubAPI.OrganizationInvitation(token, ghusername, os.Getenv("GH_ORG_OPENSOURCE"))
 
 	}
+}
+
+func CheckAvaInnerSource(w http.ResponseWriter, r *http.Request) {
+	org := os.Getenv("GH_ORG_INNERSOURCE")
+	gitHubUser, err := session.GetGitHubUserData(w, r)
+	if err != nil {
+		return
+	}
+
+	collabs := githubAPI.ListOutsideCollaborators(gitHubUser.AccessToken, org)
+	for _, collab := range collabs {
+
+		githubAPI.RemoveOutsideCollaborator(gitHubUser.AccessToken, org, *collab.Login)
+	}
+}
+
+func CheckAvaOuterource(w http.ResponseWriter, r *http.Request) {
+	org := os.Getenv("GH_ORG_OPENSOURCE")
+	gitHubUser, err := session.GetGitHubUserData(w, r)
+	var OutsidecollabsList []string
+	if err != nil {
+		return
+	}
+	repos, _ := githubAPI.GetRepositoriesFromOrganization(org)
+	Outsidecollabs := githubAPI.ListOutsideCollaborators(gitHubUser.AccessToken, org)
+	for _, list := range Outsidecollabs {
+		OutsidecollabsList = append(OutsidecollabsList, *list.Login)
+	}
+	var OutsideRepocollabsList []string
+	for _, collab := range repos {
+		var RepocollabsList []string
+
+		var Adminmember []string
+		OutsideRepocollabsList = nil
+
+		Repocollabs := githubAPI.RepositoriesListCollaborators(gitHubUser.AccessToken, org, collab.Name)
+		for _, list := range Repocollabs {
+
+			RepocollabsList = append(RepocollabsList, *list.Login)
+			if *list.RoleName == "admin" {
+				Adminmember = append(Adminmember, *list.Login)
+
+			}
+		}
+
+		for _, list := range RepocollabsList {
+			for _, Outsidelist := range OutsidecollabsList {
+				if list == Outsidelist {
+					OutsideRepocollabsList = append(OutsideRepocollabsList, Outsidelist)
+				}
+			}
+		}
+		if len(OutsideRepocollabsList) > 0 {
+
+			for _, admin := range Adminmember {
+				email, err := db.UsersGetEmail(admin)
+				if err != nil {
+					http.Error(w, err.Error(), http.StatusInternalServerError)
+					return
+				}
+				githubAPI.EmailAdmin(admin, email, collab.Name, OutsideRepocollabsList)
+			}
+
+		}
+
+	}
+
 }

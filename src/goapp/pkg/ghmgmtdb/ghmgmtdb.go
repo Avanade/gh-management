@@ -527,7 +527,7 @@ func CommunitiesActivities_TotalCount_ByCreatedBy(createdBy, search string) int 
 
 	param := map[string]interface{}{
 		"CreatedBy": createdBy,
-		"Search": search,
+		"Search":    search,
 	}
 
 	result, _ := db.ExecuteStoredProcedureWithResult("[PR_CommunityActivities_TotalCount_ByCreatedBy]", param)
@@ -1097,4 +1097,20 @@ func UpdateApprovalType(approvalType models.ApprovalType) (int, error) {
 		return 0, err
 	}
 	return int(result[0]["Id"].(int64)), nil
+}
+
+func UsersGetEmail(GithubUser string) (string, error) {
+	db := ConnectDb()
+	defer db.Close()
+
+	param := map[string]interface{}{
+		"GithubUser": GithubUser,
+	}
+
+	result, err := db.ExecuteStoredProcedureWithResult("PR_Users_GetEmail", param)
+	if err != nil {
+		return "0", err
+	}
+	return result[0]["UserPrincipalName"].(string), err
+
 }
