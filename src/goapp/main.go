@@ -140,6 +140,7 @@ func main() {
 	muxAdmin.Handle("/communityapprovers", loadAzGHAuthPage(rtCommunity.CommunityApproverHandler))
 	muxAdmin.Handle("/approvaltype/{action:add}", loadAzGHAuthPage(rtAdmin.ApprovalTypeForm))
 	muxAdmin.Handle("/approvaltype/{action:view|edit}/{id}", loadAzGHAuthPage(rtAdmin.ApprovalTypeForm))
+	muxAdmin.Handle("/externallinks", loadAzGHAuthPage(rtAdmin.CustomizeExternalLinks))
 
 	muxApi.HandleFunc("/approvals/project/callback", rtProjects.UpdateApprovalStatusProjects).Methods("POST")
 	muxApi.HandleFunc("/approvals/community/callback", rtProjects.UpdateApprovalStatusCommunity).Methods("POST")
