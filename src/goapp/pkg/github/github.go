@@ -254,11 +254,33 @@ func RemoveOutsideCollaborator(token string, org string, username string) *githu
 	}
 	return repons
 }
+func RemoveOrganizationsMember(token string, org string, username string) *github.Response {
+	client := createClient(token)
 
+	repons, err := client.Organizations.RemoveMember(context.Background(), org, username)
+
+	if err != nil {
+		fmt.Println("err")
+		fmt.Println(err)
+	}
+	return repons
+}
 func RepositoriesListCollaborators(token string, org string, repo string) []*github.User {
 	client := createClient(token)
 	options := *&github.ListCollaboratorsOptions{}
 	ListCollabs, _, err := client.Repositories.ListCollaborators(context.Background(), org, repo, &options)
+
+	if err != nil {
+		fmt.Println("err")
+		fmt.Println(err)
+	}
+
+	return ListCollabs
+}
+func OrgListMembers(token string, org string) []*github.User {
+	client := createClient(token)
+
+	ListCollabs, _, err := client.Organizations.ListMembers(context.Background(), org, nil)
 
 	if err != nil {
 		fmt.Println("err")
