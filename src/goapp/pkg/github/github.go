@@ -29,7 +29,7 @@ func createClient(token string) *github.Client {
 	return github.NewClient(tc)
 }
 
-func CreatePrivateGitHubRepository(data models.TypNewProjectReqBody) (*github.Repository, error) {
+func CreatePrivateGitHubRepository(data models.TypNewProjectReqBody, requestor string) (*github.Repository, error) {
 	client := createClient(os.Getenv("GH_TOKEN"))
 	owner := os.Getenv("GH_ORG_INNERSOURCE")
 	repoRequest := &github.TemplateRepoRequest{
@@ -44,24 +44,31 @@ func CreatePrivateGitHubRepository(data models.TypNewProjectReqBody) (*github.Re
 		return nil, err
 	}
 
-	AddCollaborator(data)
+	_, err = AddCollaborator(data, requestor)
+	if err != nil {
+		return nil, err
+	}
 	return repo, nil
 }
 
-func AddCollaborator(data models.TypNewProjectReqBody) (*github.Response, error) {
+func AddCollaborator(data models.TypNewProjectReqBody, requestor string) (*github.Response, error) {
 	client := createClient(os.Getenv("GH_TOKEN"))
 	owner := os.Getenv("GH_ORG_INNERSOURCE")
 	opts := &github.RepositoryAddCollaboratorOptions{
 		Permission: "admin",
 	}
-
+	if data.Coowner != requestor {
+		GHUser := ghmgmt.Users_Get_GHUser(requestor)
+		_, _, err := client.Repositories.AddCollaborator(context.Background(), owner, data.Name, GHUser, opts)
+		if err != nil {
+			return nil, err
+		}
+	}
 	GHUser := ghmgmt.Users_Get_GHUser(data.Coowner)
-
 	_, resp, err := client.Repositories.AddCollaborator(context.Background(), owner, data.Name, GHUser, opts)
 	if err != nil {
 		return nil, err
 	}
-
 	return resp, err
 }
 
