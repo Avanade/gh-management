@@ -43,7 +43,7 @@ func main() {
 		PermissionsPolicy:     "fullscreen=(), geolocation=()", // Permissions-Policy
 		STSSeconds:            31536000,                        // Strict-Transport-Security
 		STSIncludeSubdomains:  true,                            // Strict-Transport-Security
-		IsDevelopment:         true,
+		IsDevelopment:         false,
 	})
 
 	// Set environment variables
@@ -89,8 +89,9 @@ func main() {
 	mux.HandleFunc("/login/github/callback", rtGithub.GithubCallbackHandler)
 	mux.HandleFunc("/login/github/force", rtGithub.GithubForceSaveHandler)
 	mux.HandleFunc("/logout/github", rtGithub.GitHubLogoutHandler)
-	mux.HandleFunc("/checkAvaInnerSource", rtGithub.CheckAvaInnerSource)
-	mux.HandleFunc("/checkAvaOuterource", rtGithub.CheckAvaOuterource)
+	mux.Handle("/checkAvaInnerSource", loadGuidAuthApi(rtGithub.CheckAvaInnerSource))
+	mux.Handle("/checkAvaOpenSource", loadGuidAuthApi(rtGithub.CheckAvaOpenSource))
+	mux.Handle("/clearOrgMembers", loadGuidAuthApi(rtGithub.ClearOrgMembers))
 	muxApi := mux.PathPrefix("/api").Subrouter()
 	mux.Handle("/allusers", loadAzAuthPage(rtApi.GetAllUserFromActiveDirectory))
 

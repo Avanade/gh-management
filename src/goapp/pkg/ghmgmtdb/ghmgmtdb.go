@@ -1161,7 +1161,7 @@ func UsersGetEmail(GithubUser string) (string, error) {
 		"GithubUser": GithubUser,
 	}
 
-	result, err := db.ExecuteStoredProcedureWithResult("PR_Users_GetEmail", param)
+	result, err := db.ExecuteStoredProcedureWithResult("PR_Users_GetEmailByGitHubUsername", param)
 	if err != nil {
 		return "0", err
 	}

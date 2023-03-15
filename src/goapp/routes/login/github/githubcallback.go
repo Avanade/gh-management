@@ -143,29 +143,20 @@ func CheckMembership(ghusername string, id *int64) {
 func CheckAvaInnerSource(w http.ResponseWriter, r *http.Request) {
 
 	org := os.Getenv("GH_ORG_INNERSOURCE")
-	gitHubUser, err := session.GetGitHubUserData(w, r)
-	if err != nil {
-		return
-	}
+	token := os.Getenv("GH_TOKEN")
 
-	clearOrgMembers(gitHubUser.AccessToken, org)
-
-	collabs := githubAPI.ListOutsideCollaborators(gitHubUser.AccessToken, org)
+	collabs := githubAPI.ListOutsideCollaborators(token, org)
 	for _, collab := range collabs {
-		githubAPI.RemoveOutsideCollaborator(gitHubUser.AccessToken, org, *collab.Login)
+		githubAPI.RemoveOutsideCollaborator(token, org, *collab.Login)
 	}
 }
 
-func CheckAvaOuterource(w http.ResponseWriter, r *http.Request) {
+func CheckAvaOpenSource(w http.ResponseWriter, r *http.Request) {
 	org := os.Getenv("GH_ORG_OPENSOURCE")
-	gitHubUser, err := session.GetGitHubUserData(w, r)
-	clearOrgMembers(gitHubUser.AccessToken, org)
 	var OutsidecollabsList []string
-	if err != nil {
-		return
-	}
+	token := os.Getenv("GH_TOKEN")
 	repos, _ := githubAPI.GetRepositoriesFromOrganization(org)
-	Outsidecollabs := githubAPI.ListOutsideCollaborators(gitHubUser.AccessToken, org)
+	Outsidecollabs := githubAPI.ListOutsideCollaborators(token, org)
 	for _, list := range Outsidecollabs {
 		OutsidecollabsList = append(OutsidecollabsList, *list.Login)
 	}
@@ -176,7 +167,7 @@ func CheckAvaOuterource(w http.ResponseWriter, r *http.Request) {
 		var Adminmember []string
 		OutsideRepocollabsList = nil
 
-		Repocollabs := githubAPI.RepositoriesListCollaborators(gitHubUser.AccessToken, org, collab.Name)
+		Repocollabs := githubAPI.RepositoriesListCollaborators(token, org, collab.Name)
 		for _, list := range Repocollabs {
 
 			RepocollabsList = append(RepocollabsList, *list.Login)
@@ -210,19 +201,24 @@ func CheckAvaOuterource(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func clearOrgMembers(token string, org string) {
-	users := githubAPI.OrgListMembers(token, org)
-	for _, list := range users {
-		email, _ := db.UsersGetEmail(*list.Login)
-		if len(email) > 0 {
-			activeuser, _ := msgraph.ActiveUsers(email)
-			if activeuser == nil {
+func ClearOrgMembers(w http.ResponseWriter, r *http.Request) {
+	token := os.Getenv("GH_TOKEN")
+	organizations := []string{os.Getenv("GH_ORG_INNERSOURCE"), os.Getenv("GH_ORG_OPENSOURCE")}
+
+	for _, org := range organizations {
+		users := githubAPI.OrgListMembers(token, org)
+		for _, list := range users {
+			email, _ := db.UsersGetEmail(*list.Login)
+			if len(email) > 0 {
+				activeuser, _ := msgraph.ActiveUsers(email)
+				if activeuser == nil {
+					githubAPI.RemoveOrganizationsMember(token, org, *list.Login)
+				}
+			} else {
 				githubAPI.RemoveOrganizationsMember(token, org, *list.Login)
 			}
-		} else {
-			githubAPI.RemoveOrganizationsMember(token, org, *list.Login)
-		}
 
+		}
 	}
 
 }

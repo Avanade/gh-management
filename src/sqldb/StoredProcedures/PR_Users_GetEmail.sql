@@ -1,4 +1,4 @@
-create PROCEDURE [dbo].[PR_Users_GetEmail]
+create PROCEDURE [dbo].[PR_Users_GetEmailByGitHubUsername]
 (
 	@GithubUser varchar(100)
 )
