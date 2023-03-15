@@ -139,6 +139,10 @@ func main() {
 	muxApi.HandleFunc("/approval/types", rtApi.GetApprovalTypes).Methods("GET")
 	muxApi.HandleFunc("/approval/type/{id}", rtApi.GetApprovalTypeById).Methods("GET")
 
+	// API FOR LOGIC APP
+	muxApi.Handle("/init/indexorgrepos", loadGuidAuthApi(rtApi.InitIndexOrgRepos)).Methods("GET")
+	muxApi.Handle("/indexorgrepos", loadGuidAuthApi(rtApi.IndexOrgRepos)).Methods("GET")
+
 	muxAdmin := mux.PathPrefix("/admin").Subrouter()
 	muxAdmin.Handle("", loadAdminPage(rtAdmin.AdminIndex))
 	muxAdmin.Handle("/members", loadAdminPage(rtAdmin.ListCommunityMembers))
@@ -183,6 +187,13 @@ func loadAzAuthPage(f func(w http.ResponseWriter, r *http.Request)) *negroni.Neg
 	)
 }
 
+func loadGuidAuthApi(f func(w http.ResponseWriter, r *http.Request)) *negroni.Negroni {
+	return negroni.New(
+		negroni.HandlerFunc(session.IsGuidAuthenticated),
+		negroni.Wrap(http.HandlerFunc(f)),
+	)
+}
+
 func loadAzGHAuthPage(f func(w http.ResponseWriter, r *http.Request)) *negroni.Negroni {
 	return negroni.New(
 		negroni.HandlerFunc(session.IsAuthenticated),
@@ -209,4 +220,8 @@ func checkFailedApprovalRequests() {
 			go rtCommunity.ReprocessRequestCommunityApproval()
 		}
 	}
+}
+
+func helloWorld(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprint(w, "Hello World")
 }

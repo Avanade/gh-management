@@ -89,7 +89,7 @@ func PRProjectsInsert(body models.TypNewProjectReqBody, user string) (id int64) 
 
 	db, _ := sql.Init(cp)
 	param := map[string]interface{}{
-
+		"GithubId":                body.GithubId,
 		"Name":                    body.Name,
 		"CoOwner":                 body.Coowner,
 		"Description":             body.Description,
@@ -115,6 +115,21 @@ func ProjectInsertByImport(param map[string]interface{}) error {
 	db, _ := sql.Init(cp)
 
 	_, err := db.ExecuteStoredProcedure("dbo.PR_Projects_Insert", param)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func ProjectUpdateByImport(param map[string]interface{}) error {
+	cp := sql.ConnectionParam{
+
+		ConnectionString: os.Getenv("GHMGMTDB_CONNECTION_STRING"),
+	}
+
+	db, _ := sql.Init(cp)
+
+	_, err := db.ExecuteStoredProcedure("dbo.PR_Projects_Update_Repo_Info", param)
 	if err != nil {
 		return err
 	}
@@ -186,6 +201,32 @@ func Projects_IsExisting(body models.TypNewProjectReqBody) bool {
 	}
 
 	result, err := db.ExecuteStoredProcedureWithResult("dbo.PR_Projects_IsExisting", param)
+
+	if err != nil {
+		fmt.Println(err)
+		return false
+	}
+
+	if result[0]["Result"] == "1" {
+		return true
+	} else {
+		return false
+	}
+}
+
+func Projects_IsExisting_By_GithubId(body models.TypNewProjectReqBody) bool {
+
+	cp := sql.ConnectionParam{
+		ConnectionString: os.Getenv("GHMGMTDB_CONNECTION_STRING"),
+	}
+
+	db, _ := sql.Init(cp)
+
+	param := map[string]interface{}{
+		"GithubId": body.GithubId,
+	}
+
+	result, err := db.ExecuteStoredProcedureWithResult("dbo.PR_Projects_IsExisting_By_GithubId", param)
 
 	if err != nil {
 		fmt.Println(err)
@@ -351,6 +392,19 @@ func GetProjectByName(projectName string) []map[string]interface{} {
 	}
 
 	result, _ := db.ExecuteStoredProcedureWithResult("PR_Projects_Select_ByName", param)
+
+	return result
+}
+
+func GetProjectByGithubId(githubId int64) []map[string]interface{} {
+	db := ConnectDb()
+	defer db.Close()
+
+	param := map[string]interface{}{
+		"GithubId": githubId,
+	}
+
+	result, _ := db.ExecuteStoredProcedureWithResult("PR_Projects_Select_ByGithubId", param)
 
 	return result
 }
@@ -527,7 +581,7 @@ func CommunitiesActivities_TotalCount_ByCreatedBy(createdBy, search string) int 
 
 	param := map[string]interface{}{
 		"CreatedBy": createdBy,
-		"Search": search,
+		"Search":    search,
 	}
 
 	result, _ := db.ExecuteStoredProcedureWithResult("[PR_CommunityActivities_TotalCount_ByCreatedBy]", param)

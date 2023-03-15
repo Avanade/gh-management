@@ -133,6 +133,7 @@ func GetRepositoriesFromOrganization(org string) ([]Repo, error) {
 	var repoList []Repo
 	for _, repo := range allRepos {
 		r := Repo{
+			GithubId:    repo.GetID(),
 			FullName:    repo.GetFullName(),
 			Name:        repo.GetName(),
 			Link:        repo.GetHTMLURL(),
@@ -204,6 +205,7 @@ func TransferRepository(repo string, owner string, newOwner string) error {
 }
 
 type Repo struct {
+	GithubId    int64            `json:"id"`
 	FullName    string           `json:"repoFullName"`
 	Name        string           `json:"repoName"`
 	Link        string           `json:"repoLink"`

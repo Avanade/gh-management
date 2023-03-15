@@ -70,13 +70,13 @@ func ProjectsNewHandler(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 		} else {
-			_, err = githubAPI.CreatePrivateGitHubRepository(body, username.(string))
-			if err != nil {
-				fmt.Println(err)
+			repo, errRepo := githubAPI.CreatePrivateGitHubRepository(body, username.(string))
+			if errRepo != nil {
+				fmt.Println(errRepo)
 				httpResponseError(w, http.StatusInternalServerError, "There is a problem creating the GitHub repository.")
 				return
 			}
-
+			body.GithubId = repo.GetID()
 			_ = ghmgmtdb.PRProjectsInsert(body, username.(string))
 
 			w.WriteHeader(http.StatusOK)
