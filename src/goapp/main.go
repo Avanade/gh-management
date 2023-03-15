@@ -159,8 +159,6 @@ func main() {
 	muxApi.HandleFunc("/communityapprovers/GetCommunityApproversList", rtCommunity.GetCommunityApproversList)
 	muxApi.HandleFunc("/communityapprovers/GetAllActiveCommunityApprovers", rtCommunity.GetAllActiveCommunityApprovers)
 	muxApi.HandleFunc("/communityapprovers/GetCommunityApproversList/{id}", rtCommunity.GetCommunityApproversById)
-
-	muxApi.HandleFunc("/indexorgrepos", rtCommunity.GetCommunityApproversById)
 	mux.NotFoundHandler = http.HandlerFunc(rtPages.NotFoundHandler)
 
 	o, err := strconv.Atoi(ev.GetEnvVar("SUMMARY_REPORT_TRIGGER", "9"))
