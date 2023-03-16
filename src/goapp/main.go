@@ -147,7 +147,6 @@ func main() {
 	muxApi.Handle("/indexorgrepos", loadGuidAuthApi(rtApi.IndexOrgRepos)).Methods("GET")
 
 	muxAdmin := mux.PathPrefix("/admin").Subrouter()
-<<<<<<< HEAD
 	muxAdmin.Handle("", loadAzGHAuthPage(rtAdmin.AdminIndex))
 	muxAdmin.Handle("/members", loadAzGHAuthPage(rtAdmin.ListCommunityMembers))
 	muxAdmin.Handle("/guidance", loadAzGHAuthPage(rtGuidance.GuidanceHandler))
@@ -156,15 +155,6 @@ func main() {
 	muxAdmin.Handle("/approvaltype/{action:add}", loadAzGHAuthPage(rtAdmin.ApprovalTypeForm))
 	muxAdmin.Handle("/approvaltype/{action:view|edit}/{id}", loadAzGHAuthPage(rtAdmin.ApprovalTypeForm))
 	muxAdmin.Handle("/externallinks", loadAzGHAuthPage(rtAdmin.CustomizeExternalLinks))
-=======
-	muxAdmin.Handle("", loadAdminPage(rtAdmin.AdminIndex))
-	muxAdmin.Handle("/members", loadAdminPage(rtAdmin.ListCommunityMembers))
-	muxAdmin.Handle("/guidance", loadAdminPage(rtGuidance.GuidanceHandler))
-	muxAdmin.Handle("/approvaltypes", loadAdminPage(rtAdmin.ListApprovalTypes))
-	muxAdmin.Handle("/communityapprovers", loadAdminPage(rtCommunity.CommunityApproverHandler))
-	muxAdmin.Handle("/approvaltype/{action:add}", loadAdminPage(rtAdmin.ApprovalTypeForm))
-	muxAdmin.Handle("/approvaltype/{action:view|edit}/{id}", loadAdminPage(rtAdmin.ApprovalTypeForm))
->>>>>>> bdc8cc7db62ce10f1b96b5df06804636a421f2a1
 
 	muxApi.HandleFunc("/approvals/project/callback", rtProjects.UpdateApprovalStatusProjects).Methods("POST")
 	muxApi.HandleFunc("/approvals/community/callback", rtProjects.UpdateApprovalStatusCommunity).Methods("POST")
