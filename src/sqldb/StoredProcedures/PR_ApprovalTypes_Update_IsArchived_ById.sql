@@ -1,10 +1,6 @@
-CREATE PROCEDURE [dbo].[PR_ApprovalTypes_Update_ById] 
+CREATE PROCEDURE [dbo].[PR_ApprovalTypes_Update_IsArchived_ById] 
 (
-	@Id INT,
-	@Name VARCHAR(50),
-	@ApproverUserPrincipalName VARCHAR(50),
-	@IsActive BIT,
-	@ModifiedBy VARCHAR(50)
+	@IsArchived BIT NOT NULL,
 )
 AS
 BEGIN
@@ -16,13 +12,10 @@ BEGIN
 	IF @Id IS NULL
 	BEGIN
 		UPDATE [dbo].[ApprovalTypes]
-		SET [Name] = @Name
-			,[ApproverUserPrincipalName] = @ApproverUserPrincipalName
-			,[IsActive] = @IsActive
+		SET [IsArchived] = @IsArchived
 			,[Modified] = GETDATE()
 			,[ModifiedBy] = @ModifiedBy
 		WHERE Id = @Id
-		
 		SET @Status = 1
 	END
 
