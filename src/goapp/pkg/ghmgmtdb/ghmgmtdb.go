@@ -1152,3 +1152,19 @@ func UpdateApprovalType(approvalType models.ApprovalType) (int, error) {
 	}
 	return int(result[0]["Id"].(int64)), nil
 }
+
+func UsersGetEmail(GithubUser string) (string, error) {
+	db := ConnectDb()
+	defer db.Close()
+
+	param := map[string]interface{}{
+		"GithubUser": GithubUser,
+	}
+
+	result, err := db.ExecuteStoredProcedureWithResult("PR_Users_GetEmailByGitHubUsername", param)
+	if err != nil {
+		return "0", err
+	}
+	return result[0]["UserPrincipalName"].(string), err
+
+}

@@ -89,9 +89,12 @@ func main() {
 	mux.HandleFunc("/login/github/callback", rtGithub.GithubCallbackHandler)
 	mux.HandleFunc("/login/github/force", rtGithub.GithubForceSaveHandler)
 	mux.HandleFunc("/logout/github", rtGithub.GitHubLogoutHandler)
-
+	mux.Handle("/checkAvaInnerSource", loadGuidAuthApi(rtGithub.CheckAvaInnerSource))
+	mux.Handle("/checkAvaOpenSource", loadGuidAuthApi(rtGithub.CheckAvaOpenSource))
+	mux.Handle("/clearOrgMembers", loadGuidAuthApi(rtGithub.ClearOrgMembers))
 	muxApi := mux.PathPrefix("/api").Subrouter()
 	mux.Handle("/allusers", loadAzAuthPage(rtApi.GetAllUserFromActiveDirectory))
+
 	muxApi.Handle("/activity/type", loadAzGHAuthPage(rtApi.GetActivityTypes)).Methods("GET")
 	muxApi.Handle("/activity/type", loadAzGHAuthPage(rtApi.CreateActivityType)).Methods("POST")
 	muxApi.Handle("/activity", loadAzGHAuthPage(rtApi.CreateActivity)).Methods("POST")
