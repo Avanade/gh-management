@@ -1,24 +1,21 @@
 {{ define "content" }}
-
-
-
-<div x-data="data()" x-init="getActiveApprovers();">
+<div x-data="data()">
     <div id="pageTitle" x-show="!form.id">Community</div>
 
     <form onsubmit="event.preventDefault()" autocomplete="off">
         <fieldset x-bind:disabled="mode=='view'">
             <div x-show="!form.id">
                 <P>
-                <h3 class="text-lg font-medium leading-6 text-gray-900"> Community Information</h3>
-                <p class="mt-1 text-sm text-gray-500">
-                    If you have been unable to find the community you need in the drop-down, please submit your request
-                    here
-                    so
-                    that
-                    we
-                    can add it. Please ensure you have reviewed the full list before requesting this community for
-                    review. ​
-                </p>
+                    <h3 class="text-lg font-medium leading-6 text-gray-900"> Community Information</h3>
+                    <p class="mt-1 text-sm text-gray-500">
+                        If you have been unable to find the community you need in the drop-down, please submit your request
+                        here
+                        so
+                        that
+                        we
+                        can add it. Please ensure you have reviewed the full list before requesting this community for
+                        review. ​
+                    </p>
                 </P>
             </div>
             <div class="flex flex flex-col md:flex-row ">
@@ -27,12 +24,13 @@
                         <div>
                             <h3 class="block text-sm font-medium text-gray-700">Community Name*</h3>
                         </div>
-                        <div> <input type="text" x-model="form.name" maxlength="50" :disabled="mode=='view'"
-                                class="mt-1 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md">
+                        <div> 
+                            <input type="text" x-model="form.name" maxlength="50" :disabled="mode=='view'"
+                                class="mt-1 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md" />
                         </div>
                     </div>
                 </div>
-                <div class="basis-1/2 md:base-full  md:flex-row mx-3">
+                <div class="basis-1/2 md:base-full md:flex-row mx-3">
                     <div class="flex flex-col  ">
                         <div class="mt-4 flex flex-row">
                             <div class="basis-1/2">
@@ -42,25 +40,21 @@
                                 ID: <p x-text="form.id"></p>
                             </div>
                         </div>
-                        <div> <input type="text" name="url" id="url" x-model="form.url" maxlength="255"
+                        <div> 
+                            <input type="text" name="url" id="url" x-model="form.url" maxlength="255"
                                 :disabled="mode=='view'"
-                                class="mt-1 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md">
+                                class="mt-1 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md" />
                         </div>
                     </div>
                 </div>
-
-
-
-
             </div>
 
-            <div class="max-w-full  md:base-full  md:flex-row   mx-3">
-                <!-- <div class="flex flex-col  bg-green-100 max-w-full"> -->
+            <div class="max-w-full md:base-full md:flex-row mx-3">
                 <div>
-                    <div class="max-w-full   ">
+                    <div class="max-w-full">
                         <h3 class="mt-4 block text-sm font-medium text-gray-700">Community Description*</h3>
                     </div>
-                    <div class="  bg-gray-200">
+                    <div class="bg-gray-200">
                         <textarea name="description" id="description" x-model="form.description" rows="3"
                             maxlength="255" :disabled="mode=='view'"
                             class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md width: 100%">
@@ -68,32 +62,31 @@
                     </div>
                 </div>
             </div>
-
             <div class="flex flex flex-col md:flex-row ">
                 <div class="basis-1/2 md:base-full  md:flex-row mx-3">
-                    <div x-data="{ data: content }" class="flex flex-col  ">
-
+                    <div class="flex flex-col">
                         <div>
-                            <span class="mt-4 block text-sm font-medium text-gray-700">Business Sponsors*</span><span
-                                class="pl-1 text-xs">(Please select at least two sponsors )</span>
+                            <span class="mt-4 block text-sm font-medium text-gray-700">Business Sponsors*</span>
+                            <span class="pl-1 text-xs">(Please select at least two sponsors )</span>
                         </div>
-                        <div class="relative mt-1">
-                            <div x-html="sponsors.template"></div>
+                        <div class="mt-1 sm:mt-0 sm:col-span-2">
+                            <div x-data="combobox({
+                                        searchCallback: getAllUsers,
+                                        searchTag: 'Start typing to query list of users',
+                                        searchPlaceholder: 'Input name or email',
+                                        id : 'mail',
+                                        text : 'mail',
+                                        isMultiple : true,
+                                        isInsertable : true,
+                                        isDisplayItem : true
+                                    })" 
+                                    x-modelable="selected" x-model="form.sponsors">
+                                <div x-html="template"></div>
+                            </div>
                         </div>
-                        <div class="items-center">
-                            <template x-for="(sponsor, i) in form.sponsors">
-                                <div style="display: flex; " class="border px-2 py-2">
-                                    <div style="flex-grow: 1;" x-text="sponsor.displayName"> </div>
-                                    <div x-show="mode!='view'"> <button type="button"
-                                            class="btn btn-danger btn-small   "
-                                            @click="removeField(sponsor)">&times;</button></div>
-                                </div>
-                            </template>
-                        </div>
-
                         <div>
-                            <span class="mt-4 block text-sm font-medium text-gray-700">Tag</span><span
-                                class="pl-1 text-xs">(Please press Enter to insert Tag)</span>
+                            <span class="mt-4 block text-sm font-medium text-gray-700">Tag</span>
+                            <span class="pl-1 text-xs">(Please press Enter to insert Tag)</span>
                         </div>
                         <div x-data="combobox({
                                 data : [],
@@ -102,14 +95,10 @@
                                 isInsertable : true,
                                 isMultiple : true,
                                 isDisplayItem : true
-                            })" x-modelable="selected" x-model="form.tags">
+                        })" x-modelable="selected" x-model="form.tags">
                             <div x-html="template"></div>
                         </div>
-
                     </div>
-
-
-
                 </div>
                 <div class="basis-1/2 md:base-full  md:flex-row mx-3">
                     <div class="flex flex-col  ">
@@ -119,88 +108,169 @@
                         <div>
                             <textarea name="Notes" id="Notes" x-model="form.notes" rows="3" maxlength="255"
                                 class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
-                        </textarea>
+                            </textarea>
                         </div>
                         <div class="flex flex-row mx-1 my-3 items-center">
-
                             <input type="checkbox" name="IsExternal" id="IsExternal" x-model="form.isExternal"
-                                class="mr-2" :disabled="mode=='view'">
+                                class="mr-2" :disabled="mode=='view'" />
                             This is an external community
-
-
                         </div>
                     </div>
                 </div>
-
-
+            </div>
+            <div  x-show="mode!='view'" class="flex flex flex-col md:flex-row ">
+                <div class="basis-1/2 md:base-full  md:flex-row mx-3">
+                    <div class="flex flex-col  ">
+                        <div>
+                            <span class="mt-4 block text-sm font-medium text-gray-700">Releated Internal Communities</span> 
+                        </div>
+                        
+                            <div 
+                                x-data="combobox({
+                                        ajax : getCommunitiesinternals,
+                                        id : 'id',
+                                        text : 'name',
+                                     
+                                        isMultiple : 'true',
+                                        isDisplayItem : 'true'
+                                    })"
+                                x-modelable = "selected"
+                                x-model = "form.communitiesInternal"
+                            >
+                                <div x-html="template"></div>
+                            </div>
+                    </div>
+                </div>
+                <div class="basis-1/2 md:base-full  md:flex-row mx-3">
+                    <div class="flex flex-col  ">
+                        <div>
+                            <span class="mt-4 block text-sm font-medium text-gray-700">Related External Communities</span> 
+                        </div>
+                        <div 
+                            x-data="combobox({
+                                    ajax : getCommunitiesisexternals,
+                                    id : 'id',
+                                    text : 'name',
+                                    
+                                    isMultiple : 'true',
+                                    isDisplayItem : 'true'
+                                })"
+                            x-modelable = "selected"
+                            x-model = "form.communitiesExternal"
+                        >
+                            <div x-html="template"></div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </fieldset>
-        <div>
-            <div align="right">
-                <span x-show="form.id" >
-                <button  type="button"  x-show="mode!='edit'"
+    </form>
+    <div x-show="mode!='view'" class="mt-5 sm:col-span-6 pt-2 sm:pt-2 border-t-2 border-gray-100">
+        <h3 class="text-lg font-medium pb-3 leading-6 text-gray-900">Onboarding Instructions</h3>
+        <div 
+            x-data="markdownEditor({
+                caption: '(Markdown syntax is supported)'
+            })"
+            x-modelable = "body"
+            x-model = "form.onBoardingInstructions"
+        >
+            <div x-html="template"></div>
+        </div>
+    </div>
+    <div>
+        <div align="right">
+            <span x-show="form.id">
+                <button type="button" x-show="mode!='edit' && hasBoardingInstruction"
                     class="bg-purple-500  inline-flex justify-center py-2 px-4 rounded-md text-white"
                     @click="onBoarding()">
-                    <span >How To Join</span>
+                    <span>How To Join</span>
                 </button>
-                    </span>
-                <button type="button" x-show="mode=='view'"
-                    class="bg-orange-500  inline-flex justify-center py-2 px-4 rounded-md text-white"
-                    :class="!isValid ? 'bg-orange-100' : ''" x-bind:disabled="!isValid && ('{{.Email}}' !== communityCreatedBy)" @click="mode='edit'">
-
-                    <span x-show="form.id">Edit Community</span>
-
-                </button>
-                <button type="button" x-show="mode!='view'"
-                    class="bg-orange-500  inline-flex justify-center py-2 px-4 rounded-md text-white"
-                    :class="!isValid ? 'bg-orange-100' : ''" x-bind:disabled="!isValid" @click="submit()">
-                    <span x-show="!form.id">Submit Community</span>
-                    <span x-show="form.id">Update Community</span>
-
-                </button>
+            </span>
+            <button type="button" x-show="mode=='view'"
+                class="bg-orange-500  inline-flex justify-center py-2 px-4 rounded-md text-white"
+                :class="!isValid ? 'bg-orange-100' : ''"
+                x-bind:disabled="!isValid && ('{{.Email}}' !== communityCreatedBy)" @click="mode='edit'">
+                <span x-show="form.id">Edit Community</span>
+            </button>
+            <button type="button" x-show="mode!='view'"
+                class="bg-orange-500  inline-flex justify-center py-2 px-4 rounded-md text-white"
+                :class="!isValid ? 'bg-orange-100' : ''" x-bind:disabled="!isValid" @click="submit()">
+                <span x-show="!form.id">Submit Community</span>
+                <span x-show="form.id">Update Community</span>
             </button>
             <button type="button" x-show="mode=='edit'"
                 class="bg-orange-500  inline-flex justify-center py-2 px-4 rounded-md text-white"
-                :class="!isValid ? 'bg-orange-100' : ''" x-bind:disabled="!isValid" @click="onLoad()">
-            Cancel
-
+                @click="cancel()">
+                Cancel
             </button>
-            </div>
         </div>
-
-    </form>
-
+    </div>
 </div>
-
 
 <script src="/public/components/clsDropdown.js"></script>
 <script src="/public/components/combobox.js"></script>
+<script src="/public/components/markdownEditor.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/marked@2.1.3/marked.min.js"></script>
 <script type="text/javascript">
+    async function getCommunitiesisexternals(){
+ 
+            const res = await fetch('/api/community/getCommunitiesisexternal/1')
+            const data = await res.json()
+
+            return data.filter(item=>{return item.id != {{.Id}}})
+    }
+    async function getCommunitiesinternals(){
+ 
+        const res = await fetch('/api/community/getCommunitiesisexternal/0')
+
+        const data = await res.json()
+
+        return data.filter(item=>{return item.id != {{.Id}}})
+        
+        }
+    async function getAllUsers(data) {
+ 
+        if (data == undefined) {
+            return []
+        }
+
+        const { search } = data;
+        if (search === null || search.trim() === "") {
+            return []
+        }
+
+        const res = await fetch(`/api/search/users/${search}`)
+        const users = await res.json()
+
+        return users
+    }
+
     function data() {
+
         var modal = Alpine.store('master').modal
         return {
             mode: 'view',
             hasApprovers: false,
             communityCreatedBy: '',
-            getActiveApprovers() {
+            async init() {
                 modal.update('loading', 'Loading', 'Please wait', '', '')
-
                 fetch('/api/communityapprovers/GetAllActiveCommunityApprovers')
-                .then(r => {
-                    r.json().then(body => {
-                    if (!body || body.length < 1) {
-                        if(this.mode !== 'view') {
-                            window.location.href='/communities/list';
-                        } else {
-                            this.hasApprovers = false;
-                            this.onLoad();
-                        }
-                    } else {
-                        this.hasApprovers = true;
-                        this.onLoad();
-                    }
+                    .then(r => {
+                        r.json().then(body => {
+                            if (!body || body.length < 1) {
+                                if (this.mode !== 'view') {
+
+                                    window.location.href = '/communities/list';
+                                } else {
+                                    this.hasApprovers = false;
+                                    this.onLoad();
+                                }
+                            } else {
+                                this.hasApprovers = true;
+                                this.onLoad();
+                            }
+                        })
                     })
-                })
             },
             form: {
                 id: '{{.Id}}',
@@ -209,8 +279,16 @@
                 description: '',
                 notes: '',
                 isExternal: false,
+                onBoardingInstructions: '',
                 sponsors: [],
                 tags: [],
+                communitiesExternal: [],
+                communitiesInternal: []
+            },
+            hasBoardingInstruction() {
+                if(!this.form.onBoardingInstructions) return false
+                if(!this.form.onBoardingInstructions.trim()) return false
+                return true
             },
             sponsors: {
                 template: '',
@@ -226,7 +304,10 @@
                 displayName: '',
                 mail: '',
             },
+            
+           
             async getUsersList() {
+
                 await fetch('/api/allusers').then(j => j.json()
                     .then(data => {
 
@@ -257,15 +338,14 @@
                 this.showModal = show
             },
             async onLoad() {
-
-                spinnercount = 3
+                spinnercount = 4
                 if (this.form.id) {
                     this.mode = 'view'
                     fetch('/community/getcommunity/' + '{{.Id}}')
                         .then(r => {
                             r.json().then(body => {
-                                if(body[0]['ApprovalStatusId'] !== 5 && body[0]['CreatedBy'] !== '{{.Email}}') {
-                                    window.location.href='/communities/list';
+                                if (body[0]['ApprovalStatusId'] !== 5 && body[0]['CreatedBy'] !== '{{.Email}}') {
+                                    window.location.href = '/communities/list';
                                 }
                                 else {
                                     this.communityCreatedBy = body[0]['CreatedBy']
@@ -275,6 +355,7 @@
                                     this.form.description = body[0]["Description"]
                                     this.form.notes = body[0]["Notes"]
                                     this.form.isExternal = body[0]["IsExternal"]
+                                    this.form.onBoardingInstructions = body[0]["OnBoardingInstructions"]
                                     spinnercount = spinnercount - 1
                                     if (spinnercount < 1) {
                                         modal.visible = false
@@ -284,19 +365,35 @@
                             });
                         })
                         .catch(e => {
-                            console.log(e)
                             spinnercount = spinnercount - 1
                         })
 
-                    fetch('/api/CommunitySponsorsPerCommunityId/' + '{{.Id}}')
+                    fetch('/api/relatedcommunity/' + '{{.Id}}')
                         .then(r => {
                             r.json().then(body => {
-                                if(body){
+                                if (body) {
+                                this.form.communitiesExternal = [ ]
+                                this.form.communitiesInternal = [ ]
                                     for (let index = 0; index < body.length; index++) {
-                                        this.form.sponsors.push({
-                                            displayName: body[index]['UserPrincipalName'],
-                                            mail: body[index]['UserPrincipalName']
-                                        })
+                                        if (body[index]['IsExternal']){
+                                         this.form.communitiesExternal.push({
+                                            
+                                            id: body[index]['RelatedCommunityId'],
+                                            text: body[index]['Name'],
+                                            parentCommunityId : body[index]['ParentCommunityId'],
+                                            RelatedCommunityId: body[index]['RelatedCommunityId'],
+                                         })
+                                        }
+                                        else{
+                                            this.form.communitiesInternal.push({
+                                            
+                                            id: body[index]['RelatedCommunityId'],
+                                            text: body[index]['Name'],
+                                            parentCommunityId : body[index]['ParentCommunityId'],
+                                            RelatedCommunityId: body[index]['RelatedCommunityId'],
+                                         })
+                                        }
+                                             
                                     }
                                 }
                                 spinnercount = spinnercount - 1
@@ -306,17 +403,41 @@
                             });
                         })
                         .catch(e => {
-                            console.log(e)
+                            spinnercount = spinnercount - 1
+                        })
+                        fetch('/api/CommunitySponsorsPerCommunityId/' + '{{.Id}}')
+                        .then(r => {
+                            r.json().then(body => {
+                                if (body) {
+                                    this.form.sponsors = [ ]
+                                    for (let index = 0; index < body.length; index++) {
+                                         this.form.sponsors.push({
+                                            displayName: body[index]['UserPrincipalName'],
+                                            mail: body[index]['UserPrincipalName'],
+                                            id: body[index]['UserPrincipalName'],
+                                            text: body[index]['UserPrincipalName'],
+                                         })
+                                             
+                                    }
+                                }
+                                spinnercount = spinnercount - 1
+                                if (spinnercount < 1) {
+                                    modal.visible = false
+                                }
+                            });
+                        })
+                        .catch(e => {
                             spinnercount = spinnercount - 1
                         })
 
                     fetch('/api/CommunityTagPerCommunityId/' + '{{.Id}}')
                         .then(r => {
                             r.json().then(body => {
-                                if(body) {
+                                if (body) {
+                                    this.form.tags = [ ]
                                     for (let index = 0; index < body.length; index++) {
                                         this.form.tags.push({ id: body[index]['Id'], text: body[index]['Tag'] })
-    
+
                                     }
                                 }
                                 spinnercount = spinnercount - 1
@@ -326,15 +447,22 @@
                             });
                         })
                         .catch(e => {
-                            console.log(e)
                             spinnercount = spinnercount - 1
                         })
                 }
                 else {
                     this.mode = 'edit'
+                    modal.visible = false
                 }
-
                 await this.getUsersList()
+            },
+            cancel() {
+                if(this.form.id) {
+                    this.onLoad()
+                }
+                else {
+                    window.location.href = '/communities/list'
+                }
             },
 
 
@@ -347,9 +475,53 @@
 
                 }
 
-                postData = this.form;
+                let postData = this.form;
                 postData.tags = this.form.tags.map(i => i.text);
+                listsponsors =this.form.sponsors;
+          
+                postData.sponsors=[];
+                for (const key of Object.keys(listsponsors)) {
+                
+                     postData.sponsors.push( 
+                        {
+                            displayName:  listsponsors[key].id ,
+                             mail: listsponsors[key].id,
+                             id: listsponsors[key].id,
+                            text : listsponsors[key].id
+                        }
+                     );
+          
+                    }
 
+                const listExternal =this.form.communitiesExternal;
+                postData.communitiesExternal=[];
+                for (const key of Object.keys(listExternal)) {
+                
+                     postData.communitiesExternal.push( 
+                        {
+                            ParentCommunityId:  listExternal[key].id,
+                            RelatedCommunityId: listExternal[key].id
+                        }
+                             
+                     );
+          
+                    }
+
+
+                const listInternal =this.form.communitiesInternal;
+         
+                postData.communitiesInternal=[];
+                for (const key of Object.keys(listInternal)) {
+                
+                     postData.communitiesInternal.push( 
+                        {
+                            ParentCommunityId:  listInternal[key].id,
+                            RelatedCommunityId: listInternal[key].id
+                        }
+                             
+                     );
+          
+                    }
                 Alpine.store('master').postData('/api/community', postData, "Your community has been created.",
                     "Go to communities list", "/communities/list")
 
@@ -358,32 +530,21 @@
                 this.form.sponsors.push(this.sponsors.data.filter(i => i.mail == this.sponsors.selected)[0])
                 this.sponsors.selected = ''
             },
-            removeField(sponsors) {
-                this.form.sponsors.splice(this.form.sponsors.indexOf(sponsors), 1);
-            },
-            addNewField() {
-
-                this.fields.push({
-                    id: new Date().getTime() + this.fields.length
-                });
-            },
-            showName(userPrincipalName, githubUser) {
-                return userPrincipalName.includes(this.form.coowner) || githubUser.includes(this.form.coowner) ? true :
-                    false
-            },
-
+            
             onBoarding() {
                 window.location.href = `/community/${this.form.id}/onboarding`
             },
-
+         
             get isValid() {
                 if (
                     (!!this.form.name &&
                         !!this.form.url &&
+                        !!this.form.onBoardingInstructions &&
                         !!this.form.description //&& !!this.form.notes
                     ) &&
                     this.form.sponsors.length >= 2) {
                     return true
+                    
                 } else {
                     return false
                 }

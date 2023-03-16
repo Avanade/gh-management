@@ -7,6 +7,7 @@ CREATE PROCEDURE [dbo].[PR_Communities_Insert]
 			@Notes VARCHAR(255),
 			@TradeAssocId VARCHAR(255),
 			@IsExternal INT,
+			@OnBoardingInstructions VARCHAR(MAX) = NULL,
 			@CreatedBy  VARCHAR(50),
 			@ModifiedBy  VARCHAR(50) ,
 			@Id  INT = NULL
@@ -26,6 +27,7 @@ BEGIN
 					   ,[Notes]
 					   ,[TradeAssocId]
 					   ,[IsExternal]
+					   ,[OnBoardingInstructions]
 					   ,[Created]
 					   ,[CreatedBy]
 					   ,[Modified]
@@ -37,6 +39,7 @@ BEGIN
 					   ,@Notes
 					   ,@TradeAssocId
 					   ,@IsExternal
+					   ,@OnBoardingInstructions
 					   ,GETDATE()
 					   ,@CreatedBy
 					   ,GETDATE()
@@ -56,6 +59,7 @@ BEGIN
 		@Notes ,
 		@TradeAssocId ,
 		@IsExternal,
+		@OnBoardingInstructions ,
 		@CreatedBy ,
 		@ModifiedBy
 

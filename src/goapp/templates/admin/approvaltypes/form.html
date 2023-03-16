@@ -18,10 +18,13 @@
             </div>
         </div>
         <div class="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-t sm:border-gray-200 sm:pt-5">
+            <label for="Name" class="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2"> Approver </label>
             <div class="mt-1 sm:mt-0 sm:col-span-2">
                 <div 
                     x-data="combobox({
-                            ajax: getAllUsers,
+                            searchCallback: getAllUsers,
+                            searchTag: 'Start typing to query list of users',
+                            searchPlaceholder: 'Input name or email',
                             id : 'mail',
                             text : 'mail'
                         })"
@@ -59,9 +62,7 @@
             <button 
                 @click.prevent="onSubmitHandler" 
                 class="ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 disabled:bg-orange-200"
-                x-bind
-                    :disabled="!isValid()"
-                    :class="action == 'View' ? 'hidden' : ''">Submit</button>
+                x-bind:disabled="!isValid()":class="action == 'View' ? 'hidden' : ''">Submit</button>
         </div>
     </div>
 </fieldset>
@@ -69,11 +70,20 @@
 
 <script src="/public/components/combobox.js"></script>
 <script type="text/javascript">
-    async function getAllUsers(){
-        const res = await fetch('/api/allusers')
+    async function getAllUsers(data){
+  
+        if (data == undefined) {
+            return []
+        }
 
-        const data = await res.json()
-        return data
+        const {search} = data;
+        if (search === null || search.trim() === ""){
+            return []
+        }
+
+        const res = await fetch(`/api/search/users/${search}`)
+        const users = await res.json()
+        return users
     }
 
     function approvalTypeForm({

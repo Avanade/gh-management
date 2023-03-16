@@ -39,15 +39,16 @@ func CommunityAPIHandler(w http.ResponseWriter, r *http.Request) {
 	case "POST":
 		param := map[string]interface{}{
 
-			"Name":         strings.TrimSpace(body.Name),
-			"Url":          body.Url,
-			"Description":  body.Description,
-			"Notes":        body.Notes,
-			"TradeAssocId": body.TradeAssocId,
-			"IsExternal":   body.IsExternal,
-			"CreatedBy":    username,
-			"ModifiedBy":   username,
-			"Id":           body.Id,
+			"Name":                   strings.TrimSpace(body.Name),
+			"Url":                    body.Url,
+			"Description":            body.Description,
+			"Notes":                  body.Notes,
+			"TradeAssocId":           body.TradeAssocId,
+			"IsExternal":             body.IsExternal,
+			"OnBoardingInstructions": body.OnBoardingInstructions,
+			"CreatedBy":              username,
+			"ModifiedBy":             username,
+			"Id":                     body.Id,
 		}
 
 		result, err := db.ExecuteStoredProcedureWithResult("dbo.PR_Communities_Insert", param)
@@ -81,6 +82,45 @@ func CommunityAPIHandler(w http.ResponseWriter, r *http.Request) {
 
 		}
 
+		deleteparam := map[string]interface{}{
+
+			"ParentCommunityId": id,
+		}
+		_, error := db.ExecuteStoredProcedure("PR_RelatedCommunities_Delete", deleteparam)
+		if err != nil {
+
+			fmt.Println(error)
+		}
+
+		for _, t := range body.CommunitiesExternal {
+
+			RelatedCommunities := map[string]interface{}{
+
+				"ParentCommunityId":   id,
+				"RelatedCommunityId ": t.RelatedCommunityId,
+			}
+			_, err := db.ExecuteStoredProcedure("PR_RelatedCommunities_Insert", RelatedCommunities)
+			if err != nil {
+
+				fmt.Println(err)
+			}
+
+		}
+
+		for _, t := range body.CommunitiesInternal {
+
+			param := map[string]interface{}{
+
+				"ParentCommunityId":   id,
+				"RelatedCommunityId ": t.RelatedCommunityId,
+			}
+			_, err := db.ExecuteStoredProcedure("PR_RelatedCommunities_Insert", param)
+			if err != nil {
+
+				fmt.Println(err)
+			}
+
+		}
 		for _, t := range body.Tags {
 
 			Tagsparam := map[string]interface{}{
@@ -151,15 +191,16 @@ func MyCommunityAPIHandler(w http.ResponseWriter, r *http.Request) {
 	case "POST":
 		param := map[string]interface{}{
 
-			"Name":         strings.TrimSpace(body.Name),
-			"Url":          body.Url,
-			"Description":  body.Description,
-			"Notes":        body.Notes,
-			"TradeAssocId": body.TradeAssocId,
-			"IsExternal":   body.IsExternal,
-			"CreatedBy":    username,
-			"ModifiedBy":   username,
-			"Id":           body.Id,
+			"Name":                   strings.TrimSpace(body.Name),
+			"Url":                    body.Url,
+			"Description":            body.Description,
+			"Notes":                  body.Notes,
+			"TradeAssocId":           body.TradeAssocId,
+			"IsExternal":             body.IsExternal,
+			"OnBoardingInstructions": body.OnBoardingInstructions,
+			"CreatedBy":              username,
+			"ModifiedBy":             username,
+			"Id":                     body.Id,
 		}
 
 		result, err := db.ExecuteStoredProcedureWithResult("dbo.PR_Communities_Insert", param)
@@ -207,6 +248,37 @@ func MyCommunityAPIHandler(w http.ResponseWriter, r *http.Request) {
 			}
 
 		}
+
+		for _, t := range body.CommunitiesExternal {
+
+			RelatedCommunities := map[string]interface{}{
+
+				"ParentCommunityId":   id,
+				"RelatedCommunityId ": t.RelatedCommunityId,
+			}
+			_, err := db.ExecuteStoredProcedure("PR_RelatedCommunities_Insert", RelatedCommunities)
+			if err != nil {
+
+				fmt.Println(err)
+			}
+
+		}
+
+		for _, t := range body.CommunitiesInternal {
+
+			param := map[string]interface{}{
+
+				"ParentCommunityId":   id,
+				"RelatedCommunityId ": t.RelatedCommunityId,
+			}
+			_, err := db.ExecuteStoredProcedure("PR_RelatedCommunities_Insert", param)
+			if err != nil {
+
+				fmt.Println(err)
+			}
+
+		}
+
 		if body.Id == 0 {
 			go comm.RequestCommunityApproval(int64(id))
 		}
@@ -272,6 +344,47 @@ func GetRequestStatusByCommunity(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+	w.Write(jsonResp)
+}
+
+func GetCommunitiesIsexternal(w http.ResponseWriter, r *http.Request) {
+	req := mux.Vars(r)
+	isexternal := req["isexternal"]
+	sessionaz, _ := session.Store.Get(r, "auth-session")
+	iprofile := sessionaz.Values["profile"]
+	profile := iprofile.(map[string]interface{})
+	username := profile["preferred_username"]
+	dbConnectionParam := sql.ConnectionParam{
+		ConnectionString: os.Getenv("GHMGMTDB_CONNECTION_STRING"),
+	}
+
+	db, err := sql.Init(dbConnectionParam)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer db.Close()
+
+	param := map[string]interface{}{
+
+		"isexternal":        isexternal,
+		"UserPrincipalName": username,
+	}
+
+	Communities, err := db.ExecuteStoredProcedureWithResult("PR_Communities_Isexternal", param)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Header().Set("Content-Type", "application/json")
+	jsonResp, err := json.Marshal(Communities)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
 	w.Write(jsonResp)
 }
 

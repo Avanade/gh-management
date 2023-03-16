@@ -12,5 +12,5 @@ FROM
 	JOIN
 		ContributionAreas AS ca ON caca.ContributionAreaId = ca.Id
 	WHERE
-		caca.CommunityActivityId = 43 AND caca.IsPrimary = 0
+		caca.CommunityActivityId = @ActivityId AND caca.IsPrimary = 0
 END

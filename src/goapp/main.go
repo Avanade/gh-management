@@ -77,6 +77,7 @@ func main() {
 	mux.Handle("/community/my", loadAzGHAuthPage(rtCommunity.GetMyCommunitylist))
 	mux.Handle("/community/{id}", loadAzGHAuthPage(rtCommunity.CommunityHandler))
 	mux.Handle("/community/getcommunity/{id}", loadAzGHAuthPage(rtCommunity.GetUserCommunity))
+
 	mux.Handle("/communities/list", loadAzGHAuthPage(rtCommunity.CommunitylistHandler))
 	mux.Handle("/community", loadAzGHAuthPage(rtCommunity.GetUserCommunitylist))
 	mux.Handle("/community/{id}/onboarding", loadAzGHAuthPage(rtCommunity.CommunityOnBoarding))
@@ -88,9 +89,12 @@ func main() {
 	mux.HandleFunc("/login/github/callback", rtGithub.GithubCallbackHandler)
 	mux.HandleFunc("/login/github/force", rtGithub.GithubForceSaveHandler)
 	mux.HandleFunc("/logout/github", rtGithub.GitHubLogoutHandler)
-
+	mux.Handle("/checkAvaInnerSource", loadGuidAuthApi(rtGithub.CheckAvaInnerSource))
+	mux.Handle("/checkAvaOpenSource", loadGuidAuthApi(rtGithub.CheckAvaOpenSource))
+	mux.Handle("/clearOrgMembers", loadGuidAuthApi(rtGithub.ClearOrgMembers))
 	muxApi := mux.PathPrefix("/api").Subrouter()
 	mux.Handle("/allusers", loadAzAuthPage(rtApi.GetAllUserFromActiveDirectory))
+
 	muxApi.Handle("/activity/type", loadAzGHAuthPage(rtApi.GetActivityTypes)).Methods("GET")
 	muxApi.Handle("/activity/type", loadAzGHAuthPage(rtApi.CreateActivityType)).Methods("POST")
 	muxApi.Handle("/activity", loadAzGHAuthPage(rtApi.CreateActivity)).Methods("POST")
@@ -104,6 +108,7 @@ func main() {
 	muxApi.Handle("/community/all", loadAzAuthPage(rtApi.GetCommunities)).Methods("GET")
 	muxApi.Handle("/community/{id}/members", loadAzAuthPage(rtApi.GetCommunityMembers)).Methods("GET")
 	muxApi.Handle("/communitystatus/{id}", loadAzGHAuthPage(rtApi.GetRequestStatusByCommunity))
+	muxApi.Handle("/community/getCommunitiesisexternal/{isexternal}", loadAzGHAuthPage(rtApi.GetCommunitiesIsexternal))
 	muxApi.Handle("/contributionarea", loadAzGHAuthPage(rtApi.CreateContributionAreas)).Methods("POST")
 	muxApi.Handle("/contributionarea", loadAzGHAuthPage(rtApi.GetContributionAreas)).Methods("GET")
 	muxApi.Handle("/contributionarea/activity/{id}", loadAzGHAuthPage(rtApi.GetContributionAreasByActivityId)).Methods("GET")
@@ -112,6 +117,10 @@ func main() {
 	muxApi.Handle("/Category/update", loadAzGHAuthPage(rtApi.CategoryUpdate))
 	muxApi.Handle("/Category/{id}", loadAzGHAuthPage(rtApi.GetCategoryByID))
 	muxApi.Handle("/importGitHubReposToDatabase", loadAzAuthPage(rtApi.ImportReposToDatabase))
+
+	muxApi.Handle("/relatedcommunityAdd", loadAzAuthPage(rtApi.RelatedCommunitiesInsert))
+	muxApi.Handle("/relatedcommunityDelete", loadAzAuthPage(rtApi.RelatedCommunitiesDelete))
+	muxApi.Handle("/relatedcommunity/{id}", loadAzAuthPage(rtApi.RelatedCommunitiesSelect)).Methods("GET")
 
 	//muxApi.Handle("/CategoryArticlesAdd", loadAzGHAuthPage(rtApi.CategoryAddAPIHandler))
 	muxApi.Handle("/CategoryArticlesById/{id}", loadAzGHAuthPage(rtApi.GetCategoryArticlesById))
@@ -123,6 +132,7 @@ func main() {
 	muxApi.Handle("/repositories/archive/{project}/{projectId}/{state}/{archive}", loadAzGHAuthPage(rtApi.ArchiveProject))
 	muxApi.Handle("/repositories/visibility/{project}/{projectId}/{currentState}/{desiredState}", loadAzGHAuthPage(rtApi.SetVisibility))
 	muxApi.Handle("/allusers", loadAzAuthPage(rtApi.GetAllUserFromActiveDirectory))
+	muxApi.Handle("/search/users/{search}", loadAzAuthPage(rtApi.SearchUserFromActiveDirectory))
 	muxApi.Handle("/allrepositories", loadAzAuthPage(rtApi.GetAllRepositories))
 	muxApi.Handle("/getActiveApprovalTypes", loadAzGHAuthPage(rtApi.GetActiveApprovalTypes))
 
@@ -132,7 +142,12 @@ func main() {
 	muxApi.HandleFunc("/approval/types", rtApi.GetApprovalTypes).Methods("GET")
 	muxApi.HandleFunc("/approval/type/{id}", rtApi.GetApprovalTypeById).Methods("GET")
 
+	// API FOR LOGIC APP
+	muxApi.Handle("/init/indexorgrepos", loadGuidAuthApi(rtApi.InitIndexOrgRepos)).Methods("GET")
+	muxApi.Handle("/indexorgrepos", loadGuidAuthApi(rtApi.IndexOrgRepos)).Methods("GET")
+
 	muxAdmin := mux.PathPrefix("/admin").Subrouter()
+<<<<<<< HEAD
 	muxAdmin.Handle("", loadAzGHAuthPage(rtAdmin.AdminIndex))
 	muxAdmin.Handle("/members", loadAzGHAuthPage(rtAdmin.ListCommunityMembers))
 	muxAdmin.Handle("/guidance", loadAzGHAuthPage(rtGuidance.GuidanceHandler))
@@ -141,6 +156,15 @@ func main() {
 	muxAdmin.Handle("/approvaltype/{action:add}", loadAzGHAuthPage(rtAdmin.ApprovalTypeForm))
 	muxAdmin.Handle("/approvaltype/{action:view|edit}/{id}", loadAzGHAuthPage(rtAdmin.ApprovalTypeForm))
 	muxAdmin.Handle("/externallinks", loadAzGHAuthPage(rtAdmin.CustomizeExternalLinks))
+=======
+	muxAdmin.Handle("", loadAdminPage(rtAdmin.AdminIndex))
+	muxAdmin.Handle("/members", loadAdminPage(rtAdmin.ListCommunityMembers))
+	muxAdmin.Handle("/guidance", loadAdminPage(rtGuidance.GuidanceHandler))
+	muxAdmin.Handle("/approvaltypes", loadAdminPage(rtAdmin.ListApprovalTypes))
+	muxAdmin.Handle("/communityapprovers", loadAdminPage(rtCommunity.CommunityApproverHandler))
+	muxAdmin.Handle("/approvaltype/{action:add}", loadAdminPage(rtAdmin.ApprovalTypeForm))
+	muxAdmin.Handle("/approvaltype/{action:view|edit}/{id}", loadAdminPage(rtAdmin.ApprovalTypeForm))
+>>>>>>> bdc8cc7db62ce10f1b96b5df06804636a421f2a1
 
 	muxApi.HandleFunc("/approvals/project/callback", rtProjects.UpdateApprovalStatusProjects).Methods("POST")
 	muxApi.HandleFunc("/approvals/community/callback", rtProjects.UpdateApprovalStatusCommunity).Methods("POST")
@@ -177,10 +201,25 @@ func loadAzAuthPage(f func(w http.ResponseWriter, r *http.Request)) *negroni.Neg
 	)
 }
 
+func loadGuidAuthApi(f func(w http.ResponseWriter, r *http.Request)) *negroni.Negroni {
+	return negroni.New(
+		negroni.HandlerFunc(session.IsGuidAuthenticated),
+		negroni.Wrap(http.HandlerFunc(f)),
+	)
+}
+
 func loadAzGHAuthPage(f func(w http.ResponseWriter, r *http.Request)) *negroni.Negroni {
 	return negroni.New(
 		negroni.HandlerFunc(session.IsAuthenticated),
 		negroni.HandlerFunc(session.IsGHAuthenticated),
+		negroni.Wrap(http.HandlerFunc(f)),
+	)
+}
+
+func loadAdminPage(f func(w http.ResponseWriter, r *http.Request)) *negroni.Negroni {
+	return negroni.New(
+		negroni.HandlerFunc(session.IsAuthenticated),
+		negroni.HandlerFunc(session.IsUserAdminMW),
 		negroni.Wrap(http.HandlerFunc(f)),
 	)
 }
@@ -195,4 +234,8 @@ func checkFailedApprovalRequests() {
 			go rtCommunity.ReprocessRequestCommunityApproval()
 		}
 	}
+}
+
+func helloWorld(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprint(w, "Hello World")
 }

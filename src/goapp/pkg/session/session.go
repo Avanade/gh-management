@@ -122,6 +122,18 @@ func IsGHAuthenticated(w http.ResponseWriter, r *http.Request, next http.Handler
 	}
 }
 
+func IsGuidAuthenticated(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
+	// Check header if authenticated
+	_, err := auth.VerifyAccessToken(r)
+	// RETURN ERROR
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	// RETURN SUCCESS
+	next(w, r)
+}
+
 func GetGitHubUserData(w http.ResponseWriter, r *http.Request) (models.TypGitHubUser, error) {
 	session, err := Store.Get(r, "gh-auth-session")
 	if err != nil {
@@ -188,6 +200,15 @@ func RemoveGitHubAccount(w http.ResponseWriter, r *http.Request) error {
 	return nil
 }
 
+func IsUserAdminMW(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
+	isAdmin, _ := IsUserAdmin(w, r)
+	if isAdmin {
+		next(w, r)
+	} else {
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+	}
+}
+
 // Check if user is an admin
 func IsUserAdmin(w http.ResponseWriter, r *http.Request) (bool, error) {
 	session, err := Store.Get(r, "auth-session")
@@ -200,6 +221,20 @@ func IsUserAdmin(w http.ResponseWriter, r *http.Request) (bool, error) {
 		isUserAdmin = session.Values["isUserAdmin"].(bool)
 	}
 	return isUserAdmin, nil
+}
+
+// Get user photo
+func GetUserPhoto(w http.ResponseWriter, r *http.Request) (bool, string, error) {
+	session, err := Store.Get(r, "auth-session")
+	if err != nil {
+		return false, "", err
+	}
+
+	if session.Values["userHasPhoto"] != nil {
+		return session.Values["userHasPhoto"].(bool), fmt.Sprintf("%s", session.Values["userPhoto"]), nil
+	} else {
+		return false, "", nil
+	}
 }
 
 type ErrorDetails struct {

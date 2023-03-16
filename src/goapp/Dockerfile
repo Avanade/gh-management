@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 FROM golang:1.18.8-buster
+=======
+FROM golang:1.18.9-buster
+>>>>>>> bdc8cc7db62ce10f1b96b5df06804636a421f2a1
 
 # Set the Current Working Directory inside the container
 WORKDIR /goapp

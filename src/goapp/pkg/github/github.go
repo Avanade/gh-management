@@ -7,13 +7,15 @@ import (
 	"errors"
 	"fmt"
 	"main/models"
+	"main/pkg/email"
 	"main/pkg/envvar"
 	ghmgmt "main/pkg/ghmgmtdb"
 	"net/http"
 	"os"
 	"strings"
+	"time"
 
-	"github.com/google/go-github/v42/github"
+	"github.com/google/go-github/v50/github"
 	"golang.org/x/oauth2"
 )
 
@@ -27,7 +29,7 @@ func createClient(token string) *github.Client {
 	return github.NewClient(tc)
 }
 
-func CreatePrivateGitHubRepository(data models.TypNewProjectReqBody) (*github.Repository, error) {
+func CreatePrivateGitHubRepository(data models.TypNewProjectReqBody, requestor string) (*github.Repository, error) {
 	client := createClient(os.Getenv("GH_TOKEN"))
 	owner := os.Getenv("GH_ORG_INNERSOURCE")
 	repoRequest := &github.TemplateRepoRequest{
@@ -42,24 +44,31 @@ func CreatePrivateGitHubRepository(data models.TypNewProjectReqBody) (*github.Re
 		return nil, err
 	}
 
-	AddCollaborator(data)
+	_, err = AddCollaborator(data, requestor)
+	if err != nil {
+		return nil, err
+	}
 	return repo, nil
 }
 
-func AddCollaborator(data models.TypNewProjectReqBody) (*github.Response, error) {
+func AddCollaborator(data models.TypNewProjectReqBody, requestor string) (*github.Response, error) {
 	client := createClient(os.Getenv("GH_TOKEN"))
 	owner := os.Getenv("GH_ORG_INNERSOURCE")
 	opts := &github.RepositoryAddCollaboratorOptions{
 		Permission: "admin",
 	}
-
+	if data.Coowner != requestor {
+		GHUser := ghmgmt.Users_Get_GHUser(requestor)
+		_, _, err := client.Repositories.AddCollaborator(context.Background(), owner, data.Name, GHUser, opts)
+		if err != nil {
+			return nil, err
+		}
+	}
 	GHUser := ghmgmt.Users_Get_GHUser(data.Coowner)
-
 	_, resp, err := client.Repositories.AddCollaborator(context.Background(), owner, data.Name, GHUser, opts)
 	if err != nil {
 		return nil, err
 	}
-
 	return resp, err
 }
 
@@ -126,6 +135,7 @@ func GetRepositoriesFromOrganization(org string) ([]Repo, error) {
 	var repoList []Repo
 	for _, repo := range allRepos {
 		r := Repo{
+			GithubId:    repo.GetID(),
 			FullName:    repo.GetFullName(),
 			Name:        repo.GetName(),
 			Link:        repo.GetHTMLURL(),
@@ -197,6 +207,7 @@ func TransferRepository(repo string, owner string, newOwner string) error {
 }
 
 type Repo struct {
+	GithubId    int64            `json:"id"`
 	FullName    string           `json:"repoFullName"`
 	Name        string           `json:"repoName"`
 	Link        string           `json:"repoLink"`
@@ -206,4 +217,106 @@ type Repo struct {
 	Created     github.Timestamp `json:"created"`
 	IsArchived  bool             `json:"archived"`
 	Visibility  string           `json:"visibility"`
+}
+
+func OrganizationsIsMember(token string, GHUser string) (bool, bool, error) {
+	client := createClient(token)
+	OrgInnerSource := os.Getenv("GH_ORG_INNERSOURCE")
+	OrgInnerSourceIsMember, _, err := client.Organizations.IsMember(context.Background(), OrgInnerSource, GHUser)
+
+	OrgOuterSource := os.Getenv("GH_ORG_OPENSOURCE")
+	OrgOuterSourceIsMember, _, err := client.Organizations.IsMember(context.Background(), OrgOuterSource, GHUser)
+	return OrgInnerSourceIsMember, OrgOuterSourceIsMember, err
+}
+
+func OrganizationInvitation(token string, username string, org string) *github.Invitation {
+	client := createClient(token)
+	Email := ""
+	Role := "direct_member"
+	teamid := []int64{}
+	user, _, _ := client.Users.Get(context.Background(), username)
+	intid2 := user.ID
+	options := *&github.CreateOrgInvitationOptions{InviteeID: intid2, Email: &Email, Role: &Role, TeamID: teamid}
+
+	invite, _, _ := client.Organizations.CreateOrgInvitation(context.Background(), org, &options)
+
+	return invite
+}
+
+func ListOutsideCollaborators(token string, org string) []*github.User {
+	client := createClient(token)
+
+	options := *&github.ListOutsideCollaboratorsOptions{}
+
+	collabs, _, _ := client.Organizations.ListOutsideCollaborators(context.Background(), org, &options)
+
+	return collabs
+}
+func RemoveOutsideCollaborator(token string, org string, username string) *github.Response {
+	client := createClient(token)
+
+	repons, err := client.Organizations.RemoveOutsideCollaborator(context.Background(), org, username)
+
+	if err != nil {
+		fmt.Println("err")
+		fmt.Println(err)
+	}
+	return repons
+}
+func RemoveOrganizationsMember(token string, org string, username string) *github.Response {
+	client := createClient(token)
+
+	repons, err := client.Organizations.RemoveMember(context.Background(), org, username)
+
+	if err != nil {
+		fmt.Println("err")
+		fmt.Println(err)
+	}
+	return repons
+}
+func RepositoriesListCollaborators(token string, org string, repo string) []*github.User {
+	client := createClient(token)
+	options := *&github.ListCollaboratorsOptions{}
+	ListCollabs, _, err := client.Repositories.ListCollaborators(context.Background(), org, repo, &options)
+
+	if err != nil {
+		fmt.Println("err")
+		fmt.Println(err)
+	}
+
+	return ListCollabs
+}
+func OrgListMembers(token string, org string) []*github.User {
+	client := createClient(token)
+
+	ListCollabs, _, err := client.Organizations.ListMembers(context.Background(), org, nil)
+
+	if err != nil {
+		fmt.Println("err")
+		fmt.Println(err)
+	}
+
+	return ListCollabs
+}
+
+func EmailAdmin(admin string, adminemail string, reponame string, outisideCollab []string) {
+	e := time.Now()
+
+	link := "https://github.com/" + os.Getenv("GH_ORG_OPENSOURCE") + "/" + reponame
+	link = "<a href=\"" + link + "\">" + reponame + "</a>"
+	Collablist := "</p> <table  >"
+	for _, collab := range outisideCollab {
+		Collablist = Collablist + " <tr> <td>" + collab + " </td></tr>"
+	}
+	Collablist = Collablist + " </table  > <p>"
+	body := fmt.Sprintf("<p>Hello %s ,  </p>  \n<p>This is to inform you that your Github repository <b> %s </b> has %o outside collaborator/s. </p> %s  This email was sent to the admins of the repository.  </p> \n <p>OSPO</p>", admin, link, len(outisideCollab), Collablist)
+
+	m := email.TypEmailMessage{
+		Subject: "GitHub Repo Collaborators Scan",
+		Body:    body,
+		To:      adminemail,
+	}
+
+	email.SendEmail(m)
+	fmt.Printf(" GitHub Repo Collaborators Scan on %s was sent.", e)
 }

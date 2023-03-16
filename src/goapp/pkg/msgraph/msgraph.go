@@ -2,8 +2,10 @@ package msgraph
 
 import (
 	"bytes"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"net/url"
 	"os"
@@ -47,6 +49,55 @@ func GetAzGroupIdByName(groupName string) (string, error) {
 	}
 
 	return listGroupResponse.Value[0].Id, nil
+}
+
+// Search user by name and mail
+func SearchUsers(search string) ([]User, error) {
+	accessToken, err := getToken()
+	if err != nil {
+		return nil, err
+	}
+
+	client := &http.Client{
+		Timeout: time.Second * 10,
+	}
+
+	urlPath := `https://graph.microsoft.com/v1.0/users`
+	URL, errURL := url.Parse(urlPath)
+	if err != nil {
+		return nil, errURL
+	}
+	query := URL.Query()
+	query.Set("$search", fmt.Sprintf(`"displayName:%s" OR "mail:%s"`, search, search))
+	URL.RawQuery = query.Encode()
+
+	req, err := http.NewRequest("GET", URL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Add("Authorization", "Bearer "+accessToken)
+	req.Header.Add("ConsistencyLevel", "eventual")
+	response, err := client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer response.Body.Close()
+
+	var listUsersResponse ListUSersResponse
+	err = json.NewDecoder(response.Body).Decode(&listUsersResponse)
+	if err != nil {
+		return nil, err
+	}
+
+	// Remove users without email address
+	var users []User
+	for _, user := range listUsersResponse.Value {
+		if user.Email != "" {
+			users = append(users, user)
+		}
+	}
+
+	return users, nil
 }
 
 // Get all users from the active directory
@@ -242,6 +293,42 @@ func IsUserAdmin(user string) (bool, error) {
 	return false, nil
 }
 
+func GetUserPhoto(user string) (bool, string, error) {
+	accessToken, err := getToken()
+	if err != nil {
+		return false, "", err
+	}
+
+	client := &http.Client{
+		Timeout: time.Second * 10,
+	}
+
+	urlPath := fmt.Sprintf("https://graph.microsoft.com/v1.0/users/%s/photos/64x64/$value", user)
+
+	req, err := http.NewRequest("GET", urlPath, nil)
+	if err != nil {
+		return false, "", err
+	}
+
+	req.Header.Add("Authorization", "Bearer "+accessToken)
+	req.Header.Add("Content-Type", "application/json")
+	response, err := client.Do(req)
+	if err != nil {
+		return false, "", err
+	}
+	defer response.Body.Close()
+	if response.StatusCode == http.StatusNotFound {
+		return false, "", nil
+	}
+
+	userPhotoBytes, err := io.ReadAll(response.Body)
+	if err != nil {
+		return false, "", err
+	}
+	userPhotoBase64 := base64.StdEncoding.EncodeToString(userPhotoBytes)
+	return true, userPhotoBase64, nil
+}
+
 // Get Access Token for the Application
 func getToken() (string, error) {
 
@@ -277,6 +364,55 @@ func getToken() (string, error) {
 	}
 
 	return tokenResponse.AccessToken, nil
+}
+
+// Search user by name and mail
+func ActiveUsers(search string) ([]User, error) {
+	accessToken, err := getToken()
+	if err != nil {
+		return nil, err
+	}
+
+	client := &http.Client{
+		Timeout: time.Second * 10,
+	}
+
+	urlPath := `https://graph.microsoft.com/v1.0/users?$filter=accountEnabled+eq+true`
+	URL, errURL := url.Parse(urlPath)
+	if err != nil {
+		return nil, errURL
+	}
+	query := URL.Query()
+	query.Set("$search", fmt.Sprintf(`"displayName:%s" OR "mail:%s"`, search, search))
+	URL.RawQuery = query.Encode()
+
+	req, err := http.NewRequest("GET", URL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Add("Authorization", "Bearer "+accessToken)
+	req.Header.Add("ConsistencyLevel", "eventual")
+	response, err := client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer response.Body.Close()
+
+	var listUsersResponse ListUSersResponse
+	err = json.NewDecoder(response.Body).Decode(&listUsersResponse)
+	if err != nil {
+		return nil, err
+	}
+
+	// Remove users without email address
+	var users []User
+	for _, user := range listUsersResponse.Value {
+		if user.Email != "" {
+			users = append(users, user)
+		}
+	}
+
+	return users, nil
 }
 
 type TokenResponse struct {

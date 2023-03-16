@@ -3,7 +3,7 @@
 
 <div id="pageTitle">Community List</div>
 
-<div x-data="myCommunitiesData()" x-init="getActiveApprovers(); switchTo('my');">
+<div x-data="myCommunitiesData()" x-init="getActiveApprovers(); setView();">
   
   <div class="flex justify-between">
   <div>
@@ -74,7 +74,7 @@
         Requesting for a new community has been disabled as there aren't any approvers set by the admin to review requests. Contact the admin to resolve the issue.
       </div>
     </div>
-    <div class="bg-white shadow overflow-hidden sm:rounded-md mt-4">
+    <div class="bg-white shadow overflow-hidden sm:rounded-md mt-4" x-show="filteredCommunities">
       <ul role="list" class="divide-y divide-gray-200">
         <template x-for="( Community, index) in filteredCommunities">
           <li>     
@@ -83,7 +83,7 @@
             
               <div class="flex items-center justify-between">
                 <a @click.stop="window.location=`/community/${Community.Id}`">
-                  <p class="text-xl font-medium text-indigo-600 truncate" x-text=" Community.Name" title="Repository name">  test</p>
+                  <p class="text-xl font-medium text-indigo-600 truncate" x-text=" Community.Name" title="Community name">  test</p>
                 </a>
                 <div class="flex items-center justify-between">
                   <div class="ml-2 flex-shrink-0 flex">
@@ -189,12 +189,17 @@
       view: '',
       search: '',
       hasApprovers: false,
-      getCommunity() {
-        this.showSpinner = true
-        this.Communitylist = []
+      setView() {
         const queryString = window.location.search;
         const urlParams = new URLSearchParams(queryString);
         this.search = urlParams.get('search')
+        let v = urlParams.get('view')
+        this.view = v ? v : 'my'
+        this.switchTo(this.view)
+      },
+      getCommunity() {
+        this.showSpinner = true
+        this.Communitylist = []
         
         fetch('/community')
           .then(r => {
