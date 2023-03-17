@@ -17,7 +17,8 @@ BEGIN
 		INSERT INTO [dbo].[ApprovalTypes] (
 				Name, 
 				ApproverUserPrincipalName, 
-				IsActive, 
+				IsActive,
+				IsArchived,
 				Created, 
 				CreatedBy, 
 				Modified, 
@@ -26,6 +27,7 @@ BEGIN
 				@Name,
 				@ApproverUserPrincipalName,
 				@IsActive,
+				false,
 				getDate(),
 				@CreatedBy,
 				getDate(),
