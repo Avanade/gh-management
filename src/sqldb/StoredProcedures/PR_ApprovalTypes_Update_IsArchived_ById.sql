@@ -1,7 +1,7 @@
 CREATE PROCEDURE [dbo].[PR_ApprovalTypes_Update_IsArchived_ById] 
 (
-	@Id INT NOT NULL,
-	@IsArchived BIT NOT NULL,
+	@Id INT,
+	@IsArchived BIT,
 )
 AS
 BEGIN
