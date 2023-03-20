@@ -9,7 +9,13 @@ CREATE PROCEDURE [dbo].[PR_ApprovalTypes_Update_IsArchived_ById]
 AS
 BEGIN
 	DECLARE @Status AS BIT
-	SET @Id = (SELECT Id FROM [dbo].[ApprovalTypes] WHERE Name=@Name AND ApproverUserPrincipalName=@ApproverUserPrincipalName AND IsArchived = 0)
+	SET @Id = (
+		SELECT Id FROM [dbo].[ApprovalTypes] WHERE 
+			Id != @Id AND
+			Name=@Name AND 
+			ApproverUserPrincipalName=@ApproverUserPrincipalName AND 
+			IsArchived = 0
+	)
 	SET @Status = 0
 
 	IF @Id IS NULL
