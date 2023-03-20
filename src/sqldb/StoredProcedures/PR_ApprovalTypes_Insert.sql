@@ -8,14 +8,17 @@ CREATE PROCEDURE [dbo].[PR_ApprovalTypes_Insert]
 AS
 BEGIN
 	DECLARE @Id AS INT
-	SET @Id = (SELECT Id FROM [dbo].[ApprovalTypes] WHERE Name=@Name AND ApproverUserPrincipalName=@ApproverUserPrincipalName)
+	DECLARE @Status AS BIT
+	SET @Id = (SELECT Id FROM [dbo].[ApprovalTypes] WHERE Name=@Name AND ApproverUserPrincipalName=@ApproverUserPrincipalName AND IsArchived = 0)
+	SET @Status = 0
 
 	IF @Id IS NULL
 	BEGIN
 		INSERT INTO [dbo].[ApprovalTypes] (
 				Name, 
 				ApproverUserPrincipalName, 
-				IsActive, 
+				IsActive,
+				IsArchived,
 				Created, 
 				CreatedBy, 
 				Modified, 
@@ -24,12 +27,14 @@ BEGIN
 				@Name,
 				@ApproverUserPrincipalName,
 				@IsActive,
+				0,
 				getDate(),
 				@CreatedBy,
 				getDate(),
 				@CreatedBy
 			)
 		SET @Id = SCOPE_IDENTITY()
+		SET @Status = 1
 	END
-	SELECT @Id Id
+	SELECT @Id Id, @Status Status
 END
