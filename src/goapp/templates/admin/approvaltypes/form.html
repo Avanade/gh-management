@@ -143,6 +143,11 @@
                         Alpine.store('master').modal.show()
                         Alpine.store('master').putData(`/api/approval/type/${this.id}`, data, "Approval type has been saved.", "Go to list of approval types", "/admin/approvaltypes")
                         break;
+                    case 'delete':
+                        data.is_archived = true
+                        Alpine.store('master').modal.show()
+                        Alpine.store('master').putData(`/api/approval/type/${this.id}/archived`, data, "Approval type has been moved archive.", "Go to list of approval types", "/admin/approvaltypes")
+                        break;
                 }
             }
         }

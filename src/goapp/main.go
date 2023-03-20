@@ -139,6 +139,7 @@ func main() {
 	//API FOR APPROVAL TYPES
 	muxApi.HandleFunc("/approval/type", rtApi.CreateApprovalType).Methods("POST")
 	muxApi.HandleFunc("/approval/type/{id}", rtApi.EditApprovalTypeById).Methods("PUT")
+	muxApi.HandleFunc("/approval/type/{id}/archived", rtApi.SetIsArchivedApprovalTypeById).Methods("PUT")
 	muxApi.HandleFunc("/approval/types", rtApi.GetApprovalTypes).Methods("GET")
 	muxApi.HandleFunc("/approval/type/{id}", rtApi.GetApprovalTypeById).Methods("GET")
 
