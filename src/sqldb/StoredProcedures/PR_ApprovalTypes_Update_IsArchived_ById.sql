@@ -1,6 +1,8 @@
 CREATE PROCEDURE [dbo].[PR_ApprovalTypes_Update_IsArchived_ById] 
 (
 	@Id INT,
+	@Name VARCHAR(50),
+	@ApproverUserPrincipalName VARCHAR(50),
 	@IsArchived BIT,
 	@ModifiedBy BIT
 )
