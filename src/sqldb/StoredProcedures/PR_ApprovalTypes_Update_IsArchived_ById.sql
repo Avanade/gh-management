@@ -10,8 +10,8 @@ AS
 BEGIN
 	DECLARE @Status AS BIT
 	DECLARE @IsExist AS INT
-	SET @Id = (
-		SELECT Id FROM [dbo].[ApprovalTypes] WHERE 
+	SET @IsExist = (
+		SELECT COUNT(*) FROM [dbo].[ApprovalTypes] WHERE 
 			Id != @Id AND
 			Name=@Name AND 
 			ApproverUserPrincipalName=@ApproverUserPrincipalName AND 
