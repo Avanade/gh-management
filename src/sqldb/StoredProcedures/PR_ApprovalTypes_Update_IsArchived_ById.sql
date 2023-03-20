@@ -4,7 +4,7 @@ CREATE PROCEDURE [dbo].[PR_ApprovalTypes_Update_IsArchived_ById]
 	@Name VARCHAR(50),
 	@ApproverUserPrincipalName VARCHAR(50),
 	@IsArchived BIT,
-	@ModifiedBy BIT
+	@ModifiedBy VARCHAR(50)
 )
 AS
 BEGIN
