@@ -2,7 +2,7 @@
 (
 	[Id] INT NOT NULL PRIMARY KEY IDENTITY, 
     [Name] VARCHAR(50) NOT NULL,
-    [ApproverUserPrincipalName] VARCHAR(100) NULL,
+    [ApproverUserPrincipalName] VARCHAR(100) NOT NULL,
     [IsArchived] BIT NOT NULL DEFAULT 0,
     [IsActive] BIT NOT NULL DEFAULT 1,
     [Created] DATETIME NOT NULL DEFAULT getdate(), 
