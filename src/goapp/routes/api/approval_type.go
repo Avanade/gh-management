@@ -127,7 +127,13 @@ func SetIsArchivedApprovalTypeById(w http.ResponseWriter, r *http.Request) {
 	json.NewDecoder(r.Body).Decode(&approvalTypeDto)
 
 	id, _ := strconv.Atoi(vars["id"])
-	approvalTypeId, _, err := db.SetIsArchiveApprovalTypeById(id, approvalTypeDto.IsArchived, username)
+	approvalTypeId, _, err := db.SetIsArchiveApprovalTypeById(models.ApprovalType{
+		Id:                        id,
+		Name:                      approvalTypeDto.Name,
+		ApproverUserPrincipalName: approvalTypeDto.ApproverUserPrincipalName,
+		IsArchived:                approvalTypeDto.IsArchived,
+		ModifiedBy:                username,
+	})
 
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)

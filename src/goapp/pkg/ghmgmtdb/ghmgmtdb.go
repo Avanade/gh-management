@@ -1153,14 +1153,16 @@ func UpdateApprovalType(approvalType models.ApprovalType) (int, error) {
 	return int(result[0]["Id"].(int64)), nil
 }
 
-func SetIsArchiveApprovalTypeById(id int, isArchived bool, modifiedBy string) (int, bool, error) {
+func SetIsArchiveApprovalTypeById(approvalType models.ApprovalType) (int, bool, error) {
 	db := ConnectDb()
 	defer db.Close()
 
 	param := map[string]interface{}{
-		"Id":         id,
-		"IsArchived": isArchived,
-		"ModifiedBy": modifiedBy,
+		"Id":                        approvalType.Id,
+		"Name":                      approvalType.Name,
+		"ApproverUserPrincipalName": approvalType.ApproverUserPrincipalName,
+		"IsArchived":                approvalType.IsArchived,
+		"ModifiedBy":                approvalType.ModifiedBy,
 	}
 
 	result, err := db.ExecuteStoredProcedureWithResult("PR_ApprovalTypes_Update_IsArchived_ById", param)
