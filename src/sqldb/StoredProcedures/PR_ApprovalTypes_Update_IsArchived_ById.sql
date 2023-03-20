@@ -8,7 +8,6 @@ CREATE PROCEDURE [dbo].[PR_ApprovalTypes_Update_IsArchived_ById]
 )
 AS
 BEGIN
-	DECLARE @Id AS INT
 	DECLARE @Status AS BIT
 	SET @Id = (SELECT Id FROM [dbo].[ApprovalTypes] WHERE Name=@Name AND ApproverUserPrincipalName=@ApproverUserPrincipalName AND IsArchived = 0)
 	SET @Status = 0

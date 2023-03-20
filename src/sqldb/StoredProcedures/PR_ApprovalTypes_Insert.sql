@@ -27,7 +27,7 @@ BEGIN
 				@Name,
 				@ApproverUserPrincipalName,
 				@IsActive,
-				false,
+				0,
 				getDate(),
 				@CreatedBy,
 				getDate(),
