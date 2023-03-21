@@ -1,13 +1,15 @@
-﻿
-DELETE  
-    PA 
-FROM 
-    [dbo].[ProjectApprovals] PA INNER JOIN [dbo].[ApprovalTypes] AT ON PA.ApprovalTypeId = AT.Id
-WHERE
-    AT.ApproverUserPrincipalName IS NULL
+﻿BEGIN
+    DELETE  
+        PA 
+    FROM 
+        [dbo].[ProjectApprovals] PA INNER JOIN [dbo].[ApprovalTypes] AT ON PA.ApprovalTypeId = AT.Id
+    WHERE
+        AT.ApproverUserPrincipalName IS NULL
+END
 GO
-
-DELETE FROM [dbo].[ApprovalTypes] WHERE ApproverUserPrincipalName IS NULL
+BEGIN
+    DELETE FROM [dbo].[ApprovalTypes] WHERE ApproverUserPrincipalName IS NULL
+END
 GO
 
 CREATE TABLE [dbo].[ApprovalTypes]
