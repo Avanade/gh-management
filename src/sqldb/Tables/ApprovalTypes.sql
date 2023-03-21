@@ -1,16 +1,11 @@
-﻿BEGIN
-    DELETE  
-        PA 
-    FROM 
-        [dbo].[ProjectApprovals] PA INNER JOIN [dbo].[ApprovalTypes] AT ON PA.ApprovalTypeId = AT.Id
-    WHERE
-        AT.ApproverUserPrincipalName IS NULL
-END
-GO
-BEGIN
-    DELETE FROM [dbo].[ApprovalTypes] WHERE ApproverUserPrincipalName IS NULL
-END
-GO
+﻿DELETE  
+    PA 
+FROM 
+    [dbo].[ProjectApprovals] PA INNER JOIN [dbo].[ApprovalTypes] AT ON PA.ApprovalTypeId = AT.Id
+WHERE
+    AT.ApproverUserPrincipalName IS NULL
+
+DELETE FROM [dbo].[ApprovalTypes] WHERE ApproverUserPrincipalName IS NULL
 
 CREATE TABLE [dbo].[ApprovalTypes]
 (
@@ -25,4 +20,3 @@ CREATE TABLE [dbo].[ApprovalTypes]
     [ModifiedBy] VARCHAR(100) NULL
     CONSTRAINT FK_ApprovalTypes_Users FOREIGN KEY (ApproverUserPrincipalName) REFERENCES Users(UserPrincipalName)
 )
-GO
