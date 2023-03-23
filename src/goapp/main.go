@@ -89,9 +89,6 @@ func main() {
 	mux.HandleFunc("/login/github/callback", rtGithub.GithubCallbackHandler)
 	mux.HandleFunc("/login/github/force", rtGithub.GithubForceSaveHandler)
 	mux.HandleFunc("/logout/github", rtGithub.GitHubLogoutHandler)
-	mux.Handle("/checkAvaInnerSource", loadGuidAuthApi(rtGithub.CheckAvaInnerSource))
-	mux.Handle("/checkAvaOpenSource", loadGuidAuthApi(rtGithub.CheckAvaOpenSource))
-	mux.Handle("/clearOrgMembers", loadGuidAuthApi(rtGithub.ClearOrgMembers))
 	muxApi := mux.PathPrefix("/api").Subrouter()
 	mux.Handle("/allusers", loadAzAuthPage(rtApi.GetAllUserFromActiveDirectory))
 
@@ -148,6 +145,9 @@ func main() {
 	// API FOR LOGIC APP
 	muxApi.Handle("/init/indexorgrepos", loadGuidAuthApi(rtApi.InitIndexOrgRepos)).Methods("GET")
 	muxApi.Handle("/indexorgrepos", loadGuidAuthApi(rtApi.IndexOrgRepos)).Methods("GET")
+	muxApi.Handle("/checkAvaInnerSource", loadGuidAuthApi(rtGithub.CheckAvaInnerSource))
+	muxApi.Handle("/checkAvaOpenSource", loadGuidAuthApi(rtGithub.CheckAvaOpenSource))
+	muxApi.Handle("/clearOrgMembers", loadGuidAuthApi(rtGithub.ClearOrgMembers))
 
 	muxAdmin := mux.PathPrefix("/admin").Subrouter()
 	muxAdmin.Handle("", loadAdminPage(rtAdmin.AdminIndex))
@@ -229,8 +229,4 @@ func checkFailedApprovalRequests() {
 			go rtCommunity.ReprocessRequestCommunityApproval()
 		}
 	}
-}
-
-func helloWorld(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprint(w, "Hello World")
 }
