@@ -145,9 +145,9 @@ func main() {
 	// API FOR LOGIC APP
 	muxApi.Handle("/init/indexorgrepos", loadGuidAuthApi(rtApi.InitIndexOrgRepos)).Methods("GET")
 	muxApi.Handle("/indexorgrepos", loadGuidAuthApi(rtApi.IndexOrgRepos)).Methods("GET")
-	muxApi.Handle("/checkAvaInnerSource", loadGuidAuthApi(rtGithub.CheckAvaInnerSource))
-	muxApi.Handle("/checkAvaOpenSource", loadGuidAuthApi(rtGithub.CheckAvaOpenSource))
-	muxApi.Handle("/clearOrgMembers", loadGuidAuthApi(rtGithub.ClearOrgMembers))
+	muxApi.Handle("/checkAvaInnerSource", loadGuidAuthApi(rtGithub.CheckAvaInnerSource)).Methods("GET")
+	muxApi.Handle("/checkAvaOpenSource", loadGuidAuthApi(rtGithub.CheckAvaOpenSource)).Methods("GET")
+	muxApi.Handle("/clearOrgMembers", loadGuidAuthApi(rtGithub.ClearOrgMembers)).Methods("GET")
 
 	muxAdmin := mux.PathPrefix("/admin").Subrouter()
 	muxAdmin.Handle("", loadAdminPage(rtAdmin.AdminIndex))
