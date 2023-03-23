@@ -118,21 +118,30 @@
                 modal.visible = false;
             },
             isValid() {
-                if(
-                    this.form.name &&
-                    this.form.approver.length > 0 &&
-                    this.form.status
-                ){
-                        return true
-                }
-                return false
+                if(!this.form.name) false;
+
+                if(this.form.approver.length == 0) return false;
+
+                if(!this.form.approver[0].id) return false;
+                if(!this.form.approver[0].text) return false;
+
+                if(!this.form.status) return false;
+
+                return true
             },
             onSubmitHandler(){
+                if(!this.isValid()) {
+                    let modal = Alpine.store('master').modal
+                    modal.update('error', 'Error message', 'Invalid input', '', '')
+                    return;
+                }
+
                 const data = {
                             name : this.form.name,
                             approver_user_principal_name : this.form.approver[0].id,
                             is_active : this.form.status == 'true'
                         }
+                    
                 switch (this.action.toLowerCase()) {
                     case 'add':
                         Alpine.store('master').modal.show()
