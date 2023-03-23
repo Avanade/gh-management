@@ -37,6 +37,12 @@ INSERT INTO ApprovalTypes (Id, [Name]) VALUES (2, 'Legal')
 IF NOT EXISTS (SELECT Id FROM ApprovalTypes WHERE Id = 3)
 INSERT INTO ApprovalTypes (Id, [Name]) VALUES (3, 'Security')
 
+DELETE PA FROM [dbo].[ProjectApprovals] PA INNER JOIN [dbo].[ApprovalTypes] AT ON PA.ApprovalTypeId = AT.Id WHERE AT.ApproverUserPrincipalName IS NULL
+
+DELETE FROM [dbo].[ApprovalTypes] WHERE ApproverUserPrincipalName IS NULL
+
+ALTER TABLE [dbo].[ApprovalTypes] ALTER COLUMN [ApproverUserPrincipalName] VARCHAR(100) NOT NULL
+
 SET IDENTITY_INSERT ApprovalTypes OFF
 
 
