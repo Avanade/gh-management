@@ -568,6 +568,7 @@ type Repo struct {
 	TFSProjectReference    string `json:"TFSProjectReference"`
 	Visibility             string `json:"Visibility"`
 	ApprovalStatus         bool   `json:"ApprovalStatus"`
+	ApprovalStatusId       int    `json:"ApprovalStatusId"`
 	CoOwner                string `json:CoOwner`
 	ConfirmAvaIP           bool   `json:ConfirmAvaIP`
 	ConfirmEnabledSecurity bool   `json:ConfirmEnabledSecurity`
