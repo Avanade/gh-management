@@ -29,6 +29,11 @@ func UseTemplate(w *http.ResponseWriter, r *http.Request, page string, pageData 
 		return err
 	}
 
+	hasPhoto, userPhoto, err := session.GetUserPhoto(*w, r)
+	if err != nil {
+		return err
+	}
+
 	approvalSystemUrl := os.Getenv("APPROVAL_SYSTEM_APP_URL")
 	// Data on master page
 	var menu []models.TypMenu
@@ -45,14 +50,16 @@ func UseTemplate(w *http.ResponseWriter, r *http.Request, page string, pageData 
 	var externalLinks []models.TypMenu
 	externalLinks = append(externalLinks, models.TypMenu{Name: "Tech Community Calendar", Url: "https://techcommunitycalendar.com/", IconPath: "/public/icons/calendar.svg", External: true})
 	externalLinks = append(externalLinks, models.TypMenu{Name: "Stack Overflow at Avanade", Url: "https://avanade.stackenterprise.co/", IconPath: "/public/icons/questionmark.svg", External: true})
-	externalLinks = append(externalLinks, models.TypMenu{Name: "Open Innovation Meetup", Url: "https://opentechmeetup.com/", IconPath: "/public/icons/microphone.svg", External: true})
+	externalLinks = append(externalLinks, models.TypMenu{Name: "Open Innovation Meetup", Url: "https://opentechinnovation.com/", IconPath: "/public/icons/microphone.svg", External: true})
 	masterPageData := models.TypHeaders{Menu: menu, ExternalLinks: externalLinks, Page: getUrlPath(r.URL.Path)}
 
 	data := models.TypPageData{
 		Header:    masterPageData,
 		Profile:   sessionaz.Values["profile"],
 		ProfileGH: sessiongh,
-		Content:   pageData}
+		Content:   pageData,
+		HasPhoto:  hasPhoto,
+		UserPhoto: userPhoto}
 
 	tmpl := template.Must(
 		template.ParseFiles("templates/master.html",

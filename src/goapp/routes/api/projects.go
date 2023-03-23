@@ -47,9 +47,28 @@ func GetUserProjects(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	s, _ := json.Marshal(projects)
+	var list []Repo
+	err = json.Unmarshal(s, &list)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	for i, repo := range list {
+		if repo.RepositorySource == "GitHub" {
+			org := os.Getenv("GH_ORG_INNERSOURCE")
+			if repo.Visibility == "Public" {
+				org = os.Getenv("GH_ORG_OPENSOURCE")
+			}
+			list[i].TFSProjectReference = fmt.Sprintf("https://github.com/%s/%s", url.QueryEscape(org), url.QueryEscape(repo.Name))
+		} else {
+			continue
+		}
+	}
+
 	w.WriteHeader(http.StatusOK)
 	w.Header().Set("Content-Type", "application/json")
-	jsonResp, err := json.Marshal(projects)
+	jsonResp, err := json.Marshal(list)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -138,13 +157,17 @@ func GetAllRepositories(w http.ResponseWriter, r *http.Request) {
 	s, _ := json.Marshal(data)
 	var list []Repo
 	err := json.Unmarshal(s, &list)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 	for i, repo := range list {
 		if repo.RepositorySource == "GitHub" {
 			org := os.Getenv("GH_ORG_INNERSOURCE")
 			if repo.Visibility == "Public" {
 				org = os.Getenv("GH_ORG_OPENSOURCE")
 			}
-			list[i].TFSProjectReference = fmt.Sprintf("http://github.com/%s/%s", url.QueryEscape(org), url.QueryEscape(repo.Name))
+			list[i].TFSProjectReference = fmt.Sprintf("https://github.com/%s/%s", url.QueryEscape(org), url.QueryEscape(repo.Name))
 		} else {
 			continue
 		}
@@ -270,7 +293,7 @@ func ImportReposToDatabase(w http.ResponseWriter, r *http.Request) {
 				}
 
 				param := map[string]interface{}{
-
+					"GithubId":     repo.GithubId,
 					"Name":         repo.Name,
 					"Description":  repo.Description,
 					"IsArchived":   repo.IsArchived,
@@ -286,6 +309,124 @@ func ImportReposToDatabase(w http.ResponseWriter, r *http.Request) {
 
 		}(repo)
 	}
+}
+
+func InitIndexOrgRepos(w http.ResponseWriter, r *http.Request) {
+	var repos []gh.Repo
+
+	orgs := []string{os.Getenv("GH_ORG_INNERSOURCE"), os.Getenv("GH_ORG_OPENSOURCE")}
+
+	for _, org := range orgs {
+		reposByOrg, err := gh.GetRepositoriesFromOrganization(org)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		if reposByOrg != nil {
+			repos = append(repos, reposByOrg...)
+		}
+	}
+
+	var wg sync.WaitGroup
+
+	for _, repo := range repos {
+		wg.Add(1)
+		go func(repo gh.Repo) {
+			defer wg.Done()
+
+			visibilityId := 3
+			if repo.Visibility == "private" {
+				visibilityId = 1
+			} else if repo.Visibility == "internal" {
+				visibilityId = 2
+			}
+
+			param := map[string]interface{}{
+				"GithubId":     repo.GithubId,
+				"Name":         repo.Name,
+				"Description":  repo.Description,
+				"IsArchived":   repo.IsArchived,
+				"VisibilityId": visibilityId,
+			}
+
+			isExisting := ghmgmt.Projects_IsExisting(models.TypNewProjectReqBody{Name: repo.Name})
+
+			var err error
+
+			if isExisting {
+				param["Id"] = ghmgmt.GetProjectByName(repo.Name)[0]["Id"]
+				err = ghmgmt.ProjectUpdateByImport(param)
+			} else {
+				err = ghmgmt.ProjectInsertByImport(param)
+			}
+
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+			}
+		}(repo)
+	}
+
+	wg.Wait()
+	w.WriteHeader(http.StatusOK)
+}
+
+func IndexOrgRepos(w http.ResponseWriter, r *http.Request) {
+	var repos []gh.Repo
+
+	orgs := []string{os.Getenv("GH_ORG_INNERSOURCE"), os.Getenv("GH_ORG_OPENSOURCE")}
+
+	for _, org := range orgs {
+		reposByOrg, err := gh.GetRepositoriesFromOrganization(org)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		if reposByOrg != nil {
+			repos = append(repos, reposByOrg...)
+		}
+	}
+
+	var wg sync.WaitGroup
+
+	for _, repo := range repos {
+		wg.Add(1)
+		go func(repo gh.Repo) {
+			defer wg.Done()
+
+			visibilityId := 3
+			if repo.Visibility == "private" {
+				visibilityId = 1
+			} else if repo.Visibility == "internal" {
+				visibilityId = 2
+			}
+
+			param := map[string]interface{}{
+				"GithubId":     repo.GithubId,
+				"Name":         repo.Name,
+				"Description":  repo.Description,
+				"IsArchived":   repo.IsArchived,
+				"VisibilityId": visibilityId,
+			}
+
+			isExisting := ghmgmt.Projects_IsExisting_By_GithubId(models.TypNewProjectReqBody{GithubId: repo.GithubId})
+
+			var err error
+
+			if isExisting {
+				param["Id"] = ghmgmt.GetProjectByGithubId(repo.GithubId)[0]["Id"]
+				err = ghmgmt.ProjectUpdateByImport(param)
+			} else {
+				err = ghmgmt.ProjectInsertByImport(param)
+			}
+
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+			}
+		}(repo)
+	}
+
 	wg.Wait()
 	w.WriteHeader(http.StatusOK)
 }
@@ -299,7 +440,6 @@ func RequestApproval(id int64) {
 			handleError(err)
 		}
 	}
-
 }
 
 func ApprovalSystemRequest(data models.TypProjectApprovals) error {
@@ -419,12 +559,20 @@ type RepositoryList struct {
 }
 
 type Repo struct {
-	Id                  int    `json:"Id"`
-	Name                string `json:"Name"`
-	Description         string `json:"Description"`
-	IsArchived          bool   `json:"IsArchived"`
-	Created             string `json:"Created"`
-	RepositorySource    string `json:"RepositorySource"`
-	TFSProjectReference string `json:"TFSProjectReference"`
-	Visibility          string `json:"Visibility"`
+	Id                     int    `json:"Id"`
+	Name                   string `json:"Name"`
+	Description            string `json:"Description"`
+	IsArchived             bool   `json:"IsArchived"`
+	Created                string `json:"Created"`
+	RepositorySource       string `json:"RepositorySource"`
+	TFSProjectReference    string `json:"TFSProjectReference"`
+	Visibility             string `json:"Visibility"`
+	ApprovalStatus         bool   `json:"ApprovalStatus"`
+	ApprovalStatusId       int    `json:"ApprovalStatusId"`
+	CoOwner                string `json:CoOwner`
+	ConfirmAvaIP           bool   `json:ConfirmAvaIP`
+	ConfirmEnabledSecurity bool   `json:ConfirmEnabledSecurity`
+	CreatedBy              string `json:CreatedBy`
+	Modified               string `json:Modified`
+	ModifiedBy             string `json: ModifiedBy`
 }

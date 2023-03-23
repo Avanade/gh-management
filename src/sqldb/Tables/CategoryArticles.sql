@@ -2,7 +2,7 @@
 CREATE TABLE [dbo].[CategoryArticles](
 	[Id] [int] IDENTITY(1,1) NOT NULL,
 	[Name] [varchar](100) NULL,
-	[Url] [varchar](100) NULL,
+	[Url] [varchar](255) NULL,
 	[Body] [varchar](2000) NULL,
 	[CategoryId] [int] NULL,
 	[Created] [datetime] NULL,

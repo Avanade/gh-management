@@ -2,7 +2,7 @@ CREATE PROCEDURE [dbo].[PR_CategoryArticles_Update]
 (
 			@Id INT,
             @Name VARCHAR(100),
-			@Url VARCHAR(100),
+			@Url VARCHAR(255),
 			@Body VARCHAR(2000),
 			@CategoryId INT,
             @CreatedBy VARCHAR(50),

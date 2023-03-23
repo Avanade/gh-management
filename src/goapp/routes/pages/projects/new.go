@@ -64,16 +64,19 @@ func ProjectsNewHandler(w http.ResponseWriter, r *http.Request) {
 		if existsDb || existsGH {
 			if existsDb {
 				httpResponseError(w, http.StatusBadRequest, "The project name is existing in the database.")
+				return
 			} else if existsGH {
 				httpResponseError(w, http.StatusBadRequest, "The project name is existing in Github.")
+				return
 			}
 		} else {
-			_, err = githubAPI.CreatePrivateGitHubRepository(body)
-			if err != nil {
-				fmt.Println(err)
+			repo, errRepo := githubAPI.CreatePrivateGitHubRepository(body, username.(string))
+			if errRepo != nil {
+				fmt.Println(errRepo)
 				httpResponseError(w, http.StatusInternalServerError, "There is a problem creating the GitHub repository.")
+				return
 			}
-
+			body.GithubId = repo.GetID()
 			_ = ghmgmtdb.PRProjectsInsert(body, username.(string))
 
 			w.WriteHeader(http.StatusOK)

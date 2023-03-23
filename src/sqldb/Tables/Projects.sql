@@ -2,6 +2,7 @@
 (
 	[Id] INT NOT NULL PRIMARY KEY IDENTITY, 
     [Name] VARCHAR(100) NOT NULL, 
+    [GithubId] INT, 
     [CoOwner] VARCHAR(100) NULL, 
     [Description] VARCHAR(MAX) NULL, 
     [ConfirmAvaIP] BIT NOT NULL DEFAULT 0, 
@@ -16,7 +17,7 @@
     [OSSsponsor] [varchar](50) NULL,
 	[Avanadeofferingsassets] [varchar](50) NULL,
 	[Willbecommercialversion] [varchar](50) NULL,
-	[OSSContributionInformation] [varchar](50) NULL,
+	[OSSContributionInformation] [varchar](1000) NULL,
 	[Newcontribution] [varchar](50) NULL,
     [VisibilityId] INT NOT NULL DEFAULT 1,
     [RepositorySource] VARCHAR(15) DEFAULT 'GitHub',
