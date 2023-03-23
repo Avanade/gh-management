@@ -1244,6 +1244,10 @@ func UsersGetEmail(GithubUser string) (string, error) {
 	if err != nil {
 		return "0", err
 	}
-	return result[0]["UserPrincipalName"].(string), err
+	if len(result) == 0 {
+		return "", nil
+	} else {
+		return result[0]["UserPrincipalName"].(string), err
+	}
 
 }
