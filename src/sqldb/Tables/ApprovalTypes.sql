@@ -11,13 +11,3 @@
     [ModifiedBy] VARCHAR(100) NULL
     CONSTRAINT FK_ApprovalTypes_Users FOREIGN KEY (ApproverUserPrincipalName) REFERENCES Users(UserPrincipalName)
 )
-GO
-
--- DELETE PA FROM [dbo].[ProjectApprovals] PA INNER JOIN [dbo].[ApprovalTypes] AT ON PA.ApprovalTypeId = AT.Id WHERE AT.ApproverUserPrincipalName IS NULL
--- GO
-
--- DELETE FROM [dbo].[ApprovalTypes] WHERE ApproverUserPrincipalName IS NULL
--- GO
-
-ALTER TABLE [dbo].[ApprovalTypes] ALTER COLUMN [ApproverUserPrincipalName] VARCHAR(100) NOT NULL
-GO
