@@ -293,7 +293,7 @@ func ImportReposToDatabase(w http.ResponseWriter, r *http.Request) {
 				}
 
 				param := map[string]interface{}{
-
+					"GithubId":     repo.GithubId,
 					"Name":         repo.Name,
 					"Description":  repo.Description,
 					"IsArchived":   repo.IsArchived,
@@ -309,6 +309,124 @@ func ImportReposToDatabase(w http.ResponseWriter, r *http.Request) {
 
 		}(repo)
 	}
+}
+
+func InitIndexOrgRepos(w http.ResponseWriter, r *http.Request) {
+	var repos []gh.Repo
+
+	orgs := []string{os.Getenv("GH_ORG_INNERSOURCE"), os.Getenv("GH_ORG_OPENSOURCE")}
+
+	for _, org := range orgs {
+		reposByOrg, err := gh.GetRepositoriesFromOrganization(org)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		if reposByOrg != nil {
+			repos = append(repos, reposByOrg...)
+		}
+	}
+
+	var wg sync.WaitGroup
+
+	for _, repo := range repos {
+		wg.Add(1)
+		go func(repo gh.Repo) {
+			defer wg.Done()
+
+			visibilityId := 3
+			if repo.Visibility == "private" {
+				visibilityId = 1
+			} else if repo.Visibility == "internal" {
+				visibilityId = 2
+			}
+
+			param := map[string]interface{}{
+				"GithubId":     repo.GithubId,
+				"Name":         repo.Name,
+				"Description":  repo.Description,
+				"IsArchived":   repo.IsArchived,
+				"VisibilityId": visibilityId,
+			}
+
+			isExisting := ghmgmt.Projects_IsExisting(models.TypNewProjectReqBody{Name: repo.Name})
+
+			var err error
+
+			if isExisting {
+				param["Id"] = ghmgmt.GetProjectByName(repo.Name)[0]["Id"]
+				err = ghmgmt.ProjectUpdateByImport(param)
+			} else {
+				err = ghmgmt.ProjectInsertByImport(param)
+			}
+
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+			}
+		}(repo)
+	}
+
+	wg.Wait()
+	w.WriteHeader(http.StatusOK)
+}
+
+func IndexOrgRepos(w http.ResponseWriter, r *http.Request) {
+	var repos []gh.Repo
+
+	orgs := []string{os.Getenv("GH_ORG_INNERSOURCE"), os.Getenv("GH_ORG_OPENSOURCE")}
+
+	for _, org := range orgs {
+		reposByOrg, err := gh.GetRepositoriesFromOrganization(org)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		if reposByOrg != nil {
+			repos = append(repos, reposByOrg...)
+		}
+	}
+
+	var wg sync.WaitGroup
+
+	for _, repo := range repos {
+		wg.Add(1)
+		go func(repo gh.Repo) {
+			defer wg.Done()
+
+			visibilityId := 3
+			if repo.Visibility == "private" {
+				visibilityId = 1
+			} else if repo.Visibility == "internal" {
+				visibilityId = 2
+			}
+
+			param := map[string]interface{}{
+				"GithubId":     repo.GithubId,
+				"Name":         repo.Name,
+				"Description":  repo.Description,
+				"IsArchived":   repo.IsArchived,
+				"VisibilityId": visibilityId,
+			}
+
+			isExisting := ghmgmt.Projects_IsExisting_By_GithubId(models.TypNewProjectReqBody{GithubId: repo.GithubId})
+
+			var err error
+
+			if isExisting {
+				param["Id"] = ghmgmt.GetProjectByGithubId(repo.GithubId)[0]["Id"]
+				err = ghmgmt.ProjectUpdateByImport(param)
+			} else {
+				err = ghmgmt.ProjectInsertByImport(param)
+			}
+
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+			}
+		}(repo)
+	}
+
 	wg.Wait()
 	w.WriteHeader(http.StatusOK)
 }
@@ -322,7 +440,6 @@ func RequestApproval(id int64) {
 			handleError(err)
 		}
 	}
-
 }
 
 func ApprovalSystemRequest(data models.TypProjectApprovals) error {
@@ -451,6 +568,7 @@ type Repo struct {
 	TFSProjectReference    string `json:"TFSProjectReference"`
 	Visibility             string `json:"Visibility"`
 	ApprovalStatus         bool   `json:"ApprovalStatus"`
+	ApprovalStatusId       int    `json:"ApprovalStatusId"`
 	CoOwner                string `json:CoOwner`
 	ConfirmAvaIP           bool   `json:ConfirmAvaIP`
 	ConfirmEnabledSecurity bool   `json:ConfirmEnabledSecurity`

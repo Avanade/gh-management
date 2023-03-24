@@ -87,9 +87,9 @@ func main() {
 	mux.HandleFunc("/login/github/callback", rtGithub.GithubCallbackHandler)
 	mux.HandleFunc("/login/github/force", rtGithub.GithubForceSaveHandler)
 	mux.HandleFunc("/logout/github", rtGithub.GitHubLogoutHandler)
-
 	muxApi := mux.PathPrefix("/api").Subrouter()
 	mux.Handle("/allusers", loadAzAuthPage(rtApi.GetAllUserFromActiveDirectory))
+
 	muxApi.Handle("/activity/type", loadAzGHAuthPage(rtApi.GetActivityTypes)).Methods("GET")
 	muxApi.Handle("/activity/type", loadAzGHAuthPage(rtApi.CreateActivityType)).Methods("POST")
 	muxApi.Handle("/activity", loadAzGHAuthPage(rtApi.CreateActivity)).Methods("POST")
@@ -106,6 +106,8 @@ func main() {
 	muxApi.Handle("/community/getCommunitiesisexternal/{isexternal}", loadAzGHAuthPage(rtApi.GetCommunitiesIsexternal))
 	muxApi.Handle("/contributionarea", loadAzGHAuthPage(rtApi.CreateContributionAreas)).Methods("POST")
 	muxApi.Handle("/contributionarea", loadAzGHAuthPage(rtApi.GetContributionAreas)).Methods("GET")
+	muxApi.Handle("/contributionarea", loadAzGHAuthPage(rtApi.UpdateContributionArea)).Methods("PUT")
+	muxApi.Handle("/contributionarea/{id}", loadAzGHAuthPage(rtApi.GetContributionAreaById)).Methods("GET")
 	muxApi.Handle("/contributionarea/activity/{id}", loadAzGHAuthPage(rtApi.GetContributionAreasByActivityId)).Methods("GET")
 	muxApi.Handle("/Category", loadAzGHAuthPage(rtApi.CategoryAPIHandler))
 	muxApi.Handle("/Category/list", loadAzGHAuthPage(rtApi.CategoryListAPIHandler))
@@ -134,8 +136,16 @@ func main() {
 	//API FOR APPROVAL TYPES
 	muxApi.HandleFunc("/approval/type", rtApi.CreateApprovalType).Methods("POST")
 	muxApi.HandleFunc("/approval/type/{id}", rtApi.EditApprovalTypeById).Methods("PUT")
+	muxApi.HandleFunc("/approval/type/{id}/archived", rtApi.SetIsArchivedApprovalTypeById).Methods("PUT")
 	muxApi.HandleFunc("/approval/types", rtApi.GetApprovalTypes).Methods("GET")
 	muxApi.HandleFunc("/approval/type/{id}", rtApi.GetApprovalTypeById).Methods("GET")
+
+	// API FOR LOGIC APP
+	muxApi.Handle("/init/indexorgrepos", loadGuidAuthApi(rtApi.InitIndexOrgRepos)).Methods("GET")
+	muxApi.Handle("/indexorgrepos", loadGuidAuthApi(rtApi.IndexOrgRepos)).Methods("GET")
+	muxApi.Handle("/checkAvaInnerSource", loadGuidAuthApi(rtGithub.CheckAvaInnerSource)).Methods("GET")
+	muxApi.Handle("/checkAvaOpenSource", loadGuidAuthApi(rtGithub.CheckAvaOpenSource)).Methods("GET")
+	muxApi.Handle("/clearOrgMembers", loadGuidAuthApi(rtGithub.ClearOrgMembers)).Methods("GET")
 
 	muxAdmin := mux.PathPrefix("/admin").Subrouter()
 	muxAdmin.Handle("", loadAdminPage(rtAdmin.AdminIndex))
@@ -144,7 +154,10 @@ func main() {
 	muxAdmin.Handle("/approvaltypes", loadAdminPage(rtAdmin.ListApprovalTypes))
 	muxAdmin.Handle("/communityapprovers", loadAdminPage(rtCommunity.CommunityApproverHandler))
 	muxAdmin.Handle("/approvaltype/{action:add}", loadAdminPage(rtAdmin.ApprovalTypeForm))
-	muxAdmin.Handle("/approvaltype/{action:view|edit}/{id}", loadAdminPage(rtAdmin.ApprovalTypeForm))
+	muxAdmin.Handle("/approvaltype/{action:view|edit|delete}/{id}", loadAdminPage(rtAdmin.ApprovalTypeForm))
+	muxAdmin.Handle("/contributionarea", loadAdminPage(rtAdmin.ListContributionAreas))
+	muxAdmin.Handle("/contributionarea/{action:add}", loadAdminPage(rtAdmin.ContributionAreasForm))
+	muxAdmin.Handle("/contributionarea/{action:view|edit}/{id}", loadAdminPage(rtAdmin.ContributionAreasForm))
 
 	muxApi.HandleFunc("/approvals/project/callback", rtProjects.UpdateApprovalStatusProjects).Methods("POST")
 	muxApi.HandleFunc("/approvals/project/reassign/callback", rtProjects.UpdateApprovalReassignApprover)
@@ -178,6 +191,13 @@ func main() {
 func loadAzAuthPage(f func(w http.ResponseWriter, r *http.Request)) *negroni.Negroni {
 	return negroni.New(
 		negroni.HandlerFunc(session.IsAuthenticated),
+		negroni.Wrap(http.HandlerFunc(f)),
+	)
+}
+
+func loadGuidAuthApi(f func(w http.ResponseWriter, r *http.Request)) *negroni.Negroni {
+	return negroni.New(
+		negroni.HandlerFunc(session.IsGuidAuthenticated),
 		negroni.Wrap(http.HandlerFunc(f)),
 	)
 }

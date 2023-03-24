@@ -36,6 +36,7 @@ type TypMenu struct {
 
 type TypNewProjectReqBody struct {
 	Id                      string `json:"id"`
+	GithubId                int64  `json:"githubId"`
 	Name                    string `json:"name"`
 	Coowner                 string `json:"coowner"`
 	Description             string `json:"description"`

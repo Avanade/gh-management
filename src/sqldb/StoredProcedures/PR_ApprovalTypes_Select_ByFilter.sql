@@ -3,14 +3,15 @@ CREATE PROCEDURE [dbo].[PR_ApprovalTypes_Select_ByFilter](
 	@Filter INT = 0,
 	@Search VARCHAR(50) = '',
 	@OrderBy VARCHAR(50) = 'Name',
-	@OrderType VARCHAR(5) = 'ASC'
+	@OrderType VARCHAR(5) = 'ASC',
+	@IsArchived BIT = 0
 )
 AS
 BEGIN
 	SELECT * FROM [dbo].[ApprovalTypes]
 	WHERE
-		Name LIKE '%'+@search+'%' OR
-		ApproverUserPrincipalName LIKE '%'+@search+'%'
+		(Name LIKE '%'+@search+'%' OR
+		ApproverUserPrincipalName LIKE '%'+@search+'%') AND IsArchived = @IsArchived
 	  ORDER BY
 		CASE WHEN @OrderType = 'ASC' THEN
 			CASE @OrderBy

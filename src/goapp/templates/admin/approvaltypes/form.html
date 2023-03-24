@@ -3,7 +3,7 @@
     action : '{{ .Action }}',
     id : '{{ .Id }}'
 })" class="space-y-8 divide-y divide-gray-200">
-<fieldset x-bind:disabled="action.toLowerCase() == 'view'">
+<fieldset x-bind:disabled="action.toLowerCase() == 'view' || action.toLowerCase() == 'delete'">
     <div class="space-y-8 divide-y divide-gray-200 sm:space-y-5">
         <div>
             <div>
@@ -56,16 +56,16 @@
             </div>
           </div>
     </div>
-    <div class="pt-5">
-        <div class="flex justify-end">
-            <a href="/admin/approvaltypes" type="button" class="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">Back</a>
-            <button 
-                @click.prevent="onSubmitHandler" 
-                class="ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 disabled:bg-orange-200"
-                x-bind:disabled="!isValid()":class="action == 'View' ? 'hidden' : ''">Submit</button>
-        </div>
-    </div>
 </fieldset>
+<div class="pt-5">
+    <div class="flex justify-end">
+        <a href="/admin/approvaltypes" type="button" class="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">Back</a>
+        <button 
+            @click.prevent="onSubmitHandler" 
+            class="ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 disabled:bg-orange-200"
+            x-bind:disabled="!isValid()":class="action == 'View'? 'hidden' : ''"><p x-text="action == 'Delete' ? 'Delete' : 'Submit'"></p></button>
+    </div>
+</div>
 </form>
 
 <script src="/public/components/combobox.js"></script>
@@ -118,21 +118,30 @@
                 modal.visible = false;
             },
             isValid() {
-                if(
-                    this.form.name &&
-                    this.form.approver.length > 0 &&
-                    this.form.status
-                ){
-                        return true
-                }
-                return false
+                if(!this.form.name) false;
+
+                if(this.form.approver.length == 0) return false;
+
+                if(!this.form.approver[0].id) return false;
+                if(!this.form.approver[0].text) return false;
+
+                if(!this.form.status) return false;
+
+                return true
             },
             onSubmitHandler(){
+                if(!this.isValid()) {
+                    let modal = Alpine.store('master').modal
+                    modal.update('error', 'Error message', 'Invalid input', '', '')
+                    return;
+                }
+
                 const data = {
                             name : this.form.name,
                             approver_user_principal_name : this.form.approver[0].id,
                             is_active : this.form.status == 'true'
                         }
+                    
                 switch (this.action.toLowerCase()) {
                     case 'add':
                         Alpine.store('master').modal.show()
@@ -142,6 +151,11 @@
                     case 'edit':
                         Alpine.store('master').modal.show()
                         Alpine.store('master').putData(`/api/approval/type/${this.id}`, data, "Approval type has been saved.", "Go to list of approval types", "/admin/approvaltypes")
+                        break;
+                    case 'delete':
+                        data.is_archived = true
+                        Alpine.store('master').modal.show()
+                        Alpine.store('master').putData(`/api/approval/type/${this.id}/archived`, data, "Approval type has been moved archive.", "Go to list of approval types", "/admin/approvaltypes")
                         break;
                 }
             }

@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[PR_Projects_Insert]
 (
 	@Name VARCHAR(50),
+	@GithubId INT,
 	@CoOwner VARCHAR(100) = NULL,
 	@Description VARCHAR(1000),
 	@IsArchived BIT = 0,
@@ -23,6 +24,7 @@ IF @Created IS NULL
 DECLARE @ResultTable TABLE(Id INT);
 
 INSERT INTO Projects (
+	GithubId,
 	[Name],
 	CoOwner,
 	[Description],
@@ -42,6 +44,7 @@ INSERT INTO Projects (
 	ECATTReference)
 OUTPUT INSERTED.Id INTO @ResultTable
 VALUES (
+	@GithubId,
 	@Name,
 	@CoOwner,
 	@Description,

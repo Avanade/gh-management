@@ -2,6 +2,7 @@
 (
 	[Id] INT NOT NULL PRIMARY KEY IDENTITY, 
     [Name] VARCHAR(100) NOT NULL, 
+    [GithubId] INT, 
     [CoOwner] VARCHAR(100) NULL, 
     [Description] VARCHAR(MAX) NULL, 
     [ConfirmAvaIP] BIT NOT NULL DEFAULT 0, 

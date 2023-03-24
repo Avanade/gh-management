@@ -122,6 +122,18 @@ func IsGHAuthenticated(w http.ResponseWriter, r *http.Request, next http.Handler
 	}
 }
 
+func IsGuidAuthenticated(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
+	// Check header if authenticated
+	_, err := auth.VerifyAccessToken(r)
+	// RETURN ERROR
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	// RETURN SUCCESS
+	next(w, r)
+}
+
 func GetGitHubUserData(w http.ResponseWriter, r *http.Request) (models.TypGitHubUser, error) {
 	session, err := Store.Get(r, "gh-auth-session")
 	if err != nil {
