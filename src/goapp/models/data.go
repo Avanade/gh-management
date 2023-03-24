@@ -206,3 +206,9 @@ type TypRelatedCommunity struct {
 	ParentCommunityId  int `json:"ParentCommunityId"`
 	RelatedCommunityId int `json:"RelatedCommunityId"`
 }
+
+type TypUpdateApprovalReAssign struct {
+	Id            string `json:"id"`
+	ApproverEmail string `json:"ApproverEmail"`
+	Username      string `json:"Username"`
+}

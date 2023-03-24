@@ -437,8 +437,8 @@ func ReprocessRequestApproval() {
 }
 
 type RepositoryList struct {
-	Data  []Repo     `json:"data"`
-	Total int        `json:"total"`
+	Data  []Repo `json:"data"`
+	Total int    `json:"total"`
 }
 
 type Repo struct {
@@ -457,4 +457,4 @@ type Repo struct {
 	CreatedBy              string `json:CreatedBy`
 	Modified               string `json:Modified`
 	ModifiedBy             string `json: ModifiedBy`
-}  
+}
