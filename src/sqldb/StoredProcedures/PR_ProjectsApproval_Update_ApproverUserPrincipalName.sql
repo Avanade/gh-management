@@ -1,9 +1,4 @@
- 
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-create PROCEDURE [dbo].[PR_ProjectsApproval_Update_ApproverUserPrincipalName]
+CREATE PROCEDURE [dbo].[PR_ProjectsApproval_Update_ApproverUserPrincipalName]
 	@Id uniqueidentifier,
 	@ApproverEmail varchar(100),
  	@Username VARCHAR(100)
