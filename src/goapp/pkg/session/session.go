@@ -102,21 +102,24 @@ func IsAuthenticated(w http.ResponseWriter, r *http.Request, next http.HandlerFu
 
 func IsGHAuthenticated(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
 	// Check session if there is saved user profile
+	//url := fmt.Sprintf("/loginredirect?redirect=%v", r.URL)
+	url := fmt.Sprintf("/login/github?redirect=%v", r.URL)
 	session, err := Store.Get(r, "gh-auth-session")
 	if err != nil {
 		c := http.Cookie{
 			Name:   "gh-auth-session",
 			MaxAge: -1}
 		http.SetCookie(w, &c)
-		http.Redirect(w, r, "/login/github", http.StatusTemporaryRedirect)
+		//http.Redirect(w, r, "/login/github", http.StatusTemporaryRedirect)
+		http.Redirect(w, r, url, http.StatusTemporaryRedirect)
 		return
 	}
 
 	if _, ok := session.Values["ghProfile"]; !ok || !session.Values["ghIsValid"].(bool) {
 
 		// Asks user to login if there is no saved user profile
-		http.Redirect(w, r, "/error/ghlogin", http.StatusTemporaryRedirect)
-
+		//http.Redirect(w, r, "/error/ghlogin", http.StatusTemporaryRedirect)
+		http.Redirect(w, r, url, http.StatusTemporaryRedirect)
 	} else {
 		next(w, r)
 	}
