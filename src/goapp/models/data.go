@@ -106,6 +106,10 @@ type TypProjectApprovals struct {
 	Willbecommercialversion    string
 	OSSContributionInformation string
 	RequestStatus              string
+	ApproveUrl                 string
+	RejectUrl                  string
+	ApproveText                string
+	RejectText                 string
 }
 
 type TypApprovalSystemPost struct {
@@ -206,4 +210,15 @@ type TypCommunityApprovers struct {
 type TypRelatedCommunity struct {
 	ParentCommunityId  int `json:"ParentCommunityId"`
 	RelatedCommunityId int `json:"RelatedCommunityId"`
+}
+
+type TypUpdateApprovalReAssign struct {
+	Id                  string `json:"id"`
+	ApproverEmail       string `json:"ApproverEmail"`
+	Username            string `json:"Username"`
+	ApplicationId       string `json:"ApplicationId"`
+	ApplicationModuleId string `json:"ApplicationModuleId"`
+	ItemId              string `json:"itemId"`
+	ApproveText         string `json:"ApproveText"`
+	RejectText          string `json:"RejectText"`
 }
