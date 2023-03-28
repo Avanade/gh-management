@@ -171,7 +171,11 @@ func UpdateApprovalReassignApprover(w http.ResponseWriter, r *http.Request) {
 			OSSContributionInformation: v["OSSContributionInformation"].(string),
 			RequestStatus:              v["RequestStatus"].(string),
 		}
-
+		data.ApproveUrl = fmt.Sprintf("%s/response/%s/%s/%s/1", os.Getenv("APPROVAL_SYSTEM_APP_BaseURL"), req.ApplicationId, req.ApplicationModuleId, req.ItemId)
+		data.RejectUrl = fmt.Sprintf("%s/response/%s/%s/%s/0", os.Getenv("APPROVAL_SYSTEM_APP_BaseURL"), req.ApplicationId, req.ApplicationModuleId, req.ItemId)
+		data.ApproveText = req.ApproveText
+		data.RejectText = req.RejectText
+		fmt.Println(data.ApproveUrl)
 		err = SendReassignEmail(data)
 
 	}
@@ -220,6 +224,28 @@ func SendReassignEmail(data models.TypProjectApprovals) error {
 			</tr>
 		</table>
 		<p>For more information, send an email to <a href="mailto:|RequesterUserPrincipalName|">|RequesterUserPrincipalName|</a></p>
+		
+		<table style="margin: 10px 0;width:100%; text-align: center;">
+        <tr>
+            <td colspan="5" style="padding: 5px 0;">To process your response, click any of the buttons below:</td>
+        </tr>
+        
+        <tr style="color: white;">
+            <td style="padding: 5px 0px; width: 20%; "></td>
+            <td style="padding: 5px 0px; width: 26%; background-color: green;">
+                <a href="|ApproveUrl|" style="color: white;">
+                    |ApproveText|
+                </a>
+            </td>
+            <td style="padding: 5px 0px; width: 8%; "></td>
+            <td style="padding: 5px 0px; width: 26%; background-color: red;">
+                <a href="|RejectUrl|" style="color: white;">
+                    |RejectText|
+                </a>
+            </td>
+            <td style="padding: 5px 0px; width: 20%; "></td>
+        </tr>
+    </table>
 		`
 	replacer := strings.NewReplacer("|ApproverUserPrincipalName|", data.ApproverUserPrincipalName,
 		"|RequesterName|", data.RequesterName,
@@ -234,6 +260,10 @@ func SendReassignEmail(data models.TypProjectApprovals) error {
 		"|Avanadeofferingsassets|", data.Avanadeofferingsassets,
 		"|Willbecommercialversion|", data.Willbecommercialversion,
 		"|OSSContributionInformation|", data.OSSContributionInformation,
+		"|ApproveUrl|", data.ApproveUrl,
+		"|RejectUrl|", data.RejectUrl,
+		"|ApproveText|", data.ApproveText,
+		"|RejectText|", data.RejectText,
 	)
 
 	//buf := new(bytes.Buffer)
