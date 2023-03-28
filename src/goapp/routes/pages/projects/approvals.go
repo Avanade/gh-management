@@ -175,7 +175,7 @@ func UpdateApprovalReassignApprover(w http.ResponseWriter, r *http.Request) {
 		data.RejectUrl = fmt.Sprintf("%s/response/%s/%s/%s/0", os.Getenv("APPROVAL_SYSTEM_APP_BaseURL"), req.ApplicationId, req.ApplicationModuleId, req.ItemId)
 		data.ApproveText = req.ApproveText
 		data.RejectText = req.RejectText
-		fmt.Println(data.ApproveUrl)
+
 		err = SendReassignEmail(data)
 
 	}
