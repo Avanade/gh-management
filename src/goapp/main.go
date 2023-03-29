@@ -80,6 +80,7 @@ func main() {
 	mux.Handle("/community", loadAzGHAuthPage(rtCommunity.GetUserCommunitylist))
 	mux.Handle("/community/{id}/onboarding", loadAzGHAuthPage(rtCommunity.CommunityOnBoarding))
 	mux.HandleFunc("/loginredirect", rtPages.LoginRedirectHandler).Methods("GET")
+	mux.HandleFunc("/gitredirect", rtPages.GitredirectHandler).Methods("GET")
 	mux.HandleFunc("/login/azure", rtAzure.LoginHandler)
 	mux.HandleFunc("/login/azure/callback", rtAzure.CallbackHandler)
 	mux.HandleFunc("/logout/azure", rtAzure.LogoutHandler)
