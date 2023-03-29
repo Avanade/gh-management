@@ -165,10 +165,9 @@
                 this.form.categoryArticles.push(this.categoryArticle)
                 this.form.CategoryName = this.form.CategoryNames[0]["text"].toString()
                 this.form.categoryId =Number( this.form.CategoryNames[0]["id"].toString())
-                console.log( this.form.categoryId )
+            
                 postData = this.form;
-                console.log( "postData")
-                console.log( postData)
+             
                  Alpine.store('master').postData('/api/CategoryArticlesUpdate', postData, "Your category has been created.",
                       "Go to category list", "/guidance")
 
@@ -211,7 +210,7 @@
                                 this.form.body = body[0]["Body"]
                                 this.form.CategoryName = body[0]["CategoryName"]
                                 this.form.categoryId = body[0]["CategoryId"]
-                                console.log(this.form)
+                            
                                 this.form.CategoryNames.push({id:this.form.id ,text:this.form.CategoryName})
                                 
                             })

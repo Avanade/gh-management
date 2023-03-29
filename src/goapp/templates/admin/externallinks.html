@@ -1,76 +1,64 @@
 {{ define "content" }}
 
 <div id="pageTitle"> External Links</div>
-    <div>Customize ur External links- icon<div>
+    {{/* <div>Customize ur External links- icon<div> */}}
 {{/* --------------------------------------------- */}}
 <br><br>
 
 
 <style>
-* {
-  box-sizing: border-box;
-}
+    * {
+    box-sizing: border-box;
+    }
 
-.column {
-  float: left;
+    .column {
+    float: left;
 
-  padding: 10px;
-}
+    padding: 5px;
+    }
 
-.row:after {
-  content: "";
-  display: table;
-  clear: both;
-}
+    .row:after {
+    content: "";
+    display: table;
+    clear: both;
+    }
 </style>
 
 
 <div x-data="ExternalLinksPage()" class="relative inline-block text-left">
 
-        <div>
-        icun
-            <i class="fa fa-academic-cap"></i>
-        </div>
-
     <div class="row" name="row1">
+    
         <div class="column">
             <span> Current Icon </span>
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+            {{/* <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
-            </svg>
+            </svg> */}}
         </div>
 
         <div class="column">
-            <button @click="TechCommunityCalendar=true" @click.away="TechCommunityCalendar=false" type="button" class="inline-flex w-full justify-center gap-x-1.5 rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50" id="menu-button" aria-expanded="true" aria-haspopup="true">
+            <button @click="TechCommunityCalendar=true"
+                    @click.away="TechCommunityCalendar=false"
+                    type="button"
+                    class="inline-flex w-full justify-center gap-x-1.5 rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50" id="menu-button" aria-expanded="true" aria-haspopup="true">
                 <svg class="mr-2 h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                     <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
                 </svg>
-                <span>Tech Community Calendar</span>
+                <span x-text="TechCommunityCalendarCurrentIcon">Tech Community Calendar</span>
             </button>
 
             <div x-show="TechCommunityCalendar" class="absolute z-10 w-auto divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="menu-button" tabindex="-1" >
 
-                <div class="py-1" role="none">
-
-                    <!-- Active: "bg-gray-100 text-gray-900", Not Active: "text-gray-700" -->
-                    <a href="#" class="text-gray-700 group flex items-center px-4 py-2 text-sm" role="menuitem" tabindex="-1" id="menu-item-0">
+                <div class="py-1 hover:bg-[#fff2eb]" role="none">
+                    <a @click="onChangeTechCommCalendar() " class=" cursor-pointer text-gray-700 group flex items-center px-4 py-2 text-sm" role="menuitem" tabindex="-1" id="menu-item-0">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
                         </svg>
                         <span> Tech User Group</span>
                     </a>
- 
-                    {{/* <a href="#" class="text-gray-700 group flex items-center px-4 py-2 text-sm" role="menuitem" tabindex="-1" id="menu-item-1">
-                        <svg class="mr-3 h-5 w-5 text-gray-400 group-hover:text-gray-500" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                            <path d="M7 3.5A1.5 1.5 0 018.5 2h3.879a1.5 1.5 0 011.06.44l3.122 3.12A1.5 1.5 0 0117 6.622V12.5a1.5 1.5 0 01-1.5 1.5h-1v-3.379a3 3 0 00-.879-2.121L10.5 5.379A3 3 0 008.379 4.5H7v-1z" />
-                            <path d="M4.5 6A1.5 1.5 0 003 7.5v9A1.5 1.5 0 004.5 18h7a1.5 1.5 0 001.5-1.5v-5.879a1.5 1.5 0 00-.44-1.06L9.44 6.439A1.5 1.5 0 008.378 6H4.5z" />
-                        </svg>
-                        <span> Duplicate</span>
-                    </a> */}}
-
                 </div>
 
-                <div class="py-1" role="none">
+                {{/* <div class="py-1" role="none">
 
                     <!-- Active: "bg-gray-100 text-gray-900", Not Active: "text-gray-700" -->
                     <a href="#" class="text-gray-700 group flex items-center px-4 py-2 text-sm" role="menuitem" tabindex="-1" id="menu-item-0">
@@ -92,7 +80,7 @@
                         <span> Tech User Group</span>
                     </a>
 
-                </div>
+                </div> */}}
 
             </div>
 
@@ -226,13 +214,31 @@
     <br>
     <!--BUTTON-->
     <div> <!--button-->
-        <button type="button" class="inline-flex items-center gap-x-1.5 rounded-md bg-[#FF5800] hover:bg-[#FF4300] py-2 px-3 text-sm font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
+        <button @click="saveIcons()" type="button" class="inline-flex items-center gap-x-1.5 rounded-md bg-[#FF5800] hover:bg-[#FF4300] py-2 px-3 text-sm font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
             <path stroke-linecap="round" stroke-linejoin="round" d="M9 8.25H7.5a2.25 2.25 0 00-2.25 2.25v9a2.25 2.25 0 002.25 2.25h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25H15M9 12l3 3m0 0l3-3m-3 3V2.25" />
             </svg>
-        <span class="ml-2">Save</span>
+            <span class="ml-2">Save</span>
         </button>
     </div>
+
+
+    <!--POST TESTING---SHOULD BE HIDDEN-->
+    <div class="mt-10">
+        <div class="relative">
+        <label for="name" class="inline-block">Testing Only -Hide later</label>
+            <label for="name" class="absolute -top-2 left-2 inline-block bg-white px-2 text-xs font-medium text-gray-900">Your SVG here</label>
+            <input x-model="InputSVG" type="text" name="name" id="name" class="rounded-md border-0 py-5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-[#FF5800] sm:text-sm sm:leading-6" placeholder="....." autocomplete="nope">
+            
+            <label for="name" class="absolute -top-2 left-2 inline-block bg-white px-2 text-xs font-medium text-gray-900">SVG Name</label>
+            <input x-model="SVGName" type="text" class="rounded-md border-0 py-5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-[#FF5800] sm:text-sm sm:leading-6" placeholder="-----" autocomplete="nope">
+
+            <button @click="saveSVG()" type="button" class="mt-2 items-center gap-x-1.5 rounded-md bg-[#FF5800] hover:bg-[#FF4300] py-2 px-3 text-sm font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
+                <span class="ml-1">Save SVG</span>
+            </button>
+        </div>
+    </div>
+    <!--POST TESTING---SHOULD BE HIDDEN-->
 
 </div>
 
@@ -244,11 +250,43 @@
 <script type="text/javascript">
     function ExternalLinksPage() {
         return {
+            //Icon dropdown values
             TechCommunityCalendar: true,
             StackOverflowAvanade: false,
             OpenInnovationMeetup: false,
-            saveIcon() {
 
+            //
+            TechCommunityCalendarCurrentIcon: '',
+
+            InputSVG: '',
+            SVGName: '',
+            onChangeTechCommCalendar() {
+                this.TechCommunityCalendarCurrentIcon = 'Tech User Group'
+                console.log("Icon TechCommCalendar changed to ---> " + this.TechCommunityCalendarCurrentIcon)
+                return
+            },
+            onChangeStackOverflowAvanade() {
+                console.log("Icon StackOverflowAvanade changed to ---> ")
+                return
+            },
+            onChangeOpenInnovationMeetup() {
+                console.log("Icon OpenInnovationMeetup changed to ---> ")
+                return
+            },            
+            saveIcons() {
+                console.log("SVG ICONS successfully save to database!")
+                return
+            },
+            saveSVG() {
+
+                if(this.InputSVG === '' || this.SVGName ==='') {
+                    console.log("SVG not found, Please put SVG code.")
+                    console.clear()
+                    return
+                }
+
+                console.log("SVG successfully saved to database!")
+                return
             },
         }   
     }
