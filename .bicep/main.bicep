@@ -1,9 +1,9 @@
+param resourceName string = 'Ghmgm'
 param env string
 param location string = resourceGroup().location
 param LAManageIdentityName string
 
-var postfix = '${uniqueString(resourceGroup().id)}${env}'
-var logicAppName = 'LA${postfix}'
+var logicAppName = '${resourceName}LA${env}'
 var fileShare = '${toLower(logicAppName)}fs'
 var accountKey = LAStorageAccount.listKeys().keys[0].value
 var accountName = LAStorageAccount.name
@@ -14,7 +14,7 @@ resource LAManageIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2018
 }
 
 resource LAStorageAccount 'Microsoft.Storage/storageAccounts@2022-09-01' = {
-  name: toLower('sa${postfix}')
+  name: toLower('${resourceName}sa${env}')
   location: location
   sku: {
     name: 'Standard_LRS'
@@ -47,7 +47,7 @@ resource LAStorageAccount 'Microsoft.Storage/storageAccounts@2022-09-01' = {
 }
 
 resource LAAppServicePlan 'Microsoft.Web/serverfarms@2022-03-01' = {
-  name: 'ASP${postfix}'
+  name: '${resourceName}ASP${env}'
   location: location
   sku: {
     name: 'WS1'
