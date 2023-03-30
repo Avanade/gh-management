@@ -9,7 +9,7 @@
             "type": "ManagedServiceIdentity"
           },
           "method": "GET",
-          "uri": "@parameters('IndexOrgReposEndpoint')"
+          "uri": "@parameters('GHMgmDomain')/api/indexorgrepos"
         },
         "runAfter": {},
         "trackedProperties": {},

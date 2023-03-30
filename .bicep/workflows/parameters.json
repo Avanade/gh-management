@@ -1,18 +1,6 @@
 {
-    "CleaupOrganizationEndpoint": {
+    "GHMgmDomain": {
         "type": "String",
-        "value": "https://example.com/api/endpoint"
-    },
-    "InnersourceCheckOutsideCollaboratorsEndpoint": {
-        "type": "String",
-        "value": "https://example.com/api/endpoint"
-    },
-    "IndexOrgReposEndpoint": {
-        "type": "String",
-        "value": "https://example.com/api/endpoint"
-    },
-    "OpensourceCheckOutsideCollaboratorsEndpoint": {
-        "type": "String",
-        "value": "https://example.com/api/endpoint"
+        "value": "https://example.com"
     }
 }

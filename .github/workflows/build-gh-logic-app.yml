@@ -59,11 +59,8 @@ jobs:
         with:
           files: './.bicep/workflows/parameters.json'
         env:
-          CleaupOrganizationEndpoint.value: ${{ env.GH_DOMAIN }}/api/clearOrgMembers
-          InnersourceCheckOutsideCollaboratorsEndpoint.value: ${{ env.GH_DOMAIN }}/api/checkAvaInnerSource
-          IndexOrgReposEndpoint.value: ${{ env.GH_DOMAIN }}/api/indexorgrepos
-          OpensourceCheckOutsideCollaboratorsEndpoint.value: ${{ env.GH_DOMAIN }}/api/checkAvaOpenSource
-
+          GHMgmDomain.value: ${{ env.GH_DOMAIN }}
+          
       - name: Upload Logic App Workflows
         uses: azure/CLI@v1
         with:
