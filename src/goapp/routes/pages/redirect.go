@@ -11,6 +11,9 @@ func LoginRedirectHandler(w http.ResponseWriter, r *http.Request) {
 	if len(q["redirect"]) > 0 {
 		redirect = q["redirect"][0]
 	}
+	if len(q["search"]) > 0 {
+		redirect = redirect + "&search=" + q["search"][0]
+	}
 	data := map[string]interface{}{
 		"redirect": redirect,
 	}
@@ -23,6 +26,9 @@ func GitredirectHandler(w http.ResponseWriter, r *http.Request) {
 	redirect := "/"
 	if len(q["redirect"]) > 0 {
 		redirect = q["redirect"][0]
+	}
+	if len(q["search"]) > 0 {
+		redirect = redirect + "&search=" + q["search"][0]
 	}
 	data := map[string]interface{}{
 		"redirect": redirect,
