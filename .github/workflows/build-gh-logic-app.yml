@@ -76,8 +76,8 @@ jobs:
         with:
           azcliversion: 2.44.1
           inlineScript: |
-            echo ${{env.AZURE_PRINCIPAL_ID}}
-            echo ${{env.AZURE_TENANT_ID}}
+            echo "AZURE PRINCIPAL ID : ${{env.AZURE_PRINCIPAL_ID}}""
+            echo "AZURE TENANT ID : ${{env.AZURE_TENANT_ID}}"
             chmod +x ./.bicep/upload_workflows.sh
             ./.bicep/upload_workflows.sh ${{steps.deploy_main_bicep.outputs.accountName}} ${{steps.deploy_main_bicep.outputs.destination}}
 
