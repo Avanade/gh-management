@@ -48,8 +48,9 @@ jobs:
         env:
           AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
         run: | 
-          # Parse Azure secret into Terraform variables
+          # Parse Azure secret into env variables
           $servicePrincipal = ($env:AZURE_CREDENTIALS | ConvertFrom-Json)
+          echo $servicePrincipal
           echo "AZURE_PRINCIPAL_ID=$servicePrincipal.clientId" >> $GITHUB_ENV
           echo "AZURE_TENANT_ID=$servicePrincipal.tenantId" >> $GITHUB_ENV
         shell: pwsh
