@@ -1,6 +1,11 @@
 name: Test - Docker Container - GH-Management
 
 on:
+  push:
+    branches:
+      - test
+    paths:
+      - "src/goapp/**"
   workflow_dispatch:
 
 defaults:
