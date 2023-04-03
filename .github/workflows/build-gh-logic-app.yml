@@ -16,7 +16,7 @@ on:
         - UAT
         - TEST
 jobs:
-  build-goapp-container:
+  build-gh-logic-app:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -43,6 +43,15 @@ jobs:
         uses: azure/login@v1
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Prepare environment variables
+        env:
+          AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
+        run: | 
+          # Parse Azure secret into Terraform variables
+          $servicePrincipal = ($env:AZURE_CREDENTIALS | ConvertFrom-Json)
+          echo "PRINCIPAL_ID=$servicePrincipal.clientId" >> $GITHUB_ENV
+        shell: pwsh
 
       - name: Deploy Bicep File
         uses: azure/arm-deploy@v1
@@ -76,7 +85,7 @@ jobs:
           subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION }}
           resourceGroupName: ${{ secrets.AZURE_RG }}
           template: ./.bicep/connection.bicep
-          parameters: env=${{ env.ACTIVE_ENV }} storageAccountName=${{steps.deploy_main_bicep.outputs.accountName}}
+          parameters: env=${{ env.ACTIVE_ENV }} storageAccountName=${{steps.deploy_main_bicep.outputs.accountName}} principalId=${{env.PRINCIPAL_ID}}
           failOnStdErr: false
 
       - name: Deploy connection to storage file system
