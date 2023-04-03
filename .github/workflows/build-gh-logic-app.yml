@@ -51,6 +51,8 @@ jobs:
           # Parse Azure secret into env variables
           $servicePrincipal = ($env:AZURE_CREDENTIALS | ConvertFrom-Json)
           echo $servicePrincipal
+          echo "AZURE PRINCIPAL ID : $servicePrincipal.clientId"
+          echo "AZURE TENANT ID : $servicePrincipal.tenantId"
           echo "AZURE_PRINCIPAL_ID=$servicePrincipal.clientId" >> $GITHUB_ENV
           echo "AZURE_TENANT_ID=$servicePrincipal.tenantId" >> $GITHUB_ENV
         shell: pwsh
@@ -77,8 +79,8 @@ jobs:
         with:
           azcliversion: 2.44.1
           inlineScript: |
-            echo "AZURE PRINCIPAL ID : ${{env.AZURE_PRINCIPAL_ID}}"
-            echo "AZURE TENANT ID : ${{env.AZURE_TENANT_ID}}"
+            echo "AZURE PRINCIPAL ID : ${{ env.AZURE_PRINCIPAL_ID }}"
+            echo "AZURE TENANT ID : ${{ env.AZURE_TENANT_ID }}"
             chmod +x ./.bicep/upload_workflows.sh
             ./.bicep/upload_workflows.sh ${{steps.deploy_main_bicep.outputs.accountName}} ${{steps.deploy_main_bicep.outputs.destination}}
 
