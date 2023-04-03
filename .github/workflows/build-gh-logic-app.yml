@@ -44,20 +44,6 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      - name: Prepare environment variables
-        env:
-          AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
-        run: | 
-          # Parse Azure secret into env variables
-          $servicePrincipal = ($env:AZURE_CREDENTIALS | ConvertFrom-Json)
-          echo $servicePrincipal
-          echo "AZURE PRINCIPAL ID : $servicePrincipal.clientId"
-          echo "AZURE TENANT ID : $servicePrincipal.tenantId"
-          echo "AZURE_PRINCIPAL_ID=$servicePrincipal.clientId" >> $GITHUB_ENV
-          echo "AZURE_TENANT_ID=$servicePrincipal.tenantId" >> $GITHUB_ENV
-          echo "FROM JSON AZURE PRINCIPAL ID : ${{ fromJSON(secrets.AZURE_CREDENTIALS)['clientId'] }}" 
-        shell: pwsh
-
       - name: Deploy Bicep File
         uses: azure/arm-deploy@v1
         id: deploy_main_bicep
@@ -80,8 +66,6 @@ jobs:
         with:
           azcliversion: 2.44.1
           inlineScript: |
-            echo "AZURE PRINCIPAL ID : ${{ env.AZURE_PRINCIPAL_ID }}"
-            echo "AZURE TENANT ID : ${{ env.AZURE_TENANT_ID }}"
             chmod +x ./.bicep/upload_workflows.sh
             ./.bicep/upload_workflows.sh ${{steps.deploy_main_bicep.outputs.accountName}} ${{steps.deploy_main_bicep.outputs.destination}}
 
@@ -92,7 +76,7 @@ jobs:
           subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION }}
           resourceGroupName: ${{ secrets.AZURE_RG }}
           template: ./.bicep/connection.bicep
-          parameters: env=${{ env.ACTIVE_ENV }} storageAccountName=${{steps.deploy_main_bicep.outputs.accountName}} principalId=${{env.AZURE_PRINCIPAL_ID}} tenantId=${{env.AZURE_TENANT_ID}}
+          parameters: env=${{ env.ACTIVE_ENV }} storageAccountName=${{steps.deploy_main_bicep.outputs.accountName}} principalId=${{ fromJSON(secrets.AZURE_CREDENTIALS)['clientId'] }} tenantId=${{ fromJSON(secrets.AZURE_CREDENTIALS)['tenantId'] }}
           failOnStdErr: false
 
       - name: Deploy connection to storage file system
