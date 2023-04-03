@@ -50,7 +50,8 @@ jobs:
         run: | 
           # Parse Azure secret into Terraform variables
           $servicePrincipal = ($env:AZURE_CREDENTIALS | ConvertFrom-Json)
-          echo "PRINCIPAL_ID=$servicePrincipal.clientId" >> $GITHUB_ENV
+          echo "AZURE_PRINCIPAL_ID=$servicePrincipal.clientId" >> $GITHUB_ENV
+          echo "AZURE_TENANT_ID=$servicePrincipal.tenantId" >> $GITHUB_ENV
         shell: pwsh
 
       - name: Deploy Bicep File
@@ -85,7 +86,7 @@ jobs:
           subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION }}
           resourceGroupName: ${{ secrets.AZURE_RG }}
           template: ./.bicep/connection.bicep
-          parameters: env=${{ env.ACTIVE_ENV }} storageAccountName=${{steps.deploy_main_bicep.outputs.accountName}} principalId=${{env.PRINCIPAL_ID}}
+          parameters: env=${{ env.ACTIVE_ENV }} storageAccountName=${{steps.deploy_main_bicep.outputs.accountName}} principalId=${{env.AZURE_PRINCIPAL_ID}} tenantId=${{env.AZURE_TENANT_ID}}
           failOnStdErr: false
 
       - name: Deploy connection to storage file system

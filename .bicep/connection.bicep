@@ -4,6 +4,7 @@ param env string
 param storageAccountName string
 param location string = resourceGroup().location
 param principalId string
+param tenantId string
 
 // Get parent storage account
 resource storage_account 'Microsoft.Storage/storageAccounts@2021-06-01' existing = {
@@ -41,7 +42,7 @@ resource ConnectionPolicy 'Microsoft.Web/connections/accessPolicies@2016-06-01' 
     principal: {
       type: 'ActiveDirectory'
       identity: {
-        tenantId: subscription().tenantId
+        tenantId: tenantId
         objectId: principalId
       }
     }
