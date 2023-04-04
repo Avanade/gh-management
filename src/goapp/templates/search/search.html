@@ -201,7 +201,6 @@ class="cursor-pointer focus:outline-none"> */}}
                   if (!this.form.searchList == '') {
                     let uri = '/search/'   + this.offSet + '/' +this.pageSize+ '?search=' + this.form.searchList
                     let encoded = encodeURI(uri);
-                    //fetch('/search/' + this.form.searchList + '/' +this.offSet + '/' +this.pageSize)
                     fetch(encoded)
                     .then(r => {
                       r.json().then(body => {
