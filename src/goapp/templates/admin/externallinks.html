@@ -1,24 +1,15 @@
 {{ define "content" }}
-
-
-
 <div id="pageTitle"> External Links</div>
-    {{/* <div>Customize ur External links- icon<div> */}}
-{{/* --------------------------------------------- */}}
-<br><br>
-
 
 <style>
     * {
     box-sizing: border-box;
     }
-
     .column {
     float: left;
 
     padding: 5px;
     }
-
     .row:after {
     content: "";
     display: table;
@@ -26,11 +17,23 @@
     }
 </style>
 
-
-<div x-data="ExternalLinksPage()" class="relative inline-block text-left">
+<div x-data="ExternalLinksPage()" >
+    <div class="border-gray-200 pb-5 sm:flex sm:items-center sm:justify-between">
+        <h3 class="text-base font-semibold leading-6 text-gray-900">
+        </h3>
+        <div class="mt-3 sm:ml-4 sm:mt-0">
+            <a href="externallinks/form">
+                <button class="inline-flex items-center bg-[#FF5800] hover:bg-[#FF4300] text-white font-bold py-2 px-4 rounded">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                    </svg>
+                    <span class="ml-2">New SVG</span>
+                </button>
+            </a>
+        </div>
+    </div>    
 
     <div class="row" name="row1">
-    
         <div class="column">
             <span> Current Icon </span>
         </div>
@@ -223,42 +226,16 @@
 
     <br>
     <!--BUTTON-->
-    <div> <!--button-->
-        <button @click="saveIcons()" type="button" class="inline-flex items-center gap-x-1.5 rounded-md bg-[#FF5800] hover:bg-[#FF4300] py-2 px-3 text-sm font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
+    <div class="mt-3 sm:ml-4 sm:mt-0"> <!--button-->
+        <button @click="saveIcons()" class="inline-flex items-center bg-[#FF5800] hover:bg-[#FF4300] text-white font-bold py-2 px-4 rounded">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
             <path stroke-linecap="round" stroke-linejoin="round" d="M9 8.25H7.5a2.25 2.25 0 00-2.25 2.25v9a2.25 2.25 0 002.25 2.25h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25H15M9 12l3 3m0 0l3-3m-3 3V2.25" />
             </svg>
             <span class="ml-2">Save</span>
         </button>
-    </div>
-
-<br><br>
-    <div> <!--New SVG Button-->
-        <button @click="addSVG()" type="button" class="inline-flex items-center gap-x-1.5 rounded-md bg-[#FF5800] hover:bg-[#FF4300] py-2 px-3 text-sm font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M9 8.25H7.5a2.25 2.25 0 00-2.25 2.25v9a2.25 2.25 0 002.25 2.25h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25H15M9 12l3 3m0 0l3-3m-3 3V2.25" />
-            </svg>
-            <span class="ml-2">Add SVG</span>
-        </button>
-    </div>    
+    </div>        
 
 
-    {{/* <!--POST TESTING---SHOULD BE HIDDEN-->
-    <div class="mt-10">
-        <div class="relative">
-        <label for="name" class="inline-block">Testing Only -Hide later</label>
-            <label for="name" class="absolute -top-2 left-2 inline-block bg-white px-2 text-xs font-medium text-gray-900">Your SVG here</label>
-            <input x-model="InputSVG" type="text" name="name" id="name" class="rounded-md border-0 py-5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-[#FF5800] sm:text-sm sm:leading-6" placeholder="....." autocomplete="nope">
-            
-            <label for="name" class="absolute -top-2 left-2 inline-block bg-white px-2 text-xs font-medium text-gray-900">SVG Name</label>
-            <input x-model="SVGName" type="text" class="rounded-md border-0 py-5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-[#FF5800] sm:text-sm sm:leading-6" placeholder="-----" autocomplete="nope">
-
-            <button @click="saveSVG()" type="button" class="mt-2 items-center gap-x-1.5 rounded-md bg-[#FF5800] hover:bg-[#FF4300] py-2 px-3 text-sm font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
-                <span class="ml-1">Save SVG</span>
-            </button>
-        </div>
-    </div>
-    <!--POST TESTING---SHOULD BE HIDDEN--> */}}
 
 </div>
 
@@ -301,20 +278,14 @@
                 return
             },
             saveSVG() {
-
                 if(this.InputSVG === '' || this.SVGName ==='') {
                     console.log("SVG not found, Please put SVG code.")
                     console.clear()
                     return
                 }
-
                 console.log("SVG successfully saved to database!")
                 return
             },
-            addSVG() {
-                window.location.href = "externallinks/form"
-                console.log("Add New SVG")
-            }
         }   
     }
 </script>

@@ -8,9 +8,7 @@ import (
 
 func CustomizeExternalLinks(w http.ResponseWriter, r *http.Request) {
 	template.UseTemplate(&w, r, "admin/externallinks", nil)
-
 }
-
 func ExternalLinksForm(w http.ResponseWriter, r *http.Request) {
 	template.UseTemplate(&w, r, "admin/externallinks/form", nil)
 }
