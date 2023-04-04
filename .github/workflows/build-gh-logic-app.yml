@@ -48,7 +48,7 @@ jobs:
         uses: azure/arm-deploy@v1
         id: deploy_main_bicep
         with:
-          subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION }}
+          subscriptionId: ${{ fromJSON(secrets.AZURE_CREDENTIALS)['subscriptionId'] }}
           resourceGroupName: ${{ secrets.AZURE_RG }}
           template: ./.bicep/main.bicep
           parameters: env=${{ env.ACTIVE_ENV }} LAManageIdentityName=${{ secrets.LOGIC_APP_MANAGE_IDENTITY}}
@@ -73,7 +73,7 @@ jobs:
         uses: azure/arm-deploy@v1
         id: deploy_connection_bicep
         with:
-          subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION }}
+          subscriptionId: ${{ fromJSON(secrets.AZURE_CREDENTIALS)['subscriptionId'] }}
           resourceGroupName: ${{ secrets.AZURE_RG }}
           template: ./.bicep/connection.bicep
           parameters: env=${{ env.ACTIVE_ENV }} storageAccountName=${{steps.deploy_main_bicep.outputs.accountName}} principalId=${{ fromJSON(secrets.AZURE_CREDENTIALS)['clientId'] }} tenantId=${{ fromJSON(secrets.AZURE_CREDENTIALS)['tenantId'] }}
