@@ -76,7 +76,7 @@ jobs:
           subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION }}
           resourceGroupName: ${{ secrets.AZURE_RG }}
           template: ./.bicep/connection.bicep
-          parameters: env=${{ env.ACTIVE_ENV }} storageAccountName=${{steps.deploy_main_bicep.outputs.accountName}} principalId=${{steps.deploy_main_bicep.outputs.logicAppObjectId}} tenantId=${{ fromJSON(secrets.AZURE_CREDENTIALS)['tenantId'] }}
+          parameters: env=${{ env.ACTIVE_ENV }} storageAccountName=${{steps.deploy_main_bicep.outputs.accountName}} principalId=${{ fromJSON(secrets.AZURE_CREDENTIALS)['clientId'] }} tenantId=${{ fromJSON(secrets.AZURE_CREDENTIALS)['tenantId'] }}
           failOnStdErr: false
 
       - name: Deploy connection to storage file system

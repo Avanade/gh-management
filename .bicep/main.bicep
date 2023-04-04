@@ -106,4 +106,3 @@ resource LALogicAppConfig 'Microsoft.Web/sites/config@2022-03-01' = {
 
 output accountName string = LAStorageAccount.name
 output destination string = '${fileShare}/site/wwwroot'
-output logicAppObjectId string = reference(LALogicApp.id, '2019-08-01', 'full').identity.principalId
