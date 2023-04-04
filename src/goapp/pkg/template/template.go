@@ -67,6 +67,20 @@ func UseTemplate(w *http.ResponseWriter, r *http.Request, page string, pageData 
 	return tmpl.Execute(*w, data)
 }
 
+func getExternalLinkIcons(w *http.ResponseWriter, r *http.Request, page string) error {
+
+	var icons []models.ExternalLinksIcon
+	icons = append(icons, models.ExternalLinksIcon{IconName: "User-Group", IconPath: "/public/icons/ExternalLinks/TechCommunityCalendar/user-group.svg"})
+	icons = append(icons, models.ExternalLinksIcon{IconName: "Rectangle-Group", IconPath: "/public/icons/ExternalLinks/TechCommunityCalendar/rectangle-group.svg"})
+	icons = append(icons, models.ExternalLinksIcon{IconName: "Stack", IconPath: "/public/icons/ExternalLinks/TechCommunityCalendar/stack.svg"})
+
+	tmpl := template.Must(
+		template.ParseFiles("src/goapp/templates/admin/externallinks.html",
+			fmt.Sprintf("admin/%v.html", page)))
+	return tmpl.Execute(*w, "")
+
+}
+
 func getUrlPath(path string) string {
 	p := strings.Split(path, "/")
 	if p[1] == "" {

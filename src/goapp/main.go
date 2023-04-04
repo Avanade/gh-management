@@ -150,17 +150,6 @@ func main() {
 	muxApi.Handle("/clearOrgMembers", loadGuidAuthApi(rtGithub.ClearOrgMembers)).Methods("GET")
 
 	muxAdmin := mux.PathPrefix("/admin").Subrouter()
-<<<<<<< HEAD
-	muxAdmin.Handle("", loadAzGHAuthPage(rtAdmin.AdminIndex))
-	muxAdmin.Handle("/members", loadAzGHAuthPage(rtAdmin.ListCommunityMembers))
-	muxAdmin.Handle("/guidance", loadAzGHAuthPage(rtGuidance.GuidanceHandler))
-	muxAdmin.Handle("/approvaltypes", loadAzGHAuthPage(rtAdmin.ListApprovalTypes))
-	muxAdmin.Handle("/communityapprovers", loadAzGHAuthPage(rtCommunity.CommunityApproverHandler))
-	muxAdmin.Handle("/approvaltype/{action:add}", loadAzGHAuthPage(rtAdmin.ApprovalTypeForm))
-	muxAdmin.Handle("/approvaltype/{action:view|edit}/{id}", loadAzGHAuthPage(rtAdmin.ApprovalTypeForm))
-	muxAdmin.Handle("/externallinks", loadAzGHAuthPage(rtAdmin.CustomizeExternalLinks))
-	// muxAdmin.Handle("/externallinks", loadAzGHAuthPage(rtAdmin.))
-=======
 	muxAdmin.Handle("", loadAdminPage(rtAdmin.AdminIndex))
 	muxAdmin.Handle("/members", loadAdminPage(rtAdmin.ListCommunityMembers))
 	muxAdmin.Handle("/guidance", loadAdminPage(rtGuidance.GuidanceHandler))
@@ -171,7 +160,8 @@ func main() {
 	muxAdmin.Handle("/contributionarea", loadAdminPage(rtAdmin.ListContributionAreas))
 	muxAdmin.Handle("/contributionarea/{action:add}", loadAdminPage(rtAdmin.ContributionAreasForm))
 	muxAdmin.Handle("/contributionarea/{action:view|edit}/{id}", loadAdminPage(rtAdmin.ContributionAreasForm))
->>>>>>> 96309aa37d5874e97035fe95a3c08dab0be7fdfe
+	muxAdmin.Handle("/externallinks", loadAzGHAuthPage(rtAdmin.CustomizeExternalLinks))
+	muxAdmin.Handle("/externallinks/form", loadAzGHAuthPage(rtAdmin.ExternalLinksForm))
 
 	muxApi.HandleFunc("/approvals/project/callback", rtProjects.UpdateApprovalStatusProjects).Methods("POST")
 	muxApi.HandleFunc("/approvals/project/reassign/callback", rtProjects.UpdateApprovalReassignApprover)

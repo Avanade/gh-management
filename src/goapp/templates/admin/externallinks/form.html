@@ -1,0 +1,55 @@
+{{ define "content" }}
+<div id="pageTitle">New External Links</div>
+<br><br>
+
+<div x-data="ExternalLinksForm()">
+
+    <div>
+        <div class="relative">
+
+            <label for="name" class="absolute -top-2 left-2 inline-block bg-white px-2 text-xs font-medium text-gray-900">SVG code</label>
+            <input x-model="InputSVG" type="text" name="name" id="name" class="rounded-md border-0 py-5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-[#FF5800] sm:text-sm sm:leading-6" placeholder="....." autocomplete="nope">
+            
+            <label for="name" class="absolute -top-2 left-2 inline-block bg-white px-2 text-xs font-medium text-gray-900">SVG Name</label>
+            <input x-model="SVGName" type="text" class="rounded-md border-0 py-5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-[#FF5800] sm:text-sm sm:leading-6" placeholder="-----" autocomplete="nope">
+
+            <label for="name" class="absolute -top-2 left-2 inline-block bg-white px-2 text-xs font-medium text-gray-900">Category</label>
+            <input x-model="Category" type="text" class="rounded-md border-0 py-5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-[#FF5800] sm:text-sm sm:leading-6" placeholder="-----" autocomplete="nope">
+
+        </div>
+    </div>
+
+    <button @click="saveSVG()" type="button" class="mt-2 items-center gap-x-1.5 rounded-md bg-[#FF5800] hover:bg-[#FF4300] py-2 px-3 text-sm font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
+        <span class="ml-1">Save SVG</span>
+    </button>    
+
+</div>
+<script>
+    function ExternalLinksForm() {
+        return {
+            InputSVG: '',
+            SVGName: '',
+            Category: '',
+            saveSVG() {
+
+                if(this.InputSVG === '' || this.SVGName ==='') {
+                    console.log("SVG not found, Please put SVG code.")
+                    {{/* console.clear() */}}
+                    return
+                }
+
+                console.log("SVG successfully saved to database!")
+                return
+            },            
+
+        }
+    }
+
+
+
+</script>
+
+
+
+
+{{ end }}

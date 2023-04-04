@@ -34,6 +34,11 @@ type TypMenu struct {
 	External bool
 }
 
+type ExternalLinksIcon struct {
+	IconName string
+	IconPath string
+}
+
 type TypNewProjectReqBody struct {
 	Id                      string `json:"id"`
 	GithubId                int64  `json:"githubId"`

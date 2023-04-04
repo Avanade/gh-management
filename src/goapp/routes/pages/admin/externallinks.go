@@ -8,8 +8,16 @@ import (
 
 func CustomizeExternalLinks(w http.ResponseWriter, r *http.Request) {
 	template.UseTemplate(&w, r, "admin/externallinks", nil)
+
 }
 
+func ExternalLinksForm(w http.ResponseWriter, r *http.Request) {
+	template.UseTemplate(&w, r, "admin/externallinks/form", nil)
+}
+
+// func ExternalLinkIcons(w http.ResponseWriter, r *http.Request) {
+// 	template.getExternalLinkIcons(&w, r, "admin/externallinks", nil)
+// }
 
 
 func GetCustomizeExternalLinks(w http.ResponseWriter, r *http.Request) {
