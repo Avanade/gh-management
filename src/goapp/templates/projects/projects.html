@@ -103,7 +103,7 @@
                   </svg>
                   <p>
                     Created on
-                    <time x-data="{date: new Date(repository.Created)}" x-text="date.toLocaleString('en-US',{dateStyle: 'medium', timeStyle: 'short'})"></time>
+                    <time x-text="new Date(repository.Created).toLocaleString('en-US',{dateStyle: 'medium', timeStyle: 'short'})"></time>
                   </p>
                 </div>
               </div>
@@ -228,7 +228,7 @@
                   </svg>
                   <p>
                     Created on
-                    <time x-data="{date: new Date(repository.Created)}" x-text="date.toLocaleString('en-US',{dateStyle: 'medium', timeStyle: 'short'})"></time>
+                    <time x-text="new Date(repository.Created).toLocaleString('en-US',{dateStyle: 'medium', timeStyle: 'short'})"></time>
                   </p>
                 </div>
               </div>
