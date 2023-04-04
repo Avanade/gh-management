@@ -348,6 +348,7 @@ func InitIndexOrgRepos(w http.ResponseWriter, r *http.Request) {
 				"Description":  repo.Description,
 				"IsArchived":   repo.IsArchived,
 				"VisibilityId": visibilityId,
+				"Created":      repo.Created.Format("2006-01-02 15:04:05"),
 			}
 
 			isExisting := ghmgmt.Projects_IsExisting(models.TypNewProjectReqBody{Name: repo.Name})
@@ -408,6 +409,7 @@ func IndexOrgRepos(w http.ResponseWriter, r *http.Request) {
 				"Description":  repo.Description,
 				"IsArchived":   repo.IsArchived,
 				"VisibilityId": visibilityId,
+				"Created":      repo.Created.Format("2006-01-02 15:04:05"),
 			}
 
 			isExisting := ghmgmt.Projects_IsExisting_By_GithubId(models.TypNewProjectReqBody{GithubId: repo.GithubId})
