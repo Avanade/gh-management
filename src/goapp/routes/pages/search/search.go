@@ -20,7 +20,8 @@ func SearchHandler(w http.ResponseWriter, r *http.Request) {
 
 func GetSearchResults(w http.ResponseWriter, r *http.Request) {
 	req := mux.Vars(r)
-	searchText := req["searchText"]
+
+	searchText := r.URL.Query().Get("search")
 	offSet := req["offSet"]
 	rowCount := req["rowCount"]
 
@@ -40,8 +41,8 @@ func GetSearchResults(w http.ResponseWriter, r *http.Request) {
 	//searchTextParam := make(map[string]interface{})
 	params := map[string]interface{}{
 		"searchText": searchText,
-		"offSet": offSet,
-		"rowCount": rowCount,
+		"offSet":     offSet,
+		"rowCount":   rowCount,
 	}
 
 	searchResults, err := db.ExecuteStoredProcedureWithResult("PR_Search_communities_projects_users", params)
