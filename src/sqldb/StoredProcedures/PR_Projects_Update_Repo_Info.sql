@@ -5,7 +5,8 @@ CREATE PROCEDURE PR_Projects_Update_Repo_Info
 		@Name VARCHAR(50),
 		@Description VARCHAR(1000),
 		@IsArchived BIT,
-		@VisibilityId INT
+		@VisibilityId INT,
+		@Created DATETIME
 )
 AS
 BEGIN
@@ -18,6 +19,7 @@ UPDATE
 		[Description] = @Description,
 		[IsArchived] = @IsArchived,
 		[VisibilityId] = @VisibilityId,
+		[Created] = @Created,
 		[Modified] = GETDATE()
  WHERE  
 		[Id] = @Id
