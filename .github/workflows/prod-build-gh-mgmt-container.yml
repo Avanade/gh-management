@@ -1,11 +1,6 @@
 name: PROD - Docker Container - GH-Management
 
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - "src/goapp/**"
   workflow_dispatch:
 
 defaults:

@@ -280,7 +280,7 @@ func RepositoriesListCollaborators(token string, org string, repo string) []*git
 	ListCollabs, _, err := client.Repositories.ListCollaborators(context.Background(), org, repo, &options)
 
 	if err != nil {
-		fmt.Println("err")
+
 		fmt.Println(err)
 	}
 
@@ -292,7 +292,7 @@ func OrgListMembers(token string, org string) []*github.User {
 	ListCollabs, _, err := client.Organizations.ListMembers(context.Background(), org, nil)
 
 	if err != nil {
-		fmt.Println("err")
+
 		fmt.Println(err)
 	}
 

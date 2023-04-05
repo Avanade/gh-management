@@ -1,4 +1,4 @@
-name: DEPLOY LOGIC APP WORKFLOWS
+name: Deploy Logic App Workflows
 
 on:
   push:
@@ -16,7 +16,7 @@ on:
         - UAT
         - TEST
 jobs:
-  build-goapp-container:
+  build-gh-logic-app:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -46,9 +46,9 @@ jobs:
 
       - name: Deploy Bicep File
         uses: azure/arm-deploy@v1
-        id: deploy_bicep
+        id: deploy_main_bicep
         with:
-          subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION }}
+          subscriptionId: ${{ fromJSON(secrets.AZURE_CREDENTIALS)['subscriptionId'] }}
           resourceGroupName: ${{ secrets.AZURE_RG }}
           template: ./.bicep/main.bicep
           parameters: env=${{ env.ACTIVE_ENV }} LAManageIdentityName=${{ secrets.LOGIC_APP_MANAGE_IDENTITY}}
@@ -59,15 +59,33 @@ jobs:
         with:
           files: './.bicep/workflows/parameters.json'
         env:
-          CleaupOrganizationEndpoint.value: ${{ env.GH_DOMAIN }}/api/clearOrgMembers
-          InnersourceCheckOutsideCollaboratorsEndpoint.value: ${{ env.GH_DOMAIN }}/api/checkAvaInnerSource
-          IndexOrgReposEndpoint.value: ${{ env.GH_DOMAIN }}/api/indexorgrepos
-          OpensourceCheckOutsideCollaboratorsEndpoint.value: ${{ env.GH_DOMAIN }}/api/checkAvaOpenSource
-
+          GHMgmDomain.value: ${{ env.GH_DOMAIN }}
+          
       - name: Upload Logic App Workflows
         uses: azure/CLI@v1
         with:
           azcliversion: 2.44.1
           inlineScript: |
             chmod +x ./.bicep/upload_workflows.sh
-            ./.bicep/upload_workflows.sh ${{steps.deploy_bicep.outputs.accountName}} ${{steps.deploy_bicep.outputs.destination}}
+            ./.bicep/upload_workflows.sh ${{steps.deploy_main_bicep.outputs.accountName}} ${{steps.deploy_main_bicep.outputs.destination}}
+
+      - name: Deploy Connection Bicep File
+        uses: azure/arm-deploy@v1
+        id: deploy_connection_bicep
+        with:
+          subscriptionId: ${{ fromJSON(secrets.AZURE_CREDENTIALS)['subscriptionId'] }}
+          resourceGroupName: ${{ secrets.AZURE_RG }}
+          template: ./.bicep/connection.bicep
+          parameters: env=${{ env.ACTIVE_ENV }} storageAccountName=${{steps.deploy_main_bicep.outputs.accountName}} principalId=${{ fromJSON(secrets.AZURE_CREDENTIALS)['clientId'] }} tenantId=${{ fromJSON(secrets.AZURE_CREDENTIALS)['tenantId'] }}
+          failOnStdErr: false
+
+      - name: Deploy connection to storage file system
+        shell: pwsh
+        run: |
+          ./.bicep/deploy_connection.ps1 `
+            New-WorkflowConnection `
+              -ResourceGroup ${{secrets.AZURE_RG}} `
+              -StorageAccount ${{steps.deploy_main_bicep.outputs.accountName}} `
+              -Api ${{steps.deploy_connection_bicep.outputs.api}} `
+              -Id ${{steps.deploy_connection_bicep.outputs.id}} `
+              -RuntimeUrl ${{steps.deploy_connection_bicep.outputs.connectionRuntimeUrl}}

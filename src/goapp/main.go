@@ -66,7 +66,7 @@ func main() {
 	mux.Handle("/repositories/new", loadAzGHAuthPage(rtProjects.ProjectsNewHandler))
 	mux.Handle("/repositories/{id}", loadAzGHAuthPage(rtProjects.ProjectsHandler))
 	mux.Handle("/repositories/makepublic/{id}", loadAzGHAuthPage(rtProjects.MakePublic))
-	mux.Handle("/search/{searchText}/{offSet}/{rowCount}", loadAzGHAuthPage(rtSearch.GetSearchResults))
+	mux.Handle("/search/{offSet}/{rowCount}", loadAzGHAuthPage(rtSearch.GetSearchResults))
 	mux.Handle("/search", loadAzGHAuthPage(rtSearch.SearchHandler))
 
 	mux.Handle("/guidance", loadAzGHAuthPage(rtGuidance.GuidanceHandler))
@@ -82,6 +82,7 @@ func main() {
 	mux.Handle("/community", loadAzGHAuthPage(rtCommunity.GetUserCommunitylist))
 	mux.Handle("/community/{id}/onboarding", loadAzGHAuthPage(rtCommunity.CommunityOnBoarding))
 	mux.HandleFunc("/loginredirect", rtPages.LoginRedirectHandler).Methods("GET")
+	mux.HandleFunc("/gitredirect", rtPages.GitredirectHandler).Methods("GET")
 	mux.HandleFunc("/login/azure", rtAzure.LoginHandler)
 	mux.HandleFunc("/login/azure/callback", rtAzure.CallbackHandler)
 	mux.HandleFunc("/logout/azure", rtAzure.LogoutHandler)
@@ -121,7 +122,6 @@ func main() {
 	muxApi.Handle("/relatedcommunityDelete", loadAzAuthPage(rtApi.RelatedCommunitiesDelete))
 	muxApi.Handle("/relatedcommunity/{id}", loadAzAuthPage(rtApi.RelatedCommunitiesSelect)).Methods("GET")
 
-	//muxApi.Handle("/CategoryArticlesAdd", loadAzGHAuthPage(rtApi.CategoryAddAPIHandler))
 	muxApi.Handle("/CategoryArticlesById/{id}", loadAzGHAuthPage(rtApi.GetCategoryArticlesById))
 	muxApi.Handle("/CategoryArticlesByArticlesID/{id}", loadAzGHAuthPage(rtApi.GetCategoryArticlesByArticlesID))
 	muxApi.Handle("/CategoryArticlesUpdate", loadAzGHAuthPage(rtApi.CategoryArticlesUpdate))
@@ -162,6 +162,7 @@ func main() {
 	muxAdmin.Handle("/contributionarea/{action:view|edit}/{id}", loadAdminPage(rtAdmin.ContributionAreasForm))
 
 	muxApi.HandleFunc("/approvals/project/callback", rtProjects.UpdateApprovalStatusProjects).Methods("POST")
+	muxApi.HandleFunc("/approvals/project/reassign/callback", rtProjects.UpdateApprovalReassignApprover)
 	muxApi.HandleFunc("/approvals/community/callback", rtProjects.UpdateApprovalStatusCommunity).Methods("POST")
 	muxApi.HandleFunc("/approvals/community/callback", rtProjects.UpdateApprovalStatusCommunity).Methods("POST")
 	muxApi.HandleFunc("/communityapprovers/update", rtCommunity.CommunityApproversListUpdate)

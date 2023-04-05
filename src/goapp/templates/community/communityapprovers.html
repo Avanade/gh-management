@@ -284,12 +284,11 @@
             },
             get getapprovers() {
                 if (!this.search) {
-                    console.log(this.search)
+                 
                 return this.approvers
                 }
                 else {
-                    console.log("getapprovers")
-                    console.log(this.search)
+                 
                 return this.approvers.filter(p => p.ApproverUserPrincipalName.toLowerCase().includes(this.search.toLowerCase()))
         }
              //   return this.approvers
