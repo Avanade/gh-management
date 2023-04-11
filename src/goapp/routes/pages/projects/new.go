@@ -85,7 +85,7 @@ func ProjectsNewHandler(w http.ResponseWriter, r *http.Request) {
 				}
 				body.GithubId = repo.GetID()
 			} else {
-				repo, errRepo := githubAPI.CreatePrivateGitHubRepository(body, username.(string))
+				repo, errRepo := githubAPI.CreateInternalGitHubRepository(body, username.(string))
 				if errRepo != nil {
 					fmt.Println(errRepo)
 					httpResponseError(w, http.StatusInternalServerError, "There is a problem creating the GitHub repository.")
