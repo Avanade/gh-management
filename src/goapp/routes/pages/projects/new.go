@@ -70,13 +70,30 @@ func ProjectsNewHandler(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 		} else {
-			repo, errRepo := githubAPI.CreatePrivateGitHubRepository(body, username.(string))
-			if errRepo != nil {
-				fmt.Println(errRepo)
-				httpResponseError(w, http.StatusInternalServerError, "There is a problem creating the GitHub repository.")
+			isOrgEnterprise, err := githubAPI.GetIsOrgEnterprise()
+			if err != nil {
+				httpResponseError(w, http.StatusBadRequest, "There is a problem checking if the organization is enterprise or not.")
 				return
 			}
-			body.GithubId = repo.GetID()
+
+			if isOrgEnterprise {
+				repo, errRepo := githubAPI.CreateInternalGitHubRepository(body, username.(string))
+				if errRepo != nil {
+					fmt.Println(errRepo)
+					httpResponseError(w, http.StatusInternalServerError, "There is a problem creating the GitHub repository.")
+					return
+				}
+				body.GithubId = repo.GetID()
+			} else {
+				repo, errRepo := githubAPI.CreatePrivateGitHubRepository(body, username.(string))
+				if errRepo != nil {
+					fmt.Println(errRepo)
+					httpResponseError(w, http.StatusInternalServerError, "There is a problem creating the GitHub repository.")
+					return
+				}
+				body.GithubId = repo.GetID()
+			}
+
 			_ = ghmgmtdb.PRProjectsInsert(body, username.(string))
 
 			w.WriteHeader(http.StatusOK)
