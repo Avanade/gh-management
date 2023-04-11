@@ -59,7 +59,7 @@ func CreateInternalGitHubRepository(data models.TypNewProjectReqBody, requestor 
 	repoData := map[string]interface{}{
 		"name":                &data.Name,
 		"private":             false,
-		"visibility":          "internal",
+		"visibility":          "private",
 		"template_repository": os.Getenv("GH_REPO_TEMPLATE_NAME"),
 	}
 
