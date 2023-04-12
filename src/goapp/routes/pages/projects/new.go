@@ -24,10 +24,16 @@ func ProjectsNewHandler(w http.ResponseWriter, r *http.Request) {
 		req := mux.Vars(r)
 		id := req["id"]
 
+		sessionaz, _ := session.Store.Get(r, "auth-session")
+		iprofile := sessionaz.Values["profile"]
+		profile := iprofile.(map[string]interface{})
+		username := profile["preferred_username"]
+
 		users := db.GetUsersWithGithub()
 		data := map[string]interface{}{
 			"Id":    id,
 			"users": users,
+			"email": username,
 		}
 		template.UseTemplate(&w, r, "projects/new", data)
 	case "POST":
