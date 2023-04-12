@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io/ioutil"
 	"main/models"
 	"main/pkg/email"
 	"main/pkg/envvar"
@@ -51,86 +52,52 @@ func CreatePrivateGitHubRepository(data models.TypNewProjectReqBody, requestor s
 	return repo, nil
 }
 
-func CreateInternalGitHubRepository(data models.TypNewProjectReqBody, requestor string) (*github.Repository, error) {
-	// Set your access token or personal access token
-	authToken := os.Getenv("GH_TOKEN")
-
-	// Define the repository object with the template repository name
-	repoData := map[string]interface{}{
-		"name":                &data.Name,
-		"private":             false,
-		"visibility":          "internal",
-		"template_repository": os.Getenv("GH_REPO_TEMPLATE_NAME"),
-	}
-
-	// Convert the repository object to a JSON string
-	jsonData, err := json.Marshal(repoData)
-	if err != nil {
-		return nil, err
-	}
-
-	// Send the POST request to create the repository
-	req, err := http.NewRequest("POST", fmt.Sprintf("https://api.github.com/orgs/%s/repos", os.Getenv("GH_ORG_INNERSOURCE")), bytes.NewBuffer(jsonData))
-	if err != nil {
-		return nil, err
-	}
-	req.Header.Set("Authorization", authToken)
-	req.Header.Set("Content-Type", "application/json")
-
+func GetIsOrgAllowInternalRepo() (bool, error) {
+	// Create a new HTTP client
 	client := &http.Client{}
-	resp, err := client.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
 
-	// Check the response status code to make sure the repository was created successfully
-	if resp.StatusCode == 201 {
-		// Decode the response JSON into a Repository struct
-		var repo *github.Repository
-		err = json.NewDecoder(resp.Body).Decode(&repo)
-		if err != nil {
-			return nil, err
-		}
-		return repo, nil
-	} else {
-		return nil, errors.New(resp.Status)
-	}
-}
-
-type Enterprise struct {
-	IsEnterprise bool `json:"is_enterprise"`
-}
-
-func GetIsOrgEnterprise() (bool, error) {
-	// Set your access token or personal access token
-	authToken := os.Getenv("GH_TOKEN")
-
-	// Set the name of the organization you want to check
+	accessToken := os.Getenv("GH_TOKEN")
 	orgName := os.Getenv("GH_ORG_INNERSOURCE")
 
-	// Send the GET request to the enterprise endpoint
-	req, err := http.NewRequest("GET", fmt.Sprintf("https://api.github.com/enterprises/%s", orgName), nil)
+	// Create a new GET request to retrieve the organization details
+	req, err := http.NewRequest("GET", fmt.Sprintf("https://api.github.com/orgs/%s", orgName), nil)
 	if err != nil {
+		fmt.Printf("Error creating HTTP request: %v\n", err)
 		return false, err
 	}
-	req.Header.Set("Authorization", authToken)
 
-	client := &http.Client{}
+	// Set up the headers with the access token
+	req.Header.Set("Authorization", fmt.Sprintf("token %s", accessToken))
+	req.Header.Set("Accept", "application/vnd.github.v3+json")
+
+	// Send the request
 	resp, err := client.Do(req)
 	if err != nil {
+		fmt.Printf("Error sending HTTP request: %v\n", err)
 		return false, err
 	}
 	defer resp.Body.Close()
 
-	// Decode the response JSON into an Enterprise struct
-	var enterprise Enterprise
-	err = json.NewDecoder(resp.Body).Decode(&enterprise)
-	if err != nil {
+	// Check if the response was successful
+	if resp.StatusCode != 200 {
+		fmt.Printf("Error getting organization %s.\n", orgName)
 		return false, err
 	}
 
-	return enterprise.IsEnterprise, nil
+	// Retrieve the response data as a JSON object
+	bodyBytes, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		fmt.Printf("Error reading response body: %v\n", err)
+		return false, err
+	}
+	orgData := make(map[string]interface{})
+	err = json.Unmarshal(bodyBytes, &orgData)
+	if err != nil {
+		fmt.Printf("Error unmarshalling JSON: %v\n", err)
+		return false, err
+	}
+
+	return orgData["members_can_create_internal_repositories"].(bool), nil
 }
 
 func AddCollaborator(data models.TypNewProjectReqBody, requestor string) (*github.Response, error) {

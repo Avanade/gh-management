@@ -10,6 +10,7 @@ import (
 	session "main/pkg/session"
 	template "main/pkg/template"
 	"net/http"
+	"os"
 	"regexp"
 	"strings"
 
@@ -70,28 +71,28 @@ func ProjectsNewHandler(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 		} else {
-			isOrgEnterprise, err := githubAPI.GetIsOrgEnterprise()
+			isOrgAllowInternalRepo, err := githubAPI.GetIsOrgAllowInternalRepo()
 			if err != nil {
 				httpResponseError(w, http.StatusBadRequest, "There is a problem checking if the organization is enterprise or not.")
 				return
 			}
 
-			if isOrgEnterprise {
-				repo, errRepo := githubAPI.CreateInternalGitHubRepository(body, username.(string))
-				if errRepo != nil {
-					fmt.Println(errRepo)
-					httpResponseError(w, http.StatusInternalServerError, "There is a problem creating the GitHub repository.")
+			repo, errRepo := githubAPI.CreatePrivateGitHubRepository(body, username.(string))
+			if errRepo != nil {
+				fmt.Println(errRepo)
+				httpResponseError(w, http.StatusInternalServerError, "There is a problem creating the GitHub repository.")
+				return
+			}
+			body.GithubId = repo.GetID()
+			body.Visibility = 1
+
+			if isOrgAllowInternalRepo {
+				innersource := os.Getenv("GH_ORG_INNERSOURCE")
+				err := githubAPI.SetProjectVisibility(repo.GetName(), "internal", innersource)
+				if err != nil {
 					return
 				}
-				body.GithubId = repo.GetID()
-			} else {
-				repo, errRepo := githubAPI.CreatePrivateGitHubRepository(body, username.(string))
-				if errRepo != nil {
-					fmt.Println(errRepo)
-					httpResponseError(w, http.StatusInternalServerError, "There is a problem creating the GitHub repository.")
-					return
-				}
-				body.GithubId = repo.GetID()
+				body.Visibility = 2
 			}
 
 			_ = ghmgmtdb.PRProjectsInsert(body, username.(string))
