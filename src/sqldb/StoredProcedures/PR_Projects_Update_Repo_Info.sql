@@ -20,7 +20,7 @@ UPDATE
 		[Description] = @Description,
 		[IsArchived] = @IsArchived,
 		[VisibilityId] = @VisibilityId,
-		[TFSProjectReference] = @TFSProjectReference
+		[TFSProjectReference] = @TFSProjectReference,
 		[Created] = @Created,
 		[Modified] = GETDATE()
  WHERE  
