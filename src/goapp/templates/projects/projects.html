@@ -52,7 +52,7 @@
       <ul role="list" class="divide-y divide-gray-200">
         <template x-for="(repository, index) in userRepositoriesList">
           <li>
-            <div class="px-4 py-4 sm:px-6 hover:bg-gray-50 cursor-pointer" x-bind:class="repository.showStatus? 'bg-gray-50':''" @click="repository.showStatus = !repository.showStatus; getRepositoryApprovalStatus(repository.Id, index)">
+            <div class="px-4 py-4 sm:px-6 hover:bg-gray-50 cursor-pointer" x-bind:class="repository.showStatus? 'bg-gray-50':''" @click="repository.showStatus = !repository.showStatus; getRepositoryApprovalStatus(repository.Id, index, repository.RepositorySource)">
               <div class="flex items-center justify-between">
                 <div>
                   <span id="reponameValue" @click.stop @click="window.open(repository.TFSProjectReference)"
@@ -172,12 +172,17 @@
                   </template>
                 </ul>
               </div>
-              <div class="overflow-hidden text-sm text-gray-500 sm:mt-0" x-show="repository.statusLoaded && !repository.approvalStatus">
+              <div class="overflow-hidden text-sm text-gray-500 sm:mt-0" x-show="repository.statusLoaded && !repository.approvalStatus && repository.RepositorySource==='GitHub'">
                 <span x-show="hasApprovers">
                   No approval data found for this repository. <a class="text-indigo-600" x-bind:href="'/repositories/makepublic/' + repository.Id">Click to request</a> to make this repository public.
                 </span>
                 <span x-show="!hasApprovers">
                   There are no approvers set to review requests to make a repository public. You may contact the app admin to resolve this issue.
+                </span>
+              </div>
+              <div class="overflow-hidden text-sm text-gray-500 sm:mt-0" x-show="repository.statusLoaded && !repository.approvalStatus && repository.RepositorySource==='AzureDevOps'">
+                <span>
+                  No options available for an Azure DevOps project.
                 </span>
               </div>
 
@@ -340,16 +345,19 @@
           console.log(e)
         })
       },
-      getRepositoryApprovalStatus(id, i) {
-        if(!this.userRepositoriesList[i]["statusLoaded"]) {
+      getRepositoryApprovalStatus(id, i, source) {
+        if(!this.userRepositoriesList[i]["statusLoaded"] && source==='GitHub') {
           fetch('/api/repositories/' + id)
-        .then(r => {
-          r.json().then(body => {
-            this.userRepositoriesList[i]["approvalStatus"] = body
-            this.userRepositoriesList[i]["statusLoaded"] = true
-         
+          .then(r => {
+            r.json().then(body => {
+              this.userRepositoriesList[i]["approvalStatus"] = body
+              this.userRepositoriesList[i]["statusLoaded"] = true
+          
+            })
           })
-        })
+        }
+        else if(!this.userRepositoriesList[i]["statusLoaded"] && source==='AzureDevOps') {
+          this.userRepositoriesList[i]["statusLoaded"] = true
         }
       },
       getPageDetails() {

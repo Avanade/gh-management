@@ -23,7 +23,8 @@ SELECT [p].[Id],
        [ModifiedBy],
        [ApprovalStatusId],
        [v].[Name] AS 'Visibility',
-       [p].[RepositorySource]
+       [p].[RepositorySource],
+	  [p].[TFSProjectReference]
   FROM 
        [dbo].[Projects] AS p
   LEFT JOIN [dbo].[Visibility] AS v ON p.VisibilityId = v.Id
