@@ -10,7 +10,6 @@ import (
 	session "main/pkg/session"
 	"main/pkg/sql"
 	"net/http"
-	"net/url"
 	"os"
 	"strconv"
 	"strings"
@@ -53,17 +52,6 @@ func GetUserProjects(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
-	}
-	for i, repo := range list {
-		if repo.RepositorySource == "GitHub" {
-			org := os.Getenv("GH_ORG_INNERSOURCE")
-			if repo.Visibility == "Public" {
-				org = os.Getenv("GH_ORG_OPENSOURCE")
-			}
-			list[i].TFSProjectReference = fmt.Sprintf("https://github.com/%s/%s", url.QueryEscape(org), url.QueryEscape(repo.Name))
-		} else {
-			continue
-		}
 	}
 
 	w.WriteHeader(http.StatusOK)
@@ -160,17 +148,6 @@ func GetAllRepositories(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
-	}
-	for i, repo := range list {
-		if repo.RepositorySource == "GitHub" {
-			org := os.Getenv("GH_ORG_INNERSOURCE")
-			if repo.Visibility == "Public" {
-				org = os.Getenv("GH_ORG_OPENSOURCE")
-			}
-			list[i].TFSProjectReference = fmt.Sprintf("https://github.com/%s/%s", url.QueryEscape(org), url.QueryEscape(repo.Name))
-		} else {
-			continue
-		}
 	}
 	result := RepositoryList{
 		Data:  list,
