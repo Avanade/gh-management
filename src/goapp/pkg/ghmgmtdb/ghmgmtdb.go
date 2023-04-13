@@ -98,6 +98,7 @@ func PRProjectsInsert(body models.TypNewProjectReqBody, user string) (id int64) 
 		"ConfirmNotClientProject": body.ConfirmNotClientProject,
 		"CreatedBy":               user,
 		"VisibilityId":            body.Visibility,
+		"TFSProjectReference":     body.TFSProjectReference,
 	}
 	result, err := db.ExecuteStoredProcedureWithResult("dbo.PR_Projects_Insert", param)
 	if err != nil {
