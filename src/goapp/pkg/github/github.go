@@ -206,15 +206,15 @@ func ArchiveProject(projectName string, archive bool, org string) error {
 	return nil
 }
 
-func TransferRepository(repo string, owner string, newOwner string) error {
+func TransferRepository(repo string, owner string, newOwner string) (*github.Repository, error) {
 	client := createClient(os.Getenv("GH_TOKEN"))
 	opt := github.TransferRequest{NewOwner: newOwner}
 
-	_, _, err := client.Repositories.Transfer(context.Background(), owner, repo, opt)
+	resp, _, err := client.Repositories.Transfer(context.Background(), owner, repo, opt)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	return nil
+	return resp, nil
 }
 
 type Repo struct {

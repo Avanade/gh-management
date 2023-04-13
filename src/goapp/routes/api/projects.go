@@ -179,6 +179,8 @@ func SetVisibility(w http.ResponseWriter, r *http.Request) {
 	innersource := os.Getenv("GH_ORG_INNERSOURCE")
 	opensource := os.Getenv("GH_ORG_OPENSOURCE")
 
+	id, err := strconv.ParseInt(projectId, 10, 64)
+
 	if currentState == "Public" {
 		// Set repo to desired visibility then move to innersource
 		err := gh.SetProjectVisibility(project, desiredState, opensource)
@@ -187,7 +189,8 @@ func SetVisibility(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		gh.TransferRepository(project, opensource, innersource)
+		repo, _ := gh.TransferRepository(project, opensource, innersource)
+		ghmgmt.UpdateTFSProjectReferenceById(id, repo.GetHTMLURL())
 	} else {
 		// Set repo to desired visibility
 		err := gh.SetProjectVisibility(project, desiredState, innersource)
@@ -198,7 +201,6 @@ func SetVisibility(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Update database
-	id, err := strconv.ParseInt(projectId, 10, 64)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

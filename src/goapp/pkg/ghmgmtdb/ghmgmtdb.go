@@ -474,6 +474,23 @@ func UpdateProjectVisibilityId(id int64, visibilityId int64) error {
 	return nil
 }
 
+func UpdateTFSProjectReferenceById(id int64, tFSProjectReference string) error {
+	db := ConnectDb()
+	defer db.Close()
+
+	param := map[string]interface{}{
+		"Id":                  id,
+		"TFSProjectReference": tFSProjectReference,
+	}
+
+	_, err := db.ExecuteStoredProcedure("PR_Projects_Update_TFSProjectReference_ById", param)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func GetRequestedReposByDateRange(start time.Time, end time.Time) ([]models.TypBasicRepo, error) {
 	var RequestedRepos []models.TypBasicRepo
 	db := ConnectDb()
