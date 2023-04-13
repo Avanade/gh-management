@@ -56,7 +56,7 @@
               <div class="flex items-center justify-between">
                 <div>
                   <span id="reponameValue" @click.stop @click="window.open(repository.TFSProjectReference)"
-                   class="hover:shadow-md text-sm font-medium truncate z-50" x-bind:class="repository.IsArchived? 'text-gray-600' : 'text-indigo-600'" x-text="repository.Name" title="Repository name">  </span>
+                   class="text-sm font-medium truncate z-50" x-bind:class="repository.IsArchived? 'text-gray-600' : 'text-indigo-600'" x-text="repository.Name" title="Repository name">  </span>
                   <span class="text-sm font-medium text-gray-400 truncate" x-show="repository.IsArchived">(Archived)</span>
                 </div>
                 <div @click.stop @click.outside="closeUserRepositoryOptions(-1)" x-show="repository.RepositorySource==='GitHub'">
