@@ -404,12 +404,13 @@ func IndexOrgRepos(w http.ResponseWriter, r *http.Request) {
 			}
 
 			param := map[string]interface{}{
-				"GithubId":     repo.GithubId,
-				"Name":         repo.Name,
-				"Description":  repo.Description,
-				"IsArchived":   repo.IsArchived,
-				"VisibilityId": visibilityId,
-				"Created":      repo.Created.Format("2006-01-02 15:04:05"),
+				"GithubId":            repo.GithubId,
+				"Name":                repo.Name,
+				"Description":         repo.Description,
+				"IsArchived":          repo.IsArchived,
+				"VisibilityId":        visibilityId,
+				"TFSProjectReference": repo.TFSProjectReference,
+				"Created":             repo.Created.Format("2006-01-02 15:04:05"),
 			}
 
 			isExisting := ghmgmt.Projects_IsExisting_By_GithubId(models.TypNewProjectReqBody{GithubId: repo.GithubId})

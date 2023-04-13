@@ -145,16 +145,17 @@ func GetRepositoriesFromOrganization(org string) ([]Repo, error) {
 	var repoList []Repo
 	for _, repo := range allRepos {
 		r := Repo{
-			GithubId:    repo.GetID(),
-			FullName:    repo.GetFullName(),
-			Name:        repo.GetName(),
-			Link:        repo.GetHTMLURL(),
-			Org:         org,
-			Description: repo.GetDescription(),
-			Private:     repo.GetPrivate(),
-			Created:     repo.GetCreatedAt(),
-			IsArchived:  repo.GetArchived(),
-			Visibility:  repo.GetVisibility(),
+			GithubId:            repo.GetID(),
+			FullName:            repo.GetFullName(),
+			Name:                repo.GetName(),
+			Link:                repo.GetHTMLURL(),
+			Org:                 org,
+			Description:         repo.GetDescription(),
+			Private:             repo.GetPrivate(),
+			Created:             repo.GetCreatedAt(),
+			IsArchived:          repo.GetArchived(),
+			Visibility:          repo.GetVisibility(),
+			TFSProjectReference: repo.GetHTMLURL(),
 		}
 		repoList = append(repoList, r)
 	}
@@ -217,16 +218,17 @@ func TransferRepository(repo string, owner string, newOwner string) error {
 }
 
 type Repo struct {
-	GithubId    int64            `json:"id"`
-	FullName    string           `json:"repoFullName"`
-	Name        string           `json:"repoName"`
-	Link        string           `json:"repoLink"`
-	Org         string           `json:"org"`
-	Description string           `json:"description"`
-	Private     bool             `json:"private"`
-	Created     github.Timestamp `json:"created"`
-	IsArchived  bool             `json:"archived"`
-	Visibility  string           `json:"visibility"`
+	GithubId            int64            `json:"id"`
+	FullName            string           `json:"repoFullName"`
+	Name                string           `json:"repoName"`
+	Link                string           `json:"repoLink"`
+	Org                 string           `json:"org"`
+	Description         string           `json:"description"`
+	Private             bool             `json:"private"`
+	Created             github.Timestamp `json:"created"`
+	IsArchived          bool             `json:"archived"`
+	Visibility          string           `json:"visibility"`
+	TFSProjectReference string
 }
 
 func OrganizationsIsMember(token string, GHUser string) (bool, bool, error) {
