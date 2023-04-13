@@ -51,6 +51,16 @@ func CreatePrivateGitHubRepository(data models.TypNewProjectReqBody, requestor s
 	return repo, nil
 }
 
+func IsOrgAllowInternalRepo() (bool, error) {
+	client := createClient(os.Getenv("GH_TOKEN"))
+	orgName := os.Getenv("GH_ORG_INNERSOURCE")
+	org, _, err := client.Organizations.Get(context.Background(), orgName)
+	if err != nil {
+		return false, err
+	}
+	return *org.MembersCanCreateInternalRepos, err
+}
+
 func AddCollaborator(data models.TypNewProjectReqBody, requestor string) (*github.Response, error) {
 	client := createClient(os.Getenv("GH_TOKEN"))
 	owner := os.Getenv("GH_ORG_INNERSOURCE")

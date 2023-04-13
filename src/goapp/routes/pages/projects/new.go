@@ -10,6 +10,7 @@ import (
 	session "main/pkg/session"
 	template "main/pkg/template"
 	"net/http"
+	"os"
 	"regexp"
 	"strings"
 
@@ -76,6 +77,12 @@ func ProjectsNewHandler(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 		} else {
+			isOrgAllowInternalRepo, err := githubAPI.IsOrgAllowInternalRepo()
+			if err != nil {
+				httpResponseError(w, http.StatusBadRequest, "There is a problem checking if the organization is enterprise or not.")
+				return
+			}
+
 			repo, errRepo := githubAPI.CreatePrivateGitHubRepository(body, username.(string))
 			if errRepo != nil {
 				fmt.Println(errRepo)
@@ -83,6 +90,17 @@ func ProjectsNewHandler(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 			body.GithubId = repo.GetID()
+			body.Visibility = 1
+
+			if isOrgAllowInternalRepo {
+				innersource := os.Getenv("GH_ORG_INNERSOURCE")
+				err := githubAPI.SetProjectVisibility(repo.GetName(), "internal", innersource)
+				if err != nil {
+					return
+				}
+				body.Visibility = 2
+			}
+
 			_ = ghmgmtdb.PRProjectsInsert(body, username.(string))
 
 			w.WriteHeader(http.StatusOK)
