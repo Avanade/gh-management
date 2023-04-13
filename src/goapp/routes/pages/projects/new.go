@@ -77,7 +77,7 @@ func ProjectsNewHandler(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 		} else {
-			isOrgAllowInternalRepo, err := githubAPI.GetIsOrgAllowInternalRepo()
+			isOrgAllowInternalRepo, err := githubAPI.IsOrgAllowInternalRepo()
 			if err != nil {
 				httpResponseError(w, http.StatusBadRequest, "There is a problem checking if the organization is enterprise or not.")
 				return

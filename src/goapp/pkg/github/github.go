@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"main/models"
 	"main/pkg/email"
 	"main/pkg/envvar"
@@ -52,52 +51,14 @@ func CreatePrivateGitHubRepository(data models.TypNewProjectReqBody, requestor s
 	return repo, nil
 }
 
-func GetIsOrgAllowInternalRepo() (bool, error) {
-	// Create a new HTTP client
-	client := &http.Client{}
-
-	accessToken := os.Getenv("GH_TOKEN")
+func IsOrgAllowInternalRepo() (bool, error) {
+	client := createClient(os.Getenv("GH_TOKEN"))
 	orgName := os.Getenv("GH_ORG_INNERSOURCE")
-
-	// Create a new GET request to retrieve the organization details
-	req, err := http.NewRequest("GET", fmt.Sprintf("https://api.github.com/orgs/%s", orgName), nil)
+	org, _, err := client.Organizations.Get(context.Background(), orgName)
 	if err != nil {
-		fmt.Printf("Error creating HTTP request: %v\n", err)
 		return false, err
 	}
-
-	// Set up the headers with the access token
-	req.Header.Set("Authorization", fmt.Sprintf("token %s", accessToken))
-	req.Header.Set("Accept", "application/vnd.github.v3+json")
-
-	// Send the request
-	resp, err := client.Do(req)
-	if err != nil {
-		fmt.Printf("Error sending HTTP request: %v\n", err)
-		return false, err
-	}
-	defer resp.Body.Close()
-
-	// Check if the response was successful
-	if resp.StatusCode != 200 {
-		fmt.Printf("Error getting organization %s.\n", orgName)
-		return false, err
-	}
-
-	// Retrieve the response data as a JSON object
-	bodyBytes, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		fmt.Printf("Error reading response body: %v\n", err)
-		return false, err
-	}
-	orgData := make(map[string]interface{})
-	err = json.Unmarshal(bodyBytes, &orgData)
-	if err != nil {
-		fmt.Printf("Error unmarshalling JSON: %v\n", err)
-		return false, err
-	}
-
-	return orgData["members_can_create_internal_repositories"].(bool), nil
+	return *org.MembersCanCreateInternalRepos, err
 }
 
 func AddCollaborator(data models.TypNewProjectReqBody, requestor string) (*github.Response, error) {
