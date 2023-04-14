@@ -263,6 +263,17 @@ func RemoveOutsideCollaborator(token string, org string, username string) *githu
 	}
 	return repons
 }
+func ConvertMemberToOutsideCollaborator(token string, org string, username string) *github.Response {
+	client := createClient(token)
+
+	repons, err := client.Organizations.ConvertMemberToOutsideCollaborator(context.Background(), org, username)
+	if err != nil {
+		fmt.Println("err")
+		fmt.Println(err)
+	}
+	return repons
+}
+
 func RemoveOrganizationsMember(token string, org string, username string) *github.Response {
 	client := createClient(token)
 
@@ -319,4 +330,87 @@ func EmailAdmin(admin string, adminemail string, reponame string, outisideCollab
 
 	email.SendEmail(m)
 	fmt.Printf(" GitHub Repo Collaborators Scan on %s was sent.", e)
+}
+
+func EmailAdminConvertToColaborator(Email string, outisideCollab []string) {
+	e := time.Now()
+	var body string
+	Collablist := "</p> <table  >"
+	for _, collab := range outisideCollab {
+		Collablist = Collablist + " <tr> <td>" + collab + " </td></tr>"
+	}
+	Collablist = Collablist + " </table  > <p>"
+	if len(outisideCollab) == 1 {
+		body = fmt.Sprintf("<p>Hello %s ,  </p>  \n<p>This is to inform you that %o GitHub user on Avanade was converted as an outside collaborator. </p> %s  This email was sent to the admins of the repository.  </p>  \n <p>OSPO</p>", Email, len(outisideCollab), Collablist)
+	} else {
+
+		body = fmt.Sprintf("<p>Hello %s ,  </p>  \n<p>This is to inform you that %o GitHub user on Avanade was converted to an outside collaborator. </p> %s  This email was sent to the admins of the repository.  </p>  \n <p>OSPO</p>", Email, len(outisideCollab), Collablist)
+	}
+
+	m := email.TypEmailMessage{
+		Subject: "GitHub Organization Scan",
+		Body:    body,
+		To:      Email,
+	}
+
+	email.SendEmail(m)
+	fmt.Printf("GitHub User was converted into an outside  on %s was sent.", e)
+}
+
+func EmailRepoAdminConvertToColaborator(Email string, reponame string, outisideCollab []string) {
+	e := time.Now()
+	var body string
+	link := "https://github.com/" + os.Getenv("GH_ORG_OPENSOURCE") + "/" + reponame
+	link = "<a href=\"" + link + "\">" + reponame + "</a>"
+	Collablist := "</p> <table  >"
+	for _, collab := range outisideCollab {
+		Collablist = Collablist + " <tr> <td>" + collab + " </td></tr>"
+	}
+
+	Collablist = Collablist + " </table  > <p>"
+	if len(outisideCollab) == 1 {
+		body = fmt.Sprintf("<p>Hello %s ,  </p>  \n<p>This is to inform you that <b> %o </b> GitHub user on your GitHub repo %s was converted to an outside collaborator. </p> %s This email was sent to the admins of the repository. </p> \n <p>OSPO</p>", Email, len(outisideCollab), link, Collablist)
+
+	} else {
+
+		body = fmt.Sprintf("<p>Hello %s ,  </p>  \n<p>This is to inform you that <b> %o </b> GitHub users on your GitHub repo %s were converted to outside collaborators. </p> %s This email was sent to the admins of the repository. </p> \n <p>OSPO</p>", Email, len(outisideCollab), link, Collablist)
+	}
+
+	m := email.TypEmailMessage{
+		Subject: "GitHub Organization Scan",
+		Body:    body,
+		To:      Email,
+	}
+
+	email.SendEmail(m)
+	fmt.Printf("GitHub User was converted into an outside  on %s was sent.", e)
+}
+
+func GetRepoAdmin(org string, repo string) []string {
+	var Adminmember []string
+	var RepocollabsList []string
+	var OrgOwners []string
+	token := os.Getenv("GH_TOKEN")
+	ORG_OWNERS := os.Getenv("ORG_OWNERS")
+	OrgOwners = strings.Fields(ORG_OWNERS)
+	Repocollabs := RepositoriesListCollaborators(token, org, repo)
+
+	for _, list := range Repocollabs {
+
+		RepocollabsList = append(RepocollabsList, *list.Login)
+		if *list.RoleName == "admin" {
+			if !stringInArray(*list.Login, OrgOwners) {
+				Adminmember = append(Adminmember, *list.Login)
+			}
+		}
+	}
+	return Adminmember
+}
+func stringInArray(a string, list []string) bool {
+	for _, b := range list {
+		if b == a {
+			return true
+		}
+	}
+	return false
 }
