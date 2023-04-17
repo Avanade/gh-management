@@ -15,6 +15,8 @@ import (
 	"strings"
 	"time"
 
+	db "main/pkg/ghmgmtdb"
+
 	"github.com/google/go-github/v50/github"
 	"golang.org/x/oauth2"
 )
@@ -313,7 +315,7 @@ func OrgListMembers(token string, org string) []*github.User {
 func RepoOwnerScan(token string) error {
 	organizationsOpen := [...]string{os.Getenv("GH_ORG_OPENSOURCE"), os.Getenv("GH_ORG_INNERSOURCE")}
 	var repoOnwerDeficient []string
-
+	var email string
 	EmailSupport := os.Getenv("EMAIL_SUPPORT")
 	for _, org := range organizationsOpen {
 
@@ -326,7 +328,13 @@ func RepoOwnerScan(token string) error {
 			owners := GetRepoAdmin(org, repo.Name)
 			if len(owners) < 2 {
 				repoOnwerDeficient = append(repoOnwerDeficient, repo.Name)
-
+				for _, owner := range owners {
+					email, err = db.UsersGetEmail(owner)
+					if err != nil {
+						return err
+					}
+					EmailcoownerDeficient(email, org, repo.Name)
+				}
 			}
 
 		}
@@ -430,7 +438,6 @@ func GetRepoAdmin(org string, repo string) []string {
 			if !stringInArray(*list.Login, OrgOwners) {
 				Adminmember = append(Adminmember, *list.Login)
 
-				EmailcoownerDeficient()
 			}
 		}
 	}
