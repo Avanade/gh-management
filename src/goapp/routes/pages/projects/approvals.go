@@ -104,12 +104,14 @@ func checkAllRequests(id int64) {
 	if allApproved {
 		owner := os.Getenv("GH_ORG_INNERSOURCE")
 		newOwner := os.Getenv("GH_ORG_OPENSOURCE")
-		repoResp, _ := gh.TransferRepository(repo, owner, newOwner)
+		gh.TransferRepository(repo, owner, newOwner)
 
 		time.Sleep(3 * time.Second)
 		gh.SetProjectVisibility(repo, "public", newOwner)
 
 		ghmgmt.UpdateProjectVisibilityId(id, PUBLIC)
+
+		repoResp, _ := gh.GetRepository(repo, newOwner)
 		ghmgmt.UpdateTFSProjectReferenceById(id, repoResp.GetHTMLURL())
 	}
 }
