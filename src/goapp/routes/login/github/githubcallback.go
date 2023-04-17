@@ -203,6 +203,8 @@ func CheckAvaOpenSource(w http.ResponseWriter, r *http.Request) {
 
 func ClearOrgMembers(w http.ResponseWriter, r *http.Request) {
 	token := os.Getenv("GH_TOKEN")
+
+	// Remove GitHub users from innersource who are not employees
 	organization := os.Getenv("GH_ORG_INNERSOURCE")
 	EmailSupport := os.Getenv("EMAIL_SUPPORT")
 	var ConvertedOutsidecollabsList []string
@@ -222,6 +224,7 @@ func ClearOrgMembers(w http.ResponseWriter, r *http.Request) {
 
 	}
 
+	// Convert users who are not employees to an outside collaborator
 	organizationsOpen := os.Getenv("GH_ORG_OPENSOURCE")
 
 	usersOpenorg := githubAPI.OrgListMembers(token, organizationsOpen)
@@ -241,31 +244,33 @@ func ClearOrgMembers(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if len(ConvertedOutsidecollabsList) > 0 {
+		// Email list of new outside collaborators to ospo
 		githubAPI.EmailAdminConvertToColaborator(EmailSupport, ConvertedOutsidecollabsList)
-	}
 
-	repos, _ := githubAPI.GetRepositoriesFromOrganization(organizationsOpen)
-	for _, repo := range repos {
+		// Email repo admins with converted users
+		repos, _ := githubAPI.GetRepositoriesFromOrganization(organizationsOpen)
+		for _, repo := range repos {
 
-		RepoAdmins := githubAPI.GetRepoAdmin(organizationsOpen, repo.Name)
-		Repocollabs := githubAPI.RepositoriesListCollaborators(token, organizationsOpen, repo.Name)
-		var ConvertedInRepo []string
-		for _, collab1 := range ConvertedOutsidecollabsList {
-			for _, collab2 := range Repocollabs {
-				if collab1 == *collab2.Login {
-					ConvertedInRepo = append(ConvertedInRepo, collab1)
+			RepoAdmins := githubAPI.GetRepoAdmin(organizationsOpen, repo.Name)
+			Repocollabs := githubAPI.RepositoriesListCollaborators(token, organizationsOpen, repo.Name)
+			var ConvertedInRepo []string
+			for _, collab1 := range ConvertedOutsidecollabsList {
+				for _, collab2 := range Repocollabs {
+					if collab1 == *collab2.Login {
+						ConvertedInRepo = append(ConvertedInRepo, collab1)
+					}
 				}
 			}
-		}
 
-		for _, collab := range RepoAdmins {
-			collabemail, _ := db.UsersGetEmail(collab)
+			for _, collab := range RepoAdmins {
+				collabemail, _ := db.UsersGetEmail(collab)
 
-			if len(ConvertedInRepo) > 0 {
-				githubAPI.EmailRepoAdminConvertToColaborator(collabemail, repo.Name, ConvertedInRepo)
+				if len(ConvertedInRepo) > 0 {
+					githubAPI.EmailRepoAdminConvertToColaborator(collabemail, repo.Name, ConvertedInRepo)
+				}
 			}
-		}
 
+		}
 	}
 
 }

@@ -341,10 +341,10 @@ func EmailAdminConvertToColaborator(Email string, outisideCollab []string) {
 	}
 	Collablist = Collablist + " </table  > <p>"
 	if len(outisideCollab) == 1 {
-		body = fmt.Sprintf("<p>Hello %s ,  </p>  \n<p>This is to inform you that %o GitHub user on Avanade was converted as an outside collaborator. </p> %s  This email was sent to the admins of the repository.  </p>  \n <p>OSPO</p>", Email, len(outisideCollab), Collablist)
+		body = fmt.Sprintf("<p>Hello %s ,  </p>  \n<p>This is to inform you that %o GitHub user on Avanade was converted as an outside collaborator. </p> %s  ", Email, len(outisideCollab), Collablist)
 	} else {
 
-		body = fmt.Sprintf("<p>Hello %s ,  </p>  \n<p>This is to inform you that %o GitHub user on Avanade was converted to an outside collaborator. </p> %s  This email was sent to the admins of the repository.  </p>  \n <p>OSPO</p>", Email, len(outisideCollab), Collablist)
+		body = fmt.Sprintf("<p>Hello %s ,  </p>  \n<p>This is to inform you that %o GitHub user on Avanade was converted to an outside collaborator. </p> %s  ", Email, len(outisideCollab), Collablist)
 	}
 
 	m := email.TypEmailMessage{
