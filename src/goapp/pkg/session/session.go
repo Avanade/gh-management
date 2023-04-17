@@ -79,7 +79,7 @@ func IsAuthenticated(w http.ResponseWriter, r *http.Request, next http.HandlerFu
 				}
 
 				// Log out the user if the attempt to refresh the token failed
-				http.Redirect(w, r, "/logout", http.StatusTemporaryRedirect)
+				http.Redirect(w, r, "/logout/azure", http.StatusTemporaryRedirect)
 
 			} else if newToken != nil {
 				// fmt.Printf("TOKEN REFRESHED\n")
