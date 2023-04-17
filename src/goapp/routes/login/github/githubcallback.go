@@ -269,3 +269,8 @@ func ClearOrgMembers(w http.ResponseWriter, r *http.Request) {
 	}
 
 }
+
+func RepoOwnerScan(w http.ResponseWriter, r *http.Request) {
+	token := os.Getenv("GH_TOKEN")
+	githubAPI.RepoOwnerScan(token)
+}

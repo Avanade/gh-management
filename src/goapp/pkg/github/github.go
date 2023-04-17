@@ -310,6 +310,34 @@ func OrgListMembers(token string, org string) []*github.User {
 	return ListCollabs
 }
 
+func RepoOwnerScan(token string) error {
+	organizationsOpen := [...]string{os.Getenv("GH_ORG_OPENSOURCE"), os.Getenv("GH_ORG_INNERSOURCE")}
+	var repoOnwerDeficient []string
+
+	EmailSupport := os.Getenv("EMAIL_SUPPORT")
+	for _, org := range organizationsOpen {
+
+		repoOnwerDeficient = nil
+		repos, err := GetRepositoriesFromOrganization(org)
+		if err != nil {
+			return err
+		}
+		for _, repo := range repos {
+			owners := GetRepoAdmin(org, repo.Name)
+			if len(owners) < 2 {
+				repoOnwerDeficient = append(repoOnwerDeficient, repo.Name)
+
+			}
+
+		}
+
+		if len(repoOnwerDeficient) > 0 {
+			EmailOspoOwnerDeficient(EmailSupport, org, repoOnwerDeficient)
+		}
+	}
+	return nil
+}
+
 func EmailAdmin(admin string, adminemail string, reponame string, outisideCollab []string) {
 	e := time.Now()
 
@@ -320,7 +348,7 @@ func EmailAdmin(admin string, adminemail string, reponame string, outisideCollab
 		Collablist = Collablist + " <tr> <td>" + collab + " </td></tr>"
 	}
 	Collablist = Collablist + " </table  > <p>"
-	body := fmt.Sprintf("<p>Hello %s ,  </p>  \n<p>This is to inform you that your Github repository <b> %s </b> has %o outside collaborator/s. </p> %s  This email was sent to the admins of the repository.  </p> \n <p>OSPO</p>", admin, link, len(outisideCollab), Collablist)
+	body := fmt.Sprintf("<p>Hello %s ,  </p>  \n<p>This is to inform you that your Github repository <b> %s </b> has %d outside collaborator/s. </p> %s  This email was sent to the admins of the repository.  </p> \n <p>OSPO</p>", admin, link, len(outisideCollab), Collablist)
 
 	m := email.TypEmailMessage{
 		Subject: "GitHub Repo Collaborators Scan",
@@ -341,10 +369,10 @@ func EmailAdminConvertToColaborator(Email string, outisideCollab []string) {
 	}
 	Collablist = Collablist + " </table  > <p>"
 	if len(outisideCollab) == 1 {
-		body = fmt.Sprintf("<p>Hello %s ,  </p>  \n<p>This is to inform you that %o GitHub user on Avanade was converted as an outside collaborator. </p> %s  This email was sent to the admins of the repository.  </p>  \n <p>OSPO</p>", Email, len(outisideCollab), Collablist)
+		body = fmt.Sprintf("<p>Hello %s ,  </p>  \n<p>This is to inform you that %d GitHub user on Avanade was converted as an outside collaborator. </p> %s  This email was sent to the admins of the repository.  </p>  \n <p>OSPO</p>", Email, len(outisideCollab), Collablist)
 	} else {
 
-		body = fmt.Sprintf("<p>Hello %s ,  </p>  \n<p>This is to inform you that %o GitHub user on Avanade was converted to an outside collaborator. </p> %s  This email was sent to the admins of the repository.  </p>  \n <p>OSPO</p>", Email, len(outisideCollab), Collablist)
+		body = fmt.Sprintf("<p>Hello %s ,  </p>  \n<p>This is to inform you that %d GitHub user on Avanade was converted to an outside collaborator. </p> %s  This email was sent to the admins of the repository.  </p>  \n <p>OSPO</p>", Email, len(outisideCollab), Collablist)
 	}
 
 	m := email.TypEmailMessage{
@@ -369,11 +397,11 @@ func EmailRepoAdminConvertToColaborator(Email string, reponame string, outisideC
 
 	Collablist = Collablist + " </table  > <p>"
 	if len(outisideCollab) == 1 {
-		body = fmt.Sprintf("<p>Hello %s ,  </p>  \n<p>This is to inform you that <b> %o </b> GitHub user on your GitHub repo %s was converted to an outside collaborator. </p> %s This email was sent to the admins of the repository. </p> \n <p>OSPO</p>", Email, len(outisideCollab), link, Collablist)
+		body = fmt.Sprintf("<p>Hello %s ,  </p>  \n<p>This is to inform you that <b> %d </b> GitHub user on your GitHub repo %s was converted to an outside collaborator. </p> %s This email was sent to the admins of the repository. </p> \n <p>OSPO</p>", Email, len(outisideCollab), link, Collablist)
 
 	} else {
 
-		body = fmt.Sprintf("<p>Hello %s ,  </p>  \n<p>This is to inform you that <b> %o </b> GitHub users on your GitHub repo %s were converted to outside collaborators. </p> %s This email was sent to the admins of the repository. </p> \n <p>OSPO</p>", Email, len(outisideCollab), link, Collablist)
+		body = fmt.Sprintf("<p>Hello %s ,  </p>  \n<p>This is to inform you that <b> %d </b> GitHub users on your GitHub repo %s were converted to outside collaborators. </p> %s This email was sent to the admins of the repository. </p> \n <p>OSPO</p>", Email, len(outisideCollab), link, Collablist)
 	}
 
 	m := email.TypEmailMessage{
@@ -401,10 +429,60 @@ func GetRepoAdmin(org string, repo string) []string {
 		if *list.RoleName == "admin" {
 			if !stringInArray(*list.Login, OrgOwners) {
 				Adminmember = append(Adminmember, *list.Login)
+
+				EmailcoownerDeficient()
 			}
 		}
 	}
 	return Adminmember
+}
+
+func EmailOspoOwnerDeficient(Email string, org string, reponame []string) {
+	e := time.Now()
+	var body string
+	var link string
+
+	reponamelist := "</p> <table  >"
+	for _, repo := range reponame {
+		link = "https://github.com/" + org + "/" + repo + "/settings/access"
+		link = "<a href=\"" + link + "\">" + repo + "</a>"
+		reponamelist = reponamelist + " <tr> <td>" + link + " </td></tr>"
+	}
+
+	reponamelist = reponamelist + " </table  > <p>"
+	if len(reponame) == 1 {
+		body = fmt.Sprintf("<p>Hello %s ,  </p>  \n<p>This is to inform you that <b> %d </b> repository on %s needs to add a co-owner.</p> %s   </p>  ", Email, len(reponame), org, reponamelist)
+
+	} else {
+		body = fmt.Sprintf("<p>Hello %s ,  </p>  \n<p>This is to inform you that <b> %d </b> repositories on %s need to add a co-owner.</p> %s   </p>  ", Email, len(reponame), org, reponamelist)
+	}
+	m := email.TypEmailMessage{
+		Subject: "GitHub Organization Scan",
+		Body:    body,
+		To:      Email,
+	}
+
+	email.SendEmail(m)
+	fmt.Printf(" less than 2 owner    %s was sent.", e)
+}
+
+func EmailcoownerDeficient(Email string, Org string, reponame string) {
+	e := time.Now()
+	var body string
+	var link string
+	link = "https://github.com/" + Org + "/" + reponame + "/settings/access"
+	link = "<a href=\"" + link + "\"> here </a>"
+
+	body = fmt.Sprintf("<p>Hello %s ,  </p>  \n<p>This is to inform you that you are the only admin on %s  GitHub repository. We recommend at least 2 admins on each repository. Click %s to add a co-owner.</p> \n <p>OSPO</p>", Email, reponame, link)
+
+	m := email.TypEmailMessage{
+		Subject: "GitHub Organization Scan",
+		Body:    body,
+		To:      Email,
+	}
+
+	email.SendEmail(m)
+	fmt.Printf(" less than 2 owner  on %s was sent.", e)
 }
 func stringInArray(a string, list []string) bool {
 	for _, b := range list {
