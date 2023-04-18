@@ -60,6 +60,75 @@
                 <span x-html="form.IconSVG"> <---SVG</span>
             </div>
 
+
+
+
+<fieldset x-bind:disabled="">
+    <div class="space-y-8 divide-y divide-gray-200 sm:space-y-5">
+        {{/* <div>
+            <div>
+                <h3 class="text-lg leading-6 font-medium text-gray-900">{{ .Action }} Approval Type</h3>
+                <!-- <p class="mt-1 max-w-2xl text-sm text-gray-500">Description...</p> -->
+            </div>
+        </div> */}}
+        <div class="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-t sm:border-gray-200 sm:pt-5">
+            <label for="Name" class="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2"> SVG Code </label>
+            <div class="mt-1 sm:mt-0 sm:col-span-2">
+                <input x-model="form.svgcode" type="text" name="Name" id="Name" autocomplete=" " class="block w-full shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm border-gray-300 rounded-md">
+            </div>
+        </div>
+        <div class="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-t sm:border-gray-200 sm:pt-5">
+            <label for="Name" class="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2">Name </label>
+            <div class="mt-1 sm:mt-0 sm:col-span-2">
+                <input x-model="form.svgcode" type="text" name="Name" id="Name" autocomplete=" " class="block w-full shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm border-gray-300 rounded-md">
+            </div>
+        </div>
+        <div class="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-baseline">
+            <div>
+              <div class="text-base font-medium text-gray-900 sm:text-sm sm:text-gray-700" id="label-notifications">Status</div>
+            </div>
+            <div class="sm:col-span-2">
+
+                <div class="relative inline-block text-left">
+                    <div>
+                        <button @click="CategoryList=true"
+                                @click.away="CategoryList=false"
+                                type="button" class="inline-flex w-full justify-center gap-x-1.5 rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50" id="menu-button" aria-expanded="true" aria-haspopup="true">
+                        <span x-text="form.Category"></span>
+                        <svg class="-mr-1 h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                            <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
+                        </svg>
+                        </button>
+                    </div>
+
+                    <div x-show="CategoryList" 
+                         class="absolute right-0 z-10 mt-2 w-56 origin-top-right divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="menu-button" tabindex="-1">
+                        <div class="py-1" role="none">
+                        <!-- Active: "bg-gray-100 text-gray-900", Not Active: "text-gray-700" -->
+                            <a @click="form.Category ='TechCommunityCalendar' " class="cursor-pointer  block px-4 py-2 text-sm hover:bg-[#fff2eb]"  role="menuitem" tabindex="-1" id="menu-item-1"
+                        x-bind:class="form.Category==='TechCommunityCalendar' ? 'text-[#FF5800]' : 'text-gray-700' " 
+                        >Tech Community Calendar</a>
+                        </div>
+                        <div class="py-1" role="none">
+                            <a @click="form.Category ='StackOverflowAvanade' " class="cursor-pointer block px-4 py-2 text-sm hover:bg-[#fff2eb]" role="menuitem" tabindex="-1" id="menu-item-2"
+                        x-bind:class="form.Category==='StackOverflowAvanade' ? 'text-[#FF5800]' : 'text-gray-700' " >Stack Overflow Avanade</a>
+                        </div>
+                        <div class="py-1" role="none">
+                            <a @click="form.Category ='OpenInnovationMeetup' " class="cursor-pointer block px-4 py-2 text-sm hover:bg-[#fff2eb]" role="menuitem" tabindex="-1" id="menu-item-4"
+                        x-bind:class="form.Category==='OpenInnovationMeetup' ? 'text-[#FF5800]' : 'text-gray-700' ">Open Innovation Meetup</a>
+                        </div>
+
+
+                    </div>
+                </div>
+            </div>
+
+          </div>
+    </div>
+</fieldset>
+
+
+
         </div>
     </div>
     <!--BUTTON-->

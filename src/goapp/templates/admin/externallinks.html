@@ -225,6 +225,14 @@
             SVGName: '',
             InnerBody: true,
 
+            //x-model="form.name"
+            {{/* form : {
+                id: '',
+                icon: '',
+                svgname: '',
+                enabled: null,
+            } */}}
+
             showSpinner: false,
             getAllExternalLinks() {
                 let uri = '/admin/externallinks/GetExternalLinks'
@@ -297,6 +305,14 @@
             get ExternalLinksOIM() {
                 return this.GetExternalLinksList
             },
+            {{/* update(id, enabled) {
+                this.formUpdate.id = id
+                this.formUpdate.name = ApproverUserPrincipalName
+                postData2 = this.formUpdate;
+                Alpine.store('master').postData('/api/communityapprovers/update', postData2, "Your community approvers has been updated.",
+                    "Close")
+              
+            } */}}
             onChangeTechCommCalendar() {  
                 this.TCCCurrentIcon = 'Tech User Group'
                 console.log("Icon TechCommCalendar changed to ---> " + this.TCCCurrentIcon)
@@ -318,9 +334,14 @@
             saveSVG() {
                 if(this.InputSVG === '' || this.SVGName ==='') {
                     console.log("SVG not found, Please put SVG code.")
-                    console.clear()
                     return
                 }
+
+                {{/* this.form.
+                Alpine.store('master').modal.show()
+                Alpine.store('master').putData(`/api/externallinks/update/${this.form.id}/${this.form.enabled}`, data, "External Links has been updated.", "Go to list of External Links", "/admin/externallinks") */}}
+
+
                 console.log("SVG successfully saved to database!")
                 return
             },
