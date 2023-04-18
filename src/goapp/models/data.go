@@ -39,6 +39,17 @@ type ExternalLinksIcon struct {
 	IconPath string
 }
 
+type TypExternalLinks struct {
+	Id                        int    `json:"id"`
+	SVGName					  string `json:"svgname"`
+	IconSVG                   string `json:"iconsvg"`
+	Category                  string `json:"category"`	
+	Created                   string `json:"created"`
+	CreatedBy                 string `json:"createdBy"`
+	Modified                  string `json:"modified"`
+	ModifiedBy                string `json:"modifiedBy"`
+}
+
 type TypNewProjectReqBody struct {
 	Id                      string `json:"id"`
 	GithubId                int64  `json:"githubId"`

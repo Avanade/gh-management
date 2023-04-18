@@ -160,8 +160,13 @@ func main() {
 	muxAdmin.Handle("/contributionarea", loadAdminPage(rtAdmin.ListContributionAreas))
 	muxAdmin.Handle("/contributionarea/{action:add}", loadAdminPage(rtAdmin.ContributionAreasForm))
 	muxAdmin.Handle("/contributionarea/{action:view|edit}/{id}", loadAdminPage(rtAdmin.ContributionAreasForm))
-	muxAdmin.Handle("/externallinks", loadAzGHAuthPage(rtAdmin.CustomizeExternalLinks))
+
+	//EXTERNAL LINKS
+	muxAdmin.Handle("/externallinks/GetExternalLinks", loadAzGHAuthPage(rtAdmin.GetExternalLinks))
 	muxAdmin.Handle("/externallinks/form", loadAzGHAuthPage(rtAdmin.ExternalLinksForm))
+	muxAdmin.Handle("/externallinks", loadAzGHAuthPage(rtAdmin.ExternalLinksHandler))
+	muxAdmin.Handle("/externallinks/update", loadAzAuthPage(rtAdmin.CreateExternalLinks))
+	muxAdmin.Handle("/externallinks/{Category}", loadAzAuthPage(rtAdmin.GetExternalLinksByCategory))
 
 	muxApi.HandleFunc("/approvals/project/callback", rtProjects.UpdateApprovalStatusProjects).Methods("POST")
 	muxApi.HandleFunc("/approvals/project/reassign/callback", rtProjects.UpdateApprovalReassignApprover)

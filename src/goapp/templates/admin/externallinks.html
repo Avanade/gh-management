@@ -1,14 +1,12 @@
 {{ define "content" }}
 <div id="pageTitle"> External Links</div>
-
 <style>
     * {
     box-sizing: border-box;
     }
     .column {
     float: left;
-
-    padding: 5px;
+    padding-right: 5px;
     }
     .row:after {
     content: "";
@@ -16,8 +14,7 @@
     clear: both;
     }
 </style>
-
-<div x-data="ExternalLinksPage()" >
+<div x-data="ExternalLinksPage()" x-data="TCCCurrentIcon">
     <div class="border-gray-200 pb-5 sm:flex sm:items-center sm:justify-between">
         <h3 class="text-base font-semibold leading-6 text-gray-900">
         </h3>
@@ -32,127 +29,71 @@
             </a>
         </div>
     </div>    
-
-    <div class="row" name="row1">
-        <div class="column">
-            <span> Current Icon </span>
-        </div>
-
-        <div class="column">
-            <button @click="TechCommunityCalendar=true"
-                    @click.away="TechCommunityCalendar=false"
-                    type="button"
-                    class="inline-flex w-full justify-center gap-x-1.5 rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50" id="menu-button" aria-expanded="true" aria-haspopup="true">
-                
-                <svg class="mr-2 h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                    <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
-                </svg>
-
-                <span x-text="TechCommunityCalendarCurrentIcon"></span>
-            </button>
-
-            <div x-show="TechCommunityCalendar" class="absolute z-10 w-auto divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="menu-button" tabindex="-1" >
-
-                <div class="py-1 hover:bg-[#fff2eb]" role="none">
-                    <a @click="onChangeTechCommCalendar() " class=" cursor-pointer text-gray-700 group flex items-center px-4 py-2 text-sm" role="menuitem" tabindex="-1" id="menu-item-0">
-                        {{/* <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
-                        </svg> */}}
-                        {{ range $icons := .Header.ExternalLinks }}
-
-                        <img src="{{ $icons.IconPath }}" class="mr-4 h-6 w-6"/>
-
-                        {{ end }}
-                        {{/* <span x-text="TechCommunityCalendarCurrentIcon"></span> */}}
-
-                        {{ range $icons := .Icons.ExternalLinksPage}}
-                        <span x-text="{{ $icons.IconName }}">  Tech User Group</span>
-                        {{ end }}
-                    </a>
-                </div>
-
-                {{/* <div class="py-1" role="none">
-
-                    <!-- Active: "bg-gray-100 text-gray-900", Not Active: "text-gray-700" -->
-                    <a href="#" class="text-gray-700 group flex items-center px-4 py-2 text-sm" role="menuitem" tabindex="-1" id="menu-item-0">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5m-9-6h.008v.008H12v-.008zM12 15h.008v.008H12V15zm0 2.25h.008v.008H12v-.008zM9.75 15h.008v.008H9.75V15zm0 2.25h.008v.008H9.75v-.008zM7.5 15h.008v.008H7.5V15zm0 2.25h.008v.008H7.5v-.008zm6.75-4.5h.008v.008h-.008v-.008zm0 2.25h.008v.008h-.008V15zm0 2.25h.008v.008h-.008v-.008zm2.25-4.5h.008v.008H16.5v-.008zm0 2.25h.008v.008H16.5V15z" />
-                        </svg>
-                        <span> Tech User Group</span>
-                    </a>
-
-                </div>
-
-                <div class="py-1" role="none">
-
-                    <!-- Active: "bg-gray-100 text-gray-900", Not Active: "text-gray-700" -->
-                    <a href="#" class="text-gray-700 group flex items-center px-4 py-2 text-sm" role="menuitem" tabindex="-1" id="menu-item-0">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
-                    </svg>
-                        <span> Tech User Group</span>
-                    </a>
-
-                </div> */}}
-
-            </div>
-
-        </div>
-    </div>
-
-    <br>
     
-    <div class="row" name="row2">
-        <div class="column">
-            <span> Current Icon </span>
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M6.429 9.75L2.25 12l4.179 2.25m0-4.5l5.571 3 5.571-3m-11.142 0L2.25 7.5 12 2.25l9.75 5.25-4.179 2.25m0 0L21.75 12l-4.179 2.25m0 0l4.179 2.25L12 21.75 2.25 16.5l4.179-2.25m11.142 0l-5.571 3-5.571-3" />
-            </svg>
+    <div x-show="InnerBody">
+
+        <div class="row" name="row1">
+            <div class="column mt-1" >
+                <div class="flex justify-between">
+                    {{/* <span x-html="TCCCurrentIcon" title="TechCommunityCalendarCurrentSVGName" class=" mt-0.5 mr-2"></span> */}}
+                    <template x-for="(icon, n) in GetExternalLinksTCC" :key="n">
+                        <span class="mt-0.5 mr-1" x-html="icon.Enabled === true ? icon.IconSVG : '' " :title="icon.SVGName" ></span>
+                    </template>
+                    <span> Tech Community Calendar </span>
+                </div>
+            </div>
+
+            <div class="column">
+                <button @click="TCCList=true"
+                        @click.away="TCCList=false"
+                        type="button"
+                        class="inline-flex w-full justify-center gap-x-1.5 rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50" id="menu-button" aria-expanded="true" aria-haspopup="true">
+                    <span x-html="TCCCurrentIcon" title="TechCommunityCalendarCurrentSVGName" class="mr-2 h-5 w-5"></span>
+                    <span x-text="TCCCurrentName"></span>
+                </button>
+
+                <div x-show="TCCList" class="absolute z-10 w-auto divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="menu-button" tabindex="-1" >
+                    <template x-for="(TCC, n) in GetExternalLinksTCC" :key="n">
+                        <div class="py-1 hover:bg-[#fff2eb]" role="none">
+                            <a @click="TCCCurrentIcon = TCC.IconSVG, TCCCurrentName = TCC.SVGName" class=" cursor-pointer text-gray-700 group flex items-center px-4 py-2 text-sm" role="menuitem" tabindex="-1" id="menu-item-0" x-bind:class="TCC.Enabled === true ? 'bg-[#fff2eb]' : ''">
+                                <span x-html="TCC.IconSVG" x-bind:class="TCC.Enabled === true ? 'text-[#FF5800]' : ''" ></span>
+                                <span x-text="TCC.SVGName" class="ml-2" x-bind:class="TCC.Enabled === true ? 'text-[#FF5800]' : ''"></span>
+                            </a>
+                        </div>
+                    </template>
+                </div>
+
+            </div>
         </div>
 
-        <div class="column">
-            <button @click="StackOverflowAvanade=true" @click.away="StackOverflowAvanade=false" type="button" class="inline-flex w-full justify-center gap-x-1.5 rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50" id="menu-button" aria-expanded="true" aria-haspopup="true">
-                <svg class="mr-2 h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                    <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
-                </svg>
-                <span>Stack Overflow at Avanade</span>
-            </button>
+        <br>
 
-            <div x-show="StackOverflowAvanade" class="absolute z-10 w-auto divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="menu-button" tabindex="-1" >
-
-                <div class="py-1" role="none">
-
-                    <!-- Active: "bg-gray-100 text-gray-900", Not Active: "text-gray-700" -->
-                    <a href="#" class="text-gray-700 group flex items-center px-4 py-2 text-sm" role="menuitem" tabindex="-1" id="menu-item-0">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
-                        </svg>
-                        <span>  User </span>
-                    </a>
-
+        <div class="row" name="row2">
+            <div class="column  mt-1">
+                <div class="flex justify-between">
+                    {{/* <span x-html="SOACurrentIcon" title="TechCommunityCalendarCurrentSVGName" class=" mt-0.5 mr-2"></span> */}}
+                    <template x-for="(icon, n) in GetExternalLinksSOA" :key="n">
+                        <span class="mt-0.5 mr-1" x-html="icon.Enabled === true ? icon.IconSVG : '' " :title="icon.SVGName" ></span>
+                    </template>
+                    <span>Stack Overflow at Avanade</span>
                 </div>
+            </div>
 
-                <div class="py-1" role="none">
+            <div class="column">
+                <button @click="SOAList=true" @click.away="SOAList=false" type="button" class="inline-flex w-full justify-center gap-x-1.5 rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50" id="menu-button" aria-expanded="true" aria-haspopup="true">
+                    <span x-html="SOACurrentIcon" title="TechCommunityCalendarCurrentSVGName" class="mr-2 h-5 w-5"></span>
+                    <span x-text="SOACurrentName"></span>
+                </button>
 
-                    <!-- Active: "bg-gray-100 text-gray-900", Not Active: "text-gray-700" -->
-                    <a href="#" class="text-gray-700 group flex items-center px-4 py-2 text-sm" role="menuitem" tabindex="-1" id="menu-item-0">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5m-9-6h.008v.008H12v-.008zM12 15h.008v.008H12V15zm0 2.25h.008v.008H12v-.008zM9.75 15h.008v.008H9.75V15zm0 2.25h.008v.008H9.75v-.008zM7.5 15h.008v.008H7.5V15zm0 2.25h.008v.008H7.5v-.008zm6.75-4.5h.008v.008h-.008v-.008zm0 2.25h.008v.008h-.008V15zm0 2.25h.008v.008h-.008v-.008zm2.25-4.5h.008v.008H16.5v-.008zm0 2.25h.008v.008H16.5V15z" />
-                        </svg>
-                        <span>Calendar</span>
-                    </a>
-
-                </div>
-
-                <div class="py-1" role="none">
-
-                    <!-- Active: "bg-gray-100 text-gray-900", Not Active: "text-gray-700" -->
-                    <a href="#" class="text-gray-700 group flex items-center px-4 py-2 text-sm" role="menuitem" tabindex="-1" id="menu-item-0">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
-                    </svg>
-                        <span> Calendar 2 </span>
-                    </a>
+                <div x-show="SOAList" class="absolute z-10 w-auto divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="menu-button" tabindex="-1" >
+                    <template x-for="(SOA, n) in GetExternalLinksSOA" :key="n">
+                        <div class="py-1 hover:bg-[#fff2eb]" role="none">
+                            <a @click="SOACurrentIcon = SOA.IconSVG,SOACurrentName=SOA.SVGName" class=" cursor-pointer text-gray-700 group flex items-center px-4 py-2 text-sm" role="menuitem" tabindex="-1" id="menu-item-0" x-bind:class="SOA.Enabled === true ? 'bg-[#fff2eb]' : ''">
+                                <span x-html="SOA.IconSVG" x-bind:class="SOA.Enabled === true ? 'text-[#FF5800]' : ''"></span>
+                                <span x-text="SOA.SVGName" class="ml-2" x-bind:class="SOA.Enabled === true ? 'text-[#FF5800]' : ''">  Tech User Group</span>
+                            </a>
+                        </div>
+                    </template>
 
                 </div>
 
@@ -160,109 +101,206 @@
 
         </div>
 
-    </div>
+        <br>
 
-    <br>
-
-    <div class="row" name="row3">
-        <div class="column">
-            <span> Current Icon </span>
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M6.429 9.75L2.25 12l4.179 2.25m0-4.5l5.571 3 5.571-3m-11.142 0L2.25 7.5 12 2.25l9.75 5.25-4.179 2.25m0 0L21.75 12l-4.179 2.25m0 0l4.179 2.25L12 21.75 2.25 16.5l4.179-2.25m11.142 0l-5.571 3-5.571-3" />
-            </svg>
-        </div>
-
-        <div class="column">
-            <button @click="OpenInnovationMeetup=true" @click.away="OpenInnovationMeetup=false" type="button" class="inline-flex w-full justify-center gap-x-1.5 rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50" id="menu-button" aria-expanded="true" aria-haspopup="true">
-                <svg class="mr-2 h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                    <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
-                </svg>
-                <span>Open Innovation Meetup</span>
-            </button>
-
-            <div x-show="OpenInnovationMeetup" class="absolute z-10 w-auto divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="menu-button" tabindex="-1" >
-
-                <div class="py-1" role="none">
-
-                    <!-- Active: "bg-gray-100 text-gray-900", Not Active: "text-gray-700" -->
-                    <a href="#" class="text-gray-700 group flex items-center px-4 py-2 text-sm" role="menuitem" tabindex="-1" id="menu-item-0">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
-                        </svg>
-                        <span>  User </span>
-                    </a>
-
+        <div class="row" name="row3">
+            <div class="column mt-1">
+                <div class="flex justify-between">
+                    {{/* <span x-html="OIMCurrentIcon" title="TechCommunityCalendarCurrentSVGName" class=" mt-0.5 mr-2"></span> */}}
+                    <template x-for="(icon, n) in GetExternalLinksOIM" :key="n">
+                        <span class="mt-0.5 mr-1" x-html="icon.Enabled === true ? icon.IconSVG : '' " :title="icon.SVGName" ></span>
+                    </template>
+                    <span>Open Innovation Meetup </span>
                 </div>
+            </div>
 
-                <div class="py-1" role="none">
+            <div class="column">
+                <button @click="OIMList=true"
+                        @click.away="OIMList=false" type="button" class="inline-flex w-full justify-center gap-x-1.5 rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50" id="menu-button" aria-expanded="true" aria-haspopup="true">
+                    <span x-html="OIMCurrentIcon"
+                          title="TechCommunityCalendarCurrentSVGName" 
+                          class="mr-2 h-5 w-5"></span>
+                    <span x-text="OIMCurrentName"></span>
+                </button>
 
-                    <!-- Active: "bg-gray-100 text-gray-900", Not Active: "text-gray-700" -->
-                    <a href="#" class="text-gray-700 group flex items-center px-4 py-2 text-sm" role="menuitem" tabindex="-1" id="menu-item-0">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5m-9-6h.008v.008H12v-.008zM12 15h.008v.008H12V15zm0 2.25h.008v.008H12v-.008zM9.75 15h.008v.008H9.75V15zm0 2.25h.008v.008H9.75v-.008zM7.5 15h.008v.008H7.5V15zm0 2.25h.008v.008H7.5v-.008zm6.75-4.5h.008v.008h-.008v-.008zm0 2.25h.008v.008h-.008V15zm0 2.25h.008v.008h-.008v-.008zm2.25-4.5h.008v.008H16.5v-.008zm0 2.25h.008v.008H16.5V15z" />
-                        </svg>
-                        <span>Calendar</span>
-                    </a>
-
-                </div>
-
-                <div class="py-1" role="none">
-
-                    <!-- Active: "bg-gray-100 text-gray-900", Not Active: "text-gray-700" -->
-                    <a href="#" class="text-gray-700 group flex items-center px-4 py-2 text-sm" role="menuitem" tabindex="-1" id="menu-item-0">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
-                    </svg>
-                        <span> Calendar 2 </span>
-                    </a>
-
+                <div x-show="OIMList" class="absolute z-10 w-auto divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="menu-button" tabindex="-1" >
+                    <template x-for="(OIM, n) in GetExternalLinksOIM" :key="n">
+                        <div class="py-1 hover:bg-[#fff2eb]" role="none">
+                            <a @click="OIMCurrentIcon = OIM.IconSVG, OIMCurrentName = OIM.SVGName" class=" cursor-pointer text-gray-700 group flex items-center px-4 py-2 text-sm" role="menuitem" tabindex="-1" id="menu-item-0" x-bind:class="OIM.Enabled === true ? 'bg-[#fff2eb]' : ''">
+                                <span x-html="OIM.IconSVG" x-bind:class="OIM.Enabled === true ? 'text-[#FF5800]' : ''"></span>
+                                <span x-text="OIM.SVGName" class="ml-2" x-bind:class="OIM.Enabled === true ? 'text-[#FF5800]' : ''"></span>
+                            </a>
+                        </div>
+                    </template>
                 </div>
 
             </div>
 
         </div>
 
+        <br>
+        <!--BUTTON-->
+        <div class="mt-3 sm:ml-4 sm:mt-0"> <!--button-->
+            <button @click="saveIcons()" class="inline-flex items-center bg-[#FF5800] hover:bg-[#FF4300] text-white font-bold py-2 px-4 rounded">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 8.25H7.5a2.25 2.25 0 00-2.25 2.25v9a2.25 2.25 0 002.25 2.25h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25H15M9 12l3 3m0 0l3-3m-3 3V2.25" />
+                </svg>
+                <span class="ml-2">Save</span>
+            </button>
+        </div>        
+
+        <br><br>
+
+        <table>
+            <thead class="bg-gray-100">
+                <tr>
+                    <th scope="col" class="cursor-pointer py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-700 hover:text-gray-700 sm:pl-6 ">Icon</th>
+                    <th scope="col" class="cursor-pointer px-3 py-3.5 text-left text-sm font-semibold text-gray-700 ">Icon Name</th>
+                    <th scope="col" class="cursor-pointer px-3 py-3.5 text-left text-sm font-semibold text-gray-700 ">Category</th>
+                    <th scope="col" class="cursor-pointer px-3 py-3.5 text-left text-sm font-semibold text-gray-700 ">Status</th>
+                </tr>
+            </thead>    
+
+            <template x-for="(results, n) in getAllExternalLinks" :key="n">
+                <tr>
+                    <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-500 sm:pl-6">
+                        <span x-html="results.IconSVG" class="hover:shadow-md"></span>
+                    </td>
+                    <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500"> 
+                        {{/* <span x-text="results.IconSVG"></span> */}}
+                        <span x-text="results.SVGName"> </span>
+                    </td>
+                    <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                        <span x-text="results.Category"> </span>
+                    </td>
+                    <td class="whitespace-nowrap px-3 py-4 text-sm ">
+                        <span x-text="results.Enabled ? 'Enabled': 'Disabled'"
+                              x-bind:class="results.Enabled === true ? 'text-[#FF5800]' : 'text-gray-500' "> </span>
+                    </td>
+                </tr>
+            </template>
+        </table>
+
     </div>
 
-    <br>
-    <!--BUTTON-->
-    <div class="mt-3 sm:ml-4 sm:mt-0"> <!--button-->
-        <button @click="saveIcons()" class="inline-flex items-center bg-[#FF5800] hover:bg-[#FF4300] text-white font-bold py-2 px-4 rounded">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M9 8.25H7.5a2.25 2.25 0 00-2.25 2.25v9a2.25 2.25 0 002.25 2.25h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25H15M9 12l3 3m0 0l3-3m-3 3V2.25" />
-            </svg>
-            <span class="ml-2">Save</span>
-        </button>
-    </div>        
-
-
+    {{/* Spinner */}}
+    <div x-show="showSpinner" class="flex items-center justify-center h-20" >
+        <svg role="status" class="w-8 h-8 mr-2 text-gray-200 animate-spin dark:text-gray-600 fill-[#FF5800]" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="currentColor"/>
+        <path d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z" fill="currentFill"/>
+        </svg>
+    </div>
 
 </div>
-
-<script type="module">
-    {{/* import heroicons from 'https://cdn.jsdelivr.net/npm/heroicons@2.0.16/+esm' */}}
-    console.log("HERO ICONS");
-</script>
 
 <script type="text/javascript">
 
     function ExternalLinksPage() {
         return {
-            //Icon dropdown values
-            TechCommunityCalendar: true,
-            StackOverflowAvanade: false,
-            OpenInnovationMeetup: false,
+            GetExternalLinksList: [],
+            GetExternalLinksByCategoryList: [],
+            ELAllTechComCalendar: [],
+            SearchBySources: [],
 
-            //
-            TechCommunityCalendarCurrentIcon: '',
+            //Categories
+            GetExternalLinksByCategoryList: [],
+            GetELbySOA: [],
+            GetELbyOIM: [],
+            TCC: 'TechCommunityCalendar',
+            SOA: 'StackOverflowAvanade',
+            OIM: 'OpenInnovationMeetup',
+            TCCList: false,
+            SOAList: false,
+            OIMList: false,
 
+            //DropDowns
+            TCCCurrentIcon: '',
+            SOACurrentIcon: '',
+            OIMCurrentIcon: '',
+            TechCommunityCalendarCurrentSVGName: 'Tech Community Calendar',
+            TCCCurrentName: '',
+            SOACurrentName: '',
+            OIMCurrentName: '',
             InputSVG: '',
             SVGName: '',
-            onChangeTechCommCalendar() {
-                
-                this.TechCommunityCalendarCurrentIcon = 'Tech User Group'
-                console.log("Icon TechCommCalendar changed to ---> " + this.TechCommunityCalendarCurrentIcon)
-                console.log(this.TechCommunityCalendarCurrentIcon)
+            InnerBody: true,
+
+            showSpinner: false,
+            getAllExternalLinks() {
+                let uri = '/admin/externallinks/GetExternalLinks'
+                let encoded = encodeURI(uri);
+                fetch(encoded)
+                .then(r => {
+                    r.json().then(body => {
+                    this.GetExternalLinksList = body
+                    })
+                })
+                .catch(e => {
+                    console.log(e)
+                })
+                return this.GetExternalLinksList
+            //
+            },
+            GetExternalLinksTCC() {
+                let uri = '/admin/externallinks/' + this.TCC
+                let encoded = encodeURI(uri);
+                fetch(encoded)
+                .then(r => {
+                    r.json().then(body => {
+                    this.GetExternalLinksByCategoryList = body
+                    })
+                })
+                .catch(e => {
+                    console.log(e)
+                })
+                return this.GetExternalLinksByCategoryList
+            //
+            },
+            GetExternalLinksSOA() {
+                let uri = '/admin/externallinks/' + this.SOA
+                let encoded = encodeURI(uri);
+                fetch(encoded)
+                .then(r => {
+                    r.json().then(body => {
+                    this.GetELbySOA = body
+                    })
+                })
+                .catch(e => {
+                    console.log(e)
+                })
+                return this.GetELbySOA
+            //
+            },
+            GetExternalLinksOIM() {
+                let uri = '/admin/externallinks/' + this.OIM
+                let encoded = encodeURI(uri);
+                fetch(encoded)
+                .then(r => {
+                    r.json().then(body => {
+                    this.GetELbyOIM = body
+                    })
+                })
+                .catch(e => {
+                    console.log(e)
+                })
+                return this.GetELbyOIM
+            //
+            },
+            
+            get ExternalLinksTCC() {
+            if(!this.GetExternalLinksList==[''])
+                return this.GetExternalLinksList
+            },
+            get ExternalLinksSOA() {
+                return this.GetExternalLinksList
+            },
+            get ExternalLinksOIM() {
+                return this.GetExternalLinksList
+            },
+            onChangeTechCommCalendar() {  
+                this.TCCCurrentIcon = 'Tech User Group'
+                console.log("Icon TechCommCalendar changed to ---> " + this.TCCCurrentIcon)
+                console.log(this.TCCCurrentIcon)
                 return
             },
             onChangeStackOverflowAvanade() {
@@ -286,6 +324,10 @@
                 console.log("SVG successfully saved to database!")
                 return
             },
+
+
+
+            
         }   
     }
 </script>

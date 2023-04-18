@@ -4,14 +4,61 @@
 <div x-data="ExternalLinksForm()">
     <div>
         <div class="relative">
-            <label for="name" class="absolute -top-2 left-2 inline-block bg-white px-2 text-xs font-medium text-gray-900">SVG code</label>
-            <input x-model="InputSVG" type="text" name="name" id="name" class="rounded-md border-0 py-5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-[#FF5800] sm:text-sm sm:leading-6" placeholder="....." autocomplete="nope">
-            
-            <label for="name" class="absolute -top-2 left-2 inline-block bg-white px-2 text-xs font-medium text-gray-900">SVG Name</label>
-            <input x-model="SVGName" type="text" class="rounded-md border-0 py-5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-[#FF5800] sm:text-sm sm:leading-6" placeholder="-----" autocomplete="nope">
+            <form onsubmit="" autocomplete="off">
+                <label for="name" class="absolute -top-2 left-2 inline-block bg-white px-2 text-xs font-medium text-gray-900">SVG code</label>
+                <input x-model="form.IconSVG" type="text" name="name" id="name" class="rounded-md border-0 py-5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-[#FF5800] sm:text-sm sm:leading-6" placeholder="....." autocomplete="nope">
+                
+                <label for="name" class="absolute -top-2 left-2 inline-block bg-white px-2 text-xs font-medium text-gray-900">SVG Name</label>
+                <input x-model="form.SVGName" type="text" class="rounded-md border-0 py-5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-[#FF5800] sm:text-sm sm:leading-6" placeholder="-----" autocomplete="nope">
 
-            <label for="name" class="absolute -top-2 left-2 inline-block bg-white px-2 text-xs font-medium text-gray-900">Category</label>
-            <input x-model="Category" type="text" class="rounded-md border-0 py-5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-[#FF5800] sm:text-sm sm:leading-6" placeholder="-----" autocomplete="nope">
+
+                <div class="relative inline-block text-left">
+                    <div>
+                        <button @click="CategoryList=true"
+                                @click.away="CategoryList=false"
+                                type="button" class="inline-flex w-full justify-center gap-x-1.5 rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50" id="menu-button" aria-expanded="true" aria-haspopup="true">
+                        <span x-text="form.Category"></span>
+                        <svg class="-mr-1 h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                            <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
+                        </svg>
+                        </button>
+                    </div>
+
+                    <!--
+                        Dropdown menu, show/hide based on menu state.
+
+                        Entering: "transition ease-out duration-100"
+                        From: "transform opacity-0 scale-95"
+                        To: "transform opacity-100 scale-100"
+                        Leaving: "transition ease-in duration-75"
+                        From: "transform opacity-100 scale-100"
+                        To: "transform opacity-0 scale-95"
+                    -->
+                    <div x-show="CategoryList" 
+                         class="absolute right-0 z-10 mt-2 w-56 origin-top-right divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="menu-button" tabindex="-1">
+                        <div class="py-1" role="none">
+                        <!-- Active: "bg-gray-100 text-gray-900", Not Active: "text-gray-700" -->
+                            <a @click="form.Category ='TechCommunityCalendar' " class="cursor-pointer  block px-4 py-2 text-sm hover:bg-[#fff2eb]"  role="menuitem" tabindex="-1" id="menu-item-1"
+                        x-bind:class="form.Category==='TechCommunityCalendar' ? 'text-[#FF5800]' : 'text-gray-700' " 
+                        >Tech Community Calendar</a>
+                        </div>
+                        <div class="py-1" role="none">
+                            <a @click="form.Category ='StackOverflowAvanade' " class="cursor-pointer block px-4 py-2 text-sm hover:bg-[#fff2eb]" role="menuitem" tabindex="-1" id="menu-item-2"
+                        x-bind:class="form.Category==='StackOverflowAvanade' ? 'text-[#FF5800]' : 'text-gray-700' " >Stack Overflow Avanade</a>
+                        </div>
+                        <div class="py-1" role="none">
+                            <a @click="form.Category ='OpenInnovationMeetup' " class="cursor-pointer block px-4 py-2 text-sm hover:bg-[#fff2eb]" role="menuitem" tabindex="-1" id="menu-item-4"
+                        x-bind:class="form.Category==='OpenInnovationMeetup' ? 'text-[#FF5800]' : 'text-gray-700' ">Open Innovation Meetup</a>
+                        </div>
+
+
+                    </div>
+                </div>
+
+            </form> 
+            <div>
+                <span x-html="form.IconSVG"> <---SVG</span>
+            </div>
 
         </div>
     </div>
@@ -27,17 +74,29 @@
 <script>
     function ExternalLinksForm() {
         return {
-            InputSVG: '',
-            SVGName: '',
-            Category: '',
+            svgOnly: (`<svg height="100" width="100">
+  <circle cx="50" cy="50" r="40" stroke="black" stroke-width="3" fill="red" />
+
+</svg>`),
+            form: {
+                IconSVG: '',
+                SVGName: '',
+                Category: 'Category',
+            },
+
+            CategoryList: false,
+
             saveSVG() {
-                if(this.InputSVG === '' || this.SVGName ==='') {
+                if(this.form.IconSVG === '' || this.form.SVGName ==='' || this.form.Category === 'Category') {
                     console.log("SVG not found, Please put SVG code.")
-                    {{/* console.clear() */}}
                     return
+                } else {
+                    postData = this.form;
+                    Alpine.store('master').postData('/admin/externallinks/update', postData, "Your SVG file has been added.",
+                        "Close")
                 }
-                window.location.href = "/admin/externallinks"
-                console.log("SVG successfully saved to database!")
+                {{/* window.location.href = "/admin/externallinks" */}}
+                console.log("Your SVG file has been added successfully! ")
                 return
             },            
         }
