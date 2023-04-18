@@ -59,6 +59,7 @@ type TypNewProjectReqBody struct {
 	ConfirmAvaIP            bool   `json:"confirmAvaIP"`
 	ConfirmSecIPScan        bool   `json:"confirmSecIPScan"`
 	ConfirmNotClientProject bool   `json:"ConfirmNotClientProject"`
+	Visibility              int
 }
 
 type TypeMakeProjectPublicReqBody struct {

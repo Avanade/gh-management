@@ -26,6 +26,9 @@
     <div class="flex items-center justify-center h-40" x-show="showSpinner">
       <svg role="status" class="w-8 h-8 mr-2 text-gray-200 animate-spin dark:text-gray-600 fill-[#FF5800]" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="currentColor"/>
+        <path
+        d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z"
+        fill="currentFill" />
        </svg>
     </div>
 
@@ -49,11 +52,11 @@
       <ul role="list" class="divide-y divide-gray-200">
         <template x-for="(repository, index) in userRepositoriesList">
           <li>
-            <div class="px-4 py-4 sm:px-6 hover:bg-gray-50 cursor-pointer" x-bind:class="repository.showStatus? 'bg-gray-50':''" @click="repository.showStatus = !repository.showStatus; getRepositoryApprovalStatus(repository.Id, index)">
+            <div class="px-4 py-4 sm:px-6 hover:bg-gray-50 cursor-pointer" x-bind:class="repository.showStatus? 'bg-gray-50':''" @click="repository.showStatus = !repository.showStatus; getRepositoryApprovalStatus(repository.Id, index, repository.RepositorySource)">
               <div class="flex items-center justify-between">
                 <div>
                   <span id="reponameValue" @click.stop @click="window.open(repository.TFSProjectReference)"
-                   class="hover:shadow-md text-sm font-medium truncate z-50" x-bind:class="repository.IsArchived? 'text-gray-600' : 'text-indigo-600'" x-text="repository.Name" title="Repository name">  </span>
+                   class="text-sm font-medium truncate z-50" x-bind:class="repository.IsArchived? 'text-gray-600' : 'text-indigo-600'" x-text="repository.Name" title="Repository name">  </span>
                   <span class="text-sm font-medium text-gray-400 truncate" x-show="repository.IsArchived">(Archived)</span>
                 </div>
                 <div @click.stop @click.outside="closeUserRepositoryOptions(-1)" x-show="repository.RepositorySource==='GitHub'">
@@ -109,13 +112,13 @@
               </div>
               <div class="mt-2  sm:flex">
                 <div class="sm:flex w-1/2  text-sm text-gray-500 " >
-                   <p class="flex items-start text-sm text-gray-500 " title="Visibility"> 
+                   <p class="flex items-start text-sm text-gray-500 " title="Repository Owners"> 
                    
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
                       <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
                     </svg>
 
-                     <span x-text="repository.CoOwner + ' , ' + repository.CreatedBy " style="margin-left: 8px; "></span> 
+                     <span x-text="getRepoOwners(repository.CoOwner, repository.CreatedBy) " style="margin-left: 8px; "></span> 
          
                   </p>
                 
@@ -169,12 +172,17 @@
                   </template>
                 </ul>
               </div>
-              <div class="overflow-hidden text-sm text-gray-500 sm:mt-0" x-show="repository.statusLoaded && !repository.approvalStatus">
+              <div class="overflow-hidden text-sm text-gray-500 sm:mt-0" x-show="repository.statusLoaded && !repository.approvalStatus && repository.RepositorySource==='GitHub'">
                 <span x-show="hasApprovers">
                   No approval data found for this repository. <a class="text-indigo-600" x-bind:href="'/repositories/makepublic/' + repository.Id">Click to request</a> to make this repository public.
                 </span>
                 <span x-show="!hasApprovers">
                   There are no approvers set to review requests to make a repository public. You may contact the app admin to resolve this issue.
+                </span>
+              </div>
+              <div class="overflow-hidden text-sm text-gray-500 sm:mt-0" x-show="repository.statusLoaded && !repository.approvalStatus && repository.RepositorySource==='AzureDevOps'">
+                <span>
+                  No options available for an Azure DevOps project.
                 </span>
               </div>
 
@@ -217,6 +225,22 @@
                   <span class="text-sm font-medium truncate" x-bind:class="repository.IsArchived? 'text-gray-600' : 'text-indigo-600'" x-text="repository.Name" title="Repository name"></span>  
                   <span class="text-sm font-medium text-gray-400 truncate" x-show="repository.IsArchived">(Archived)</span>
                 </div>
+                {{ if .isAdmin }}
+                <div @click.stop @click.outside="closeUserRepositoryOptions(-1)" x-show="repository.RepositorySource==='GitHub' && repository.Visibility==='Public'">
+                  <div class="relative mt-1">
+                    <button @click="repository.showOptions = !repository.showOptions; closeUserRepositoryOptions(index);" type="button" class="absolute inset-y-0 right-0 flex items-center rounded-r-md px-2 focus:outline-none">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z" />
+                      </svg>
+                    </button>
+                    <ul x-show="repository.showOptions" class="absolute z-10 mt-1 max-h-60 right-0 top-1 overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm" id="options" role="listbox">
+                      <li @click="setVisibility(repository.Name,repository.Id,repository.Visibility,'private')" class="hover:bg-[#fff2eb] relative cursor-pointer select-none py-2 pl-3 pr-9 text-gray-900" id="option-0" role="option" tabindex="-1">
+                        <span class="block truncate">Make Private</span>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+                {{ end }}
               </div>
               <div class="mt-2 sm:flex sm:justify-between">
                 <div class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
@@ -246,12 +270,12 @@
               </div>
               <div class="mt-2 sm:flex">
                 <div class="sm:flex w-1/2">
-                  <p class="flex items-center text-sm text-gray-500" title="Visibility">
+                  <p class="flex items-center text-sm text-gray-500" title="Repository Owners">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
                       <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
                     </svg>
                     
-                    <span x-text="repository.CoOwner + ' , ' + repository.CreatedBy " style="margin-left: 8px; "></span> 
+                    <span x-text="getRepoOwners(repository.CoOwner, repository.CreatedBy)" style="margin-left: 8px; "></span> 
          
                   </p>
                 </div>
@@ -337,16 +361,19 @@
           console.log(e)
         })
       },
-      getRepositoryApprovalStatus(id, i) {
-        if(!this.userRepositoriesList[i]["statusLoaded"]) {
+      getRepositoryApprovalStatus(id, i, source) {
+        if(!this.userRepositoriesList[i]["statusLoaded"] && source==='GitHub') {
           fetch('/api/repositories/' + id)
-        .then(r => {
-          r.json().then(body => {
-            this.userRepositoriesList[i]["approvalStatus"] = body
-            this.userRepositoriesList[i]["statusLoaded"] = true
-         
+          .then(r => {
+            r.json().then(body => {
+              this.userRepositoriesList[i]["approvalStatus"] = body
+              this.userRepositoriesList[i]["statusLoaded"] = true
+          
+            })
           })
-        })
+        }
+        else if(!this.userRepositoriesList[i]["statusLoaded"] && source==='AzureDevOps') {
+          this.userRepositoriesList[i]["statusLoaded"] = true
         }
       },
       getPageDetails() {
@@ -429,7 +456,7 @@
         }
 
         let title = "Confirmation"
-        let message = currentState === "Public" ? `Your repository will be moved to innersource and repository visibility will be ${desiredState}.` : `You are about to change your repository's visibility to ${desiredState}.`
+        let message = currentState === "Public" ? `This repository will be moved to innersource and repository visibility will be ${desiredState}.` : `You are about to change your repository's visibility to ${desiredState}.`
         Alpine.store('master').confirmationModal.update(title, message, f)
         Alpine.store('master').confirmationModal.show()
       },
@@ -457,6 +484,13 @@
         this.offset = this.page * 15;
 
         this.getAllRepositories();
+      },
+      getRepoOwners(owner, coowner){
+        let owners = []
+        if(owner) owners.push(owner)
+        if(coowner) owners.push(coowner)
+        if(owners.length < 1) return 'No owner data'
+        return owners.join(', ')
       }
 
     }

@@ -97,6 +97,7 @@ func PRProjectsInsert(body models.TypNewProjectReqBody, user string) (id int64) 
 		"ConfirmEnabledSecurity":  body.ConfirmSecIPScan,
 		"ConfirmNotClientProject": body.ConfirmNotClientProject,
 		"CreatedBy":               user,
+		"VisibilityId":            body.Visibility,
 	}
 	result, err := db.ExecuteStoredProcedureWithResult("dbo.PR_Projects_Insert", param)
 	if err != nil {
