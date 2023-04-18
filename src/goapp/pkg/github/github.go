@@ -53,6 +53,16 @@ func CreatePrivateGitHubRepository(data models.TypNewProjectReqBody, requestor s
 	return repo, nil
 }
 
+func IsOrgAllowInternalRepo() (bool, error) {
+	client := createClient(os.Getenv("GH_TOKEN"))
+	orgName := os.Getenv("GH_ORG_INNERSOURCE")
+	org, _, err := client.Organizations.Get(context.Background(), orgName)
+	if err != nil {
+		return false, err
+	}
+	return *org.MembersCanCreateInternalRepos, err
+}
+
 func AddCollaborator(data models.TypNewProjectReqBody, requestor string) (*github.Response, error) {
 	client := createClient(os.Getenv("GH_TOKEN"))
 	owner := os.Getenv("GH_ORG_INNERSOURCE")
@@ -377,10 +387,17 @@ func EmailAdminConvertToColaborator(Email string, outisideCollab []string) {
 	}
 	Collablist = Collablist + " </table  > <p>"
 	if len(outisideCollab) == 1 {
+<<<<<<< HEAD
 		body = fmt.Sprintf("<p>Hello %s ,  </p>  \n<p>This is to inform you that %d GitHub user on Avanade was converted as an outside collaborator. </p> %s  This email was sent to the admins of the repository.  </p>  \n <p>OSPO</p>", Email, len(outisideCollab), Collablist)
 	} else {
 
 		body = fmt.Sprintf("<p>Hello %s ,  </p>  \n<p>This is to inform you that %d GitHub user on Avanade was converted to an outside collaborator. </p> %s  This email was sent to the admins of the repository.  </p>  \n <p>OSPO</p>", Email, len(outisideCollab), Collablist)
+=======
+		body = fmt.Sprintf("<p>Hello %s ,  </p>  \n<p>This is to inform you that %o GitHub user on Avanade was converted as an outside collaborator. </p> %s  ", Email, len(outisideCollab), Collablist)
+	} else {
+
+		body = fmt.Sprintf("<p>Hello %s ,  </p>  \n<p>This is to inform you that %o GitHub user on Avanade was converted to an outside collaborator. </p> %s  ", Email, len(outisideCollab), Collablist)
+>>>>>>> 500f28c00370139e923c19f335015fa34f25f8e6
 	}
 
 	m := email.TypEmailMessage{

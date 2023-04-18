@@ -12,7 +12,9 @@ BEGIN
         [p].[Created],
         [p].[RepositorySource],
         [p].[TFSProjectReference],
-        [v].[Name] AS "Visibility"
+        [v].[Name] AS "Visibility",
+		    [p].[CoOwner],
+        [p].[Createdby]
 	  FROM [dbo].[Projects] AS p
 	  LEFT JOIN [dbo].[Visibility] AS v ON p.VisibilityId = v.Id
     WHERE
