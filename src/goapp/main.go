@@ -150,7 +150,7 @@ func main() {
 	muxApi.Handle("/checkAvaInnerSource", loadGuidAuthApi(rtApi.CheckAvaInnerSource)).Methods("GET")
 	muxApi.Handle("/checkAvaOpenSource", loadGuidAuthApi(rtApi.CheckAvaOpenSource)).Methods("GET")
 	muxApi.Handle("/clearOrgMembers", loadGuidAuthApi(rtApi.ClearOrgMembers)).Methods("GET")
-	muxApi.HandleFunc("/RepoOwnerScan", loadGuidAuthApi(rtApi.RepoOwnerScan)).Methods("GET")
+	muxApi.Handle("/RepoOwnerScan", loadGuidAuthApi(rtApi.RepoOwnerScan)).Methods("GET")
 	muxAdmin := mux.PathPrefix("/admin").Subrouter()
 	muxAdmin.Handle("", loadAdminPage(rtAdmin.AdminIndex))
 	muxAdmin.Handle("/members", loadAdminPage(rtAdmin.ListCommunityMembers))
