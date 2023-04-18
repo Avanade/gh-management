@@ -3,6 +3,7 @@ package routes
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	models "main/models"
 	email "main/pkg/email"
 	ghmgmt "main/pkg/ghmgmtdb"
@@ -104,7 +105,11 @@ func checkAllRequests(id int64) {
 	if allApproved {
 		owner := os.Getenv("GH_ORG_INNERSOURCE")
 		newOwner := os.Getenv("GH_ORG_OPENSOURCE")
-		gh.TransferRepository(repo, owner, newOwner)
+		_, err := gh.TransferRepository(repo, owner, newOwner)
+		if err != nil {
+			log.Fatalf("FATAL ERROR : %s", err.Error())
+			log.Printf("PRINT ERROR : %s", err.Error())
+		}
 
 		time.Sleep(3 * time.Second)
 		gh.SetProjectVisibility(repo, "public", newOwner)
