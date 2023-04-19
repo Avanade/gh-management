@@ -23,11 +23,13 @@ SELECT [p].[Id],
        [ModifiedBy],
        [ApprovalStatusId],
        [v].[Name] AS 'Visibility',
-       [p].[RepositorySource]
+       [p].[RepositorySource],
+	  [p].[TFSProjectReference]
   FROM 
        [dbo].[Projects] AS p
   LEFT JOIN [dbo].[Visibility] AS v ON p.VisibilityId = v.Id
   WHERE  
-       [CreatedBy] = @UserPrincipalName
+       [CreatedBy] = @UserPrincipalName OR
+	  [CoOwner] = @UserPrincipalName
   ORDER BY [Created] DESC
 END
