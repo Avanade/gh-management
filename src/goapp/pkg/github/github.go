@@ -1,16 +1,11 @@
 package githubAPI
 
 import (
-	"bytes"
 	"context"
-	"encoding/json"
-	"errors"
 	"fmt"
 	"main/models"
 	"main/pkg/email"
-	"main/pkg/envvar"
 	ghmgmt "main/pkg/ghmgmtdb"
-	"net/http"
 	"os"
 	"strings"
 	"time"
@@ -163,46 +158,27 @@ func GetRepositoriesFromOrganization(org string) ([]Repo, error) {
 }
 
 func SetProjectVisibility(projectName string, visibility string, org string) error {
-	client := &http.Client{}
-	urlPath := fmt.Sprintf("https://api.github.com/repos/%s/%s", org, projectName)
-	postBody, _ := json.Marshal(map[string]string{
-		"visibility": visibility,
-	})
-	reqBody := bytes.NewBuffer(postBody)
+	client := createClient(os.Getenv("GH_TOKEN"))
+	opt := &github.Repository{Visibility: github.String(visibility)}
 
-	req, err := http.NewRequest(http.MethodPatch, urlPath, reqBody)
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", "Bearer "+envvar.GetEnvVar("GH_TOKEN", ""))
-
-	resp, err := client.Do(req)
+	_, _, err := client.Repositories.Edit(context.Background(), org, projectName, opt)
 	if err != nil {
 		return err
 	}
-	if resp.StatusCode == http.StatusUnprocessableEntity {
-		return errors.New("Failed to make repository " + visibility)
-	}
-
 	return nil
+
 }
 
 func ArchiveProject(projectName string, archive bool, org string) error {
-	client := &http.Client{}
-	urlPath := fmt.Sprintf("https://api.github.com/repos/%s/%s", org, projectName)
-	postBody, _ := json.Marshal(map[string]bool{
-		"archived": archive,
-	})
-	reqBody := bytes.NewBuffer(postBody)
+	client := createClient(os.Getenv("GH_TOKEN"))
+	opt := &github.Repository{Archived: github.Bool(archive)}
 
-	req, err := http.NewRequest(http.MethodPatch, urlPath, reqBody)
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", "Bearer "+envvar.GetEnvVar("GH_TOKEN", ""))
-
-	_, err = client.Do(req)
+	_, _, err := client.Repositories.Edit(context.Background(), org, projectName, opt)
 	if err != nil {
 		return err
 	}
-
 	return nil
+
 }
 
 func TransferRepository(repo string, owner string, newOwner string) error {
