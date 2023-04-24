@@ -1,4 +1,4 @@
-name: Deploy Logic App Workflows
+name: Deploy GH MGMT Workflow
 
 on:
   push:
