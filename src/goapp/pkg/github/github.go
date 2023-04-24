@@ -164,6 +164,7 @@ func SetProjectVisibility(projectName string, visibility string, org string) err
 	_, _, err := client.Repositories.Edit(context.Background(), org, projectName, opt)
 	if err != nil {
 		return err
+
 	}
 	return nil
 
