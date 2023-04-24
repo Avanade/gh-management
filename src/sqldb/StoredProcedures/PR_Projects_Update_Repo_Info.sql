@@ -6,6 +6,7 @@ CREATE PROCEDURE PR_Projects_Update_Repo_Info
 		@Description VARCHAR(1000),
 		@IsArchived BIT,
 		@VisibilityId INT,
+		@TFSProjectReference VARCHAR(150) = NULL,
 		@Created DATETIME
 )
 AS
@@ -19,6 +20,7 @@ UPDATE
 		[Description] = @Description,
 		[IsArchived] = @IsArchived,
 		[VisibilityId] = @VisibilityId,
+		[TFSProjectReference] = @TFSProjectReference,
 		[Created] = @Created,
 		[Modified] = GETDATE()
  WHERE  

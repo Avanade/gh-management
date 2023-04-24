@@ -43,6 +43,7 @@ type TypNewProjectReqBody struct {
 	ConfirmAvaIP            bool   `json:"confirmAvaIP"`
 	ConfirmSecIPScan        bool   `json:"confirmSecIPScan"`
 	ConfirmNotClientProject bool   `json:"ConfirmNotClientProject"`
+	TFSProjectReference     string
 	Visibility              int
 }
 

@@ -110,6 +110,9 @@ func checkAllRequests(id int64) {
 		gh.SetProjectVisibility(repo, "public", newOwner)
 
 		ghmgmt.UpdateProjectVisibilityId(id, PUBLIC)
+
+		repoResp, _ := gh.GetRepository(repo, newOwner)
+		ghmgmt.UpdateTFSProjectReferenceById(id, repoResp.GetHTMLURL())
 	}
 }
 
