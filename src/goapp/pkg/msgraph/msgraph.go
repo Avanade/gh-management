@@ -383,7 +383,8 @@ func ActiveUsers(search string) ([]User, error) {
 		return nil, errURL
 	}
 	query := URL.Query()
-	query.Set("$search", fmt.Sprintf(`"displayName:%s" OR "mail:%s"`, search, search))
+	query.Set("$select", "displayName,otherMails,mail")
+	query.Set("$search", fmt.Sprintf(`"displayName:%s" OR "otherMails:%s" OR "mail:%s"`, search, search, search))
 	URL.RawQuery = query.Encode()
 
 	req, err := http.NewRequest("GET", URL.String(), nil)
@@ -407,7 +408,7 @@ func ActiveUsers(search string) ([]User, error) {
 	// Remove users without email address
 	var users []User
 	for _, user := range listUsersResponse.Value {
-		if user.Email != "" {
+		if len(user.OtherMails) > 0 {
 			users = append(users, user)
 		}
 	}
@@ -428,8 +429,9 @@ type ListUSersResponse struct {
 }
 
 type User struct {
-	Name  string `json:"displayName"`
-	Email string `json:"mail"`
+	Name       string   `json:"displayName"`
+	Email      string   `json:"mail"`
+	OtherMails []string `json:"otherMails"`
 }
 
 type ADGroupsResponse struct {

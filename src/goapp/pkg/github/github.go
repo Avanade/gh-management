@@ -7,13 +7,11 @@ import (
 	"errors"
 	"fmt"
 	"main/models"
-	"main/pkg/email"
 	"main/pkg/envvar"
 	ghmgmt "main/pkg/ghmgmtdb"
 	"net/http"
 	"os"
 	"strings"
-	"time"
 
 	"github.com/google/go-github/v50/github"
 	"golang.org/x/oauth2"
@@ -275,6 +273,17 @@ func RemoveOutsideCollaborator(token string, org string, username string) *githu
 	}
 	return repons
 }
+func ConvertMemberToOutsideCollaborator(token string, org string, username string) *github.Response {
+	client := createClient(token)
+
+	repons, err := client.Organizations.ConvertMemberToOutsideCollaborator(context.Background(), org, username)
+	if err != nil {
+		fmt.Println("err")
+		fmt.Println(err)
+	}
+	return repons
+}
+
 func RemoveOrganizationsMember(token string, org string, username string) *github.Response {
 	client := createClient(token)
 
@@ -309,26 +318,4 @@ func OrgListMembers(token string, org string) []*github.User {
 	}
 
 	return ListCollabs
-}
-
-func EmailAdmin(admin string, adminemail string, reponame string, outisideCollab []string) {
-	e := time.Now()
-
-	link := "https://github.com/" + os.Getenv("GH_ORG_OPENSOURCE") + "/" + reponame
-	link = "<a href=\"" + link + "\">" + reponame + "</a>"
-	Collablist := "</p> <table  >"
-	for _, collab := range outisideCollab {
-		Collablist = Collablist + " <tr> <td>" + collab + " </td></tr>"
-	}
-	Collablist = Collablist + " </table  > <p>"
-	body := fmt.Sprintf("<p>Hello %s ,  </p>  \n<p>This is to inform you that your Github repository <b> %s </b> has %o outside collaborator/s. </p> %s  This email was sent to the admins of the repository.  </p> \n <p>OSPO</p>", admin, link, len(outisideCollab), Collablist)
-
-	m := email.TypEmailMessage{
-		Subject: "GitHub Repo Collaborators Scan",
-		Body:    body,
-		To:      adminemail,
-	}
-
-	email.SendEmail(m)
-	fmt.Printf(" GitHub Repo Collaborators Scan on %s was sent.", e)
 }
