@@ -14,6 +14,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/gorilla/mux"
 )
@@ -191,6 +192,7 @@ func SetVisibility(w http.ResponseWriter, r *http.Request) {
 
 		gh.TransferRepository(project, opensource, innersource)
 
+		time.Sleep(3 * time.Second)
 		repoResp, _ := gh.GetRepository(project, innersource)
 		ghmgmt.UpdateTFSProjectReferenceById(id, repoResp.GetHTMLURL())
 	} else {
