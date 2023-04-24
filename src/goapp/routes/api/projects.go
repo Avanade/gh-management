@@ -189,8 +189,10 @@ func SetVisibility(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		repo, _ := gh.TransferRepository(project, opensource, innersource)
-		ghmgmt.UpdateTFSProjectReferenceById(id, repo.GetHTMLURL())
+		gh.TransferRepository(project, opensource, innersource)
+
+		repoResp, _ := gh.GetRepository(project, innersource)
+		ghmgmt.UpdateTFSProjectReferenceById(id, repoResp.GetHTMLURL())
 	} else {
 		// Set repo to desired visibility
 		err := gh.SetProjectVisibility(project, desiredState, innersource)
