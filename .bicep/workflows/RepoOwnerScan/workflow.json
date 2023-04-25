@@ -9,7 +9,7 @@
                         "type": "ManagedServiceIdentity"
                     },
                     "method": "GET",
-                    "uri": "@{concat(parameters('GHMgmDomain'), '/api/clearOrgMembers')}"
+                    "uri": "@{concat(parameters('GHMgmDomain'), '/api/RepoOwnerScan')}"
                 },
                 "runAfter": {},
                 "type": "Http"
