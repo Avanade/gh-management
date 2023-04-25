@@ -109,7 +109,6 @@ func CreateExternalLinks(w http.ResponseWriter, r *http.Request) {
 	var body models.TypExternalLinks
 
 	err := json.NewDecoder(r.Body).Decode(&body)
-
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		fmt.Println(err)
@@ -135,4 +134,43 @@ func CreateExternalLinks(w http.ResponseWriter, r *http.Request) {
 		fmt.Println(err)
 
 	}
+}
+
+func UpdateExternalLinks(w http.ResponseWriter, r *http.Request) {
+
+	sessionaz, _ := session.Store.Get(r, "auth-session")
+	iprofile := sessionaz.Values["profile"]
+	profile := iprofile.(map[string]interface{})
+	username := profile["preferred_username"]
+	var body models.TypCategory
+
+	err := json.NewDecoder(r.Body).Decode(&body)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		fmt.Println(err)
+
+		return
+	}
+
+	cp := sql.ConnectionParam{
+
+		ConnectionString: os.Getenv("GHMGMTDB_CONNECTION_STRING"),
+	}
+	db, err := sql.Init(cp)
+
+	params := map[string]interface{}{
+
+		"Name":       body.Name,
+		"CreatedBy":  username,
+		"ModifiedBy": username,
+		"Id":         body.Id,
+	}
+
+	_, err2 := db.ExecuteStoredProcedureWithResult("dbo.PR_ExternalLinks_Update", params)
+	if err != nil {
+		fmt.Println(err2)
+
+		return
+	}
+
 }

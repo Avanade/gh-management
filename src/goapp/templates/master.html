@@ -307,28 +307,28 @@
 
 {{/* x-data="{ category.: appro.Disabled ? false  : true }" */}}
               
-              
-                <div @click="" class="cursor-pointer px-2 py-2 flex text-gray-600 hover:bg-gray-50 hover:text-gray-900 text-base font-medium rounded-md">
-                  <template x-for="(category, n) in GetExternalLinksByCategoryTCC" :key="n">
-                    <span x-html="category.Enabled === true ? category.IconSVG : ''"></span>
-                  </template>
-                  <span class="ml-2">Tech Community Calendar</span>
-                </div>
+
+              <a href="https://techcommunitycalendar.com/" target="_blank" class="cursor-pointer px-2 py-2 flex text-gray-600 hover:bg-gray-50 hover:text-gray-900 text-base font-medium rounded-md">
+                <template x-for="(category, n) in GetExternalLinksByCategoryTCC" :key="n">
+                  <span x-html="category.Enabled === true ? category.IconSVG : ''"></span>
+                </template>
+                <span class="ml-2">Tech Community Calendar</span>
+              </a>
 
               
-              <div class="cursor-pointer px-2 py-2 flex text-gray-600 hover:bg-gray-50 hover:text-gray-900 text-base font-medium rounded-md">
+              <a href="https://avanade.stackenterprise.co/" target="_blank" class="cursor-pointer px-2 py-2 flex text-gray-600 hover:bg-gray-50 hover:text-gray-900 text-base font-medium rounded-md">
                   <template x-for="(category, n) in GetExternalLinksByCategorySOA" :key="n">
                     <span x-html="category.Enabled === true ? category.IconSVG : '' "></span>
                   </template>
                 <span class="ml-2">Stack Overflow at Avanade</span>
-              </div>
+              </a>
 
-              <div class="cursor-pointer px-2 py-2 flex text-gray-600 hover:bg-gray-50 hover:text-gray-900 text-base font-medium rounded-md">
+              <a href="https://opentechinnovation.com/" target="_blank" class="cursor-pointer px-2 py-2 flex text-gray-600 hover:bg-gray-50 hover:text-gray-900 text-base font-medium rounded-md">
                   <template x-for="(category, n) in GetExternalLinksByCategoryOIM" :key="n">
                     <span x-html="category.Enabled === true ? category.IconSVG : '' "></span>
                   </template>
                 <span class="ml-2">Open Innovation Meetup</span>
-              </div>
+              </a>
 
 
             </nav>

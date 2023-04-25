@@ -19,7 +19,7 @@
         <h3 class="text-base font-semibold leading-6 text-gray-900">
         </h3>
         <div class="mt-3 sm:ml-4 sm:mt-0">
-            <a href="externallinks/form">
+            <a href="externallinks/form?form=NEW">
                 <button class="inline-flex items-center bg-[#FF5800] hover:bg-[#FF4300] text-white font-bold py-2 px-4 rounded">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
@@ -28,128 +28,168 @@
                 </button>
             </a>
         </div>
-    </div>    
+    </div>
+
+
+    <div>
+        {{/* <div class="mt-8 flex flex-col">
+            <div class="-my-2 -mx-4 overflow-x-auto sm:-mx-6 lg:-mx-8">
+                <div class="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
+                    <div x-data="table({
+                    callback : getApprovalTypes,
+                    data : 'data',
+                    total : 'total',
+                    columns : [
+                        { 
+                            name : 'Name', 
+                            value : 'Name',
+                            sort : {
+                                orderby : 'Name',
+                                ordertype : 'ASC'
+                            }
+                        },
+                        { 
+                            name : 'Approver', 
+                            value : 'ApproverUserPrincipalName',
+                            sort : {
+                                orderby : 'ApproverUserPrincipalName',
+                                ordertype : 'ASC'
+                            }
+                        },
+                        { name : 'IsActive', value : 'IsActive' },
+                        { 
+                            name : 'Action', 
+                            value : 'Id', 
+                            render : value => renderAction(value)
+                        }
+                    ]
+                    })">
+                        <div x-html="template"></div>
+                    </div>
+                </div>
+            </div>
+        </div> */}}
+
+    <div>    
     
-    <div x-show="InnerBody">
+    <div>
+        <!--<div name="HIDE-THIS">
+            <div class="row" name="row1">
+                <div class="column mt-1" >
+                    <div class="flex justify-between">
+                        {{/* <span x-html="TCCCurrentIcon" title="TechCommunityCalendarCurrentSVGName" class=" mt-0.5 mr-2"></span> */}}
+                        <template x-for="(icon, n) in GetExternalLinksTCC" :key="n">
+                            <span class="mt-0.5 mr-1" x-html="icon.Enabled === true ? icon.IconSVG : '' " :title="icon.SVGName" ></span>
+                        </template>
+                        <span> Tech Community Calendar </span>
+                    </div>
+                </div>
 
-        <div class="row" name="row1">
-            <div class="column mt-1" >
-                <div class="flex justify-between">
-                    {{/* <span x-html="TCCCurrentIcon" title="TechCommunityCalendarCurrentSVGName" class=" mt-0.5 mr-2"></span> */}}
-                    <template x-for="(icon, n) in GetExternalLinksTCC" :key="n">
-                        <span class="mt-0.5 mr-1" x-html="icon.Enabled === true ? icon.IconSVG : '' " :title="icon.SVGName" ></span>
-                    </template>
-                    <span> Tech Community Calendar </span>
+                <div class="column">
+                    <button @click="TCCList=true"
+                            @click.away="TCCList=false"
+                            type="button"
+                            class="inline-flex w-full justify-center gap-x-1.5 rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50" id="menu-button" aria-expanded="true" aria-haspopup="true">
+                        <span x-html="TCCCurrentIcon" title="TechCommunityCalendarCurrentSVGName" class="mr-2 h-5 w-5"></span>
+                        <span x-text="TCCCurrentName"></span>
+                    </button>
+
+                    <div x-show="TCCList" class="absolute z-10 w-auto divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="menu-button" tabindex="-1" >
+                        <template x-for="(TCC, n) in GetExternalLinksTCC" :key="n">
+                            <div class="py-1 hover:bg-[#fff2eb]" role="none">
+                                <a @click="TCCCurrentIcon = TCC.IconSVG, TCCCurrentName = TCC.SVGName" class=" cursor-pointer text-gray-700 group flex items-center px-4 py-2 text-sm" role="menuitem" tabindex="-1" id="menu-item-0" x-bind:class="TCC.Enabled === true ? 'bg-[#fff2eb]' : ''">
+                                    <span x-html="TCC.IconSVG" x-bind:class="TCC.Enabled === true ? 'text-[#FF5800]' : ''" ></span>
+                                    <span x-text="TCC.SVGName" class="ml-2" x-bind:class="TCC.Enabled === true ? 'text-[#FF5800]' : ''"></span>
+                                </a>
+                            </div>
+                        </template>
+                    </div>
+
                 </div>
             </div>
 
-            <div class="column">
-                <button @click="TCCList=true"
-                        @click.away="TCCList=false"
-                        type="button"
-                        class="inline-flex w-full justify-center gap-x-1.5 rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50" id="menu-button" aria-expanded="true" aria-haspopup="true">
-                    <span x-html="TCCCurrentIcon" title="TechCommunityCalendarCurrentSVGName" class="mr-2 h-5 w-5"></span>
-                    <span x-text="TCCCurrentName"></span>
+            <br>
+
+            <div class="row" name="row2">
+                <div class="column  mt-1">
+                    <div class="flex justify-between">
+                        {{/* <span x-html="SOACurrentIcon" title="TechCommunityCalendarCurrentSVGName" class=" mt-0.5 mr-2"></span> */}}
+                        <template x-for="(icon, n) in GetExternalLinksSOA" :key="n">
+                            <span class="mt-0.5 mr-1" x-html="icon.Enabled === true ? icon.IconSVG : '' " :title="icon.SVGName" ></span>
+                        </template>
+                        <span>Stack Overflow at Avanade</span>
+                    </div>
+                </div>
+
+                <div class="column">
+                    <button @click="SOAList=true" @click.away="SOAList=false" type="button" class="inline-flex w-full justify-center gap-x-1.5 rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50" id="menu-button" aria-expanded="true" aria-haspopup="true">
+                        <span x-html="SOACurrentIcon" title="TechCommunityCalendarCurrentSVGName" class="mr-2 h-5 w-5"></span>
+                        <span x-text="SOACurrentName"></span>
+                    </button>
+
+                    <div x-show="SOAList" class="absolute z-10 w-auto divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="menu-button" tabindex="-1" >
+                        <template x-for="(SOA, n) in GetExternalLinksSOA" :key="n">
+                            <div class="py-1 hover:bg-[#fff2eb]" role="none">
+                                <a @click="SOACurrentIcon = SOA.IconSVG,SOACurrentName=SOA.SVGName" class=" cursor-pointer text-gray-700 group flex items-center px-4 py-2 text-sm" role="menuitem" tabindex="-1" id="menu-item-0" x-bind:class="SOA.Enabled === true ? 'bg-[#fff2eb]' : ''">
+                                    <span x-html="SOA.IconSVG" x-bind:class="SOA.Enabled === true ? 'text-[#FF5800]' : ''"></span>
+                                    <span x-text="SOA.SVGName" class="ml-2" x-bind:class="SOA.Enabled === true ? 'text-[#FF5800]' : ''">  Tech User Group</span>
+                                </a>
+                            </div>
+                        </template>
+
+                    </div>
+                </div>
+
+            </div>
+
+            <br>
+
+            <div class="row" name="row3">
+                <div class="column mt-1">
+                    <div class="flex justify-between">
+                        {{/* <span x-html="OIMCurrentIcon" title="TechCommunityCalendarCurrentSVGName" class=" mt-0.5 mr-2"></span> */}}
+                        <template x-for="(icon, n) in GetExternalLinksOIM" :key="n">
+                            <span class="mt-0.5 mr-1" x-html="icon.Enabled === true ? icon.IconSVG : '' " :title="icon.SVGName" ></span>
+                        </template>
+                        <span>Open Innovation Meetup </span>
+                    </div>
+                </div>
+
+                <div class="column">
+                    <button @click="OIMList=true"
+                            @click.away="OIMList=false" type="button" class="inline-flex w-full justify-center gap-x-1.5 rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50" id="menu-button" aria-expanded="true" aria-haspopup="true">
+                        <span x-html="OIMCurrentIcon"
+                            title="TechCommunityCalendarCurrentSVGName" 
+                            class="mr-2 h-5 w-5"></span>
+                        <span x-text="OIMCurrentName"></span>
+                    </button>
+
+                    <div x-show="OIMList" class="absolute z-10 w-auto divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="menu-button" tabindex="-1" >
+                        <template x-for="(OIM, n) in GetExternalLinksOIM" :key="n">
+                            <div class="py-1 hover:bg-[#fff2eb]" role="none">
+                                <a @click="OIMCurrentIcon = OIM.IconSVG, OIMCurrentName = OIM.SVGName" class=" cursor-pointer text-gray-700 group flex items-center px-4 py-2 text-sm" role="menuitem" tabindex="-1" id="menu-item-0" x-bind:class="OIM.Enabled === true ? 'bg-[#fff2eb]' : ''">
+                                    <span x-html="OIM.IconSVG" x-bind:class="OIM.Enabled === true ? 'text-[#FF5800]' : ''"></span>
+                                    <span x-text="OIM.SVGName" class="ml-2" x-bind:class="OIM.Enabled === true ? 'text-[#FF5800]' : ''"></span>
+                                </a>
+                            </div>
+                        </template>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <br>
+
+            <div class="mt-3 sm:ml-4 sm:mt-0"> 
+                <button @click="saveIcons()" class="inline-flex items-center bg-[#FF5800] hover:bg-[#FF4300] text-white font-bold py-2 px-4 rounded">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 8.25H7.5a2.25 2.25 0 00-2.25 2.25v9a2.25 2.25 0 002.25 2.25h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25H15M9 12l3 3m0 0l3-3m-3 3V2.25" />
+                    </svg>
+                    <span class="ml-2">Save</span>
                 </button>
-
-                <div x-show="TCCList" class="absolute z-10 w-auto divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="menu-button" tabindex="-1" >
-                    <template x-for="(TCC, n) in GetExternalLinksTCC" :key="n">
-                        <div class="py-1 hover:bg-[#fff2eb]" role="none">
-                            <a @click="TCCCurrentIcon = TCC.IconSVG, TCCCurrentName = TCC.SVGName" class=" cursor-pointer text-gray-700 group flex items-center px-4 py-2 text-sm" role="menuitem" tabindex="-1" id="menu-item-0" x-bind:class="TCC.Enabled === true ? 'bg-[#fff2eb]' : ''">
-                                <span x-html="TCC.IconSVG" x-bind:class="TCC.Enabled === true ? 'text-[#FF5800]' : ''" ></span>
-                                <span x-text="TCC.SVGName" class="ml-2" x-bind:class="TCC.Enabled === true ? 'text-[#FF5800]' : ''"></span>
-                            </a>
-                        </div>
-                    </template>
-                </div>
-
-            </div>
-        </div>
-
-        <br>
-
-        <div class="row" name="row2">
-            <div class="column  mt-1">
-                <div class="flex justify-between">
-                    {{/* <span x-html="SOACurrentIcon" title="TechCommunityCalendarCurrentSVGName" class=" mt-0.5 mr-2"></span> */}}
-                    <template x-for="(icon, n) in GetExternalLinksSOA" :key="n">
-                        <span class="mt-0.5 mr-1" x-html="icon.Enabled === true ? icon.IconSVG : '' " :title="icon.SVGName" ></span>
-                    </template>
-                    <span>Stack Overflow at Avanade</span>
-                </div>
-            </div>
-
-            <div class="column">
-                <button @click="SOAList=true" @click.away="SOAList=false" type="button" class="inline-flex w-full justify-center gap-x-1.5 rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50" id="menu-button" aria-expanded="true" aria-haspopup="true">
-                    <span x-html="SOACurrentIcon" title="TechCommunityCalendarCurrentSVGName" class="mr-2 h-5 w-5"></span>
-                    <span x-text="SOACurrentName"></span>
-                </button>
-
-                <div x-show="SOAList" class="absolute z-10 w-auto divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="menu-button" tabindex="-1" >
-                    <template x-for="(SOA, n) in GetExternalLinksSOA" :key="n">
-                        <div class="py-1 hover:bg-[#fff2eb]" role="none">
-                            <a @click="SOACurrentIcon = SOA.IconSVG,SOACurrentName=SOA.SVGName" class=" cursor-pointer text-gray-700 group flex items-center px-4 py-2 text-sm" role="menuitem" tabindex="-1" id="menu-item-0" x-bind:class="SOA.Enabled === true ? 'bg-[#fff2eb]' : ''">
-                                <span x-html="SOA.IconSVG" x-bind:class="SOA.Enabled === true ? 'text-[#FF5800]' : ''"></span>
-                                <span x-text="SOA.SVGName" class="ml-2" x-bind:class="SOA.Enabled === true ? 'text-[#FF5800]' : ''">  Tech User Group</span>
-                            </a>
-                        </div>
-                    </template>
-
-                </div>
-
-            </div>
-
-        </div>
-
-        <br>
-
-        <div class="row" name="row3">
-            <div class="column mt-1">
-                <div class="flex justify-between">
-                    {{/* <span x-html="OIMCurrentIcon" title="TechCommunityCalendarCurrentSVGName" class=" mt-0.5 mr-2"></span> */}}
-                    <template x-for="(icon, n) in GetExternalLinksOIM" :key="n">
-                        <span class="mt-0.5 mr-1" x-html="icon.Enabled === true ? icon.IconSVG : '' " :title="icon.SVGName" ></span>
-                    </template>
-                    <span>Open Innovation Meetup </span>
-                </div>
-            </div>
-
-            <div class="column">
-                <button @click="OIMList=true"
-                        @click.away="OIMList=false" type="button" class="inline-flex w-full justify-center gap-x-1.5 rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50" id="menu-button" aria-expanded="true" aria-haspopup="true">
-                    <span x-html="OIMCurrentIcon"
-                          title="TechCommunityCalendarCurrentSVGName" 
-                          class="mr-2 h-5 w-5"></span>
-                    <span x-text="OIMCurrentName"></span>
-                </button>
-
-                <div x-show="OIMList" class="absolute z-10 w-auto divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="menu-button" tabindex="-1" >
-                    <template x-for="(OIM, n) in GetExternalLinksOIM" :key="n">
-                        <div class="py-1 hover:bg-[#fff2eb]" role="none">
-                            <a @click="OIMCurrentIcon = OIM.IconSVG, OIMCurrentName = OIM.SVGName" class=" cursor-pointer text-gray-700 group flex items-center px-4 py-2 text-sm" role="menuitem" tabindex="-1" id="menu-item-0" x-bind:class="OIM.Enabled === true ? 'bg-[#fff2eb]' : ''">
-                                <span x-html="OIM.IconSVG" x-bind:class="OIM.Enabled === true ? 'text-[#FF5800]' : ''"></span>
-                                <span x-text="OIM.SVGName" class="ml-2" x-bind:class="OIM.Enabled === true ? 'text-[#FF5800]' : ''"></span>
-                            </a>
-                        </div>
-                    </template>
-                </div>
-
-            </div>
-
-        </div>
-
-        <br>
-        <!--BUTTON-->
-        <div class="mt-3 sm:ml-4 sm:mt-0"> <!--button-->
-            <button @click="saveIcons()" class="inline-flex items-center bg-[#FF5800] hover:bg-[#FF4300] text-white font-bold py-2 px-4 rounded">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M9 8.25H7.5a2.25 2.25 0 00-2.25 2.25v9a2.25 2.25 0 002.25 2.25h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25H15M9 12l3 3m0 0l3-3m-3 3V2.25" />
-                </svg>
-                <span class="ml-2">Save</span>
-            </button>
-        </div>        
-
-        <br><br>
+            </div>        
+        </div>-->
 
         <table>
             <thead class="bg-gray-100">
@@ -158,6 +198,7 @@
                     <th scope="col" class="cursor-pointer px-3 py-3.5 text-left text-sm font-semibold text-gray-700 ">Icon Name</th>
                     <th scope="col" class="cursor-pointer px-3 py-3.5 text-left text-sm font-semibold text-gray-700 ">Category</th>
                     <th scope="col" class="cursor-pointer px-3 py-3.5 text-left text-sm font-semibold text-gray-700 ">Status</th>
+                    <th scope="col" class="cursor-pointer px-3 py-3.5 text-left text-sm font-semibold text-gray-700 ">Action</th>
                 </tr>
             </thead>    
 
@@ -174,12 +215,26 @@
                         <span x-text="results.Category"> </span>
                     </td>
                     <td class="whitespace-nowrap px-3 py-4 text-sm ">
-                        <span x-text="results.Enabled ? 'Enabled': 'Disabled'"
-                              x-bind:class="results.Enabled === true ? 'text-[#FF5800]' : 'text-gray-500' "> </span>
+                        <span x-model="SVGStatus"
+                              x-bind:class="results.Enabled === true ? 'text-[#FF5800]' : 'text-gray-500' "
+                              x-text="results.Enabled ? 'Enabled': 'Disabled'"> </span>
+                    </td>
+                    <td>
+                        <span @Click="editSVG(results.Id)" class="cursor-pointer">Edit</span> |
+                        <span @Click="deleteSVG()" class="cursor-pointer">Delete</span>
                     </td>
                 </tr>
             </template>
         </table>
+
+
+        {{/* <div class="pt-5">
+            <div class="flex justify-end">
+                <button @click="saveIcons()" class="ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 disabled:bg-orange-200">
+                Submit
+                </button>
+            </div>
+        </div> */}}
 
     </div>
 
@@ -223,15 +278,14 @@
             OIMCurrentName: '',
             InputSVG: '',
             SVGName: '',
-            InnerBody: true,
+
+            SVGStatus: '',
 
             //x-model="form.name"
-            {{/* form : {
-                id: '',
-                icon: '',
-                svgname: '',
-                enabled: null,
-            } */}}
+            form: {
+                svgname: ''
+
+            },
 
             showSpinner: false,
             getAllExternalLinks() {
@@ -345,8 +399,27 @@
                 console.log("SVG successfully saved to database!")
                 return
             },
+            {{/* editSVG(iconsvg, svgname, category, status) {
+                console.log("-----> "+ iconsvg + "/" + svgname + "/" + category + "/" + status + "/" + 'EDIT')
+                window.location.href = 'externallinks/form?form=' + iconsvg + "/" + svgname + "/" + category + "/" + status+ "/" +'EDIT'
+
+            }, */}}
+            editSVG(id) {
+                console.log("-----> " + id )
+                {{/* window.location.href = 'externallinks/form?form=' + id */}}
+            },
 
 
+            deleteSVG() {
+
+
+            },
+
+            {{/* goToNextPage(param1, param1s) {
+
+                window.location.href = 'page1/form?form=' + param1 + "/" + param2
+
+            }, */}}
 
             
         }   
