@@ -1,19 +1,12 @@
 package githubAPI
 
 import (
-	"bytes"
 	"context"
-	"encoding/json"
-	"errors"
 	"fmt"
 	"main/models"
-	"main/pkg/email"
-	"main/pkg/envvar"
 	ghmgmt "main/pkg/ghmgmtdb"
-	"net/http"
 	"os"
 	"strings"
-	"time"
 
 	"github.com/google/go-github/v50/github"
 	"golang.org/x/oauth2"
@@ -145,16 +138,17 @@ func GetRepositoriesFromOrganization(org string) ([]Repo, error) {
 	var repoList []Repo
 	for _, repo := range allRepos {
 		r := Repo{
-			GithubId:    repo.GetID(),
-			FullName:    repo.GetFullName(),
-			Name:        repo.GetName(),
-			Link:        repo.GetHTMLURL(),
-			Org:         org,
-			Description: repo.GetDescription(),
-			Private:     repo.GetPrivate(),
-			Created:     repo.GetCreatedAt(),
-			IsArchived:  repo.GetArchived(),
-			Visibility:  repo.GetVisibility(),
+			GithubId:            repo.GetID(),
+			FullName:            repo.GetFullName(),
+			Name:                repo.GetName(),
+			Link:                repo.GetHTMLURL(),
+			Org:                 org,
+			Description:         repo.GetDescription(),
+			Private:             repo.GetPrivate(),
+			Created:             repo.GetCreatedAt(),
+			IsArchived:          repo.GetArchived(),
+			Visibility:          repo.GetVisibility(),
+			TFSProjectReference: repo.GetHTMLURL(),
 		}
 		repoList = append(repoList, r)
 	}
@@ -163,70 +157,53 @@ func GetRepositoriesFromOrganization(org string) ([]Repo, error) {
 }
 
 func SetProjectVisibility(projectName string, visibility string, org string) error {
-	client := &http.Client{}
-	urlPath := fmt.Sprintf("https://api.github.com/repos/%s/%s", org, projectName)
-	postBody, _ := json.Marshal(map[string]string{
-		"visibility": visibility,
-	})
-	reqBody := bytes.NewBuffer(postBody)
+	client := createClient(os.Getenv("GH_TOKEN"))
+	opt := &github.Repository{Visibility: github.String(visibility)}
 
-	req, err := http.NewRequest(http.MethodPatch, urlPath, reqBody)
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", "Bearer "+envvar.GetEnvVar("GH_TOKEN", ""))
-
-	resp, err := client.Do(req)
+	_, _, err := client.Repositories.Edit(context.Background(), org, projectName, opt)
 	if err != nil {
 		return err
-	}
-	if resp.StatusCode == http.StatusUnprocessableEntity {
-		return errors.New("Failed to make repository " + visibility)
-	}
 
+	}
 	return nil
+
 }
 
 func ArchiveProject(projectName string, archive bool, org string) error {
-	client := &http.Client{}
-	urlPath := fmt.Sprintf("https://api.github.com/repos/%s/%s", org, projectName)
-	postBody, _ := json.Marshal(map[string]bool{
-		"archived": archive,
-	})
-	reqBody := bytes.NewBuffer(postBody)
+	client := createClient(os.Getenv("GH_TOKEN"))
+	opt := &github.Repository{Archived: github.Bool(archive)}
 
-	req, err := http.NewRequest(http.MethodPatch, urlPath, reqBody)
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", "Bearer "+envvar.GetEnvVar("GH_TOKEN", ""))
-
-	_, err = client.Do(req)
+	_, _, err := client.Repositories.Edit(context.Background(), org, projectName, opt)
 	if err != nil {
 		return err
 	}
-
 	return nil
+
 }
 
-func TransferRepository(repo string, owner string, newOwner string) error {
+func TransferRepository(repo string, owner string, newOwner string) (*github.Repository, error) {
 	client := createClient(os.Getenv("GH_TOKEN"))
 	opt := github.TransferRequest{NewOwner: newOwner}
 
-	_, _, err := client.Repositories.Transfer(context.Background(), owner, repo, opt)
+	resp, _, err := client.Repositories.Transfer(context.Background(), owner, repo, opt)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	return nil
+	return resp, nil
 }
 
 type Repo struct {
-	GithubId    int64            `json:"id"`
-	FullName    string           `json:"repoFullName"`
-	Name        string           `json:"repoName"`
-	Link        string           `json:"repoLink"`
-	Org         string           `json:"org"`
-	Description string           `json:"description"`
-	Private     bool             `json:"private"`
-	Created     github.Timestamp `json:"created"`
-	IsArchived  bool             `json:"archived"`
-	Visibility  string           `json:"visibility"`
+	GithubId            int64            `json:"id"`
+	FullName            string           `json:"repoFullName"`
+	Name                string           `json:"repoName"`
+	Link                string           `json:"repoLink"`
+	Org                 string           `json:"org"`
+	Description         string           `json:"description"`
+	Private             bool             `json:"private"`
+	Created             github.Timestamp `json:"created"`
+	IsArchived          bool             `json:"archived"`
+	Visibility          string           `json:"visibility"`
+	TFSProjectReference string
 }
 
 func OrganizationsIsMember(token string, GHUser string) (bool, bool, error) {
@@ -318,109 +295,4 @@ func OrgListMembers(token string, org string) []*github.User {
 	}
 
 	return ListCollabs
-}
-
-func EmailAdmin(admin string, adminemail string, reponame string, outisideCollab []string) {
-	e := time.Now()
-
-	link := "https://github.com/" + os.Getenv("GH_ORG_OPENSOURCE") + "/" + reponame
-	link = "<a href=\"" + link + "\">" + reponame + "</a>"
-	Collablist := "</p> <table  >"
-	for _, collab := range outisideCollab {
-		Collablist = Collablist + " <tr> <td>" + collab + " </td></tr>"
-	}
-	Collablist = Collablist + " </table  > <p>"
-	body := fmt.Sprintf("<p>Hello %s ,  </p>  \n<p>This is to inform you that your Github repository <b> %s </b> has %o outside collaborator/s. </p> %s  This email was sent to the admins of the repository.  </p> \n <p>OSPO</p>", admin, link, len(outisideCollab), Collablist)
-
-	m := email.TypEmailMessage{
-		Subject: "GitHub Repo Collaborators Scan",
-		Body:    body,
-		To:      adminemail,
-	}
-
-	email.SendEmail(m)
-	fmt.Printf(" GitHub Repo Collaborators Scan on %s was sent.", e)
-}
-
-func EmailAdminConvertToColaborator(Email string, outisideCollab []string) {
-	e := time.Now()
-	var body string
-	Collablist := "</p> <table  >"
-	for _, collab := range outisideCollab {
-		Collablist = Collablist + " <tr> <td>" + collab + " </td></tr>"
-	}
-	Collablist = Collablist + " </table  > <p>"
-	if len(outisideCollab) == 1 {
-		body = fmt.Sprintf("<p>Hello %s ,  </p>  \n<p>This is to inform you that %o GitHub user on Avanade was converted as an outside collaborator. </p> %s  ", Email, len(outisideCollab), Collablist)
-	} else {
-
-		body = fmt.Sprintf("<p>Hello %s ,  </p>  \n<p>This is to inform you that %o GitHub user on Avanade was converted to an outside collaborator. </p> %s  ", Email, len(outisideCollab), Collablist)
-	}
-
-	m := email.TypEmailMessage{
-		Subject: "GitHub Organization Scan",
-		Body:    body,
-		To:      Email,
-	}
-
-	email.SendEmail(m)
-	fmt.Printf("GitHub User was converted into an outside  on %s was sent.", e)
-}
-
-func EmailRepoAdminConvertToColaborator(Email string, reponame string, outisideCollab []string) {
-	e := time.Now()
-	var body string
-	link := "https://github.com/" + os.Getenv("GH_ORG_OPENSOURCE") + "/" + reponame
-	link = "<a href=\"" + link + "\">" + reponame + "</a>"
-	Collablist := "</p> <table  >"
-	for _, collab := range outisideCollab {
-		Collablist = Collablist + " <tr> <td>" + collab + " </td></tr>"
-	}
-
-	Collablist = Collablist + " </table  > <p>"
-	if len(outisideCollab) == 1 {
-		body = fmt.Sprintf("<p>Hello %s ,  </p>  \n<p>This is to inform you that <b> %o </b> GitHub user on your GitHub repo %s was converted to an outside collaborator. </p> %s This email was sent to the admins of the repository. </p> \n <p>OSPO</p>", Email, len(outisideCollab), link, Collablist)
-
-	} else {
-
-		body = fmt.Sprintf("<p>Hello %s ,  </p>  \n<p>This is to inform you that <b> %o </b> GitHub users on your GitHub repo %s were converted to outside collaborators. </p> %s This email was sent to the admins of the repository. </p> \n <p>OSPO</p>", Email, len(outisideCollab), link, Collablist)
-	}
-
-	m := email.TypEmailMessage{
-		Subject: "GitHub Organization Scan",
-		Body:    body,
-		To:      Email,
-	}
-
-	email.SendEmail(m)
-	fmt.Printf("GitHub User was converted into an outside  on %s was sent.", e)
-}
-
-func GetRepoAdmin(org string, repo string) []string {
-	var Adminmember []string
-	var RepocollabsList []string
-	var OrgOwners []string
-	token := os.Getenv("GH_TOKEN")
-	ORG_OWNERS := os.Getenv("ORG_OWNERS")
-	OrgOwners = strings.Fields(ORG_OWNERS)
-	Repocollabs := RepositoriesListCollaborators(token, org, repo)
-
-	for _, list := range Repocollabs {
-
-		RepocollabsList = append(RepocollabsList, *list.Login)
-		if *list.RoleName == "admin" {
-			if !stringInArray(*list.Login, OrgOwners) {
-				Adminmember = append(Adminmember, *list.Login)
-			}
-		}
-	}
-	return Adminmember
-}
-func stringInArray(a string, list []string) bool {
-	for _, b := range list {
-		if b == a {
-			return true
-		}
-	}
-	return false
 }

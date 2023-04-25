@@ -98,6 +98,7 @@ func PRProjectsInsert(body models.TypNewProjectReqBody, user string) (id int64) 
 		"ConfirmNotClientProject": body.ConfirmNotClientProject,
 		"CreatedBy":               user,
 		"VisibilityId":            body.Visibility,
+		"TFSProjectReference":     body.TFSProjectReference,
 	}
 	result, err := db.ExecuteStoredProcedureWithResult("dbo.PR_Projects_Insert", param)
 	if err != nil {
@@ -466,6 +467,23 @@ func UpdateProjectVisibilityId(id int64, visibilityId int64) error {
 	}
 
 	_, err := db.ExecuteStoredProcedure("PR_Projects_Update_Visibility_ById", param)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func UpdateTFSProjectReferenceById(id int64, tFSProjectReference string) error {
+	db := ConnectDb()
+	defer db.Close()
+
+	param := map[string]interface{}{
+		"Id":                  id,
+		"TFSProjectReference": tFSProjectReference,
+	}
+
+	_, err := db.ExecuteStoredProcedure("PR_Projects_Update_TFSProjectReference_ById", param)
 	if err != nil {
 		return err
 	}

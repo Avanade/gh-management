@@ -10,11 +10,11 @@ import (
 	session "main/pkg/session"
 	"main/pkg/sql"
 	"net/http"
-	"net/url"
 	"os"
 	"strconv"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/gorilla/mux"
 )
@@ -53,17 +53,6 @@ func GetUserProjects(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
-	}
-	for i, repo := range list {
-		if repo.RepositorySource == "GitHub" {
-			org := os.Getenv("GH_ORG_INNERSOURCE")
-			if repo.Visibility == "Public" {
-				org = os.Getenv("GH_ORG_OPENSOURCE")
-			}
-			list[i].TFSProjectReference = fmt.Sprintf("https://github.com/%s/%s", url.QueryEscape(org), url.QueryEscape(repo.Name))
-		} else {
-			continue
-		}
 	}
 
 	w.WriteHeader(http.StatusOK)
@@ -161,17 +150,6 @@ func GetAllRepositories(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	for i, repo := range list {
-		if repo.RepositorySource == "GitHub" {
-			org := os.Getenv("GH_ORG_INNERSOURCE")
-			if repo.Visibility == "Public" {
-				org = os.Getenv("GH_ORG_OPENSOURCE")
-			}
-			list[i].TFSProjectReference = fmt.Sprintf("https://github.com/%s/%s", url.QueryEscape(org), url.QueryEscape(repo.Name))
-		} else {
-			continue
-		}
-	}
 	result := RepositoryList{
 		Data:  list,
 		Total: ghmgmt.Repos_TotalCount_BySearchTerm(search),
@@ -202,6 +180,8 @@ func SetVisibility(w http.ResponseWriter, r *http.Request) {
 	innersource := os.Getenv("GH_ORG_INNERSOURCE")
 	opensource := os.Getenv("GH_ORG_OPENSOURCE")
 
+	id, err := strconv.ParseInt(projectId, 10, 64)
+
 	if currentState == "Public" {
 		// Set repo to desired visibility then move to innersource
 		err := gh.SetProjectVisibility(project, desiredState, opensource)
@@ -211,6 +191,10 @@ func SetVisibility(w http.ResponseWriter, r *http.Request) {
 		}
 
 		gh.TransferRepository(project, opensource, innersource)
+
+		time.Sleep(3 * time.Second)
+		repoResp, _ := gh.GetRepository(project, innersource)
+		ghmgmt.UpdateTFSProjectReferenceById(id, repoResp.GetHTMLURL())
 	} else {
 		// Set repo to desired visibility
 		err := gh.SetProjectVisibility(project, desiredState, innersource)
@@ -221,7 +205,6 @@ func SetVisibility(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Update database
-	id, err := strconv.ParseInt(projectId, 10, 64)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -404,12 +387,13 @@ func IndexOrgRepos(w http.ResponseWriter, r *http.Request) {
 			}
 
 			param := map[string]interface{}{
-				"GithubId":     repo.GithubId,
-				"Name":         repo.Name,
-				"Description":  repo.Description,
-				"IsArchived":   repo.IsArchived,
-				"VisibilityId": visibilityId,
-				"Created":      repo.Created.Format("2006-01-02 15:04:05"),
+				"GithubId":            repo.GithubId,
+				"Name":                repo.Name,
+				"Description":         repo.Description,
+				"IsArchived":          repo.IsArchived,
+				"VisibilityId":        visibilityId,
+				"TFSProjectReference": repo.TFSProjectReference,
+				"Created":             repo.Created.Format("2006-01-02 15:04:05"),
 			}
 
 			isExisting := ghmgmt.Projects_IsExisting_By_GithubId(models.TypNewProjectReqBody{GithubId: repo.GithubId})
