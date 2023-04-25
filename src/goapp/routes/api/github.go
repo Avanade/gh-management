@@ -125,7 +125,7 @@ func ClearOrgMembers(w http.ResponseWriter, r *http.Request) {
 		for _, repo := range repos {
 
 			RepoAdmins := GetRepoCollaborators(organizationsOpen, repo.Name, "admin", "direct")
-			Repocollabs := githubAPI.RepositoriesListCollaborators(token, organizationsOpen, repo.Name, "", "direct")
+			Repocollabs := GetRepoCollaborators(token, organizationsOpen, repo.Name, "", "direct")
 			var ConvertedInRepo []string
 			for _, collab1 := range ConvertedOutsidecollabsList {
 				for _, collab2 := range Repocollabs {
