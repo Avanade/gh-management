@@ -69,7 +69,7 @@ jobs:
           azcliversion: 2.44.1
           inlineScript: |
             chmod +x ./.bicep/logicapps/upload_workflows.sh
-            ./.bicep/logicapps/upload_workflows.sh ${{steps.deploy_main_bicep.outputs.accountName}} ${{steps.deploy_main_bicep.outputs.destination}}
+            ./.bicep/logicapps/upload_workflows.sh ${{steps.deploy_main_bicep.outputs.accountName}} ${{steps.deploy_main_bicep.outputs.destination}} ./.bicep/logicapps/workflows
 
       - name: Deploy Connection Bicep File
         uses: azure/arm-deploy@v1
