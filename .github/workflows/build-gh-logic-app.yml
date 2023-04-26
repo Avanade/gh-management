@@ -16,15 +16,14 @@ on:
         - UAT
         - TEST
 
-defaults:
-  run:
-    working-directory: ./.bicep/logicapps
-
 jobs:
   build-gh-logic-app:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+
+      - name: Change working directory
+        run: cd ./.bicep/logicapps
 
       - name: Configuration for PRODUCTION environment
         if: ${{ github.event.inputs.selected_environment == 'PROD' }}
@@ -56,7 +55,7 @@ jobs:
           subscriptionId: ${{ fromJSON(secrets.AZURE_CREDENTIALS)['subscriptionId'] }}
           resourceGroupName: ${{ secrets.AZURE_RG }}
           template: ./main.bicep
-          parameters: env=${{ env.ACTIVE_ENV }} LAManageIdentityName=${{ secrets.LOGIC_APP_MANAGE_IDENTITY}}
+          parameters: env=${{ env.ACTIVE_ENV }} LAManageIdentityName=${{ secrets.LOGIC_APP_MANAGE_IDENTITY }}
           failOnStdErr: false
           scope: resourcegroup
 
