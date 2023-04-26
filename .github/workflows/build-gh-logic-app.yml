@@ -68,9 +68,8 @@ jobs:
         with:
           azcliversion: 2.44.1
           inlineScript: |
-            cd ./.bicep/logicapps
-            chmod +x ./upload_workflows.sh
-            ./upload_workflows.sh ${{steps.deploy_main_bicep.outputs.accountName}} ${{steps.deploy_main_bicep.outputs.destination}}
+            chmod +x ./.bicep/logicapps/upload_workflows.sh
+            ./.bicep/logicapps/upload_workflows.sh ${{steps.deploy_main_bicep.outputs.accountName}} ${{steps.deploy_main_bicep.outputs.destination}}
 
       - name: Deploy Connection Bicep File
         uses: azure/arm-deploy@v1
@@ -86,8 +85,7 @@ jobs:
       - name: Deploy connection to storage file system
         shell: pwsh
         run: |
-          cd ./.bicep/logicapps/
-          ./deploy_connection.ps1 `
+          ./.bicep/logicapps/deploy_connection.ps1 `
             New-WorkflowConnection `
               -ResourceGroup ${{secrets.AZURE_RG}} `
               -StorageAccount ${{steps.deploy_main_bicep.outputs.accountName}} `
