@@ -1,11 +1,10 @@
 {{ define "content" }}
 <div id="pageTitle">New External Links</div>
 <br>
-<div x-data="ExternalLinksForm({
-                    action: '{{ .Action }}',
-                    id: '{{ .Id }}'
-                })" 
-                x-init="getExternalLinks()">
+<form x-data="ExternalLinksForm()" 
+      x-init="getExternalLinksById()">
+                <span x-text="action"></span>
+                <span x-text="id"></span>
     <div>
         <div class="relative">
             {{/* <form onsubmit="" autocomplete="off">
@@ -40,13 +39,19 @@ x-data="externalLinksForm({
                     <div class="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-t sm:border-gray-200 sm:pt-5">
                         <label for="Name" class="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2"> SVG Code </label>
                         <div class="mt-1 sm:mt-0 sm:col-span-2">
-                            <input x-model="form.IconSVG" type="text" name="Name" id="Name" autocomplete="nope" class="block w-full shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm border-gray-300 rounded-md">
+                            <template x-for="(result, n) in getExternalLinksById" :key="n">
+                            <input x-model="form.IconSVG=result.IconSVG" type="text" name="Name" id="Name" autocomplete="nope" class="block w-full shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm border-gray-300 rounded-md">
+                            </template>
+                            <span> </span>
+
                         </div>
                     </div>
                     <div class="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-t sm:border-gray-200 sm:pt-5">
                         <label for="Name" class="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2">Name </label>
                         <div class="mt-1 sm:mt-0 sm:col-span-2">
-                            <input x-model="form.SVGName" type="text" name="Name" id="Name" autocomplete="nope" class="block w-full shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm border-gray-300 rounded-md">
+                            <template x-for="(result, n) in getExternalLinksById" :key="n">
+                            <input x-model="form.SVGName=result.SVGName" type="text" name="Name" id="Name" autocomplete="nope" class="block w-full shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm border-gray-300 rounded-md">
+                            </template>
                         </div>
                     </div>
                     {{/*  */}}
@@ -61,7 +66,9 @@ x-data="externalLinksForm({
                                     <button @click="CategoryList=true"
                                             @click.away="CategoryList=false"
                                             type="button" class="inline-flex w-full justify-center gap-x-1.5 rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50" id="menu-button" aria-expanded="true" aria-haspopup="true">
-                                    <span x-text="form.Category"></span>
+                                    <template x-for="(result, n) in getExternalLinksById" :key="n">
+                                    <span x-text="form.Category=result.Category"></span>
+                                    </template>
                                     <svg class="-mr-1 h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                                         <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
                                     </svg>
@@ -143,11 +150,16 @@ x-data="externalLinksForm({
                                 <!-- <p class="text-sm text-gray-500">Description here...</p> -->
                                 <div class="mt-4 space-y-4">
                                 <div class="flex items-center">
-                                    <input  x-model="form.Enabled" value="true" type="radio" class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300">
+                                    <template x-for="(result, n) in getExternalLinksById" :key="n">
+                                    <input x-model="form.Enabled=result.Enabled.toString()" value="true" type="radio" class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300">
+                                    </template>
                                     <label for="active" class="ml-3 block text-sm font-medium text-gray-700"> Active </label>
                                 </div>
+                                {{/* SearchBy === null  ? 'false' : offSet + SearchBy.length  */}}
                                 <div class="flex items-center">
-                                    <input  x-model="form.Enabled" value="false" type="radio" class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300">
+                                    <template x-for="(result, n) in getExternalLinksById" :key="n">
+                                    <input  x-model="form.Enabled=result.Enabled.toString()" value="false" type="radio" class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300">
+                                    </template>
                                     <label for="not_active" class="ml-3 block text-sm font-medium text-gray-700"> Not Active </label>
                                 </div>
                                 </div>
@@ -206,22 +218,23 @@ x-data="externalLinksForm({
 
 
 {{/* END */}}
-</div>
-<script>
+</form>
+<script type="text/javascript">
         {{/* function externalLinksForm({
         action = 'view',
         id = null
     }){ */}}
 
     function ExternalLinksForm() {
-
+        {{/* action = 'view',
+        id = null */}}
         return {
             svgOnly: (`<svg height="100" width="100">
   <circle cx="50" cy="50" r="40" stroke="black" stroke-width="3" fill="red" />
 
 </svg>`),
-            action='add',
-            id = null,
+            action:'',
+            id: null,
 
             GetExternalLinksList: [],
             form: {
@@ -237,17 +250,8 @@ x-data="externalLinksForm({
 
             CategoryList: false,
 
-            onSubmitHandler() {
-                {{/* if(this.form.IconSVG === '' || this.form.SVGName ==='' || this.form.Category === 'Category') {
-                    console.log("SVG not found, Please put SVG code.")
-                    return
-                } else {
-                    postData = this.form;
-                    Alpine.store('master').postData('/admin/externallinks/update', postData, "Your SVG file has been added.",
-                        "Close")
-                }
-                console.log("Your SVG file has been added successfully! ")
-                return */}}
+            {{/* onSubmitHandler() {
+
 
                 const data = {
                 id: this.id,
@@ -267,9 +271,9 @@ x-data="externalLinksForm({
                         Alpine.store('master').putData(`/admin/externallinks/update`, data, "Contribution area has been saved.", "Go to External Links ", "/admin/externallinks")
                         break;
                 }
-            },
+            }, */}}
             getExternalLinksById(id) {
-                let uri = '/admin/externallinks/' + id
+                let uri = '/admin/externallinks/' + 63
                 let encoded = encodeURI(uri);
                 fetch(encoded)
                 .then(r => {
@@ -282,31 +286,32 @@ x-data="externalLinksForm({
                 })
                 return this.GetExternalLinksList
             },
-            getExternalLinks() {
+            {{/* getExternalLinks() {
                 const params = new URLSearchParams(window.location.search);
                 const name = params.get("form");
                 this.form1.exlinks = name
-                console.log(this.form1.exlinks)
-            },
+                console.log(this.GetExternalLinksList)
+            }, */}}
 
-            async init(){
+            {{/* async init(){
                 this.action = 'add',
                 this.id = id
 
                 if (this.action.toLowerCase() == 'add') return;
 
-                {{/* var modal = Alpine.store('master').modal
-                modal.update('loading', 'Loading', 'Please wait for a moment.', '', '')
+                    var modal = Alpine.store('master').modal
+                    modal.update('loading', 'Loading', 'Please wait for a moment.', '', '')
 
-                const res = await fetch(`/admin/externallinks/view/`this.id)
-                const data = await res.json()
+                    const res = await fetch(`/admin/externallinks/`this.id)
+                    const data = await res.json()
 
-                this.form.name = data.Name;
-                this.form.approver = [{'id' : data.id, 'text' : data.ApproverUserPrincipalName}]
-                this.form.status = data.IsActive.toString();
+                    this.form.IconSVG = data[0].IconSVG;
+                    this.form.SVGName = data[0].SVGName;
+                    this.form.Category = data[0].Category
+                    this.form.Enabled = data.Enabled.toString();
 
-                modal.visible = false; */}}
-            },
+                    modal.visible = false;
+            }, */}}
             
         }
     }
