@@ -12,8 +12,6 @@ param containerUsername string
 @secure()
 param containerPassword string
 
-var prefix = 'bps${uniqueString(resourceGroup().id)}'
-
 @allowed([
   'F1'
   'B1'
@@ -26,8 +24,8 @@ var prefix = 'bps${uniqueString(resourceGroup().id)}'
 ])
 param sku string = 'P1v2'
 
-resource bpsAppServicePlan 'Microsoft.Web/serverfarms@2020-06-01' = {
-  name: '${prefix}AppServicePlan'
+resource ghmgmtAppServicePlan 'Microsoft.Web/serverfarms@2020-06-01' = {
+  name: '${dockerImage}-asp'
   location: location
   properties: {
     reserved: true
@@ -38,11 +36,11 @@ resource bpsAppServicePlan 'Microsoft.Web/serverfarms@2020-06-01' = {
   kind: 'linux'
 }
 
-resource bpsAppService 'Microsoft.Web/sites@2022-03-01' = {
-  name: '${prefix}AppService'
+resource ghmgmtAppService 'Microsoft.Web/sites@2022-03-01' = {
+  name: dockerImage
   location: location
   properties: {
-    serverFarmId: bpsAppServicePlan.id
+    serverFarmId: ghmgmtAppServicePlan.id
     siteConfig: {
       appSettings: [
         {
