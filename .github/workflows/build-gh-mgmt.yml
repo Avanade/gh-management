@@ -36,9 +36,6 @@ jobs:
 
   build-and-deploy:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./.bicep/webapp
     steps:
 
       # Checkout code
@@ -55,7 +52,7 @@ jobs:
       with:
         subscriptionId: ${{ fromJSON(secrets.AZURE_CREDENTIALS)['subscriptionId'] }}
         resourceGroupName: ${{ secrets.AZURE_RG }}
-        template: ./main.bicep
+        template: ./.bicep/webapp/main.bicep
         parameters: 'dockerImage=${{ env.IMAGE_NAME }} containerRegName=${{ secrets.ACR_REGISTRY }}'
         failOnStdErr: false
         scope: resourcegroup
