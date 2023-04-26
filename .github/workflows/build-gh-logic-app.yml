@@ -26,14 +26,20 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Find .bicep files and logic apps
+      - name: Find .bicep folder
         run: |
           echo FIND .bicep
           find .bicep
-          echo FIND logicapps
-          find logicapps
-          echo FIND workflows
-          find workflows
+
+      - name: Find logic apps folder
+        run: |
+            echo FIND logicapps
+            find logicapps
+
+      - name: Find workflows folder
+        run: |
+            echo FIND workflows
+            find workflows
 
       - name: Configuration for PRODUCTION environment
         if: ${{ github.event.inputs.selected_environment == 'PROD' }}
