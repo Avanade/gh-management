@@ -26,16 +26,6 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Find .bicep folder
-        run: |
-          echo FIND .bicep
-          find .bicep
-
-      - name: Find logic apps folder
-        run: |
-            echo FIND logicapps
-            find logicapps
-
       - name: Find workflows folder
         run: |
             echo FIND workflows
