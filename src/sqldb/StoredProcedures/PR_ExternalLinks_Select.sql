@@ -1,4 +1,4 @@
-CREATE PROCEDURE PR_ExternalLinks_Insert
+CREATE PROCEDURE PR_ExternalLinks_Select
 	@IconSVG VARCHAR(100),
 	@SVGName VARCHAR(100),
 	@UserPrincipalName VARCHAR(100)

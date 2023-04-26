@@ -48,6 +48,7 @@ type TypExternalLinks struct {
 	CreatedBy                 string `json:"createdBy"`
 	Modified                  string `json:"modified"`
 	ModifiedBy                string `json:"modifiedBy"`
+	Enabled					  string `json:"enabled"`
 }
 
 type TypNewProjectReqBody struct {

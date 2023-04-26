@@ -1,7 +1,11 @@
 {{ define "content" }}
 <div id="pageTitle">New External Links</div>
 <br>
-<div x-data="ExternalLinksForm()" x-init="getExternalLinks()">
+<div x-data="ExternalLinksForm({
+                    action: '{{ .Action }}',
+                    id: '{{ .Id }}'
+                })" 
+                x-init="getExternalLinks()">
     <div>
         <div class="relative">
             {{/* <form onsubmit="" autocomplete="off">
@@ -15,12 +19,17 @@
                 
 
             </form>  */}}
+{{/* 
 
 
-
-
-
-            <fieldset >
+x-data="externalLinksForm({
+                    action: '{{ .Action }}',
+                    id: '{{ .Id }}'
+                })"
+                
+                 */}}
+            <fieldset 
+            >
                 <div class="mt-4 space-y-8 divide-y divide-gray-200 sm:space-y-5">
                     {{/* <div>
                         <div>
@@ -31,13 +40,13 @@
                     <div class="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-t sm:border-gray-200 sm:pt-5">
                         <label for="Name" class="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2"> SVG Code </label>
                         <div class="mt-1 sm:mt-0 sm:col-span-2">
-                            <input x-model="form.IconSVG" type="text" name="Name" id="Name" autocomplete=" " class="block w-full shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm border-gray-300 rounded-md">
+                            <input x-model="form.IconSVG" type="text" name="Name" id="Name" autocomplete="nope" class="block w-full shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm border-gray-300 rounded-md">
                         </div>
                     </div>
                     <div class="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-t sm:border-gray-200 sm:pt-5">
                         <label for="Name" class="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2">Name </label>
                         <div class="mt-1 sm:mt-0 sm:col-span-2">
-                            <input x-model="form.SVGName" type="text" name="Name" id="Name" autocomplete=" " class="block w-full shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm border-gray-300 rounded-md">
+                            <input x-model="form.SVGName" type="text" name="Name" id="Name" autocomplete="nope" class="block w-full shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm border-gray-300 rounded-md">
                         </div>
                     </div>
                     {{/*  */}}
@@ -134,11 +143,11 @@
                                 <!-- <p class="text-sm text-gray-500">Description here...</p> -->
                                 <div class="mt-4 space-y-4">
                                 <div class="flex items-center">
-                                    <input  x-model="form.status" value="true" type="radio" class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300">
+                                    <input  x-model="form.Enabled" value="true" type="radio" class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300">
                                     <label for="active" class="ml-3 block text-sm font-medium text-gray-700"> Active </label>
                                 </div>
                                 <div class="flex items-center">
-                                    <input  x-model="form.status" value="false" type="radio" class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300">
+                                    <input  x-model="form.Enabled" value="false" type="radio" class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300">
                                     <label for="not_active" class="ml-3 block text-sm font-medium text-gray-700"> Not Active </label>
                                 </div>
                                 </div>
@@ -181,7 +190,7 @@
         <a href="/admin/externallinks" type="button" class="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">Back</a>
 
 
-        <button @click="saveSVG()" class="ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 disabled:bg-orange-200"
+        <button @click.prevent="onSubmitHandler" class="ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 disabled:bg-orange-200" x-bind::class="action == 'View'? 'hidden' : ''"
         >
         Submit
         </button>
@@ -199,26 +208,37 @@
 {{/* END */}}
 </div>
 <script>
+        {{/* function externalLinksForm({
+        action = 'view',
+        id = null
+    }){ */}}
+
     function ExternalLinksForm() {
+
         return {
             svgOnly: (`<svg height="100" width="100">
   <circle cx="50" cy="50" r="40" stroke="black" stroke-width="3" fill="red" />
 
 </svg>`),
+            action='add',
+            id = null,
+
+            GetExternalLinksList: [],
             form: {
                 IconSVG: '',
                 SVGName: '',
                 Category: 'Category',
+                Enabled: ''
             },
 
-            form: {
+            form1: {
                 exlinks: ''
             },
 
             CategoryList: false,
 
-            saveSVG() {
-                if(this.form.IconSVG === '' || this.form.SVGName ==='' || this.form.Category === 'Category') {
+            onSubmitHandler() {
+                {{/* if(this.form.IconSVG === '' || this.form.SVGName ==='' || this.form.Category === 'Category') {
                     console.log("SVG not found, Please put SVG code.")
                     return
                 } else {
@@ -226,16 +246,68 @@
                     Alpine.store('master').postData('/admin/externallinks/update', postData, "Your SVG file has been added.",
                         "Close")
                 }
-                {{/* window.location.href = "/admin/externallinks" */}}
                 console.log("Your SVG file has been added successfully! ")
-                return
+                return */}}
+
+                const data = {
+                id: this.id,
+                iconsvg: this.form.IconSVG,
+                svgname : this.form.SVGName,
+                category: this.form.Category,
+                enabled: this.form.Enabled,
+                        }
+                switch (this.action.toLowerCase()) {
+                    case 'add':
+                        Alpine.store('master').modal.show()
+                        Alpine.store('master').postData("/admin/externallinks/update", data, "Contribution area has been added.", "Go to External Links ", "/admin/externallinks")
+                        break;
+                
+                    case 'edit':
+                        Alpine.store('master').modal.show()
+                        Alpine.store('master').putData(`/admin/externallinks/update`, data, "Contribution area has been saved.", "Go to External Links ", "/admin/externallinks")
+                        break;
+                }
+            },
+            getExternalLinksById(id) {
+                let uri = '/admin/externallinks/' + id
+                let encoded = encodeURI(uri);
+                fetch(encoded)
+                .then(r => {
+                    r.json().then(body => {
+                    this.GetExternalLinksList = body
+                    })
+                })
+                .catch(e => {
+                    console.log(e)
+                })
+                return this.GetExternalLinksList
             },
             getExternalLinks() {
                 const params = new URLSearchParams(window.location.search);
                 const name = params.get("form");
-                this.form.exlinks = name
-                console.log(this.form.exlinks)
+                this.form1.exlinks = name
+                console.log(this.form1.exlinks)
             },
+
+            async init(){
+                this.action = 'add',
+                this.id = id
+
+                if (this.action.toLowerCase() == 'add') return;
+
+                {{/* var modal = Alpine.store('master').modal
+                modal.update('loading', 'Loading', 'Please wait for a moment.', '', '')
+
+                const res = await fetch(`/admin/externallinks/view/`this.id)
+                const data = await res.json()
+
+                this.form.name = data.Name;
+                this.form.approver = [{'id' : data.id, 'text' : data.ApproverUserPrincipalName}]
+                this.form.status = data.IsActive.toString();
+
+                modal.visible = false; */}}
+            },
+            
         }
     }
 </script>

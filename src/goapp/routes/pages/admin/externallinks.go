@@ -4,21 +4,34 @@ import (
 	"encoding/json"
 
 	// db "main/pkg/ghmgmtdb"
+	"fmt"
+	models "main/models"
 	session "main/pkg/session"
 	"main/pkg/sql"
 	template "main/pkg/template"
 	"net/http"
 	"os"
+	"strconv"
+	"strings"
+
 	"github.com/gorilla/mux"
-		"fmt"
-	models "main/models"
 )
 
 func ExternalLinksHandler(w http.ResponseWriter, r *http.Request) {
 	template.UseTemplate(&w, r, "admin/externallinks", nil)
 }
 func ExternalLinksForm(w http.ResponseWriter, r *http.Request) {
-	template.UseTemplate(&w, r, "admin/externallinks/form", nil)
+	// template.UseTemplate(&w, r, "admin/externallinks/form", nil)
+	vars := mux.Vars(r)
+	id, _ := strconv.Atoi(vars["id"])
+	action := vars["action"]
+	template.UseTemplate(&w, r, "admin/externallinks/form", struct {
+		Id     int
+		Action string
+	}{
+		Id:     id,
+		Action: strings.Title(action),
+	})
 }
 
 func GetExternalLinks(w http.ResponseWriter, r *http.Request) {
@@ -58,10 +71,56 @@ func GetExternalLinks(w http.ResponseWriter, r *http.Request) {
 	w.Write(jsonResp)
 }
 
+func GetExternalLinksById(w http.ResponseWriter, r *http.Request) {
+	req := mux.Vars(r)
+	id := req["id"]
+
+	dbConnectionParam := sql.ConnectionParam{
+		ConnectionString: os.Getenv("GHMGMTDB_CONNECTION_STRING"),
+	}
+	db, err := sql.Init(dbConnectionParam)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer db.Close()
+
+	param := map[string]interface{}{
+		"Id": id,
+	}
+
+	ExternalLinks, err := db.ExecuteStoredProcedureWithResult("PR_ExternalLinks_SelectById", param)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Header().Set("Content-Type", "application/json")
+	jsonResp, err := json.Marshal(ExternalLinks)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.Write(jsonResp)
+}
+
+// func ExternalLinksForm(w http.ResponseWriter, r *http.Request) {
+// 	vars := mux.Vars(r)
+// 	id, _ := strconv.Atoi(vars["id"])
+// 	action := vars["action"]
+// 	template.UseTemplate(&w, r, "admin/contributionareas/form", struct {
+// 		Id     int
+// 		Action string
+// 	}{
+// 		Id:     id,
+// 		Action: strings.Title(action),
+// 	})
+// }
+
 func GetExternalLinksByCategory(w http.ResponseWriter, r *http.Request) {
 	req := mux.Vars(r)
 	Category := req["Category"]
-
 
 	sessionaz, _ := session.Store.Get(r, "auth-session")
 	iprofile := sessionaz.Values["profile"]
@@ -126,6 +185,7 @@ func CreateExternalLinks(w http.ResponseWriter, r *http.Request) {
 		"IconSVG":   body.IconSVG,
 		"Category":  body.Category,
 		"CreatedBy": username,
+		"Enabled" :  body.Enabled,
 	}
 
 	__, err := db.ExecuteStoredProcedureWithResult("PR_ExternalLinks_Insert", param)
@@ -173,4 +233,26 @@ func UpdateExternalLinks(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+}
+
+func ExternalLinksDelete(w http.ResponseWriter, r *http.Request) {
+	req := mux.Vars(r)
+	id := req["id"]
+
+
+
+	cp := sql.ConnectionParam{
+		ConnectionString: os.Getenv("GHMGMTDB_CONNECTION_STRING"),
+	}
+
+	db, err := sql.Init(cp)
+
+	param := map[string]interface{}{
+		"Id": id,
+	}
+
+	_, error := db.ExecuteStoredProcedure("PR_ExternalLinks_Delete", param)
+	if err != nil {
+		fmt.Println(error)
+	}
 }
