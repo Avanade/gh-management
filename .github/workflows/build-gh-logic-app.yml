@@ -9,12 +9,17 @@ on:
       selected_environment:
         type: choice
         description: SELECT ENVIRONMENT
-        require: true
+        required: true
         default: TEST
         options: 
         - PROD
         - UAT
         - TEST
+        
+defaults:
+  run:
+    working-directory: .bicep/logicapps
+
 jobs:
   build-gh-logic-app:
     runs-on: ubuntu-latest
@@ -50,14 +55,15 @@ jobs:
         with:
           subscriptionId: ${{ fromJSON(secrets.AZURE_CREDENTIALS)['subscriptionId'] }}
           resourceGroupName: ${{ secrets.AZURE_RG }}
-          template: ./.bicep/main.bicep
+          template: main.bicep
           parameters: env=${{ env.ACTIVE_ENV }} LAManageIdentityName=${{ secrets.LOGIC_APP_MANAGE_IDENTITY}}
           failOnStdErr: false
+          scope: resourcegroup
 
       - name: Setup Workflow Parameters
         uses: microsoft/variable-substitution@v1 
         with:
-          files: './.bicep/workflows/parameters.json'
+          files: 'workflows/parameters.json'
         env:
           GHMgmDomain.value: ${{ env.GH_DOMAIN }}
           
@@ -66,8 +72,8 @@ jobs:
         with:
           azcliversion: 2.44.1
           inlineScript: |
-            chmod +x ./.bicep/upload_workflows.sh
-            ./.bicep/upload_workflows.sh ${{steps.deploy_main_bicep.outputs.accountName}} ${{steps.deploy_main_bicep.outputs.destination}}
+            chmod +x upload_workflows.sh
+            upload_workflows.sh ${{steps.deploy_main_bicep.outputs.accountName}} ${{steps.deploy_main_bicep.outputs.destination}}
 
       - name: Deploy Connection Bicep File
         uses: azure/arm-deploy@v1
@@ -75,14 +81,15 @@ jobs:
         with:
           subscriptionId: ${{ fromJSON(secrets.AZURE_CREDENTIALS)['subscriptionId'] }}
           resourceGroupName: ${{ secrets.AZURE_RG }}
-          template: ./.bicep/connection.bicep
+          template: connection.bicep
           parameters: env=${{ env.ACTIVE_ENV }} storageAccountName=${{steps.deploy_main_bicep.outputs.accountName}} principalId=${{ fromJSON(secrets.AZURE_CREDENTIALS)['clientId'] }} tenantId=${{ fromJSON(secrets.AZURE_CREDENTIALS)['tenantId'] }}
           failOnStdErr: false
+          scope: resourcegroup
 
       - name: Deploy connection to storage file system
         shell: pwsh
         run: |
-          ./.bicep/deploy_connection.ps1 `
+          deploy_connection.ps1 `
             New-WorkflowConnection `
               -ResourceGroup ${{secrets.AZURE_RG}} `
               -StorageAccount ${{steps.deploy_main_bicep.outputs.accountName}} `
