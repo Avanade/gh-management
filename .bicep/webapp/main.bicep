@@ -63,8 +63,7 @@ resource bpsAppService 'Microsoft.Web/sites@2022-03-01' = {
 }
 
 resource publishingcreds 'Microsoft.Web/sites/config@2021-01-01' existing = {
-  parent: bpsAppService
-  name: 'publishingcredentials'
+  name: '${prefix}AppService/publishingcredentials'
 }
 
 var creds = list(publishingcreds.id, publishingcreds.apiVersion).properties.scmUri
