@@ -1,6 +1,9 @@
 param location string = resourceGroup().location
 
 @secure()
+param dockerImage string
+
+@secure()
 param containerServer string
 
 @secure()
@@ -34,9 +37,6 @@ resource bpsAppServicePlan 'Microsoft.Web/serverfarms@2020-06-01' = {
   }
   kind: 'linux'
 }
-
-@description('The relative docker image name.')
-param dockerImage string
 
 resource bpsAppService 'Microsoft.Web/sites@2022-03-01' = {
   name: '${prefix}AppService'

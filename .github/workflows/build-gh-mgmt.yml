@@ -23,7 +23,7 @@ jobs:
       - uses: actions/checkout@v2
 
       - name: Configuration for PRODUCTION environment
-        run: echo "IMAGE_NAME=gh-mgmt-${{github.event.inputs.selected_environment}}" >> $GITHUB_ENV
+        run: echo "IMAGE_NAME=${{github.event.inputs.selected_environment}}-gh-mgmt-app" >> $GITHUB_ENV
 
       - uses: azure/docker-login@v1 
         with:
