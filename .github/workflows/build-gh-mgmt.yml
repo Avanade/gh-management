@@ -53,6 +53,6 @@ jobs:
         subscriptionId: ${{ fromJSON(secrets.AZURE_CREDENTIALS)['subscriptionId'] }}
         resourceGroupName: ${{ secrets.AZURE_RG }}
         template: ./.bicep/webapp/main.bicep
-        parameters: 'dockerImage=${{ env.IMAGE_NAME }} containerRegName=${{ secrets.ACR_USERNAME }}'
+        parameters: 'dockerImage=${{ env.IMAGE_NAME }} containerServer=${{ secrets.ACR_REGISTRY }} containerUsername=${{ secrets.ACR_USERNAME }} containerPassword=${{ secrets.ACR_PASSWORD }}'
         failOnStdErr: false
         scope: resourcegroup
