@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - main
+    paths:
+      - ".bicep/logicapps"
   workflow_dispatch:
     inputs:
       selected_environment:
@@ -15,10 +17,6 @@ on:
         - PROD
         - UAT
         - TEST
-
-defaults:
-  run:
-    working-directory: ./.bicep/logicapps
 
 jobs:
   build-gh-logic-app:
