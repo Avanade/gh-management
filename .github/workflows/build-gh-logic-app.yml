@@ -4,8 +4,6 @@ on:
   push:
     branches:
       - main
-    paths:
-      - ".bicep/logicapps"
   workflow_dispatch:
     inputs:
       selected_environment:
@@ -24,11 +22,6 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Find workflows folder
-        run: |
-            echo FIND workflows
-            find workflows
-
       - name: Configuration for PRODUCTION environment
         if: ${{ github.event.inputs.selected_environment == 'PROD' }}
         run: |
@@ -46,6 +39,9 @@ jobs:
         run: |
           echo "GH_DOMAIN=${{ secrets.GH_DOMAIN_TEST }}" >> $GITHUB_ENV
           echo "ACTIVE_ENV=TEST" >> $GITHUB_ENV
+
+      - name: Set logicapps directory in github env
+        run: echo "LOGIC_APP_PATH=./.bicep/logicapps >> $GITHUB_ENV"
         
       - name: Login Azure
         uses: azure/login@v1
@@ -58,7 +54,7 @@ jobs:
         with:
           subscriptionId: ${{ fromJSON(secrets.AZURE_CREDENTIALS)['subscriptionId'] }}
           resourceGroupName: ${{ secrets.AZURE_RG }}
-          template: ./main.bicep
+          template: '${{env.LOGIC_APP_PATH}}/main.bicep'
           parameters: env=${{ env.ACTIVE_ENV }} LAManageIdentityName=${{ secrets.LOGIC_APP_MANAGE_IDENTITY }}
           failOnStdErr: false
           scope: resourcegroup
@@ -66,7 +62,7 @@ jobs:
       - name: Setup Workflow Parameters
         uses: microsoft/variable-substitution@v1 
         with:
-          files: './workflows/parameters.json'
+          files: '${{env.LOGIC_APP_PATH}}/workflows/parameters.json'
         env:
           GHMgmDomain.value: ${{ env.GH_DOMAIN }}
           
@@ -75,8 +71,8 @@ jobs:
         with:
           azcliversion: 2.44.1
           inlineScript: |
-            chmod +x ./upload_workflows.sh
-            ./upload_workflows.sh ${{steps.deploy_main_bicep.outputs.accountName}} ${{steps.deploy_main_bicep.outputs.destination}}
+            chmod +x ${{env.LOGIC_APP_PATH}}/upload_workflows.sh
+            ${{env.LOGIC_APP_PATH}}/upload_workflows.sh ${{steps.deploy_main_bicep.outputs.accountName}} ${{steps.deploy_main_bicep.outputs.destination}}
 
       - name: Deploy Connection Bicep File
         uses: azure/arm-deploy@v1
@@ -84,7 +80,7 @@ jobs:
         with:
           subscriptionId: ${{ fromJSON(secrets.AZURE_CREDENTIALS)['subscriptionId'] }}
           resourceGroupName: ${{ secrets.AZURE_RG }}
-          template: ./connection.bicep
+          template: ${{env.LOGIC_APP_PATH}}/connection.bicep
           parameters: env=${{ env.ACTIVE_ENV }} storageAccountName=${{steps.deploy_main_bicep.outputs.accountName}} principalId=${{ fromJSON(secrets.AZURE_CREDENTIALS)['clientId'] }} tenantId=${{ fromJSON(secrets.AZURE_CREDENTIALS)['tenantId'] }}
           failOnStdErr: false
           scope: resourcegroup
@@ -92,7 +88,7 @@ jobs:
       - name: Deploy connection to storage file system
         shell: pwsh
         run: |
-          ./deploy_connection.ps1 `
+          ${{env.LOGIC_APP_PATH}}/deploy_connection.ps1 `
             New-WorkflowConnection `
               -ResourceGroup ${{secrets.AZURE_RG}} `
               -StorageAccount ${{steps.deploy_main_bicep.outputs.accountName}} `
