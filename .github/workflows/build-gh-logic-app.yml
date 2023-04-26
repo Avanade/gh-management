@@ -63,7 +63,7 @@ jobs:
       - name: Setup Workflow Parameters
         uses: microsoft/variable-substitution@v1 
         with:
-          files: './workflows/parameters.json'
+          files: ./.bicep/logicapps/workflows/parameters.json
         env:
           GHMgmDomain.value: ${{ env.GH_DOMAIN }}
           
@@ -81,7 +81,7 @@ jobs:
         with:
           subscriptionId: ${{ fromJSON(secrets.AZURE_CREDENTIALS)['subscriptionId'] }}
           resourceGroupName: ${{ secrets.AZURE_RG }}
-          template: ./connection.bicep
+          template: ./.bicep/logicapps/connection.bicep
           parameters: env=${{ env.ACTIVE_ENV }} storageAccountName=${{steps.deploy_main_bicep.outputs.accountName}} principalId=${{ fromJSON(secrets.AZURE_CREDENTIALS)['clientId'] }} tenantId=${{ fromJSON(secrets.AZURE_CREDENTIALS)['tenantId'] }}
           failOnStdErr: false
           scope: resourcegroup
