@@ -7,11 +7,11 @@ on:
         type: choice
         description: SELECT ENVIRONMENT
         required: true
-        default: TEST
+        default: dev
         options: 
-        - PROD
-        - UAT
-        - DEV
+        - prod
+        - uat
+        - dev
 
 jobs:
   deploy-in-acr:
