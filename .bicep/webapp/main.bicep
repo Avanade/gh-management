@@ -1,9 +1,13 @@
 param location string = resourceGroup().location
-param containerRegName string
 
-resource containerRegistry 'Microsoft.ContainerRegistry/registries@2022-02-01-preview' existing = {
-  name: containerRegName
-}
+@secure()
+param containerServer string
+
+@secure()
+param containerUsername string
+
+@secure()
+param containerPassword string
 
 var prefix = 'bps${uniqueString(resourceGroup().id)}'
 
@@ -47,33 +51,18 @@ resource bpsAppService 'Microsoft.Web/sites@2022-03-01' = {
         }
         {
           name: 'DOCKER_REGISTRY_SERVER_URL'
-          value: 'https://${containerRegistry.properties.loginServer}'
+          value: 'https://${containerServer}'
         }
         {
           name: 'DOCKER_REGISTRY_SERVER_USERNAME'
-          value: containerRegistry.name      }
+          value: containerUsername
+        }
         {
           name: 'DOCKER_REGISTRY_SERVER_PASSWORD'
-          value: containerRegistry.listCredentials().passwords[0].value
+          value: containerPassword
         }
       ]
-      linuxFxVersion: 'DOCKER|${containerRegistry.properties.loginServer}/${dockerImage}'
+      linuxFxVersion: 'DOCKER|${containerServer}/${dockerImage}'
     }
-  }
-}
-
-resource publishingcreds 'Microsoft.Web/sites/config@2021-01-01' existing = {
-  name: '${prefix}AppService/publishingcredentials'
-}
-
-var creds = list(publishingcreds.id, publishingcreds.apiVersion).properties.scmUri
-
-resource containerRegistryWebhook 'Microsoft.ContainerRegistry/registries/webhooks@2022-02-01-preview' = {
-  name: 'acrwebhook'
-  location: location
-  parent: containerRegistry
-  properties: {
-    actions: ['push']
-    serviceUri: '${creds}/api/registry/webhook'
   }
 }
