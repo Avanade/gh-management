@@ -13,6 +13,9 @@ on:
         - uat
         - dev
 
+env:
+  DOCKER_IMG_NAME: ${{github.event.inputs.selected_environment}}-gh-mgmt-app
+
 jobs:
   deploy-in-acr:
     runs-on: ubuntu-latest
@@ -21,18 +24,14 @@ jobs:
         working-directory: ./src/goapp
     steps:
       - uses: actions/checkout@v2
-
-      - name: Configuration for PRODUCTION environment
-        run: echo "IMAGE_NAME=${{github.event.inputs.selected_environment}}-gh-mgmt-app" >> $GITHUB_ENV
-
       - uses: azure/docker-login@v1 
         with:
           login-server: ${{ secrets.ACR_REGISTRY }}
           username: ${{ secrets.ACR_USERNAME }}
           password: ${{ secrets.ACR_PASSWORD }}
       - run: |
-          docker build . -t ${{ secrets.ACR_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }} -t ${{ secrets.ACR_REGISTRY }}/${{ env.IMAGE_NAME }}:latest
-          docker push ${{ secrets.ACR_REGISTRY }}/${{ env.IMAGE_NAME }}
+          docker build . -t ${{ secrets.ACR_REGISTRY }}/${{ env.DOCKER_IMG_NAME }}:${{ github.sha }} -t ${{ secrets.ACR_REGISTRY }}/${{ env.DOCKER_IMG_NAME }}:latest
+          docker push ${{ secrets.ACR_REGISTRY }}/${{ env.DOCKER_IMG_NAME }}
 
   build-and-deploy:
     runs-on: ubuntu-latest
@@ -53,6 +52,6 @@ jobs:
         subscriptionId: ${{ fromJSON(secrets.AZURE_CREDENTIALS)['subscriptionId'] }}
         resourceGroupName: ${{ secrets.AZURE_RG }}
         template: ./.bicep/webapp/main.bicep
-        parameters: 'dockerImage=${{ env.IMAGE_NAME }} containerServer=${{ secrets.ACR_REGISTRY }} containerUsername=${{ secrets.ACR_USERNAME }} containerPassword=${{ secrets.ACR_PASSWORD }}'
+        parameters: 'dockerImage=${{ env.DOCKER_IMG_NAME }} containerServer=${{ secrets.ACR_REGISTRY }} containerUsername=${{ secrets.ACR_USERNAME }} containerPassword=${{ secrets.ACR_PASSWORD }}'
         failOnStdErr: false
         scope: resourcegroup
