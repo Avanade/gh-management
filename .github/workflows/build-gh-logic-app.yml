@@ -16,14 +16,24 @@ on:
         - UAT
         - TEST
 
+defaults:
+  run:
+    working-directory: ./.bicep/logicapps
+
 jobs:
   build-gh-logic-app:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
 
-      - name: Change working directory
-        run: cd ./.bicep/logicapps
+      - name: Find .bicep files and logic apps
+        run: |
+          echo FIND .bicep
+          find .bicep
+          echo FIND logicapps
+          find logicapps
+          echo FIND workflows
+          find workflows
 
       - name: Configuration for PRODUCTION environment
         if: ${{ github.event.inputs.selected_environment == 'PROD' }}
