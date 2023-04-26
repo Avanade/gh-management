@@ -1,31 +1,31 @@
 CREATE PROCEDURE PR_ExternalLinks_Insert
-	@IconSVG VARCHAR(100),
 	@SVGName VARCHAR(100),
-	@UserPrincipalName VARCHAR(100)
-
+	@IconSVG VARCHAR(1000),
+	@Category VARCHAR(100),
+	@CreatedBy VARCHAR(100),
+	@Enabled VARCHAR(100)
 AS
 BEGIN
 
-SET NOCOUNT ON;
-
-INSERT INTO [dbo].[ExternalLinks]
-           ( 
-            [UserPrincipalName],
-			[IconSVG],
+INSERT INTO [dbo].[ExternalLinks] ( 
 			[SVGName],
+			[IconSVG],
+			[Category],
             [Created],
             [CreatedBy],
             [Modified],
-            [ModifiedBy]
-            )
-     VALUES
+            [ModifiedBy],
+			[Enabled]
+)
+VALUES
            ( 
-            @UserPrincipalName,
-			@IconSVG,
 			@SVGName,
+			@IconSVG,
+			@Category,
             GETDATE(),
-            @UserPrincipalName,
+            @CreatedBy,
             GETDATE(),
-            @UserPrincipalName
+            @CreatedBy,
+			@Enabled
             )
 END
