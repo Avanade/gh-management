@@ -15,14 +15,13 @@ on:
         - PROD
         - UAT
         - TEST
-        
-defaults:
-  run:
-    working-directory: ./.bicep/logicapps
 
 jobs:
   build-gh-logic-app:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: .bicep/logicapps
     steps:
       - uses: actions/checkout@v2
 
