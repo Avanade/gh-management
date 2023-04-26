@@ -1,31 +1,12 @@
 CREATE PROCEDURE PR_ExternalLinks_Select
-	@IconSVG VARCHAR(100),
-	@SVGName VARCHAR(100),
-	@UserPrincipalName VARCHAR(100)
-
+	@CreatedBy as varchar(100)
 AS
 BEGIN
 
-SET NOCOUNT ON;
+SELECT * FROM	[dbo].[ExternalLinks]
 
-INSERT INTO [dbo].[ExternalLinks]
-           ( 
-            [UserPrincipalName],
-			[IconSVG],
-			[SVGName],
-            [Created],
-            [CreatedBy],
-            [Modified],
-            [ModifiedBy]
-            )
-     VALUES
-           ( 
-            @UserPrincipalName,
-			@IconSVG,
-			@SVGName,
-            GETDATE(),
-            @UserPrincipalName,
-            GETDATE(),
-            @UserPrincipalName
-            )
+WHERE 
+	CreatedBy = @CreatedBy
+ORDER BY id desc
+
 END
