@@ -1,45 +1,58 @@
-name: Deploy GH MGMT Workflow
+name: Deploy Github Management Workflow
 
 on:
-  push:
-    branches:
-      - main
   workflow_dispatch:
     inputs:
       selected_environment:
         type: choice
         description: SELECT ENVIRONMENT
-        require: true
+        required: true
         default: TEST
         options: 
         - PROD
         - UAT
-        - TEST
+        - DEV
+
 jobs:
-  build-gh-logic-app:
+  deploy-in-acr:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./src/goapp
     steps:
       - uses: actions/checkout@v2
 
       - name: Configuration for PRODUCTION environment
-        if: ${{ github.event.inputs.selected_environment == 'PROD' }}
-        run: |
-          echo "GH_DOMAIN=${{ secrets.GH_DOMAIN_PROD }}" >> $GITHUB_ENV
-          echo "ACTIVE_ENV=PROD" >> $GITHUB_ENV
+        run: echo "IMAGE_NAME=gh-mgmt-${{github.event.inputs.selected_environment}}" >> $GITHUB_ENV
 
-      - name: Configuration for UAT environment
-        if: ${{ github.event.inputs.selected_environment == 'UAT' }}
-        run: |
-          echo "GH_DOMAIN=${{ secrets.GH_DOMAIN_UAT }}" >> $GITHUB_ENV
-          echo "ACTIVE_ENV=UAT" >> $GITHUB_ENV
-
-      - name: Configuration for TEST environment
-        if: ${{ github.event.inputs.selected_environment == 'TEST' }}
-        run: |
-          echo "GH_DOMAIN=${{ secrets.GH_DOMAIN_TEST }}" >> $GITHUB_ENV
-          echo "ACTIVE_ENV=TEST" >> $GITHUB_ENV
-        
-      - name: Login Azure
-        uses: azure/login@v1
+      - uses: azure/docker-login@v1 
         with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
+          login-server: ${{ secrets.ACR_REGISTRY }}
+          username: ${{ secrets.ACR_USERNAME }}
+          password: ${{ secrets.ACR_PASSWORD }}
+      - run: |
+          docker build . -t ${{ secrets.ACR_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }} -t ${{ secrets.ACR_REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+          docker push ${{ secrets.ACR_REGISTRY }}/${{ env.IMAGE_NAME }}
+
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+
+      # Checkout code
+    - uses: actions/checkout@main
+
+      # Log into Azure
+    - uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      # Deploy Bicep file
+    - name: deploy
+      uses: azure/arm-deploy@v1
+      with:
+        subscriptionId: ${{ fromJSON(secrets.AZURE_CREDENTIALS)['subscriptionId'] }}
+        resourceGroupName: ${{ secrets.AZURE_RG }}
+        template: ./main.bicep
+        parameters: 'dockerImage=${{ env.IMAGE_NAME }} containerRegName=${{ secrets.ACR_REGISTRY }}'
+        failOnStdErr: false
+        scope: resourcegroup
