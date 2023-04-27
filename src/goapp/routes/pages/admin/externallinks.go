@@ -120,12 +120,13 @@ func GetExternalLinksById(w http.ResponseWriter, r *http.Request) {
 
 func GetExternalLinksByCategory(w http.ResponseWriter, r *http.Request) {
 	req := mux.Vars(r)
-	Category := req["Category"]
+	category := req["Category"]
 
 	sessionaz, _ := session.Store.Get(r, "auth-session")
 	iprofile := sessionaz.Values["profile"]
 	profile := iprofile.(map[string]interface{})
 	username := fmt.Sprint(profile["preferred_username"])
+
 	// Connect to database
 	dbConnectionParam := sql.ConnectionParam{
 		ConnectionString: os.Getenv("GHMGMTDB_CONNECTION_STRING"),
@@ -138,7 +139,7 @@ func GetExternalLinksByCategory(w http.ResponseWriter, r *http.Request) {
 	defer db.Close()
 
 	param := map[string]interface{} {
-		"Category": Category,
+		"Category": category,
 		"CreatedBy": username,
 	}
 

@@ -310,7 +310,7 @@
 
               <a href="https://techcommunitycalendar.com/" target="_blank" class="cursor-pointer px-2 py-2 flex text-gray-600 hover:bg-gray-50 hover:text-gray-900 text-base font-medium rounded-md">
                 <template x-for="(category, n) in GetExternalLinksByCategoryTCC" :key="n">
-                  <span x-html="category.Enabled === true ? category.IconSVG : ''"></span>
+                  <span x-html="category.Enabled === true ? category.IconSVG : '' "></span>
                 </template>
                 <span class="ml-2">Tech Community Calendar</span>
               </a>
@@ -658,6 +658,7 @@
         },
         //ExternalLinks
         GetExternalLinksByCategoryList: [],
+        GetExternalLinksByCategoryTCCList: [],
         GetExternalLinksByCategorySOAList: [],
         GetExternalLinksByCategoryOIMList: [],
         TCC: 'TechCommunityCalendar',
@@ -704,22 +705,22 @@
           if(redirect) window.location.href=redirect; localStorage.clear()
         },
         GetExternalLinksByCategoryTCC() {
-            let uri = '/admin/externallinks/' + this.TCC
+            let uri = '/admin/externallinks/category/' + this.TCC
             let encoded = encodeURI(uri);
             fetch(encoded)
             .then(r => {
                 r.json().then(body => {
-                this.GetExternalLinksByCategoryList = body
+                this.GetExternalLinksByCategoryTCCList = body
                 })
             })
             .catch(e => {
                 console.log(e)
             })
-            return this.GetExternalLinksByCategoryList
+            return this.GetExternalLinksByCategoryTCCList
         //
         },
         GetExternalLinksByCategorySOA() {
-            let uri = '/admin/externallinks/' + this.SOA
+            let uri = '/admin/externallinks/category/' + this.SOA
             let encoded = encodeURI(uri);
             fetch(encoded)
             .then(r => {
@@ -734,7 +735,7 @@
         //
         },
         GetExternalLinksByCategoryOIM() {
-            let uri = '/admin/externallinks/' + this.OIM
+            let uri = '/admin/externallinks/category/' + this.OIM
             let encoded = encodeURI(uri);
             fetch(encoded)
             .then(r => {
