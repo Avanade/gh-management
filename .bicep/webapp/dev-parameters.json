@@ -1,0 +1,45 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "dockerImage": {"value": ""},
+        "containerServer": {"value": ""},
+        "containerUsername": {"value": ""},
+        "containerPassword": {"value": ""},
+        "appServiceSettings": {
+            "value": {
+                "WEBSITES_ENABLE_APP_SERVICE_STORAGE":"false",
+                "DOCKER_REGISTRY_SERVER_URL":"",
+                "DOCKER_REGISTRY_SERVER_USERNAME":"",
+                "DOCKER_REGISTRY_SERVER_PASSWORD":"",
+
+                "TENANT_ID":"",
+                "CLIENT_ID":"",
+                "CLIENT_SECRET":"",
+                "HOME_URL":"",
+                "GH_CLIENT_ID":"",
+                "GH_CLIENT_SECRET":"",
+                "GH_TOKEN":"",
+                "GHMGMTDB_CONNECTION_STRING":"",
+                "EMAIL_ENDPOINT":"",
+                
+                "GH_ORG_INNERSOURCE":"Rgm-org",
+                "GH_ORG_OPENSOURCE":"Rgm-org-public",
+                "GH_REPO_TEMPLATE":"Avanade",
+                "GH_REPO_TEMPLATE_NAME":"avanade-template",
+                "APPROVAL_SYSTEM_APP_URL":"https://ava-approval-system.azurewebsites.net",
+                "APPROVAL_SYSTEM_APP_BaseURL":"https://ava-approval-system.azurewebsites.net",
+                "APPROVAL_SYSTEM_APP_ID":"ba8bfbd0-14c9-45da-af6d-2d0839924806",
+                "APPROVAL_SYSTEM_APP_MODULE_PROJECTS":"0cf34292-e40f-46cb-af73-9fe7dd646ee3",
+                "APPROVAL_SYSTEM_APP_MODULE_COMMUNITY":"f3540e54-1c6e-448e-8810-179f53292a0e",
+                "GH_AZURE_AD_GROUP":"App_access_Github",
+                "GH_AZURE_AD_ADMIN_GROUP":"OpenSourceCommunityPortal-AdminUsers",
+                "EMAIL_SUPPORT":"jerrico.dela.cruz@accenture.com",
+                "SUMMARY_REPORT_TRIGGER":"1",
+                "EMAIL_SUMMARY_REPORT":"ismael.r.ibuan@accenture.com",
+                "CONTENT_SECURITY_POLICY":"default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' cdn.jsdelivr.net unpkg.com; style-src 'self' 'unsafe-inline'; connect-src 'self' graph.microsoft.com login.microsoftonline.com api.github.com prod-01.uksouth.logic.azure.com ghmgmlatest.azurewebsites.net; frame-src 'self' login.microsoftonline.com; img-src 'self' data:;",
+                "ORG_OWNERS":"iibuan dennisdelamida"
+            }
+        }
+    }
+}

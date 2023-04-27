@@ -1,5 +1,7 @@
 param location string = resourceGroup().location
 
+param projectName string
+
 @secure()
 param dockerImage string
 
@@ -7,10 +9,7 @@ param dockerImage string
 param containerServer string
 
 @secure()
-param containerUsername string
-
-@secure()
-param containerPassword string
+param appServiceSettings object
 
 @allowed([
   'F1'
@@ -25,7 +24,7 @@ param containerPassword string
 param sku string = 'P1v2'
 
 resource ghmgmtAppServicePlan 'Microsoft.Web/serverfarms@2020-06-01' = {
-  name: '${dockerImage}-asp'
+  name: '${projectName}-asp'
   location: location
   properties: {
     reserved: true
@@ -37,29 +36,15 @@ resource ghmgmtAppServicePlan 'Microsoft.Web/serverfarms@2020-06-01' = {
 }
 
 resource ghmgmtAppService 'Microsoft.Web/sites@2022-03-01' = {
-  name: dockerImage
+  name: projectName
   location: location
   properties: {
     serverFarmId: ghmgmtAppServicePlan.id
     siteConfig: {
-      appSettings: [
-        {
-          name: 'WEBSITES_ENABLE_APP_SERVICE_STORAGE'
-          value: 'false'
-        }
-        {
-          name: 'DOCKER_REGISTRY_SERVER_URL'
-          value: 'https://${containerServer}'
-        }
-        {
-          name: 'DOCKER_REGISTRY_SERVER_USERNAME'
-          value: containerUsername
-        }
-        {
-          name: 'DOCKER_REGISTRY_SERVER_PASSWORD'
-          value: containerPassword
-        }
-      ]
+      appSettings: [for item in items(appServiceSettings): {
+        name: item.key
+        value: item.value
+      }]
       linuxFxVersion: 'DOCKER|${containerServer}/${dockerImage}'
     }
   }

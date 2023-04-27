@@ -40,6 +40,38 @@ jobs:
       # Checkout code
     - uses: actions/checkout@main
 
+    - name: Configuration for TEST environment
+      if: ${{ github.event.inputs.selected_environment == 'dev' }}
+      run: |
+        echo "GH_CREDENTIALS=${{ secrets.GH_CREDENTIALS_DEV }}" >> $GITHUB_ENV
+        echo "GHMGMT_CONNECTION_STRING=${{ secrets.GH_MGMT_CONNECTION_STRING_DEV }}" >> $GITHUB_ENV
+
+    - name: Configuration for UAT environment
+      if: ${{ github.event.inputs.selected_environment == 'uat' }}
+      run: |
+        echo "GH_CREDENTIALS=${{ secrets.GH_CREDENTIALS_UAT }}" >> $GITHUB_ENV
+        echo "GHMGMT_CONNECTION_STRING=${{ secrets.GH_MGMT_CONNECTION_STRING_UAT }}" >> $GITHUB_ENV
+
+    - name: SUBTITUTE VARIABLES
+      uses: microsoft/variable-substitution@v1 
+      with:
+        files: ./.bicep/webapp/${{ github.event.inputs.selected_environment }}-parameters.bicep
+      env:
+        parameters.dockerImage.value : ${{ env.DOCKER_IMG_NAME }}
+        parameters.containerServer.value : ${{ secrets.ACR_REGISTRY }}
+        parameters.appServiceSettings.value.DOCKER_REGISTRY_SERVER_URL : https://${{ secrets.ACR_REGISTRY }}
+        parameters.appServiceSettings.value.DOCKER_REGISTRY_SERVER_USERNAME : ${{ secrets.ACR_USERNAME }} 
+        parameters.appServiceSettings.value.DOCKER_REGISTRY_SERVER_PASSWORD : ${{ secrets.ACR_PASSWORD }} 
+        parameters.appServiceSettings.value.TENANT_ID : ${{ fromJSON(secrets.AZURE_CREDENTIALS)['tenantId'] }}
+        parameters.appServiceSettings.value.CLIENT_ID : ${{ fromJSON(secrets.AZURE_CREDENTIALS)['clientId'] }}
+        parameters.appServiceSettings.value.CLIENT_SECRET : ${{ fromJSON(secrets.AZURE_CREDENTIALS)['clientSecret'] }}
+        parameters.appServiceSettings.value.HOME_URL : 'https://${{ env.DOCKER_IMG_NAME }}.azurewebsites.net'
+        parameters.appServiceSettings.value.GH_CLIENT_ID : ${{ fromJSON(env.GH_CREDENTIALS)['clientId'] }}
+        parameters.appServiceSettings.value.GH_CLIENT_SECRET : ${{ fromJSON(env.GH_CREDENTIALS)['clientSecret'] }}
+        parameters.appServiceSettings.value.GH_TOKEN : ${{ fromJSON(env.GH_CREDENTIALS)['token'] }}
+        parameters.appServiceSettings.value.GHMGMTDB_CONNECTION_STRING : ${{ env.GHMGMT_CONNECTION_STRING }}
+        parameters.appServiceSettings.value.EMAIL_ENDPOINT : ${{ secrets.EMAIL_ENDPOINT }}
+
       # Log into Azure
     - uses: azure/login@v1
       with:
@@ -52,6 +84,6 @@ jobs:
         subscriptionId: ${{ fromJSON(secrets.AZURE_CREDENTIALS)['subscriptionId'] }}
         resourceGroupName: ${{ secrets.AZURE_RG }}
         template: ./.bicep/webapp/main.bicep
-        parameters: 'dockerImage=${{ env.DOCKER_IMG_NAME }} containerServer=${{ secrets.ACR_REGISTRY }} containerUsername=${{ secrets.ACR_USERNAME }} containerPassword=${{ secrets.ACR_PASSWORD }}'
+        parameters: ./.bicep/webapp/${{ github.event.inputs.selected_environment }}-parameters.bicep
         failOnStdErr: false
         scope: resourcegroup
