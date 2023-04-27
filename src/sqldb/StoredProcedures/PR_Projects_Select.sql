@@ -18,7 +18,7 @@ SELECT [Id],
        [Created],
        [CreatedBy],
        [Modified],
-       [ModifiedBy]
+       [ModifiedBy] 
   FROM 
        [dbo].[Projects]
 
