@@ -224,3 +224,7 @@ type TypUpdateApprovalReAssign struct {
 	ApproveText         string `json:"ApproveText"`
 	RejectText          string `json:"RejectText"`
 }
+type TypRepoOwner struct {
+	Id                int64
+	UserPrincipalName string
+}

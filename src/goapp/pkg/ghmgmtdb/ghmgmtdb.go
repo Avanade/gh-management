@@ -384,7 +384,21 @@ func ProjectsApprovalUpdateGUID(id int64, ApprovalSystemGUID string) {
 	}
 	db.ExecuteStoredProcedure("PR_ProjectsApproval_Update_ApprovalSystemGUID", param)
 }
+func GetProjectForRepoOwner() (RepoOwner []models.TypRepoOwner) {
+	db := ConnectDb()
+	defer db.Close()
 
+	result, _ := db.ExecuteStoredProcedureWithResult("PR_Projects_ToRepoOwners", nil)
+
+	for _, v := range result {
+		data := models.TypRepoOwner{
+			Id:                v["Id"].(int64),
+			UserPrincipalName: v["UserPrincipalName"].(string),
+		}
+		RepoOwner = append(RepoOwner, data)
+	}
+	return RepoOwner
+}
 func GetProjectByName(projectName string) []map[string]interface{} {
 	db := ConnectDb()
 	defer db.Close()
@@ -1325,5 +1339,46 @@ func UsersGetEmail(GithubUser string) (string, error) {
 	} else {
 		return result[0]["UserPrincipalName"].(string), err
 	}
+
+}
+
+func RepoOwnersInsert(ProjectId int64, userPrincipalName string) error {
+	db := ConnectDb()
+	defer db.Close()
+
+	param := map[string]interface{}{
+		"ProjectId":         ProjectId,
+		"UserPrincipalName": userPrincipalName,
+	}
+
+	_, err := db.ExecuteStoredProcedure("PR_RepoOwners_Insert", param)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func RepoOwnersByUserAndProjectId(id int64, userPrincipalName string) (RepoOwner []models.TypRepoOwner, err error) {
+	db := ConnectDb()
+	defer db.Close()
+
+	param := map[string]interface{}{
+		"ProjectId":         id,
+		"UserPrincipalName": userPrincipalName,
+	}
+	result, err := db.ExecuteStoredProcedureWithResult("PR_RepoOwners_Select_ByUserAndProjectId", param)
+	if err != nil {
+		println(err)
+	}
+
+	for _, v := range result {
+		data := models.TypRepoOwner{
+			Id:                v["ProjectId"].(int64),
+			UserPrincipalName: v["UserPrincipalName"].(string),
+		}
+		RepoOwner = append(RepoOwner, data)
+	}
+	return RepoOwner, err
 
 }
