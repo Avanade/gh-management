@@ -52,7 +52,7 @@
       <ul role="list" class="divide-y divide-gray-200">
         <template x-for="(repository, index) in userRepositoriesList">
           <li>
-            <div class="px-4 py-4 sm:px-6 hover:bg-gray-50 cursor-pointer" x-bind:class="repository.showStatus? 'bg-gray-50':''" @click="repository.showStatus = !repository.showStatus; getRepositoryApprovalStatus(repository.Id, index, repository.RepositorySource)">
+            <div class="px-4 py-4 sm:px-6 hover:bg-gray-50 cursor-pointer" x-bind:class="repository.showStatus? 'bg-gray-50':''" @click="repository.showStatus = !repository.showStatus; getRepositoryApprovalStatus(repository.Id, index, repository.RepositorySource); getUserRepoCollaborators(repository.Id, index);">
               <div class="flex items-center justify-between">
                 <div>
                   <span id="reponameValue" @click.stop @click="window.open(repository.TFSProjectReference)"
@@ -111,18 +111,6 @@
                 </div>
               </div>
               <div class="mt-2  sm:flex">
-                <div class="sm:flex w-1/2  text-sm text-gray-500 " >
-                   <p class="flex items-start text-sm text-gray-500 " title="Repository Owners"> 
-                   
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
-                    </svg>
-
-                     <span x-text="getRepoOwners(repository.CoOwner, repository.CreatedBy) " style="margin-left: 8px; "></span> 
-         
-                  </p>
-                
-                </div>
                 <div class="sm:flex w-1/2">
                     <p class="flex items-start text-sm text-gray-500" title="Visibility">
                       <svg xmlns="http://www.w3.org/2000/svg" class="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" fill="none" viewBox="0 0 20 20" stroke="currentColor" stroke-width="2">
@@ -134,14 +122,138 @@
               </div>
             </div>
             <div class="px-4 py-4 sm-px-6 bg-gray-100" style="box-shadow: inset 0px 7px 6px -4px #ccc;" x-show="repository.showStatus" class="transform -translate-x-full duration-300">
-              <div class="flex items-center justify-center h-20" x-show="!repository.statusLoaded">
-                <svg role="status" class="w-8 h-8 mr-2 text-gray-200 animate-spin dark:text-gray-600 fill-[#FF5800]" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="currentColor"/>
-                  <path d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z" fill="currentFill"/>
-                </svg>
+              <!-- REPO COLLABORATORS -->
+              <div class="px-4 sm:px-6 lg:px-8">
+                <div class="relative">
+                  <div class="absolute inset-0 flex items-center" aria-hidden="true">
+                    <div class="w-full border-t border-gray-300"></div>
+                  </div>
+                  <div class="relative flex items-center justify-between">
+                    <span class="bg-gray-100 pr-3 text-base font-semibold leading-6 text-gray-900">Collaborators</span>
+                    <!-- <button type="button" class="inline-flex items-center gap-x-1.5 rounded-full bg-white px-3 py-1.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
+                      <svg class="-ml-1 -mr-0.5 h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                        <path d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z" />
+                      </svg>
+                      <span>Add</span>
+                    </button> -->
+                  </div>
+                </div>
+                <div class="mt-1 flow-root">
+                  <!-- SPINNER -->
+                  <div class="flex items-center justify-center h-20" x-show="!repository.collaboratorsLoaded">
+                    <svg role="status" class="w-8 h-8 mr-2 text-gray-200 animate-spin dark:text-gray-600 fill-[#FF5800]" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="currentColor"/>
+                      <path d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z" fill="currentFill"/>
+                    </svg>
+                  </div>
+                  <template x-if="repository.RepositorySource==='GitHub'">
+                    <div class="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8 shadow bg-gray-50 mt-3 sm:rounded-md" x-show="repository.collaboratorsLoaded">
+                      <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
+                        <table class="min-w-full divide-y divide-gray-300">
+                          <thead>
+                            <tr>
+                              <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-0">
+                                Name
+                              </th>
+                              <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                                GitHub Username
+                              </th>
+                              <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                                Email
+                              </th>
+                              <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                                Permission
+                              </th>
+                              <!-- <th scope="col" class="relative py-3.5 pl-3 pr-4 sm:pr-0">
+                              </th> -->
+                            </tr>
+                          </thead>
+                          <tbody class="divide-y divide-gray-200">
+                            <template x-for="item of repository.collaborators">
+                              <tr>
+                                <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm text-gray-900 sm:pl-0" x-text="item.name===''? '-':item.name"></td>
+                                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                                  <span x-text="item.GitHubUsername"></span> <br> <span x-show="item.isOutsideCollaborator" class="text-xs font-light italic">Outside Collaborator</span>
+                                </td>
+                                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500" x-text="item.email===''? '-':item.email"></td>
+                                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500" x-text="item.role">admin</td>
+                                <!-- <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm sm:pr-0">
+                                  <a href="#" class="text-indigo-600 hover:text-indigo-900">
+                                    Update
+                                  </a> | 
+                                  <a href="#" class="text-indigo-600 hover:text-indigo-900">
+                                    Remove
+                                  </a>
+                                </td> -->
+                              </tr>
+                            </template>
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </template>
+                  <template x-if="repository.RepositorySource==='AzureDevOps'">
+                    <div class="mx-4 mt-2 mb-1 overflow-x-auto sm:-mx-6 lg:-mx-8 shadow bg-gray-50 mt-3 sm:rounded-md" x-show="repository.collaboratorsLoaded">
+                      <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
+                        <table class="min-w-full divide-y divide-gray-300">
+                          <thead>
+                            <tr>
+                              <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-0">
+                                Name
+                              </th>
+                              <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                                Email
+                              </th>
+                            </tr>
+                          </thead>
+                          <tbody class="divide-y divide-gray-200">
+                            <template x-for="item of repository.collaborators">
+                              <tr>
+                                <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm text-gray-900 sm:pl-0" x-text="item.name===''? '-':item.name"></td>
+                                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500" x-text="item.email===''? '-':item.email"></td>
+                              </tr>
+                            </template>
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </template>
+                </div>
               </div>
-              <!-- This example requires Tailwind CSS v2.0+ -->
-              <div class="bg-gray-50 shadow overflow-hidden sm:rounded-md" x-show="repository.statusLoaded && repository.approvalStatus">
+
+              <!-- APPROVAL STATUS -->
+              <div class="px-4 sm:px-6 lg:px-8 mt-8">
+                <div class="relative">
+                  <div class="absolute inset-0 flex items-center" aria-hidden="true">
+                    <div class="w-full border-t border-gray-300"></div>
+                  </div>
+                  <div class="relative flex items-center justify-between">
+                    <span class="bg-gray-100 pr-3 text-base font-semibold leading-6 text-gray-900">Approval Requests</span>
+                  </div>
+                </div>
+
+                <!-- SPINNER -->
+                <div class="flex items-center justify-center h-20" x-show="!repository.statusLoaded">
+                  <svg role="status" class="w-8 h-8 mr-2 text-gray-200 animate-spin dark:text-gray-600 fill-[#FF5800]" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="currentColor"/>
+                    <path d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z" fill="currentFill"/>
+                  </svg>
+                </div>
+                <div class="mt-3 overflow-hidden text-sm text-gray-500" x-show="repository.statusLoaded && !repository.approvalStatus && repository.RepositorySource==='GitHub'">
+                  <span x-show="hasApprovers">
+                    No approval data found for this repository. <a class="text-indigo-600" x-bind:href="'/repositories/makepublic/' + repository.Id">Click to request</a> to make this repository public.
+                  </span>
+                  <span x-show="!hasApprovers">
+                    There are no approvers set to review requests to make a repository public. You may contact the app admin to resolve this issue.
+                  </span>
+                </div>
+                <div class="mt-3 overflow-hidden text-sm text-gray-500" x-show="repository.statusLoaded && !repository.approvalStatus && repository.RepositorySource==='AzureDevOps'">
+                  <span>
+                    No options available for an Azure DevOps project.
+                  </span>
+                </div>
+              </div>
+              <div class="mt-3 bg-gray-50 shadow overflow-hidden sm:rounded-md" x-show="repository.statusLoaded && repository.approvalStatus">
                 <ul role="list" class="divide-y divide-gray-200">
                   <template x-for="item of repository.approvalStatus">
                     <li>
@@ -172,20 +284,6 @@
                   </template>
                 </ul>
               </div>
-              <div class="overflow-hidden text-sm text-gray-500 sm:mt-0" x-show="repository.statusLoaded && !repository.approvalStatus && repository.RepositorySource==='GitHub'">
-                <span x-show="hasApprovers">
-                  No approval data found for this repository. <a class="text-indigo-600" x-bind:href="'/repositories/makepublic/' + repository.Id">Click to request</a> to make this repository public.
-                </span>
-                <span x-show="!hasApprovers">
-                  There are no approvers set to review requests to make a repository public. You may contact the app admin to resolve this issue.
-                </span>
-              </div>
-              <div class="overflow-hidden text-sm text-gray-500 sm:mt-0" x-show="repository.statusLoaded && !repository.approvalStatus && repository.RepositorySource==='AzureDevOps'">
-                <span>
-                  No options available for an Azure DevOps project.
-                </span>
-              </div>
-
             </div>
           </li>
         </template>
@@ -219,9 +317,9 @@
       <ul role="list" class="divide-y divide-gray-100">
         <template x-for="(repository, index) in allRepositoriesList">
           <li>
-            <div class="px-4 py-4 sm:px-6 hover:bg-gray-50 cursor-pointer" @click="openLink(repository.TFSProjectReference)">
+            <div class="px-4 py-4 sm:px-6 hover:bg-gray-50 cursor-pointer" @click="getRepoCollaborators(repository.Id, index); repository.showStatus = !repository.showStatus">
               <div class="flex items-center justify-between">
-                <div>
+                <div @click.stop @click="window.open(repository.TFSProjectReference)">
                   <span class="text-sm font-medium truncate" x-bind:class="repository.IsArchived? 'text-gray-600' : 'text-indigo-600'" x-text="repository.Name" title="Repository name"></span>  
                   <span class="text-sm font-medium text-gray-400 truncate" x-show="repository.IsArchived">(Archived)</span>
                 </div>
@@ -270,22 +368,112 @@
               </div>
               <div class="mt-2 sm:flex">
                 <div class="sm:flex w-1/2">
-                  <p class="flex items-center text-sm text-gray-500" title="Repository Owners">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
-                    </svg>
-                    
-                    <span x-text="getRepoOwners(repository.CoOwner, repository.CreatedBy)" style="margin-left: 8px; "></span> 
-         
-                  </p>
-                </div>
-                <div class="sm:flex w-1/2">
                   <p class="flex items-center text-sm text-gray-500" title="Visibility">
                     <svg xmlns="http://www.w3.org/2000/svg" class="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" fill="none" viewBox="0 0 20 20" stroke="currentColor" stroke-width="2">
                       <path stroke-linecap="round" stroke-linejoin="round" d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M18 18l2-1v-2.5" />
                     </svg>
                     <span x-text="repository.Visibility" style="margin-left: 8px;"></span>
                   </p>
+                </div>
+              </div>
+            </div>
+            <div class="px-4 py-4 sm-px-6 bg-gray-100" style="box-shadow: inset 0px 7px 6px -4px #ccc;" x-show="repository.showStatus" class="transform -translate-x-full duration-300">
+              <!-- REPO COLLABORATORS -->
+              <div class="px-4 sm:px-6 lg:px-8">
+                <div class="relative">
+                  <div class="absolute inset-0 flex items-center" aria-hidden="true">
+                    <div class="w-full border-t border-gray-300"></div>
+                  </div>
+                  <div class="relative flex items-center justify-between">
+                    <span class="bg-gray-100 pr-3 text-base font-semibold leading-6 text-gray-900">Collaborators</span>
+                    <!-- <button type="button" class="inline-flex items-center gap-x-1.5 rounded-full bg-white px-3 py-1.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
+                      <svg class="-ml-1 -mr-0.5 h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                        <path d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z" />
+                      </svg>
+                      <span>Add</span>
+                    </button> -->
+                  </div>
+                </div>
+                <div class="mt-1 flow-root">
+                  <!-- SPINNER -->
+                  <div class="flex items-center justify-center h-20" x-show="!repository.collaboratorsLoaded">
+                    <svg role="status" class="w-8 h-8 mr-2 text-gray-200 animate-spin dark:text-gray-600 fill-[#FF5800]" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="currentColor"/>
+                      <path d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z" fill="currentFill"/>
+                    </svg>
+                  </div>
+                  <template x-if="repository.RepositorySource==='GitHub'">
+                    <div class="mx-4 my-2 overflow-x-auto sm:-mx-6 lg:-mx-8 shadow bg-gray-50 mt-3 sm:rounded-md" x-show="repository.collaboratorsLoaded">
+                      <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
+                        <table class="min-w-full divide-y divide-gray-300">
+                          <thead>
+                            <tr>
+                              <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-0">
+                                Name
+                              </th>
+                              <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                                GitHub Username
+                              </th>
+                              <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                                Email
+                              </th>
+                              <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                                Permission
+                              </th>
+                              <!-- <th scope="col" class="relative py-3.5 pl-3 pr-4 sm:pr-0">
+                              </th> -->
+                            </tr>
+                          </thead>
+                          <tbody class="divide-y divide-gray-200">
+                            <template x-for="item of repository.collaborators">
+                              <tr>
+                                <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm text-gray-900 sm:pl-0" x-text="item.name===''? '-':item.name"></td>
+                                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                                  <span x-text="item.GitHubUsername"></span> <br> <span x-show="item.isOutsideCollaborator" class="text-xs font-light italic">Outside Collaborator</span>
+                                </td>
+                                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500" x-text="item.email===''? '-':item.email"></td>
+                                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500" x-text="item.role">admin</td>
+                                <!-- <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm sm:pr-0">
+                                  <a href="#" class="text-indigo-600 hover:text-indigo-900">
+                                    Update
+                                  </a> | 
+                                  <a href="#" class="text-indigo-600 hover:text-indigo-900">
+                                    Remove
+                                  </a>
+                                </td> -->
+                              </tr>
+                            </template>
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </template>
+                  <template x-if="repository.RepositorySource==='AzureDevOps'">
+                    <div class="mx-4 mt-2 mb-2 overflow-x-auto sm:-mx-6 lg:-mx-8 shadow bg-gray-50 mt-3 sm:rounded-md" x-show="repository.collaboratorsLoaded">
+                      <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
+                        <table class="min-w-full divide-y divide-gray-300">
+                          <thead>
+                            <tr>
+                              <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-0">
+                                Name
+                              </th>
+                              <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                                Email
+                              </th>
+                            </tr>
+                          </thead>
+                          <tbody class="divide-y divide-gray-200">
+                            <template x-for="item of repository.collaborators">
+                              <tr>
+                                <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm text-gray-900 sm:pl-0" x-text="item.name===''? '-':item.name"></td>
+                                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500" x-text="item.email===''? '-':item.email"></td>
+                              </tr>
+                            </template>
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </template>
                 </div>
               </div>
             </div>
@@ -312,7 +500,137 @@
     </div>
   </div>
   
+
+  <!-- Modal -->
+  <div class="relative z-10" aria-labelledby="modal-title" role="dialog" aria-modal="true" x-show="showAddCollaboratorModal">
+
+    <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
+
+    <div class="fixed inset-0 z-10 overflow-y-auto">
+      <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+        <div class="relative transform rounded-lg bg-white px-4 pb-4 pt-5 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-sm sm:p-6">
+          <div>
+            <div class="mt-1 sm:mt-2">
+              <h3 class="text-base font-semibold leading-6 text-gray-900" id="modal-title">Add a collaborator</h3>
+              <div class="mt-2">
+                <form class="space-y-6" action="#" method="POST">
+                  <div>
+                    <label for="user" class="block text-sm leading-6 text-gray-900">GitHub User</label>
+                    <div class="mt-2">
+                      <div>
+                        <div class="relative mt-1">
+                          <input id="ghUsername" name="ghUsername" @click="combobox.ghUsername = !combobox.ghUsername"
+                            x-model="form.ghUsername" type="text"
+                            class="mt-1 focus:ring-orange-500 focus:border-orange-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md border-2"
+                            role="combobox" aria-controls="options" aria-expanded="false">
+
+                            <!-- <button x-show="!isCoownerempty" type="button"
+                                class="absolute inset-y-0 right-0 flex items-center rounded-r-md px-2 focus:outline-none">
+                                <svg id="clearBtn" class="h-5 w-5 text-gray-400" @click="clearCoowner"
+                                    xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+                                    <path
+                                        d="M256 8C119 8 8 119 8 256s111 248 248 248 248-111 248-248S393 8 256 8zm0 448c-110.5 0-200-89.5-200-200S145.5 56 256 56s200 89.5 200 200-89.5 200-200 200zm101.8-262.2L295.6 256l62.2 62.2c4.7 4.7 4.7 12.3 0 17l-22.6 22.6c-4.7 4.7-12.3 4.7-17 0L256 295.6l-62.2 62.2c-4.7 4.7-12.3 4.7-17 0l-22.6-22.6c-4.7-4.7-4.7-12.3 0-17l62.2-62.2-62.2-62.2c-4.7-4.7-4.7-12.3 0-17l22.6-22.6c4.7-4.7 12.3-4.7 17 0l62.2 62.2 62.2-62.2c4.7-4.7 12.3-4.7 17 0l22.6 22.6c4.7 4.7 4.7 12.3 0 17z" />
+                                </svg>
+                            </button> -->
+
+                          <ul class="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm"
+                            id="options" x-show="combobox.ghUsername" role="listbox">
+                            <div class="italic text-sm text-gray-500 p-3">Only users with associated GH account are displayed</div>
+                            <li class="relative cursor-default select-none py-2 pl-3 pr-9 text-gray-900"
+                              id="option-0" role="option"
+                              @click="form.ghUsername = 'iibuan'; combobox.ghUsername = !combobox.ghUsername"
+                              tabindex="-1">
+                              <div class="flex">
+                                <span class="truncate">
+                                  ismael.r.ibuan@accenture.com
+                                </span>
+                                <span class="ml-2 truncate text-gray-500">
+                                  &nbsp@iibuan
+                                </span>
+                              </div>
+                            </li>
+                          </ul>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+            
+                  <div>
+                    <div class="flex items-center justify-between">
+                      <label for="permission" class="block text-sm leading-6 text-gray-900">Permission</label>
+                    </div>
+                    <div class="mt-2">
+                      <div>
+                        <div class="relative mt-1">
+                          <input id="permission" name="permission" @click="combobox.permission = !combobox.permission"
+                            x-model="form.permission" type="text"
+                            class="mt-1 focus:ring-orange-500 focus:border-orange-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md border-2"
+                            role="combobox" aria-controls="options" aria-expanded="false">
+
+                          <ul class="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm"
+                            id="options" x-show="combobox.permission" role="listbox">
+                            <li class="relative cursor-default select-none py-2 pl-3 pr-9 text-gray-900"
+                              id="option-0" role="option"
+                              @click="form.permission = 'admin'; combobox.permission = !combobox.permission"
+                              tabindex="-1">
+                              <div class="flex">
+                                <span class="truncate">
+                                  admin
+                                </span>
+                              </div>
+                            </li>
+                            <li class="relative cursor-default select-none py-2 pl-3 pr-9 text-gray-900"
+                              id="option-0" role="option"
+                              @click="form.permission = 'admin'; combobox.permission = !combobox.permission"
+                              tabindex="-1">
+                              <div class="flex">
+                                <span class="truncate">
+                                  admin
+                                </span>
+                              </div>
+                            </li>
+                            <li class="relative cursor-default select-none py-2 pl-3 pr-9 text-gray-900"
+                              id="option-0" role="option"
+                              @click="form.permission = 'admin'; combobox.permission = !combobox.permission"
+                              tabindex="-1">
+                              <div class="flex">
+                                <span class="truncate">
+                                  admin
+                                </span>
+                              </div>
+                            </li>
+                            <li class="relative cursor-default select-none py-2 pl-3 pr-9 text-gray-900"
+                              id="option-0" role="option"
+                              @click="form.permission = 'admin'; combobox.permission = !combobox.permission"
+                              tabindex="-1">
+                              <div class="flex">
+                                <span class="truncate">
+                                  admin
+                                </span>
+                              </div>
+                            </li>
+                          </ul>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+            
+                  <div class="mt-5 sm:mt-6">
+                    <button type="submit" class="inline-flex justify-center rounded-md bg-[#FF5800] px-5 mr-2 py-2 text-sm font-semibold text-white shadow-sm  focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Add</button>
+                    <button type="button" class="inline-flex justify-center rounded-md bg-gray-200 px-3 py-2 text-sm font-semibold text-gray-700 shadow-sm  focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Cancel</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+          
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
+
+
 
 <script>
   function myRepositoriesData() {
@@ -330,6 +648,16 @@
       showEnd: 0,
       page: 0,
       hasApprovers: false,
+      form: {
+        repoId: '',
+        ghUsername: '',
+        permission: '',
+      },
+      combobox: {
+        ghUsername: false,
+        permission: false
+      },
+      showAddCollaboratorModal: false,
       getUserRepositories() {
         if (!this.userRepositoriesList || this.userRepositoriesList.length === 0) {
           this.showSpinner = true
@@ -491,6 +819,36 @@
         if(coowner) owners.push(coowner)
         if(owners.length < 1) return 'No owner data'
         return owners.join(', ')
+      },
+      getUserRepoCollaborators(id, i) {
+        console.log
+        if(!this.userRepositoriesList[i]["collaboratorsLoaded"]) {
+          fetch(`/api/repositories/collaborators/${id}`)
+          .then(r => {
+            r.json().then(body => {
+              this.userRepositoriesList[i]["collaborators"] = body
+              this.userRepositoriesList[i]["collaboratorsLoaded"] = true
+            });
+          })
+          .catch(e => {
+            console.log(e)
+          })
+        }
+      },
+      getRepoCollaborators(id, i) {
+        console.log
+        if(!this.allRepositoriesList[i]["collaboratorsLoaded"]) {
+          fetch(`/api/repositories/collaborators/${id}`)
+          .then(r => {
+            r.json().then(body => {
+              this.allRepositoriesList[i]["collaborators"] = body
+              this.allRepositoriesList[i]["collaboratorsLoaded"] = true
+            });
+          })
+          .catch(e => {
+            console.log(e)
+          })
+        }
       }
 
     }
