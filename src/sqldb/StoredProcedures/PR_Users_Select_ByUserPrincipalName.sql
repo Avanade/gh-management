@@ -12,6 +12,7 @@ BEGIN
 
 SELECT 
 		[UserPrincipalName],
+		[Name],
 		[GivenName],
 		[SurName],
 		[JobTitle],
