@@ -42,17 +42,27 @@ jobs:
 
     - name: Configuration for TEST environment
       if: ${{ github.event.inputs.selected_environment == 'dev' }}
-      run: |
-        echo "GH_CREDENTIALS=${{ secrets.GH_CREDENTIALS_DEV }}" >> $GITHUB_ENV
-        echo "GHMGMT_CONNECTION_STRING=${{ secrets.GH_MGMT_CONNECTION_STRING_DEV }}" >> $GITHUB_ENV
+      uses: microsoft/variable-substitution@v1 
+      with:
+        files: ./.bicep/webapp/${{ github.event.inputs.selected_environment }}-parameters.bicep
+      env:
+        parameters.appServiceSettings.value.GH_CLIENT_ID : ${{ fromJSON(secrets.GH_CREDENTIALS_DEV)['clientId'] }}
+        parameters.appServiceSettings.value.GH_CLIENT_SECRET : ${{ fromJSON(secrets.GH_CREDENTIALS_DEV)['clientSecret'] }}
+        parameters.appServiceSettings.value.GH_TOKEN : ${{ fromJSON(secrets.GH_CREDENTIALS_DEV)['token'] }}
+        parameters.appServiceSettings.value.GHMGMTDB_CONNECTION_STRING : ${{ secrets.GH_MGMT_CONNECTION_STRING_DEV }}
 
     - name: Configuration for UAT environment
       if: ${{ github.event.inputs.selected_environment == 'uat' }}
-      run: |
-        echo "GH_CREDENTIALS=${{ secrets.GH_CREDENTIALS_UAT }}" >> $GITHUB_ENV
-        echo "GHMGMT_CONNECTION_STRING=${{ secrets.GH_MGMT_CONNECTION_STRING_UAT }}" >> $GITHUB_ENV
+      uses: microsoft/variable-substitution@v1 
+      with:
+        files: ./.bicep/webapp/${{ github.event.inputs.selected_environment }}-parameters.bicep
+      env:
+        parameters.appServiceSettings.value.GH_CLIENT_ID : ${{ fromJSON(secrets.GH_CREDENTIALS_UAT)['clientId'] }}
+        parameters.appServiceSettings.value.GH_CLIENT_SECRET : ${{ fromJSON(secrets.GH_CREDENTIALS_UAT)['clientSecret'] }}
+        parameters.appServiceSettings.value.GH_TOKEN : ${{ fromJSON(secrets.GH_CREDENTIALS_UAT)['token'] }}
+        parameters.appServiceSettings.value.GHMGMTDB_CONNECTION_STRING : ${{ secrets.GH_MGMT_CONNECTION_STRING_UAT }}
 
-    - name: SUBTITUTE VARIABLES
+    - name: SUBSTITUTE VARIABLES
       uses: microsoft/variable-substitution@v1 
       with:
         files: ./.bicep/webapp/${{ github.event.inputs.selected_environment }}-parameters.bicep
@@ -66,10 +76,6 @@ jobs:
         parameters.appServiceSettings.value.CLIENT_ID : ${{ fromJSON(secrets.AZURE_CREDENTIALS)['clientId'] }}
         parameters.appServiceSettings.value.CLIENT_SECRET : ${{ fromJSON(secrets.AZURE_CREDENTIALS)['clientSecret'] }}
         parameters.appServiceSettings.value.HOME_URL : 'https://${{ env.DOCKER_IMG_NAME }}.azurewebsites.net'
-        parameters.appServiceSettings.value.GH_CLIENT_ID : ${{ fromJSON(env.GH_CREDENTIALS)['clientId'] }}
-        parameters.appServiceSettings.value.GH_CLIENT_SECRET : ${{ fromJSON(env.GH_CREDENTIALS)['clientSecret'] }}
-        parameters.appServiceSettings.value.GH_TOKEN : ${{ fromJSON(env.GH_CREDENTIALS)['token'] }}
-        parameters.appServiceSettings.value.GHMGMTDB_CONNECTION_STRING : ${{ env.GHMGMT_CONNECTION_STRING }}
         parameters.appServiceSettings.value.EMAIL_ENDPOINT : ${{ secrets.EMAIL_ENDPOINT }}
 
       # Log into Azure
