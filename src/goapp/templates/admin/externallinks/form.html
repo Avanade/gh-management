@@ -273,7 +273,7 @@ x-data="externalLinksForm({
                 }
             }, */}}
             getExternalLinksById(id) {
-                let uri = '/admin/externallinks/' + 63
+                let uri = '/admin/externallinks/' + id
                 let encoded = encodeURI(uri);
                 fetch(encoded)
                 .then(r => {
