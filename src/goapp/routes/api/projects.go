@@ -100,6 +100,100 @@ func GetRequestStatusByProject(w http.ResponseWriter, r *http.Request) {
 	w.Write(jsonResp)
 }
 
+func GetRepoCollaboratorsByRepoId(w http.ResponseWriter, r *http.Request) {
+	req := mux.Vars(r)
+	id, _ := strconv.ParseInt(req["id"], 10, 64)
+
+	// Get repository
+	data := ghmgmt.GetProjectById(id)
+	s, _ := json.Marshal(data)
+	var repoList []Repo
+	err := json.Unmarshal(s, &repoList)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	var result []Collaborator
+
+	if len(repoList) > 0 {
+		repo := repoList[0]
+
+		if repo.RepositorySource == "GitHub" {
+			repoUrl := strings.Replace(repoList[0].TFSProjectReference, "https://", "", -1)
+			repoUrlSub := strings.Split(repoUrl, "/")
+
+			token := os.Getenv("GH_TOKEN")
+
+			collaborators := gh.RepositoriesListCollaborators(token, repoUrlSub[1], repoList[0].Name, "", "direct")
+			outsideCollaborators := gh.RepositoriesListCollaborators(token, repoUrlSub[1], repoList[0].Name, "", "outside")
+			var outsideCollaboratorsUsernames []string
+			for _, x := range outsideCollaborators {
+				outsideCollaboratorsUsernames = append(outsideCollaboratorsUsernames, *x.Login)
+			}
+
+			for _, collaborator := range collaborators {
+
+				// Identify if user is an outside collaborator
+				isOutsideCollab := false
+				for _, x := range outsideCollaboratorsUsernames {
+					if *collaborator.Login == x {
+						isOutsideCollab = true
+						break
+					}
+				}
+
+				collabResult := Collaborator{
+					Id:                    collaborator.GetID(),
+					Role:                  *collaborator.RoleName,
+					GitHubUsername:        *collaborator.Login,
+					IsOutsideCollaborator: isOutsideCollab,
+				}
+
+				//Get user name and email address
+				users, err := ghmgmt.GetUserByGitHubId(strconv.FormatInt(*collaborator.ID, 10))
+				if err != nil {
+					http.Error(w, err.Error(), http.StatusInternalServerError)
+					return
+				}
+
+				if len(users) > 0 {
+					collabResult.Name = users[0]["Name"].(string)
+					collabResult.Email = users[0]["UserPrincipalName"].(string)
+				}
+
+				result = append(result, collabResult)
+			}
+		} else {
+			var collabResult Collaborator
+
+			users, err := ghmgmt.GetUserByUserPrincipal(repo.CreatedBy)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+
+			collabResult.Email = repo.CreatedBy
+
+			if len(users) > 0 {
+				collabResult.Name = users[0]["Name"].(string)
+			}
+
+			result = append(result, collabResult)
+		}
+
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Header().Set("Content-Type", "application/json")
+	jsonResp, err := json.Marshal(result)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.Write(jsonResp)
+}
+
 func ArchiveProject(w http.ResponseWriter, r *http.Request) {
 	req := mux.Vars(r)
 	project := req["project"]
@@ -561,4 +655,13 @@ type Repo struct {
 	CreatedBy              string `json:CreatedBy`
 	Modified               string `json:Modified`
 	ModifiedBy             string `json: ModifiedBy`
+}
+
+type Collaborator struct {
+	Id                    int64  `json:"id"`
+	Name                  string `json:"name"`
+	Email                 string `json:"email"`
+	Role                  string `json:"role"`
+	GitHubUsername        string `json:"ghUsername`
+	IsOutsideCollaborator bool   `json:"isOutsideCollaborator"`
 }

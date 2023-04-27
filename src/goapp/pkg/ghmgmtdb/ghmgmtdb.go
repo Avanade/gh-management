@@ -398,6 +398,19 @@ func GetProjectByName(projectName string) []map[string]interface{} {
 	return result
 }
 
+func GetProjectById(id int64) []map[string]interface{} {
+	db := ConnectDb()
+	defer db.Close()
+
+	param := map[string]interface{}{
+		"Id": id,
+	}
+
+	result, _ := db.ExecuteStoredProcedureWithResult("PR_Projects_Select_ById", param)
+
+	return result
+}
+
 func GetProjectByGithubId(githubId int64) []map[string]interface{} {
 	db := ConnectDb()
 	defer db.Close()
@@ -840,6 +853,50 @@ func Users_Get_GHUser(UserPrincipalName string) (GHUser string) {
 
 	GHUser = result[0]["GitHubUser"].(string)
 	return GHUser
+}
+
+func GetUserByGitHubId(GitHubId string) ([]map[string]interface{}, error) {
+
+	cp := sql.ConnectionParam{
+		ConnectionString: os.Getenv("GHMGMTDB_CONNECTION_STRING"),
+	}
+
+	db, _ := sql.Init(cp)
+
+	param := map[string]interface{}{
+
+		"GitHubId": GitHubId,
+	}
+
+	result, err := db.ExecuteStoredProcedureWithResult("PR_Users_Select_ByGitHubId", param)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return result, nil
+}
+
+func GetUserByUserPrincipal(UserPrincipalName string) ([]map[string]interface{}, error) {
+
+	cp := sql.ConnectionParam{
+		ConnectionString: os.Getenv("GHMGMTDB_CONNECTION_STRING"),
+	}
+
+	db, _ := sql.Init(cp)
+
+	param := map[string]interface{}{
+
+		"UserPrincipalName": UserPrincipalName,
+	}
+
+	result, err := db.ExecuteStoredProcedureWithResult("PR_Users_Select_ByUserPrincipalName", param)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return result, nil
 }
 
 func IsUserAdmin(userPrincipalName string) bool {
