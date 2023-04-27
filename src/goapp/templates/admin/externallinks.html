@@ -19,7 +19,7 @@
     </div>
     
     <div>
-        <table x-show="showTable" class="w-full mt-4">
+        <table x-show="showTable" class="w-full mt-4 ">
                 <tr class="bg-gray-100">
                     <th scope="col" class="cursor-pointer px-3 py-3.5 text-left text-sm font-semibold text-gray-700 ">Icon</th>
                     <th scope="col" class="cursor-pointer px-3 py-3.5 text-left text-sm font-semibold text-gray-700 ">Icon Name</th>
@@ -29,7 +29,7 @@
                 </tr> 
 
             <template x-for="(results, n) in getAllExternalLinks" :key="n">
-                <tr>
+                <tr class="hover:bg-gray-100">
                     <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-500 sm:pl-6">
                         <span x-html="results.IconSVG" class="hover:shadow-md"></span>
                     </td>
