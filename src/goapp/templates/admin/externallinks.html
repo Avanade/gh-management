@@ -1,206 +1,32 @@
 {{ define "content" }}
-<div id="pageTitle"> External Links</div>
-<style>
-    * {
-    box-sizing: border-box;
-    }
-    .column {
-    float: left;
-    padding-right: 5px;
-    }
-    .row:after {
-    content: "";
-    display: table;
-    clear: both;
-    }
-</style>
-<div x-data="ExternalLinksPage()" x-data="TCCCurrentIcon">
+
+<div x-data="ExternalLinksPage()" >
+
     <div class="border-gray-200 pb-5 sm:flex sm:items-center sm:justify-between">
         <h3 class="text-base font-semibold leading-6 text-gray-900">
+            <div>List of External Links</div>
         </h3>
         <div class="mt-3 sm:ml-4 sm:mt-0">
             <a href="externallinks/add">
                 <button class="inline-flex items-center bg-[#FF5800] hover:bg-[#FF4300] text-white font-bold py-2 px-4 rounded">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
                     </svg>
-                    <span class="ml-2">New SVG</span>
+                    <span class="ml-2">Add SVG</span>
                 </button>
             </a>
         </div>
     </div>
-
-
-    <div>
-        {{/* <div class="mt-8 flex flex-col">
-            <div class="-my-2 -mx-4 overflow-x-auto sm:-mx-6 lg:-mx-8">
-                <div class="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
-                    <div x-data="table({
-                    callback : getApprovalTypes,
-                    data : 'data',
-                    total : 'total',
-                    columns : [
-                        { 
-                            name : 'Name', 
-                            value : 'Name',
-                            sort : {
-                                orderby : 'Name',
-                                ordertype : 'ASC'
-                            }
-                        },
-                        { 
-                            name : 'Approver', 
-                            value : 'ApproverUserPrincipalName',
-                            sort : {
-                                orderby : 'ApproverUserPrincipalName',
-                                ordertype : 'ASC'
-                            }
-                        },
-                        { name : 'IsActive', value : 'IsActive' },
-                        { 
-                            name : 'Action', 
-                            value : 'Id', 
-                            render : value => renderAction(value)
-                        }
-                    ]
-                    })">
-                        <div x-html="template"></div>
-                    </div>
-                </div>
-            </div>
-        </div> */}}
-
-    <div>    
     
     <div>
-        <!--<div name="HIDE-THIS">
-            <div class="row" name="row1">
-                <div class="column mt-1" >
-                    <div class="flex justify-between">
-                        {{/* <span x-html="TCCCurrentIcon" title="TechCommunityCalendarCurrentSVGName" class=" mt-0.5 mr-2"></span> */}}
-                        <template x-for="(icon, n) in GetExternalLinksTCC" :key="n">
-                            <span class="mt-0.5 mr-1" x-html="icon.Enabled === true ? icon.IconSVG : '' " :title="icon.SVGName" ></span>
-                        </template>
-                        <span> Tech Community Calendar </span>
-                    </div>
-                </div>
-
-                <div class="column">
-                    <button @click="TCCList=true"
-                            @click.away="TCCList=false"
-                            type="button"
-                            class="inline-flex w-full justify-center gap-x-1.5 rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50" id="menu-button" aria-expanded="true" aria-haspopup="true">
-                        <span x-html="TCCCurrentIcon" title="TechCommunityCalendarCurrentSVGName" class="mr-2 h-5 w-5"></span>
-                        <span x-text="TCCCurrentName"></span>
-                    </button>
-
-                    <div x-show="TCCList" class="absolute z-10 w-auto divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="menu-button" tabindex="-1" >
-                        <template x-for="(TCC, n) in GetExternalLinksTCC" :key="n">
-                            <div class="py-1 hover:bg-[#fff2eb]" role="none">
-                                <a @click="TCCCurrentIcon = TCC.IconSVG, TCCCurrentName = TCC.SVGName" class=" cursor-pointer text-gray-700 group flex items-center px-4 py-2 text-sm" role="menuitem" tabindex="-1" id="menu-item-0" x-bind:class="TCC.Enabled === true ? 'bg-[#fff2eb]' : ''">
-                                    <span x-html="TCC.IconSVG" x-bind:class="TCC.Enabled === true ? 'text-[#FF5800]' : ''" ></span>
-                                    <span x-text="TCC.SVGName" class="ml-2" x-bind:class="TCC.Enabled === true ? 'text-[#FF5800]' : ''"></span>
-                                </a>
-                            </div>
-                        </template>
-                    </div>
-
-                </div>
-            </div>
-
-            <br>
-
-            <div class="row" name="row2">
-                <div class="column  mt-1">
-                    <div class="flex justify-between">
-                        {{/* <span x-html="SOACurrentIcon" title="TechCommunityCalendarCurrentSVGName" class=" mt-0.5 mr-2"></span> */}}
-                        <template x-for="(icon, n) in GetExternalLinksSOA" :key="n">
-                            <span class="mt-0.5 mr-1" x-html="icon.Enabled === true ? icon.IconSVG : '' " :title="icon.SVGName" ></span>
-                        </template>
-                        <span>Stack Overflow at Avanade</span>
-                    </div>
-                </div>
-
-                <div class="column">
-                    <button @click="SOAList=true" @click.away="SOAList=false" type="button" class="inline-flex w-full justify-center gap-x-1.5 rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50" id="menu-button" aria-expanded="true" aria-haspopup="true">
-                        <span x-html="SOACurrentIcon" title="TechCommunityCalendarCurrentSVGName" class="mr-2 h-5 w-5"></span>
-                        <span x-text="SOACurrentName"></span>
-                    </button>
-
-                    <div x-show="SOAList" class="absolute z-10 w-auto divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="menu-button" tabindex="-1" >
-                        <template x-for="(SOA, n) in GetExternalLinksSOA" :key="n">
-                            <div class="py-1 hover:bg-[#fff2eb]" role="none">
-                                <a @click="SOACurrentIcon = SOA.IconSVG,SOACurrentName=SOA.SVGName" class=" cursor-pointer text-gray-700 group flex items-center px-4 py-2 text-sm" role="menuitem" tabindex="-1" id="menu-item-0" x-bind:class="SOA.Enabled === true ? 'bg-[#fff2eb]' : ''">
-                                    <span x-html="SOA.IconSVG" x-bind:class="SOA.Enabled === true ? 'text-[#FF5800]' : ''"></span>
-                                    <span x-text="SOA.SVGName" class="ml-2" x-bind:class="SOA.Enabled === true ? 'text-[#FF5800]' : ''">  Tech User Group</span>
-                                </a>
-                            </div>
-                        </template>
-
-                    </div>
-                </div>
-
-            </div>
-
-            <br>
-
-            <div class="row" name="row3">
-                <div class="column mt-1">
-                    <div class="flex justify-between">
-                        {{/* <span x-html="OIMCurrentIcon" title="TechCommunityCalendarCurrentSVGName" class=" mt-0.5 mr-2"></span> */}}
-                        <template x-for="(icon, n) in GetExternalLinksOIM" :key="n">
-                            <span class="mt-0.5 mr-1" x-html="icon.Enabled === true ? icon.IconSVG : '' " :title="icon.SVGName" ></span>
-                        </template>
-                        <span>Open Innovation Meetup </span>
-                    </div>
-                </div>
-
-                <div class="column">
-                    <button @click="OIMList=true"
-                            @click.away="OIMList=false" type="button" class="inline-flex w-full justify-center gap-x-1.5 rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50" id="menu-button" aria-expanded="true" aria-haspopup="true">
-                        <span x-html="OIMCurrentIcon"
-                            title="TechCommunityCalendarCurrentSVGName" 
-                            class="mr-2 h-5 w-5"></span>
-                        <span x-text="OIMCurrentName"></span>
-                    </button>
-
-                    <div x-show="OIMList" class="absolute z-10 w-auto divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="menu-button" tabindex="-1" >
-                        <template x-for="(OIM, n) in GetExternalLinksOIM" :key="n">
-                            <div class="py-1 hover:bg-[#fff2eb]" role="none">
-                                <a @click="OIMCurrentIcon = OIM.IconSVG, OIMCurrentName = OIM.SVGName" class=" cursor-pointer text-gray-700 group flex items-center px-4 py-2 text-sm" role="menuitem" tabindex="-1" id="menu-item-0" x-bind:class="OIM.Enabled === true ? 'bg-[#fff2eb]' : ''">
-                                    <span x-html="OIM.IconSVG" x-bind:class="OIM.Enabled === true ? 'text-[#FF5800]' : ''"></span>
-                                    <span x-text="OIM.SVGName" class="ml-2" x-bind:class="OIM.Enabled === true ? 'text-[#FF5800]' : ''"></span>
-                                </a>
-                            </div>
-                        </template>
-                    </div>
-
-                </div>
-
-            </div>
-
-            <br>
-
-            <div class="mt-3 sm:ml-4 sm:mt-0"> 
-                <button @click="saveIcons()" class="inline-flex items-center bg-[#FF5800] hover:bg-[#FF4300] text-white font-bold py-2 px-4 rounded">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 8.25H7.5a2.25 2.25 0 00-2.25 2.25v9a2.25 2.25 0 002.25 2.25h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25H15M9 12l3 3m0 0l3-3m-3 3V2.25" />
-                    </svg>
-                    <span class="ml-2">Save</span>
-                </button>
-            </div>        
-        </div>-->
-
-        <table>
-            <thead class="bg-gray-100">
-                <tr>
+        <table class="w-full mt-4">
+                <tr class="bg-gray-100">
                     <th scope="col" class="cursor-pointer py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-700 hover:text-gray-700 sm:pl-6 ">Icon</th>
                     <th scope="col" class="cursor-pointer px-3 py-3.5 text-left text-sm font-semibold text-gray-700 ">Icon Name</th>
                     <th scope="col" class="cursor-pointer px-3 py-3.5 text-left text-sm font-semibold text-gray-700 ">Category</th>
                     <th scope="col" class="cursor-pointer px-3 py-3.5 text-left text-sm font-semibold text-gray-700 ">Status</th>
                     <th scope="col" class="cursor-pointer px-3 py-3.5 text-left text-sm font-semibold text-gray-700 ">Action</th>
-                </tr>
-            </thead>    
+                </tr> 
 
             <template x-for="(results, n) in getAllExternalLinks" :key="n">
                 <tr>
@@ -208,34 +34,36 @@
                         <span x-html="results.IconSVG" class="hover:shadow-md"></span>
                     </td>
                     <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500"> 
-                        {{/* <span x-text="results.IconSVG"></span> */}}
                         <span x-text="results.SVGName"> </span>
                     </td>
                     <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                         <span x-text="results.Category"> </span>
                     </td>
                     <td class="whitespace-nowrap px-3 py-4 text-sm ">
-                        <span x-model="SVGStatus"
-                              x-bind:class="results.Enabled === true ? 'text-[#FF5800]' : 'text-gray-500' "
-                              x-text="results.Enabled ? 'Enabled': 'Disabled'"> </span>
+                        <span x-bind:class="results.Enabled === true ? 'text-[#FF5800]' : 'text-gray-500' " x-text="results.Enabled ? 'Enabled': 'Disabled'"> </span>
                     </td>
-                    <td>
-                        <span @Click="editSVG(results.Id)" class="cursor-pointer">Edit</span> |
-                        <span @Click="deleteSVG(results.Id)" class="cursor-pointer">Delete</span>
+                    <td class="whitespace-nowrap px-3 py-4 text-sm flex">
+                        <span @Click="onClickAction(results.Id, 'view')" class="cursor-pointer py-1 text-left text-sm font-semibold text-gray-500 " title="View" >
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-blue-500">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                            </svg>
+                        </span>
+                        <span @Click="onClickAction(results.Id, 'edit')" class="cursor-pointer py-1 text-left text-sm font-semibold text-gray-500 " title="Edit">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 mx-3 text-orange-500">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.832 19.82a4.5 4.5 0 01-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 011.13-1.897L16.863 4.487zm0 0L19.5 7.125"></path>
+                            </svg>
+                        </span>
+                        <span @Click="onClickAction(results.Id, 'edit')" class="cursor-pointer py-1 text-left text-sm font-semibold text-gray-500 " title="Delete">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-red-500">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0">
+                                </path>
+                            </svg>
+                        </span>
                     </td>
                 </tr>
             </template>
         </table>
-
-
-        {{/* <div class="pt-5">
-            <div class="flex justify-end">
-                <button @click="saveIcons()" class="ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 disabled:bg-orange-200">
-                Submit
-                </button>
-            </div>
-        </div> */}}
-
     </div>
 
     {{/* Spinner */}}
@@ -249,171 +77,48 @@
 </div>
 
 <script type="text/javascript">
-
     function ExternalLinksPage() {
         return {
             GetExternalLinksList: [],
-            GetExternalLinksByCategoryList: [],
-            ELAllTechComCalendar: [],
-            SearchBySources: [],
+            showSpinner: true,
 
-            //Categories
-            GetExternalLinksByCategoryList: [],
-            GetELbySOA: [],
-            GetELbyOIM: [],
-            TCC: 'TechCommunityCalendar',
-            SOA: 'StackOverflowAvanade',
-            OIM: 'OpenInnovationMeetup',
-            TCCList: false,
-            SOAList: false,
-            OIMList: false,
-
-            //DropDowns
-            TCCCurrentIcon: '',
-            SOACurrentIcon: '',
-            OIMCurrentIcon: '',
-            TechCommunityCalendarCurrentSVGName: 'Tech Community Calendar',
-            TCCCurrentName: '',
-            SOACurrentName: '',
-            OIMCurrentName: '',
-            InputSVG: '',
-            SVGName: '',
-
-            SVGStatus: '',
-
-            //x-model="form.name"
-            form: {
-                svgname: ''
-
-            },
-
-            showSpinner: false,
             getAllExternalLinks() {
+
                 let uri = '/admin/externallinks/GetExternalLinks'
                 let encoded = encodeURI(uri);
                 fetch(encoded)
                 .then(r => {
                     r.json().then(body => {
                     this.GetExternalLinksList = body
+                    this.showSpinner = false
                     })
                 })
                 .catch(e => {
                     console.log(e)
                 })
                 return this.GetExternalLinksList
-            //
             },
-            GetExternalLinksTCC() {
-                let uri = '/admin/externallinks/' + this.TCC
-                let encoded = encodeURI(uri);
-                fetch(encoded)
-                .then(r => {
-                    r.json().then(body => {
-                    this.GetExternalLinksByCategoryList = body
-                    })
-                })
-                .catch(e => {
-                    console.log(e)
-                })
-                return this.GetExternalLinksByCategoryList
-            //
-            },
-            GetExternalLinksSOA() {
-                let uri = '/admin/externallinks/' + this.SOA
-                let encoded = encodeURI(uri);
-                fetch(encoded)
-                .then(r => {
-                    r.json().then(body => {
-                    this.GetELbySOA = body
-                    })
-                })
-                .catch(e => {
-                    console.log(e)
-                })
-                return this.GetELbySOA
-            //
-            },
-            GetExternalLinksOIM() {
-                let uri = '/admin/externallinks/' + this.OIM
-                let encoded = encodeURI(uri);
-                fetch(encoded)
-                .then(r => {
-                    r.json().then(body => {
-                    this.GetELbyOIM = body
-                    })
-                })
-                .catch(e => {
-                    console.log(e)
-                })
-                return this.GetELbyOIM
-            //
-            },
-            
-            get ExternalLinksTCC() {
-            if(!this.GetExternalLinksList==[''])
-                return this.GetExternalLinksList
-            },
-            get ExternalLinksSOA() {
-                return this.GetExternalLinksList
-            },
-            get ExternalLinksOIM() {
-                return this.GetExternalLinksList
-            },
-            {{/* update(id, enabled) {
-                this.formUpdate.id = id
-                this.formUpdate.name = ApproverUserPrincipalName
-                postData2 = this.formUpdate;
-                Alpine.store('master').postData('/api/communityapprovers/update', postData2, "Your community approvers has been updated.",
-                    "Close")
-              
-            } */}}
-            onChangeTechCommCalendar() {  
-                this.TCCCurrentIcon = 'Tech User Group'
-                console.log("Icon TechCommCalendar changed to ---> " + this.TCCCurrentIcon)
-                console.log(this.TCCCurrentIcon)
-                return
-            },
-            onChangeStackOverflowAvanade() {
-                console.log("Icon StackOverflowAvanade changed to ---> ")
-                return
-            },
-            onChangeOpenInnovationMeetup() {
-                console.log("Icon OpenInnovationMeetup changed to ---> ")
-                return
-            },            
-            saveIcons() {
-                console.log("SVG ICONS successfully save to database!")
-                return
-            },
-            saveSVG() {
-                if(this.InputSVG === '' || this.SVGName ==='') {
-                    console.log("SVG not found, Please put SVG code.")
-                    return
-                }
+            onClickAction(id, action) {
+                switch(action) {
+                    case 'view':
+                    console.log("-----> " + id)
+                    break
 
-                {{/* this.form.
-                Alpine.store('master').modal.show()
-                Alpine.store('master').putData(`/api/externallinks/update/${this.form.id}/${this.form.enabled}`, data, "External Links has been updated.", "Go to list of External Links", "/admin/externallinks") */}}
+                    case 'edit':
+                    console.log("-----> " + id)
+                    window.location.href = 'externallinks/edit/'+ id
+                    break
 
-
-                console.log("SVG successfully saved to database!")
-                return
-            },
-            {{/* editSVG(iconsvg, svgname, category, status) {
-                console.log("-----> "+ iconsvg + "/" + svgname + "/" + category + "/" + status + "/" + 'EDIT')
-                window.location.href = 'externallinks/form?form=' + iconsvg + "/" + svgname + "/" + category + "/" + status+ "/" +'EDIT'
-
-            }, */}}
-            editSVG(id) {
-                console.log("-----> " + id)
-                {{/* window.location.href = 'externallinks/edit/'+ id */}}
-            },
-            deleteSVG(id) {
-                window.location.href = 'externallinks/' +'delete/'+ id
-                {{/* console.log(id+"<--is deleted") */}}
-                {{/* window.location.href = '/' */}}
-                {{/* Alpine.store('master').modal.show()
+                    case 'delete':
+                    window.location.href = 'externallinks/' +'delete/'+ id
+                                    {{/* Alpine.store('master').modal.show()
                 Alpine.store('master').deleteData (`/admin/externallinks/delete/`data, "External Link has deleted.", "Go to list of External Links", "/admin/externallinks") */}}
+                    break
+
+                    default:
+                    console.log('defualt')
+                    break
+                }
             },
 
             
