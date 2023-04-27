@@ -40,27 +40,26 @@ jobs:
       # Checkout code
     - uses: actions/checkout@main
 
-    - name: Configuration for TEST environment
-      if: ${{ github.event.inputs.selected_environment == 'dev' }}
-      uses: microsoft/variable-substitution@v1 
-      with:
-        files: ./.bicep/webapp/${{ github.event.inputs.selected_environment }}-parameters.bicep
-      env:
-        parameters.appServiceSettings.value.GH_CLIENT_ID : ${{ fromJSON(secrets.GH_CREDENTIALS_DEV)['clientId'] }}
-        parameters.appServiceSettings.value.GH_CLIENT_SECRET : ${{ fromJSON(secrets.GH_CREDENTIALS_DEV)['clientSecret'] }}
-        parameters.appServiceSettings.value.GH_TOKEN : ${{ fromJSON(secrets.GH_CREDENTIALS_DEV)['token'] }}
-        parameters.appServiceSettings.value.GHMGMTDB_CONNECTION_STRING : ${{ secrets.GH_MGMT_CONNECTION_STRING_DEV }}
+    # - name: Configuration for TEST environment
+    #   uses: microsoft/variable-substitution@v1 
+    #   with:
+    #     files: ./.bicep/webapp/${{ github.event.inputs.selected_environment }}-parameters.bicep
+    #   env:
+    #     parameters.appServiceSettings.value.GH_CLIENT_ID : ${{ fromJSON(secrets.GH_CREDENTIALS_DEV)['clientId'] }}
+    #     parameters.appServiceSettings.value.GH_CLIENT_SECRET : ${{ fromJSON(secrets.GH_CREDENTIALS_DEV)['clientSecret'] }}
+    #     parameters.appServiceSettings.value.GH_TOKEN : ${{ fromJSON(secrets.GH_CREDENTIALS_DEV)['token'] }}
+    #     parameters.appServiceSettings.value.GHMGMTDB_CONNECTION_STRING : ${{ secrets.GH_MGMT_CONNECTION_STRING_DEV }}
 
-    - name: Configuration for UAT environment
-      if: ${{ github.event.inputs.selected_environment == 'uat' }}
-      uses: microsoft/variable-substitution@v1 
-      with:
-        files: ./.bicep/webapp/${{ github.event.inputs.selected_environment }}-parameters.bicep
-      env:
-        parameters.appServiceSettings.value.GH_CLIENT_ID : ${{ fromJSON(secrets.GH_CREDENTIALS_UAT)['clientId'] }}
-        parameters.appServiceSettings.value.GH_CLIENT_SECRET : ${{ fromJSON(secrets.GH_CREDENTIALS_UAT)['clientSecret'] }}
-        parameters.appServiceSettings.value.GH_TOKEN : ${{ fromJSON(secrets.GH_CREDENTIALS_UAT)['token'] }}
-        parameters.appServiceSettings.value.GHMGMTDB_CONNECTION_STRING : ${{ secrets.GH_MGMT_CONNECTION_STRING_UAT }}
+    # - name: Configuration for UAT environment
+    #   if: ${{ github.event.inputs.selected_environment == 'uat' }}
+    #   uses: microsoft/variable-substitution@v1 
+    #   with:
+    #     files: ./.bicep/webapp/${{ github.event.inputs.selected_environment }}-parameters.bicep
+    #   env:
+    #     parameters.appServiceSettings.value.GH_CLIENT_ID : ${{ fromJSON(secrets.GH_CREDENTIALS_UAT)['clientId'] }}
+    #     parameters.appServiceSettings.value.GH_CLIENT_SECRET : ${{ fromJSON(secrets.GH_CREDENTIALS_UAT)['clientSecret'] }}
+    #     parameters.appServiceSettings.value.GH_TOKEN : ${{ fromJSON(secrets.GH_CREDENTIALS_UAT)['token'] }}
+    #     parameters.appServiceSettings.value.GHMGMTDB_CONNECTION_STRING : ${{ secrets.GH_MGMT_CONNECTION_STRING_UAT }}
 
     - name: SUBSTITUTE VARIABLES
       uses: microsoft/variable-substitution@v1 
@@ -77,6 +76,10 @@ jobs:
         parameters.appServiceSettings.value.CLIENT_SECRET : ${{ fromJSON(secrets.AZURE_CREDENTIALS)['clientSecret'] }}
         parameters.appServiceSettings.value.HOME_URL : 'https://${{ env.DOCKER_IMG_NAME }}.azurewebsites.net'
         parameters.appServiceSettings.value.EMAIL_ENDPOINT : ${{ secrets.EMAIL_ENDPOINT }}
+        parameters.appServiceSettings.value.GH_CLIENT_ID : ${{ fromJSON(secrets.GH_CREDENTIALS_DEV)['clientId'] }}
+        parameters.appServiceSettings.value.GH_CLIENT_SECRET : ${{ fromJSON(secrets.GH_CREDENTIALS_DEV)['clientSecret'] }}
+        parameters.appServiceSettings.value.GH_TOKEN : ${{ fromJSON(secrets.GH_CREDENTIALS_DEV)['token'] }}
+        parameters.appServiceSettings.value.GHMGMTDB_CONNECTION_STRING : ${{ secrets.GH_MGMT_CONNECTION_STRING_DEV }}
 
       # Log into Azure
     - uses: azure/login@v1
