@@ -19,7 +19,7 @@
     </div>
     
     <div>
-        <table class="w-full mt-4">
+        <table x-show="showTable" class="w-full mt-4">
                 <tr class="bg-gray-100">
                     <th scope="col" class="cursor-pointer py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-700 hover:text-gray-700 sm:pl-6 ">Icon</th>
                     <th scope="col" class="cursor-pointer px-3 py-3.5 text-left text-sm font-semibold text-gray-700 ">Icon Name</th>
@@ -66,7 +66,6 @@
         </table>
     </div>
 
-    {{/* Spinner */}}
     <div x-show="showSpinner" class="flex items-center justify-center h-20" >
         <svg role="status" class="w-8 h-8 mr-2 text-gray-200 animate-spin dark:text-gray-600 fill-[#FF5800]" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="currentColor"/>
@@ -79,11 +78,11 @@
 <script type="text/javascript">
     function ExternalLinksPage() {
         return {
-            GetExternalLinksList: [],
+            showTable: false,
             showSpinner: true,
+            GetExternalLinksList: [],
 
             getAllExternalLinks() {
-
                 let uri = '/admin/externallinks/GetExternalLinks'
                 let encoded = encodeURI(uri);
                 fetch(encoded)
@@ -91,6 +90,7 @@
                     r.json().then(body => {
                     this.GetExternalLinksList = body
                     this.showSpinner = false
+                    this.showTable = true
                     })
                 })
                 .catch(e => {
@@ -103,18 +103,18 @@
                     case 'view':
                     console.log("-----> " + id)
                     break
-
+                    //
                     case 'edit':
                     console.log("-----> " + id)
                     window.location.href = 'externallinks/edit/'+ id
                     break
-
+                    //
                     case 'delete':
                     window.location.href = 'externallinks/' +'delete/'+ id
                                     {{/* Alpine.store('master').modal.show()
                 Alpine.store('master').deleteData (`/admin/externallinks/delete/`data, "External Link has deleted.", "Go to list of External Links", "/admin/externallinks") */}}
                     break
-
+                    //
                     default:
                     console.log('defualt')
                     break
