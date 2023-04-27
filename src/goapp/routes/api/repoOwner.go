@@ -15,10 +15,10 @@ func ProjectToRepoOwner(w http.ResponseWriter, r *http.Request) {
 
 		RepoOwners, _ := ghmgmt.RepoOwnersByUserAndProjectId(ProjectOwnerForRepoOwner.Id, ProjectOwnerForRepoOwner.UserPrincipalName)
 		if len(RepoOwners) < 1 {
-			err := ghmgmt.RepoOwnersInsert(ProjectOwnerForRepoOwner.Id, ProjectOwnerForRepoOwner.UserPrincipalName)
-			if err != nil {
+			error := ghmgmt.RepoOwnersInsert(ProjectOwnerForRepoOwner.Id, ProjectOwnerForRepoOwner.UserPrincipalName)
+			if error != nil {
 
-				fmt.Println(err)
+				fmt.Println(error)
 			}
 		}
 	}
