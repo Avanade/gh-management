@@ -1,24 +1,24 @@
-create PROCEDURE [dbo].[PR_Projects_ToRepoOwners]
- as
+CREATE PROCEDURE [dbo].[PR_Projects_ToRepoOwners]
+ AS
 BEGIN
     -- SET NOCOUNT ON added to prevent extra result sets from
     -- interfering with SELECT statements.
     SET NOCOUNT ON
 
-	 select distinct
+	 SELECT DISTINCT
 				Id  ,
 				UserPrincipalName  
-			 from 
-			 (    select distinct 
+			 FROM 
+			 (    SELECT DISTINCT  		
 							Id  ,
-							UserPrincipalName   as UserPrincipalName
-					from 
-							(select id  , [CreatedBy],[CoOwner] from Projects where RepositorySource='GitHub' ) x 
+							UserPrincipalName   AS UserPrincipalName
+					FROM 
+							(SELECT id  , [CreatedBy],[CoOwner] FROM Projects WHERE RepositorySource='GitHub' ) x 
 							UNPIVOT  
 							(UserPrincipalName FOR Owners IN (CreatedBy, CoOwner)   )AS unpvt
 			   ) ProjectOwners
-			   union
-			   select id  , [CreatedBy]  as owners  from Projects where RepositorySource='AzureDevOps'  
+			   UNION
+			   SELECT id  , [CreatedBy]  AS owners  FROM Projects WHERE RepositorySource='AzureDevOps'  
 			     
 			 
 END
