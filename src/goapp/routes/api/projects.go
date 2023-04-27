@@ -167,19 +167,27 @@ func GetRepoCollaboratorsByRepoId(w http.ResponseWriter, r *http.Request) {
 		} else {
 			var collabResult Collaborator
 
-			users, err := ghmgmt.GetUserByUserPrincipal(repo.CreatedBy)
+			repoOwner, err := ghmgmt.GetRepoOwnersRecordByRepoId(int64(repo.Id))
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
 			}
 
-			collabResult.Email = repo.CreatedBy
+			if len(repoOwner) > 0 {
+				users, err := ghmgmt.GetUserByUserPrincipal(repoOwner[0].UserPrincipalName)
+				if err != nil {
+					http.Error(w, err.Error(), http.StatusInternalServerError)
+					return
+				}
 
-			if len(users) > 0 {
-				collabResult.Name = users[0]["Name"].(string)
+				if len(users) > 0 {
+					collabResult.Name = users[0]["Name"].(string)
+				}
+
+				collabResult.Email = repoOwner[0].UserPrincipalName
+				result = append(result, collabResult)
 			}
 
-			result = append(result, collabResult)
 		}
 
 	}

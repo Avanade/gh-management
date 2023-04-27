@@ -1382,3 +1382,26 @@ func RepoOwnersByUserAndProjectId(id int64, userPrincipalName string) (RepoOwner
 	return RepoOwner, err
 
 }
+
+func GetRepoOwnersRecordByRepoId(id int64) (RepoOwner []models.TypRepoOwner, err error) {
+	db := ConnectDb()
+	defer db.Close()
+
+	param := map[string]interface{}{
+		"ProjectId": id,
+	}
+	result, err := db.ExecuteStoredProcedureWithResult("PR_RepoOwners_Select_ByRepoId", param)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, v := range result {
+		data := models.TypRepoOwner{
+			Id:                v["ProjectId"].(int64),
+			UserPrincipalName: v["UserPrincipalName"].(string),
+		}
+		RepoOwner = append(RepoOwner, data)
+	}
+	return RepoOwner, nil
+
+}
