@@ -64,7 +64,7 @@ jobs:
     - name: SUBSTITUTE VARIABLES
       uses: microsoft/variable-substitution@v1 
       with:
-        files: ./.bicep/webapp/${{ github.event.inputs.selected_environment }}-parameters.bicep
+        files: ./.bicep/webapp/${{ github.event.inputs.selected_environment }}-parameters.json
       env:
         parameters.dockerImage.value : ${{ env.DOCKER_IMG_NAME }}
         parameters.containerServer.value : ${{ secrets.ACR_REGISTRY }}
