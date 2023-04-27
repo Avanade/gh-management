@@ -16,3 +16,5 @@ FROM
 	[dbo].[Users]
 WHERE
     [GitHubId] = @GitHubId
+
+END
