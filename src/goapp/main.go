@@ -169,12 +169,11 @@ func main() {
 	muxAdmin.Handle("/contributionarea/{action:view|edit}/{id}", loadAdminPage(rtAdmin.ContributionAreasForm))
 
 	//EXTERNAL LINKS
-	muxAdmin.Handle("/externallinks/GetExternalLinks", loadAzGHAuthPage(rtAdmin.GetExternalLinks))
-	muxAdmin.Handle("/externallinks/{id}", loadAdminPage(rtAdmin.GetExternalLinksById))
-	// muxAdmin.Handle("/externallinks/form", loadAzGHAuthPage(rtAdmin.ExternalLinksForm))
 	muxAdmin.Handle("/externallinks", loadAzGHAuthPage(rtAdmin.ExternalLinksHandler))
-	muxAdmin.Handle("/externallinks/update", loadAzAuthPage(rtAdmin.CreateExternalLinks))
+	muxAdmin.Handle("/externallinks/", loadAzGHAuthPage(rtAdmin.GetExternalLinks))
+	muxAdmin.Handle("/externallinks/{id}", loadAdminPage(rtAdmin.GetExternalLinksById))
 	muxAdmin.Handle("/externallinks/category/{Category}", loadAdminPage(rtAdmin.GetExternalLinksByCategory))
+	muxAdmin.Handle("/externallinks/update", loadAzAuthPage(rtAdmin.CreateExternalLinks))
 	muxAdmin.Handle("/externallinks/{action:add}", loadAdminPage(rtAdmin.ExternalLinksForm))
 	muxAdmin.Handle("/externallinks/{action:view|edit}/{id}", loadAzAuthPage(rtAdmin.ExternalLinksForm))
 	muxAdmin.Handle("/externallinks/{action:delete}/{id}", loadAzAuthPage(rtAdmin.ExternalLinksDelete))

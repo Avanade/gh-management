@@ -21,7 +21,7 @@
     <div>
         <table x-show="showTable" class="w-full mt-4">
                 <tr class="bg-gray-100">
-                    <th scope="col" class="cursor-pointer py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-700 hover:text-gray-700 sm:pl-6 ">Icon</th>
+                    <th scope="col" class="cursor-pointer px-3 py-3.5 text-left text-sm font-semibold text-gray-700 ">Icon</th>
                     <th scope="col" class="cursor-pointer px-3 py-3.5 text-left text-sm font-semibold text-gray-700 ">Icon Name</th>
                     <th scope="col" class="cursor-pointer px-3 py-3.5 text-left text-sm font-semibold text-gray-700 ">Category</th>
                     <th scope="col" class="cursor-pointer px-3 py-3.5 text-left text-sm font-semibold text-gray-700 ">Status</th>
@@ -83,7 +83,7 @@
             GetExternalLinksList: [],
 
             getAllExternalLinks() {
-                let uri = '/admin/externallinks/GetExternalLinks'
+                let uri = '/admin/externallinks/'
                 let encoded = encodeURI(uri);
                 fetch(encoded)
                 .then(r => {
@@ -101,18 +101,18 @@
             onClickAction(id, action) {
                 switch(action) {
                     case 'view':
-                    console.log("-----> " + id)
+                    console.log("--> " + id)
                     break
                     //
                     case 'edit':
-                    console.log("-----> " + id)
+                    console.log("--> " + id)
                     window.location.href = 'externallinks/edit/'+ id
                     break
                     //
                     case 'delete':
                     window.location.href = 'externallinks/' +'delete/'+ id
-                                    {{/* Alpine.store('master').modal.show()
-                Alpine.store('master').deleteData (`/admin/externallinks/delete/`data, "External Link has deleted.", "Go to list of External Links", "/admin/externallinks") */}}
+                    {{/* Alpine.store('master').modal.show()
+                    Alpine.store('master').deleteData (`/admin/externallinks/delete/`data, "External Link has deleted.", "Go to list of External Links", "/admin/externallinks") */}}
                     break
                     //
                     default:

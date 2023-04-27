@@ -2,8 +2,6 @@ package routes
 
 import (
 	"encoding/json"
-
-	// db "main/pkg/ghmgmtdb"
 	"fmt"
 	models "main/models"
 	session "main/pkg/session"
@@ -105,19 +103,6 @@ func GetExternalLinksById(w http.ResponseWriter, r *http.Request) {
 	w.Write(jsonResp)
 }
 
-// func ExternalLinksForm(w http.ResponseWriter, r *http.Request) {
-// 	vars := mux.Vars(r)
-// 	id, _ := strconv.Atoi(vars["id"])
-// 	action := vars["action"]
-// 	template.UseTemplate(&w, r, "admin/contributionareas/form", struct {
-// 		Id     int
-// 		Action string
-// 	}{
-// 		Id:     id,
-// 		Action: strings.Title(action),
-// 	})
-// }
-
 func GetExternalLinksByCategory(w http.ResponseWriter, r *http.Request) {
 	req := mux.Vars(r)
 	category := req["Category"]
@@ -138,8 +123,8 @@ func GetExternalLinksByCategory(w http.ResponseWriter, r *http.Request) {
 	}
 	defer db.Close()
 
-	param := map[string]interface{} {
-		"Category": category,
+	param := map[string]interface{}{
+		"Category":  category,
 		"CreatedBy": username,
 	}
 
@@ -160,7 +145,6 @@ func GetExternalLinksByCategory(w http.ResponseWriter, r *http.Request) {
 	w.Write(jsonResp)
 }
 
-// Add External Links
 func CreateExternalLinks(w http.ResponseWriter, r *http.Request) {
 	sessionaz, _ := session.Store.Get(r, "auth-session")
 	iprofile := sessionaz.Values["profile"]
@@ -186,7 +170,7 @@ func CreateExternalLinks(w http.ResponseWriter, r *http.Request) {
 		"IconSVG":   body.IconSVG,
 		"Category":  body.Category,
 		"CreatedBy": username,
-		"Enabled" :  body.Enabled,
+		"Enabled":   body.Enabled,
 	}
 
 	__, err := db.ExecuteStoredProcedureWithResult("PR_ExternalLinks_Insert", param)
@@ -198,62 +182,67 @@ func CreateExternalLinks(w http.ResponseWriter, r *http.Request) {
 }
 
 func UpdateExternalLinks(w http.ResponseWriter, r *http.Request) {
-
 	sessionaz, _ := session.Store.Get(r, "auth-session")
 	iprofile := sessionaz.Values["profile"]
 	profile := iprofile.(map[string]interface{})
 	username := profile["preferred_username"]
-	var body models.TypCategory
+	var body models.TypExternalLinks
 
 	err := json.NewDecoder(r.Body).Decode(&body)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		fmt.Println(err)
-
 		return
 	}
 
 	cp := sql.ConnectionParam{
-
 		ConnectionString: os.Getenv("GHMGMTDB_CONNECTION_STRING"),
 	}
 	db, err := sql.Init(cp)
 
 	params := map[string]interface{}{
-
-		"Name":       body.Name,
+		"Id":         body.Id,
+		"SVGName":    body.SVGName,
+		"IconSVG":    body.IconSVG,
+		"Category":   body.Category,
 		"CreatedBy":  username,
 		"ModifiedBy": username,
-		"Id":         body.Id,
+		"Enabled":    body.Enabled,
 	}
 
 	_, err2 := db.ExecuteStoredProcedureWithResult("dbo.PR_ExternalLinks_Update", params)
 	if err != nil {
 		fmt.Println(err2)
-
 		return
 	}
-
 }
 
 func ExternalLinksDelete(w http.ResponseWriter, r *http.Request) {
 	req := mux.Vars(r)
 	id := req["id"]
 
-
-
 	cp := sql.ConnectionParam{
 		ConnectionString: os.Getenv("GHMGMTDB_CONNECTION_STRING"),
 	}
-
 	db, err := sql.Init(cp)
-
 	param := map[string]interface{}{
 		"Id": id,
 	}
-
 	_, error := db.ExecuteStoredProcedure("PR_ExternalLinks_Delete", param)
 	if err != nil {
 		fmt.Println(error)
 	}
 }
+
+// func ExternalLinksForm(w http.ResponseWriter, r *http.Request) {
+// 	vars := mux.Vars(r)
+// 	id, _ := strconv.Atoi(vars["id"])
+// 	action := vars["action"]
+// 	template.UseTemplate(&w, r, "admin/contributionareas/form", struct {
+// 		Id     int
+// 		Action string
+// 	}{
+// 		Id:     id,
+// 		Action: strings.Title(action),
+// 	})
+// }
