@@ -5,8 +5,6 @@
         "projectName": {"value": ""}, 
         "dockerImage": {"value": ""},
         "containerServer": {"value": ""},
-        "containerUsername": {"value": ""},
-        "containerPassword": {"value": ""},
         "appServiceSettings": {
             "value": {
                 "WEBSITES_ENABLE_APP_SERVICE_STORAGE":"false",
