@@ -37,7 +37,7 @@ func CreatePrivateGitHubRepository(data models.TypNewProjectReqBody, requestor s
 		return nil, err
 	}
 
-	_, err = AddCollaborator(data, requestor)
+	_, err = AddCollaboratorToRequestedRepo(data, requestor)
 	if err != nil {
 		return nil, err
 	}
@@ -54,21 +54,31 @@ func IsOrgAllowInternalRepo() (bool, error) {
 	return *org.MembersCanCreateInternalRepos, err
 }
 
-func AddCollaborator(data models.TypNewProjectReqBody, requestor string) (*github.Response, error) {
-	client := createClient(os.Getenv("GH_TOKEN"))
+func AddCollaboratorToRequestedRepo(data models.TypNewProjectReqBody, requestor string) (*github.Response, error) {
 	owner := os.Getenv("GH_ORG_INNERSOURCE")
-	opts := &github.RepositoryAddCollaboratorOptions{
-		Permission: "admin",
-	}
+
 	if data.Coowner != requestor {
 		GHUser := ghmgmt.Users_Get_GHUser(requestor)
-		_, _, err := client.Repositories.AddCollaborator(context.Background(), owner, data.Name, GHUser, opts)
+		_, err := AddCollaborator(owner, data.Name, GHUser, "admin")
 		if err != nil {
 			return nil, err
 		}
 	}
 	GHUser := ghmgmt.Users_Get_GHUser(data.Coowner)
-	_, resp, err := client.Repositories.AddCollaborator(context.Background(), owner, data.Name, GHUser, opts)
+	resp, err := AddCollaborator(owner, data.Name, GHUser, "admin")
+	if err != nil {
+		return nil, err
+	}
+	return resp, err
+}
+
+func AddCollaborator(owner string, repo string, user string, permission string) (*github.Response, error) {
+	client := createClient(os.Getenv("GH_TOKEN"))
+	opts := &github.RepositoryAddCollaboratorOptions{
+		Permission: permission,
+	}
+
+	_, resp, err := client.Repositories.AddCollaborator(context.Background(), owner, repo, user, opts)
 	if err != nil {
 		return nil, err
 	}

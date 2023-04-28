@@ -65,6 +65,20 @@ func GetUserProjects(w http.ResponseWriter, r *http.Request) {
 	w.Write(jsonResp)
 }
 
+func GetUsersWithGithub(w http.ResponseWriter, r *http.Request) {
+
+	users := ghmgmt.GetUsersWithGithub()
+
+	w.WriteHeader(http.StatusOK)
+	w.Header().Set("Content-Type", "application/json")
+	jsonResp, err := json.Marshal(users)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.Write(jsonResp)
+}
+
 func GetRequestStatusByProject(w http.ResponseWriter, r *http.Request) {
 	req := mux.Vars(r)
 	id := req["id"]
@@ -120,13 +134,13 @@ func GetRepoCollaboratorsByRepoId(w http.ResponseWriter, r *http.Request) {
 		repo := repoList[0]
 
 		if repo.RepositorySource == "GitHub" {
-			repoUrl := strings.Replace(repoList[0].TFSProjectReference, "https://", "", -1)
+			repoUrl := strings.Replace(repo.TFSProjectReference, "https://", "", -1)
 			repoUrlSub := strings.Split(repoUrl, "/")
 
 			token := os.Getenv("GH_TOKEN")
 
-			collaborators := gh.RepositoriesListCollaborators(token, repoUrlSub[1], repoList[0].Name, "", "direct")
-			outsideCollaborators := gh.RepositoriesListCollaborators(token, repoUrlSub[1], repoList[0].Name, "", "outside")
+			collaborators := gh.RepositoriesListCollaborators(token, repoUrlSub[1], repo.Name, "", "direct")
+			outsideCollaborators := gh.RepositoriesListCollaborators(token, repoUrlSub[1], repo.Name, "", "outside")
 			var outsideCollaboratorsUsernames []string
 			for _, x := range outsideCollaborators {
 				outsideCollaboratorsUsernames = append(outsideCollaboratorsUsernames, *x.Login)
