@@ -98,6 +98,7 @@ func PRProjectsInsert(body models.TypNewProjectReqBody, user string) (id int64) 
 		"ConfirmNotClientProject": body.ConfirmNotClientProject,
 		"CreatedBy":               user,
 		"VisibilityId":            body.Visibility,
+		"TFSProjectReference":     body.TFSProjectReference,
 	}
 	result, err := db.ExecuteStoredProcedureWithResult("dbo.PR_Projects_Insert", param)
 	if err != nil {
@@ -383,7 +384,21 @@ func ProjectsApprovalUpdateGUID(id int64, ApprovalSystemGUID string) {
 	}
 	db.ExecuteStoredProcedure("PR_ProjectsApproval_Update_ApprovalSystemGUID", param)
 }
+func GetProjectForRepoOwner() (RepoOwner []models.TypRepoOwner) {
+	db := ConnectDb()
+	defer db.Close()
 
+	result, _ := db.ExecuteStoredProcedureWithResult("PR_Projects_ToRepoOwners", nil)
+
+	for _, v := range result {
+		data := models.TypRepoOwner{
+			Id:                v["Id"].(int64),
+			UserPrincipalName: v["UserPrincipalName"].(string),
+		}
+		RepoOwner = append(RepoOwner, data)
+	}
+	return RepoOwner
+}
 func GetProjectByName(projectName string) []map[string]interface{} {
 	db := ConnectDb()
 	defer db.Close()
@@ -393,6 +408,19 @@ func GetProjectByName(projectName string) []map[string]interface{} {
 	}
 
 	result, _ := db.ExecuteStoredProcedureWithResult("PR_Projects_Select_ByName", param)
+
+	return result
+}
+
+func GetProjectById(id int64) []map[string]interface{} {
+	db := ConnectDb()
+	defer db.Close()
+
+	param := map[string]interface{}{
+		"Id": id,
+	}
+
+	result, _ := db.ExecuteStoredProcedureWithResult("PR_Projects_Select_ById", param)
 
 	return result
 }
@@ -466,6 +494,23 @@ func UpdateProjectVisibilityId(id int64, visibilityId int64) error {
 	}
 
 	_, err := db.ExecuteStoredProcedure("PR_Projects_Update_Visibility_ById", param)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func UpdateTFSProjectReferenceById(id int64, tFSProjectReference string) error {
+	db := ConnectDb()
+	defer db.Close()
+
+	param := map[string]interface{}{
+		"Id":                  id,
+		"TFSProjectReference": tFSProjectReference,
+	}
+
+	_, err := db.ExecuteStoredProcedure("PR_Projects_Update_TFSProjectReference_ById", param)
 	if err != nil {
 		return err
 	}
@@ -822,6 +867,72 @@ func Users_Get_GHUser(UserPrincipalName string) (GHUser string) {
 
 	GHUser = result[0]["GitHubUser"].(string)
 	return GHUser
+}
+
+func GetUserByGitHubId(GitHubId string) ([]map[string]interface{}, error) {
+
+	cp := sql.ConnectionParam{
+		ConnectionString: os.Getenv("GHMGMTDB_CONNECTION_STRING"),
+	}
+
+	db, _ := sql.Init(cp)
+
+	param := map[string]interface{}{
+
+		"GitHubId": GitHubId,
+	}
+
+	result, err := db.ExecuteStoredProcedureWithResult("PR_Users_Select_ByGitHubId", param)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return result, nil
+}
+
+func GetUserByGitHubUsername(GitHubUser string) ([]map[string]interface{}, error) {
+
+	cp := sql.ConnectionParam{
+		ConnectionString: os.Getenv("GHMGMTDB_CONNECTION_STRING"),
+	}
+
+	db, _ := sql.Init(cp)
+
+	param := map[string]interface{}{
+
+		"GitHubUser": GitHubUser,
+	}
+
+	result, err := db.ExecuteStoredProcedureWithResult("PR_Users_Select_ByGitHubUsers", param)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return result, nil
+}
+
+func GetUserByUserPrincipal(UserPrincipalName string) ([]map[string]interface{}, error) {
+
+	cp := sql.ConnectionParam{
+		ConnectionString: os.Getenv("GHMGMTDB_CONNECTION_STRING"),
+	}
+
+	db, _ := sql.Init(cp)
+
+	param := map[string]interface{}{
+
+		"UserPrincipalName": UserPrincipalName,
+	}
+
+	result, err := db.ExecuteStoredProcedureWithResult("PR_Users_Select_ByUserPrincipalName", param)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return result, nil
 }
 
 func IsUserAdmin(userPrincipalName string) bool {
@@ -1251,4 +1362,84 @@ func UsersGetEmail(GithubUser string) (string, error) {
 		return result[0]["UserPrincipalName"].(string), err
 	}
 
+}
+
+func RepoOwnersInsert(ProjectId int64, userPrincipalName string) error {
+	db := ConnectDb()
+	defer db.Close()
+
+	param := map[string]interface{}{
+		"ProjectId":         ProjectId,
+		"UserPrincipalName": userPrincipalName,
+	}
+
+	_, err := db.ExecuteStoredProcedure("PR_RepoOwners_Insert", param)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func RepoOwnersByUserAndProjectId(id int64, userPrincipalName string) (RepoOwner []models.TypRepoOwner, err error) {
+	db := ConnectDb()
+	defer db.Close()
+
+	param := map[string]interface{}{
+		"ProjectId":         id,
+		"UserPrincipalName": userPrincipalName,
+	}
+	result, err := db.ExecuteStoredProcedureWithResult("PR_RepoOwners_Select_ByUserAndProjectId", param)
+	if err != nil {
+		println(err)
+	}
+
+	for _, v := range result {
+		data := models.TypRepoOwner{
+			Id:                v["ProjectId"].(int64),
+			UserPrincipalName: v["UserPrincipalName"].(string),
+		}
+		RepoOwner = append(RepoOwner, data)
+	}
+	return RepoOwner, err
+
+}
+
+func GetRepoOwnersRecordByRepoId(id int64) (RepoOwner []models.TypRepoOwner, err error) {
+	db := ConnectDb()
+	defer db.Close()
+
+	param := map[string]interface{}{
+		"ProjectId": id,
+	}
+	result, err := db.ExecuteStoredProcedureWithResult("PR_RepoOwners_Select_ByRepoId", param)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, v := range result {
+		data := models.TypRepoOwner{
+			Id:                v["ProjectId"].(int64),
+			UserPrincipalName: v["UserPrincipalName"].(string),
+		}
+		RepoOwner = append(RepoOwner, data)
+	}
+	return RepoOwner, nil
+
+}
+
+func DeleteRepoOwnerRecordByUserAndProjectId(id int64, userPrincipalName string) error {
+	db := ConnectDb()
+	defer db.Close()
+
+	param := map[string]interface{}{
+		"ProjectId":         id,
+		"UserPrincipalName": userPrincipalName,
+	}
+	_, err := db.ExecuteStoredProcedure("PR_RepoOwners_Delete_ByUserAndProjectId", param)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

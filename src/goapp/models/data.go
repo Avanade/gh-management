@@ -43,6 +43,7 @@ type TypNewProjectReqBody struct {
 	ConfirmAvaIP            bool   `json:"confirmAvaIP"`
 	ConfirmSecIPScan        bool   `json:"confirmSecIPScan"`
 	ConfirmNotClientProject bool   `json:"ConfirmNotClientProject"`
+	TFSProjectReference     string
 	Visibility              int
 }
 
@@ -222,4 +223,8 @@ type TypUpdateApprovalReAssign struct {
 	ItemId              string `json:"itemId"`
 	ApproveText         string `json:"ApproveText"`
 	RejectText          string `json:"RejectText"`
+}
+type TypRepoOwner struct {
+	Id                int64
+	UserPrincipalName string
 }

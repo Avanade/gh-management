@@ -8,6 +8,9 @@ import (
 	rtApi "main/routes/api"
 	rtAzure "main/routes/login/azure"
 	rtGithub "main/routes/login/github"
+	"os"
+
+	//rtGithubAPi "main/routes/login/github"
 	rtPages "main/routes/pages"
 	rtActivities "main/routes/pages/activities"
 	rtAdmin "main/routes/pages/admin"
@@ -17,7 +20,6 @@ import (
 	rtSearch "main/routes/pages/search"
 	reports "main/routes/timerjobs"
 	"net/http"
-	"os"
 	"strconv"
 	"time"
 
@@ -128,9 +130,12 @@ func main() {
 	muxApi.Handle("/repositories/list", loadAzGHAuthPage(rtApi.GetUserProjects))
 	muxApi.Handle("/repositories/{id}", loadAzGHAuthPage(rtApi.GetRequestStatusByProject))
 	muxApi.Handle("/repositories/request/public", loadAzGHAuthPage(rtApi.RequestMakePublic))
+	muxApi.Handle("/repositories/collaborators/{id}", loadAzGHAuthPage(rtApi.GetRepoCollaboratorsByRepoId))
+	muxApi.Handle("/repositories/collaborators/add/{id}/{ghUser}/{permission}", loadAzGHAuthPage(rtApi.AddCollaborator))
 	muxApi.Handle("/repositories/archive/{project}/{projectId}/{state}/{archive}", loadAzGHAuthPage(rtApi.ArchiveProject))
 	muxApi.Handle("/repositories/visibility/{project}/{projectId}/{currentState}/{desiredState}", loadAzGHAuthPage(rtApi.SetVisibility))
 	muxApi.Handle("/allusers", loadAzAuthPage(rtApi.GetAllUserFromActiveDirectory))
+	muxApi.Handle("/alluserswithgithub", loadAzAuthPage(rtApi.GetUsersWithGithub))
 	muxApi.Handle("/search/users/{search}", loadAzAuthPage(rtApi.SearchUserFromActiveDirectory))
 	muxApi.Handle("/allrepositories", loadAzAuthPage(rtApi.GetAllRepositories))
 	muxApi.Handle("/getActiveApprovalTypes", loadAzGHAuthPage(rtApi.GetActiveApprovalTypes))
@@ -145,9 +150,14 @@ func main() {
 	// API FOR LOGIC APP
 	muxApi.Handle("/init/indexorgrepos", loadGuidAuthApi(rtApi.InitIndexOrgRepos)).Methods("GET")
 	muxApi.Handle("/indexorgrepos", loadGuidAuthApi(rtApi.IndexOrgRepos)).Methods("GET")
-	muxApi.Handle("/checkAvaInnerSource", loadGuidAuthApi(rtGithub.CheckAvaInnerSource)).Methods("GET")
-	muxApi.Handle("/checkAvaOpenSource", loadGuidAuthApi(rtGithub.CheckAvaOpenSource)).Methods("GET")
-	muxApi.Handle("/clearOrgMembers", loadGuidAuthApi(rtGithub.ClearOrgMembers)).Methods("GET")
+	muxApi.Handle("/checkAvaInnerSource", loadGuidAuthApi(rtApi.CheckAvaInnerSource)).Methods("GET")
+	muxApi.Handle("/checkAvaOpenSource", loadGuidAuthApi(rtApi.CheckAvaOpenSource)).Methods("GET")
+	muxApi.Handle("/clearOrgMembers", loadGuidAuthApi(rtApi.ClearOrgMembers)).Methods("GET")
+	muxApi.Handle("/RepoOwnerScan", loadGuidAuthApi(rtApi.RepoOwnerScan)).Methods("GET")
+
+	// API FOR ProjectToRepoOwner APP
+	muxApi.HandleFunc("/projectToRepoOwner", rtApi.ProjectToRepoOwner)
+
 	muxAdmin := mux.PathPrefix("/admin").Subrouter()
 	muxAdmin.Handle("", loadAdminPage(rtAdmin.AdminIndex))
 	muxAdmin.Handle("/members", loadAdminPage(rtAdmin.ListCommunityMembers))
