@@ -113,11 +113,8 @@
                     break
                     //
                     case 'delete':
-                    {{/* window.location.href = 'externallinks/' +'delete/'+ id */}}
-                    {{/* Alpine.store('master').modal.show()
-                    Alpine.store('master').deleteData (`/admin/externallinks/delete/`data, "External Link has deleted.", "Go to list of External Links", "/admin/externallinks") */}}
                     Alpine.store('master').modal.show()
-                    Alpine.store('master').deleteData(`externallinks/delete/`+id, nil,"External Link has deleted.", "Go to list of aexternal links", "/admin/externallinks")
+                    Alpine.store('master').putData(`externallinks/delete/`+id, "" , "External Link has deleted.", "Go to list of external links", "/admin/externallinks")
                     break
                     //
                     default:
