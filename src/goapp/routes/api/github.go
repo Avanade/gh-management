@@ -211,6 +211,37 @@ func AddCollaborator(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+		if permission == "admin" {
+			users, _ := db.GetUserByGitHubUsername(ghUser)
+
+			if len(users) > 0 {
+				err = db.RepoOwnersInsert(id, users[0]["UserPrincipalName"].(string))
+				if err != nil {
+					http.Error(w, err.Error(), http.StatusInternalServerError)
+					return
+				}
+			}
+		} else {
+			//if not admin, check is the user is currently an admin, remove if he is
+			users, _ := db.GetUserByGitHubUsername(ghUser)
+
+			if len(users) > 0 {
+				rec, err := db.RepoOwnersByUserAndProjectId(id, users[0]["UserPrincipalName"].(string))
+				if err != nil {
+					http.Error(w, err.Error(), http.StatusInternalServerError)
+					return
+				}
+
+				if len(rec) > 0 {
+					err := db.DeleteRepoOwnerRecordByUserAndProjectId(id, users[0]["UserPrincipalName"].(string))
+					if err != nil {
+						http.Error(w, err.Error(), http.StatusInternalServerError)
+						return
+					}
+				}
+			}
+		}
+
 		w.WriteHeader(http.StatusOK)
 	}
 
