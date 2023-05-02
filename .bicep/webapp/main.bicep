@@ -3,9 +3,6 @@ param location string = resourceGroup().location
 param projectName string
 
 @secure()
-param dockerImage string
-
-@secure()
 param containerServer string
 
 @secure()
@@ -45,7 +42,7 @@ resource ghmgmtAppService 'Microsoft.Web/sites@2022-03-01' = {
         name: item.key
         value: item.value
       }]
-      linuxFxVersion: 'DOCKER|${containerServer}/${dockerImage}'
+      linuxFxVersion: 'DOCKER|${containerServer}/${projectName}'
     }
   }
 }

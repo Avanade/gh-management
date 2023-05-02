@@ -14,7 +14,7 @@ on:
         - dev
 
 env:
-  DOCKER_IMG_NAME: ${{github.event.inputs.selected_environment}}-gh-mgmt-app
+  PROJECT_NAME: ${{github.event.inputs.selected_environment}}-gh-mgmt-app
 
 jobs:
   deploy-in-acr:
@@ -30,8 +30,8 @@ jobs:
           username: ${{ secrets.ACR_USERNAME }}
           password: ${{ secrets.ACR_PASSWORD }}
       - run: |
-          docker build . -t ${{ secrets.ACR_REGISTRY }}/${{ env.DOCKER_IMG_NAME }}:${{ github.sha }} -t ${{ secrets.ACR_REGISTRY }}/${{ env.DOCKER_IMG_NAME }}:latest
-          docker push ${{ secrets.ACR_REGISTRY }}/${{ env.DOCKER_IMG_NAME }}
+          docker build . -t ${{ secrets.ACR_REGISTRY }}/${{ env.PROJECT_NAME }}:${{ github.sha }} -t ${{ secrets.ACR_REGISTRY }}/${{ env.PROJECT_NAME }}:latest
+          docker push ${{ secrets.ACR_REGISTRY }}/${{ env.PROJECT_NAME }}
 
   build-and-deploy:
     runs-on: ubuntu-latest
@@ -61,13 +61,19 @@ jobs:
     #     parameters.appServiceSettings.value.GH_TOKEN : ${{ fromJSON(secrets.GH_CREDENTIALS_UAT)['token'] }}
     #     parameters.appServiceSettings.value.GHMGMTDB_CONNECTION_STRING : ${{ secrets.GH_MGMT_CONNECTION_STRING_UAT }}
 
+    - name: Add mask
+      run: |
+        echo "::add-mask::${{ fromJSON(secrets.AZURE_CREDENTIALS)['tenantId'] }}"
+        echo "::add-mask::${{ fromJSON(secrets.AZURE_CREDENTIALS)['clientId'] }}"
+        echo "::add-mask::${{ fromJSON(secrets.AZURE_CREDENTIALS)['clientSecret'] }}"
+        echo "::add-mask::${{ secrets.GH_CREDENTIALS_DEV }}"
+
     - name: SUBSTITUTE VARIABLES
       uses: microsoft/variable-substitution@v1 
       with:
         files: ./.bicep/webapp/${{ github.event.inputs.selected_environment }}-parameters.json
       env:
-        parameters.projectName.value : ${{ env.DOCKER_IMG_NAME }}
-        parameters.dockerImage.value : ${{ env.DOCKER_IMG_NAME }}
+        parameters.projectName.value : ${{ env.PROJECT_NAME }}
         parameters.containerServer.value : ${{ secrets.ACR_REGISTRY }}
         parameters.appServiceSettings.value.DOCKER_REGISTRY_SERVER_URL : https://${{ secrets.ACR_REGISTRY }}
         parameters.appServiceSettings.value.DOCKER_REGISTRY_SERVER_USERNAME : ${{ secrets.ACR_USERNAME }} 
@@ -75,7 +81,7 @@ jobs:
         parameters.appServiceSettings.value.TENANT_ID : ${{ fromJSON(secrets.AZURE_CREDENTIALS)['tenantId'] }}
         parameters.appServiceSettings.value.CLIENT_ID : ${{ fromJSON(secrets.AZURE_CREDENTIALS)['clientId'] }}
         parameters.appServiceSettings.value.CLIENT_SECRET : ${{ fromJSON(secrets.AZURE_CREDENTIALS)['clientSecret'] }}
-        parameters.appServiceSettings.value.HOME_URL : 'https://${{ env.DOCKER_IMG_NAME }}.azurewebsites.net'
+        parameters.appServiceSettings.value.HOME_URL : 'https://${{ env.PROJECT_NAME }}.azurewebsites.net'
         parameters.appServiceSettings.value.EMAIL_ENDPOINT : ${{ secrets.EMAIL_ENDPOINT }}
         parameters.appServiceSettings.value.GH_CLIENT_ID : ${{ fromJSON(secrets.GH_CREDENTIALS_DEV)['clientId'] }}
         parameters.appServiceSettings.value.GH_CLIENT_SECRET : ${{ fromJSON(secrets.GH_CREDENTIALS_DEV)['clientSecret'] }}
