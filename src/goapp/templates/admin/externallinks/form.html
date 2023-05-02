@@ -1,7 +1,10 @@
 {{ define "content" }}
 <div id="pageTitle">New External Links</div>
 <br>
-<form x-data="ExternalLinksForm()" 
+<form x-data="ExternalLinksForm({
+    action : '{{ .Action }}',
+    id : '{{ .Id }}'
+})" 
       x-init="getExternalLinksById()">
                 <span x-text="action"></span>
                 <span x-text="id"></span>
@@ -84,7 +87,7 @@ x-data="externalLinksForm({
                                     >Tech Community Calendar</a>
                                     </div>
                                     <div class="py-1" role="none">
-                                        <a @click="form.Category ='StackOverflowAvanade' " class="cursor-pointer block px-4 py-2 text-sm hover:bg-[#fff2eb]" role="menuitem" tabindex="-1" id="menu-item-2"
+                                        <a @click="form.Category = 'StackOverflowAvanade' " class="cursor-pointer block px-4 py-2 text-sm hover:bg-[#fff2eb]" role="menuitem" tabindex="-1" id="menu-item-2"
                                     x-bind:class="form.Category==='StackOverflowAvanade' ? 'text-[#FF5800]' : 'text-gray-700' " >Stack Overflow Avanade</a>
                                     </div>
                                     <div class="py-1" role="none">
@@ -217,17 +220,22 @@ x-data="externalLinksForm({
 {{/* END */}}
 </form>
 <script type="text/javascript">
-    function ExternalLinksForm() {
+
+    function ExternalLinksForm({
+        action = 'view',
+        id = null
+    }){
         return {
             svgOnly: (`<svg height="100" width="100"> <circle cx="50" cy="50" r="40" stroke="black" stroke-width="3" fill="red" /> </svg>`),
-            action:'',
+            
+            action: 'view',
             id: null,
 
             GetExternalLinksList: [],
             form: {
                 IconSVG: '',
                 SVGName: '',
-                Category: 'Category',
+                Category: '',
                 Enabled: ''
             },
 
@@ -255,8 +263,8 @@ x-data="externalLinksForm({
                         break;
                 }
             }, */}}
-            getExternalLinksById(id) {
-                let uri = '/admin/externallinks/' + 63
+            getExternalLinksById() {
+                let uri = '/admin/externallinks/' + this.id
                 let encoded = encodeURI(uri);
                 fetch(encoded)
                 .then(r => {
@@ -269,17 +277,14 @@ x-data="externalLinksForm({
                 })
                 return this.GetExternalLinksList
             },
-            {{/* getExternalLinks() {
-                const params = new URLSearchParams(window.location.search);
-                const name = params.get("form");
-                this.form1.exlinks = name
-                console.log(this.GetExternalLinksList)
-            }, */}}
-
+            editExternalLink() {
+            Alpine.store('master').modal.show()
+            Alpine.store('master').putData(`/admin/externallinks/edit/`+this.id, "" , "External Link has been saved.", "Go to list of external link", "/admin/externallinks")
+            },
             async init(){
-                {{/* this.action = 'add',
+                this.action = 'add',
                 this.id = id
-                if (this.action.toLowerCase() == 'add') return; */}}
+                if (this.action.toLowerCase() == 'add') return;
 
                     var modal = Alpine.store('master').modal
                     modal.update('loading', 'Loading', 'Please wait for a moment.', '', '')

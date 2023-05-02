@@ -102,12 +102,13 @@
             onClickAction(id, action) {
                 switch(action) {
                     case 'view':
-                    console.log("--> " + id)
+                    window.location.href = 'externallinks/view/'+id
+                    console.log("--> " + id + "VIEW")
                     break
                     //
                     case 'edit':
                     console.log("--> " + id)
-                    window.location.href = 'externallinks/edit/'+ id
+                    window.location.href = 'externallinks/edit/'+id
                     break
                     //
                     case 'delete':
