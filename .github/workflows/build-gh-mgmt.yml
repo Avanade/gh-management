@@ -63,12 +63,8 @@ jobs:
 
     - name: Add mask
       run: |
-        TENANT_ID=jq ${{ fromJSON(secrets.AZURE_CREDENTIALS)['tenantId'] }}
-        CLIENT_ID=jq ${{ fromJSON(secrets.AZURE_CREDENTIALS)['clientId'] }}
-        CLIENT_SECRET= jq ${{ fromJSON(secrets.AZURE_CREDENTIALS)['clientSecret'] }}
-        echo "::add-mask::$TENANT_ID
-        echo "::add-mask::$CLIENT_ID
-        echo "::add-mask::$CLIENT_SECRET
+        echo "TENANT_ID=${{ fromJSON(secrets.AZURE_CREDENTIALS)['tenantId'] }}" >> $GITHUB_ENV
+        echo "::add-mask::$TENANT_ID"
 
     - name: SUBSTITUTE VARIABLES
       uses: microsoft/variable-substitution@v1 
@@ -80,7 +76,7 @@ jobs:
         parameters.appServiceSettings.value.DOCKER_REGISTRY_SERVER_URL : https://${{ secrets.ACR_REGISTRY }}
         parameters.appServiceSettings.value.DOCKER_REGISTRY_SERVER_USERNAME : ${{ secrets.ACR_USERNAME }} 
         parameters.appServiceSettings.value.DOCKER_REGISTRY_SERVER_PASSWORD : ${{ secrets.ACR_PASSWORD }} 
-        parameters.appServiceSettings.value.TENANT_ID : ${{ fromJSON(secrets.AZURE_CREDENTIALS)['tenantId'] }}
+        parameters.appServiceSettings.value.TENANT_ID : ${{ env.TENANT_ID }}
         parameters.appServiceSettings.value.CLIENT_ID : ${{ fromJSON(secrets.AZURE_CREDENTIALS)['clientId'] }}
         parameters.appServiceSettings.value.CLIENT_SECRET : ${{ fromJSON(secrets.AZURE_CREDENTIALS)['clientSecret'] }}
         parameters.appServiceSettings.value.HOME_URL : 'https://${{ env.PROJECT_NAME }}.azurewebsites.net'
