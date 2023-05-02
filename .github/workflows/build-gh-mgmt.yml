@@ -55,6 +55,10 @@ jobs:
         echo "::add-mask::$creds.clientId"
         echo "::add-mask::$creds.clientSecret"
 
+        echo "TENANT_ID=$creds.tenantId" >> $GITHUB_ENV
+        echo "CLIENT_ID=$creds.clientId" >> $GITHUB_ENV
+        echo "CLIENT_SECRET=$creds.clientSecret" >> $GITHUB_ENV
+
     - name: SUBSTITUTE VARIABLES
       uses: microsoft/variable-substitution@v1 
       with:
@@ -65,9 +69,9 @@ jobs:
         parameters.appServiceSettings.value.DOCKER_REGISTRY_SERVER_URL : https://${{ secrets.ACR_REGISTRY }}
         parameters.appServiceSettings.value.DOCKER_REGISTRY_SERVER_USERNAME : ${{ secrets.ACR_USERNAME }} 
         parameters.appServiceSettings.value.DOCKER_REGISTRY_SERVER_PASSWORD : ${{ secrets.ACR_PASSWORD }} 
-        parameters.appServiceSettings.value.TENANT_ID : ${{ fromJSON(secrets.AZURE_CREDENTIALS)['tenantId'] }}
-        parameters.appServiceSettings.value.CLIENT_ID : ${{ fromJSON(secrets.AZURE_CREDENTIALS)['clientId'] }}
-        parameters.appServiceSettings.value.CLIENT_SECRET : ${{ fromJSON(secrets.AZURE_CREDENTIALS)['clientSecret'] }}
+        parameters.appServiceSettings.value.TENANT_ID : ${{ env.TENANT_ID }}
+        parameters.appServiceSettings.value.CLIENT_ID : ${{ env.CLIENT_ID }}
+        parameters.appServiceSettings.value.CLIENT_SECRET : ${{ env.CLIENT_SECRET }}
         parameters.appServiceSettings.value.HOME_URL : 'https://${{ env.PROJECT_NAME }}.azurewebsites.net'
         parameters.appServiceSettings.value.EMAIL_ENDPOINT : ${{ secrets.EMAIL_ENDPOINT }}
         parameters.appServiceSettings.value.GH_CLIENT_ID : ${{ fromJSON(secrets.GH_CREDENTIALS_DEV)['clientId'] }}
