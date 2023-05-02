@@ -130,12 +130,12 @@
                   </div>
                   <div class="relative flex items-center justify-between">
                     <span class="bg-gray-100 pr-3 text-base font-semibold leading-6 text-gray-900">Collaborators</span>
-                    <!-- <button type="button" class="inline-flex items-center gap-x-1.5 rounded-full bg-white px-3 py-1.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
+                    <button type="button" @click="showAddCollaboratorModal=true; form.repoId=repository.Id; mode='add'" class="inline-flex items-center gap-x-1.5 rounded-full bg-white px-3 py-1.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
                       <svg class="-ml-1 -mr-0.5 h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                         <path d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z" />
                       </svg>
                       <span>Add</span>
-                    </button> -->
+                    </button>
                   </div>
                 </div>
                 <div class="mt-1 flow-root">
@@ -164,8 +164,8 @@
                               <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
                                 Permission
                               </th>
-                              <!-- <th scope="col" class="relative py-3.5 pl-3 pr-4 sm:pr-0">
-                              </th> -->
+                              <th scope="col" class="relative py-3.5 pl-3 pr-4 sm:pr-0">
+                              </th>
                             </tr>
                           </thead>
                           <tbody class="divide-y divide-gray-200">
@@ -176,15 +176,15 @@
                                   <span x-text="item.GitHubUsername"></span> <br> <span x-show="item.isOutsideCollaborator" class="text-xs font-light italic">Outside Collaborator</span>
                                 </td>
                                 <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500" x-text="item.email===''? '-':item.email"></td>
-                                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500" x-text="item.role">admin</td>
-                                <!-- <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm sm:pr-0">
-                                  <a href="#" class="text-indigo-600 hover:text-indigo-900">
+                                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500" x-text="item.role"></td>
+                                <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm sm:pr-0">
+                                  <a href="#" class="text-indigo-600 hover:text-indigo-900" @click="updateCollaborator(repository.Id, item.GitHubUsername, item.role);">
                                     Update
-                                  </a> | 
-                                  <a href="#" class="text-indigo-600 hover:text-indigo-900">
-                                    Remove
                                   </a>
-                                </td> -->
+                                  <!-- <a href="#" class="text-indigo-600 hover:text-indigo-900">
+                                    Remove
+                                  </a> -->
+                                </td>
                               </tr>
                             </template>
                           </tbody>
@@ -386,12 +386,14 @@
                   </div>
                   <div class="relative flex items-center justify-between">
                     <span class="bg-gray-100 pr-3 text-base font-semibold leading-6 text-gray-900">Collaborators</span>
-                    <!-- <button type="button" class="inline-flex items-center gap-x-1.5 rounded-full bg-white px-3 py-1.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
+                    {{ if .isAdmin }}
+                    <button x-show="repository.RepositorySource==='GitHub'" type="button" @click="showAddCollaboratorModal=true; form.repoId=repository.Id; mode='add'" class="inline-flex items-center gap-x-1.5 rounded-full bg-white px-3 py-1.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
                       <svg class="-ml-1 -mr-0.5 h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                         <path d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z" />
                       </svg>
                       <span>Add</span>
-                    </button> -->
+                    </button>
+                    {{ end }}
                   </div>
                 </div>
                 <div class="mt-1 flow-root">
@@ -420,8 +422,10 @@
                               <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
                                 Permission
                               </th>
-                              <!-- <th scope="col" class="relative py-3.5 pl-3 pr-4 sm:pr-0">
-                              </th> -->
+                              {{ if .isAdmin }}
+                              <th scope="col" class="relative py-3.5 pl-3 pr-4 sm:pr-0">
+                              </th>
+                              {{ end }}
                             </tr>
                           </thead>
                           <tbody class="divide-y divide-gray-200">
@@ -432,15 +436,17 @@
                                   <span x-text="item.GitHubUsername"></span> <br> <span x-show="item.isOutsideCollaborator" class="text-xs font-light italic">Outside Collaborator</span>
                                 </td>
                                 <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500" x-text="item.email===''? '-':item.email"></td>
-                                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500" x-text="item.role">admin</td>
-                                <!-- <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm sm:pr-0">
-                                  <a href="#" class="text-indigo-600 hover:text-indigo-900">
+                                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500" x-text="item.role"></td>
+                                {{ if .isAdmin }}
+                                <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm sm:pr-0">
+                                  <a href="#" class="text-indigo-600 hover:text-indigo-900" @click="updateCollaborator(repository.Id, item.GitHubUsername, item.role);">
                                     Update
-                                  </a> | 
-                                  <a href="#" class="text-indigo-600 hover:text-indigo-900">
-                                    Remove
                                   </a>
-                                </td> -->
+                                  <!-- <a href="#" class="text-indigo-600 hover:text-indigo-900">
+                                    Remove
+                                  </a> -->
+                                </td>
+                                {{ end }}
                               </tr>
                             </template>
                           </tbody>
@@ -511,44 +517,45 @@
         <div class="relative transform rounded-lg bg-white px-4 pb-4 pt-5 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-sm sm:p-6">
           <div>
             <div class="mt-1 sm:mt-2">
-              <h3 class="text-base font-semibold leading-6 text-gray-900" id="modal-title">Add a collaborator</h3>
+              <h3 class="text-base font-semibold leading-6 text-gray-900" id="modal-title" x-text="mode==='add'? 'Add a collaborator' : 'Update permission'"></h3>
               <div class="mt-2">
-                <form class="space-y-6" action="#" method="POST">
+                <form class="space-y-6" onsubmit="event.preventDefault()" autocomplete="off">
                   <div>
                     <label for="user" class="block text-sm leading-6 text-gray-900">GitHub User</label>
                     <div class="mt-2">
                       <div>
                         <div class="relative mt-1">
-                          <input id="ghUsername" name="ghUsername" @click="combobox.ghUsername = !combobox.ghUsername"
+                          <input id="ghUsername" name="ghUsername" @click="if(mode==='add')combobox.ghUsername = !combobox.ghUsername"
                             x-model="form.ghUsername" type="text"
                             class="mt-1 focus:ring-orange-500 focus:border-orange-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md border-2"
-                            role="combobox" aria-controls="options" aria-expanded="false">
+                            role="combobox" aria-controls="options" aria-expanded="false" x-bind:readonly="mode!=='add'">
 
-                            <!-- <button x-show="!isCoownerempty" type="button"
+                            <button x-show="form.ghUsername !== '' && mode==='add'" type="button"
                                 class="absolute inset-y-0 right-0 flex items-center rounded-r-md px-2 focus:outline-none">
-                                <svg id="clearBtn" class="h-5 w-5 text-gray-400" @click="clearCoowner"
+                                <svg id="clearBtn" class="h-5 w-5 text-gray-400" @click="form.ghUsername=''"
                                     xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
                                     <path
                                         d="M256 8C119 8 8 119 8 256s111 248 248 248 248-111 248-248S393 8 256 8zm0 448c-110.5 0-200-89.5-200-200S145.5 56 256 56s200 89.5 200 200-89.5 200-200 200zm101.8-262.2L295.6 256l62.2 62.2c4.7 4.7 4.7 12.3 0 17l-22.6 22.6c-4.7 4.7-12.3 4.7-17 0L256 295.6l-62.2 62.2c-4.7 4.7-12.3 4.7-17 0l-22.6-22.6c-4.7-4.7-4.7-12.3 0-17l62.2-62.2-62.2-62.2c-4.7-4.7-4.7-12.3 0-17l22.6-22.6c4.7-4.7 12.3-4.7 17 0l62.2 62.2 62.2-62.2c4.7-4.7 12.3-4.7 17 0l22.6 22.6c4.7 4.7 4.7 12.3 0 17z" />
                                 </svg>
-                            </button> -->
+                            </button>
 
                           <ul class="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm"
                             id="options" x-show="combobox.ghUsername" role="listbox">
                             <div class="italic text-sm text-gray-500 p-3">Only users with associated GH account are displayed</div>
-                            <li class="relative cursor-default select-none py-2 pl-3 pr-9 text-gray-900"
-                              id="option-0" role="option"
-                              @click="form.ghUsername = 'iibuan'; combobox.ghUsername = !combobox.ghUsername"
-                              tabindex="-1">
-                              <div class="flex">
-                                <span class="truncate">
-                                  ismael.r.ibuan@accenture.com
-                                </span>
-                                <span class="ml-2 truncate text-gray-500">
-                                  &nbsp@iibuan
-                                </span>
-                              </div>
-                            </li>
+                            <template x-for="(ghUser) in githubUsers">
+                              <li class="relative cursor-default select-none py-2 pl-3 pr-9 text-gray-900 hover:bg-gray-50"
+                                id="option-0" role="option"
+                                @click="form.ghUsername = ghUser.GitHubUser; combobox.ghUsername = !combobox.ghUsername"
+                                x-show="showName(ghUser.UserPrincipalName, ghUser.GitHubUser)"
+                                tabindex="-1">
+                                <div class="flex">
+                                  <span class="truncate" x-text="ghUser.UserPrincipalName">
+                                  </span>
+                                  <span class="ml-2 truncate text-gray-500" x-text="ghUser.GitHubUser">
+                                  </span>
+                                </div>
+                              </li>
+                            </template>
                           </ul>
                         </div>
                       </div>
@@ -564,51 +571,23 @@
                         <div class="relative mt-1">
                           <input id="permission" name="permission" @click="combobox.permission = !combobox.permission"
                             x-model="form.permission" type="text"
-                            class="mt-1 focus:ring-orange-500 focus:border-orange-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md border-2"
-                            role="combobox" aria-controls="options" aria-expanded="false">
+                            class="hover:cursor-pointer mt-1 focus:ring-orange-500 focus:border-orange-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md border-2"
+                            role="combobox" aria-controls="options" aria-expanded="false" readonly>
 
                           <ul class="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm"
                             id="options" x-show="combobox.permission" role="listbox">
-                            <li class="relative cursor-default select-none py-2 pl-3 pr-9 text-gray-900"
-                              id="option-0" role="option"
-                              @click="form.permission = 'admin'; combobox.permission = !combobox.permission"
-                              tabindex="-1">
-                              <div class="flex">
-                                <span class="truncate">
-                                  admin
-                                </span>
-                              </div>
-                            </li>
-                            <li class="relative cursor-default select-none py-2 pl-3 pr-9 text-gray-900"
-                              id="option-0" role="option"
-                              @click="form.permission = 'admin'; combobox.permission = !combobox.permission"
-                              tabindex="-1">
-                              <div class="flex">
-                                <span class="truncate">
-                                  admin
-                                </span>
-                              </div>
-                            </li>
-                            <li class="relative cursor-default select-none py-2 pl-3 pr-9 text-gray-900"
-                              id="option-0" role="option"
-                              @click="form.permission = 'admin'; combobox.permission = !combobox.permission"
-                              tabindex="-1">
-                              <div class="flex">
-                                <span class="truncate">
-                                  admin
-                                </span>
-                              </div>
-                            </li>
-                            <li class="relative cursor-default select-none py-2 pl-3 pr-9 text-gray-900"
-                              id="option-0" role="option"
-                              @click="form.permission = 'admin'; combobox.permission = !combobox.permission"
-                              tabindex="-1">
-                              <div class="flex">
-                                <span class="truncate">
-                                  admin
-                                </span>
-                              </div>
-                            </li>
+                            <template x-for="(permission, index) in gitHubRepoPermissions">
+                              <li class="hover:bg-gray-50 relative cursor-default select-none py-2 pl-3 pr-9 text-gray-900"
+                                id="option-0" role="option"
+                                @click="form.permission = permission; combobox.permission = !combobox.permission"
+                                tabindex="-1">
+                                <div class="flex">
+                                  <span class="truncate"- x-text="permission">
+                                  </span>
+                                </div>
+                              </li>
+                            </template>
+                            
                           </ul>
                         </div>
                       </div>
@@ -616,8 +595,8 @@
                   </div>
             
                   <div class="mt-5 sm:mt-6">
-                    <button type="submit" class="inline-flex justify-center rounded-md bg-[#FF5800] px-5 mr-2 py-2 text-sm font-semibold text-white shadow-sm  focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Add</button>
-                    <button type="button" class="inline-flex justify-center rounded-md bg-gray-200 px-3 py-2 text-sm font-semibold text-gray-700 shadow-sm  focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Cancel</button>
+                    <button type="submit" @click="submit()" x-bind:disabled="!isValid" class="inline-flex justify-center rounded-md bg-[#FF5800] px-5 mr-2 py-2 text-sm font-semibold text-white shadow-sm  focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:bg-slate-300" x-text="mode==='add'? 'Add' : 'Update'"></button>
+                    <button @click="showAddCollaboratorModal=false; form.repoId=''; form.ghUsername=''; form.permission='';" type="button" class="inline-flex justify-center rounded-md bg-gray-200 px-3 py-2 text-sm font-semibold text-gray-700 shadow-sm  focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Cancel</button>
                   </div>
                 </form>
               </div>
@@ -631,7 +610,7 @@
 </div>
 
 
-
+<script src="/public/components/combobox.js"></script>
 <script>
   function myRepositoriesData() {
     return {
@@ -658,6 +637,8 @@
         permission: false
       },
       showAddCollaboratorModal: false,
+      githubUsers: [],
+      mode: 'add',
       getUserRepositories() {
         if (!this.userRepositoriesList || this.userRepositoriesList.length === 0) {
           this.showSpinner = true
@@ -705,6 +686,7 @@
         }
       },
       getPageDetails() {
+        this.getGitHubUsers()
         const queryString = window.location.search;
         const urlParams = new URLSearchParams(queryString);
         let v = urlParams.get('view')
@@ -821,7 +803,6 @@
         return owners.join(', ')
       },
       getUserRepoCollaborators(id, i) {
-        console.log
         if(!this.userRepositoriesList[i]["collaboratorsLoaded"]) {
           fetch(`/api/repositories/collaborators/${id}`)
           .then(r => {
@@ -836,7 +817,6 @@
         }
       },
       getRepoCollaborators(id, i) {
-        console.log
         if(!this.allRepositoriesList[i]["collaboratorsLoaded"]) {
           fetch(`/api/repositories/collaborators/${id}`)
           .then(r => {
@@ -849,8 +829,49 @@
             console.log(e)
           })
         }
+      },
+      gitHubRepoPermissions: ['admin','pull','triage','push','maintain'],
+      getGitHubUsers(){
+        fetch(`/api/alluserswithgithub`)
+          .then(r => {
+            r.json().then(body => {
+              this.githubUsers = body
+            });
+          })
+          .catch(e => {
+            console.log(e)
+          })
+      },
+      showName(userPrincipalName, githubUser) {
+        return userPrincipalName.toLowerCase().includes(this.form.ghUsername.toLowerCase()) || githubUser.toLowerCase().includes(this.form.ghUsername.toLowerCase()) ? true : false
+      },
+      submit(){
+        Alpine.store('master').modal.reset()
+        Alpine.store('master').modal.show()
+        Alpine.store('master').getData(`/api/repositories/collaborators/add/${this.form.repoId}/${this.form.ghUsername}/${this.form.permission}`, "GitHub user has been invited to the repository.", "Close", "/repositories")
+        this.form.repoId=''
+        this.form.ghUsername=''
+        this.form.permission=''
+        this.showAddCollaboratorModal=false
+      },
+      get isValid() {
+        if (
+          !!this.form.repoId &&
+          !!this.form.ghUsername &&
+          !!this.form.permission
+        ) {
+          return true
+        } else {
+          return false
+        }
+      },
+      updateCollaborator(id, user, role) {
+        this.mode='edit'
+        this.form.repoId = id
+        this.form.ghUsername = user,
+        this.form.permission = role === 'read' ? 'pull' : role === 'write' ? 'push' : role
+        this.showAddCollaboratorModal = true
       }
-
     }
   }
 </script>

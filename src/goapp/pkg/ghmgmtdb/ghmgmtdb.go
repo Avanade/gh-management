@@ -891,6 +891,28 @@ func GetUserByGitHubId(GitHubId string) ([]map[string]interface{}, error) {
 	return result, nil
 }
 
+func GetUserByGitHubUsername(GitHubUser string) ([]map[string]interface{}, error) {
+
+	cp := sql.ConnectionParam{
+		ConnectionString: os.Getenv("GHMGMTDB_CONNECTION_STRING"),
+	}
+
+	db, _ := sql.Init(cp)
+
+	param := map[string]interface{}{
+
+		"GitHubUser": GitHubUser,
+	}
+
+	result, err := db.ExecuteStoredProcedureWithResult("PR_Users_Select_ByGitHubUsers", param)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return result, nil
+}
+
 func GetUserByUserPrincipal(UserPrincipalName string) ([]map[string]interface{}, error) {
 
 	cp := sql.ConnectionParam{
@@ -1425,4 +1447,20 @@ func GetRepoOwnersRecordByRepoId(id int64) (RepoOwner []models.TypRepoOwner, err
 	}
 	return RepoOwner, nil
 
+}
+
+func DeleteRepoOwnerRecordByUserAndProjectId(id int64, userPrincipalName string) error {
+	db := ConnectDb()
+	defer db.Close()
+
+	param := map[string]interface{}{
+		"ProjectId":         id,
+		"UserPrincipalName": userPrincipalName,
+	}
+	_, err := db.ExecuteStoredProcedure("PR_RepoOwners_Delete_ByUserAndProjectId", param)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
