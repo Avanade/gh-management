@@ -64,7 +64,7 @@ jobs:
     - name: Add mask
       run: |
         THE_SECRET=${{ fromJSON(secrets.AZURE_CREDENTIALS)['tenantId'] }}
-        echo "::add-mask::$THE_SECRET
+        echo "::add-mask::$THE_SECRET"
 
     - name: SUBSTITUTE VARIABLES
       uses: microsoft/variable-substitution@v1 
