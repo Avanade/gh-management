@@ -63,9 +63,9 @@ jobs:
 
     - name: Add mask
       run: |
-        TENANT_ID=jq -r ${{ fromJSON(secrets.AZURE_CREDENTIALS)['tenantId'] }}
-        CLIENT_ID=jq -r ${{ fromJSON(secrets.AZURE_CREDENTIALS)['clientId'] }}"
-        CLIENT_SECRET= jq -r ${{ fromJSON(secrets.AZURE_CREDENTIALS)['clientSecret'] }}"
+        TENANT_ID=jq ${{ fromJSON(secrets.AZURE_CREDENTIALS)['tenantId'] }}
+        CLIENT_ID=jq ${{ fromJSON(secrets.AZURE_CREDENTIALS)['clientId'] }}
+        CLIENT_SECRET= jq ${{ fromJSON(secrets.AZURE_CREDENTIALS)['clientSecret'] }}
         "::add-mask::$TENANT_ID
         "::add-mask::$CLIENT_ID
         "::add-mask::$CLIENT_SECRET
