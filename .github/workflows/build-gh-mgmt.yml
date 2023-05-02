@@ -15,7 +15,6 @@ on:
 
 env:
   PROJECT_NAME: ${{github.event.inputs.selected_environment}}-gh-mgmt-app
-  TENANT_ID: ${{ fromJSON(secrets.AZURE_CREDENTIALS)['tenantId'] }}
 
 jobs:
   deploy-in-acr:
@@ -62,6 +61,11 @@ jobs:
     #     parameters.appServiceSettings.value.GH_TOKEN : ${{ fromJSON(secrets.GH_CREDENTIALS_UAT)['token'] }}
     #     parameters.appServiceSettings.value.GHMGMTDB_CONNECTION_STRING : ${{ secrets.GH_MGMT_CONNECTION_STRING_UAT }}
 
+    - name: Add mask
+      run: |
+        THE_SECRET=${{ fromJSON(secrets.AZURE_CREDENTIALS)['tenantId'] }}
+        echo "::add-mask::$THE_SECRET
+
     - name: SUBSTITUTE VARIABLES
       uses: microsoft/variable-substitution@v1 
       with:
@@ -72,7 +76,7 @@ jobs:
         parameters.appServiceSettings.value.DOCKER_REGISTRY_SERVER_URL : https://${{ secrets.ACR_REGISTRY }}
         parameters.appServiceSettings.value.DOCKER_REGISTRY_SERVER_USERNAME : ${{ secrets.ACR_USERNAME }} 
         parameters.appServiceSettings.value.DOCKER_REGISTRY_SERVER_PASSWORD : ${{ secrets.ACR_PASSWORD }} 
-        parameters.appServiceSettings.value.TENANT_ID : ${{ env.TENANT_ID }}
+        parameters.appServiceSettings.value.TENANT_ID : ${{ fromJSON(secrets.AZURE_CREDENTIALS)['tenantId'] }}
         parameters.appServiceSettings.value.CLIENT_ID : ${{ fromJSON(secrets.AZURE_CREDENTIALS)['clientId'] }}
         parameters.appServiceSettings.value.CLIENT_SECRET : ${{ fromJSON(secrets.AZURE_CREDENTIALS)['clientSecret'] }}
         parameters.appServiceSettings.value.HOME_URL : 'https://${{ env.PROJECT_NAME }}.azurewebsites.net'
