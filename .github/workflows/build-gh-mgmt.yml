@@ -54,25 +54,19 @@ jobs:
         echo "CLIENT_SECRET=$az_creds.clientSecret" >> $GITHUB_ENV
 
     - name: Setup Dev Github Credentials
-      if: ${{ github.event.inputs.selected_environment == 'dev' }}
       run: |
-        gh_creds=`cat > cred.json <<EOL
-        ${{ secrets.GH_CREDENTIALS_DEV }}
-        EOL`
-
-        echo "::add-mask::$gh_creds.clientId"
-        echo "::add-mask::$gh_creds.clientSecret"
-        echo "::add-mask::$gh_creds.token"
-        echo "GH_CLIENT_ID=$gh_creds.clientId" >> $GITHUB_ENV
-        echo "GH_CLIENT_SECRET=$gh_creds.clientSecret" >> $GITHUB_ENV
-        echo "GH_TOKEN=$gh_creds.token" >> $GITHUB_ENV
-
-    - name: Setup Dev Github Credentials
-      if: ${{ github.event.inputs.selected_environment == 'uat' }}
-      run: |
-        gh_creds=`cat > cred.json <<EOL
-        ${{ secrets.GH_CREDENTIALS_UAT }}
-        EOL`
+        case ${{ github.event.inputs.selected_environment }} in
+          "dev")
+            gh_creds=`cat > cred.json <<EOL
+            ${{ secrets.GH_CREDENTIALS_DEV }}
+            EOL`
+          ;;
+          "uat")
+            gh_creds=`cat > cred.json <<EOL
+            ${{ secrets.GH_CREDENTIALS_UAT }}
+            EOL`
+          ;;
+        esac
 
         echo "::add-mask::$gh_creds.clientId"
         echo "::add-mask::$gh_creds.clientSecret"
