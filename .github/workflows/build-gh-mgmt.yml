@@ -63,10 +63,10 @@ jobs:
 
     - name: Add mask
       run: |
-        echo "::add-mask::${{ fromJSON(secrets.AZURE_CREDENTIALS)['tenantId'] }}"
-        echo "::add-mask::${{ fromJSON(secrets.AZURE_CREDENTIALS)['clientId'] }}"
-        echo "::add-mask::${{ fromJSON(secrets.AZURE_CREDENTIALS)['clientSecret'] }}"
-        echo "::add-mask::${{ secrets.GH_CREDENTIALS_DEV }}"
+        "::add-mask::${{ fromJSON(secrets.AZURE_CREDENTIALS)['tenantId'] }}"
+        "::add-mask::${{ fromJSON(secrets.AZURE_CREDENTIALS)['clientId'] }}"
+        "::add-mask::${{ fromJSON(secrets.AZURE_CREDENTIALS)['clientSecret'] }}"
+        "::add-mask::${{ secrets.GH_CREDENTIALS_DEV }}"
 
     - name: SUBSTITUTE VARIABLES
       uses: microsoft/variable-substitution@v1 
