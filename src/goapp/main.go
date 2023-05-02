@@ -174,8 +174,8 @@ func main() {
 	muxAdmin.Handle("/externallinks/{id}", loadAdminPage(rtAdmin.GetExternalLinksById))
 	muxAdmin.Handle("/externallinks/category/{Category}", loadAdminPage(rtAdmin.GetExternalLinksByCategory))
 	muxAdmin.Handle("/externallinks/update", loadAzAuthPage(rtAdmin.CreateExternalLinks))
-	muxAdmin.Handle("/externallinks/{action:add}", loadAdminPage(rtAdmin.ExternalLinksForm))
-	muxAdmin.Handle("/externallinks/{action:view|edit}/{id}", loadAzAuthPage(rtAdmin.ExternalLinksForm))
+	// muxAdmin.Handle("/externallinks/{action:add}", loadAdminPage(rtAdmin.ExternalLinksForm))
+	muxAdmin.Handle("/externallinks/{action:view|add|edit}/{id}", loadAzAuthPage(rtAdmin.ExternalLinksForm))
 	muxAdmin.Handle("/externallinks/{action:delete}/{id}", loadAzAuthPage(rtAdmin.ExternalLinksDelete))
 
 	muxApi.HandleFunc("/approvals/project/callback", rtProjects.UpdateApprovalStatusProjects).Methods("POST")

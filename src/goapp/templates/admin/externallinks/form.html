@@ -99,8 +99,6 @@ x-data="externalLinksForm({
 
                     </div>
 
-
-                    {{/*  */}}
                     {{/* <div class="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-baseline">
                         <label for="combobox" class="block text-sm font-medium leading-6 text-gray-900">Assigned to</label>
                         <div class="relative mt-2">
@@ -137,7 +135,6 @@ x-data="externalLinksForm({
                             </ul>
                         </div>
                     </div> */}}
-                    {{/*  */}}
 
 
 
@@ -220,19 +217,9 @@ x-data="externalLinksForm({
 {{/* END */}}
 </form>
 <script type="text/javascript">
-        {{/* function externalLinksForm({
-        action = 'view',
-        id = null
-    }){ */}}
-
     function ExternalLinksForm() {
-        {{/* action = 'view',
-        id = null */}}
         return {
-            svgOnly: (`<svg height="100" width="100">
-  <circle cx="50" cy="50" r="40" stroke="black" stroke-width="3" fill="red" />
-
-</svg>`),
+            svgOnly: (`<svg height="100" width="100"> <circle cx="50" cy="50" r="40" stroke="black" stroke-width="3" fill="red" /> </svg>`),
             action:'',
             id: null,
 
@@ -242,10 +229,6 @@ x-data="externalLinksForm({
                 SVGName: '',
                 Category: 'Category',
                 Enabled: ''
-            },
-
-            form1: {
-                exlinks: ''
             },
 
             CategoryList: false,
@@ -293,25 +276,24 @@ x-data="externalLinksForm({
                 console.log(this.GetExternalLinksList)
             }, */}}
 
-            {{/* async init(){
-                this.action = 'add',
+            async init(){
+                {{/* this.action = 'add',
                 this.id = id
-
-                if (this.action.toLowerCase() == 'add') return;
+                if (this.action.toLowerCase() == 'add') return; */}}
 
                     var modal = Alpine.store('master').modal
                     modal.update('loading', 'Loading', 'Please wait for a moment.', '', '')
 
-                    const res = await fetch(`/admin/externallinks/`this.id)
+                    {{/* const res = await fetch(`/admin/externallinks/`this.id)
                     const data = await res.json()
 
                     this.form.IconSVG = data[0].IconSVG;
                     this.form.SVGName = data[0].SVGName;
                     this.form.Category = data[0].Category
-                    this.form.Enabled = data.Enabled.toString();
+                    this.form.Enabled = data.Enabled.toString(); */}}
 
                     modal.visible = false;
-            }, */}}
+            },
             
         }
     }
