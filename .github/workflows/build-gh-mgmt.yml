@@ -40,31 +40,20 @@ jobs:
       # Checkout code
     - uses: actions/checkout@main
 
-    # - name: Configuration for TEST environment
-    #   uses: microsoft/variable-substitution@v1 
-    #   with:
-    #     files: ./.bicep/webapp/${{ github.event.inputs.selected_environment }}-parameters.bicep
-    #   env:
-    #     parameters.appServiceSettings.value.GH_CLIENT_ID : ${{ fromJSON(secrets.GH_CREDENTIALS_DEV)['clientId'] }}
-    #     parameters.appServiceSettings.value.GH_CLIENT_SECRET : ${{ fromJSON(secrets.GH_CREDENTIALS_DEV)['clientSecret'] }}
-    #     parameters.appServiceSettings.value.GH_TOKEN : ${{ fromJSON(secrets.GH_CREDENTIALS_DEV)['token'] }}
-    #     parameters.appServiceSettings.value.GHMGMTDB_CONNECTION_STRING : ${{ secrets.GH_MGMT_CONNECTION_STRING_DEV }}
-
-    # - name: Configuration for UAT environment
-    #   if: ${{ github.event.inputs.selected_environment == 'uat' }}
-    #   uses: microsoft/variable-substitution@v1 
-    #   with:
-    #     files: ./.bicep/webapp/${{ github.event.inputs.selected_environment }}-parameters.bicep
-    #   env:
-    #     parameters.appServiceSettings.value.GH_CLIENT_ID : ${{ fromJSON(secrets.GH_CREDENTIALS_UAT)['clientId'] }}
-    #     parameters.appServiceSettings.value.GH_CLIENT_SECRET : ${{ fromJSON(secrets.GH_CREDENTIALS_UAT)['clientSecret'] }}
-    #     parameters.appServiceSettings.value.GH_TOKEN : ${{ fromJSON(secrets.GH_CREDENTIALS_UAT)['token'] }}
-    #     parameters.appServiceSettings.value.GHMGMTDB_CONNECTION_STRING : ${{ secrets.GH_MGMT_CONNECTION_STRING_UAT }}
-
-    - name: Add mask
+    - name: Setup Azure and Github cred.
       run: |
-        THE_SECRET=${{ fromJSON(secrets.AZURE_CREDENTIALS)['tenantId'] }}
-        echo "::add-mask::$THE_SECRET"
+        creds=`cat > cred.json <<EOL
+        ${{ secrets.AZURE_CREDENTIALS }}
+        EOL`
+        # the following lines are only required for multi line json
+        content="${content//'%'/'%25'}"
+        content="${content//$'\n'/'%0A'}"
+        content="${content//$'\r'/'%0D'}"
+        # end of optional handling for multi line json
+
+        echo "::add-mask::$creds.tenantId"
+        echo "::add-mask::$creds.clientId"
+        echo "::add-mask::$creds.clientSecret"
 
     - name: SUBSTITUTE VARIABLES
       uses: microsoft/variable-substitution@v1 
