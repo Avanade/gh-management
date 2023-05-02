@@ -61,12 +61,11 @@ jobs:
     #     parameters.appServiceSettings.value.GH_TOKEN : ${{ fromJSON(secrets.GH_CREDENTIALS_UAT)['token'] }}
     #     parameters.appServiceSettings.value.GHMGMTDB_CONNECTION_STRING : ${{ secrets.GH_MGMT_CONNECTION_STRING_UAT }}
 
-    - name: Add mask
+    - name: Add SECRETS
       run: |
-        "::add-mask::${{ fromJSON(secrets.AZURE_CREDENTIALS)['tenantId'] }}"
-        "::add-mask::${{ fromJSON(secrets.AZURE_CREDENTIALS)['clientId'] }}"
-        "::add-mask::${{ fromJSON(secrets.AZURE_CREDENTIALS)['clientSecret'] }}"
-        "::add-mask::${{ secrets.GH_CREDENTIALS_DEV }}"
+        ACR_TENANT_ID=jq -r '.inputs.secret' ${{ fromJSON(secrets.AZURE_CREDENTIALS)['tenantId'] }}
+        ACR_CLIENT_ID=jq -r '.inputs.secret' $${{ fromJSON(secrets.AZURE_CREDENTIALS)['clientId'] }}
+        ACR_CLIENT_SECRET=jq -r '.inputs.secret' $${{ fromJSON(secrets.AZURE_CREDENTIALS)['clientSecret'] }}
 
     - name: SUBSTITUTE VARIABLES
       uses: microsoft/variable-substitution@v1 
