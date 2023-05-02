@@ -85,6 +85,16 @@ func AddCollaborator(owner string, repo string, user string, permission string) 
 	return resp, err
 }
 
+func RemoveCollaborator(owner string, repo string, user string, permission string) (*github.Response, error) {
+	client := createClient(os.Getenv("GH_TOKEN"))
+
+	resp, err := client.Repositories.RemoveCollaborator(context.Background(), owner, repo, user)
+	if err != nil {
+		return nil, err
+	}
+	return resp, err
+}
+
 func GetRepository(repoName string, org string) (*github.Repository, error) {
 	client := createClient(os.Getenv("GH_TOKEN"))
 	owner := org
