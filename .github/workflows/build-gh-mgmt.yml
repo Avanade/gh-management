@@ -15,6 +15,7 @@ on:
 
 env:
   PROJECT_NAME: ${{github.event.inputs.selected_environment}}-gh-mgmt-app
+  TENANT_ID: ${{ fromJSON(secrets.AZURE_CREDENTIALS)['tenantId'] }}
 
 jobs:
   deploy-in-acr:
@@ -60,11 +61,6 @@ jobs:
     #     parameters.appServiceSettings.value.GH_CLIENT_SECRET : ${{ fromJSON(secrets.GH_CREDENTIALS_UAT)['clientSecret'] }}
     #     parameters.appServiceSettings.value.GH_TOKEN : ${{ fromJSON(secrets.GH_CREDENTIALS_UAT)['token'] }}
     #     parameters.appServiceSettings.value.GHMGMTDB_CONNECTION_STRING : ${{ secrets.GH_MGMT_CONNECTION_STRING_UAT }}
-
-    - name: Add mask
-      run: |
-        echo "TENANT_ID=${{ fromJSON(secrets.AZURE_CREDENTIALS)['tenantId'] }}" >> $GITHUB_ENV
-        echo "::add-mask::$TENANT_ID"
 
     - name: SUBSTITUTE VARIABLES
       uses: microsoft/variable-substitution@v1 
