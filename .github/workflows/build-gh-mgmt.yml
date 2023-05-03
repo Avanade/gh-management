@@ -46,9 +46,9 @@ jobs:
           ${{ secrets.AZURE_CREDENTIALS }}
         EOL
 
-        TENANT_ID=`jq '.tenantId' az_cred.json`
-        CLIENT_ID=`jq '.clientId' az_cred.json`
-        CLIENT_SECRET=`jq '.clientSecret' az_cred.json`
+        TENANT_ID=`jq -r '.tenantId' az_cred.json`
+        CLIENT_ID=`jq -r '.clientId' az_cred.json`
+        CLIENT_SECRET=`jq -r '.clientSecret' az_cred.json`
 
         echo "::add-mask::$TENANT_ID"
         echo "::add-mask::$CLIENT_ID"
@@ -73,9 +73,9 @@ jobs:
             ;;
         esac
 
-        CLIENT_ID=`jq '.clientId' gh_cred.json`
-        CLIENT_SECRET=`jq '.clientSecret' gh_cred.json`
-        TOKEN=`jq '.token' gh_cred.json`
+        CLIENT_ID=`jq -r '.clientId' gh_cred.json`
+        CLIENT_SECRET=`jq -r '.clientSecret' gh_cred.json`
+        TOKEN=`jq -r '.token' gh_cred.json`
 
         echo "::add-mask::$CLIENT_ID"
         echo "::add-mask::$CLIENT_SECRET"
