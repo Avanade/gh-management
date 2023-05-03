@@ -85,6 +85,16 @@ func AddCollaborator(owner string, repo string, user string, permission string) 
 	return resp, err
 }
 
+func RemoveCollaborator(owner string, repo string, user string, permission string) (*github.Response, error) {
+	client := createClient(os.Getenv("GH_TOKEN"))
+
+	resp, err := client.Repositories.RemoveCollaborator(context.Background(), owner, repo, user)
+	if err != nil {
+		return nil, err
+	}
+	return resp, err
+}
+
 func GetRepository(repoName string, org string) (*github.Repository, error) {
 	client := createClient(os.Getenv("GH_TOKEN"))
 	owner := org
@@ -285,13 +295,7 @@ func RemoveOrganizationsMember(token string, org string, username string) *githu
 func RepositoriesListCollaborators(token string, org string, repo string, role string, affiliations string) []*github.User {
 	client := createClient(token)
 	options := *&github.ListCollaboratorsOptions{Permission: role, Affiliation: affiliations}
-	ListCollabs, _, err := client.Repositories.ListCollaborators(context.Background(), org, repo, &options)
-
-	if err != nil {
-
-		fmt.Println(err)
-	}
-
+	ListCollabs, _, _ := client.Repositories.ListCollaborators(context.Background(), org, repo, &options)
 	return ListCollabs
 }
 func OrgListMembers(token string, org string) []*github.User {

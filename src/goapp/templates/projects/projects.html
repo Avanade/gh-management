@@ -178,12 +178,12 @@
                                 <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500" x-text="item.email===''? '-':item.email"></td>
                                 <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500" x-text="item.role"></td>
                                 <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm sm:pr-0">
-                                  <a href="#" class="text-indigo-600 hover:text-indigo-900" @click="updateCollaborator(repository.Id, item.GitHubUsername, item.role);">
+                                  <a class="text-indigo-600 hover:text-indigo-900 hover:cursor-pointer" @click="updateCollaborator(repository.Id, item.GitHubUsername, item.role);">
                                     Update
-                                  </a>
-                                  <!-- <a href="#" class="text-indigo-600 hover:text-indigo-900">
+                                  </a> |
+                                  <a class="text-indigo-600 hover:text-indigo-900 hover:cursor-pointer" @click="removeCollaborator(repository.Id, item.GitHubUsername, item.role)">
                                     Remove
-                                  </a> -->
+                                  </a>
                                 </td>
                               </tr>
                             </template>
@@ -422,8 +422,10 @@
                               <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
                                 Permission
                               </th>
-                              <!-- <th scope="col" class="relative py-3.5 pl-3 pr-4 sm:pr-0">
-                              </th> -->
+                              {{ if .isAdmin }}
+                              <th scope="col" class="relative py-3.5 pl-3 pr-4 sm:pr-0">
+                              </th>
+                              {{ end }}
                             </tr>
                           </thead>
                           <tbody class="divide-y divide-gray-200">
@@ -435,14 +437,16 @@
                                 </td>
                                 <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500" x-text="item.email===''? '-':item.email"></td>
                                 <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500" x-text="item.role"></td>
-                                <!-- <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm sm:pr-0">
-                                  <a href="#" class="text-indigo-600 hover:text-indigo-900">
+                                {{ if .isAdmin }}
+                                <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm sm:pr-0">
+                                  <a class="text-indigo-600 hover:text-indigo-900 hover:cursor-pointer" @click="updateCollaborator(repository.Id, item.GitHubUsername, item.role);">
                                     Update
                                   </a> | 
-                                  <a href="#" class="text-indigo-600 hover:text-indigo-900">
+                                  <a href="#" class="text-indigo-600 hover:text-indigo-900 hover:cursor-pointer" @click="removeCollaborator(repository.Id, item.GitHubUsername, item.role)">
                                     Remove
                                   </a>
-                                </td> -->
+                                </td>
+                                {{ end }}
                               </tr>
                             </template>
                           </tbody>
@@ -867,7 +871,19 @@
         this.form.ghUsername = user,
         this.form.permission = role === 'read' ? 'pull' : role === 'write' ? 'push' : role
         this.showAddCollaboratorModal = true
-      }
+      },
+      removeCollaborator(id, user, permission) {
+        let url = `/api/repositories/collaborators/remove/${id}/${user}/${permission}`
+        let f = () => {
+          Alpine.store('master').modal.show()
+          Alpine.store('master').getData(url, `Collaborator was successfully removed.`, "Refresh repository list", "/repositories")                
+        }
+
+        let title = "Confirmation"
+        let message = `Remove ${user} from the repository?` 
+        Alpine.store('master').confirmationModal.update(title, message, f)
+        Alpine.store('master').confirmationModal.show()
+      },
     }
   }
 </script>

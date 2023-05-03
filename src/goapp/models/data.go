@@ -226,5 +226,6 @@ type TypUpdateApprovalReAssign struct {
 }
 type TypRepoOwner struct {
 	Id                int64
+	RepoName          string
 	UserPrincipalName string
 }
