@@ -71,11 +71,12 @@ jobs:
               ${{ secrets.GH_CREDENTIALS_UAT }}
             EOL
           ;;
+          *)
         esac
 
         CLIENT_ID=`jq '.clientId' gh_cred.json`
         CLIENT_SECRET=`jq '.clientSecret' gh_cred.json`
-        TOKEN=`jq '.tenantId' gh_cred.json`
+        TOKEN=`jq '.token' gh_cred.json`
 
         echo "::add-mask::$CLIENT_ID"
         echo "::add-mask::$CLIENT_SECRET"
