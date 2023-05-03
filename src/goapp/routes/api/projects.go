@@ -355,7 +355,7 @@ func RequestMakePublic(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	go RequestApproval(id)
+	RequestApproval(id)
 }
 
 func ImportReposToDatabase(w http.ResponseWriter, r *http.Request) {
@@ -574,8 +574,8 @@ func ApprovalSystemRequest(data models.TypProjectApprovals) error {
 				<td style="font-size:larger">|ProjectName|<td>
 			</tr>
 			<tr>
-				<td style="font-weight: bold;">CoOwner<td>
-				<td style="font-size:larger">|CoownerName|<td>
+				<td style="font-weight: bold;">Requested by<td>
+				<td style="font-size:larger">|Requester|<td>
 			</tr>
 			<tr>
 				<td style="font-weight: bold;">Description<td>
@@ -588,7 +588,7 @@ func ApprovalSystemRequest(data models.TypProjectApprovals) error {
 				<td style="font-size:larger">|Newcontribution|<td>
 			</tr>
 			<tr>
-				<td style="font-weight: bold;">Who is sponsoring this OSS contribution?<td>
+				<td style="font-weight: bold;">Who is sponsoring thapprovalsyscois OSS contribution?<td>
 				<td style="font-size:larger">|OSSsponsor|<td>
 			</tr>
 			<tr>
@@ -610,7 +610,7 @@ func ApprovalSystemRequest(data models.TypProjectApprovals) error {
 			"|RequesterName|", data.RequesterName,
 			"|ApprovalType|", data.ApprovalType,
 			"|ProjectName|", data.ProjectName,
-			"|CoownerName|", data.CoownerName,
+			"|Requester|", data.RequesterName,
 			"|ProjectDescription|", data.ProjectDescription,
 			"|RequesterUserPrincipalName|", data.RequesterUserPrincipalName,
 
