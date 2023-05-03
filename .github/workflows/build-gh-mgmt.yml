@@ -62,14 +62,14 @@ jobs:
       run: |
         case ${{ github.event.inputs.selected_environment }} in
           "dev")
-            cat > gh_cred.json <<EOL
-              ${{ secrets.GH_CREDENTIALS_DEV }}
-            EOL
+        cat > gh_cred.json <<EOL
+          ${{ secrets.GH_CREDENTIALS_DEV }}
+        EOL
             ;;
           "uat")
-            cat > gh_cred.json <<EOL
-              ${{ secrets.GH_CREDENTIALS_UAT }}
-            EOL
+        cat > gh_cred.json <<EOL
+          ${{ secrets.GH_CREDENTIALS_UAT }}
+        EOL
             ;;
         esac
 
