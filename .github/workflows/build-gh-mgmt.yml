@@ -65,13 +65,12 @@ jobs:
             cat > gh_cred.json <<EOL
               ${{ secrets.GH_CREDENTIALS_DEV }}
             EOL
-          ;;
+            ;;
           "uat")
             cat > gh_cred.json <<EOL
               ${{ secrets.GH_CREDENTIALS_UAT }}
             EOL
-          ;;
-          *)
+            ;;
         esac
 
         CLIENT_ID=`jq '.clientId' gh_cred.json`
