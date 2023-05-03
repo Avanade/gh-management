@@ -7,6 +7,7 @@ import (
 	models "main/models"
 	ghmgmt "main/pkg/ghmgmtdb"
 	gh "main/pkg/github"
+	githubAPI "main/pkg/github"
 	session "main/pkg/session"
 	"main/pkg/sql"
 	"net/http"
@@ -517,8 +518,20 @@ func IndexOrgRepos(w http.ResponseWriter, r *http.Request) {
 			var err error
 
 			if isExisting {
-				param["Id"] = ghmgmt.GetProjectByGithubId(repo.GithubId)[0]["Id"]
+				userdata := ghmgmt.GetProjectByGithubId(repo.GithubId)
+				param["Id"] = userdata[0]["Id"]
+
 				err = ghmgmt.ProjectUpdateByImport(param)
+				if userdata[0]["CreatedBy"] != nil {
+					RepoOwners, _ := ghmgmt.RepoOwnersByUserAndProjectId(param["Id"].(int64), userdata[0]["CreatedBy"].(string))
+					if len(RepoOwners) < 1 {
+						error := ghmgmt.RepoOwnersInsert(param["Id"].(int64), userdata[0]["CreatedBy"].(string))
+						if error != nil {
+
+							fmt.Println(error)
+						}
+					}
+				}
 			} else {
 				err = ghmgmt.ProjectInsertByImport(param)
 			}
@@ -653,6 +666,44 @@ func ReprocessRequestApproval() {
 	for _, v := range projectApprovals {
 		go ApprovalSystemRequest(v)
 	}
+}
+
+func RepoOwnersCleanup(w http.ResponseWriter, r *http.Request) {
+	token := os.Getenv("GH_TOKEN")
+	RepoUsers, _ := ghmgmt.SelectAllRepoNameAndOwners()
+	organizations := [...]string{os.Getenv("GH_ORG_INNERSOURCE"), os.Getenv("GH_ORG_OPENSOURCE")}
+	var wg sync.WaitGroup
+	for _, RepoUser := range RepoUsers {
+		wg.Add(1)
+		func(RepoUser models.TypRepoOwner) {
+			fmt.Println("Project ID : " + strconv.FormatInt(RepoUser.Id, 10))
+			isAdmin := false
+			validRepo := false
+			for _, organization := range organizations {
+				RepoAdmins_ := githubAPI.RepositoriesListCollaborators(token, organization, RepoUser.RepoName, "admin", "direct")
+				if len(RepoAdmins_) > 0 {
+					for _, list := range RepoAdmins_ {
+						validRepo = true
+						email, _ := ghmgmt.UsersGetEmail(*list.Login)
+						if RepoUser.UserPrincipalName == email {
+							isAdmin = true
+						}
+					}
+				}
+			}
+
+			if validRepo && !isAdmin {
+				err := ghmgmt.DeleteRepoOwnerRecordByUserAndProjectId(RepoUser.Id, RepoUser.UserPrincipalName)
+
+				if err != nil {
+					http.Error(w, err.Error(), http.StatusInternalServerError)
+				}
+			}
+			defer wg.Done()
+
+		}(RepoUser)
+	}
+	wg.Wait()
 }
 
 type RepositoryList struct {
