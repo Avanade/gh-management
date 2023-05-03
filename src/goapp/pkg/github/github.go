@@ -295,13 +295,7 @@ func RemoveOrganizationsMember(token string, org string, username string) *githu
 func RepositoriesListCollaborators(token string, org string, repo string, role string, affiliations string) []*github.User {
 	client := createClient(token)
 	options := *&github.ListCollaboratorsOptions{Permission: role, Affiliation: affiliations}
-	ListCollabs, _, err := client.Repositories.ListCollaborators(context.Background(), org, repo, &options)
-
-	if err != nil {
-
-		fmt.Println(err)
-	}
-
+	ListCollabs, _, _ := client.Repositories.ListCollaborators(context.Background(), org, repo, &options)
 	return ListCollabs
 }
 func OrgListMembers(token string, org string) []*github.User {

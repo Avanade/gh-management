@@ -384,6 +384,7 @@ func ProjectsApprovalUpdateGUID(id int64, ApprovalSystemGUID string) {
 	}
 	db.ExecuteStoredProcedure("PR_ProjectsApproval_Update_ApprovalSystemGUID", param)
 }
+
 func GetProjectForRepoOwner() (RepoOwner []models.TypRepoOwner) {
 	db := ConnectDb()
 	defer db.Close()
@@ -1403,6 +1404,44 @@ func RepoOwnersByUserAndProjectId(id int64, userPrincipalName string) (RepoOwner
 	}
 	return RepoOwner, err
 
+}
+
+func SelectAllRepoNameAndOwners() (RepoOwner []models.TypRepoOwner, err error) {
+	db := ConnectDb()
+	defer db.Close()
+
+	result, err := db.ExecuteStoredProcedureWithResult("PR_RepoOwners_SelectAllRepoNameAndOwners", nil)
+	if err != nil {
+		println(err)
+	}
+
+	for _, v := range result {
+		data := models.TypRepoOwner{
+			Id:                v["ProjectId"].(int64),
+			RepoName:          v["Name"].(string),
+			UserPrincipalName: v["UserPrincipalName"].(string),
+		}
+		RepoOwner = append(RepoOwner, data)
+	}
+	return RepoOwner, err
+
+}
+
+func RepoOwnersDelete(ProjectId int64, userPrincipalName string) error {
+	db := ConnectDb()
+	defer db.Close()
+
+	param := map[string]interface{}{
+		"ProjectId":         ProjectId,
+		"UserPrincipalName": userPrincipalName,
+	}
+
+	_, err := db.ExecuteStoredProcedure("PR_RepoOwners_Delete_ByUserAndProjectId", param)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func GetRepoOwnersRecordByRepoId(id int64) (RepoOwner []models.TypRepoOwner, err error) {
