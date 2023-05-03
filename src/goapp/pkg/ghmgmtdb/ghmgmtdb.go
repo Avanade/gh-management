@@ -1427,23 +1427,6 @@ func SelectAllRepoNameAndOwners() (RepoOwner []models.TypRepoOwner, err error) {
 
 }
 
-func RepoOwnersDelete(ProjectId int64, userPrincipalName string) error {
-	db := ConnectDb()
-	defer db.Close()
-
-	param := map[string]interface{}{
-		"ProjectId":         ProjectId,
-		"UserPrincipalName": userPrincipalName,
-	}
-
-	_, err := db.ExecuteStoredProcedure("PR_RepoOwners_Delete_ByUserAndProjectId", param)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
 func GetRepoOwnersRecordByRepoId(id int64) (RepoOwner []models.TypRepoOwner, err error) {
 	db := ConnectDb()
 	defer db.Close()

@@ -693,7 +693,7 @@ func RepoOwnersCleanup(w http.ResponseWriter, r *http.Request) {
 			}
 
 			if validRepo && !isAdmin {
-				err := ghmgmt.RepoOwnersDelete(RepoUser.Id, RepoUser.UserPrincipalName)
+				err := ghmgmt.DeleteRepoOwnerRecordByUserAndProjectId(RepoUser.Id, RepoUser.UserPrincipalName)
 
 				if err != nil {
 					http.Error(w, err.Error(), http.StatusInternalServerError)
