@@ -42,38 +42,48 @@ jobs:
 
     - name: Setup Azure Credentials
       run: |
-        az_creds=`cat > cred.json <<EOL
-        ${{ secrets.AZURE_CREDENTIALS }}
-        EOL`
+        cat > az_cred.json <<EOL
+          ${{ secrets.AZURE_CREDENTIALS }}
+        EOL
 
-        echo "::add-mask::$az_creds.tenantId"
-        echo "::add-mask::$az_creds.clientId"
-        echo "::add-mask::$az_creds.clientSecret"
-        echo "TENANT_ID=$az_creds.tenantId" >> $GITHUB_ENV
-        echo "CLIENT_ID=$az_creds.clientId" >> $GITHUB_ENV
-        echo "CLIENT_SECRET=$az_creds.clientSecret" >> $GITHUB_ENV
+        TENANT_ID=`jq '.tenantId' az_cred.json`
+        CLIENT_ID=`jq '.clientId' az_cred.json`
+        CLIENT_SECRET=`jq '.clientSecret' az_cred.json`
+
+        echo "::add-mask::$TENANT_ID"
+        echo "::add-mask::$CLIENT_ID"
+        echo "::add-mask::$CLIENT_SECRET"
+
+        echo "TENANT_ID=$TENANT_ID" >> $GITHUB_ENV
+        echo "CLIENT_ID=$CLIENT_ID" >> $GITHUB_ENV
+        echo "CLIENT_SECRET=$CLIENT_SECRET" >> $GITHUB_ENV
 
     - name: Setup Dev Github Credentials
       run: |
         case ${{ github.event.inputs.selected_environment }} in
           "dev")
-            gh_creds=`cat > cred.json <<EOL
-            ${{ secrets.GH_CREDENTIALS_DEV }}
-            EOL`
+            cat > gh_cred.json <<EOL
+              ${{ secrets.GH_CREDENTIALS_DEV }}
+            EOL
           ;;
           "uat")
-            gh_creds=`cat > cred.json <<EOL
-            ${{ secrets.GH_CREDENTIALS_UAT }}
-            EOL`
+            cat > gh_cred.json <<EOL
+              ${{ secrets.GH_CREDENTIALS_UAT }}
+            EOL
           ;;
         esac
 
-        echo "::add-mask::$gh_creds.clientId"
-        echo "::add-mask::$gh_creds.clientSecret"
-        echo "::add-mask::$gh_creds.token"
-        echo "GH_CLIENT_ID=$gh_creds.clientId" >> $GITHUB_ENV
-        echo "GH_CLIENT_SECRET=$gh_creds.clientSecret" >> $GITHUB_ENV
-        echo "GH_TOKEN=$gh_creds.token" >> $GITHUB_ENV
+        CLIENT_ID=`jq '.clientId' gh_cred.json`
+        CLIENT_SECRET=`jq '.clientSecret' gh_cred.json`
+        TOKEN=`jq '.tenantId' gh_cred.json`
+
+        echo "::add-mask::$CLIENT_ID"
+        echo "::add-mask::$CLIENT_SECRET"
+        echo "::add-mask::$TOKEN"
+
+        echo "GH_CLIENT_ID=$CLIENT_ID" >> $GITHUB_ENV
+        echo "GH_CLIENT_SECRET=$CLIENT_SECRET" >> $GITHUB_ENV
+        echo "GH_TOKEN=$TOKEN" >> $GITHUB_ENV
 
     - name: SUBSTITUTE VARIABLES
       uses: microsoft/variable-substitution@v1 
