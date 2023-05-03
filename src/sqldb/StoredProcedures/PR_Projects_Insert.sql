@@ -26,7 +26,6 @@ DECLARE @ResultTable TABLE(Id INT);
 INSERT INTO Projects (
 	GithubId,
 	[Name],
-	CoOwner,
 	[Description],
 	IsArchived,
 	ConfirmAvaIP,
@@ -46,7 +45,6 @@ OUTPUT INSERTED.Id INTO @ResultTable
 VALUES (
 	@GithubId,
 	@Name,
-	@CoOwner,
 	@Description,
 	@IsArchived,
 	@ConfirmAvaIP,
@@ -73,5 +71,10 @@ IF @CreatedBy IS NOT NULL
 
 IF @CoOwner IS NOT NULL
 	EXEC [PR_UserAccess_Insert] @Id, @CoOwner
+	
+IF @CreatedBy IS NOT NULL
+	EXEC PR_RepoOwners_Insert @Id, @CreatedBy
 
+IF @CoOwner IS NOT NULL
+	EXEC PR_RepoOwners_Insert @Id, @CoOwner
 SELECT @Id [ItemId]

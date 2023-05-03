@@ -1,15 +1,10 @@
 package githubAPI
 
 import (
-	"bytes"
 	"context"
-	"encoding/json"
-	"errors"
 	"fmt"
 	"main/models"
-	"main/pkg/envvar"
 	ghmgmt "main/pkg/ghmgmtdb"
-	"net/http"
 	"os"
 	"strings"
 
@@ -42,7 +37,7 @@ func CreatePrivateGitHubRepository(data models.TypNewProjectReqBody, requestor s
 		return nil, err
 	}
 
-	_, err = AddCollaborator(data, requestor)
+	_, err = AddCollaboratorToRequestedRepo(data, requestor)
 	if err != nil {
 		return nil, err
 	}
@@ -59,21 +54,41 @@ func IsOrgAllowInternalRepo() (bool, error) {
 	return *org.MembersCanCreateInternalRepos, err
 }
 
-func AddCollaborator(data models.TypNewProjectReqBody, requestor string) (*github.Response, error) {
-	client := createClient(os.Getenv("GH_TOKEN"))
+func AddCollaboratorToRequestedRepo(data models.TypNewProjectReqBody, requestor string) (*github.Response, error) {
 	owner := os.Getenv("GH_ORG_INNERSOURCE")
-	opts := &github.RepositoryAddCollaboratorOptions{
-		Permission: "admin",
-	}
+
 	if data.Coowner != requestor {
 		GHUser := ghmgmt.Users_Get_GHUser(requestor)
-		_, _, err := client.Repositories.AddCollaborator(context.Background(), owner, data.Name, GHUser, opts)
+		_, err := AddCollaborator(owner, data.Name, GHUser, "admin")
 		if err != nil {
 			return nil, err
 		}
 	}
 	GHUser := ghmgmt.Users_Get_GHUser(data.Coowner)
-	_, resp, err := client.Repositories.AddCollaborator(context.Background(), owner, data.Name, GHUser, opts)
+	resp, err := AddCollaborator(owner, data.Name, GHUser, "admin")
+	if err != nil {
+		return nil, err
+	}
+	return resp, err
+}
+
+func AddCollaborator(owner string, repo string, user string, permission string) (*github.Response, error) {
+	client := createClient(os.Getenv("GH_TOKEN"))
+	opts := &github.RepositoryAddCollaboratorOptions{
+		Permission: permission,
+	}
+
+	_, resp, err := client.Repositories.AddCollaborator(context.Background(), owner, repo, user, opts)
+	if err != nil {
+		return nil, err
+	}
+	return resp, err
+}
+
+func RemoveCollaborator(owner string, repo string, user string, permission string) (*github.Response, error) {
+	client := createClient(os.Getenv("GH_TOKEN"))
+
+	resp, err := client.Repositories.RemoveCollaborator(context.Background(), owner, repo, user)
 	if err != nil {
 		return nil, err
 	}
@@ -143,16 +158,17 @@ func GetRepositoriesFromOrganization(org string) ([]Repo, error) {
 	var repoList []Repo
 	for _, repo := range allRepos {
 		r := Repo{
-			GithubId:    repo.GetID(),
-			FullName:    repo.GetFullName(),
-			Name:        repo.GetName(),
-			Link:        repo.GetHTMLURL(),
-			Org:         org,
-			Description: repo.GetDescription(),
-			Private:     repo.GetPrivate(),
-			Created:     repo.GetCreatedAt(),
-			IsArchived:  repo.GetArchived(),
-			Visibility:  repo.GetVisibility(),
+			GithubId:            repo.GetID(),
+			FullName:            repo.GetFullName(),
+			Name:                repo.GetName(),
+			Link:                repo.GetHTMLURL(),
+			Org:                 org,
+			Description:         repo.GetDescription(),
+			Private:             repo.GetPrivate(),
+			Created:             repo.GetCreatedAt(),
+			IsArchived:          repo.GetArchived(),
+			Visibility:          repo.GetVisibility(),
+			TFSProjectReference: repo.GetHTMLURL(),
 		}
 		repoList = append(repoList, r)
 	}
@@ -161,70 +177,53 @@ func GetRepositoriesFromOrganization(org string) ([]Repo, error) {
 }
 
 func SetProjectVisibility(projectName string, visibility string, org string) error {
-	client := &http.Client{}
-	urlPath := fmt.Sprintf("https://api.github.com/repos/%s/%s", org, projectName)
-	postBody, _ := json.Marshal(map[string]string{
-		"visibility": visibility,
-	})
-	reqBody := bytes.NewBuffer(postBody)
+	client := createClient(os.Getenv("GH_TOKEN"))
+	opt := &github.Repository{Visibility: github.String(visibility)}
 
-	req, err := http.NewRequest(http.MethodPatch, urlPath, reqBody)
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", "Bearer "+envvar.GetEnvVar("GH_TOKEN", ""))
-
-	resp, err := client.Do(req)
+	_, _, err := client.Repositories.Edit(context.Background(), org, projectName, opt)
 	if err != nil {
 		return err
-	}
-	if resp.StatusCode == http.StatusUnprocessableEntity {
-		return errors.New("Failed to make repository " + visibility)
-	}
 
+	}
 	return nil
+
 }
 
 func ArchiveProject(projectName string, archive bool, org string) error {
-	client := &http.Client{}
-	urlPath := fmt.Sprintf("https://api.github.com/repos/%s/%s", org, projectName)
-	postBody, _ := json.Marshal(map[string]bool{
-		"archived": archive,
-	})
-	reqBody := bytes.NewBuffer(postBody)
+	client := createClient(os.Getenv("GH_TOKEN"))
+	opt := &github.Repository{Archived: github.Bool(archive)}
 
-	req, err := http.NewRequest(http.MethodPatch, urlPath, reqBody)
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", "Bearer "+envvar.GetEnvVar("GH_TOKEN", ""))
-
-	_, err = client.Do(req)
+	_, _, err := client.Repositories.Edit(context.Background(), org, projectName, opt)
 	if err != nil {
 		return err
 	}
-
 	return nil
+
 }
 
-func TransferRepository(repo string, owner string, newOwner string) error {
+func TransferRepository(repo string, owner string, newOwner string) (*github.Repository, error) {
 	client := createClient(os.Getenv("GH_TOKEN"))
 	opt := github.TransferRequest{NewOwner: newOwner}
 
-	_, _, err := client.Repositories.Transfer(context.Background(), owner, repo, opt)
+	resp, _, err := client.Repositories.Transfer(context.Background(), owner, repo, opt)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	return nil
+	return resp, nil
 }
 
 type Repo struct {
-	GithubId    int64            `json:"id"`
-	FullName    string           `json:"repoFullName"`
-	Name        string           `json:"repoName"`
-	Link        string           `json:"repoLink"`
-	Org         string           `json:"org"`
-	Description string           `json:"description"`
-	Private     bool             `json:"private"`
-	Created     github.Timestamp `json:"created"`
-	IsArchived  bool             `json:"archived"`
-	Visibility  string           `json:"visibility"`
+	GithubId            int64            `json:"id"`
+	FullName            string           `json:"repoFullName"`
+	Name                string           `json:"repoName"`
+	Link                string           `json:"repoLink"`
+	Org                 string           `json:"org"`
+	Description         string           `json:"description"`
+	Private             bool             `json:"private"`
+	Created             github.Timestamp `json:"created"`
+	IsArchived          bool             `json:"archived"`
+	Visibility          string           `json:"visibility"`
+	TFSProjectReference string
 }
 
 func OrganizationsIsMember(token string, GHUser string) (bool, bool, error) {
@@ -293,16 +292,10 @@ func RemoveOrganizationsMember(token string, org string, username string) *githu
 	}
 	return repons
 }
-func RepositoriesListCollaborators(token string, org string, repo string) []*github.User {
+func RepositoriesListCollaborators(token string, org string, repo string, role string, affiliations string) []*github.User {
 	client := createClient(token)
-	options := *&github.ListCollaboratorsOptions{}
-	ListCollabs, _, err := client.Repositories.ListCollaborators(context.Background(), org, repo, &options)
-
-	if err != nil {
-
-		fmt.Println(err)
-	}
-
+	options := *&github.ListCollaboratorsOptions{Permission: role, Affiliation: affiliations}
+	ListCollabs, _, _ := client.Repositories.ListCollaborators(context.Background(), org, repo, &options)
 	return ListCollabs
 }
 func OrgListMembers(token string, org string) []*github.User {

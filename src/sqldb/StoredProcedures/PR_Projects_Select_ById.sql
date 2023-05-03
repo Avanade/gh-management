@@ -1,5 +1,7 @@
-﻿CREATE PROCEDURE [dbo].[PR_Projects_Select]
-
+CREATE PROCEDURE [dbo].[PR_Projects_Select_ById]
+(
+	@Id INT
+)
 AS
 BEGIN
 	-- SET NOCOUNT ON added to prevent extra result sets from
@@ -8,6 +10,7 @@ BEGIN
 
     -- Insert statements for procedure here
 SELECT [Id],
+       [GithubId],
        [Name],
        [CoOwner],
        [Description],
@@ -18,8 +21,11 @@ SELECT [Id],
        [Created],
        [CreatedBy],
        [Modified],
-       [ModifiedBy] 
+       [ModifiedBy],
+       [TFSProjectReference],
+       [RepositorySource]
   FROM 
        [dbo].[Projects]
-
+  WHERE
+      [Id] = @Id
 END

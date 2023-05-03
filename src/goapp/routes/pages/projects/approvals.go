@@ -110,6 +110,9 @@ func checkAllRequests(id int64) {
 		gh.SetProjectVisibility(repo, "public", newOwner)
 
 		ghmgmt.UpdateProjectVisibilityId(id, PUBLIC)
+
+		repoResp, _ := gh.GetRepository(repo, newOwner)
+		ghmgmt.UpdateTFSProjectReferenceById(id, repoResp.GetHTMLURL())
 	}
 }
 
@@ -150,16 +153,11 @@ func UpdateApprovalReassignApprover(w http.ResponseWriter, r *http.Request) {
 			Id:                         v["Id"].(int64),
 			ProjectId:                  v["ProjectId"].(int64),
 			ProjectName:                v["ProjectName"].(string),
-			ProjectCoowner:             v["ProjectCoowner"].(string),
 			ProjectDescription:         v["ProjectDescription"].(string),
 			RequesterGivenName:         v["RequesterGivenName"].(string),
 			RequesterSurName:           v["RequesterSurName"].(string),
 			RequesterName:              v["RequesterName"].(string),
 			RequesterUserPrincipalName: v["RequesterUserPrincipalName"].(string),
-			CoownerGivenName:           v["CoownerGivenName"].(string),
-			CoownerSurName:             v["CoownerSurName"].(string),
-			CoownerName:                v["CoownerName"].(string),
-			CoownerUserPrincipalName:   v["CoownerUserPrincipalName"].(string),
 			ApprovalTypeId:             v["ApprovalTypeId"].(int64),
 			ApprovalType:               v["ApprovalType"].(string),
 			ApproverUserPrincipalName:  v["ApproverUserPrincipalName"].(string),
@@ -193,8 +191,8 @@ func SendReassignEmail(data models.TypProjectApprovals) error {
 				<td style="font-size:larger">|ProjectName|<td>
 			</tr>
 			<tr>
-				<td style="font-weight: bold;">CoOwner<td>
-				<td style="font-size:larger">|CoownerName|<td>
+				<td style="font-weight: bold;">Requested by<td>
+				<td style="font-size:larger">|Requester|<td>
 			</tr>
 			<tr>
 				<td style="font-weight: bold;">Description<td>
@@ -251,7 +249,7 @@ func SendReassignEmail(data models.TypProjectApprovals) error {
 		"|RequesterName|", data.RequesterName,
 		"|ApprovalType|", data.ApprovalType,
 		"|ProjectName|", data.ProjectName,
-		"|CoownerName|", data.CoownerName,
+		"|Requester|", data.RequesterName,
 		"|ProjectDescription|", data.ProjectDescription,
 		"|RequesterUserPrincipalName|", data.RequesterUserPrincipalName,
 

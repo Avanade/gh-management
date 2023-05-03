@@ -1,16 +1,20 @@
 package routes
 
 import (
-	githubAPI "main/pkg/github"
-	"net/http"
-	"os"
-	"strings"
-	"time"
-
+	"encoding/json"
 	"fmt"
 	"main/pkg/email"
 	db "main/pkg/ghmgmtdb"
+	githubAPI "main/pkg/github"
 	"main/pkg/msgraph"
+	"net/http"
+	"os"
+	"strconv"
+	"strings"
+	"time"
+
+	"github.com/google/go-github/v50/github"
+	"github.com/gorilla/mux"
 )
 
 func CheckAvaInnerSource(w http.ResponseWriter, r *http.Request) {
@@ -26,38 +30,38 @@ func CheckAvaInnerSource(w http.ResponseWriter, r *http.Request) {
 
 func CheckAvaOpenSource(w http.ResponseWriter, r *http.Request) {
 	org := os.Getenv("GH_ORG_OPENSOURCE")
-	var OutsidecollabsList []string
+	var OutsideCollabsUsers []string
 	token := os.Getenv("GH_TOKEN")
 	repos, _ := githubAPI.GetRepositoriesFromOrganization(org)
 	Outsidecollabs := githubAPI.ListOutsideCollaborators(token, org)
 	for _, list := range Outsidecollabs {
-		OutsidecollabsList = append(OutsidecollabsList, *list.Login)
+		OutsideCollabsUsers = append(OutsideCollabsUsers, *list.Login)
 	}
-	var OutsideRepocollabsList []string
+	var RepoOutsideCollabsList []string
 	for _, collab := range repos {
-		var RepocollabsList []string
+		var RepoCollabsUserNames []string
 
 		var Adminmember []string
-		OutsideRepocollabsList = nil
+		RepoOutsideCollabsList = nil
 
-		Repocollabs := githubAPI.RepositoriesListCollaborators(token, org, collab.Name)
-		for _, list := range Repocollabs {
+		RepoCollabs := githubAPI.RepositoriesListCollaborators(token, org, collab.Name, "", "direct")
+		for _, list := range RepoCollabs {
 
-			RepocollabsList = append(RepocollabsList, *list.Login)
+			RepoCollabsUserNames = append(RepoCollabsUserNames, *list.Login)
 			if *list.RoleName == "admin" {
 				Adminmember = append(Adminmember, *list.Login)
 
 			}
 		}
 
-		for _, list := range RepocollabsList {
-			for _, Outsidelist := range OutsidecollabsList {
+		for _, list := range RepoCollabsUserNames {
+			for _, Outsidelist := range OutsideCollabsUsers {
 				if list == Outsidelist {
-					OutsideRepocollabsList = append(OutsideRepocollabsList, Outsidelist)
+					RepoOutsideCollabsList = append(RepoOutsideCollabsList, Outsidelist)
 				}
 			}
 		}
-		if len(OutsideRepocollabsList) > 0 {
+		if len(RepoOutsideCollabsList) > 0 {
 
 			for _, admin := range Adminmember {
 				email, err := db.UsersGetEmail(admin)
@@ -65,7 +69,7 @@ func CheckAvaOpenSource(w http.ResponseWriter, r *http.Request) {
 					http.Error(w, err.Error(), http.StatusInternalServerError)
 					return
 				}
-				EmailAdmin(admin, email, collab.Name, OutsideRepocollabsList)
+				EmailAdmin(admin, email, collab.Name, RepoOutsideCollabsList)
 			}
 
 		}
@@ -124,8 +128,8 @@ func ClearOrgMembers(w http.ResponseWriter, r *http.Request) {
 		repos, _ := githubAPI.GetRepositoriesFromOrganization(organizationsOpen)
 		for _, repo := range repos {
 
-			RepoAdmins := GetRepoAdmin(organizationsOpen, repo.Name)
-			Repocollabs := githubAPI.RepositoriesListCollaborators(token, organizationsOpen, repo.Name)
+			RepoAdmins := GetRepoCollaborators(organizationsOpen, repo.Name, "admin", "direct")
+			Repocollabs := GetRepoCollaborators(organizationsOpen, repo.Name, "", "direct")
 			var ConvertedInRepo []string
 			for _, collab1 := range ConvertedOutsidecollabsList {
 				for _, collab2 := range Repocollabs {
@@ -136,7 +140,7 @@ func ClearOrgMembers(w http.ResponseWriter, r *http.Request) {
 			}
 
 			for _, collab := range RepoAdmins {
-				collabemail, _ := db.UsersGetEmail(collab)
+				collabemail, _ := db.UsersGetEmail(*collab.Login)
 
 				if len(ConvertedInRepo) > 0 {
 					EmailRepoAdminConvertToColaborator(collabemail, repo.Name, ConvertedInRepo)
@@ -160,11 +164,11 @@ func RepoOwnerScan(w http.ResponseWriter, r *http.Request) {
 		repos, _ := githubAPI.GetRepositoriesFromOrganization(org)
 
 		for _, repo := range repos {
-			owners := GetRepoAdmin(org, repo.Name)
+			owners := GetRepoCollaborators(org, repo.Name, "", "direct")
 			if len(owners) < 2 {
 				repoOnwerDeficient = append(repoOnwerDeficient, repo.Name)
 				for _, owner := range owners {
-					email, _ = db.UsersGetEmail(owner)
+					email, _ = db.UsersGetEmail(*owner.Login)
 
 					EmailcoownerDeficient(email, org, repo.Name)
 				}
@@ -175,6 +179,115 @@ func RepoOwnerScan(w http.ResponseWriter, r *http.Request) {
 		if len(repoOnwerDeficient) > 0 {
 			EmailOspoOwnerDeficient(EmailSupport, org, repoOnwerDeficient)
 		}
+	}
+
+}
+
+func AddCollaborator(w http.ResponseWriter, r *http.Request) {
+	req := mux.Vars(r)
+	id, _ := strconv.ParseInt(req["id"], 10, 64)
+	ghUser := req["ghUser"]
+	permission := req["permission"]
+
+	// Get repository
+	data := db.GetProjectById(id)
+	s, _ := json.Marshal(data)
+	var repoList []Repo
+	err := json.Unmarshal(s, &repoList)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if len(repoList) > 0 {
+		repo := repoList[0]
+
+		repoUrl := strings.Replace(repo.TFSProjectReference, "https://", "", -1)
+		repoUrlSub := strings.Split(repoUrl, "/")
+
+		_, err := githubAPI.AddCollaborator(repoUrlSub[1], repo.Name, ghUser, permission)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		if permission == "admin" {
+			users, _ := db.GetUserByGitHubUsername(ghUser)
+
+			if len(users) > 0 {
+				err = db.RepoOwnersInsert(id, users[0]["UserPrincipalName"].(string))
+				if err != nil {
+					http.Error(w, err.Error(), http.StatusInternalServerError)
+					return
+				}
+			}
+		} else {
+			//if not admin, check is the user is currently an admin, remove if he is
+			users, _ := db.GetUserByGitHubUsername(ghUser)
+
+			if len(users) > 0 {
+				rec, err := db.RepoOwnersByUserAndProjectId(id, users[0]["UserPrincipalName"].(string))
+				if err != nil {
+					http.Error(w, err.Error(), http.StatusInternalServerError)
+					return
+				}
+
+				if len(rec) > 0 {
+					err := db.DeleteRepoOwnerRecordByUserAndProjectId(id, users[0]["UserPrincipalName"].(string))
+					if err != nil {
+						http.Error(w, err.Error(), http.StatusInternalServerError)
+						return
+					}
+				}
+			}
+		}
+
+		w.WriteHeader(http.StatusOK)
+	}
+
+}
+
+func RemoveCollaborator(w http.ResponseWriter, r *http.Request) {
+	req := mux.Vars(r)
+	id, _ := strconv.ParseInt(req["id"], 10, 64)
+	ghUser := req["ghUser"]
+	permission := req["permission"]
+
+	// Get repository
+	data := db.GetProjectById(id)
+	s, _ := json.Marshal(data)
+	var repoList []Repo
+	err := json.Unmarshal(s, &repoList)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if len(repoList) > 0 {
+		repo := repoList[0]
+
+		repoUrl := strings.Replace(repo.TFSProjectReference, "https://", "", -1)
+		repoUrlSub := strings.Split(repoUrl, "/")
+
+		_, err := githubAPI.RemoveCollaborator(repoUrlSub[1], repo.Name, ghUser, permission)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		if permission == "admin" {
+			users, _ := db.GetUserByGitHubUsername(ghUser)
+
+			if len(users) > 0 {
+				err = db.DeleteRepoOwnerRecordByUserAndProjectId(id, users[0]["UserPrincipalName"].(string))
+				if err != nil {
+					http.Error(w, err.Error(), http.StatusInternalServerError)
+					return
+				}
+			}
+		}
+
+		w.WriteHeader(http.StatusOK)
 	}
 
 }
@@ -255,26 +368,13 @@ func EmailRepoAdminConvertToColaborator(Email string, reponame string, outisideC
 	fmt.Printf("GitHub User was converted into an outside  on %s was sent.", e)
 }
 
-func GetRepoAdmin(org string, repo string) []string {
-	var Adminmember []string
-	var RepocollabsList []string
-	var OrgOwners []string
+func GetRepoCollaborators(org string, repo string, role string, affiliations string) []*github.User {
+
 	token := os.Getenv("GH_TOKEN")
-	ORG_OWNERS := os.Getenv("ORG_OWNERS")
-	OrgOwners = strings.Fields(ORG_OWNERS)
-	Repocollabs := githubAPI.RepositoriesListCollaborators(token, org, repo)
 
-	for _, list := range Repocollabs {
+	Repocollabs := githubAPI.RepositoriesListCollaborators(token, org, repo, role, affiliations)
 
-		RepocollabsList = append(RepocollabsList, *list.Login)
-		if *list.RoleName == "admin" {
-			if !stringInArray(*list.Login, OrgOwners) {
-				Adminmember = append(Adminmember, *list.Login)
-
-			}
-		}
-	}
-	return Adminmember
+	return Repocollabs
 }
 
 func EmailOspoOwnerDeficient(Email string, org string, reponame []string) {
@@ -324,6 +424,7 @@ func EmailcoownerDeficient(Email string, Org string, reponame string) {
 	email.SendEmail(m)
 	fmt.Printf(" less than 2 owner  on %s was sent.", e)
 }
+
 func stringInArray(a string, list []string) bool {
 	for _, b := range list {
 		if b == a {
