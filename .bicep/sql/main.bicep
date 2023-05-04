@@ -31,3 +31,8 @@ resource sqlServerDatabase 'Microsoft.Sql/servers/databases@2022-08-01-preview' 
     tier: skuTier
   }
 }
+
+resource sqlServerFrewallRuleGithubRunnerIPAddress 'Microsoft.Sql/servers/firewallRules@2022-08-01-preview' = {
+  parent: sqlServer
+  name: 'GithubRunnerIPAddress'
+}
