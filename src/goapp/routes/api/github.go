@@ -403,7 +403,7 @@ func EmailOspoOwnerDeficient(Email string, org string, reponame []string) {
 		body = fmt.Sprintf("<p>Hello %s ,  </p>  \n<p>This is to inform you that <b> %d </b> repositories on %s need to add a co-owner.</p> %s   </p>  ", Email, len(reponame), org, reponamelist)
 	}
 	m := email.TypEmailMessage{
-		Subject: "GitHub Organization Scan",
+		Subject: "Repository Owners Scan",
 		Body:    body,
 		To:      Email,
 	}
@@ -422,7 +422,7 @@ func EmailcoownerDeficient(Email string, Org string, reponame string) {
 	body = fmt.Sprintf("<p>Hello %s ,  </p>  \n<p>This is to inform you that you are the only admin on %s  GitHub repository. We recommend at least 2 admins on each repository. Click %s to add a co-owner.</p> \n <p>OSPO</p>", Email, reponame, link)
 
 	m := email.TypEmailMessage{
-		Subject: "GitHub Organization Scan",
+		Subject: "Repository Owners Scan",
 		Body:    body,
 		To:      Email,
 	}

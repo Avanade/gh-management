@@ -355,7 +355,7 @@ func RequestMakePublic(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	RequestApproval(id)
+	go RequestApproval(id)
 }
 
 func ImportReposToDatabase(w http.ResponseWriter, r *http.Request) {
