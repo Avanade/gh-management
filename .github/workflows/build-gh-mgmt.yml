@@ -57,11 +57,7 @@ jobs:
         subscriptionId: ${{ fromJSON(secrets.AZURE_CREDENTIALS)['subscriptionId'] }}
         resourceGroupName: ${{ secrets.AZURE_RG }}
         template: ./.bicep/sql/main.bicep
-        parameters: |
-          serverName=${{ secrets.SERVER_NAME }} 
-          administratorLogin=${{ secrets.SERVER_USERNAME }}
-          administratorLoginPassword=${{ secrets.SERVER_PASSWORD }} 
-          databaseName=${{ env.DATABASE_NAME }}
+        parameters: serverName=${{ secrets.SERVER_NAME }} administratorLogin=${{ secrets.SERVER_USERNAME }} administratorLoginPassword=${{ secrets.SERVER_PASSWORD }} databaseName=${{ env.DATABASE_NAME }}
         failOnStdErr: false
         scope: resourcegroup
 
