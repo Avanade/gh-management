@@ -9,7 +9,7 @@
                         "type": "ManagedServiceIdentity"
                     },
                     "method": "GET",
-                    "uri": "@{concat(parameters('GHMgmDomain'), '/api/init/indexorgrepos')}"
+                    "uri": "@concat(parameters('GHMgmDomain'), '/api/init/indexorgrepos')"
                 },
                 "runAfter": {},
                 "trackedProperties": {},
