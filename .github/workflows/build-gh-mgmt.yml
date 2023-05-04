@@ -34,7 +34,7 @@ jobs:
           docker push ${{ secrets.ACR_REGISTRY }}/${{ env.PROJECT_NAME }}
 
   deploy-server-and-database:
-    runs-on: ubuntu-lates
+    runs-on: ubuntu-latest
     steps:
 
     - uses: actions/checkout@v2
