@@ -62,11 +62,12 @@ jobs:
         scope: resourcegroup
 
     - uses: azure/sql-action@v1.3
+      if: success()
       with:
         connection-string: Server=tcp:${{ secrets.SERVER_NAME }}.database.windows.net,1433;Initial Catalog=${{ env.DATABASE_NAME }};Persist Security Info=False;User ID=${{ secrets.SERVER_USERNAME }};Password=${{ secrets.SERVER_PASSWORD }};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;
         project-file: 'src/sqldb/sqldb.sqlproj'
 
-  deploy-database-and-webapp:
+  deploy-appserviceplan-and-webapp:
     runs-on: ubuntu-latest
     steps:
 
