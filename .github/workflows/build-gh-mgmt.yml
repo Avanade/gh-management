@@ -17,14 +17,14 @@ env:
   PROJECT_NAME: ${{github.event.inputs.selected_environment}}-gh-mgmt-app
 
 jobs:
-  deploy-in-acr:
+  build-and-deploy-in-acr:
     runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: ./src/goapp
     steps:
       - uses: actions/checkout@v2
-      - uses: azure/docker-login@v1 
+      - uses: azure/docker-login@v1
         with:
           login-server: ${{ secrets.ACR_REGISTRY }}
           username: ${{ secrets.ACR_USERNAME }}
@@ -33,12 +33,48 @@ jobs:
           docker build . -t ${{ secrets.ACR_REGISTRY }}/${{ env.PROJECT_NAME }}:${{ github.sha }} -t ${{ secrets.ACR_REGISTRY }}/${{ env.PROJECT_NAME }}:latest
           docker push ${{ secrets.ACR_REGISTRY }}/${{ env.PROJECT_NAME }}
 
-  build-and-deploy:
+  deploy-server-and-database:
+    runs-on: ubuntu-lates
+    steps:
+
+    - uses: actions/checkout@v2
+
+    - id: string
+      uses: ASzc/change-string-case-action@v5
+      with:
+        string: ${{github.event.inputs.selected_environment}}
+
+    - name: Create database name
+      run: echo "DATABASE_NAME=${{steps.string.outputs.uppercase}}GhManagementDb" >> $GITHUB_ENV
+
+    - uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    - name: Deploy SQL Server & Database
+      uses: azure/arm-deploy@v1
+      with:
+        subscriptionId: ${{ fromJSON(secrets.AZURE_CREDENTIALS)['subscriptionId'] }}
+        resourceGroupName: ${{ secrets.AZURE_RG }}
+        template: ./.bicep/sql/main.bicep
+        parameters: |
+          serverName=${{ secrets.SERVER_NAME }} 
+          administratorLogin=${{ secrets.SERVER_USERNAME }}
+          administratorLoginPassword=${{ secrets.SERVER_PASSWORD }} 
+          databaseName=${{ env.DATABASE_NAME }}
+        failOnStdErr: false
+        scope: resourcegroup
+
+    - uses: azure/sql-action@v1.3
+      with:
+        connection-string: Server=tcp:${{ secrets.SERVER_NAME }}.database.windows.net,1433;Initial Catalog=${{ env.DATABASE_NAME }};Persist Security Info=False;User ID=${{ secrets.SERVER_USERNAME }};Password=${{ secrets.SERVER_PASSWORD }};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;
+        project-file: 'src/sqldb/sqldb.sqlproj'
+
+  deploy-database-and-webapp:
     runs-on: ubuntu-latest
     steps:
 
-      # Checkout code
-    - uses: actions/checkout@main
+    - uses: actions/checkout@v2
 
     - name: Setup Azure Credentials
       run: |
@@ -103,15 +139,13 @@ jobs:
         parameters.appServiceSettings.value.GH_CLIENT_ID : ${{ env.GH_CLIENT_ID }}
         parameters.appServiceSettings.value.GH_CLIENT_SECRET : ${{ env.GH_CLIENT_SECRET }}
         parameters.appServiceSettings.value.GH_TOKEN : ${{ env.GH_TOKEN }}
-        parameters.appServiceSettings.value.GHMGMTDB_CONNECTION_STRING : ${{ secrets.GH_MGMT_CONNECTION_STRING_DEV }}
+        parameters.appServiceSettings.value.GHMGMTDB_CONNECTION_STRING : Server=tcp:${{ secrets.SERVER_NAME }}.database.windows.net,1433;Initial Catalog=${{ env.DATABASE_NAME }};Persist Security Info=False;User ID=${{ secrets.SERVER_USERNAME }};Password=${{ secrets.SERVER_PASSWORD }};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;
 
-      # Log into Azure
     - uses: azure/login@v1
       with:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      # Deploy Bicep file
-    - name: deploy
+    - name: Deploy App Service Plan and Web App
       uses: azure/arm-deploy@v1
       with:
         subscriptionId: ${{ fromJSON(secrets.AZURE_CREDENTIALS)['subscriptionId'] }}
