@@ -102,11 +102,40 @@ func ProjectsNewHandler(w http.ResponseWriter, r *http.Request) {
 				body.Visibility = 2
 			}
 
-			_ = ghmgmtdb.PRProjectsInsert(body, username.(string))
+			repoId := ghmgmtdb.PRProjectsInsert(body, username.(string))
+
+			// Add  requestor and coowner as repo admins
+			err = AddCollaboratorToRequestedRepo(username.(string), body.Name, repoId)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+			err = AddCollaboratorToRequestedRepo(body.Coowner, body.Name, repoId)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
 
 			w.WriteHeader(http.StatusOK)
 		}
 	}
+}
+
+func AddCollaboratorToRequestedRepo(user string, repo string, repoId int64) error {
+	innersource := os.Getenv("GH_ORG_INNERSOURCE")
+	gHUser := ghmgmtdb.Users_Get_GHUser(user)
+	isInnersourceMember, _, _ := githubAPI.OrganizationsIsMember(os.Getenv("GH_TOKEN"), gHUser)
+	if isInnersourceMember {
+		_, err := githubAPI.AddCollaborator(innersource, repo, gHUser, "admin")
+		if err != nil {
+			return err
+		}
+		err = ghmgmtdb.RepoOwnersInsert(repoId, user)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func ProjectsHandler(w http.ResponseWriter, r *http.Request) {
