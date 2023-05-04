@@ -205,44 +205,50 @@ func AddCollaborator(w http.ResponseWriter, r *http.Request) {
 		repoUrl := strings.Replace(repo.TFSProjectReference, "https://", "", -1)
 		repoUrlSub := strings.Split(repoUrl, "/")
 
-		_, err := githubAPI.AddCollaborator(repoUrlSub[1], repo.Name, ghUser, permission)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
+		isInnersource := strings.EqualFold(repoUrlSub[1], os.Getenv("GH_ORG_INNERSOURCE"))
+		isMember, _, _ := githubAPI.OrganizationsIsMember(os.Getenv("GH_TOKEN"), ghUser)
 
-		if permission == "admin" {
-			users, _ := db.GetUserByGitHubUsername(ghUser)
-
-			if len(users) > 0 {
-				err = db.RepoOwnersInsert(id, users[0]["UserPrincipalName"].(string))
-				if err != nil {
-					http.Error(w, err.Error(), http.StatusInternalServerError)
-					return
-				}
+		if (isInnersource && isMember) || (!isInnersource) {
+			_, err := githubAPI.AddCollaborator(repoUrlSub[1], repo.Name, ghUser, permission)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
 			}
-		} else {
-			//if not admin, check is the user is currently an admin, remove if he is
+
 			users, _ := db.GetUserByGitHubUsername(ghUser)
+			if permission == "admin" {
 
-			if len(users) > 0 {
-				rec, err := db.RepoOwnersByUserAndProjectId(id, users[0]["UserPrincipalName"].(string))
-				if err != nil {
-					http.Error(w, err.Error(), http.StatusInternalServerError)
-					return
-				}
-
-				if len(rec) > 0 {
-					err := db.DeleteRepoOwnerRecordByUserAndProjectId(id, users[0]["UserPrincipalName"].(string))
+				if len(users) > 0 {
+					err = db.RepoOwnersInsert(id, users[0]["UserPrincipalName"].(string))
 					if err != nil {
 						http.Error(w, err.Error(), http.StatusInternalServerError)
 						return
 					}
 				}
-			}
-		}
+			} else {
+				//if not admin, check is the user is currently an admin, remove if he is
+				if len(users) > 0 {
+					rec, err := db.RepoOwnersByUserAndProjectId(id, users[0]["UserPrincipalName"].(string))
+					if err != nil {
+						http.Error(w, err.Error(), http.StatusInternalServerError)
+						return
+					}
 
-		w.WriteHeader(http.StatusOK)
+					if len(rec) > 0 {
+						err := db.DeleteRepoOwnerRecordByUserAndProjectId(id, users[0]["UserPrincipalName"].(string))
+						if err != nil {
+							http.Error(w, err.Error(), http.StatusInternalServerError)
+							return
+						}
+					}
+				}
+			}
+
+			w.WriteHeader(http.StatusOK)
+		} else {
+			http.Error(w, "Can't invite a user that is not a member of the innersource organization.", http.StatusInternalServerError)
+			return
+		}
 	}
 
 }

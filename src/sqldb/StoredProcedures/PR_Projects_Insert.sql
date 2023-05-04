@@ -72,9 +72,4 @@ IF @CreatedBy IS NOT NULL
 IF @CoOwner IS NOT NULL
 	EXEC [PR_UserAccess_Insert] @Id, @CoOwner
 	
-IF @CreatedBy IS NOT NULL
-	EXEC PR_RepoOwners_Insert @Id, @CreatedBy
-
-IF @CoOwner IS NOT NULL
-	EXEC PR_RepoOwners_Insert @Id, @CoOwner
 SELECT @Id [ItemId]
