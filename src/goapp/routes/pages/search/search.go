@@ -2,6 +2,7 @@ package routes
 
 import (
 	"encoding/json"
+	session "main/pkg/session"
 	"main/pkg/sql"
 	"net/http"
 	"os"
@@ -24,7 +25,10 @@ func GetSearchResults(w http.ResponseWriter, r *http.Request) {
 	searchText := r.URL.Query().Get("search")
 	offSet := req["offSet"]
 	rowCount := req["rowCount"]
-
+	sessionaz, _ := session.Store.Get(r, "auth-session")
+	iprofile := sessionaz.Values["profile"]
+	profile := iprofile.(map[string]interface{})
+	username := profile["preferred_username"]
 	// Connect to database
 	dbConnectionParam := sql.ConnectionParam{
 		ConnectionString: os.Getenv("GHMGMTDB_CONNECTION_STRING"),
@@ -40,9 +44,10 @@ func GetSearchResults(w http.ResponseWriter, r *http.Request) {
 	// Get Search List from SP
 	//searchTextParam := make(map[string]interface{})
 	params := map[string]interface{}{
-		"searchText": searchText,
-		"offSet":     offSet,
-		"rowCount":   rowCount,
+		"searchText":    searchText,
+		"offSet":        offSet,
+		"rowCount":      rowCount,
+		"userprincipal": username,
 	}
 
 	searchResults, err := db.ExecuteStoredProcedureWithResult("PR_Search_communities_projects_users", params)

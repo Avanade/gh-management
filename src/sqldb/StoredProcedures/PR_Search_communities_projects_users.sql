@@ -2,8 +2,8 @@ CREATE PROCEDURE [dbo].[PR_Search_communities_projects_users]
 
 @searchText VARCHAR (100),
 @offSet INT = 0,
-@rowCount INT = 0
-
+@rowCount INT = 0,
+@userprincipal VARCHAR (100) = null
 AS 
 
 SELECT
@@ -25,7 +25,7 @@ SELECT
 				Projects.Id [ID]
 FROM	[dbo].[Projects]
 WHERE	[Name] LIKE '%'+@searchText+'%'
-		OR [CreatedBy]
+		OR RO.UserPrincipalName
 		LIKE '%'+@searchText+'%'
 
 UNION
@@ -36,14 +36,24 @@ SELECT
 		c.[Id]
 FROM	[dbo].[Communities] c
   	INNER JOIN ApprovalStatus T ON c.ApprovalStatusId = T.Id
-WHERE	(c.[Name] LIKE '%'+@searchText+'%'
-		OR [Description] LIKE '%'+@searchText+'%' )
+WHERE	(
+			(
+				c.[Name] LIKE '%'+@searchText+'%'
+				OR [Description] LIKE '%'+@searchText+'%' 
+			)
 
-		AND 
-		(c.ApprovalStatusId = 5 OR c.CreatedBy = 'dennis.delamida@accenture.com')
-				AND
-		c.ApprovalStatusId =5
+			AND c.ApprovalStatusId = 5
+		)
+		OR
+		(
+			(
+				c.[Name] LIKE '%'+@searchText+'%'
+				OR [Description] LIKE '%'+@searchText+'%' 
+			)
 
+			AND c.CreatedBy = @userprincipal
+		)
+	
 ORDER BY [Name]
 OFFSET @offSet ROWS
 FETCH NEXT @rowCount ROWS ONLY
