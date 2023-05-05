@@ -19,7 +19,6 @@
                 "GH_CLIENT_SECRET":"",
                 "GH_TOKEN":"",
                 "GHMGMTDB_CONNECTION_STRING":"",
-                "CONNECTION_STRING":"",
                 "EMAIL_ENDPOINT":"",
                 
                 "GH_ORG_INNERSOURCE":"Rgm-org",
