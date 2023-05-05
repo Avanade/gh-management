@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"main/models"
-	ghmgmt "main/pkg/ghmgmtdb"
 	"os"
 	"strings"
 
@@ -37,10 +36,6 @@ func CreatePrivateGitHubRepository(data models.TypNewProjectReqBody, requestor s
 		return nil, err
 	}
 
-	_, err = AddCollaboratorToRequestedRepo(data, requestor)
-	if err != nil {
-		return nil, err
-	}
 	return repo, nil
 }
 
@@ -54,24 +49,6 @@ func IsOrgAllowInternalRepo() (bool, error) {
 	return *org.MembersCanCreateInternalRepos, err
 }
 
-func AddCollaboratorToRequestedRepo(data models.TypNewProjectReqBody, requestor string) (*github.Response, error) {
-	owner := os.Getenv("GH_ORG_INNERSOURCE")
-
-	if data.Coowner != requestor {
-		GHUser := ghmgmt.Users_Get_GHUser(requestor)
-		_, err := AddCollaborator(owner, data.Name, GHUser, "admin")
-		if err != nil {
-			return nil, err
-		}
-	}
-	GHUser := ghmgmt.Users_Get_GHUser(data.Coowner)
-	resp, err := AddCollaborator(owner, data.Name, GHUser, "admin")
-	if err != nil {
-		return nil, err
-	}
-	return resp, err
-}
-
 func AddCollaborator(owner string, repo string, user string, permission string) (*github.Response, error) {
 	client := createClient(os.Getenv("GH_TOKEN"))
 	opts := &github.RepositoryAddCollaboratorOptions{
@@ -79,6 +56,16 @@ func AddCollaborator(owner string, repo string, user string, permission string) 
 	}
 
 	_, resp, err := client.Repositories.AddCollaborator(context.Background(), owner, repo, user, opts)
+	if err != nil {
+		return nil, err
+	}
+	return resp, err
+}
+
+func RemoveCollaborator(owner string, repo string, user string, permission string) (*github.Response, error) {
+	client := createClient(os.Getenv("GH_TOKEN"))
+
+	resp, err := client.Repositories.RemoveCollaborator(context.Background(), owner, repo, user)
 	if err != nil {
 		return nil, err
 	}
@@ -285,13 +272,7 @@ func RemoveOrganizationsMember(token string, org string, username string) *githu
 func RepositoriesListCollaborators(token string, org string, repo string, role string, affiliations string) []*github.User {
 	client := createClient(token)
 	options := *&github.ListCollaboratorsOptions{Permission: role, Affiliation: affiliations}
-	ListCollabs, _, err := client.Repositories.ListCollaborators(context.Background(), org, repo, &options)
-
-	if err != nil {
-
-		fmt.Println(err)
-	}
-
+	ListCollabs, _, _ := client.Repositories.ListCollaborators(context.Background(), org, repo, &options)
 	return ListCollabs
 }
 func OrgListMembers(token string, org string) []*github.User {

@@ -205,7 +205,77 @@ func AddCollaborator(w http.ResponseWriter, r *http.Request) {
 		repoUrl := strings.Replace(repo.TFSProjectReference, "https://", "", -1)
 		repoUrlSub := strings.Split(repoUrl, "/")
 
-		_, err := githubAPI.AddCollaborator(repoUrlSub[1], repo.Name, ghUser, permission)
+		isInnersource := strings.EqualFold(repoUrlSub[1], os.Getenv("GH_ORG_INNERSOURCE"))
+		isMember, _, _ := githubAPI.OrganizationsIsMember(os.Getenv("GH_TOKEN"), ghUser)
+
+		if (isInnersource && isMember) || (!isInnersource) {
+			_, err := githubAPI.AddCollaborator(repoUrlSub[1], repo.Name, ghUser, permission)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+
+			users, _ := db.GetUserByGitHubUsername(ghUser)
+			if permission == "admin" {
+
+				if len(users) > 0 {
+					err = db.RepoOwnersInsert(id, users[0]["UserPrincipalName"].(string))
+					if err != nil {
+						http.Error(w, err.Error(), http.StatusInternalServerError)
+						return
+					}
+				}
+			} else {
+				//if not admin, check is the user is currently an admin, remove if he is
+				if len(users) > 0 {
+					rec, err := db.RepoOwnersByUserAndProjectId(id, users[0]["UserPrincipalName"].(string))
+					if err != nil {
+						http.Error(w, err.Error(), http.StatusInternalServerError)
+						return
+					}
+
+					if len(rec) > 0 {
+						err := db.DeleteRepoOwnerRecordByUserAndProjectId(id, users[0]["UserPrincipalName"].(string))
+						if err != nil {
+							http.Error(w, err.Error(), http.StatusInternalServerError)
+							return
+						}
+					}
+				}
+			}
+
+			w.WriteHeader(http.StatusOK)
+		} else {
+			http.Error(w, "Can't invite a user that is not a member of the innersource organization.", http.StatusInternalServerError)
+			return
+		}
+	}
+
+}
+
+func RemoveCollaborator(w http.ResponseWriter, r *http.Request) {
+	req := mux.Vars(r)
+	id, _ := strconv.ParseInt(req["id"], 10, 64)
+	ghUser := req["ghUser"]
+	permission := req["permission"]
+
+	// Get repository
+	data := db.GetProjectById(id)
+	s, _ := json.Marshal(data)
+	var repoList []Repo
+	err := json.Unmarshal(s, &repoList)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if len(repoList) > 0 {
+		repo := repoList[0]
+
+		repoUrl := strings.Replace(repo.TFSProjectReference, "https://", "", -1)
+		repoUrlSub := strings.Split(repoUrl, "/")
+
+		_, err := githubAPI.RemoveCollaborator(repoUrlSub[1], repo.Name, ghUser, permission)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -215,29 +285,10 @@ func AddCollaborator(w http.ResponseWriter, r *http.Request) {
 			users, _ := db.GetUserByGitHubUsername(ghUser)
 
 			if len(users) > 0 {
-				err = db.RepoOwnersInsert(id, users[0]["UserPrincipalName"].(string))
+				err = db.DeleteRepoOwnerRecordByUserAndProjectId(id, users[0]["UserPrincipalName"].(string))
 				if err != nil {
 					http.Error(w, err.Error(), http.StatusInternalServerError)
 					return
-				}
-			}
-		} else {
-			//if not admin, check is the user is currently an admin, remove if he is
-			users, _ := db.GetUserByGitHubUsername(ghUser)
-
-			if len(users) > 0 {
-				rec, err := db.RepoOwnersByUserAndProjectId(id, users[0]["UserPrincipalName"].(string))
-				if err != nil {
-					http.Error(w, err.Error(), http.StatusInternalServerError)
-					return
-				}
-
-				if len(rec) > 0 {
-					err := db.DeleteRepoOwnerRecordByUserAndProjectId(id, users[0]["UserPrincipalName"].(string))
-					if err != nil {
-						http.Error(w, err.Error(), http.StatusInternalServerError)
-						return
-					}
 				}
 			}
 		}
@@ -352,7 +403,7 @@ func EmailOspoOwnerDeficient(Email string, org string, reponame []string) {
 		body = fmt.Sprintf("<p>Hello %s ,  </p>  \n<p>This is to inform you that <b> %d </b> repositories on %s need to add a co-owner.</p> %s   </p>  ", Email, len(reponame), org, reponamelist)
 	}
 	m := email.TypEmailMessage{
-		Subject: "GitHub Organization Scan",
+		Subject: "Repository Owners Scan",
 		Body:    body,
 		To:      Email,
 	}
@@ -371,7 +422,7 @@ func EmailcoownerDeficient(Email string, Org string, reponame string) {
 	body = fmt.Sprintf("<p>Hello %s ,  </p>  \n<p>This is to inform you that you are the only admin on %s  GitHub repository. We recommend at least 2 admins on each repository. Click %s to add a co-owner.</p> \n <p>OSPO</p>", Email, reponame, link)
 
 	m := email.TypEmailMessage{
-		Subject: "GitHub Organization Scan",
+		Subject: "Repository Owners Scan",
 		Body:    body,
 		To:      Email,
 	}
