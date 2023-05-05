@@ -139,7 +139,7 @@ jobs:
         parameters.appServiceSettings.value.GH_CLIENT_SECRET : ${{ env.GH_CLIENT_SECRET }}
         parameters.appServiceSettings.value.GH_TOKEN : ${{ env.GH_TOKEN }}
         parameters.appServiceSettings.value.GHMGMTDB_CONNECTION_STRING : Server=tcp:${{ secrets.SERVER_NAME }}.database.windows.net,1433;Initial Catalog=${{ needs.deploy-server-and-database.outputs.DATABASE_NAME }};Persist Security Info=False;User ID=${{ secrets.SERVER_USERNAME }};Password=${{ secrets.SERVER_PASSWORD }};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;
-        parameters.appServiceSettings.value.CONNECTIONSTRING : ${{ secrets.GH_MGMT_CONNECTION_STRING }}
+        parameters.appServiceSettings.value.CONNECTION_STRING : ${{ secrets.GH_MGMT_CONNECTION_STRING }}
 
     - uses: azure/login@v1
       with:
