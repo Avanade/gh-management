@@ -22,7 +22,7 @@ SELECT
 				WHEN [CreatedBy] IS NULL THEN [RepositorySource]
 				ELSE [RepositorySource] + ' - ' + [CreatedBy]
 			END [Description],
-				Projects.Id [ID]
+				P.Id [ID]
 FROM	[dbo].[Projects] P
 	INNER JOIN RepoOwners RO ON P.Id = RO.ProjectId  
 WHERE	[Name] LIKE '%'+@searchText+'%'
