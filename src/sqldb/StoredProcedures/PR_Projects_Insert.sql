@@ -65,11 +65,5 @@ VALUES (
 DECLARE @Id AS INT
 
 SELECT @Id = Id FROM @ResultTable
-
-IF @CreatedBy IS NOT NULL
-	EXEC [PR_UserAccess_Insert] @Id, @CreatedBy
-
-IF @CoOwner IS NOT NULL
-	EXEC [PR_UserAccess_Insert] @Id, @CoOwner
 	
 SELECT @Id [ItemId]
