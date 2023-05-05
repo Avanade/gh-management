@@ -23,7 +23,8 @@ SELECT
 				ELSE [RepositorySource] + ' - ' + [CreatedBy]
 			END [Description],
 				Projects.Id [ID]
-FROM	[dbo].[Projects]
+FROM	[dbo].[Projects] P
+	INNER JOIN RepoOwners RO ON P.Id = RO.ProjectId  
 WHERE	[Name] LIKE '%'+@searchText+'%'
 		OR RO.UserPrincipalName
 		LIKE '%'+@searchText+'%'
