@@ -39,16 +39,22 @@ type ExternalLinksIcon struct {
 	IconPath string
 }
 
+type SVGIcons struct {
+
+}
+
 type TypExternalLinks struct {
-	Id                        int    `json:"id"`
-	SVGName					  string `json:"svgname"`
-	IconSVG                   string `json:"iconsvg"`
-	Category                  string `json:"category"`	
-	Created                   string `json:"created"`
-	CreatedBy                 string `json:"createdBy"`
-	Modified                  string `json:"modified"`
-	ModifiedBy                string `json:"modifiedBy"`
-	Enabled					  string `json:"enabled"`
+	Id         int 	  `json:"id"`
+	SVGName    string `json:"svgname"`
+	IconSVG    string `json:"iconsvg"`
+	Hyperlink  string `json:"hyperlink"`
+	LinkName   string `json:"linkname"`
+	Category   string `json:"category"`
+	Enabled    string `json:"enabled"`
+	Created    string `json:"created"`
+	CreatedBy  string `json:"createdBy"`
+	Modified   string `json:"modified"`
+	ModifiedBy string `json:"modifiedBy"`
 }
 
 type TypNewProjectReqBody struct {

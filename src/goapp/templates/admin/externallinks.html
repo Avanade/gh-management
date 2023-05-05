@@ -7,12 +7,14 @@
             <div>List of External Links</div>
         </h3>
         <div class="mt-3 sm:ml-4 sm:mt-0">
-                <button  @Click="addSVG()" class="inline-flex items-center bg-[#FF5800] hover:bg-[#FF4300] text-white font-bold py-2 px-4 rounded">
+                <a href="externallinks/add/">
+                <button class="inline-flex items-center bg-[#FF5800] hover:bg-[#FF4300] text-white font-bold py-2 px-4 rounded">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
                     </svg>
                     <span class="ml-2">Add SVG</span>
                 </button>
+                </a>
         </div>
     </div>
     
@@ -20,7 +22,8 @@
         <table x-show="showTable" class="w-full mt-4 ">
                 <tr class="bg-gray-100">
                     <th scope="col" class="cursor-pointer px-3 py-3.5 text-left text-sm font-semibold text-gray-700 ">Icon</th>
-                    {{/* <th scope="col" class="cursor-pointer px-3 py-3.5 text-left text-sm font-semibold text-gray-700 ">Icon Name</th> */}}
+                    <th scope="col" class="cursor-pointer px-3 py-3.5 text-left text-sm font-semibold text-gray-700 ">Hyperlink</th>
+                    <th scope="col" class="cursor-pointer px-3 py-3.5 text-left text-sm font-semibold text-gray-700 ">Link Name</th>                    
                     <th scope="col" class="cursor-pointer px-3 py-3.5 text-left text-sm font-semibold text-gray-700 ">Category</th>
                     <th scope="col" class="cursor-pointer px-3 py-3.5 text-left text-sm font-semibold text-gray-700 ">Status</th>
                     <th scope="col" class="cursor-pointer px-3 py-3.5 text-left text-sm font-semibold text-gray-700 ">Action</th>
@@ -31,12 +34,15 @@
                     <td class="whitespace-nowrap px-3 py-3.5 text-sm text-gray-500">
                         <span x-html="results.IconSVG" class="hover:shadow-md"></span>
                     </td>
-                    {{/* <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500"> 
-                        <span x-text="results.SVGName"> </span>
-                    </td> */}}
+                    <td class="whitespace-nowrap px-3 py-3.5 text-sm text-gray-500">
+                        <span x-html="results.Hyperlink" class="hover:shadow-md"></span>
+                    </td>
+                    <td class="whitespace-nowrap px-3 py-3.5 text-sm text-gray-500">
+                        <span x-text="results.LinkName"> </span>
+                    </td>  
                     <td class="whitespace-nowrap px-3 py-3.5 text-sm text-gray-500">
                         <span x-text="results.Category"> </span>
-                    </td>
+                    </td>                  
                     <td class="whitespace-nowrap px-3 py-3.5 text-sm">
                         <span x-bind:class="results.Enabled === true ? 'text-[#FF5800]' : 'text-gray-500' " x-text="results.Enabled ? 'Enabled': 'Disabled'"> </span>
                     </td>
@@ -79,7 +85,6 @@
             showTable: false,
             showSpinner: true,
             externalLinks: [],
-            
             getAllExternalLinks() {
                 let uri = '/admin/externallinks/'
                 let encoded = encodeURI(uri);
@@ -96,29 +101,21 @@
                 })
                 return this.externalLinks
             },
-            addSVG(id) {
-                window.location.href = 'externallinks/add'
-            },
             onClickAction(id, action) {
                 switch(action) {
                     case 'view':
                     window.location.href = 'externallinks/view/'+id
-                    console.log("--> " + id + "VIEW")
-                    break
-                    //
+                    break;
                     case 'edit':
-                    console.log("--> " + id)
                     window.location.href = 'externallinks/edit/'+id
-                    break
-                    //
+                    break;
                     case 'delete':
                     Alpine.store('master').modal.show()
                     Alpine.store('master').putData(`externallinks/delete/`+id, "" , "External Link has deleted.", "Go to list of external links", "/admin/externallinks")
-                    break
-                    //
+                    break;
                     default:
                     console.log('defualt')
-                    break
+                    break;
                 }
             },
 

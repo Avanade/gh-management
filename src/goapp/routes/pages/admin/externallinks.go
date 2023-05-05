@@ -19,7 +19,6 @@ func ExternalLinksHandler(w http.ResponseWriter, r *http.Request) {
 	template.UseTemplate(&w, r, "admin/externallinks", nil)
 }
 func ExternalLinksForm(w http.ResponseWriter, r *http.Request) {
-	// template.UseTemplate(&w, r, "admin/externallinks/form", nil)
 	vars := mux.Vars(r)
 	id, _ := strconv.Atoi(vars["id"])
 	action := vars["action"]
@@ -30,6 +29,19 @@ func ExternalLinksForm(w http.ResponseWriter, r *http.Request) {
 		Id:     id,
 		Action: strings.Title(action),
 	})
+
+	var externalLinks []models.TypMenu
+
+	externalLinks = append(externalLinks, models.TypMenu{Name: "Tech Community Calendar", Url: "https://techcommunitycalendar.com/", IconPath: "/public/icons/ExternalLinks/arrow-trending-up.svg", External: true})
+
+
+	data:= 
+
+	tmpl := template.Must(
+		template.ParseFiles("admin/externallinks/form",
+			fmt.Sprintf("admin/externallinks/%v.html", page)))
+	return tmpl.Execute(*w, data)
+
 }
 
 func GetExternalLinks(w http.ResponseWriter, r *http.Request) {
@@ -150,9 +162,9 @@ func CreateExternalLinks(w http.ResponseWriter, r *http.Request) {
 	iprofile := sessionaz.Values["profile"]
 	profile := iprofile.(map[string]interface{})
 	username := profile["preferred_username"]
-	var body models.TypExternalLinks
+	var data models.TypExternalLinks
 
-	err := json.NewDecoder(r.Body).Decode(&body)
+	err := json.NewDecoder(r.Body).Decode(&data)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		fmt.Println(err)
@@ -165,19 +177,20 @@ func CreateExternalLinks(w http.ResponseWriter, r *http.Request) {
 	db, _ := sql.Init(cp)
 	defer db.Close()
 
-	param := map[string]interface{}{
-		"SVGName":   body.SVGName,
-		"IconSVG":   body.IconSVG,
-		"Category":  body.Category,
+	params := map[string]interface{}{
+		"SVGName":   data.SVGName,
+		"IconSVG":   data.IconSVG,
+		"Hyperlink": data.Hyperlink,
+		"LinkName":  data.LinkName,
+		"Category":  data.Category,
+		"Enabled":   data.Enabled,
 		"CreatedBy": username,
-		"Enabled":   body.Enabled,
 	}
 
-	__, err := db.ExecuteStoredProcedureWithResult("PR_ExternalLinks_Insert", param)
+	__, err := db.ExecuteStoredProcedure("PR_ExternalLinks_Insert", params)
 	if err != nil {
 		fmt.Println(__)
 		fmt.Println(err)
-
 	}
 }
 
@@ -199,18 +212,20 @@ func UpdateExternalLinks(w http.ResponseWriter, r *http.Request) {
 		ConnectionString: os.Getenv("GHMGMTDB_CONNECTION_STRING"),
 	}
 	db, err := sql.Init(cp)
+	
 
 	params := map[string]interface{}{
 		"Id":         body.Id,
 		"SVGName":    body.SVGName,
 		"IconSVG":    body.IconSVG,
+		"Hyperlink":  body.Hyperlink,
+		"LinkName":   body.LinkName,
 		"Category":   body.Category,
-		"CreatedBy":  username,
-		"ModifiedBy": username,
 		"Enabled":    body.Enabled,
+		"ModifiedBy": username,
 	}
 
-	_, err2 := db.ExecuteStoredProcedureWithResult("dbo.PR_ExternalLinks_Update", params)
+	_, err2 := db.ExecuteStoredProcedure("dbo.PR_ExternalLinks_Update", params)
 	if err != nil {
 		fmt.Println(err2)
 		return
@@ -233,16 +248,3 @@ func ExternalLinksDelete(w http.ResponseWriter, r *http.Request) {
 		fmt.Println(error)
 	}
 }
-
-// func ExternalLinksForm(w http.ResponseWriter, r *http.Request) {
-// 	vars := mux.Vars(r)
-// 	id, _ := strconv.Atoi(vars["id"])
-// 	action := vars["action"]
-// 	template.UseTemplate(&w, r, "admin/contributionareas/form", struct {
-// 		Id     int
-// 		Action string
-// 	}{
-// 		Id:     id,
-// 		Action: strings.Title(action),
-// 	})
-// }

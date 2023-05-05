@@ -1,50 +1,60 @@
 {{ define "content" }}
-<div id="pageTitle">New External Links</div>
 <br>
+
+    <link rel="shortcut icon" href="data:image/x-icon;," type="image/x-icon"> 
 <form x-data="ExternalLinksForm({
     action : '{{ .Action }}',
     id : '{{ .Id }}'
-})" 
-      x-init="getExternalLinksById()">
-                <span x-text="action"></span>
-                <span x-text="id"></span>
+})" >
     <div>
         <div class="relative">
-            {{/* <form onsubmit="" autocomplete="off">
-                <label for="name" class="absolute -top-2 left-2 inline-block bg-white px-2 text-xs font-medium text-gray-900">SVG code</label>
-                <input x-model="form.IconSVG" type="text" name="name" id="name" class="rounded-md border-0 py-5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-[#FF5800] sm:text-sm sm:leading-6" placeholder="....." autocomplete="nope">
-                
-                <label for="name" class="absolute -top-2 left-2 inline-block bg-white px-2 text-xs font-medium text-gray-900">SVG Name</label>
-                <input x-model="form.SVGName" type="text" class="rounded-md border-0 py-5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-[#FF5800] sm:text-sm sm:leading-6" placeholder="-----" autocomplete="nope">
 
-
-                
-
-            </form>  */}}
-{{/* 
-
-
-x-data="externalLinksForm({
-                    action: '{{ .Action }}',
-                    id: '{{ .Id }}'
-                })"
-                
-                 */}}
-            <fieldset 
-            >
+        
+            <div>
+                <h3 class="text-lg leading-6 font-medium text-gray-900">{{ .Action }} External Link</h3>
+            </div>
+            <fieldset x-bind:disabled="action.toLowerCase() == 'view' ">
                 <div class="mt-4 space-y-8 divide-y divide-gray-200 sm:space-y-5">
-                    {{/* <div>
-                        <div>
-                            <h3 class="text-lg leading-6 font-medium text-gray-900">{{ .Action }} Approval Type</h3>
-                            <!-- <p class="mt-1 max-w-2xl text-sm text-gray-500">Description...</p> -->
-                        </div>
-                    </div> */}}
                     <div class="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-t sm:border-gray-200 sm:pt-5">
-                        <label for="Name" class="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2"> SVG Code </label>
+                        <label for="Name" class="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2"> Icon </label>
                         <div class="mt-1 sm:mt-0 sm:col-span-2">
-                            <template x-for="(result, n) in getExternalLinksById" :key="n">
-                            <input x-model="form.IconSVG=result.IconSVG" type="text" name="Name" id="Name" autocomplete="nope" class="block w-full shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm border-gray-300 rounded-md">
-                            </template>
+                            <input x-model="form.IconSVG" type="text" name="Name" id="Name" autocomplete="nope" class="block w-full shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm border-gray-300 rounded-md" >
+                            {{/*  */}}
+                            <div class="relative inline-block text-left">
+                            <div @click="showIcons = true" @click.away="showIcons=false">
+                                <button type="button" class="inline-flex w-full justify-center gap-x-1.5 rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50" id="menu-button" aria-expanded="true" aria-haspopup="true">
+                                    <span x-text="form.IconName"></span>
+                                    <svg class="-mr-1 h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                    <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
+                                    </svg>
+                                </button>
+                            </div>
+
+                            <div x-show="showIcons"  class="absolute right-0 z-10 mt-1 w-56 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="menu-button" tabindex="-1">
+                                <div class="py-1" role="none">
+                                    <a @Click="form.IconName = 'arrow-trending-up' " class="cursor-pointer text-gray-700 block px-4 py-2 text-sm" role="menuitem" tabindex="-1" id="menu-item-0">Icon1
+                                    
+                                    
+                                    </a>
+                                    <a @Click="form.IconName = 'at-symbol' " class="text-gray-700 block px-4 py-2 text-sm" role="menuitem" tabindex="-1" id="menu-item-1">Icon2</a>
+                                    <a @Click="form.IconName = 'Icon3' " class="text-gray-700 block px-4 py-2 text-sm" role="menuitem" tabindex="-1" id="menu-item-2">Icon3</a>
+                                </div>
+                            </div>
+                            </div>
+                            {{/*  */}}
+                        </div>
+                    </div>
+                    <div class="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-t sm:border-gray-200 sm:pt-5">
+                        <label for="Name" class="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2"> Hyperlink </label>
+                        <div class="mt-1 sm:mt-0 sm:col-span-2">
+                            <input x-model="form.Hyperlink" type="text" name="Name" id="Name" autocomplete="nope" class="block w-full shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm border-gray-300 rounded-md">
+                            <span> </span>
+                        </div>
+                    </div>
+                    <div class="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-t sm:border-gray-200 sm:pt-5">
+                        <label for="Name" class="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2"> Link Name </label>
+                        <div class="mt-1 sm:mt-0 sm:col-span-2">
+                            <input x-model="form.LinkName" type="text" name="Name" id="Name" autocomplete="nope" class="block w-full shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm border-gray-300 rounded-md">
                             <span> </span>
 
                         </div>
@@ -52,9 +62,7 @@ x-data="externalLinksForm({
                     <div class="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-t sm:border-gray-200 sm:pt-5">
                         <label for="Name" class="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2">Name </label>
                         <div class="mt-1 sm:mt-0 sm:col-span-2">
-                            <template x-for="(result, n) in getExternalLinksById" :key="n">
-                            <input x-model="form.SVGName=result.SVGName" type="text" name="Name" id="Name" autocomplete="nope" class="block w-full shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm border-gray-300 rounded-md">
-                            </template>
+                            <input x-model="form.SVGName" type="text" name="Name" id="Name" autocomplete="nope" class="block w-full shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm border-gray-300 rounded-md">
                         </div>
                     </div>
                     {{/*  */}}
@@ -62,16 +70,14 @@ x-data="externalLinksForm({
 
                         <label for="Name" class="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2"> Assign to </label>
 
-                        <div class="mt-1 sm:mt-0 sm:col-span-2">
+                        <div class="mt-2 sm:col-span-2">
 
                             <div class="relative inline-block text-left">
                                 <div>
                                     <button @click="CategoryList=true"
                                             @click.away="CategoryList=false"
                                             type="button" class="inline-flex w-full justify-center gap-x-1.5 rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50" id="menu-button" aria-expanded="true" aria-haspopup="true">
-                                    <template x-for="(result, n) in getExternalLinksById" :key="n">
-                                    <span x-text="form.Category=result.Category"></span>
-                                    </template>
+                                    <span x-text="form.Category"></span>
                                     <svg class="-mr-1 h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                                         <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
                                     </svg>
@@ -79,10 +85,9 @@ x-data="externalLinksForm({
                                 </div>
 
                                 <div x-show="CategoryList" 
-                                    class="absolute right-0 z-10 mt-2 w-56 origin-top-right divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="menu-button" tabindex="-1">
+                                    class="absolute right-0 z-10 mt-0 w-56 origin-top-right divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="menu-button" tabindex="-1">
                                     <div class="py-1" role="none">
-                                    <!-- Active: "bg-gray-100 text-gray-900", Not Active: "text-gray-700" -->
-                                        <a @click="form.Category ='TechCommunityCalendar' " class="cursor-pointer  block px-4 py-2 text-sm hover:bg-[#fff2eb]"  role="menuitem" tabindex="-1" id="menu-item-1"
+                                        <a @click="form.Category ='Tech Community Calendar' " class="cursor-pointer  block px-4 py-2 text-sm hover:bg-[#fff2eb]"  role="menuitem" tabindex="-1" id="menu-item-1"
                                     x-bind:class="form.Category==='TechCommunityCalendar' ? 'text-[#FF5800]' : 'text-gray-700' " 
                                     >Tech Community Calendar</a>
                                     </div>
@@ -102,64 +107,19 @@ x-data="externalLinksForm({
 
                     </div>
 
-                    {{/* <div class="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-baseline">
-                        <label for="combobox" class="block text-sm font-medium leading-6 text-gray-900">Assigned to</label>
-                        <div class="relative mt-2">
-                            <input id="combobox" type="text" class="w-full rounded-md border-0 bg-white py-1.5 pl-3 pr-12 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6" role="combobox" aria-controls="options" aria-expanded="false">
-                            <button type="button" class="absolute inset-y-0 right-0 flex items-center rounded-r-md px-2 focus:outline-none">
-                            <svg class="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                                <path fill-rule="evenodd" d="M10 3a.75.75 0 01.55.24l3.25 3.5a.75.75 0 11-1.1 1.02L10 4.852 7.3 7.76a.75.75 0 01-1.1-1.02l3.25-3.5A.75.75 0 0110 3zm-3.76 9.2a.75.75 0 011.06.04l2.7 2.908 2.7-2.908a.75.75 0 111.1 1.02l-3.25 3.5a.75.75 0 01-1.1 0l-3.25-3.5a.75.75 0 01.04-1.06z" clip-rule="evenodd" />
-                            </svg>
-                            </button>
-
-                            <ul class="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm" id="options" role="listbox">
-                            <!--
-                                Combobox option, manage highlight styles based on mouseenter/mouseleave and keyboard navigation.
-
-                                Active: "text-white bg-indigo-600", Not Active: "text-gray-900"
-                            -->
-                            <li class="relative cursor-default select-none py-2 pl-8 pr-4 text-gray-900" id="option-0" role="option" tabindex="-1">
-                                <!-- Selected: "font-semibold" -->
-                                <span class="block truncate ml-10">Leslie Alexander</span>
-
-                                <!--
-                                Checkmark, only display for selected option.
-
-                                Active: "text-white", Not Active: "text-indigo-600"
-                                -->
-                                <span class="absolute inset-y-0 left-0 flex items-center pl-1.5 text-indigo-600 ml-6" >
-                                    <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                                        <path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd" />
-                                    </svg>
-                                </span>
-                            </li>
-
-                            <!-- More items... -->
-                            </ul>
-                        </div>
-                    </div> */}}
-
-
-
                     <div class="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-baseline">
                         <div>
                             <div class="text-base font-medium text-gray-900 sm:text-sm sm:text-gray-700" id="label-notifications">Status</div>
                             </div>
                             <div class="sm:col-span-2">
                             <div class="max-w-lg">
-                                <!-- <p class="text-sm text-gray-500">Description here...</p> -->
                                 <div class="mt-4 space-y-4">
                                 <div class="flex items-center">
-                                    <template x-for="(result, n) in getExternalLinksById" :key="n">
-                                    <input x-model="form.Enabled=result.Enabled.toString()" value="true" type="radio" class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300">
-                                    </template>
+                                    <input x-model="form.Enabled" value="true" type="radio" class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300">
                                     <label for="active" class="ml-3 block text-sm font-medium text-gray-700"> Active </label>
                                 </div>
-                                {{/* SearchBy === null  ? 'false' : offSet + SearchBy.length  */}}
                                 <div class="flex items-center">
-                                    <template x-for="(result, n) in getExternalLinksById" :key="n">
-                                    <input  x-model="form.Enabled=result.Enabled.toString()" value="false" type="radio" class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300">
-                                    </template>
+                                    <input  x-model="form.Enabled" value="false" type="radio" class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300">
                                     <label for="not_active" class="ml-3 block text-sm font-medium text-gray-700"> Not Active </label>
                                 </div>
                                 </div>
@@ -169,135 +129,83 @@ x-data="externalLinksForm({
 
                 {{/*  */}}
                 </div>
-
-
-
                 
             </fieldset>
 
-
-
         </div>
-
-
-
         
     </div>
 
-    
 
-    <!--BUTTON-->
-        {{/* <button @click="saveSVG()" class="mt-2 inline-flex items-center bg-[#FF5800] hover:bg-[#FF4300] text-white font-bold py-2 px-4 rounded">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M9 8.25H7.5a2.25 2.25 0 00-2.25 2.25v9a2.25 2.25 0 002.25 2.25h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25H15M9 12l3 3m0 0l3-3m-3 3V2.25" />
-            </svg>
-            <span class="ml-2">Save</span>
-        </button> */}}
-
-
-{{/* Button from approval types page */}}
 
 <div class="pt-5">
     <div class="flex justify-end">
         <a href="/admin/externallinks" type="button" class="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">Back</a>
 
-
-        <button @click.prevent="onSubmitHandler" class="ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 disabled:bg-orange-200" x-bind::class="action == 'View'? 'hidden' : ''"
+        <button @click.prevent="onSubmitHandler()" class="ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 disabled:bg-orange-200" x-bind:class=" action == 'View'? 'hidden' : '' "
         >
         Submit
         </button>
-        {{/* <button 
-            @click.prevent="onSubmitHandler" 
-            class="ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 disabled:bg-orange-200"
-            x-bind:disabled="!isValid()":class="action == 'View'? 'hidden' : ''"><p x-text="action == 'Delete' ? 'Delete' : 'Submit'"></p>
-        </button> */}}
     </div>
 </div>
-
-
-
-
 {{/* END */}}
 </form>
-<script type="text/javascript">
 
+
+<script type="text/javascript">
     function ExternalLinksForm({
         action = 'view',
         id = null
     }){
         return {
-            svgOnly: (`<svg height="100" width="100"> <circle cx="50" cy="50" r="40" stroke="black" stroke-width="3" fill="red" /> </svg>`),
-            
-            action: 'view',
+            action: '',
             id: null,
-
-            GetExternalLinksList: [],
-            form: {
+            form : {
+                Id: {{ .Id }},
+                IconName: 'Select an Icon',
                 IconSVG: '',
+                Hyperlink: '',
+                LinkName: '',
                 SVGName: '',
-                Category: '',
-                Enabled: ''
+                Category: ''.trim(),
+                Enabled: '',
             },
+            showIcons: false,
+
 
             CategoryList: false,
 
-            {{/* onSubmitHandler() {
-
-
-                const data = {
-                id: this.id,
-                iconsvg: this.form.IconSVG,
-                svgname : this.form.SVGName,
-                category: this.form.Category,
-                enabled: this.form.Enabled,
-                        }
-                switch (this.action.toLowerCase()) {
-                    case 'add':
-                        Alpine.store('master').modal.show()
-                        Alpine.store('master').postData("/admin/externallinks/update", data, "Contribution area has been added.", "Go to External Links ", "/admin/externallinks")
-                        break;
-                
-                    case 'edit':
-                        Alpine.store('master').modal.show()
-                        Alpine.store('master').putData(`/admin/externallinks/update`, data, "Contribution area has been saved.", "Go to External Links ", "/admin/externallinks")
-                        break;
-                }
-            }, */}}
-            getExternalLinksById() {
-                let uri = '/admin/externallinks/' + this.id
-                let encoded = encodeURI(uri);
-                fetch(encoded)
-                .then(r => {
-                    r.json().then(body => {
-                    this.GetExternalLinksList = body
-                    })
-                })
-                .catch(e => {
-                    console.log(e)
-                })
-                return this.GetExternalLinksList
-            },
-            editExternalLink() {
-            Alpine.store('master').modal.show()
-            Alpine.store('master').putData(`/admin/externallinks/edit/`+this.id, "" , "External Link has been saved.", "Go to list of external link", "/admin/externallinks")
-            },
-            async init(){
-                this.action = 'add',
+            async init() {
+                this.action = action,
                 this.id = id
                 if (this.action.toLowerCase() == 'add') return;
 
-                    var modal = Alpine.store('master').modal
-                    modal.update('loading', 'Loading', 'Please wait for a moment.', '', '')
+                var modal = Alpine.store('master').modal
+                modal.update('loading', 'Loading', 'Please wait for a moment.', '', '')
 
-                    {{/* const res = await fetch(`/admin/externallinks/`this.id)
-                    const data = await res.json()
+                const res = await fetch('/admin/externallinks/' + id)
+                const externallinks = await res.json()
 
-                    this.form.IconSVG = data[0].IconSVG;
-                    this.form.SVGName = data[0].SVGName;
-                    this.form.Category = data[0].Category
-                    this.form.Enabled = data.Enabled.toString(); */}}
-
-                    modal.visible = false;
+                modal.visible = false
+                
+                this.form.IconSVG = externallinks[0].IconSVG
+                this.form.Hyperlink = externallinks[0].Hyperlink
+                this.form.LinkName = externallinks[0].LinkName
+                this.form.SVGName = externallinks[0].SVGName
+                this.form.Category = externallinks[0].Category
+                this.form.Enabled = externallinks[0].Enabled.toString()
+            },
+            onSubmitHandler() {
+                switch(this.action.toLowerCase()) {
+                    case 'add':
+                        Alpine.store('master').modal.show()
+                        Alpine.store('master').postData(`/api/externallinks/create`, this.form, "External links has been added.", "Go to list of external links", "/admin/externallinks")
+                    break;
+                    case 'edit':
+                        Alpine.store('master').modal.show()
+                        Alpine.store('master').putData(`/api/externallinks/update/`+ this.id ,this.form, "External Link has been saved.", "Go to list of external link", "/admin/externallinks")
+                    break;
+                }
             },
             
         }

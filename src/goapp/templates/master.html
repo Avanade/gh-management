@@ -291,7 +291,10 @@
               <div class="flex-grow border-t border-gray-400"></div>
               <p class="text-base font-medium text-black">External Links</p>
 
-              {{/* {{ range $link := .Header.ExternalLinks }}
+
+
+
+              {{ range $link := .Header.ExternalLinks }}
               <a
                 href="{{ $link.Url }}"
                 class="text-gray-600 hover:bg-gray-50 hover:text-gray-900 group flex items-center px-2 py-2 text-base font-medium rounded-md"
@@ -302,7 +305,9 @@
                 <img src="{{ $link.IconPath }}" class="mr-4 h-6 w-6"/>
                 {{ $link.Name }}
               </a>
-              {{ end }} */}}
+              {{ end }}
+
+
 
 
 {{/* x-data="{ category.: appro.Disabled ? false  : true }" */}}
