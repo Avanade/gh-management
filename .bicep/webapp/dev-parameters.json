@@ -3,6 +3,7 @@
     "contentVersion": "1.0.0.0",
     "parameters": {
         "projectName": {"value": ""},
+        "sqlServerName": {"value": ""},
         "containerServer": {"value": ""},
         "appServiceSettings": {
             "value": {

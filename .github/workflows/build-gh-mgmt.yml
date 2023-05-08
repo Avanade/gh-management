@@ -125,6 +125,7 @@ jobs:
       with:
         files: ./.bicep/webapp/${{ github.event.inputs.selected_environment }}-parameters.json
       env:
+        parameters.sqlServerName.value : ${{ secrets.SERVER_NAME }}
         parameters.projectName.value : ${{ env.PROJECT_NAME }}
         parameters.containerServer.value : ${{ secrets.ACR_REGISTRY }}
         parameters.appServiceSettings.value.DOCKER_REGISTRY_SERVER_URL : https://${{ secrets.ACR_REGISTRY }}
@@ -138,7 +139,7 @@ jobs:
         parameters.appServiceSettings.value.GH_CLIENT_ID : ${{ env.GH_CLIENT_ID }}
         parameters.appServiceSettings.value.GH_CLIENT_SECRET : ${{ env.GH_CLIENT_SECRET }}
         parameters.appServiceSettings.value.GH_TOKEN : ${{ env.GH_TOKEN }}
-        parameters.appServiceSettings.value.GHMGMTDB_CONNECTION_STRING : Server=${{ secrets.SERVER_NAME }}.database.windows.net,1433;Initial Catalog=${{ needs.deploy-server-and-database.outputs.DATABASE_NAME }};Persist Security Info=False;User ID=${{ secrets.SERVER_USERNAME }};Password=${{ secrets.SERVER_PASSWORD }};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;
+        parameters.appServiceSettings.value.GHMGMTDB_CONNECTION_STRING : Server=tcp:${{ secrets.SERVER_NAME }}.database.windows.net,1433;Initial Catalog=${{ needs.deploy-server-and-database.outputs.DATABASE_NAME }};Persist Security Info=False;User ID=${{ secrets.SERVER_USERNAME }};Password=${{ secrets.SERVER_PASSWORD }};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;
 
     - uses: azure/login@v1
       with:

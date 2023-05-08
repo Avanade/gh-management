@@ -3,6 +3,9 @@ param location string = resourceGroup().location
 param projectName string
 
 @secure()
+param sqlServerName string
+
+@secure()
 param containerServer string
 
 @secure()
@@ -46,3 +49,18 @@ resource ghmgmtAppService 'Microsoft.Web/sites@2022-03-01' = {
     }
   }
 }
+
+param possibleOutboundIpAddressesList array = split(ghmgmtAppService.properties.possibleOutboundIpAddresses, ',')
+
+resource ghmgmtSqlServer 'Microsoft.Sql/servers@2022-08-01-preview' existing = {
+  name: sqlServerName
+}
+
+resource ghmgmtSqlServerFirewalls 'Microsoft.Sql/servers/firewallRules@2022-08-01-preview' = [for ipAddress in possibleOutboundIpAddressesList: {
+  name: '${projectName}-${ipAddress}'
+  parent: ghmgmtSqlServer
+  properties: {
+    endIpAddress: ipAddress
+    startIpAddress: ipAddress
+  }
+}]
