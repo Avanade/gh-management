@@ -34,8 +34,8 @@ jobs:
           docker push ${{ secrets.ACR_REGISTRY }}/${{ env.PROJECT_NAME }}
 
   deploy-server-and-database:
-    if: ${{ needs.build-and-deploy-in-acr.result == 'success' }}
     runs-on: ubuntu-latest
+    if: ${{ needs.build-and-deploy-in-acr.result == 'success' }}
     outputs:
       database_name: ${{ steps.create_database.outputs.database_name }}
     steps:
@@ -73,8 +73,8 @@ jobs:
         project-file: 'src/sqldb/sqldb.sqlproj'
 
   deploy-appserviceplan-and-webapp:
-    if: ${{ needs.jobsdeploy-server-and-database.result == 'success' }}
     runs-on: ubuntu-latest
+    if: ${{ needs.jobsdeploy-server-and-database.result == 'success' }}
     steps:
 
     - uses: actions/checkout@v2
