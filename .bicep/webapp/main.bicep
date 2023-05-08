@@ -52,7 +52,7 @@ resource ghmgmtAppService 'Microsoft.Web/sites@2022-03-01' = {
 
 var possibleOutboundIpAddressesList = split(ghmgmtAppService.properties.possibleOutboundIpAddresses, ',')
 
-module sqlServerFirewalls 'serversFirewallRules.bicep' = {
+module sqlServerFirewalls '../sql/sqlServerFirewallRules.bicep' = {
   name: 'ghmgmtSqlServerFirewalls'
   params: {
     outboundIpAddresses: possibleOutboundIpAddressesList

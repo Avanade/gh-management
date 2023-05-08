@@ -34,7 +34,10 @@ jobs:
           docker push ${{ secrets.ACR_REGISTRY }}/${{ env.PROJECT_NAME }}
 
   deploy-server-and-database:
+    if: success()
     runs-on: ubuntu-latest
+    outputs:
+      database_name: ${{ steps.create_database.outputs.database_name }}
     steps:
 
     - uses: actions/checkout@v2
@@ -45,9 +48,9 @@ jobs:
         string: ${{github.event.inputs.selected_environment}}
 
     - name: Create database name
+      id: create_database
       run: |
-        echo "DATABASE_NAME=${{steps.string.outputs.uppercase}}GhManagementDb" >> $GITHUB_ENV
-        echo "DATABASE_NAME=${{steps.string.outputs.uppercase}}GhManagementDb" >> $GITHUB_OUTPUT
+        echo "database_name=${{steps.string.outputs.uppercase}}GhManagementDb" >> $GITHUB_OUTPUT
 
     - uses: azure/login@v1
       with:
@@ -59,17 +62,18 @@ jobs:
         subscriptionId: ${{ fromJSON(secrets.AZURE_CREDENTIALS)['subscriptionId'] }}
         resourceGroupName: ${{ secrets.AZURE_RG }}
         template: ./.bicep/sql/main.bicep
-        parameters: serverName=${{ secrets.SERVER_NAME }} administratorLogin=${{ secrets.SERVER_USERNAME }} administratorLoginPassword=${{ secrets.SERVER_PASSWORD }} databaseName=${{ env.DATABASE_NAME }}
+        parameters: serverName=${{ secrets.SERVER_NAME }} administratorLogin=${{ secrets.SERVER_USERNAME }} administratorLoginPassword=${{ secrets.SERVER_PASSWORD }} databaseName=${{ steps.create_database.outputs.database_name }}
         failOnStdErr: false
         scope: resourcegroup
 
     - uses: azure/sql-action@v1.3
       if: success()
       with:
-        connection-string: Server=${{ secrets.SERVER_NAME }}.database.windows.net;Initial Catalog=${{ env.DATABASE_NAME }};Persist Security Info=False;User ID=${{ secrets.SERVER_USERNAME }};Password=${{ secrets.SERVER_PASSWORD }};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;
+        connection-string: Server=${{ secrets.SERVER_NAME }}.database.windows.net;Initial Catalog=${{ steps.create_database.outputs.database_name }};Persist Security Info=False;User ID=${{ secrets.SERVER_USERNAME }};Password=${{ secrets.SERVER_PASSWORD }};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;
         project-file: 'src/sqldb/sqldb.sqlproj'
 
   deploy-appserviceplan-and-webapp:
+    if: success()
     runs-on: ubuntu-latest
     steps:
 
@@ -139,7 +143,7 @@ jobs:
         parameters.appServiceSettings.value.GH_CLIENT_ID : ${{ env.GH_CLIENT_ID }}
         parameters.appServiceSettings.value.GH_CLIENT_SECRET : ${{ env.GH_CLIENT_SECRET }}
         parameters.appServiceSettings.value.GH_TOKEN : ${{ env.GH_TOKEN }}
-        parameters.appServiceSettings.value.GHMGMTDB_CONNECTION_STRING : Server=tcp:${{ secrets.SERVER_NAME }}.database.windows.net,1433;Initial Catalog=${{ needs.deploy-server-and-database.outputs.DATABASE_NAME }};Persist Security Info=False;User ID=${{ secrets.SERVER_USERNAME }};Password=${{ secrets.SERVER_PASSWORD }};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;
+        parameters.appServiceSettings.value.GHMGMTDB_CONNECTION_STRING : Server=tcp:${{ secrets.SERVER_NAME }}.database.windows.net,1433;Initial Catalog=${{ needs.jobs.deploy-server-and-database.outputs.database_name }};Persist Security Info=False;User ID=${{ secrets.SERVER_USERNAME }};Password=${{ secrets.SERVER_PASSWORD }};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;
 
     - uses: azure/login@v1
       with:
