@@ -34,7 +34,7 @@ jobs:
           docker push ${{ secrets.ACR_REGISTRY }}/${{ env.PROJECT_NAME }}
 
   deploy-server-and-database:
-    if: success()
+    if: needs.build-and-deploy-in-acr.result == 'success'
     runs-on: ubuntu-latest
     outputs:
       database_name: ${{ steps.create_database.outputs.database_name }}
@@ -59,6 +59,7 @@ jobs:
     - name: Deploy SQL Server & Database
       uses: azure/arm-deploy@v1
       with:
+        deploymentName: Deploy SQL Server & Database
         subscriptionId: ${{ fromJSON(secrets.AZURE_CREDENTIALS)['subscriptionId'] }}
         resourceGroupName: ${{ secrets.AZURE_RG }}
         template: ./.bicep/sql/main.bicep
@@ -67,13 +68,12 @@ jobs:
         scope: resourcegroup
 
     - uses: azure/sql-action@v1.3
-      if: success()
       with:
         connection-string: Server=${{ secrets.SERVER_NAME }}.database.windows.net;Initial Catalog=${{ steps.create_database.outputs.database_name }};Persist Security Info=False;User ID=${{ secrets.SERVER_USERNAME }};Password=${{ secrets.SERVER_PASSWORD }};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;
         project-file: 'src/sqldb/sqldb.sqlproj'
 
   deploy-appserviceplan-and-webapp:
-    if: success()
+    if: needs.jobsdeploy-server-and-database.result == 'success'
     runs-on: ubuntu-latest
     steps:
 
@@ -152,6 +152,7 @@ jobs:
     - name: Deploy App Service Plan and Web App
       uses: azure/arm-deploy@v1
       with:
+        deploymentName: Deploy App Service Plan & Web App
         subscriptionId: ${{ fromJSON(secrets.AZURE_CREDENTIALS)['subscriptionId'] }}
         resourceGroupName: ${{ secrets.AZURE_RG }}
         template: ./.bicep/webapp/main.bicep
