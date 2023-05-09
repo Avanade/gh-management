@@ -7,14 +7,15 @@ import (
 	models "main/models"
 	ghmgmt "main/pkg/ghmgmtdb"
 	gh "main/pkg/github"
+	githubAPI "main/pkg/github"
 	session "main/pkg/session"
 	"main/pkg/sql"
 	"net/http"
-	"net/url"
 	"os"
 	"strconv"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/gorilla/mux"
 )
@@ -54,21 +55,24 @@ func GetUserProjects(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	for i, repo := range list {
-		if repo.RepositorySource == "GitHub" {
-			org := os.Getenv("GH_ORG_INNERSOURCE")
-			if repo.Visibility == "Public" {
-				org = os.Getenv("GH_ORG_OPENSOURCE")
-			}
-			list[i].TFSProjectReference = fmt.Sprintf("https://github.com/%s/%s", url.QueryEscape(org), url.QueryEscape(repo.Name))
-		} else {
-			continue
-		}
-	}
 
 	w.WriteHeader(http.StatusOK)
 	w.Header().Set("Content-Type", "application/json")
 	jsonResp, err := json.Marshal(list)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.Write(jsonResp)
+}
+
+func GetUsersWithGithub(w http.ResponseWriter, r *http.Request) {
+
+	users := ghmgmt.GetUsersWithGithub()
+
+	w.WriteHeader(http.StatusOK)
+	w.Header().Set("Content-Type", "application/json")
+	jsonResp, err := json.Marshal(users)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -104,6 +108,108 @@ func GetRequestStatusByProject(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	w.Header().Set("Content-Type", "application/json")
 	jsonResp, err := json.Marshal(projects)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.Write(jsonResp)
+}
+
+func GetRepoCollaboratorsByRepoId(w http.ResponseWriter, r *http.Request) {
+	req := mux.Vars(r)
+	id, _ := strconv.ParseInt(req["id"], 10, 64)
+
+	// Get repository
+	data := ghmgmt.GetProjectById(id)
+	s, _ := json.Marshal(data)
+	var repoList []Repo
+	err := json.Unmarshal(s, &repoList)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	var result []Collaborator
+
+	if len(repoList) > 0 {
+		repo := repoList[0]
+
+		if repo.RepositorySource == "GitHub" {
+			repoUrl := strings.Replace(repo.TFSProjectReference, "https://", "", -1)
+			repoUrlSub := strings.Split(repoUrl, "/")
+
+			token := os.Getenv("GH_TOKEN")
+
+			collaborators := gh.RepositoriesListCollaborators(token, repoUrlSub[1], repo.Name, "", "direct")
+			outsideCollaborators := gh.RepositoriesListCollaborators(token, repoUrlSub[1], repo.Name, "", "outside")
+			var outsideCollaboratorsUsernames []string
+			for _, x := range outsideCollaborators {
+				outsideCollaboratorsUsernames = append(outsideCollaboratorsUsernames, *x.Login)
+			}
+
+			for _, collaborator := range collaborators {
+
+				// Identify if user is an outside collaborator
+				isOutsideCollab := false
+				for _, x := range outsideCollaboratorsUsernames {
+					if *collaborator.Login == x {
+						isOutsideCollab = true
+						break
+					}
+				}
+
+				collabResult := Collaborator{
+					Id:                    collaborator.GetID(),
+					Role:                  *collaborator.RoleName,
+					GitHubUsername:        *collaborator.Login,
+					IsOutsideCollaborator: isOutsideCollab,
+				}
+
+				//Get user name and email address
+				users, err := ghmgmt.GetUserByGitHubId(strconv.FormatInt(*collaborator.ID, 10))
+				if err != nil {
+					http.Error(w, err.Error(), http.StatusInternalServerError)
+					return
+				}
+
+				if len(users) > 0 {
+					collabResult.Name = users[0]["Name"].(string)
+					collabResult.Email = users[0]["UserPrincipalName"].(string)
+				}
+
+				result = append(result, collabResult)
+			}
+		} else {
+			var collabResult Collaborator
+
+			repoOwner, err := ghmgmt.GetRepoOwnersRecordByRepoId(int64(repo.Id))
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+
+			if len(repoOwner) > 0 {
+				users, err := ghmgmt.GetUserByUserPrincipal(repoOwner[0].UserPrincipalName)
+				if err != nil {
+					http.Error(w, err.Error(), http.StatusInternalServerError)
+					return
+				}
+
+				if len(users) > 0 {
+					collabResult.Name = users[0]["Name"].(string)
+				}
+
+				collabResult.Email = repoOwner[0].UserPrincipalName
+				result = append(result, collabResult)
+			}
+
+		}
+
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Header().Set("Content-Type", "application/json")
+	jsonResp, err := json.Marshal(result)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -161,17 +267,6 @@ func GetAllRepositories(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	for i, repo := range list {
-		if repo.RepositorySource == "GitHub" {
-			org := os.Getenv("GH_ORG_INNERSOURCE")
-			if repo.Visibility == "Public" {
-				org = os.Getenv("GH_ORG_OPENSOURCE")
-			}
-			list[i].TFSProjectReference = fmt.Sprintf("https://github.com/%s/%s", url.QueryEscape(org), url.QueryEscape(repo.Name))
-		} else {
-			continue
-		}
-	}
 	result := RepositoryList{
 		Data:  list,
 		Total: ghmgmt.Repos_TotalCount_BySearchTerm(search),
@@ -202,6 +297,8 @@ func SetVisibility(w http.ResponseWriter, r *http.Request) {
 	innersource := os.Getenv("GH_ORG_INNERSOURCE")
 	opensource := os.Getenv("GH_ORG_OPENSOURCE")
 
+	id, err := strconv.ParseInt(projectId, 10, 64)
+
 	if currentState == "Public" {
 		// Set repo to desired visibility then move to innersource
 		err := gh.SetProjectVisibility(project, desiredState, opensource)
@@ -211,6 +308,10 @@ func SetVisibility(w http.ResponseWriter, r *http.Request) {
 		}
 
 		gh.TransferRepository(project, opensource, innersource)
+
+		time.Sleep(3 * time.Second)
+		repoResp, _ := gh.GetRepository(project, innersource)
+		ghmgmt.UpdateTFSProjectReferenceById(id, repoResp.GetHTMLURL())
 	} else {
 		// Set repo to desired visibility
 		err := gh.SetProjectVisibility(project, desiredState, innersource)
@@ -221,7 +322,6 @@ func SetVisibility(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Update database
-	id, err := strconv.ParseInt(projectId, 10, 64)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -255,7 +355,7 @@ func RequestMakePublic(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	go RequestApproval(id)
+	RequestApproval(id)
 }
 
 func ImportReposToDatabase(w http.ResponseWriter, r *http.Request) {
@@ -404,12 +504,13 @@ func IndexOrgRepos(w http.ResponseWriter, r *http.Request) {
 			}
 
 			param := map[string]interface{}{
-				"GithubId":     repo.GithubId,
-				"Name":         repo.Name,
-				"Description":  repo.Description,
-				"IsArchived":   repo.IsArchived,
-				"VisibilityId": visibilityId,
-				"Created":      repo.Created.Format("2006-01-02 15:04:05"),
+				"GithubId":            repo.GithubId,
+				"Name":                repo.Name,
+				"Description":         repo.Description,
+				"IsArchived":          repo.IsArchived,
+				"VisibilityId":        visibilityId,
+				"TFSProjectReference": repo.TFSProjectReference,
+				"Created":             repo.Created.Format("2006-01-02 15:04:05"),
 			}
 
 			isExisting := ghmgmt.Projects_IsExisting_By_GithubId(models.TypNewProjectReqBody{GithubId: repo.GithubId})
@@ -417,8 +518,20 @@ func IndexOrgRepos(w http.ResponseWriter, r *http.Request) {
 			var err error
 
 			if isExisting {
-				param["Id"] = ghmgmt.GetProjectByGithubId(repo.GithubId)[0]["Id"]
+				userdata := ghmgmt.GetProjectByGithubId(repo.GithubId)
+				param["Id"] = userdata[0]["Id"]
+
 				err = ghmgmt.ProjectUpdateByImport(param)
+				if userdata[0]["CreatedBy"] != nil {
+					RepoOwners, _ := ghmgmt.RepoOwnersByUserAndProjectId(param["Id"].(int64), userdata[0]["CreatedBy"].(string))
+					if len(RepoOwners) < 1 {
+						error := ghmgmt.RepoOwnersInsert(param["Id"].(int64), userdata[0]["CreatedBy"].(string))
+						if error != nil {
+
+							fmt.Println(error)
+						}
+					}
+				}
 			} else {
 				err = ghmgmt.ProjectInsertByImport(param)
 			}
@@ -461,8 +574,8 @@ func ApprovalSystemRequest(data models.TypProjectApprovals) error {
 				<td style="font-size:larger">|ProjectName|<td>
 			</tr>
 			<tr>
-				<td style="font-weight: bold;">CoOwner<td>
-				<td style="font-size:larger">|CoownerName|<td>
+				<td style="font-weight: bold;">Requested by<td>
+				<td style="font-size:larger">|Requester|<td>
 			</tr>
 			<tr>
 				<td style="font-weight: bold;">Description<td>
@@ -475,7 +588,7 @@ func ApprovalSystemRequest(data models.TypProjectApprovals) error {
 				<td style="font-size:larger">|Newcontribution|<td>
 			</tr>
 			<tr>
-				<td style="font-weight: bold;">Who is sponsoring this OSS contribution?<td>
+				<td style="font-weight: bold;">Who is sponsoring thapprovalsyscois OSS contribution?<td>
 				<td style="font-size:larger">|OSSsponsor|<td>
 			</tr>
 			<tr>
@@ -497,7 +610,7 @@ func ApprovalSystemRequest(data models.TypProjectApprovals) error {
 			"|RequesterName|", data.RequesterName,
 			"|ApprovalType|", data.ApprovalType,
 			"|ProjectName|", data.ProjectName,
-			"|CoownerName|", data.CoownerName,
+			"|Requester|", data.RequesterName,
 			"|ProjectDescription|", data.ProjectDescription,
 			"|RequesterUserPrincipalName|", data.RequesterUserPrincipalName,
 
@@ -555,6 +668,44 @@ func ReprocessRequestApproval() {
 	}
 }
 
+func RepoOwnersCleanup(w http.ResponseWriter, r *http.Request) {
+	token := os.Getenv("GH_TOKEN")
+	RepoUsers, _ := ghmgmt.SelectAllRepoNameAndOwners()
+	organizations := [...]string{os.Getenv("GH_ORG_INNERSOURCE"), os.Getenv("GH_ORG_OPENSOURCE")}
+	var wg sync.WaitGroup
+	for _, RepoUser := range RepoUsers {
+		wg.Add(1)
+		func(RepoUser models.TypRepoOwner) {
+			fmt.Println("Project ID : " + strconv.FormatInt(RepoUser.Id, 10))
+			isAdmin := false
+			validRepo := false
+			for _, organization := range organizations {
+				RepoAdmins_ := githubAPI.RepositoriesListCollaborators(token, organization, RepoUser.RepoName, "admin", "direct")
+				if len(RepoAdmins_) > 0 {
+					for _, list := range RepoAdmins_ {
+						validRepo = true
+						email, _ := ghmgmt.UsersGetEmail(*list.Login)
+						if RepoUser.UserPrincipalName == email {
+							isAdmin = true
+						}
+					}
+				}
+			}
+
+			if validRepo && !isAdmin {
+				err := ghmgmt.DeleteRepoOwnerRecordByUserAndProjectId(RepoUser.Id, RepoUser.UserPrincipalName)
+
+				if err != nil {
+					http.Error(w, err.Error(), http.StatusInternalServerError)
+				}
+			}
+			defer wg.Done()
+
+		}(RepoUser)
+	}
+	wg.Wait()
+}
+
 type RepositoryList struct {
 	Data  []Repo `json:"data"`
 	Total int    `json:"total"`
@@ -577,4 +728,13 @@ type Repo struct {
 	CreatedBy              string `json:CreatedBy`
 	Modified               string `json:Modified`
 	ModifiedBy             string `json: ModifiedBy`
+}
+
+type Collaborator struct {
+	Id                    int64  `json:"id"`
+	Name                  string `json:"name"`
+	Email                 string `json:"email"`
+	Role                  string `json:"role"`
+	GitHubUsername        string `json:"ghUsername`
+	IsOutsideCollaborator bool   `json:"isOutsideCollaborator"`
 }

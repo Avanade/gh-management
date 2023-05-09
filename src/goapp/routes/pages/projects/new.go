@@ -90,6 +90,7 @@ func ProjectsNewHandler(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 			body.GithubId = repo.GetID()
+			body.TFSProjectReference = repo.GetHTMLURL()
 			body.Visibility = 1
 
 			if isOrgAllowInternalRepo {
