@@ -1,0 +1,34 @@
+name: Deploy GH MGMT Container
+
+on:
+  workflow_dispatch:
+    inputs:
+      selected_environment:
+        type: choice
+        description: SELECT ENVIRONMENT
+        required: true
+        default: dev
+        options: 
+        - prod
+        - uat
+        - dev
+
+env:
+  PROJECT_NAME: ava-gh-mgmt-${{github.event.inputs.selected_environment}}
+
+jobs:
+  build-and-deploy-in-acr:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./src/goapp
+    steps:
+      - uses: actions/checkout@v2
+      - uses: azure/docker-login@v1
+        with:
+          login-server: ${{ secrets.ACR_REGISTRY }}
+          username: ${{ secrets.ACR_USERNAME }}
+          password: ${{ secrets.ACR_PASSWORD }}
+      - run: |
+          docker build . -t ${{ secrets.ACR_REGISTRY }}/${{ env.PROJECT_NAME }}:${{ github.sha }} -t ${{ secrets.ACR_REGISTRY }}/${{ env.PROJECT_NAME }}:latest
+          docker push ${{ secrets.ACR_REGISTRY }}/${{ env.PROJECT_NAME }}
