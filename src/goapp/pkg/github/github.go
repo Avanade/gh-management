@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"main/models"
-	ghmgmt "main/pkg/ghmgmtdb"
 	"os"
 	"strings"
 
@@ -37,10 +36,6 @@ func CreatePrivateGitHubRepository(data models.TypNewProjectReqBody, requestor s
 		return nil, err
 	}
 
-	_, err = AddCollaboratorToRequestedRepo(data, requestor)
-	if err != nil {
-		return nil, err
-	}
 	return repo, nil
 }
 
@@ -52,24 +47,6 @@ func IsOrgAllowInternalRepo() (bool, error) {
 		return false, err
 	}
 	return *org.MembersCanCreateInternalRepos, err
-}
-
-func AddCollaboratorToRequestedRepo(data models.TypNewProjectReqBody, requestor string) (*github.Response, error) {
-	owner := os.Getenv("GH_ORG_INNERSOURCE")
-
-	if data.Coowner != requestor {
-		GHUser := ghmgmt.Users_Get_GHUser(requestor)
-		_, err := AddCollaborator(owner, data.Name, GHUser, "admin")
-		if err != nil {
-			return nil, err
-		}
-	}
-	GHUser := ghmgmt.Users_Get_GHUser(data.Coowner)
-	resp, err := AddCollaborator(owner, data.Name, GHUser, "admin")
-	if err != nil {
-		return nil, err
-	}
-	return resp, err
 }
 
 func AddCollaborator(owner string, repo string, user string, permission string) (*github.Response, error) {
