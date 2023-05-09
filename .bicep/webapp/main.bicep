@@ -49,7 +49,7 @@ resource ghmgmtAppService 'Microsoft.Web/sites@2022-03-01' = {
         name: item.key
         value: item.value
       }]
-      linuxFxVersion: 'DOCKER|${containerServer}/${projectName}'
+      linuxFxVersion: 'DOCKER|${containerServer}/${appServiceName}'
     }
   }
 }
