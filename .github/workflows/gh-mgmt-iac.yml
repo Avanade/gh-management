@@ -14,7 +14,8 @@ on:
         - dev
 
 env:
-  PROJECT_NAME: ava-gh-mgmt-${{github.event.inputs.selected_environment}}
+  PROJECT_NAME: ava-gh-mgmt
+  ACTIVE_ENV: ${{github.event.inputs.selected_environment}}
 
 jobs:
   deploy-server-and-database:
@@ -114,6 +115,7 @@ jobs:
       env:
         parameters.sqlServerName.value : ${{ secrets.SERVER_NAME }}
         parameters.projectName.value : ${{ env.PROJECT_NAME }}
+        parameters.activeEnv.value : ${{ env.ACTIVE_ENV}}
         parameters.containerServer.value : ${{ secrets.ACR_REGISTRY }}
         parameters.appServiceSettings.value.DOCKER_REGISTRY_SERVER_URL : https://${{ secrets.ACR_REGISTRY }}
         parameters.appServiceSettings.value.DOCKER_REGISTRY_SERVER_USERNAME : ${{ secrets.ACR_USERNAME }} 
@@ -121,7 +123,7 @@ jobs:
         parameters.appServiceSettings.value.TENANT_ID : ${{ secrets.AD_TENANT_ID_DEV }}
         parameters.appServiceSettings.value.CLIENT_ID : ${{ secrets.AD_CLIENT_ID_DEV }}
         parameters.appServiceSettings.value.CLIENT_SECRET : ${{ secrets.AD_CLIENT_SECRET_DEV }}
-        parameters.appServiceSettings.value.HOME_URL : 'https://${{ env.PROJECT_NAME }}.azurewebsites.net'
+        parameters.appServiceSettings.value.HOME_URL : 'https://${{ env.PROJECT_NAME }}-${{env.ACTIVE_ENV}}.azurewebsites.net'
         parameters.appServiceSettings.value.EMAIL_ENDPOINT : ${{ secrets.EMAIL_ENDPOINT }}
         parameters.appServiceSettings.value.GH_CLIENT_ID : ${{ env.GH_CLIENT_ID }}
         parameters.appServiceSettings.value.GH_CLIENT_SECRET : ${{ env.GH_CLIENT_SECRET }}

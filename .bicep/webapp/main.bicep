@@ -2,6 +2,8 @@ param location string = resourceGroup().location
 
 param projectName string
 
+param activeEnv string
+
 @secure()
 param sqlServerName string
 
@@ -35,8 +37,10 @@ resource ghmgmtAppServicePlan 'Microsoft.Web/serverfarms@2020-06-01' = {
   kind: 'linux'
 }
 
+var appServiceName = '${projectName}-${activeEnv}'
+
 resource ghmgmtAppService 'Microsoft.Web/sites@2022-03-01' = {
-  name: projectName
+  name: appServiceName
   location: location
   properties: {
     serverFarmId: ghmgmtAppServicePlan.id
@@ -56,7 +60,7 @@ module sqlServerFirewalls '../sql/sqlServerFirewallRules.bicep' = {
   name: 'ghmgmtSqlServerFirewalls'
   params: {
     outboundIpAddresses: possibleOutboundIpAddressesList
-    projectName: projectName
+    projectName: appServiceName
     sqlServerName: sqlServerName
   }
 }
