@@ -11,7 +11,6 @@ import (
 	"os"
 	"strconv"
 	"strings"
-
 	"github.com/gorilla/mux"
 )
 
@@ -32,8 +31,6 @@ func ExternalLinksForm(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetExternalLinks(w http.ResponseWriter, r *http.Request) {
-
-	// Connect to database
 	dbConnectionParam := sql.ConnectionParam{
 		ConnectionString: os.Getenv("GHMGMTDB_CONNECTION_STRING"),
 	}
