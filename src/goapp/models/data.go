@@ -87,6 +87,8 @@ type TypCommunity struct {
 	Notes                  string                `json:"notes"`
 	TradeAssocId           string                `json:"tradeAssocId"`
 	IsExternal             bool                  `json:"isExternal"`
+	CommunityType          string                `json:"CommunityType"`
+	ChannelId              string                `json:"ChannelId"`
 	OnBoardingInstructions string                `json:"onBoardingInstructions"`
 	Created                string                `json:"created"`
 	CreatedBy              string                `json:"createdBy"`
