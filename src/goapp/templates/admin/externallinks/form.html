@@ -15,7 +15,7 @@
                         <div class="mt-1 sm:mt-0 sm:col-span-2">
                             <div
                                 x-data="combobox({ 
-                                ajax : getExternalTypez,
+                                ajax : getExternalIcons,
                                 id: 'id' ,
                                 text: 'name',
                                 isMultiple: false,
@@ -117,16 +117,15 @@
 
                 modal.visible = false
 
-                const data = this.getExternalTypez();
+                const data = this.getExternalIcons();
                 this.testing = data.filter((v) => v.iconpath == externallinks[0].IconSVG).map((v)=>{return{"id": v.id, "text":v.name} });
-                console.log(this.testing)
 
                 this.form.IconSVG = externallinks[0].IconSVG
                 this.form.Hyperlink = externallinks[0].Hyperlink
                 this.form.LinkName = externallinks[0].LinkName
                 this.form.Enabled = externallinks[0].Enabled.toString()
             },
-            getExternalTypez() {
+            getExternalIcons() {
                 let Externals = [
                     {   
                         "id": 0,
@@ -158,11 +157,21 @@
                         "name": "chat-bar-square",
                         "iconpath": "/public/icons/ExternalLinks/chat-bar-square.svg"
                     },             
+                                        {
+                        "id": 6,
+                        "name": "calendar",
+                        "iconpath": "/public/icons/ExternalLinks/calendar.svg"
+                    },   
+                                        {
+                        "id": 7,
+                        "name": "calendar-days",
+                        "iconpath": "/public/icons/ExternalLinks/calendar-days.svg"
+                    },                                           
                     ]
                 return Externals
             },
             onSubmitHandler() {
-                const data = this.getExternalTypez();
+                const data = this.getExternalIcons();
                 this.form.IconSVG = data.find((v) => v.id == this.testing[0].id).iconpath;
                 switch(this.action.toLowerCase()) {
                     case 'add':
