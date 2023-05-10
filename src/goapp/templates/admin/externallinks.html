@@ -24,7 +24,7 @@
                     <th scope="col" class="cursor-pointer px-3 py-3.5 text-left text-sm font-semibold text-gray-700 ">Icon</th>
                     <th scope="col" class="cursor-pointer px-3 py-3.5 text-left text-sm font-semibold text-gray-700 ">Hyperlink</th>
                     <th scope="col" class="cursor-pointer px-3 py-3.5 text-left text-sm font-semibold text-gray-700 ">Link Name</th>                    
-                    <th scope="col" class="cursor-pointer px-3 py-3.5 text-left text-sm font-semibold text-gray-700 ">Category</th>
+                    {{/* <th scope="col" class="cursor-pointer px-3 py-3.5 text-left text-sm font-semibold text-gray-700 ">Category</th> */}}
                     <th scope="col" class="cursor-pointer px-3 py-3.5 text-left text-sm font-semibold text-gray-700 ">Status</th>
                     <th scope="col" class="cursor-pointer px-3 py-3.5 text-left text-sm font-semibold text-gray-700 ">Action</th>
                 </tr> 
@@ -32,19 +32,18 @@
             <template x-for="(results, n) in getAllExternalLinks" :key="n">
                 <tr class="hover:bg-gray-100">
                     <td class="whitespace-nowrap px-3 py-3.5 text-sm text-gray-500">
-                        <span x-html="results.IconSVG" class="hover:shadow-md"></span>
+                        <img x-bind:src="window.location.origin+results.IconSVG" class="mr-4 h-6 w-6" x-bind:title="results.IconSVG.substring(28)"/>
                     </td>
                     <td class="whitespace-nowrap px-3 py-3.5 text-sm text-gray-500">
-                        <span x-html="results.Hyperlink" class="hover:shadow-md"></span>
+                        <a x-bind:href="results.Hyperlink" target="_blank" x-bind:title="results.Hyperlink" class="cursor-pointer">
+                            <span x-html="results.Hyperlink" class="hover:shadow-md"></span>
+                        </a>
                     </td>
                     <td class="whitespace-nowrap px-3 py-3.5 text-sm text-gray-500">
-                        <span x-text="results.LinkName"> </span>
-                    </td>  
-                    <td class="whitespace-nowrap px-3 py-3.5 text-sm text-gray-500">
-                        <span x-text="results.Category"> </span>
-                    </td>                  
+                        <span x-text="results.LinkName" title="Link Name"> </span>
+                    </td>              
                     <td class="whitespace-nowrap px-3 py-3.5 text-sm">
-                        <span x-bind:class="results.Enabled === true ? 'text-[#FF5800]' : 'text-gray-500' " x-text="results.Enabled ? 'Enabled': 'Disabled'"> </span>
+                        <span x-bind:class="results.Enabled === true ? 'text-[#FF5800]' : 'text-gray-500' " x-text="results.Enabled ? 'Enabled': 'Disabled'" > </span>
                     </td>
                     <td class="whitespace-nowrap px-3 py-3.5 text-sm flex">
                         <span @Click="onClickAction(results.Id, 'view')" class="cursor-pointer py-1 text-left text-sm font-semibold text-gray-500" title="View" >
@@ -102,6 +101,7 @@
                 return this.externalLinks
             },
             onClickAction(id, action) {
+
                 switch(action) {
                     case 'view':
                     window.location.href = 'externallinks/view/'+id
@@ -117,6 +117,10 @@
                     console.log('defualt')
                     break;
                 }
+            },
+            onClickHyperLink(value) {
+                window.location.origin+value
+                console.log("Clicking--> " + value)
             },
 
         }   

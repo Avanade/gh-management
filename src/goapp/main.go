@@ -174,13 +174,14 @@ func main() {
 	//EXTERNAL LINKS
 	muxAdmin.Handle("/externallinks", loadAdminPage(rtAdmin.ExternalLinksHandler))
 	muxAdmin.Handle("/externallinks/", loadAdminPage(rtAdmin.GetExternalLinks))
+	muxAdmin.Handle("/externallinks/enabled", loadAdminPage(rtAdmin.GetExternalLinksAllEnabled))
 	muxAdmin.Handle("/externallinks/{id}", loadAdminPage(rtAdmin.GetExternalLinksById))
-	muxAdmin.Handle("/externallinks/category/{Category}", loadAdminPage(rtAdmin.GetExternalLinksByCategory))
-	muxApi.HandleFunc("/externallinks/create", rtAdmin.CreateExternalLinks).Methods("POST")
-	muxApi.HandleFunc("/externallinks/update/{id}", rtAdmin.UpdateExternalLinks).Methods("PUT")
 	muxAdmin.Handle("/externallinks/{action:add}/", loadAdminPage(rtAdmin.ExternalLinksForm))
 	muxAdmin.Handle("/externallinks/{action:view|edit}/{id}", loadAdminPage(rtAdmin.ExternalLinksForm))
 	muxAdmin.Handle("/externallinks/{action:delete}/{id}", loadAdminPage(rtAdmin.ExternalLinksDelete))
+	//EXTERNAL LINKS API
+	muxApi.HandleFunc("/externallinks/create", rtAdmin.CreateExternalLinks).Methods("POST")
+	muxApi.HandleFunc("/externallinks/update/{id}", rtAdmin.UpdateExternalLinks).Methods("PUT")
 
 	muxApi.HandleFunc("/approvals/project/callback", rtProjects.UpdateApprovalStatusProjects).Methods("POST")
 	muxApi.HandleFunc("/approvals/project/reassign/callback", rtProjects.UpdateApprovalReassignApprover)

@@ -29,26 +29,10 @@ func ExternalLinksForm(w http.ResponseWriter, r *http.Request) {
 		Id:     id,
 		Action: strings.Title(action),
 	})
-
-	var externalLinks []models.TypMenu
-
-	externalLinks = append(externalLinks, models.TypMenu{Name: "Tech Community Calendar", Url: "https://techcommunitycalendar.com/", IconPath: "/public/icons/ExternalLinks/arrow-trending-up.svg", External: true})
-
-
-	data:= 
-
-	tmpl := template.Must(
-		template.ParseFiles("admin/externallinks/form",
-			fmt.Sprintf("admin/externallinks/%v.html", page)))
-	return tmpl.Execute(*w, data)
-
 }
 
 func GetExternalLinks(w http.ResponseWriter, r *http.Request) {
-	sessionaz, _ := session.Store.Get(r, "auth-session")
-	iprofile := sessionaz.Values["profile"]
-	profile := iprofile.(map[string]interface{})
-	username := fmt.Sprint(profile["preferred_username"])
+
 	// Connect to database
 	dbConnectionParam := sql.ConnectionParam{
 		ConnectionString: os.Getenv("GHMGMTDB_CONNECTION_STRING"),
@@ -60,11 +44,7 @@ func GetExternalLinks(w http.ResponseWriter, r *http.Request) {
 	}
 	defer db.Close()
 
-	param := map[string]interface{}{
-		"CreatedBy": username,
-	}
-
-	ExternalLinks, err := db.ExecuteStoredProcedureWithResult("PR_ExternalLinks_Select", param)
+	ExternalLinks, err := db.ExecuteStoredProcedureWithResult("PR_ExternalLinks_Select", nil)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -79,6 +59,43 @@ func GetExternalLinks(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Write(jsonResp)
+}
+
+func GetExternalLinksAllEnabled(w http.ResponseWriter, r *http.Request) {
+	// sessionaz, _ := session.Store.Get(r, "auth-session")
+	// iprofile := sessionaz.Values["profile"]
+	// profile := iprofile.(map[string]interface{})
+	// username := fmt.Sprint(profile["preferred_username"])
+	// Connect to database
+	dbConnectionParam := sql.ConnectionParam{
+		ConnectionString: os.Getenv("GHMGMTDB_CONNECTION_STRING"),
+	}
+	db, err := sql.Init(dbConnectionParam)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer db.Close()
+
+	param := map[string]interface{}{
+		"Enabled": true,
+	}
+
+	ExternalLinks, err := db.ExecuteStoredProcedureWithResult("PR_ExternalLinks_SelectAllEnabled", param)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Header().Set("Content-Type", "application/json")
+	jsonResp, err := json.Marshal(ExternalLinks)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Write(jsonResp)	
 }
 
 func GetExternalLinksById(w http.ResponseWriter, r *http.Request) {
@@ -115,48 +132,6 @@ func GetExternalLinksById(w http.ResponseWriter, r *http.Request) {
 	w.Write(jsonResp)
 }
 
-func GetExternalLinksByCategory(w http.ResponseWriter, r *http.Request) {
-	req := mux.Vars(r)
-	category := req["Category"]
-
-	sessionaz, _ := session.Store.Get(r, "auth-session")
-	iprofile := sessionaz.Values["profile"]
-	profile := iprofile.(map[string]interface{})
-	username := fmt.Sprint(profile["preferred_username"])
-
-	// Connect to database
-	dbConnectionParam := sql.ConnectionParam{
-		ConnectionString: os.Getenv("GHMGMTDB_CONNECTION_STRING"),
-	}
-	db, err := sql.Init(dbConnectionParam)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	defer db.Close()
-
-	param := map[string]interface{}{
-		"Category":  category,
-		"CreatedBy": username,
-	}
-
-	ExternalLinks, err := db.ExecuteStoredProcedureWithResult("PR_ExternalLinks_SelectByCategory", param)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	w.WriteHeader(http.StatusOK)
-	w.Header().Set("Content-Type", "application/json")
-	jsonResp, err := json.Marshal(ExternalLinks)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	w.Write(jsonResp)
-}
-
 func CreateExternalLinks(w http.ResponseWriter, r *http.Request) {
 	sessionaz, _ := session.Store.Get(r, "auth-session")
 	iprofile := sessionaz.Values["profile"]
@@ -178,11 +153,11 @@ func CreateExternalLinks(w http.ResponseWriter, r *http.Request) {
 	defer db.Close()
 
 	params := map[string]interface{}{
-		"SVGName":   data.SVGName,
+		// "SVGName":   data.SVGName,
 		"IconSVG":   data.IconSVG,
 		"Hyperlink": data.Hyperlink,
 		"LinkName":  data.LinkName,
-		"Category":  data.Category,
+		// "Category":  data.Category,
 		"Enabled":   data.Enabled,
 		"CreatedBy": username,
 	}
@@ -216,11 +191,11 @@ func UpdateExternalLinks(w http.ResponseWriter, r *http.Request) {
 
 	params := map[string]interface{}{
 		"Id":         body.Id,
-		"SVGName":    body.SVGName,
+		// "SVGName":    body.SVGName,
 		"IconSVG":    body.IconSVG,
 		"Hyperlink":  body.Hyperlink,
 		"LinkName":   body.LinkName,
-		"Category":   body.Category,
+		// "Category":   body.Category,
 		"Enabled":    body.Enabled,
 		"ModifiedBy": username,
 	}

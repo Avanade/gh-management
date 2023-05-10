@@ -291,10 +291,7 @@
               <div class="flex-grow border-t border-gray-400"></div>
               <p class="text-base font-medium text-black">External Links</p>
 
-
-
-
-              {{ range $link := .Header.ExternalLinks }}
+              {{/* {{ range $link := .Header.ExternalLinks }}
               <a
                 href="{{ $link.Url }}"
                 class="text-gray-600 hover:bg-gray-50 hover:text-gray-900 group flex items-center px-2 py-2 text-base font-medium rounded-md"
@@ -305,36 +302,16 @@
                 <img src="{{ $link.IconPath }}" class="mr-4 h-6 w-6"/>
                 {{ $link.Name }}
               </a>
-              {{ end }}
+              {{ end }} */}}
 
-
-
-
-{{/* x-data="{ category.: appro.Disabled ? false  : true }" */}}
-              
-
-              <a href="https://techcommunitycalendar.com/" target="_blank" class="cursor-pointer px-2 py-2 flex text-gray-600 hover:bg-gray-50 hover:text-gray-900 text-base font-medium rounded-md">
-                <template x-for="(category, n) in GetExternalLinksByCategoryTCC" :key="n">
-                  <span x-html="category.Enabled === true ? category.IconSVG : '' "></span>
-                </template>
-                <span class="ml-2">Tech Community Calendar</span>
-              </a>
-
-              
-              <a href="https://avanade.stackenterprise.co/" target="_blank" class="cursor-pointer px-2 py-2 flex text-gray-600 hover:bg-gray-50 hover:text-gray-900 text-base font-medium rounded-md">
-                  <template x-for="(category, n) in GetExternalLinksByCategorySOA" :key="n">
-                    <span x-html="category.Enabled === true ? category.IconSVG : '' "></span>
-                  </template>
-                <span class="ml-2">Stack Overflow at Avanade</span>
-              </a>
-
-              <a href="https://opentechinnovation.com/" target="_blank" class="cursor-pointer px-2 py-2 flex text-gray-600 hover:bg-gray-50 hover:text-gray-900 text-base font-medium rounded-md">
-                  <template x-for="(category, n) in GetExternalLinksByCategoryOIM" :key="n">
-                    <span x-html="category.Enabled === true ? category.IconSVG : '' "></span>
-                  </template>
-                <span class="ml-2">Open Innovation Meetup</span>
-              </a>
-
+            <template x-for="(results, n) in getEnabledExternalLinks" :key="n">
+              <div class="w-full mt-4 ">
+                <a x-bind:href="results.Hyperlink" class="text-gray-600 hover:bg-gray-50 hover:text-gray-900 group flex items-center px-2 py-2 text-base font-medium rounded-md" target="_blank" >
+                  <img x-bind:src="window.location.origin+results.IconSVG" class="text-gray-600 mr-4 h-6 w-6 "/>
+                  <span x-text="results.LinkName"> </span>
+                </a>
+              </div>
+            </template>
 
             </nav>
           </div>
@@ -669,6 +646,23 @@
         SOA: 'StackOverflowAvanade',
         OIM: 'OpenInnovationMeetup',
 
+        externalLinks: {
+          IconSVG: '',
+          HyperLink:'',
+          LinkName: '',
+          Enabled: ''
+        },
+        externalLinksEnabled:[],
+        async init() {
+          const res = await fetch('/admin/externallinks/enabled')
+          const externallinks = await res.json()
+
+          this.externalLinks.IconSVG = externallinks[0].IconSVG
+          this.externalLinks.Hyperlink = externallinks[0].Hyperlink
+          this.externalLinks.LinkName = externallinks[0].LinkName
+          this.externalLinks.Enabled = externallinks[0].Enabled
+          console.log("Heyy--->>>" + this.externalLinks.Hyperlink)
+        },
         get profileDomain() {
           var domain = this.profile.username.split('@')[1]
           return domain
@@ -708,51 +702,24 @@
           let redirect = localStorage.getItem("redirectUrl")
           if(redirect) window.location.href=redirect; localStorage.clear()
         },
-        GetExternalLinksByCategoryTCC() {
-            let uri = '/admin/externallinks/category/' + this.TCC
+        getEnabledExternalLinks() {
+            let uri = '/admin/externallinks/enabled'
             let encoded = encodeURI(uri);
             fetch(encoded)
             .then(r => {
                 r.json().then(body => {
-                this.GetExternalLinksByCategoryTCCList = body
+                this.externalLinksEnabled = body
                 })
             })
             .catch(e => {
                 console.log(e)
             })
-            return this.GetExternalLinksByCategoryTCCList
-        //
+            return this.externalLinksEnabled
         },
-        GetExternalLinksByCategorySOA() {
-            let uri = '/admin/externallinks/category/' + this.SOA
-            let encoded = encodeURI(uri);
-            fetch(encoded)
-            .then(r => {
-                r.json().then(body => {
-                this.GetExternalLinksByCategorySOAList = body
-                })
-            })
-            .catch(e => {
-                console.log(e)
-            })
-            return this.GetExternalLinksByCategorySOAList
-        //
-        },
-        GetExternalLinksByCategoryOIM() {
-            let uri = '/admin/externallinks/category/' + this.OIM
-            let encoded = encodeURI(uri);
-            fetch(encoded)
-            .then(r => {
-                r.json().then(body => {
-                this.GetExternalLinksByCategoryOIMList = body
-                })
-            })
-            .catch(e => {
-                console.log(e)
-            })
-            return this.GetExternalLinksByCategoryOIMList
-        //
-        }, 
+            constructImageURL(fileName) {
+                console.log(window.location.origin)
+                return window.location.origin + fileName
+            },        
       }
     }
   </script>

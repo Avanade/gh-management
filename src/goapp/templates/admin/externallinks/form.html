@@ -1,15 +1,10 @@
 {{ define "content" }}
-<br>
-
-    <link rel="shortcut icon" href="data:image/x-icon;," type="image/x-icon"> 
 <form x-data="ExternalLinksForm({
     action : '{{ .Action }}',
     id : '{{ .Id }}'
 })" >
     <div>
         <div class="relative">
-
-        
             <div>
                 <h3 class="text-lg leading-6 font-medium text-gray-900">{{ .Action }} External Link</h3>
             </div>
@@ -18,30 +13,19 @@
                     <div class="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-t sm:border-gray-200 sm:pt-5">
                         <label for="Name" class="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2"> Icon </label>
                         <div class="mt-1 sm:mt-0 sm:col-span-2">
-                            <input x-model="form.IconSVG" type="text" name="Name" id="Name" autocomplete="nope" class="block w-full shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm border-gray-300 rounded-md" >
-                            {{/*  */}}
-                            <div class="relative inline-block text-left">
-                            <div @click="showIcons = true" @click.away="showIcons=false">
-                                <button type="button" class="inline-flex w-full justify-center gap-x-1.5 rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50" id="menu-button" aria-expanded="true" aria-haspopup="true">
-                                    <span x-text="form.IconName"></span>
-                                    <svg class="-mr-1 h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                                    <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
-                                    </svg>
-                                </button>
+                            <div
+                                x-data="combobox({ 
+                                ajax : getExternalTypez,
+                                id: 'id' ,
+                                text: 'name',
+                                isMultiple: false,
+                                isInsertable: false,
+                                isDisplayItem : false,
+                                displaySearch: false
+                                })"
+                                x-modelable="selected" x-model="testing">
+                                <div x-html="template"></div>
                             </div>
-
-                            <div x-show="showIcons"  class="absolute right-0 z-10 mt-1 w-56 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="menu-button" tabindex="-1">
-                                <div class="py-1" role="none">
-                                    <a @Click="form.IconName = 'arrow-trending-up' " class="cursor-pointer text-gray-700 block px-4 py-2 text-sm" role="menuitem" tabindex="-1" id="menu-item-0">Icon1
-                                    
-                                    
-                                    </a>
-                                    <a @Click="form.IconName = 'at-symbol' " class="text-gray-700 block px-4 py-2 text-sm" role="menuitem" tabindex="-1" id="menu-item-1">Icon2</a>
-                                    <a @Click="form.IconName = 'Icon3' " class="text-gray-700 block px-4 py-2 text-sm" role="menuitem" tabindex="-1" id="menu-item-2">Icon3</a>
-                                </div>
-                            </div>
-                            </div>
-                            {{/*  */}}
                         </div>
                     </div>
                     <div class="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-t sm:border-gray-200 sm:pt-5">
@@ -58,53 +42,6 @@
                             <span> </span>
 
                         </div>
-                    </div>
-                    <div class="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-t sm:border-gray-200 sm:pt-5">
-                        <label for="Name" class="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2">Name </label>
-                        <div class="mt-1 sm:mt-0 sm:col-span-2">
-                            <input x-model="form.SVGName" type="text" name="Name" id="Name" autocomplete="nope" class="block w-full shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm border-gray-300 rounded-md">
-                        </div>
-                    </div>
-                    {{/*  */}}
-                    <div class="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-baseline">
-
-                        <label for="Name" class="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2"> Assign to </label>
-
-                        <div class="mt-2 sm:col-span-2">
-
-                            <div class="relative inline-block text-left">
-                                <div>
-                                    <button @click="CategoryList=true"
-                                            @click.away="CategoryList=false"
-                                            type="button" class="inline-flex w-full justify-center gap-x-1.5 rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50" id="menu-button" aria-expanded="true" aria-haspopup="true">
-                                    <span x-text="form.Category"></span>
-                                    <svg class="-mr-1 h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                                        <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
-                                    </svg>
-                                    </button>
-                                </div>
-
-                                <div x-show="CategoryList" 
-                                    class="absolute right-0 z-10 mt-0 w-56 origin-top-right divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="menu-button" tabindex="-1">
-                                    <div class="py-1" role="none">
-                                        <a @click="form.Category ='Tech Community Calendar' " class="cursor-pointer  block px-4 py-2 text-sm hover:bg-[#fff2eb]"  role="menuitem" tabindex="-1" id="menu-item-1"
-                                    x-bind:class="form.Category==='TechCommunityCalendar' ? 'text-[#FF5800]' : 'text-gray-700' " 
-                                    >Tech Community Calendar</a>
-                                    </div>
-                                    <div class="py-1" role="none">
-                                        <a @click="form.Category = 'StackOverflowAvanade' " class="cursor-pointer block px-4 py-2 text-sm hover:bg-[#fff2eb]" role="menuitem" tabindex="-1" id="menu-item-2"
-                                    x-bind:class="form.Category==='StackOverflowAvanade' ? 'text-[#FF5800]' : 'text-gray-700' " >Stack Overflow Avanade</a>
-                                    </div>
-                                    <div class="py-1" role="none">
-                                        <a @click="form.Category ='OpenInnovationMeetup' " class="cursor-pointer block px-4 py-2 text-sm hover:bg-[#fff2eb]" role="menuitem" tabindex="-1" id="menu-item-4"
-                                    x-bind:class="form.Category==='OpenInnovationMeetup' ? 'text-[#FF5800]' : 'text-gray-700' ">Open Innovation Meetup</a>
-                                    </div>
-
-
-                                </div>
-                            </div>
-                        </div>
-
                     </div>
 
                     <div class="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-baseline">
@@ -127,16 +64,12 @@
                         </div>
                     </div>
 
-                {{/*  */}}
                 </div>
                 
             </fieldset>
 
         </div>
-        
     </div>
-
-
 
 <div class="pt-5">
     <div class="flex justify-end">
@@ -148,9 +81,10 @@
         </button>
     </div>
 </div>
-{{/* END */}}
+
 </form>
 
+<script src="/public/components/combobox.js"></script>
 
 <script type="text/javascript">
     function ExternalLinksForm({
@@ -162,24 +96,21 @@
             id: null,
             form : {
                 Id: {{ .Id }},
-                IconName: 'Select an Icon',
                 IconSVG: '',
                 Hyperlink: '',
                 LinkName: '',
-                SVGName: '',
-                Category: ''.trim(),
                 Enabled: '',
             },
             showIcons: false,
-
-
+            testing: [],
             CategoryList: false,
-
             async init() {
                 this.action = action,
                 this.id = id
-                if (this.action.toLowerCase() == 'add') return;
-
+                if (this.action.toLowerCase() == 'add') {
+                    this.form.IconSVG = 'Select Icon'
+                    return;
+                }
                 var modal = Alpine.store('master').modal
                 modal.update('loading', 'Loading', 'Please wait for a moment.', '', '')
 
@@ -187,15 +118,54 @@
                 const externallinks = await res.json()
 
                 modal.visible = false
-                
+
+                const data = this.getExternalTypez();
+                this.testing = data.filter((v) => v.iconpath == externallinks[0].IconSVG).map((v)=>{return{"id": v.id, "text":v.name} });
+                console.log(this.testing)
+
                 this.form.IconSVG = externallinks[0].IconSVG
                 this.form.Hyperlink = externallinks[0].Hyperlink
                 this.form.LinkName = externallinks[0].LinkName
-                this.form.SVGName = externallinks[0].SVGName
-                this.form.Category = externallinks[0].Category
                 this.form.Enabled = externallinks[0].Enabled.toString()
             },
+            getExternalTypez() {
+                let Externals = [
+                    {   
+                        "id": 0,
+                        "name": "arrow-trending-up",
+                        "iconpath": "/public/icons/ExternalLinks/arrow-trending-up.svg"
+                    },
+                                        {
+                        "id": 1,
+                        "name": "at-symbol",
+                        "iconpath": "/public/icons/ExternalLinks/at-symbol.svg"
+                    },
+                                        {
+                        "id": 2,
+                        "name": "bell-alert",
+                        "iconpath": "/public/icons/ExternalLinks/bell-alert.svg"
+                    },
+                                        {
+                        "id": 3,
+                        "name": "bolt",
+                        "iconpath": "/public/icons/ExternalLinks/bolt.svg"
+                    },
+                                        {
+                        "id": 4,
+                        "name": "bookmark-square",
+                        "iconpath": "/public/icons/ExternalLinks/bookmark-square.svg"
+                    },        
+                                        {
+                        "id": 5,
+                        "name": "chat-bar-square",
+                        "iconpath": "/public/icons/ExternalLinks/chat-bar-square.svg"
+                    },             
+                    ]
+                return Externals
+            },
             onSubmitHandler() {
+                const data = this.getExternalTypez();
+                this.form.IconSVG = data.find((v) => v.id == this.testing[0].id).iconpath;
                 switch(this.action.toLowerCase()) {
                     case 'add':
                         Alpine.store('master').modal.show()
@@ -212,3 +182,5 @@
     }
 </script>
 {{ end }}
+
+

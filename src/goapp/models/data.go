@@ -39,8 +39,8 @@ type ExternalLinksIcon struct {
 	IconPath string
 }
 
-type SVGIcons struct {
-
+type ExternalLinksData struct {
+	Data string
 }
 
 type TypExternalLinks struct {
