@@ -47,7 +47,8 @@ func CommunityAPIHandler(w http.ResponseWriter, r *http.Request) {
 			"Description":            body.Description,
 			"Notes":                  body.Notes,
 			"TradeAssocId":           body.TradeAssocId,
-			"IsExternal":             body.IsExternal,
+			"CommunityType":          body.CommunityType,
+			"ChannelId":              body.ChannelId,
 			"OnBoardingInstructions": body.OnBoardingInstructions,
 			"CreatedBy":              username,
 			"ModifiedBy":             username,
@@ -199,7 +200,8 @@ func MyCommunityAPIHandler(w http.ResponseWriter, r *http.Request) {
 			"Description":            body.Description,
 			"Notes":                  body.Notes,
 			"TradeAssocId":           body.TradeAssocId,
-			"IsExternal":             body.IsExternal,
+			"CommunityType":          body.CommunityType,
+			"ChannelId":              body.ChannelId,
 			"OnBoardingInstructions": body.OnBoardingInstructions,
 			"CreatedBy":              username,
 			"ModifiedBy":             username,
@@ -390,6 +392,22 @@ func GetCommunitiesIsexternal(w http.ResponseWriter, r *http.Request) {
 
 	w.Write(jsonResp)
 }
+func CommunityInitCommunityType(w http.ResponseWriter, r *http.Request) {
+	dbConnectionParam := sql.ConnectionParam{
+		ConnectionString: os.Getenv("GHMGMTDB_CONNECTION_STRING"),
+	}
+
+	db, err := sql.Init(dbConnectionParam)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer db.Close()
+
+	_, err = db.ExecuteStoredProcedure("dbo.PR_Communities_InitCommunityType", nil)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 
 func ProcessCommunityMembersListExcel(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Process Community Members List By Excel triggered.")

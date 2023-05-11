@@ -9,6 +9,8 @@
     [IsExternal] BIT NOT NULL DEFAULT 0,
     [ApprovalStatusId] INT NOT NULL DEFAULT 1,
     [OnBoardingInstructions] VARCHAR(MAX) NULL,
+    [CommunityType] VARCHAR(10) NULL,
+    [ChannelId] [varchar](100) NULL,
     [Created] DATETIME NOT NULL DEFAULT getdate(), 
     [CreatedBy] VARCHAR(100) NULL, 
     [Modified] DATETIME NOT NULL DEFAULT getdate(), 

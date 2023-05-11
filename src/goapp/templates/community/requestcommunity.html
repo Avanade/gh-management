@@ -18,7 +18,44 @@
                     </p>
                 </P>
             </div>
-            <div class="flex flex flex-col md:flex-row ">
+          
+            <div class="flex flex flex-col md:flex-row bg ">
+                <div class="basis-1/2 md:base-full  md:flex-row mx-3">
+          
+                    <div class="flex flex-col  ">
+                    <div>
+                        <span class="mt-4 block text-sm font-medium text-gray-700">Community Type</span> 
+                        
+                    </div>
+                    <div 
+                        x-data="combobox({
+                                ajax : getCommunityType,
+                                id : 'id',
+                                text : 'name',
+                                isMultiple : false,
+                                displaySearch :false,
+                            })"
+                        x-modelable = "selected" x-model = "form.CommunityTypes" >
+                        <div x-html="template"></div>
+                      
+                    </div>
+                    </div>
+                    
+                </div>
+               
+                <div class="basis-1/2 md:base-full  md:flex-row mx-3" >
+                    <div class="flex flex-col  " x-show="form.CommunityTypes[0]['text']=='teams'">
+                        <div>
+                            <span class="mt-4 block text-sm font-medium text-gray-700">Channel Id</span> 
+                        </div>
+                        <div> 
+                            <input type="text" x-model="form.ChannelId" maxlength="100" :disabled="mode=='view'"
+                                class="mt-1 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md" />
+                        </div>
+                </div>
+                </div>
+            </div>
+            <div class="flex flex flex-col md:flex-row  ">
                 <div class="basis-1/2 md:base-full  md:flex-row mx-3">
                     <div class="mt-4 flex flex-col  ">
                         <div>
@@ -101,7 +138,7 @@
                     </div>
                 </div>
                 <div class="basis-1/2 md:base-full  md:flex-row mx-3">
-                    <div class="flex flex-col  ">
+                    <div class="flex flex-col sm:col-span-2 ">
                         <div class="mt-4">
                             <h3 class="block text-sm font-medium text-gray-700">Notes</h3>
                         </div>
@@ -110,11 +147,7 @@
                                 class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
                             </textarea>
                         </div>
-                        <div class="flex flex-row mx-1 my-3 items-center">
-                            <input type="checkbox" name="IsExternal" id="IsExternal" x-model="form.isExternal"
-                                class="mr-2" :disabled="mode=='view'" />
-                            This is an external community
-                        </div>
+                       
                     </div>
                 </div>
             </div>
@@ -282,7 +315,7 @@
 
         const res = await fetch(`/api/search/users/${search}`)
         const users = await res.json()
-
+        
         return users
     }
 
@@ -321,6 +354,9 @@
                 notes: '',
                 isExternal: false,
                 onBoardingInstructions: '',
+                CommunityType:'',
+                ChannelId:'',
+                CommunityTypes:[],
                 sponsors: [],
                 tags: [],
                 communitiesExternal: [],
@@ -369,7 +405,6 @@
                 mail: '',
             },
             
-           
             async getUsersList() {
 
                 await fetch('/api/allusers').then(j => j.json()
@@ -390,6 +425,27 @@
                     'displayName',
                     'mail', 'mail',
                     'datapush()')
+            },
+            getCommunityType() {
+
+            let CommunityType = [
+                {
+                    "id": 'external',
+                    "name": "external" 
+                },
+                {
+                    "id": 'internal',
+                    "name": "internal" 
+                },
+                {
+                    "id": 'teams',
+                    "name": "teams" 
+                }]
+
+            
+                return CommunityType
+
+
             },
             showModal: false,
             status: "",
@@ -419,6 +475,10 @@
                                     this.form.description = body[0]["Description"]
                                     this.form.notes = body[0]["Notes"]
                                     this.form.isExternal = body[0]["IsExternal"]
+                                    this.form.CommunityType = body[0]["CommunityType"]
+                                    this.form.CommunityTypes.push({ id:body[0]["CommunityType"],text: body[0]["CommunityType"]})
+                                    this.form.ChannelId= body[0]["ChannelId"]
+                                  //  { id: body[index]['Id'], text: body[index]['Tag'] }
                                     this.form.onBoardingInstructions = body[0]["OnBoardingInstructions"]
                                     spinnercount = spinnercount - 1
                                     if (spinnercount < 1) {
@@ -431,7 +491,7 @@
                         .catch(e => {
                             spinnercount = spinnercount - 1
                         })
-
+                        
                     fetch('/api/relatedcommunity/' + '{{.Id}}')
                         .then(r => {
                             r.json().then(body => {
@@ -542,7 +602,7 @@
                 let postData = this.form;
                 postData.tags = this.form.tags.map(i => i.text);
                 listsponsors =this.form.sponsors;
-          
+                
                 postData.sponsors=[];
                 for (const key of Object.keys(listsponsors)) {
                 
@@ -557,6 +617,7 @@
           
                     }
 
+                this.form.CommunityType =this.form.CommunityTypes[0]["text"].toString()
                 const listExternal =this.form.communitiesExternal;
                 postData.communitiesExternal=[];
                 for (const key of Object.keys(listExternal)) {
@@ -586,6 +647,7 @@
                      );
           
                     }
+                    
                 Alpine.store('master').postData('/api/community', postData, "Your community has been created.",
                     "Go to communities list", "/communities/list")
 
@@ -616,6 +678,8 @@
 
 
         }
+        
     }
+   
 </script>
 {{ end }}

@@ -6,7 +6,8 @@ CREATE PROCEDURE [dbo].[PR_Communities_Insert]
 			@Description VARCHAR(255),
 			@Notes VARCHAR(255),
 			@TradeAssocId VARCHAR(255),
-			@IsExternal INT,
+			@CommunityType VARCHAR(10),
+			@ChannelId VARCHAR(100)=NULL,
 			@OnBoardingInstructions VARCHAR(MAX) = NULL,
 			@CreatedBy  VARCHAR(50),
 			@ModifiedBy  VARCHAR(50) ,
@@ -26,7 +27,8 @@ BEGIN
 					   ,[Description]
 					   ,[Notes]
 					   ,[TradeAssocId]
-					   ,[IsExternal]
+					   ,[CommunityType]
+					   ,[ChannelId]
 					   ,[OnBoardingInstructions]
 					   ,[Created]
 					   ,[CreatedBy]
@@ -38,7 +40,8 @@ BEGIN
 					   ,@Description
 					   ,@Notes
 					   ,@TradeAssocId
-					   ,@IsExternal
+					   ,@CommunityType
+					   ,@ChannelId
 					   ,@OnBoardingInstructions
 					   ,GETDATE()
 					   ,@CreatedBy
@@ -58,7 +61,8 @@ BEGIN
 		@Description ,
 		@Notes ,
 		@TradeAssocId ,
-		@IsExternal,
+		@CommunityType,
+		@ChannelId,
 		@OnBoardingInstructions ,
 		@CreatedBy ,
 		@ModifiedBy
