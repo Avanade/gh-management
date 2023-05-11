@@ -131,10 +131,8 @@
               },
             })
             .then( r => {
-              if(r.status === 200) {
-                this.modal.update('success','Success',successMessage, actionButtonText, redirectUrl)
-                console.log(this.actionButtonText)
-                console.log(this.redirectUrl)
+              if(r.status === 200) { 
+                this.modal.update('success','Success',typeof(successMessage) === 'string'? successMessage : successMessage(r.data), actionButtonText, redirectUrl)
               }
               else {
                 r.text().then(body => {

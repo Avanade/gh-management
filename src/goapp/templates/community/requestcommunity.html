@@ -52,7 +52,7 @@
                             <input type="text" x-model="form.ChannelId" maxlength="100" :disabled="mode=='view'"
                                 class="mt-1 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md" />
                         </div>
-                </div>
+                    </div>
                 </div>
             </div>
             <div class="flex flex flex-col md:flex-row  ">
@@ -372,10 +372,14 @@
                     const fileInput = document.querySelector("#fileupload");
                     const formData = new FormData()
                     formData.append("fileupload", fileInput.files[0])
-                    console.log(formData.getAll("fileupload"))
+                    
+                    let successMessage = (x) => {
+                        return `File was successfully processed. ${x.newMembers} new member(s) had been added to the community.`
+                    }
+
                     Alpine.store('master').modal.reset()
                     Alpine.store('master').modal.show()
-                    Alpine.store('master').uploadFile(url, formData, "Members list was successfully processed.",
+                    Alpine.store('master').uploadFile(url, formData, successMessage,
                         "Close", `/community/${this.form.id}`)
                 }
 
