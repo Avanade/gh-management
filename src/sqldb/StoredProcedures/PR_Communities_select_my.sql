@@ -17,5 +17,5 @@ SELECT c.[Id]
 FROM [dbo].[Communities] c
 INNER JOIN ApprovalStatus T ON c.ApprovalStatusId = T.Id
 INNER JOIN [dbo].[CommunityMembers] CM ON c.Id = CM.CommunityId
-WHERE CM.UserPrincipalName = @UserPrincipalName
+WHERE CM.UserPrincipalName = @UserPrincipalName AND c.ApprovalStatusId = 5
 END
