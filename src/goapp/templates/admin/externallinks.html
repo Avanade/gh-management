@@ -12,7 +12,7 @@
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
                     </svg>
-                    <span class="ml-2">Add SVG</span>
+                    <span class="ml-2">Add External Link</span>
                 </button>
                 </a>
         </div>
@@ -22,8 +22,8 @@
         <table x-show="showTable" class="w-full mt-4 ">
                 <tr class="bg-gray-100">
                     <th scope="col" class="cursor-pointer px-3 py-3.5 text-left text-sm font-semibold text-gray-700 ">Icon</th>
-                    <th scope="col" class="cursor-pointer px-3 py-3.5 text-left text-sm font-semibold text-gray-700 ">Hyperlink</th>
-                    <th scope="col" class="cursor-pointer px-3 py-3.5 text-left text-sm font-semibold text-gray-700 ">Link Name</th>                    
+                    <th scope="col" class="cursor-pointer px-3 py-3.5 text-left text-sm font-semibold text-gray-700 ">Link Name</th> 
+                    <th scope="col" class="cursor-pointer px-3 py-3.5 text-left text-sm font-semibold text-gray-700 ">Hyperlink</th>                   
                     <th scope="col" class="cursor-pointer px-3 py-3.5 text-left text-sm font-semibold text-gray-700 ">Status</th>
                     <th scope="col" class="cursor-pointer px-3 py-3.5 text-left text-sm font-semibold text-gray-700 ">Action</th>
                 </tr> 
@@ -34,12 +34,12 @@
                         <img x-bind:src="window.location.origin+results.IconSVG" class="mr-4 h-6 w-6" x-bind:title="results.IconSVG.substring(28)"/>
                     </td>
                     <td class="whitespace-nowrap px-3 py-3.5 text-sm text-gray-500">
+                        <span x-text="results.LinkName" title="Link Name"> </span>
+                    </td>
+                    <td class="whitespace-nowrap px-3 py-3.5 text-sm text-gray-500">
                         <a x-bind:href="results.Hyperlink" target="_blank" x-bind:title="results.Hyperlink" class="cursor-pointer">
                             <span x-html="results.Hyperlink" class="hover:shadow-md"></span>
                         </a>
-                    </td>
-                    <td class="whitespace-nowrap px-3 py-3.5 text-sm text-gray-500">
-                        <span x-text="results.LinkName" title="Link Name"> </span>
                     </td>              
                     <td class="whitespace-nowrap px-3 py-3.5 text-sm">
                         <span x-bind:class="results.Enabled === true ? 'text-[#FF5800]' : 'text-gray-500' " x-text="results.Enabled ? 'Enabled': 'Disabled'" > </span>
