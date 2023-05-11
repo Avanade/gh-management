@@ -47,6 +47,7 @@ require (
 	github.com/gorilla/sessions v1.2.1
 	github.com/lestrrat-go/jwx v1.2.25
 	github.com/pquerna/cachecontrol v0.1.0 // indirect
+	github.com/thedatashed/xlsxreader v1.2.5
 	golang.org/x/crypto v0.0.0-20220511200225-c6db032c6c88 // indirect
 	golang.org/x/net v0.0.0-20220425223048-2871e0cb64e4 // indirect
 	golang.org/x/oauth2 v0.0.0-20220411215720-9780585627b5

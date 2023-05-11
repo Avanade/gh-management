@@ -7,6 +7,5 @@
     [CreatedBy] VARCHAR(100) NULL, 
     [Modified] DATETIME NOT NULL DEFAULT getdate(), 
     [ModifiedBy] VARCHAR(100) NULL
-    CONSTRAINT [FK_CommunityMembers_Communities] FOREIGN KEY (CommunityId) REFERENCES Communities(Id), 
-    CONSTRAINT [FK_CommunityMembers_Users] FOREIGN KEY (UserPrincipalName) REFERENCES Users(UserPrincipalName)
+    CONSTRAINT [FK_CommunityMembers_Communities] FOREIGN KEY (CommunityId) REFERENCES Communities(Id)
 )
