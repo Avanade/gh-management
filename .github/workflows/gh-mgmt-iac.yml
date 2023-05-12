@@ -19,4 +19,4 @@ jobs:
       with:
         azcliversion: 2.30.0
         inlineScript: |
-          az keyvault key list --vault-name "IPS-AV-EmTech"
+          az keyvault key list --vault-name "ITS-AV-EmTech"
