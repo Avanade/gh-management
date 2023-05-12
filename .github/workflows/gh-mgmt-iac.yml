@@ -19,4 +19,4 @@ jobs:
       with:
         azcliversion: 2.30.0
         inlineScript: |
-          az keyvault secret show --name "tencommunityportal" --vault-name "ITS-AV-EmTech" --query "value"
+          az keyvault key list
