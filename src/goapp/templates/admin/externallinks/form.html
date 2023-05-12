@@ -105,14 +105,16 @@
             async init() {
                 this.action = action,
                 this.id = id
+
                 if (this.action.toLowerCase() == 'add') {
                     this.form.IconSVG = 'Select Icon'
-                    return;
+                    return
                 }
+
                 var modal = Alpine.store('master').modal
                 modal.update('loading', 'Loading', 'Please wait for a moment.', '', '')
 
-                const res = await fetch('/admin/externallinks/' + id)
+                const res = await fetch('/api/externallinks/' + id)
                 const externallinks = await res.json()
 
                 modal.visible = false
@@ -185,6 +187,7 @@
                 this.form.IconSVG = data.find((v) => v.id == this.testing[0].id).iconpath;
                 switch(this.action.toLowerCase()) {
                     case 'add':
+                    console.log(this.form.IconSVG)
                         Alpine.store('master').modal.show()
                         Alpine.store('master').postData(`/api/externallinks/create`, this.form, "External links has been added.", "Go to list of external links", "/admin/externallinks")
                     break;

@@ -969,27 +969,6 @@ func Communities_AddMember(CommunityId int, UserPrincipalName string) error {
 
 }
 
-// Insert External Links
-// func ExternalLinks_Insert(svgname, iconsvg, category, createdBy string) error {
-// 	db := ConnectDb()
-// 	defer db.Close()
-
-// 	param := map[string]interface{}{
-// 		"SVGName":   svgname,
-// 		"IconSVG":   iconsvg,
-// 		"Category":  category,
-// 		"CreatedBy": createdBy,
-// 	}
-
-// 	_, err := db.ExecuteStoredProcedureWithResult("PR_ExternalLinks_Insert", param)
-// 	if err != nil {
-// 		fmt.Println(err)
-// 		return err
-// 	}
-
-// 	return nil
-// }
-
 func Communities_Related(CommunityId int64) (data []models.TypRelatedCommunities, err error) {
 
 	cp := sql.ConnectionParam{

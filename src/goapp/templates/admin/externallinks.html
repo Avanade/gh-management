@@ -1,6 +1,6 @@
 {{ define "content" }}
 
-<div x-data="ExternalLinksPage()" >
+<div x-data="ExternalLinksPage()" x-init="getAllExternalLinks()">
 
     <div class="border-gray-200 pb-5 sm:flex sm:items-center sm:justify-between">
         <h3 class="text-base font-semibold leading-6 text-gray-900">
@@ -28,7 +28,7 @@
                     <th scope="col" class="cursor-pointer px-3 py-3.5 text-left text-sm font-semibold text-gray-700 ">Action</th>
                 </tr> 
 
-            <template x-for="(results, n) in getAllExternalLinks" :key="n">
+            <template x-for="(results, n) in externalLinks" :key="n">
                 <tr class="hover:bg-gray-100">
                     <td class="whitespace-nowrap px-3 py-3.5 text-sm text-gray-500">
                         <img x-bind:src="window.location.origin+results.IconSVG" class="mr-4 h-6 w-6" x-bind:title="results.IconSVG.substring(28)"/>
@@ -84,7 +84,7 @@
             showSpinner: true,
             externalLinks: [],
             getAllExternalLinks() {
-                let uri = '/admin/externallinks/'
+                let uri = '/api/externallinks/'
                 let encoded = encodeURI(uri);
                 fetch(encoded)
                 .then(r => {
@@ -110,7 +110,7 @@
                     break;
                     case 'delete':
                     Alpine.store('master').modal.show()
-                    Alpine.store('master').putData(`externallinks/delete/`+id, "" , "External Link has deleted.", "Go to list of external links", "/admin/externallinks")
+                    Alpine.store('master').putData(`/api/externallinks/delete/`+id, "" , "External Link has deleted.", "Go to list of external links", "/admin/externallinks")
                     break;
                     default:
                     console.log('defualt')

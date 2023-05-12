@@ -1,9 +1,7 @@
 CREATE PROCEDURE PR_ExternalLinks_Insert
-	@SVGName VARCHAR(100),
-	@IconSVG VARCHAR(1000),
+	@IconSVG VARCHAR(100),
 	@Hyperlink VARCHAR(100),
 	@LinkName VARCHAR(100),
-	@Category VARCHAR(100),
 	@Enabled VARCHAR(100),
 	@CreatedBy VARCHAR(100)
 
@@ -11,11 +9,9 @@ AS
 BEGIN
 
 INSERT INTO [dbo].[ExternalLinks] ( 
-			[SVGName],
 			[IconSVG],
 			[Hyperlink],
 			[LinkName],
-			[Category],
 			[Enabled],
             [Created],
             [CreatedBy],
@@ -24,11 +20,9 @@ INSERT INTO [dbo].[ExternalLinks] (
 )
 VALUES
            ( 
-			@SVGName,
 			@IconSVG,
 			@Hyperlink,
 			@LinkName,
-			@Category,
 			@Enabled,
             GETDATE(),
             @CreatedBy,

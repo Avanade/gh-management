@@ -45,11 +45,11 @@ type ExternalLinksData struct {
 
 type TypExternalLinks struct {
 	Id         int 	  `json:"id"`
-	SVGName    string `json:"svgname"`
+	
 	IconSVG    string `json:"iconsvg"`
 	Hyperlink  string `json:"hyperlink"`
 	LinkName   string `json:"linkname"`
-	Category   string `json:"category"`
+
 	Enabled    string `json:"enabled"`
 	Created    string `json:"created"`
 	CreatedBy  string `json:"createdBy"`
