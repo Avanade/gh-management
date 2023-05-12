@@ -52,7 +52,7 @@
                             <input type="text" x-model="form.ChannelId" maxlength="100" :disabled="mode=='view'"
                                 class="mt-1 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md" />
                         </div>
-                </div>
+                    </div>
                 </div>
             </div>
             <div class="flex flex flex-col md:flex-row  ">
@@ -198,6 +198,7 @@
             </div>
         </fieldset>
     </form>
+
     <div x-show="mode!='view'" class="mt-5 sm:col-span-6 pt-2 sm:pt-2 border-t-2 border-gray-100">
         <h3 class="text-lg font-medium pb-3 leading-6 text-gray-900">Onboarding Instructions</h3>
         <div 
@@ -225,6 +226,11 @@
                 x-bind:disabled="!isValid && ('{{.Email}}' !== communityCreatedBy)" @click="mode='edit'">
                 <span x-show="form.id">Edit Community</span>
             </button>
+            <button type="button" x-show="mode=='view' && ('{{.Email}}' === communityCreatedBy)"
+                class="bg-orange-500  inline-flex justify-center py-2 px-4 rounded-md text-white"
+                @click="showUploadMembersFileModal = true">
+                <span x-show="form.id">Upload Members List File</span>
+            </button>
             <button type="button" x-show="mode!='view'"
                 class="bg-orange-500  inline-flex justify-center py-2 px-4 rounded-md text-white"
                 :class="!isValid ? 'bg-orange-100' : ''" x-bind:disabled="!isValid" @click="submit()">
@@ -238,7 +244,41 @@
             </button>
         </div>
     </div>
-   
+
+    <!-- Modal -->
+    <template x-if="showUploadMembersFileModal">
+        <div class="relative z-10" aria-labelledby="modal-title" role="dialog" aria-modal="true" >
+      
+          <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
+      
+          <div class="fixed inset-0 z-10 overflow-y-auto">
+            <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+              <div class="relative transform rounded-lg bg-white px-4 pb-4 pt-5 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-md sm:p-6">
+                <div>
+                  <div class="mt-1 sm:mt-2">
+                    <h3 class="text-base font-semibold leading-6 text-gray-900" id="modal-title">Upload Members List File</h3>
+                    <div class="mt-2">
+                      <div class="mt-2 text-sm text-gray-500">You can quickly add members to this community by uploading a members list file. Here are some guidelines:</div>
+                      <ul class="mt-2 list-disc list-outside text-sm text-gray-500 pl-5 mb-5">
+                          <li>Should be an excel file (.xls/.xlsx)</li>
+                          <li>Members' email address should be on the first column</li>
+                          <li>The file processor ignores rows that contains invalid email address</li>
+                      </ul>
+                      <form onsubmit="event.preventDefault()" autocomplete="off">
+                          <input x-model="membersFile.file" type="file" id="fileupload" accept=".xls,.xlsx, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel" class="text-sm text-gray-700"/>
+                          <br>
+                          <button x-bind:disabled="!membersFile.file" type="button" class="mt-5 inline-flex justify-center rounded-md bg-[#FF5800] px-5 mr-2 py-2 text-sm font-semibold text-white shadow-sm  focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:bg-slate-300" @click="uploadFile()" > Upload </button>
+                          <button @click="showUploadMembersFileModal = false; membersFile.file=null;" type="button" class="inline-flex justify-center rounded-md bg-gray-200 px-3 py-2 text-sm font-semibold text-gray-700 shadow-sm  focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Cancel</button>
+                      </form>
+                    </div>
+                  </div>
+                </div>
+                
+              </div>
+            </div>
+          </div>
+        </div>
+    </template>
 </div>
 
 <script src="/public/components/clsDropdown.js"></script>
@@ -321,6 +361,33 @@
                 tags: [],
                 communitiesExternal: [],
                 communitiesInternal: []
+            },
+            membersFile: {
+                file: null
+            },
+            showUploadMembersFileModal: false,
+            uploadFile(){
+                let url = `/api/community/members/processfile/${this.form.id}`
+                let f = () => {
+                    const fileInput = document.querySelector("#fileupload");
+                    const formData = new FormData()
+                    formData.append("fileupload", fileInput.files[0])
+                    
+                    let successMessage = (x) => {
+                        return `File was successfully processed. ${x.newMembers} new member(s) had been added to the community.`
+                    }
+
+                    Alpine.store('master').modal.reset()
+                    Alpine.store('master').modal.show()
+                    Alpine.store('master').uploadFile(url, formData, successMessage,
+                        "Close", `/community/${this.form.id}`)
+                }
+
+                let title = "Confirmation"
+                let message = `Do you want to upload the selected file?` 
+                Alpine.store('master').confirmationModal.update(title, message, f)
+                Alpine.store('master').confirmationModal.show()
+
             },
             hasBoardingInstruction() {
                 if(!this.form.onBoardingInstructions) return false

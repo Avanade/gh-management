@@ -18,3 +18,4 @@ jobs:
         with:        
           connection-string: ${{ secrets.GH_MGMT_CONNECTION_STRING }}
           project-file: 'src/sqldb/sqldb.sqlproj'
+          arguments: '/p:BlockOnPossibleDataLoss=false'

@@ -3,17 +3,20 @@ package routes
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	models "main/models"
 	ghmgmt "main/pkg/ghmgmtdb"
 	session "main/pkg/session"
 	"main/pkg/sql"
 	comm "main/routes/pages/community"
 	"net/http"
+	"net/mail"
 	"os"
 	"strconv"
 	"strings"
 
 	"github.com/gorilla/mux"
+	"github.com/thedatashed/xlsxreader"
 )
 
 func CommunityAPIHandler(w http.ResponseWriter, r *http.Request) {
@@ -405,15 +408,62 @@ func CommunityInitCommunityType(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
-
 	}
 }
-func ConnectDb() *sql.DB {
-	cp := sql.ConnectionParam{
-		ConnectionString: os.Getenv("GHMGMTDB_CONNECTION_STRING"),
+
+func ProcessCommunityMembersListExcel(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("Process Community Members List By Excel triggered.")
+	vars := mux.Vars(r)
+	id, _ := strconv.Atoi(vars["id"])
+	counter := 0
+
+	r.ParseMultipartForm(32 << 20)
+
+	file, handler, err := r.FormFile("fileupload")
+	if err != nil {
+		fmt.Println("Error Retrieving the File")
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer file.Close()
+
+	fmt.Printf("Uploaded File: %+v\n", handler.Filename)
+	fmt.Printf("File Size: %+v\n", handler.Size)
+	fmt.Printf("MIME Header: %+v\n", handler.Header)
+
+	// check if the file is an excel file
+	fileName := strings.Split(handler.Filename, ".")
+	if !strings.EqualFold(fileName[len(fileName)-1], "xls") && !strings.EqualFold(fileName[len(fileName)-1], "xlsx") {
+		http.Error(w, "The file is not valid.", http.StatusBadRequest)
+		return
 	}
 
-	db, _ := sql.Init(cp)
-
-	return db
+	fileBytes, err := ioutil.ReadAll(file)
+	if err != nil {
+		fmt.Println(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	xl, _ := xlsxreader.NewReader(fileBytes)
+	for row := range xl.ReadRows(xl.Sheets[0]) {
+		for _, cell := range row.Cells {
+			_, err := mail.ParseAddress(cell.Value)
+			if err == nil {
+				err = ghmgmt.Communities_AddMember(id, cell.Value)
+				if err == nil {
+					counter++
+				}
+			}
+		}
+	}
+	w.Header().Set("Content-Type", "application/json")
+	response := struct {
+		NewMembers int `json:"newMembers"`
+	}{NewMembers: counter}
+	jsonResp, err := json.Marshal(response)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.Write(jsonResp)
 }

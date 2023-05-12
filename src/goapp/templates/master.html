@@ -122,7 +122,29 @@
               var msg = e.response.data ? e.response.data : "An error occured while processing."
               this.modal.update("error", "Failed", msg, "","")
             })
-          }
+          },
+          uploadFile(endpoint, body, successMessage, actionButtonText, redirectUrl) {
+            axios.post(endpoint, body,
+            {
+              headers: {
+                  'Content-Type': 'multipart/form-data'
+              },
+            })
+            .then( r => {
+              if(r.status === 200) { 
+                this.modal.update('success','Success',typeof(successMessage) === 'string'? successMessage : successMessage(r.data), actionButtonText, redirectUrl)
+              }
+              else {
+                r.text().then(body => {
+                    this.modal.update("error", "Failed", body, "", "")
+                });
+              }
+            })
+            .catch(e=>{
+              var msg = e.response.data ? e.response.data : "An error occured while processing."
+              this.modal.update("error", "Failed", msg, "","")
+            })
+          },
         })
       })
     </script>
