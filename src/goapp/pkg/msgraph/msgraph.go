@@ -417,18 +417,18 @@ func ActiveUsers(search string) ([]User, error) {
 }
 
 func GetTeamsMembers(ChannelId string, token string) ([]User, error) {
-	// accessToken, err := getToken()
-	// if err != nil {
-	// 	return nil, err
-	// }
-
+	accessToken, err := getToken()
+	if err != nil {
+		return nil, err
+	}
+	if token == "" {
+		token = accessToken
+	}
 	client := &http.Client{
 		Timeout: time.Second * 10,
 	}
 
 	urlPath := fmt.Sprintf("https://graph.microsoft.com/v1.0/groups/%s/members", ChannelId)
-
-	//urlPath := "https://graph.microsoft.com/v1.0/groups/" + ChannelId + "/members"
 
 	req, err := http.NewRequest("GET", urlPath, nil)
 	if err != nil {
@@ -447,7 +447,6 @@ func GetTeamsMembers(ChannelId string, token string) ([]User, error) {
 		return nil, err
 	}
 
-	// Remove users without email address
 	var users []User
 	for _, user := range listUsersResponse.Value {
 		if user.Email != "" {

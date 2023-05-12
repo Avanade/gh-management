@@ -5,6 +5,7 @@ import (
 	"fmt"
 	models "main/models"
 	ghmgmt "main/pkg/ghmgmtdb"
+	"main/pkg/msgraph"
 	session "main/pkg/session"
 	"main/pkg/sql"
 	comm "main/routes/pages/community"
@@ -138,6 +139,17 @@ func CommunityAPIHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		if body.Id == 0 {
 			go comm.RequestCommunityApproval(int64(id))
+		}
+
+		TeamMembers, _ := msgraph.GetTeamsMembers(body.ChannelId, "")
+
+		if len(TeamMembers) > 0 {
+
+			for _, TeamMember := range TeamMembers {
+				fmt.Println(TeamMember.Email)
+
+				ghmgmt.Communities_AddMember(id, TeamMember.Email)
+			}
 		}
 	case "GET":
 		param := map[string]interface{}{
