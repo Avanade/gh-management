@@ -146,7 +146,6 @@ func CommunityAPIHandler(w http.ResponseWriter, r *http.Request) {
 			if len(TeamMembers) > 0 {
 
 				for _, TeamMember := range TeamMembers {
-					fmt.Println(TeamMember.Email)
 
 					ghmgmt.Communities_AddMember(id, TeamMember.Email)
 				}
