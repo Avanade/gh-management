@@ -141,16 +141,19 @@ func CommunityAPIHandler(w http.ResponseWriter, r *http.Request) {
 			go comm.RequestCommunityApproval(int64(id))
 		}
 
-		TeamMembers, _ := msgraph.GetTeamsMembers(body.ChannelId, "")
+		go func(channelId string) {
+			TeamMembers, _ := msgraph.GetTeamsMembers(body.ChannelId, "")
+			if len(TeamMembers) > 0 {
 
-		if len(TeamMembers) > 0 {
+				for _, TeamMember := range TeamMembers {
+					fmt.Println(TeamMember.Email)
 
-			for _, TeamMember := range TeamMembers {
-				fmt.Println(TeamMember.Email)
-
-				ghmgmt.Communities_AddMember(id, TeamMember.Email)
+					ghmgmt.Communities_AddMember(id, TeamMember.Email)
+				}
 			}
-		}
+
+		}(body.ChannelId)
+
 	case "GET":
 		param := map[string]interface{}{
 
