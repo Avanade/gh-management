@@ -79,7 +79,6 @@ func CategoryAPIHandler(w http.ResponseWriter, r *http.Request) {
 			"Id": body.Id,
 		}
 		_, err := ghmgmt.CommunitiesSelectByID(param)
-		//	_, err := db.ExecuteStoredProcedure("dbo.PR_Communities_select_byID", param)
 		if err != nil {
 			fmt.Println(err)
 		}
@@ -100,7 +99,7 @@ func CategoryListAPIHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Get project list
 
-	Communities, err := db.ExecuteStoredProcedureWithResult("PR_Category_select", nil)
+	Communities, err := ghmgmt.CategorySelect()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -137,7 +136,7 @@ func GetCategoryArticlesById(w http.ResponseWriter, r *http.Request) {
 	// Get project list
 	params := make(map[string]interface{})
 	params["Id"] = id
-	CategoryArticles, err := db.ExecuteStoredProcedureWithResult("PR_CategoryArticles_select_ById", params)
+	CategoryArticles, err := ghmgmt.CategoryArticlesselectById(params)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -172,7 +171,8 @@ func GetCategoryArticlesByArticlesID(w http.ResponseWriter, r *http.Request) {
 	// Get project list
 	params := make(map[string]interface{})
 	params["Id"] = id
-	CategoryArticles, err := db.ExecuteStoredProcedureWithResult("PR_CategoryArticles_select_ByArticlesID", params)
+
+	CategoryArticles, err := ghmgmt.CategoryArticlesSelectByArticlesID(params)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -207,7 +207,7 @@ func GetCategoryByID(w http.ResponseWriter, r *http.Request) {
 	// Get project list
 	params := make(map[string]interface{})
 	params["Id"] = id
-	Category, err := db.ExecuteStoredProcedureWithResult("PR_Category_select_ById", params)
+	Category, err := ghmgmt.CategorySelectById(params)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

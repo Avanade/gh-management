@@ -1,7 +1,6 @@
 package ghmgmt
 
 import (
-	"database/sql"
 	"fmt"
 )
 
@@ -28,10 +27,46 @@ func CategoryArticlesInsert(params map[string]interface{}) ([]map[string]interfa
 
 	return result, err
 }
-func CommunitiesSelectByID(params map[string]interface{}) (sql.Result, error) {
+
+func CategorySelect() ([]map[string]interface{}, error) {
 	db := ConnectDb()
 	defer db.Close()
-	result, err := db.ExecuteStoredProcedure("dbo.PR_Communities_select_byID", params)
+
+	result, err := db.ExecuteStoredProcedureWithResult("dbo.PR_Category_select", nil)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	return result, err
+}
+func CategoryArticlesselectById(params map[string]interface{}) ([]map[string]interface{}, error) {
+	db := ConnectDb()
+	defer db.Close()
+
+	result, err := db.ExecuteStoredProcedureWithResult("dbo.PR_CategoryArticles_select_ById", params)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	return result, err
+}
+func CategoryArticlesSelectByArticlesID(params map[string]interface{}) ([]map[string]interface{}, error) {
+	db := ConnectDb()
+	defer db.Close()
+
+	result, err := db.ExecuteStoredProcedureWithResult("dbo.PR_CategoryArticles_select_ByArticlesID", params)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	return result, err
+}
+
+func CategorySelectById(params map[string]interface{}) ([]map[string]interface{}, error) {
+	db := ConnectDb()
+	defer db.Close()
+
+	result, err := db.ExecuteStoredProcedureWithResult("dbo.PR_Category_select_ById", params)
 	if err != nil {
 		fmt.Println(err)
 	}
