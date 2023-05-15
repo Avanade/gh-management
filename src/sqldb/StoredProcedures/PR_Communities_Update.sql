@@ -7,6 +7,7 @@ CREATE PROCEDURE [dbo].[PR_Communities_Update]
 			@Notes VARCHAR(255),
 			@TradeAssocId VARCHAR(255),
             @CommunityType VARCHAR(10),
+            @ChannelId VARCHAR(100)=NULL,
             @OnBoardingInstructions VARCHAR(MAX) = NULL,
 			@CreatedBy  VARCHAR(50),
 			@ModifiedBy  VARCHAR(50)
@@ -19,6 +20,7 @@ UPDATE [dbo].[Communities]
       ,[Notes] = @Notes
       ,[TradeAssocId] = @TradeAssocId
       ,[CommunityType] = @CommunityType
+      ,[ChannelId] = @ChannelId
       ,[OnBoardingInstructions]=@OnBoardingInstructions
       ,[Created] =GETDATE()
       ,[CreatedBy] = @CreatedBy
