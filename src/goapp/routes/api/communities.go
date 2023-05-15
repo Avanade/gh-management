@@ -142,7 +142,12 @@ func CommunityAPIHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		go func(channelId string) {
-			TeamMembers, _ := msgraph.GetTeamsMembers(body.ChannelId, "")
+			TeamMembers, err := msgraph.GetTeamsMembers(body.ChannelId, "")
+			if err != nil {
+
+				fmt.Println(err)
+				return
+			}
 			if len(TeamMembers) > 0 {
 
 				for _, TeamMember := range TeamMembers {
