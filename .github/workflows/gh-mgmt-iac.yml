@@ -40,7 +40,6 @@ jobs:
             echo "server_username=${{secrets.SERVER_USERNAME}}" >> $GITHUB_OUTPUT
             echo "server_password=${{secrets.SERVER_PASSWORD}}" >> $GITHUB_OUTPUT
           ;;
-          )
           "prod")
             echo "server_name=${{secrets.SERVER_NAME_PROD}}" >> $GITHUB_OUTPUT
             echo "server_username=${{secrets.SERVER_USERNAME_PROD}}" >> $GITHUB_OUTPUT
