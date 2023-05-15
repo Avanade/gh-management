@@ -73,3 +73,14 @@ func CategorySelectById(params map[string]interface{}) ([]map[string]interface{}
 
 	return result, err
 }
+func CategoryArticlesUpdate(params map[string]interface{}) error {
+	db := ConnectDb()
+	defer db.Close()
+
+	_, err := db.ExecuteStoredProcedure("dbo.PR_CategoryArticles_Update", params)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	return err
+}

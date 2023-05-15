@@ -28,12 +28,6 @@ func CategoryAPIHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// cp := sql.ConnectionParam{
-
-	// 	ConnectionString: os.Getenv("GHMGMTDB_CONNECTION_STRING"),
-	// }
-
-	// db, _ := sql.Init(cp)
 	switch r.Method {
 	case "POST":
 		param := map[string]interface{}{
@@ -238,12 +232,6 @@ func CategoryArticlesUpdate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	cp := sql.ConnectionParam{
-
-		ConnectionString: os.Getenv("GHMGMTDB_CONNECTION_STRING"),
-	}
-	db, _ := sql.Init(cp)
-
 	param1 := map[string]interface{}{
 
 		"Name":       body.CategoryName,
@@ -267,7 +255,8 @@ func CategoryArticlesUpdate(w http.ResponseWriter, r *http.Request) {
 		"CreatedBy":  username,
 		"ModifiedBy": username,
 	}
-	_, err2 := db.ExecuteStoredProcedure("dbo.PR_CategoryArticles_Update", param)
+
+	err2 := ghmgmt.CategoryArticlesUpdate(param)
 	if err2 != nil {
 		fmt.Println(err)
 		return
@@ -291,12 +280,6 @@ func CategoryUpdate(w http.ResponseWriter, r *http.Request) {
 
 		return
 	}
-
-	// cp := sql.ConnectionParam{
-
-	// 	ConnectionString: os.Getenv("GHMGMTDB_CONNECTION_STRING"),
-	// }
-	// db, err := sql.Init(cp)
 
 	param1 := map[string]interface{}{
 
