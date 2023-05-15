@@ -34,6 +34,29 @@ type TypMenu struct {
 	External bool
 }
 
+type ExternalLinksIcon struct {
+	IconName string
+	IconPath string
+}
+
+type ExternalLinksData struct {
+	Data string
+}
+
+type TypExternalLinks struct {
+	Id         int 	  `json:"id"`
+	
+	IconSVG    string `json:"iconsvg"`
+	Hyperlink  string `json:"hyperlink"`
+	LinkName   string `json:"linkname"`
+
+	Enabled    string `json:"enabled"`
+	Created    string `json:"created"`
+	CreatedBy  string `json:"createdBy"`
+	Modified   string `json:"modified"`
+	ModifiedBy string `json:"modifiedBy"`
+}
+
 type TypNewProjectReqBody struct {
 	Id                      string `json:"id"`
 	GithubId                int64  `json:"githubId"`
@@ -64,6 +87,8 @@ type TypCommunity struct {
 	Notes                  string                `json:"notes"`
 	TradeAssocId           string                `json:"tradeAssocId"`
 	IsExternal             bool                  `json:"isExternal"`
+	CommunityType          string                `json:"CommunityType"`
+	ChannelId              string                `json:"ChannelId"`
 	OnBoardingInstructions string                `json:"onBoardingInstructions"`
 	Created                string                `json:"created"`
 	CreatedBy              string                `json:"createdBy"`

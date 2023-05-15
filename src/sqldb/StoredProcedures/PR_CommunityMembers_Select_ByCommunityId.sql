@@ -9,7 +9,7 @@ BEGIN
 	SET NOCOUNT ON;
 
     -- Insert statements for procedure here
-SELECT CM.[Id],
+SELECT
        CM.[CommunityId],
        CM.[UserPrincipalName],
        U.[Name]

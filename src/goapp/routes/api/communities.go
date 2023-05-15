@@ -3,17 +3,21 @@ package routes
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	models "main/models"
 	ghmgmt "main/pkg/ghmgmtdb"
+	"main/pkg/msgraph"
 	session "main/pkg/session"
 	"main/pkg/sql"
 	comm "main/routes/pages/community"
 	"net/http"
+	"net/mail"
 	"os"
 	"strconv"
 	"strings"
 
 	"github.com/gorilla/mux"
+	"github.com/thedatashed/xlsxreader"
 )
 
 func CommunityAPIHandler(w http.ResponseWriter, r *http.Request) {
@@ -44,7 +48,8 @@ func CommunityAPIHandler(w http.ResponseWriter, r *http.Request) {
 			"Description":            body.Description,
 			"Notes":                  body.Notes,
 			"TradeAssocId":           body.TradeAssocId,
-			"IsExternal":             body.IsExternal,
+			"CommunityType":          body.CommunityType,
+			"ChannelId":              body.ChannelId,
 			"OnBoardingInstructions": body.OnBoardingInstructions,
 			"CreatedBy":              username,
 			"ModifiedBy":             username,
@@ -138,6 +143,24 @@ func CommunityAPIHandler(w http.ResponseWriter, r *http.Request) {
 		if body.Id == 0 {
 			go comm.RequestCommunityApproval(int64(id))
 		}
+
+		go func(channelId string) {
+			TeamMembers, err := msgraph.GetTeamsMembers(body.ChannelId, "")
+			if err != nil {
+
+				fmt.Println(err)
+				return
+			}
+			if len(TeamMembers) > 0 {
+
+				for _, TeamMember := range TeamMembers {
+
+					ghmgmt.Communities_AddMember(id, TeamMember.Email)
+				}
+			}
+
+		}(body.ChannelId)
+
 	case "GET":
 		param := map[string]interface{}{
 
@@ -196,7 +219,8 @@ func MyCommunityAPIHandler(w http.ResponseWriter, r *http.Request) {
 			"Description":            body.Description,
 			"Notes":                  body.Notes,
 			"TradeAssocId":           body.TradeAssocId,
-			"IsExternal":             body.IsExternal,
+			"CommunityType":          body.CommunityType,
+			"ChannelId":              body.ChannelId,
 			"OnBoardingInstructions": body.OnBoardingInstructions,
 			"CreatedBy":              username,
 			"ModifiedBy":             username,
@@ -387,13 +411,78 @@ func GetCommunitiesIsexternal(w http.ResponseWriter, r *http.Request) {
 
 	w.Write(jsonResp)
 }
-
-func ConnectDb() *sql.DB {
-	cp := sql.ConnectionParam{
+func CommunityInitCommunityType(w http.ResponseWriter, r *http.Request) {
+	dbConnectionParam := sql.ConnectionParam{
 		ConnectionString: os.Getenv("GHMGMTDB_CONNECTION_STRING"),
 	}
 
-	db, _ := sql.Init(cp)
+	db, err := sql.Init(dbConnectionParam)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer db.Close()
 
-	return db
+	_, err = db.ExecuteStoredProcedure("dbo.PR_Communities_InitCommunityType", nil)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+}
+
+func ProcessCommunityMembersListExcel(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("Process Community Members List By Excel triggered.")
+	vars := mux.Vars(r)
+	id, _ := strconv.Atoi(vars["id"])
+	counter := 0
+
+	r.ParseMultipartForm(32 << 20)
+
+	file, handler, err := r.FormFile("fileupload")
+	if err != nil {
+		fmt.Println("Error Retrieving the File")
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer file.Close()
+
+	fmt.Printf("Uploaded File: %+v\n", handler.Filename)
+	fmt.Printf("File Size: %+v\n", handler.Size)
+	fmt.Printf("MIME Header: %+v\n", handler.Header)
+
+	// check if the file is an excel file
+	fileName := strings.Split(handler.Filename, ".")
+	if !strings.EqualFold(fileName[len(fileName)-1], "xls") && !strings.EqualFold(fileName[len(fileName)-1], "xlsx") {
+		http.Error(w, "The file is not valid.", http.StatusBadRequest)
+		return
+	}
+
+	fileBytes, err := ioutil.ReadAll(file)
+	if err != nil {
+		fmt.Println(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	xl, _ := xlsxreader.NewReader(fileBytes)
+	for row := range xl.ReadRows(xl.Sheets[0]) {
+		for _, cell := range row.Cells {
+			_, err := mail.ParseAddress(cell.Value)
+			if err == nil {
+				err = ghmgmt.Communities_AddMember(id, cell.Value)
+				if err == nil {
+					counter++
+				}
+			}
+		}
+	}
+	w.Header().Set("Content-Type", "application/json")
+	response := struct {
+		NewMembers int `json:"newMembers"`
+	}{NewMembers: counter}
+	jsonResp, err := json.Marshal(response)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.Write(jsonResp)
 }

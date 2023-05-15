@@ -2608,6 +2608,10 @@ select {
   list-style-position: outside;
 }
 
+.list-disc {
+  list-style-type: disc;
+}
+
 .appearance-none {
   -webkit-appearance: none;
      -moz-appearance: none;
@@ -3932,6 +3936,10 @@ select {
 
 .pb-3 {
   padding-bottom: 0.75rem;
+}
+
+.pl-5 {
+  padding-left: 1.25rem;
 }
 
 .pr-2 {
@@ -6046,6 +6054,10 @@ select {
 
   .sm\:max-w-lg {
     max-width: 32rem;
+  }
+
+  .sm\:max-w-md {
+    max-width: 28rem;
   }
 
   .sm\:flex-auto {
