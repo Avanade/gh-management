@@ -5,28 +5,19 @@ import (
 	"fmt"
 	models "main/models"
 	session "main/pkg/session"
-	"main/pkg/sql"
+	// "main/pkg/sql"
 
 	"net/http"
-	"os"
-
+	// "os"
+	ghmgmt "main/pkg/ghmgmtdb"
 	"github.com/gorilla/mux"
 )
 
 
 
 func GetExternalLinks(w http.ResponseWriter, r *http.Request) {
-	dbConnectionParam := sql.ConnectionParam{
-		ConnectionString: os.Getenv("GHMGMTDB_CONNECTION_STRING"),
-	}
-	db, err := sql.Init(dbConnectionParam)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	defer db.Close()
 
-	ExternalLinks, err := db.ExecuteStoredProcedureWithResult("PR_ExternalLinks_Select", nil)
+	ExternalLinks, err := ghmgmt.ExternalLinksExecuteSelect()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -44,21 +35,11 @@ func GetExternalLinks(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetExternalLinksAllEnabled(w http.ResponseWriter, r *http.Request) {
-	dbConnectionParam := sql.ConnectionParam{
-		ConnectionString: os.Getenv("GHMGMTDB_CONNECTION_STRING"),
-	}
-	db, err := sql.Init(dbConnectionParam)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	defer db.Close()
-
 	param := map[string]interface{}{
 		"Enabled": true,
 	}
 
-	ExternalLinks, err := db.ExecuteStoredProcedureWithResult("PR_ExternalLinks_SelectAllEnabled", param)
+	ExternalLinks, err := ghmgmt.ExternalLinksExecuteAllEnabled(param)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -79,21 +60,11 @@ func GetExternalLinksById(w http.ResponseWriter, r *http.Request) {
 	req := mux.Vars(r)
 	id := req["id"]
 
-	dbConnectionParam := sql.ConnectionParam{
-		ConnectionString: os.Getenv("GHMGMTDB_CONNECTION_STRING"),
-	}
-	db, err := sql.Init(dbConnectionParam)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	defer db.Close()
-
 	param := map[string]interface{}{
 		"Id": id,
 	}
 
-	ExternalLinks, err := db.ExecuteStoredProcedureWithResult("PR_ExternalLinks_SelectById", param)
+	ExternalLinks, err := ghmgmt.ExternalLinksExecuteById(param)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -123,12 +94,6 @@ func CreateExternalLinks(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	cp := sql.ConnectionParam{
-		ConnectionString: os.Getenv("GHMGMTDB_CONNECTION_STRING"),
-	}
-	db, _ := sql.Init(cp)
-	defer db.Close()
-
 	params := map[string]interface{}{
 		"IconSVG":   data.IconSVG,
 		"Hyperlink": data.Hyperlink,
@@ -137,7 +102,7 @@ func CreateExternalLinks(w http.ResponseWriter, r *http.Request) {
 		"CreatedBy": username,
 	}
 
-	__, err := db.ExecuteStoredProcedure("PR_ExternalLinks_Insert", params)
+	__, err := ghmgmt.ExternalLinksExecuteCreate(params)
 	if err != nil {
 		fmt.Println(__)
 		fmt.Println(err)
@@ -158,12 +123,6 @@ func UpdateExternalLinks(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	cp := sql.ConnectionParam{
-		ConnectionString: os.Getenv("GHMGMTDB_CONNECTION_STRING"),
-	}
-	db, err := sql.Init(cp)
-	
-
 	params := map[string]interface{}{
 		"Id":         body.Id,
 		"IconSVG":    body.IconSVG,
@@ -173,7 +132,7 @@ func UpdateExternalLinks(w http.ResponseWriter, r *http.Request) {
 		"ModifiedBy": username,
 	}
 
-	_, err2 := db.ExecuteStoredProcedure("dbo.PR_ExternalLinks_Update", params)
+	_, err2 := ghmgmt.ExternalLinksExecuteUpdate(params)
 	if err != nil {
 		fmt.Println(err2)
 		return
@@ -184,15 +143,15 @@ func ExternalLinksDelete(w http.ResponseWriter, r *http.Request) {
 	req := mux.Vars(r)
 	id := req["id"]
 
-	cp := sql.ConnectionParam{
-		ConnectionString: os.Getenv("GHMGMTDB_CONNECTION_STRING"),
-	}
-	db, err := sql.Init(cp)
+	// cp := sql.ConnectionParam{
+	// 	ConnectionString: os.Getenv("GHMGMTDB_CONNECTION_STRING"),
+	// }
+	// db, err := sql.Init(cp)
 	param := map[string]interface{}{
 		"Id": id,
 	}
-	_, error := db.ExecuteStoredProcedure("PR_ExternalLinks_Delete", param)
-	if err != nil {
+	_, error := ghmgmt.ExternalLinksExecuteDelete(param)
+	if error != nil {
 		fmt.Println(error)
 	}
 }
