@@ -103,15 +103,21 @@
 
                 switch(action) {
                     case 'view':
-                    window.location.href = 'externallinks/view/'+id
-                    break;
+                        window.location.href = 'externallinks/view/'+id
+                        break;
                     case 'edit':
-                    window.location.href = 'externallinks/edit/'+id
-                    break;
+                        window.location.href = 'externallinks/edit/'+id
+                        break;
                     case 'delete':
-                    Alpine.store('master').modal.show()
-                    Alpine.store('master').putData(`/api/externallinks/delete/`+id, "" , "External Link has deleted.", "Go to list of external links", "/admin/externallinks")
-                    break;
+                        let f = () => {
+                            Alpine.store('master').modal.show()
+                            Alpine.store('master').putData(`/api/externallinks/delete/`+id, "" , "External Link has been deleted.", "Go to list of external links", "/admin/externallinks")
+                        }
+                        let title = "Confirmation"
+                        let message = `Are you sure you want to delete this external link?` 
+                        Alpine.store('master').confirmationModal.update(title, message, f)
+                        Alpine.store('master').confirmationModal.show()
+                        break;
                     default:
                     console.log('defualt')
                     break;
