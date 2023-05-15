@@ -2,6 +2,11 @@ param location string = resourceGroup().location
 
 param projectName string
 
+@allowed([
+  'test'
+  'uat'
+  'prod'
+])
 param activeEnv string
 
 @secure()
@@ -62,5 +67,28 @@ module sqlServerFirewalls '../sql/sqlServerFirewallRules.bicep' = {
     outboundIpAddresses: possibleOutboundIpAddressesList
     projectName: appServiceName
     sqlServerName: sqlServerName
+  }
+}
+
+// TAGS
+resource ghmgmtAppServicePlanTags 'Microsoft.Resources/tags@2022-09-01' = {
+  name: 'default'
+  scope: ghmgmtAppServicePlan
+  properties: {
+    tags: {
+      project : 'gh-management,Approval System'
+      env : 'test,uat,prod'
+    }
+  }
+}
+
+resource ghmgmtAppServiceTags 'Microsoft.Resources/tags@2022-09-01' = {
+  name:  'default'
+  scope: ghmgmtAppService
+  properties: {
+    tags: {
+      project: 'gh-management'
+      env: activeEnv
+    }
   }
 }

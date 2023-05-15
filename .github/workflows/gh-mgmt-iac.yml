@@ -2,21 +2,81 @@ name: Deploy IAC Workflow
 
 on:
   workflow_dispatch:
+    inputs:
+      selected_environment:
+        type: choice
+        description: SELECT ENVIRONMENT
+        required: true
+        default: test
+        options: 
+        - prod
+        - uat
+        - test
+
+env:
+  PROJECT_NAME: ava-gh-mgmt
+  ACTIVE_ENV: ${{github.event.inputs.selected_environment}}
 
 jobs:
-
-  build-and-deploy:
+  deploy-server-and-database:
     runs-on: ubuntu-latest
+    outputs:
+      database_name: ${{ steps.create_database.outputs.database_name }}
     steps:
 
-    - name: Azure Login
-      uses: azure/login@v1
+    - uses: actions/checkout@v2
+
+    - id: string
+      uses: ASzc/change-string-case-action@v5
+      with:
+        string: ${{github.event.inputs.selected_environment}}
+
+    - name: Set Server Credentials
+      id: server_credentials
+      run: |
+        case ${{ github.event.inputs.selected_environment }} in
+          "test" | "uat")
+            echo "server_name=${{secrets.SERVER_NAME}}" >> $GITHUB_OUTPUT
+            echo "server_username=${{secrets.SERVER_USERNAME}}" >> $GITHUB_OUTPUT
+            echo "server_password=${{secrets.SERVER_PASSWORD}}" >> $GITHUB_OUTPUT
+          ;;
+          )
+          "prod")
+            echo "server_name=${{secrets.SERVER_NAME_PROD}}" >> $GITHUB_OUTPUT
+            echo "server_username=${{secrets.SERVER_USERNAME_PROD}}" >> $GITHUB_OUTPUT
+            echo "server_password=${{secrets.SERVER_PASSWORD_PROD}}" >> $GITHUB_OUTPUT
+          ;;
+        esac
+
+    - name: Create database name
+      id: create_database
+      run: |
+        case ${{ github.event.inputs.selected_environment }} in
+          "test" | "prod")
+            echo "database_name=GhManagementDb" >> $GITHUB_OUTPUT
+          ;;
+          "uat")
+            echo "database_name=GhManagementDbUAT" >> $GITHUB_OUTPUT
+          ;;
+        esac
+
+    - uses: azure/login@v1
       with:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-    - name: Azure CLI script
-      uses: azure/CLI@v1
+    - name: Deploy SQL Server & Database
+      uses: azure/arm-deploy@v1
       with:
-        azcliversion: 2.30.0
-        inlineScript: |
-          az keyvault key list --vault-name "ITS-AV-EmTech"
+        subscriptionId: ${{ fromJSON(secrets.AZURE_CREDENTIALS)['subscriptionId'] }}
+        resourceGroupName: ${{ secrets.AZURE_RG }}
+        template: ./.bicep/sql/main.bicep
+        parameters: activeEnv=${{github.event.inputs.selected_environment}} serverName=${{ steps.server_credentials.outputs.server_name }} administratorLogin=${{ steps.server_credentials.outputs.server_username }} administratorLoginPassword=${{ steps.server_credentials.outputs.server_password }} databaseName=${{ steps.create_database.outputs.database_name }}
+        failOnStdErr: false
+        scope: resourcegroup
+
+    - uses: azure/sql-action@v1.3
+      if: success()
+      with:
+        connection-string: Server=${{ steps.server_credentials.outputs.server_name }}.database.windows.net;Initial Catalog=${{ steps.create_database.outputs.database_name }};Persist Security Info=False;User ID=${{ steps.server_credentials.outputs.server_username }};Password=${{ steps.server_credentials.outputs.server_password }};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;
+        project-file: 'src/sqldb/sqldb.sqlproj'
+        arguments: '/p:BlockOnPossibleDataLoss=false'

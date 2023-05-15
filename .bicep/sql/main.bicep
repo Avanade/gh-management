@@ -1,3 +1,10 @@
+@allowed([
+  'test'
+  'uat'
+  'prod'
+])
+param activeEnv string
+
 @secure()
 param serverName string
 @secure()
@@ -29,5 +36,27 @@ resource sqlServerDatabase 'Microsoft.Sql/servers/databases@2022-08-01-preview' 
   sku: {
     name: skuName
     tier: skuTier
+  }
+}
+
+resource sqlServerTags 'Microsoft.Resources/tags@2022-09-01' = {
+  name:  'default'
+  scope: sqlServer
+  properties: {
+    tags: {
+      project: 'gh-management,Approval System'
+      env: activeEnv == 'prod' ? 'prod' : 'test,uat'
+    }
+  }
+}
+
+resource sqlServerDatabaseTags 'Microsoft.Resources/tags@2022-09-01' = {
+  name: 'default'
+  scope: sqlServerDatabase
+  properties: {
+    tags: {
+      project: 'gh-management'
+      env: activeEnv
+    }
   }
 }
