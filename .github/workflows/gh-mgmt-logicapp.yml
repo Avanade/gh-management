@@ -52,6 +52,21 @@ jobs:
           subscriptionId: ${{ fromJSON(secrets.AZURE_CREDENTIALS)['subscriptionId'] }}
           resourceGroupName: ${{ secrets.AZURE_RG }}
           template: ./.bicep/logicapps/main.bicep
-          
+          parameters: env=${{ env.ACTIVE_ENV }} LAManageIdentityName=${{ secrets.LOGIC_APP_MANAGE_IDENTITY }}
           failOnStdErr: false
           scope: resourcegroup
+
+      - name: Setup Workflow Parameters
+        uses: microsoft/variable-substitution@v1 
+        with:
+          files: ./.bicep/logicapps/workflows/parameters.json
+        env:
+          GHMgmDomain.value: ${{ env.GH_DOMAIN }}
+          
+      - name: Upload Logic App Workflows
+        uses: azure/CLI@v1
+        with:
+          azcliversion: 2.44.1
+          inlineScript: |
+            chmod +x ./.bicep/logicapps/upload_workflows.sh
+            ./.bicep/logicapps/upload_workflows.sh ${{steps.deploy_main_bicep.outputs.accountName}} ${{steps.deploy_main_bicep.outputs.destination}} ./.bicep/logicapps/workflows

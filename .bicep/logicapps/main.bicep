@@ -1,17 +1,17 @@
 param resourceName string = 'Ghmgm'
-// param env string
+param env string
 param location string = resourceGroup().location
-// param LAManageIdentityName string
+param LAManageIdentityName string
 
-// var logicAppName = '${resourceName}LA${env}'
-// var fileShare = '${toLower(logicAppName)}fs${env}'
-// var accountKey = LAStorageAccount.listKeys().keys[0].value
-// var accountName = LAStorageAccount.name
+var logicAppName = '${resourceName}LA${env}'
+var fileShare = '${toLower(logicAppName)}fs${env}'
+var accountKey = LAStorageAccount.listKeys().keys[0].value
+var accountName = LAStorageAccount.name
 
-// resource LAManageIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2018-11-30' = {
-//   name: LAManageIdentityName
-//   location: location
-// }
+resource LAManageIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2018-11-30' = {
+  name: LAManageIdentityName
+  location: location
+}
 
 resource LAStorageAccount 'Microsoft.Storage/storageAccounts@2022-09-01' = {
   name: toLower('${resourceName}sa')
@@ -71,38 +71,38 @@ resource LAAppServicePlan 'Microsoft.Web/serverfarms@2022-03-01' = {
   }
 }
 
-// resource LALogicApp 'Microsoft.Web/sites@2022-03-01' = {
-//   name: logicAppName
-//   location: location
-//   kind: 'functionapp,workflowapp'
-//   identity: {
-//     type: 'UserAssigned'
-//     userAssignedIdentities: {
-//       '${LAManageIdentity.id}' : {}
-//     }
-//   }
-//   properties: {
-//     serverFarmId: LAAppServicePlan.id
-//     // clientAffinityEnabled: false
-//     // httpsOnly: true
-//   }
-// }
+resource LALogicApp 'Microsoft.Web/sites@2022-03-01' = {
+  name: logicAppName
+  location: location
+  kind: 'functionapp,workflowapp'
+  identity: {
+    type: 'UserAssigned'
+    userAssignedIdentities: {
+      '${LAManageIdentity.id}' : {}
+    }
+  }
+  properties: {
+    serverFarmId: LAAppServicePlan.id
+    // clientAffinityEnabled: false
+    // httpsOnly: true
+  }
+}
 
-// resource LALogicAppConfig 'Microsoft.Web/sites/config@2022-03-01' = {
-//   name: 'appsettings'
-//   parent: LALogicApp
-//   properties: {
-//     APP_KIND : 'workflowApp'
-//     AzureFunctionsJobHost__extensionBundle__id : 'Microsoft.Azure.Functions.ExtensionBundle.Workflows'
-//     AzureFunctionsJobHost__extensionBundle__version : '[1.*, 2.0.0)'
-//     AzureWebJobsStorage : 'DefaultEndpointsProtocol=https;AccountName=${accountName};AccountKey=${accountKey};EndpointSuffix=core.windows.net'
-//     FUNCTIONS_EXTENSION_VERSION : '~4'
-//     FUNCTIONS_WORKER_RUNTIME : 'node'
-//     WEBSITE_CONTENTAZUREFILECONNECTIONSTRING : 'DefaultEndpointsProtocol=https;AccountName=${accountName};AccountKey=${accountKey};EndpointSuffix=core.windows.net'
-//     WEBSITE_CONTENTSHARE : fileShare
-//     WEBSITE_NODE_DEFAULT_VERSION : '~14'
-//   }
-// }
+resource LALogicAppConfig 'Microsoft.Web/sites/config@2022-03-01' = {
+  name: 'appsettings'
+  parent: LALogicApp
+  properties: {
+    APP_KIND : 'workflowApp'
+    AzureFunctionsJobHost__extensionBundle__id : 'Microsoft.Azure.Functions.ExtensionBundle.Workflows'
+    AzureFunctionsJobHost__extensionBundle__version : '[1.*, 2.0.0)'
+    AzureWebJobsStorage : 'DefaultEndpointsProtocol=https;AccountName=${accountName};AccountKey=${accountKey};EndpointSuffix=core.windows.net'
+    FUNCTIONS_EXTENSION_VERSION : '~4'
+    FUNCTIONS_WORKER_RUNTIME : 'node'
+    WEBSITE_CONTENTAZUREFILECONNECTIONSTRING : 'DefaultEndpointsProtocol=https;AccountName=${accountName};AccountKey=${accountKey};EndpointSuffix=core.windows.net'
+    WEBSITE_CONTENTSHARE : fileShare
+    WEBSITE_NODE_DEFAULT_VERSION : '~14'
+  }
+}
 
-// output accountName string = LAStorageAccount.name
-// output destination string = '${fileShare}/site/wwwroot'
+output accountName string = LAStorageAccount.name
+output destination string = '${fileShare}/site/wwwroot'
