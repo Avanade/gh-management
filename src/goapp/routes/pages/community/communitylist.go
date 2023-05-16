@@ -102,17 +102,6 @@ func GetCommunityIManagelist(w http.ResponseWriter, r *http.Request) {
 	profile := iprofile.(map[string]interface{})
 	username := profile["preferred_username"]
 
-	// dbConnectionParam := sql.ConnectionParam{
-	// 	ConnectionString: os.Getenv("GHMGMTDB_CONNECTION_STRING"),
-	// }
-
-	// db, err := sql.Init(dbConnectionParam)
-	// if err != nil {
-	// 	http.Error(w, err.Error(), http.StatusInternalServerError)
-	// 	return
-	// }
-	// defer db.Close()
-
 	params := make(map[string]interface{})
 	params["UserPrincipalName"] = username
 	Communities, err := ghmgmt.CommunityIManageExecuteSelect(params)
