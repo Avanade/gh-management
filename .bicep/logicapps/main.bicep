@@ -104,5 +104,40 @@ resource LALogicAppConfig 'Microsoft.Web/sites/config@2022-03-01' = {
   }
 }
 
+// TAGS
+resource LAStorageAccountTags 'Microsoft.Resources/tags@2022-09-01' = {
+  name: 'default'
+  scope: LAStorageAccount
+  properties: {
+    tags: {
+      project : 'ghmgmt-logicapp'
+      env : 'test,uat,prod'
+    }
+  }
+}
+
+resource LAAppServicePlanTags 'Microsoft.Resources/tags@2022-09-01' = {
+  name:  'default'
+  scope: LAAppServicePlan
+  properties: {
+    tags: {
+      project: 'ghmgmt-logicapp'
+      env: 'test,uat,prod'
+    }
+  }
+}
+
+resource LALogicAppTags 'Microsoft.Resources/tags@2022-09-01' = {
+  name:  'default'
+  scope: LALogicApp
+  properties: {
+    tags: {
+      project: 'ghmgmt-logicapp'
+      env: env
+    }
+  }
+}
+
+
 output accountName string = LAStorageAccount.name
 output destination string = '${fileShare}/site/wwwroot'
