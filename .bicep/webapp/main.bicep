@@ -24,7 +24,7 @@ param appServiceSettings object
 
 @allowed([
   'F1'
-  'B1'      
+  'B1'
   'P1v2'
   'P2v2'
   'P3v2'
