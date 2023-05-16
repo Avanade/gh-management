@@ -46,30 +46,30 @@ resource LAStorageAccount 'Microsoft.Storage/storageAccounts@2022-09-01' = {
   }
 }
 
-// resource LAAppServicePlan 'Microsoft.Web/serverfarms@2022-03-01' = {
-//   name: '${resourceName}ASP'
-//   location: location
-//   sku: {
-//     name: 'WS1'
-//     tier: 'WorkflowStandard'
-//     size: 'WS1'
-//     family: 'WS'
-//     capacity: 1
-//   }
-//   kind: 'elastic'
-//   properties: {
-//     perSiteScaling: false
-//     elasticScaleEnabled: true
-//     maximumElasticWorkerCount: 20
-//     isSpot: false
-//     reserved: false
-//     isXenon: false
-//     hyperV: false
-//     targetWorkerCount: 0
-//     targetWorkerSizeId: 0
-//     zoneRedundant: false
-//   }
-// }
+resource LAAppServicePlan 'Microsoft.Web/serverfarms@2022-03-01' = {
+  name: '${resourceName}ASP'
+  location: location
+  sku: {
+    name: 'WS1'
+    tier: 'WorkflowStandard'
+    size: 'WS1'
+    family: 'WS'
+    capacity: 1
+  }
+  kind: 'elastic'
+  properties: {
+    perSiteScaling: false
+    elasticScaleEnabled: true
+    maximumElasticWorkerCount: 20
+    isSpot: false
+    reserved: false
+    isXenon: false
+    hyperV: false
+    targetWorkerCount: 0
+    targetWorkerSizeId: 0
+    zoneRedundant: false
+  }
+}
 
 // resource LALogicApp 'Microsoft.Web/sites@2022-03-01' = {
 //   name: logicAppName
