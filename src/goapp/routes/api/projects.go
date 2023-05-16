@@ -42,7 +42,8 @@ func GetUserProjects(w http.ResponseWriter, r *http.Request) {
 	// Get project list
 	params := make(map[string]interface{})
 	params["UserPrincipalName"] = username
-	projects, err := db.ExecuteStoredProcedureWithResult("PR_Projects_Select_ByUserPrincipalName", params)
+
+	projects, err := ghmgmt.ProjectsSelectByUserPrincipalName(params)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -99,7 +100,8 @@ func GetRequestStatusByProject(w http.ResponseWriter, r *http.Request) {
 	// Get project list
 	params := make(map[string]interface{})
 	params["Id"] = id
-	projects, err := db.ExecuteStoredProcedureWithResult("PR_ProjectApprovals_Select_ById", params)
+
+	projects, err := ghmgmt.ProjectApprovalsSelectById(params)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

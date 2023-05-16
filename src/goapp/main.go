@@ -149,7 +149,6 @@ func main() {
 	muxApi.HandleFunc("/approval/type/{id}/archived", rtApi.SetIsArchivedApprovalTypeById).Methods("PUT")
 	muxApi.HandleFunc("/approval/types", rtApi.GetApprovalTypes).Methods("GET")
 	muxApi.HandleFunc("/approval/type/{id}", rtApi.GetApprovalTypeById).Methods("GET")
-
 	// API FOR LOGIC APP
 	muxApi.Handle("/init/indexorgrepos", loadGuidAuthApi(rtApi.InitIndexOrgRepos)).Methods("GET")
 	muxApi.Handle("/indexorgrepos", loadGuidAuthApi(rtApi.IndexOrgRepos)).Methods("GET")

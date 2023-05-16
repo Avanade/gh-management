@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	models "main/models"
+	ghmgmt "main/pkg/ghmgmtdb"
 	session "main/pkg/session"
 	"main/pkg/sql"
 	"net/http"
@@ -25,12 +26,6 @@ func CommunitySponsorsAPIHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	cp := sql.ConnectionParam{
-
-		ConnectionString: os.Getenv("GHMGMTDB_CONNECTION_STRING"),
-	}
-
-	db, _ := sql.Init(cp)
 	switch r.Method {
 	case "POST":
 		param := map[string]interface{}{
@@ -39,13 +34,8 @@ func CommunitySponsorsAPIHandler(w http.ResponseWriter, r *http.Request) {
 			"UserPrincipalName": body.UserPrincipalName,
 			"CreatedBy":         username,
 		}
-		_, err := db.ExecuteStoredProcedure("dbo.PR_CommunitySponsors_Insert", param)
-		if err != nil {
-			fmt.Println(err)
-		}
-	case "GET":
-		//	param := map[string]interface{}{}
-		_, err := db.ExecuteStoredProcedure("dbo.PR_CommunitySponsors_Select", nil)
+
+		_, err := ghmgmt.CommunitySponsorsInsert(param)
 		if err != nil {
 			fmt.Println(err)
 		}
@@ -56,7 +46,7 @@ func CommunitySponsorsAPIHandler(w http.ResponseWriter, r *http.Request) {
 			"UserPrincipalName": body.UserPrincipalName,
 			"CreatedBy":         username,
 		}
-		_, err := db.ExecuteStoredProcedure("dbo.PR_CommunitySponsors_Update", param)
+		_, err := ghmgmt.CommunitySponsorsUpdate(param)
 		if err != nil {
 			fmt.Println(err)
 		}
@@ -83,7 +73,8 @@ func CommunitySponsorsPerCommunityId(w http.ResponseWriter, r *http.Request) {
 
 		"CommunityId": id,
 	}
-	CommunitySponsors, err := db.ExecuteStoredProcedureWithResult("PR_CommunitySponsors_Select_By_CommunityId", param)
+
+	CommunitySponsors, err := ghmgmt.CommunitySponsorsSelectByCommunityId(param)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	models "main/models"
+	ghmgmt "main/pkg/ghmgmtdb"
 	session "main/pkg/session"
 	"main/pkg/sql"
 	"net/http"
@@ -27,12 +28,6 @@ func CategoryAPIHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	cp := sql.ConnectionParam{
-
-		ConnectionString: os.Getenv("GHMGMTDB_CONNECTION_STRING"),
-	}
-
-	db, _ := sql.Init(cp)
 	switch r.Method {
 	case "POST":
 		param := map[string]interface{}{
@@ -43,7 +38,7 @@ func CategoryAPIHandler(w http.ResponseWriter, r *http.Request) {
 			"Id":         body.Id,
 		}
 
-		result, err := db.ExecuteStoredProcedureWithResult("dbo.PR_Category_Insert", param)
+		result, err := ghmgmt.CategoryInsert(param)
 		if err != nil {
 			fmt.Println(err)
 		}
@@ -65,7 +60,7 @@ func CategoryAPIHandler(w http.ResponseWriter, r *http.Request) {
 				"ModifiedBy":  username,
 			}
 
-			_, err := db.ExecuteStoredProcedure("dbo.PR_CategoryArticles_Insert", CategoryArticles)
+			_, err := ghmgmt.CategoryArticlesInsert(CategoryArticles)
 			if err != nil {
 				fmt.Println(err)
 
@@ -77,7 +72,7 @@ func CategoryAPIHandler(w http.ResponseWriter, r *http.Request) {
 
 			"Id": body.Id,
 		}
-		_, err := db.ExecuteStoredProcedure("dbo.PR_Communities_select_byID", param)
+		_, err := ghmgmt.CommunitiesSelectByID(param)
 		if err != nil {
 			fmt.Println(err)
 		}
@@ -98,7 +93,7 @@ func CategoryListAPIHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Get project list
 
-	Communities, err := db.ExecuteStoredProcedureWithResult("PR_Category_select", nil)
+	Communities, err := ghmgmt.CategorySelect()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -135,7 +130,7 @@ func GetCategoryArticlesById(w http.ResponseWriter, r *http.Request) {
 	// Get project list
 	params := make(map[string]interface{})
 	params["Id"] = id
-	CategoryArticles, err := db.ExecuteStoredProcedureWithResult("PR_CategoryArticles_select_ById", params)
+	CategoryArticles, err := ghmgmt.CategoryArticlesselectById(params)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -170,7 +165,8 @@ func GetCategoryArticlesByArticlesID(w http.ResponseWriter, r *http.Request) {
 	// Get project list
 	params := make(map[string]interface{})
 	params["Id"] = id
-	CategoryArticles, err := db.ExecuteStoredProcedureWithResult("PR_CategoryArticles_select_ByArticlesID", params)
+
+	CategoryArticles, err := ghmgmt.CategoryArticlesSelectByArticlesID(params)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -205,7 +201,7 @@ func GetCategoryByID(w http.ResponseWriter, r *http.Request) {
 	// Get project list
 	params := make(map[string]interface{})
 	params["Id"] = id
-	Category, err := db.ExecuteStoredProcedureWithResult("PR_Category_select_ById", params)
+	Category, err := ghmgmt.CategorySelectById(params)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -236,12 +232,6 @@ func CategoryArticlesUpdate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	cp := sql.ConnectionParam{
-
-		ConnectionString: os.Getenv("GHMGMTDB_CONNECTION_STRING"),
-	}
-	db, _ := sql.Init(cp)
-
 	param1 := map[string]interface{}{
 
 		"Name":       body.CategoryName,
@@ -249,7 +239,8 @@ func CategoryArticlesUpdate(w http.ResponseWriter, r *http.Request) {
 		"ModifiedBy": username,
 		"Id":         body.CategoryId,
 	}
-	result, err := db.ExecuteStoredProcedureWithResult("dbo.PR_Category_Insert", param1)
+
+	result, err := ghmgmt.CategoryInsert(param1)
 	if err != nil {
 		fmt.Println(err)
 
@@ -264,7 +255,8 @@ func CategoryArticlesUpdate(w http.ResponseWriter, r *http.Request) {
 		"CreatedBy":  username,
 		"ModifiedBy": username,
 	}
-	_, err2 := db.ExecuteStoredProcedure("dbo.PR_CategoryArticles_Update", param)
+
+	err2 := ghmgmt.CategoryArticlesUpdate(param)
 	if err2 != nil {
 		fmt.Println(err)
 		return
@@ -289,12 +281,6 @@ func CategoryUpdate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	cp := sql.ConnectionParam{
-
-		ConnectionString: os.Getenv("GHMGMTDB_CONNECTION_STRING"),
-	}
-	db, err := sql.Init(cp)
-
 	param1 := map[string]interface{}{
 
 		"Name":       body.Name,
@@ -303,7 +289,7 @@ func CategoryUpdate(w http.ResponseWriter, r *http.Request) {
 		"Id":         body.Id,
 	}
 
-	_, err2 := db.ExecuteStoredProcedureWithResult("dbo.PR_Category_Insert", param1)
+	_, err2 := ghmgmt.CategoryInsert(param1)
 	if err != nil {
 		fmt.Println(err2)
 
