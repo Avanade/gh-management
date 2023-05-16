@@ -219,11 +219,7 @@ func AddCollaborator(w http.ResponseWriter, r *http.Request) {
 			if permission == "admin" {
 
 				if len(users) > 0 {
-					err = db.RepoOwnersInsert(id, users[0]["UserPrincipalName"].(string))
-					if err != nil {
-						http.Error(w, err.Error(), http.StatusInternalServerError)
-						return
-					}
+					db.RepoOwnersInsert(id, users[0]["UserPrincipalName"].(string))
 				}
 			} else {
 				//if not admin, check is the user is currently an admin, remove if he is
