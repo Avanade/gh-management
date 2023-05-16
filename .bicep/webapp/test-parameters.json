@@ -25,8 +25,8 @@
                 "GHMGMTDB_CONNECTION_STRING":"",
                 "EMAIL_ENDPOINT":"",
                 
-                "GH_ORG_INNERSOURCE":"dev-innersource",
-                "GH_ORG_OPENSOURCE":"dev-opensource",
+                "GH_ORG_INNERSOURCE":"rgm-org",
+                "GH_ORG_OPENSOURCE":"rgm-org-public",
                 "GH_REPO_TEMPLATE":"Avanade",
                 "GH_REPO_TEMPLATE_NAME":"avanade-template",
                 "APPROVAL_SYSTEM_APP_URL":"https://ava-approval-system.azurewebsites.net",

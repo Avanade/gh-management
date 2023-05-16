@@ -7,11 +7,11 @@ on:
         type: choice
         description: SELECT ENVIRONMENT
         required: true
-        default: dev
+        default: test
         options: 
         - prod
         - uat
-        - dev
+        - test
 
 env:
   APPSERVICE_NAME: ${{github.event.inputs.selected_environment}}-gh-mgmt-app
