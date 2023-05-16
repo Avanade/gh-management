@@ -1,3 +1,5 @@
+param appServicePlanName string
+
 param location string = resourceGroup().location
 
 param projectName string
@@ -31,7 +33,7 @@ param appServiceSettings object
 param sku string = 'P1v2'
 
 resource ghmgmtAppServicePlan 'Microsoft.Web/serverfarms@2020-06-01' = {
-  name: '${projectName}-asp'
+  name: appServicePlanName
   location: location
   properties: {
     reserved: true
