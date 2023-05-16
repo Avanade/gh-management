@@ -145,6 +145,7 @@ jobs:
       with:
         files: ./.bicep/webapp/${{ github.event.inputs.selected_environment }}-parameters.json
       env:
+        parameters.imageName.value: ${{github.event.inputs.selected_environment}}-gh-mgmt-app
         parameters.appServicePlanName.value : 'opetechgh'
         parameters.sqlServerName.value : ${{ secrets.SERVER_NAME }}
         parameters.projectName.value : ${{ env.PROJECT_NAME }}

@@ -14,7 +14,7 @@ on:
         - dev
 
 env:
-  APPSERVICE_NAME: ava-gh-mgmt-${{github.event.inputs.selected_environment}}
+  APPSERVICE_NAME: ${{github.event.inputs.selected_environment}}-gh-mgmt-app
 
 jobs:
   build-and-deploy-in-acr:

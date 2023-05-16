@@ -4,6 +4,8 @@ param location string = resourceGroup().location
 
 param projectName string
 
+param imageName string
+
 @allowed([
   'test'
   'uat'
@@ -22,7 +24,7 @@ param appServiceSettings object
 
 @allowed([
   'F1'
-  'B1'
+  'B1'      
   'P1v2'
   'P2v2'
   'P3v2'
@@ -56,7 +58,7 @@ resource ghmgmtAppService 'Microsoft.Web/sites@2022-03-01' = {
         name: item.key
         value: item.value
       }]
-      linuxFxVersion: 'DOCKER|${containerServer}/${appServiceName}'
+      linuxFxVersion: 'DOCKER|${containerServer}/${imageName}'
     }
   }
 }
