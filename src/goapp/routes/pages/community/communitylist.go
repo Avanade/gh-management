@@ -7,7 +7,7 @@ import (
 	template "main/pkg/template"
 	"net/http"
 	"os"
-
+	ghmgmt "main/pkg/ghmgmtdb"
 	"github.com/gorilla/mux"
 )
 
@@ -102,20 +102,20 @@ func GetCommunityIManagelist(w http.ResponseWriter, r *http.Request) {
 	profile := iprofile.(map[string]interface{})
 	username := profile["preferred_username"]
 
-	dbConnectionParam := sql.ConnectionParam{
-		ConnectionString: os.Getenv("GHMGMTDB_CONNECTION_STRING"),
-	}
+	// dbConnectionParam := sql.ConnectionParam{
+	// 	ConnectionString: os.Getenv("GHMGMTDB_CONNECTION_STRING"),
+	// }
 
-	db, err := sql.Init(dbConnectionParam)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	defer db.Close()
+	// db, err := sql.Init(dbConnectionParam)
+	// if err != nil {
+	// 	http.Error(w, err.Error(), http.StatusInternalServerError)
+	// 	return
+	// }
+	// defer db.Close()
 
 	params := make(map[string]interface{})
 	params["UserPrincipalName"] = username
-	Communities, err := db.ExecuteStoredProcedureWithResult("PR_Communities_select_IManage", params)
+	Communities, err := ghmgmt.CommunityIManageExecuteSelect(params)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

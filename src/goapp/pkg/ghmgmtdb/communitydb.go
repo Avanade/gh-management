@@ -168,3 +168,15 @@ func RelatedCommunitiesSelect(params map[string]interface{}) ([]map[string]inter
 
 	return result, err
 }
+
+func CommunityIManageExecuteSelect(params map[string]interface{}) ([]map[string]interface{}, error) {
+	db := ConnectDb()
+	defer db.Close()
+	
+	result, err := db.ExecuteStoredProcedureWithResult("dbo.PR_Communities_select_IManage", params)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	return result, err
+}
