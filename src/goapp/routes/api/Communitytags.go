@@ -2,6 +2,7 @@ package routes
 
 import (
 	"encoding/json"
+	ghmgmt "main/pkg/ghmgmtdb"
 	"main/pkg/sql"
 	"net/http"
 	"os"
@@ -28,7 +29,8 @@ func CommunityTagPerCommunityId(w http.ResponseWriter, r *http.Request) {
 
 		"CommunityId": id,
 	}
-	CommunityTags, err := db.ExecuteStoredProcedureWithResult("PR_CommunityTags_Select_By_CommunityId", param)
+
+	CommunityTags, err := ghmgmt.CommunityTagsSelectByCommunityId(param)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

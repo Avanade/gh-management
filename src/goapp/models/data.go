@@ -22,9 +22,8 @@ type TypGitHubUser struct {
 }
 
 type TypHeaders struct {
-	Menu          []TypMenu
-	ExternalLinks []TypMenu
-	Page          string
+	Menu []TypMenu
+	Page string
 }
 
 type TypMenu struct {
@@ -44,11 +43,11 @@ type ExternalLinksData struct {
 }
 
 type TypExternalLinks struct {
-	Id         int 	  `json:"id"`
-	
-	IconSVG    string `json:"iconsvg"`
-	Hyperlink  string `json:"hyperlink"`
-	LinkName   string `json:"linkname"`
+	Id int `json:"id"`
+
+	IconSVG   string `json:"iconsvg"`
+	Hyperlink string `json:"hyperlink"`
+	LinkName  string `json:"linkname"`
 
 	Enabled    string `json:"enabled"`
 	Created    string `json:"created"`

@@ -33,12 +33,7 @@ func CommunityAPIHandler(w http.ResponseWriter, r *http.Request) {
 		fmt.Println(body)
 		return
 	}
-	cp := sql.ConnectionParam{
 
-		ConnectionString: os.Getenv("GHMGMTDB_CONNECTION_STRING"),
-	}
-
-	db, _ := sql.Init(cp)
 	switch r.Method {
 	case "POST":
 		param := map[string]interface{}{
@@ -56,7 +51,7 @@ func CommunityAPIHandler(w http.ResponseWriter, r *http.Request) {
 			"Id":                     body.Id,
 		}
 
-		result, err := db.ExecuteStoredProcedureWithResult("dbo.PR_Communities_Insert", param)
+		result, err := ghmgmt.CommunitiesInsert(param)
 		if err != nil {
 			fmt.Println(err)
 		}
@@ -79,7 +74,9 @@ func CommunityAPIHandler(w http.ResponseWriter, r *http.Request) {
 				"UserPrincipalName ": s.Mail,
 				"CreatedBy":          username,
 			}
-			_, err := db.ExecuteStoredProcedure("dbo.PR_CommunitySponsors_Insert", sponsorsparam)
+
+			_, err := ghmgmt.CommunitySponsorsInsert(sponsorsparam)
+
 			if err != nil {
 				fmt.Println(err)
 
@@ -91,7 +88,7 @@ func CommunityAPIHandler(w http.ResponseWriter, r *http.Request) {
 
 			"ParentCommunityId": id,
 		}
-		_, error := db.ExecuteStoredProcedure("PR_RelatedCommunities_Delete", deleteparam)
+		_, error := ghmgmt.RelatedCommunitiesDelete(deleteparam)
 		if err != nil {
 
 			fmt.Println(error)
@@ -104,7 +101,8 @@ func CommunityAPIHandler(w http.ResponseWriter, r *http.Request) {
 				"ParentCommunityId":   id,
 				"RelatedCommunityId ": t.RelatedCommunityId,
 			}
-			_, err := db.ExecuteStoredProcedure("PR_RelatedCommunities_Insert", RelatedCommunities)
+
+			_, err := ghmgmt.RelatedCommunitiesInsert(RelatedCommunities)
 			if err != nil {
 
 				fmt.Println(err)
@@ -119,7 +117,7 @@ func CommunityAPIHandler(w http.ResponseWriter, r *http.Request) {
 				"ParentCommunityId":   id,
 				"RelatedCommunityId ": t.RelatedCommunityId,
 			}
-			_, err := db.ExecuteStoredProcedure("PR_RelatedCommunities_Insert", param)
+			_, err := ghmgmt.RelatedCommunitiesInsert(param)
 			if err != nil {
 
 				fmt.Println(err)
@@ -133,7 +131,7 @@ func CommunityAPIHandler(w http.ResponseWriter, r *http.Request) {
 				"CommunityId": id,
 				"Tag ":        t,
 			}
-			_, err := db.ExecuteStoredProcedure("PR_CommunityTags_Insert", Tagsparam)
+			_, err := ghmgmt.CommunityTagsInsert(Tagsparam)
 			if err != nil {
 
 				fmt.Println(err)
@@ -166,7 +164,7 @@ func CommunityAPIHandler(w http.ResponseWriter, r *http.Request) {
 
 			"Id": body.Id,
 		}
-		_, err := db.ExecuteStoredProcedure("dbo.PR_Communities_select_byID", param)
+		_, err := ghmgmt.CommunitiesSelectByID(param)
 		if err != nil {
 			fmt.Println(err)
 		}
@@ -183,7 +181,8 @@ func CommunityAPIHandler(w http.ResponseWriter, r *http.Request) {
 			"CreatedBy":    body.CreatedBy,
 			"ModifiedBy":   body.ModifiedBy,
 		}
-		_, err := db.ExecuteStoredProcedure("dbo.PR_Communities_Update", param)
+
+		_, err := ghmgmt.CommunitiesUpdate(param)
 		if err != nil {
 			fmt.Println(err)
 		}
@@ -204,12 +203,7 @@ func MyCommunityAPIHandler(w http.ResponseWriter, r *http.Request) {
 		fmt.Println(body)
 		return
 	}
-	cp := sql.ConnectionParam{
 
-		ConnectionString: os.Getenv("GHMGMTDB_CONNECTION_STRING"),
-	}
-
-	db, _ := sql.Init(cp)
 	switch r.Method {
 	case "POST":
 		param := map[string]interface{}{
@@ -227,7 +221,7 @@ func MyCommunityAPIHandler(w http.ResponseWriter, r *http.Request) {
 			"Id":                     body.Id,
 		}
 
-		result, err := db.ExecuteStoredProcedureWithResult("dbo.PR_Communities_Insert", param)
+		result, err := ghmgmt.CommunitiesInsert(param)
 		if err != nil {
 			fmt.Println(err)
 		}
@@ -250,7 +244,7 @@ func MyCommunityAPIHandler(w http.ResponseWriter, r *http.Request) {
 				"UserPrincipalName ": s.Mail,
 				"CreatedBy":          username,
 			}
-			_, err := db.ExecuteStoredProcedure("dbo.PR_CommunitySponsors_Insert", sponsorsparam)
+			_, err := ghmgmt.CommunitySponsorsInsert(sponsorsparam)
 			if err != nil {
 				fmt.Println(err)
 
@@ -265,7 +259,7 @@ func MyCommunityAPIHandler(w http.ResponseWriter, r *http.Request) {
 				"CommunityId": id,
 				"Tag ":        t,
 			}
-			_, err := db.ExecuteStoredProcedure("PR_CommunityTags_Insert", Tagsparam)
+			_, err := ghmgmt.CommunityTagsInsert(Tagsparam)
 			if err != nil {
 
 				fmt.Println(err)
@@ -280,7 +274,7 @@ func MyCommunityAPIHandler(w http.ResponseWriter, r *http.Request) {
 				"ParentCommunityId":   id,
 				"RelatedCommunityId ": t.RelatedCommunityId,
 			}
-			_, err := db.ExecuteStoredProcedure("PR_RelatedCommunities_Insert", RelatedCommunities)
+			_, err := ghmgmt.RelatedCommunitiesInsert(RelatedCommunities)
 			if err != nil {
 
 				fmt.Println(err)
@@ -295,7 +289,7 @@ func MyCommunityAPIHandler(w http.ResponseWriter, r *http.Request) {
 				"ParentCommunityId":   id,
 				"RelatedCommunityId ": t.RelatedCommunityId,
 			}
-			_, err := db.ExecuteStoredProcedure("PR_RelatedCommunities_Insert", param)
+			_, err := ghmgmt.RelatedCommunitiesInsert(param)
 			if err != nil {
 
 				fmt.Println(err)
@@ -311,7 +305,7 @@ func MyCommunityAPIHandler(w http.ResponseWriter, r *http.Request) {
 
 			"Id": body.Id,
 		}
-		_, err := db.ExecuteStoredProcedure("dbo.PR_Communities_select_byID", param)
+		_, err := ghmgmt.CommunitiesSelectByID(param)
 		if err != nil {
 			fmt.Println(err)
 		}
@@ -328,7 +322,7 @@ func MyCommunityAPIHandler(w http.ResponseWriter, r *http.Request) {
 			"CreatedBy":    body.CreatedBy,
 			"ModifiedBy":   body.ModifiedBy,
 		}
-		_, err := db.ExecuteStoredProcedure("dbo.PR_Communities_Update", param)
+		_, err := ghmgmt.CommunitiesUpdate(param)
 		if err != nil {
 			fmt.Println(err)
 		}
@@ -355,7 +349,7 @@ func GetRequestStatusByCommunity(w http.ResponseWriter, r *http.Request) {
 	// Get project list
 	params := make(map[string]interface{})
 	params["Id"] = id
-	projects, err := db.ExecuteStoredProcedureWithResult("PR_CommunityApprovals_Select_ById", params)
+	projects, err := ghmgmt.CommunityApprovalsSelectById(params)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -395,7 +389,7 @@ func GetCommunitiesIsexternal(w http.ResponseWriter, r *http.Request) {
 		"UserPrincipalName": username,
 	}
 
-	Communities, err := db.ExecuteStoredProcedureWithResult("PR_Communities_Isexternal", param)
+	Communities, err := ghmgmt.CommunitiesIsexternal(param)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -423,7 +417,7 @@ func CommunityInitCommunityType(w http.ResponseWriter, r *http.Request) {
 	}
 	defer db.Close()
 
-	_, err = db.ExecuteStoredProcedure("dbo.PR_Communities_InitCommunityType", nil)
+	_, err = ghmgmt.CommunitiesInitCommunityType(nil)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
