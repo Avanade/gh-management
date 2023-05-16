@@ -26,11 +26,6 @@ jobs:
 
     - uses: actions/checkout@v2
 
-    - id: string
-      uses: ASzc/change-string-case-action@v5
-      with:
-        string: ${{github.event.inputs.selected_environment}}
-
     - name: Set Server Credentials
       id: server_credentials
       run: |

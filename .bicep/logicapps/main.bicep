@@ -3,8 +3,8 @@ param env string
 param location string = resourceGroup().location
 param LAManageIdentityName string
 
-var logicAppName = '${resourceName}LA${env}'
-var fileShare = '${toLower(logicAppName)}fs${env}'
+var logicAppName = '${resourceName}LA${toUpper(first(env))}${substring(env, 1)}'
+var fileShare = 'fs${toLower(logicAppName)}'
 var accountKey = LAStorageAccount.listKeys().keys[0].value
 var accountName = LAStorageAccount.name
 
