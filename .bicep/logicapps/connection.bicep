@@ -12,7 +12,7 @@ resource storage_account 'Microsoft.Storage/storageAccounts@2021-06-01' existing
 }
 
 //  Create connection
-param connectionName string = '${resourceName}ASP${env}'
+param connectionName string = '${resourceName}CN${toUpper(first(env))}${substring(env, 1)}'
 resource connection 'Microsoft.Web/connections@2016-06-01' = {
   name: connectionName
   location: location

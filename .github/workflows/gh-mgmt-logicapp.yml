@@ -70,3 +70,14 @@ jobs:
           inlineScript: |
             chmod +x ./.bicep/logicapps/upload_workflows.sh
             ./.bicep/logicapps/upload_workflows.sh ${{steps.deploy_main_bicep.outputs.accountName}} ${{steps.deploy_main_bicep.outputs.destination}} ./.bicep/logicapps/workflows
+
+      - name: Deploy Connection Bicep File
+        uses: azure/arm-deploy@v1
+        id: deploy_connection_bicep
+        with:
+          subscriptionId: ${{ fromJSON(secrets.AZURE_CREDENTIALS)['subscriptionId'] }}
+          resourceGroupName: ${{ secrets.AZURE_RG }}
+          template: ./.bicep/logicapps/connection.bicep
+          parameters: env=${{ env.ACTIVE_ENV }} storageAccountName=${{steps.deploy_main_bicep.outputs.accountName}} principalId=${{ fromJSON(secrets.AZURE_CREDENTIALS)['clientId'] }} tenantId=${{ fromJSON(secrets.AZURE_CREDENTIALS)['tenantId'] }}
+          failOnStdErr: false
+          scope: resourcegroup
