@@ -22,9 +22,6 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       database_name: ${{ steps.create_database.outputs.database_name }}
-      server_name: ${{ steps.server_credentials.outputs.server_name }}
-      server_username: ${{ steps.server_credentials.outputs.server_username }}
-      server_password: ${{ steps.server_credentials.outputs.server_password }}
     steps:
 
     - uses: actions/checkout@v2
@@ -108,6 +105,22 @@ jobs:
             ;;
         esac
 
+    - name: Set Server Credentials
+      id: server_credentials
+      run: |
+        case ${{ github.event.inputs.selected_environment }} in
+          "test" | "uat")
+            echo "server_name=${{secrets.SERVER_NAME}}" >> $GITHUB_OUTPUT
+            echo "server_username=${{secrets.SERVER_USERNAME}}" >> $GITHUB_OUTPUT
+            echo "server_password=${{secrets.SERVER_PASSWORD}}" >> $GITHUB_OUTPUT
+          ;;
+          "prod")
+            echo "server_name=${{secrets.SERVER_NAME_PROD}}" >> $GITHUB_OUTPUT
+            echo "server_username=${{secrets.SERVER_USERNAME_PROD}}" >> $GITHUB_OUTPUT
+            echo "server_password=${{secrets.SERVER_PASSWORD_PROD}}" >> $GITHUB_OUTPUT
+          ;;
+        esac
+
     - name: Setup Dev Github Credentials
       run: |
         case ${{ github.event.inputs.selected_environment }} in
@@ -162,7 +175,7 @@ jobs:
         parameters.appServiceSettings.value.GH_CLIENT_ID : ${{ env.GH_CLIENT_ID }}
         parameters.appServiceSettings.value.GH_CLIENT_SECRET : ${{ env.GH_CLIENT_SECRET }}
         parameters.appServiceSettings.value.GH_TOKEN : ${{ env.GH_TOKEN }}
-        parameters.appServiceSettings.value.GHMGMTDB_CONNECTION_STRING : Server=tcp:${{ needs.deploy-server-and-database.outputs.server_name }}.database.windows.net,1433;Initial Catalog=${{ needs.deploy-server-and-database.outputs.database_name }};Persist Security Info=False;User ID=${{ needs.deploy-server-and-database.outputs.server_username }};Password=${{ needs.deploy-server-and-database.outputs.server_password }};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;
+        parameters.appServiceSettings.value.GHMGMTDB_CONNECTION_STRING : Server=tcp:${{ steps.server_credentials.outputs.server_name }}.database.windows.net,1433;Initial Catalog=${{ needs.deploy-server-and-database.outputs.database_name }};Persist Security Info=False;User ID=${{ steps.server_credentials.outputs.server_username }};Password=${{ steps.server_credentials.outputs.server_password }};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;
 
     - uses: azure/login@v1
       with:
