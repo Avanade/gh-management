@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	models "main/models"
+	ghmgmt "main/pkg/ghmgmtdb"
 	"main/pkg/sql"
 	"net/http"
 	"os"
@@ -37,7 +38,7 @@ func RelatedCommunitiesInsert(w http.ResponseWriter, r *http.Request) {
 		"RelatedCommunityId": body.RelatedCommunityId,
 	}
 
-	approvers, err := db.ExecuteStoredProcedure("PR_RelatedCommunities_Insert", param)
+	approvers, err := ghmgmt.RelatedCommunitiesInsert(param)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -80,7 +81,7 @@ func RelatedCommunitiesDelete(w http.ResponseWriter, r *http.Request) {
 		"RelatedCommunityId": body.RelatedCommunityId,
 	}
 
-	approvers, err := db.ExecuteStoredProcedure("PR_RelatedCommunities_Delete", param)
+	approvers, err := ghmgmt.RelatedCommunitiesDelete(param)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -114,7 +115,7 @@ func RelatedCommunitiesSelect(w http.ResponseWriter, r *http.Request) {
 		"ParentCommunityId": id,
 	}
 
-	approvers, err := db.ExecuteStoredProcedureWithResult("PR_RelatedCommunities_Select", param)
+	approvers, err := ghmgmt.RelatedCommunitiesSelect(param)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
