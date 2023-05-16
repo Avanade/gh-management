@@ -96,7 +96,7 @@ func GetMyCommunitylist(w http.ResponseWriter, r *http.Request) {
 	w.Write(jsonResp)
 }
 
-func GetMyManagedCommunitylist(w http.ResponseWriter, r *http.Request) {
+func GetCommunityIManagelist(w http.ResponseWriter, r *http.Request) {
 	sessionaz, _ := session.Store.Get(r, "auth-session")
 	iprofile := sessionaz.Values["profile"]
 	profile := iprofile.(map[string]interface{})

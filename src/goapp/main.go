@@ -45,7 +45,7 @@ func main() {
 		PermissionsPolicy:     "fullscreen=(), geolocation=()", // Permissions-Policy
 		STSSeconds:            31536000,                        // Strict-Transport-Security
 		STSIncludeSubdomains:  true,                            // Strict-Transport-Security
-		IsDevelopment:         false,
+		IsDevelopment:         true,
 	})
 
 	// Set environment variables
@@ -77,6 +77,7 @@ func main() {
 	mux.Handle("/guidance/Article/{id}", loadAzGHAuthPage(rtGuidance.ArticleHandler))
 	mux.Handle("/community/new", loadAzGHAuthPage(rtCommunity.CommunityHandler))
 	mux.Handle("/community/my", loadAzGHAuthPage(rtCommunity.GetMyCommunitylist))
+	mux.Handle("/community/imanage", loadAzGHAuthPage(rtCommunity.GetCommunityIManagelist))
 	mux.Handle("/community/{id}", loadAzGHAuthPage(rtCommunity.CommunityHandler))
 	mux.Handle("/community/getcommunity/{id}", loadAzGHAuthPage(rtCommunity.GetUserCommunity))
 
