@@ -16,6 +16,10 @@
         <div @click="switchTo('all')" class="px-3 py-2 font-medium text-sm rounded-md cursor-pointer"
           x-bind:class="view==='all' ? 'bg-[#fff2eb] text-[#FF5800]':'text-gray-500 hover:text-gray-700'"> All Communities
         </div>
+
+        <div @click="switchTo('mycommunities')" class="px-3 py-2 font-medium text-sm rounded-md cursor-pointer"
+          x-bind:class="view==='mycommunities' ? 'bg-[#fff2eb] text-[#FF5800]':'text-gray-500 hover:text-gray-700'"> Communities I Manage
+        </div>
       </nav>
     </div>
     <div class="flex">
@@ -230,6 +234,22 @@
           this.showSpinner = false
         })
       },
+      getMyCommunities() {
+        this.showSpinner = true
+        this.Communitylist = []
+        fetch('/community/imanage')
+        .then(r => {
+          r.json().then(body => {
+            this.Communitylist = body
+          });
+        })
+        .catch(e => {
+          console.log(e)
+        })
+        .finally(()=>{            
+          this.showSpinner = false
+        })
+      },      
       getActiveApprovers() {
         fetch('/api/communityapprovers/GetAllActiveCommunityApprovers')
           .then(r => {
@@ -269,6 +289,10 @@
           case 'all':
             this.view = tab
             this.getCommunity()
+            break
+          case 'mycommunities':
+            this.view = tab
+            this.getMyCommunities()
         }
       },
     }
