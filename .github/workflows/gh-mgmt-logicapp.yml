@@ -85,10 +85,10 @@ jobs:
       - name: Deploy connection to storage file system
         shell: pwsh
         run: |
-          ./.bicep/logicapps/deploy_connection.ps1 `
-            New-WorkflowConnection `
-              -ResourceGroup ${{secrets.AZURE_RG}} `
-              -StorageAccount ${{steps.deploy_main_bicep.outputs.accountName}} `
-              -Api ${{steps.deploy_connection_bicep.outputs.api}} `
-              -Id ${{steps.deploy_connection_bicep.outputs.id}} `
-              -RuntimeUrl ${{steps.deploy_connection_bicep.outputs.connectionRuntimeUrl}}
+          . ./.bicep/logicapps/deploy_connection.ps1
+          New-WorkflowConnection `
+            -ResourceGroup ${{secrets.AZURE_RG}} `
+            -StorageAccount ${{steps.deploy_main_bicep.outputs.accountName}} `
+            -Api ${{steps.deploy_connection_bicep.outputs.api}} `
+            -Id ${{steps.deploy_connection_bicep.outputs.id}} `
+            -RuntimeUrl ${{steps.deploy_connection_bicep.outputs.connectionRuntimeUrl}}
