@@ -25,21 +25,21 @@
                 "GHMGMTDB_CONNECTION_STRING":"",
                 "EMAIL_ENDPOINT":"",
                 
-                "GH_ORG_INNERSOURCE":"rgm-org",
-                "GH_ORG_OPENSOURCE":"rgm-org-public",
+                "GH_ORG_INNERSOURCE":"uat-innersource",
+                "GH_ORG_OPENSOURCE":"uat-opensource",
                 "GH_REPO_TEMPLATE":"Avanade",
                 "GH_REPO_TEMPLATE_NAME":"avanade-template",
-                "APPROVAL_SYSTEM_APP_URL":"https://ava-approval-system.azurewebsites.net",
-                "APPROVAL_SYSTEM_APP_BaseURL":"https://ava-approval-system.azurewebsites.net",
-                "APPROVAL_SYSTEM_APP_ID":"ba8bfbd0-14c9-45da-af6d-2d0839924806",
-                "APPROVAL_SYSTEM_APP_MODULE_PROJECTS":"0cf34292-e40f-46cb-af73-9fe7dd646ee3",
-                "APPROVAL_SYSTEM_APP_MODULE_COMMUNITY":"f3540e54-1c6e-448e-8810-179f53292a0e",
+                "APPROVAL_SYSTEM_APP_URL":"https://uat-approval-system-app.azurewebsites.net/",
+                "APPROVAL_SYSTEM_APP_BaseURL":"https://uat-approval-system-app.azurewebsites.net",
+                "APPROVAL_SYSTEM_APP_ID":"fdb2f419-eb15-4c45-b2c9-d993dc4e68a2",
+                "APPROVAL_SYSTEM_APP_MODULE_PROJECTS":"e170b3e5-445e-4c07-a3e5-cb7aa81e2e3e",
+                "APPROVAL_SYSTEM_APP_MODULE_COMMUNITY":"00c33a7c-6637-4e48-8e09-63f5f850b9ac",
                 "GH_AZURE_AD_GROUP":"App_access_Github",
                 "GH_AZURE_AD_ADMIN_GROUP":"OpenSourceCommunityPortal-AdminUsers",
                 "EMAIL_SUPPORT":"jerrico.dela.cruz@accenture.com",
                 "SUMMARY_REPORT_TRIGGER":"1",
                 "EMAIL_SUMMARY_REPORT":"ismael.r.ibuan@accenture.com",
-                "CONTENT_SECURITY_POLICY":"default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' cdn.jsdelivr.net unpkg.com; style-src 'self' 'unsafe-inline'; connect-src 'self' graph.microsoft.com login.microsoftonline.com api.github.com prod-01.uksouth.logic.azure.com ghmgmlatest.azurewebsites.net; frame-src 'self' login.microsoftonline.com; img-src 'self' data:;"
+                "CONTENT_SECURITY_POLICY":"default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' cdn.jsdelivr.net unpkg.com; style-src 'self' 'unsafe-inline'; connect-src 'self' graph.microsoft.com login.microsoftonline.com api.github.com prod-01.uksouth.logic.azure.com ghmgmlauat.azurewebsites.net; frame-src 'self' login.microsoftonline.com; img-src 'self' data:;"
             }
         }
     }

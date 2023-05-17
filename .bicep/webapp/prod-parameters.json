@@ -1,0 +1,46 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "imageName": {"value": ""},
+        "appServicePlanName": {"value": ""},
+        "projectName": {"value": ""},
+        "activeEnv": {"value": ""},
+        "sqlServerName": {"value": ""},
+        "containerServer": {"value": ""},
+        "appServiceSettings": {
+            "value": {
+                "WEBSITES_ENABLE_APP_SERVICE_STORAGE":"",
+                "DOCKER_REGISTRY_SERVER_URL":"",
+                "DOCKER_REGISTRY_SERVER_USERNAME":"",
+                "DOCKER_REGISTRY_SERVER_PASSWORD":"",
+
+                "TENANT_ID":"",
+                "CLIENT_ID":"",
+                "CLIENT_SECRET":"",
+                "HOME_URL":"",
+                "GH_CLIENT_ID":"",
+                "GH_CLIENT_SECRET":"",
+                "GH_TOKEN":"",
+                "GHMGMTDB_CONNECTION_STRING":"",
+                "EMAIL_ENDPOINT":"",
+                
+                "GH_ORG_INNERSOURCE":"ava-innersource",
+                "GH_ORG_OPENSOURCE":"Avanade",
+                "GH_REPO_TEMPLATE":"avanade",
+                "GH_REPO_TEMPLATE_NAME":"avanade-template",
+                "APPROVAL_SYSTEM_APP_URL":"https://otapproval.avanade.com/",
+                "APPROVAL_SYSTEM_APP_BaseURL":"",
+                "APPROVAL_SYSTEM_APP_ID":"DD92C0CC-55AE-4B7B-8C5E-2FDB18EECB22",
+                "APPROVAL_SYSTEM_APP_MODULE_PROJECTS":"7E62CD15-3F11-4CC2-8EB9-6AEBAE1CF1ED",
+                "APPROVAL_SYSTEM_APP_MODULE_COMMUNITY":"9377C88D-FB85-476B-8DAD-A2768DB52945",
+                "GH_AZURE_AD_GROUP":"App_access_Github",
+                "GH_AZURE_AD_ADMIN_GROUP":"OpenSourceCommunityPortal-AdminUsers",
+                "EMAIL_SUPPORT":"ospo@avanade.com",
+                "SUMMARY_REPORT_TRIGGER":"7",
+                "EMAIL_SUMMARY_REPORT":"chris.lloyd-jones@avanade.com",
+                "CONTENT_SECURITY_POLICY":"default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' unpkg.com cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; connect-src 'self' graph.microsoft.com login.microsoftonline.com api.github.com prod-01.uksouth.logic.azure.com; frame-src 'self' login.microsoftonline.com; img-src 'self' data:;"
+            }
+        }
+    }
+}
