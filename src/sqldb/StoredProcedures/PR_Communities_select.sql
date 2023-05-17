@@ -17,8 +17,8 @@ SELECT c.[Id]
 	  ,t.Name "ApprovalStatus"
   FROM [dbo].[Communities] c
   	INNER JOIN ApprovalStatus T ON c.ApprovalStatusId = T.Id
-  where 
-	c.ApprovalStatusId =5
-	or
-	c.[CreatedBy] = @CreatedBy 
+  WHERE 
+	  c.ApprovalStatusId =5
+	-- or
+	-- c.[CreatedBy] = @CreatedBy 
 END
