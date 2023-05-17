@@ -19,6 +19,4 @@ SELECT c.[Id]
   	INNER JOIN ApprovalStatus T ON c.ApprovalStatusId = T.Id
   WHERE 
 	  c.ApprovalStatusId =5
-	-- or
-	-- c.[CreatedBy] = @CreatedBy 
 END
