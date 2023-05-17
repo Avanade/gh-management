@@ -2,9 +2,9 @@ param resourceName string = 'Ghmgm'
 param env string
 
 param storageAccountName string
+param logicAppName string
 param location string = resourceGroup().location
 param principalId string
-param tenantId string
 
 // Get parent storage account
 resource storage_account 'Microsoft.Storage/storageAccounts@2021-06-01' existing = {
@@ -35,18 +35,20 @@ resource connection 'Microsoft.Web/connections@2016-06-01' = {
 // Create access policy for the connection
 // Type not in Bicep yet but works fine
 resource ConnectionPolicy 'Microsoft.Web/connections/accessPolicies@2016-06-01' = {
-  parent: connection
-  name: 'accesspolicy'
+  name: '${connectionName}/${logicAppName}'
   location: location
   properties: {
     principal: {
       type: 'ActiveDirectory'
       identity: {
-        tenantId: tenantId
+        tenantId: subscription().tenantId
         objectId: principalId
       }
     }
   }
+  dependsOn: [
+    connection
+  ]
 }
 
 // Return the connection runtime URL, this needs to be set in the connection JSON file later
