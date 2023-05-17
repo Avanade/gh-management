@@ -51,6 +51,6 @@ resource ConnectionPolicy 'Microsoft.Web/connections/accessPolicies@2016-06-01' 
 
 // Return the connection runtime URL, this needs to be set in the connection JSON file later
 output connectionRuntimeUrl string = reference(connection.id, connection.apiVersion, 'full').properties.connectionRuntimeUrl
-output api string = subscriptionResourceId('Microsoft.Web/locations/managedApis', location, 'azureblob')
+output api string = subscriptionResourceId('Microsoft.Web/locations/managedApis', location, 'azurequeues')
 output id string = connection.id
 output name string = connection.name
