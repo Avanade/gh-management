@@ -7,7 +7,7 @@ import (
 	template "main/pkg/template"
 	"net/http"
 	"os"
-
+	ghmgmt "main/pkg/ghmgmtdb"
 	"github.com/gorilla/mux"
 )
 
@@ -80,6 +80,31 @@ func GetMyCommunitylist(w http.ResponseWriter, r *http.Request) {
 	params := make(map[string]interface{})
 	params["UserPrincipalName"] = username
 	Communities, err := db.ExecuteStoredProcedureWithResult("PR_Communities_select_my", params)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Header().Set("Content-Type", "application/json")
+	jsonResp, err := json.Marshal(Communities)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Write(jsonResp)
+}
+
+func GetCommunityIManagelist(w http.ResponseWriter, r *http.Request) {
+	sessionaz, _ := session.Store.Get(r, "auth-session")
+	iprofile := sessionaz.Values["profile"]
+	profile := iprofile.(map[string]interface{})
+	username := profile["preferred_username"]
+
+	params := make(map[string]interface{})
+	params["UserPrincipalName"] = username
+	Communities, err := ghmgmt.CommunityIManageExecuteSelect(params)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
