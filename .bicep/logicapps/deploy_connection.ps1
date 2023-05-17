@@ -58,7 +58,7 @@ function New-WorkflowConnection {
         Add-AzStorageAccountNetworkRule -ResourceGroupName $ResourceGroup -Name $StorageAccount -IPAddressOrRange $ip | Out-Null
 
         # Connects the Azure context and sets the subscription.
-        New-RpicTenantConnection
+        # New-RpicTenantConnection
 
         # Static values
         $directoryPath = "/site/wwwroot/"
