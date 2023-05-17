@@ -26,8 +26,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Configuration for PRODUCTION environment
-        if: ${{ github.event.inputs.selected_environment == 'PROD' }}
+      - name: Set GH_Domain and ACTIVE_ENV
         run: |
           case ${{ github.event.inputs.selected_environment }} in
             "prod")
