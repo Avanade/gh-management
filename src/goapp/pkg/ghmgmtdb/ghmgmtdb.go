@@ -1386,7 +1386,34 @@ func GetRepoOwnersRecordByRepoId(id int64) (RepoOwner []models.TypRepoOwner, err
 		RepoOwner = append(RepoOwner, data)
 	}
 	return RepoOwner, nil
+}
 
+func GetGitHubRepositories() ([]map[string]interface{}, error) {
+	db := ConnectDb()
+	defer db.Close()
+
+	result, err := db.ExecuteStoredProcedureWithResult("PR_Projects_SelectAllGitHub", nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return result, nil
+}
+
+func GetRepoOwnersByProjectIdWithGHUsername(id int64) ([]map[string]interface{}, error) {
+	db := ConnectDb()
+	defer db.Close()
+
+	param := map[string]interface{}{
+		"ProjectId": id,
+	}
+
+	result, err := db.ExecuteStoredProcedureWithResult("PR_RepoOwners_SelectGHUser_ByRepoId", param)
+	if err != nil {
+		return nil, err
+	}
+
+	return result, nil
 }
 
 func DeleteRepoOwnerRecordByUserAndProjectId(id int64, userPrincipalName string) error {
