@@ -12,6 +12,11 @@ on:
         - prod
         - uat
         - test
+      disable_data_loss:
+        type: boolean
+        description: Block on possible data loss
+        required: true
+        default: true
 
 env:
   PROJECT_NAME: ava-gh-mgmt
@@ -73,7 +78,7 @@ jobs:
       with:
         connection-string: Server=${{ steps.server_credentials.outputs.server_name }}.database.windows.net;Initial Catalog=${{ steps.create_database.outputs.database_name }};Persist Security Info=False;User ID=${{ steps.server_credentials.outputs.server_username }};Password=${{ steps.server_credentials.outputs.server_password }};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;
         project-file: 'src/sqldb/sqldb.sqlproj'
-        arguments: '/p:BlockOnPossibleDataLoss=false'
+        arguments: '/p:BlockOnPossibleDataLoss=${{github.event.inputs.disable_data_loss}}'
 
   deploy-appserviceplan-and-webapp:
     runs-on: ubuntu-latest

@@ -52,7 +52,7 @@ jobs:
           subscriptionId: ${{ fromJSON(secrets.AZURE_CREDENTIALS)['subscriptionId'] }}
           resourceGroupName: ${{ secrets.AZURE_RG }}
           template: ./.bicep/logicapps/main.bicep
-          parameters: env=${{ env.ACTIVE_ENV }} LAManageIdentityName=${{ secrets.LOGIC_APP_MANAGE_IDENTITY }}
+          parameters: env=${{ env.ACTIVE_ENV }} laManageIdentityName=${{ secrets.LOGIC_APP_MANAGE_IDENTITY }}
           failOnStdErr: false
           scope: resourcegroup
 
@@ -78,7 +78,7 @@ jobs:
           subscriptionId: ${{ fromJSON(secrets.AZURE_CREDENTIALS)['subscriptionId'] }}
           resourceGroupName: ${{ secrets.AZURE_RG }}
           template: ./.bicep/logicapps/connection.bicep
-          parameters: env=${{ env.ACTIVE_ENV }} storageAccountName=${{steps.deploy_main_bicep.outputs.accountName}} logicAppName=${{steps.deploy_main_bicep.outputs.logicAppName}} principalId=${{ fromJSON(secrets.AZURE_CREDENTIALS)['clientId'] }}
+          parameters: env=${{ env.ACTIVE_ENV }} storageAccountName=${{steps.deploy_main_bicep.outputs.accountName}} logicAppName=${{steps.deploy_main_bicep.outputs.logicAppName}} laManageIdentityName=${{ secrets.LOGIC_APP_MANAGE_IDENTITY }}
           failOnStdErr: false
           scope: resourcegroup
 

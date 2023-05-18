@@ -1,7 +1,7 @@
 param resourceName string = 'Ghmgm'
 param env string
 param location string = resourceGroup().location
-param LAManageIdentityName string
+param laManageIdentityName string
 
 var logicAppName = '${resourceName}LA${toUpper(first(env))}${substring(env, 1)}'
 var fileShare = 'fs${toLower(logicAppName)}'
@@ -9,7 +9,7 @@ var accountKey = LAStorageAccount.listKeys().keys[0].value
 var accountName = LAStorageAccount.name
 
 resource LAManageIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2018-11-30' = {
-  name: LAManageIdentityName
+  name: laManageIdentityName
   location: location
 }
 
