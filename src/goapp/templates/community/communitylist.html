@@ -146,7 +146,7 @@
                     </svg>
                   </div>
                 
-                  <ul role="list" class="divide-y divide-gray-200">
+                  <ul x-show="IManageStatus" role="list" class="divide-y divide-gray-200 ">
                     <template x-for="item of Community.approvalStatus">
                       <li> 
                         <div class="px-4 py-4 sm:px-6">
@@ -204,7 +204,7 @@
         this.switchTo(this.view)
       },
       getCommunity() {
-        this.showSpinner = true
+        this.showSpinner = false
         this.Communitylist = []
         
         fetch('/community')
