@@ -693,41 +693,66 @@ func ReprocessRequestApproval() {
 }
 
 func RepoOwnersCleanup(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("REPO OWNERS CLEANUP TRIGGERED...")
 	token := os.Getenv("GH_TOKEN")
-	RepoUsers, _ := ghmgmt.SelectAllRepoNameAndOwners()
-	organizations := [...]string{os.Getenv("GH_ORG_INNERSOURCE"), os.Getenv("GH_ORG_OPENSOURCE")}
+
+	// Get all repos from database
+	repos, err := ghmgmt.GetGitHubRepositories()
+	if err != nil {
+		fmt.Printf(err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
 	var wg sync.WaitGroup
-	for _, RepoUser := range RepoUsers {
+	maxGoroutines := 50
+	guard := make(chan struct{}, maxGoroutines)
+
+	for _, repo := range repos {
+		guard <- struct{}{}
 		wg.Add(1)
-		func(RepoUser models.TypRepoOwner) {
-			fmt.Println("Project ID : " + strconv.FormatInt(RepoUser.Id, 10))
-			isAdmin := false
-			validRepo := false
-			for _, organization := range organizations {
-				RepoAdmins_ := gh.RepositoriesListCollaborators(token, organization, RepoUser.RepoName, "admin", "direct")
-				if len(RepoAdmins_) > 0 {
-					for _, list := range RepoAdmins_ {
-						validRepo = true
-						email, _ := ghmgmt.UsersGetEmail(*list.Login)
-						if RepoUser.UserPrincipalName == email {
-							isAdmin = true
-						}
-					}
-				}
-			}
-
-			if validRepo && !isAdmin {
-				err := ghmgmt.DeleteRepoOwnerRecordByUserAndProjectId(RepoUser.Id, RepoUser.UserPrincipalName)
-
-				if err != nil {
-					http.Error(w, err.Error(), http.StatusInternalServerError)
-				}
-			}
-			defer wg.Done()
-
-		}(RepoUser)
+		go func(r map[string]interface{}) {
+			cleanupRepoOwners(r, token)
+			<-guard
+			wg.Done()
+		}(repo)
 	}
 	wg.Wait()
+	w.WriteHeader(http.StatusOK)
+	fmt.Println("REPO OWNERS CLEANUP SUCCESSFUL")
+}
+
+func cleanupRepoOwners(repo map[string]interface{}, token string) {
+	fmt.Println("Checking owners of : " + repo["Name"].(string))
+
+	// Get admins of the repository
+	repoUrl := strings.Replace(repo["TFSProjectReference"].(string), "https://", "", -1)
+	repoUrlSub := strings.Split(repoUrl, "/")
+
+	admins := gh.RepositoriesListCollaborators(token, repoUrlSub[1], repo["Name"].(string), "admin", "direct")
+
+	// Get owners of the repo on the database
+	owners, err := ghmgmt.GetRepoOwnersByProjectIdWithGHUsername(repo["Id"].(int64))
+	if err != nil {
+		fmt.Printf(err.Error())
+		return
+	}
+
+	// Check if owner is on the admin list
+	for _, owner := range owners {
+		isAdmin := false
+		for _, admin := range admins {
+			if owner["GitHubUser"].(string) == *admin.Login {
+				isAdmin = true
+				break
+			}
+		}
+
+		// if owner is not on the list of admins
+		if !isAdmin {
+			ghmgmt.DeleteRepoOwnerRecordByUserAndProjectId(repo["Id"].(int64), owner["UserPrincipalName"].(string))
+		}
+	}
 }
 
 type RepositoryList struct {
