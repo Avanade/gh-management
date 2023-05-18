@@ -17,6 +17,21 @@ on:
         description: Block on possible data loss
         required: true
         default: true
+      db_infra:
+        type: boolean
+        description: Run deployment of SQL Server resource
+        required: true
+        default: true
+      db_project:
+        type: boolean
+        description: Run build and publish the SQL Project
+        required: true
+        default: true
+      app_infra:
+        type: boolean
+        description: Run deployment of AppServicePlan and AppService
+        required: true
+        default: true
 
 env:
   PROJECT_NAME: ava-gh-mgmt
@@ -59,11 +74,14 @@ jobs:
           ;;
         esac
 
-    - uses: azure/login@v1
+    - name: Login to Azure
+      if: ${{ github.event.inputs.db_infra == 'true' || github.event.inputs.db_project == 'true' }}
+      uses: azure/login@v1
       with:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
 
     - name: Deploy SQL Server & Database
+      if: ${{ github.event.inputs.db_infra == 'true' }}
       uses: azure/arm-deploy@v1
       with:
         subscriptionId: ${{ fromJSON(secrets.AZURE_CREDENTIALS)['subscriptionId'] }}
@@ -74,7 +92,7 @@ jobs:
         scope: resourcegroup
 
     - uses: azure/sql-action@v1.3
-      if: success()
+      if: ${{ github.event.inputs.db_project == 'true' }}
       with:
         connection-string: Server=${{ steps.server_credentials.outputs.server_name }}.database.windows.net;Initial Catalog=${{ steps.create_database.outputs.database_name }};Persist Security Info=False;User ID=${{ steps.server_credentials.outputs.server_username }};Password=${{ steps.server_credentials.outputs.server_password }};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;
         project-file: 'src/sqldb/sqldb.sqlproj'
@@ -83,7 +101,7 @@ jobs:
   deploy-appserviceplan-and-webapp:
     runs-on: ubuntu-latest
     needs: [deploy-server-and-database]
-    if: ${{ needs.deploy-server-and-database.result == 'success' }}
+    if: ${{ needs.deploy-server-and-database.result == 'success' &&  github.event.inputs.app_infra == 'true'}}
     steps:
 
     - uses: actions/checkout@v2
