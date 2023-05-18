@@ -91,9 +91,10 @@
                 </a>
                 <div class="flex items-center justify-between">
                   <div class="ml-2 flex-shrink-0 flex">
-                    <p class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full"
+                    <p x-show="IManageStatus" class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full"
                       x-bind:class="Community.ApprovalStatus === 'Approved' ? ' bg-green-100 text-green-800': Community.ApprovalStatus === 'Rejected' ? ' bg-red-100 text-red-800' : ' bg-gray-200 text-gray-800'"
-                      x-text="Community.ApprovalStatus"></p>
+                      x-text="Community.ApprovalStatus">
+                    </p>                    
                   </div>
                 </div>
               </div>
@@ -193,6 +194,7 @@
       view: '',
       search: '',
       hasApprovers: false,
+      IManageStatus: false,
       setView() {
         const queryString = window.location.search;
         const urlParams = new URLSearchParams(queryString);
@@ -283,16 +285,20 @@
       switchTo(tab) {
         switch(tab) {
           case 'my':
+          this.IManageStatus = false
             this.view = tab
             this.getMyCommunity()
             break
           case 'all':
+          this.IManageStatus = false
             this.view = tab
             this.getCommunity()
             break
           case 'communitiesIManage':
+            this.IManageStatus = true
             this.view = tab
             this.getCommunitiesIManage()
+            break
         }
       },
     }
