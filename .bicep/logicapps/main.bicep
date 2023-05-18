@@ -142,3 +142,4 @@ resource LALogicAppTags 'Microsoft.Resources/tags@2022-09-01' = {
 output accountName string = LAStorageAccount.name
 output destination string = '${fileShare}/site/wwwroot'
 output logicAppName string = LALogicApp.name
+output fileShare string = fileShare

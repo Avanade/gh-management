@@ -92,5 +92,6 @@ jobs:
               -StorageAccount ${{steps.deploy_main_bicep.outputs.accountName}} `
               -Api ${{steps.deploy_connection_bicep.outputs.api}} `
               -Id ${{steps.deploy_connection_bicep.outputs.id}} `
-              -RuntimeUrl ${{steps.deploy_connection_bicep.outputs.connectionRuntimeUrl}}
+              -RuntimeUrl ${{steps.deploy_connection_bicep.outputs.connectionRuntimeUrl}} `
+              -FileShareName ${{steps.deploy_main_bicep.outputs.fileShare}}
           azPSVersion: "latest"

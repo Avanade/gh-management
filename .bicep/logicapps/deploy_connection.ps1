@@ -38,6 +38,8 @@ function New-WorkflowConnection {
     $Id,
     [Parameter(Mandatory = $true)]
     $RuntimeUrl
+    [Parameter(Mandatory = $true)]
+    $FileShareName
     )
 
     $ErrorActionPreference = "Stop"
@@ -67,7 +69,7 @@ function New-WorkflowConnection {
         $ctx = (Get-AzStorageAccount -ResourceGroupName $ResourceGroup -Name $StorageAccount).Context
 
         # Get the file share
-        $fsName = (Get-AZStorageShare -Context $ctx).Name
+        $fsName = (Get-AZStorageShare -Context $ctx -Name $FileShareName).Name
 
         # Download connection file
         $configPath = $directoryPath + "connections.json"
