@@ -35,7 +35,7 @@ jobs:
               ;;
             "test" | "uat")
                 echo "GH_DOMAIN=https://${{ env.PROJECT_NAME }}-${{env.ACTIVE_ENV}}.azurewebsites.net" >> $GITHUB_ENV
-                echo "ACTIVE_ENV=test" >> $GITHUB_ENV
+                echo "ACTIVE_ENV=${{env.ACTIVE_ENV}}" >> $GITHUB_ENV
               ;;
           esac
         
