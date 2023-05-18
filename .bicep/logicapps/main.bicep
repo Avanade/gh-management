@@ -1,20 +1,20 @@
 param resourceName string = 'Ghmgm'
 param env string
 param location string = resourceGroup().location
-param LAManageIdentityName string
+param laManageIdentityName string
 
-var logicAppName = '${resourceName}LA${env}'
-var fileShare = '${toLower(logicAppName)}fs'
+var logicAppName = '${resourceName}LA${toUpper(first(env))}${substring(env, 1)}'
+var fileShare = 'fs${toLower(logicAppName)}'
 var accountKey = LAStorageAccount.listKeys().keys[0].value
 var accountName = LAStorageAccount.name
 
 resource LAManageIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2018-11-30' = {
-  name: LAManageIdentityName
+  name: laManageIdentityName
   location: location
 }
 
 resource LAStorageAccount 'Microsoft.Storage/storageAccounts@2022-09-01' = {
-  name: toLower('${resourceName}sa${env}')
+  name: toLower('${resourceName}sa')
   location: location
   sku: {
     name: 'Standard_LRS'
@@ -47,7 +47,7 @@ resource LAStorageAccount 'Microsoft.Storage/storageAccounts@2022-09-01' = {
 }
 
 resource LAAppServicePlan 'Microsoft.Web/serverfarms@2022-03-01' = {
-  name: '${resourceName}ASP${env}'
+  name: '${resourceName}ASP'
   location: location
   sku: {
     name: 'WS1'
@@ -104,5 +104,42 @@ resource LALogicAppConfig 'Microsoft.Web/sites/config@2022-03-01' = {
   }
 }
 
+// TAGS
+resource LAStorageAccountTags 'Microsoft.Resources/tags@2022-09-01' = {
+  name: 'default'
+  scope: LAStorageAccount
+  properties: {
+    tags: {
+      project : 'ghmgmt-logicapp'
+      env : 'test,uat,prod'
+    }
+  }
+}
+
+resource LAAppServicePlanTags 'Microsoft.Resources/tags@2022-09-01' = {
+  name:  'default'
+  scope: LAAppServicePlan
+  properties: {
+    tags: {
+      project: 'ghmgmt-logicapp'
+      env: 'test,uat,prod'
+    }
+  }
+}
+
+resource LALogicAppTags 'Microsoft.Resources/tags@2022-09-01' = {
+  name:  'default'
+  scope: LALogicApp
+  properties: {
+    tags: {
+      project: 'ghmgmt-logicapp'
+      env: env
+    }
+  }
+}
+
+
 output accountName string = LAStorageAccount.name
 output destination string = '${fileShare}/site/wwwroot'
+output logicAppName string = LALogicApp.name
+output fileShare string = fileShare
