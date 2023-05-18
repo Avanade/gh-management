@@ -7,7 +7,6 @@ import (
 	models "main/models"
 	ghmgmt "main/pkg/ghmgmtdb"
 	gh "main/pkg/github"
-	githubAPI "main/pkg/github"
 	session "main/pkg/session"
 	"main/pkg/sql"
 	"net/http"
@@ -475,6 +474,7 @@ func InitIndexOrgRepos(w http.ResponseWriter, r *http.Request) {
 }
 
 func IndexOrgRepos(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("INDEX ORGANIZATION REPOSITORIES TRIGGERED...")
 	var repos []gh.Repo
 
 	orgs := []string{os.Getenv("GH_ORG_INNERSOURCE"), os.Getenv("GH_ORG_OPENSOURCE")}
@@ -492,60 +492,82 @@ func IndexOrgRepos(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var wg sync.WaitGroup
+	maxGoroutines := 50
+	guard := make(chan struct{}, maxGoroutines)
 
 	for _, repo := range repos {
+		guard <- struct{}{}
 		wg.Add(1)
-		go func(repo gh.Repo) {
-			defer wg.Done()
-
-			visibilityId := 3
-			if repo.Visibility == "private" {
-				visibilityId = 1
-			} else if repo.Visibility == "internal" {
-				visibilityId = 2
-			}
-
-			param := map[string]interface{}{
-				"GithubId":            repo.GithubId,
-				"Name":                repo.Name,
-				"Description":         repo.Description,
-				"IsArchived":          repo.IsArchived,
-				"VisibilityId":        visibilityId,
-				"TFSProjectReference": repo.TFSProjectReference,
-				"Created":             repo.Created.Format("2006-01-02 15:04:05"),
-			}
-
-			isExisting := ghmgmt.Projects_IsExisting_By_GithubId(models.TypNewProjectReqBody{GithubId: repo.GithubId})
-
-			var err error
-
-			if isExisting {
-				userdata := ghmgmt.GetProjectByGithubId(repo.GithubId)
-				param["Id"] = userdata[0]["Id"]
-
-				err = ghmgmt.ProjectUpdateByImport(param)
-				if userdata[0]["CreatedBy"] != nil {
-					RepoOwners, _ := ghmgmt.RepoOwnersByUserAndProjectId(param["Id"].(int64), userdata[0]["CreatedBy"].(string))
-					if len(RepoOwners) < 1 {
-						error := ghmgmt.RepoOwnersInsert(param["Id"].(int64), userdata[0]["CreatedBy"].(string))
-						if error != nil {
-
-							fmt.Println(error)
-						}
-					}
-				}
-			} else {
-				err = ghmgmt.ProjectInsertByImport(param)
-			}
-
-			if err != nil {
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-			}
+		go func(r gh.Repo) {
+			indexRepo(r)
+			<-guard
+			wg.Done()
 		}(repo)
 	}
-
 	wg.Wait()
+
 	w.WriteHeader(http.StatusOK)
+	fmt.Println("INDEX ORGANIZATION REPOSITORIES SUCCESSFUL")
+}
+
+func indexRepo(repo gh.Repo) {
+	fmt.Println("Indexing " + repo.Name + "...")
+
+	visibilityId := 3
+	if repo.Visibility == "private" {
+		visibilityId = 1
+	} else if repo.Visibility == "internal" {
+		visibilityId = 2
+	}
+
+	param := map[string]interface{}{
+		"GithubId":            repo.GithubId,
+		"Name":                repo.Name,
+		"Description":         repo.Description,
+		"IsArchived":          repo.IsArchived,
+		"VisibilityId":        visibilityId,
+		"TFSProjectReference": repo.TFSProjectReference,
+		"Created":             repo.Created.Format("2006-01-02 15:04:05"),
+	}
+
+	isExisting := ghmgmt.Projects_IsExisting_By_GithubId(models.TypNewProjectReqBody{GithubId: repo.GithubId})
+
+	if isExisting {
+		project := ghmgmt.GetProjectByGithubId(repo.GithubId)
+		param["Id"] = project[0]["Id"]
+
+		err := ghmgmt.ProjectUpdateByImport(param)
+		if err != nil {
+			return
+		}
+
+		// Get direct admin collaborators
+		repoUrl := strings.Replace(repo.TFSProjectReference, "https://", "", -1)
+		repoUrlSub := strings.Split(repoUrl, "/")
+
+		token := os.Getenv("GH_TOKEN")
+
+		collaborators := gh.RepositoriesListCollaborators(token, repoUrlSub[1], repo.Name, "admin", "direct")
+		// Get userprincipal from database
+		for _, admin := range collaborators {
+			users, err := ghmgmt.GetUserByGitHubId(strconv.FormatInt(*admin.ID, 10))
+			if err != nil {
+				return
+			}
+
+			//Insert to repoowners table
+			if len(users) > 0 {
+				if len(users) > 0 {
+					ghmgmt.RepoOwnersInsert(project[0]["Id"].(int64), users[0]["UserPrincipalName"].(string))
+				}
+			}
+		}
+	} else {
+		err := ghmgmt.ProjectInsertByImport(param)
+		if err != nil {
+			return
+		}
+	}
 }
 
 func RequestApproval(id int64) {
@@ -682,7 +704,7 @@ func RepoOwnersCleanup(w http.ResponseWriter, r *http.Request) {
 			isAdmin := false
 			validRepo := false
 			for _, organization := range organizations {
-				RepoAdmins_ := githubAPI.RepositoriesListCollaborators(token, organization, RepoUser.RepoName, "admin", "direct")
+				RepoAdmins_ := gh.RepositoriesListCollaborators(token, organization, RepoUser.RepoName, "admin", "direct")
 				if len(RepoAdmins_) > 0 {
 					for _, list := range RepoAdmins_ {
 						validRepo = true
