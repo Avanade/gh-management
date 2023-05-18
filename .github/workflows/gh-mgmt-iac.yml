@@ -39,7 +39,7 @@ env:
 
 jobs:
   deploy-server-and-database:
-    if: ${{ (github.event.inputs.db_infra == true || github.event.inputs.db_project == true) == true }}
+    if: ${{ github.event.inputs.db_infra == 'true' || github.event.inputs.db_project == 'true' }}
     runs-on: ubuntu-latest
     outputs:
       database_name: ${{ steps.create_database.outputs.database_name }}
@@ -80,7 +80,7 @@ jobs:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
 
     - name: Deploy SQL Server & Database
-      if: ${{ github.event.inputs.db_infra == true }}
+      if: ${{ github.event.inputs.db_infra == 'true' }}
       uses: azure/arm-deploy@v1
       with:
         subscriptionId: ${{ fromJSON(secrets.AZURE_CREDENTIALS)['subscriptionId'] }}
@@ -91,7 +91,7 @@ jobs:
         scope: resourcegroup
 
     - uses: azure/sql-action@v1.3
-      if: ${{ github.event.inputs.db_project == true }}
+      if: ${{ github.event.inputs.db_project == 'true' }}
       with:
         connection-string: Server=${{ steps.server_credentials.outputs.server_name }}.database.windows.net;Initial Catalog=${{ steps.create_database.outputs.database_name }};Persist Security Info=False;User ID=${{ steps.server_credentials.outputs.server_username }};Password=${{ steps.server_credentials.outputs.server_password }};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;
         project-file: 'src/sqldb/sqldb.sqlproj'
@@ -100,7 +100,7 @@ jobs:
   deploy-appserviceplan-and-webapp:
     runs-on: ubuntu-latest
     needs: [deploy-server-and-database]
-    if: ${{ (needs.deploy-server-and-database.result == 'success' || needs.deploy-server-and-database.result == 'skipped') &&  github.event.inputs.app_infra == true}}
+    if: ${{ (needs.deploy-server-and-database.result == 'success' || needs.deploy-server-and-database.result == 'skipped') &&  github.event.inputs.app_infra == 'true'}}
     steps:
 
     - uses: actions/checkout@v2
