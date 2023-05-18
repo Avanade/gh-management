@@ -52,10 +52,10 @@ resource ConnectionPolicy 'Microsoft.Web/connections/accessPolicies@2016-06-01' 
       }
     }
   }
-
+}
 
 // TAGS
-resource LAStorageAccountTags 'Microsoft.Resources/tags@2022-09-01' = {
+resource connectionTags 'Microsoft.Resources/tags@2022-09-01' = {
   name: 'default'
   scope: connection
   properties: {
@@ -64,7 +64,7 @@ resource LAStorageAccountTags 'Microsoft.Resources/tags@2022-09-01' = {
       env: env
     }
   }
-}}
+}
 
 // Return the connection runtime URL, this needs to be set in the connection JSON file later
 output connectionRuntimeUrl string = reference(connection.id, connection.apiVersion, 'full').properties.connectionRuntimeUrl
