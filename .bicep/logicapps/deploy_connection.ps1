@@ -37,7 +37,7 @@ function New-WorkflowConnection {
     [Parameter(Mandatory = $true)]
     $Id,
     [Parameter(Mandatory = $true)]
-    $RuntimeUrl
+    $RuntimeUrl,
     [Parameter(Mandatory = $true)]
     $FileShareName
     )
