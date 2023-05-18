@@ -2,9 +2,14 @@ param resourceName string = 'Ghmgm'
 param env string
 
 param storageAccountName string
+param logicAppName string
 param location string = resourceGroup().location
-param principalId string
-param tenantId string
+param laManageIdentityName string
+
+resource LAManageIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2018-11-30' = {
+  name: laManageIdentityName
+  location: location
+}
 
 // Get parent storage account
 resource storage_account 'Microsoft.Storage/storageAccounts@2021-06-01' existing = {
@@ -12,7 +17,7 @@ resource storage_account 'Microsoft.Storage/storageAccounts@2021-06-01' existing
 }
 
 //  Create connection
-param connectionName string = '${resourceName}ASP${env}'
+param connectionName string = '${resourceName}CN${toUpper(first(env))}${substring(env, 1)}'
 resource connection 'Microsoft.Web/connections@2016-06-01' = {
   name: connectionName
   location: location
@@ -36,21 +41,33 @@ resource connection 'Microsoft.Web/connections@2016-06-01' = {
 // Type not in Bicep yet but works fine
 resource ConnectionPolicy 'Microsoft.Web/connections/accessPolicies@2016-06-01' = {
   parent: connection
-  name: 'accesspolicy'
+  name: logicAppName
   location: location
   properties: {
     principal: {
       type: 'ActiveDirectory'
       identity: {
-        tenantId: tenantId
-        objectId: principalId
+        tenantId: subscription().tenantId
+        objectId: LAManageIdentity.properties.principalId
       }
+    }
+  }
+}
+
+// TAGS
+resource connectionTags 'Microsoft.Resources/tags@2022-09-01' = {
+  name: 'default'
+  scope: connection
+  properties: {
+    tags: {
+      project : 'ghmgmt-logicapp'
+      env: env
     }
   }
 }
 
 // Return the connection runtime URL, this needs to be set in the connection JSON file later
 output connectionRuntimeUrl string = reference(connection.id, connection.apiVersion, 'full').properties.connectionRuntimeUrl
-output api string = subscriptionResourceId('Microsoft.Web/locations/managedApis', location, 'azureblob')
+output api string = subscriptionResourceId('Microsoft.Web/locations/managedApis', location, 'azurequeues')
 output id string = connection.id
 output name string = connection.name
