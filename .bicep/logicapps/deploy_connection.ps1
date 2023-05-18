@@ -37,7 +37,9 @@ function New-WorkflowConnection {
     [Parameter(Mandatory = $true)]
     $Id,
     [Parameter(Mandatory = $true)]
-    $RuntimeUrl
+    $RuntimeUrl,
+    [Parameter(Mandatory = $true)]
+    $FileShareName
     )
 
     $ErrorActionPreference = "Stop"
@@ -58,7 +60,7 @@ function New-WorkflowConnection {
         Add-AzStorageAccountNetworkRule -ResourceGroupName $ResourceGroup -Name $StorageAccount -IPAddressOrRange $ip | Out-Null
 
         # Connects the Azure context and sets the subscription.
-        New-RpicTenantConnection
+        # New-RpicTenantConnection
 
         # Static values
         $directoryPath = "/site/wwwroot/"
@@ -67,7 +69,7 @@ function New-WorkflowConnection {
         $ctx = (Get-AzStorageAccount -ResourceGroupName $ResourceGroup -Name $StorageAccount).Context
 
         # Get the file share
-        $fsName = (Get-AZStorageShare -Context $ctx).Name
+        $fsName = (Get-AZStorageShare -Context $ctx -Name $FileShareName).Name
 
         # Download connection file
         $configPath = $directoryPath + "connections.json"
