@@ -39,7 +39,7 @@ env:
 
 jobs:
   deploy-server-and-database:
-    if: ${{ github.event.inputs.db_infra == true || github.event.inputs.db_project == true }}
+    if: ${{ (github.event.inputs.db_infra == true || github.event.inputs.db_project == true) == true }}
     runs-on: ubuntu-latest
     outputs:
       database_name: ${{ steps.create_database.outputs.database_name }}
