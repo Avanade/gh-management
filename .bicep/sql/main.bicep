@@ -39,6 +39,7 @@ resource sqlServerDatabase 'Microsoft.Sql/servers/databases@2022-08-01-preview' 
   }
 }
 
+// TAGS
 resource sqlServerTags 'Microsoft.Resources/tags@2022-09-01' = {
   name:  'default'
   scope: sqlServer
