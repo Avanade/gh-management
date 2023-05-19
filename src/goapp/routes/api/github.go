@@ -164,7 +164,7 @@ func RepoOwnerScan(w http.ResponseWriter, r *http.Request) {
 		repos, _ := githubAPI.GetRepositoriesFromOrganization(org)
 
 		for _, repo := range repos {
-			owners := GetRepoCollaborators(org, repo.Name, "", "direct")
+			owners := GetRepoCollaborators(org, repo.Name, "admin", "direct")
 			if len(owners) < 2 {
 				repoOnwerDeficient = append(repoOnwerDeficient, repo.Name)
 				for _, owner := range owners {
