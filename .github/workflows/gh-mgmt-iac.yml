@@ -86,7 +86,7 @@ jobs:
       with:
         subscriptionId: ${{ fromJSON(secrets.AZURE_CREDENTIALS)['subscriptionId'] }}
         resourceGroupName: ${{ secrets.AZURE_RG }}
-        template: ./.bicep/sql/main.bicep
+        template: ./.bicep/sql/deployGhMgmtSqlDatabase.bicep
         parameters: activeEnv=${{github.event.inputs.selected_environment}} serverName=${{ steps.server_credentials.outputs.server_name }} administratorLogin=${{ steps.server_credentials.outputs.server_username }} administratorLoginPassword=${{ steps.server_credentials.outputs.server_password }} databaseName=${{ steps.create_database.outputs.database_name }}
         failOnStdErr: false
         scope: resourcegroup
@@ -224,7 +224,7 @@ jobs:
       with:
         subscriptionId: ${{ fromJSON(secrets.AZURE_CREDENTIALS)['subscriptionId'] }}
         resourceGroupName: ${{ secrets.AZURE_RG }}
-        template: ./.bicep/webapp/main.bicep
+        template: ./.bicep/webapp/deployGhMgmtAppService.bicep
         parameters: ./.bicep/webapp/${{ github.event.inputs.selected_environment }}-parameters.json
         failOnStdErr: false
         scope: resourcegroup
