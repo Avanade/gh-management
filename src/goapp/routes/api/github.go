@@ -169,11 +169,12 @@ func RepoOwnerScan(w http.ResponseWriter, r *http.Request) {
 				repoOnwerDeficient = append(repoOnwerDeficient, repo.Name)
 				for _, owner := range owners {
 					email, _ = db.UsersGetEmail(*owner.Login)
-
-					EmailcoownerDeficient(email, org, repo.Name)
+					fmt.Println(email)
+					if email != "" {
+						EmailcoownerDeficient(email, org, repo.Name)
+					}
 				}
 			}
-
 		}
 
 		if len(repoOnwerDeficient) > 0 {
