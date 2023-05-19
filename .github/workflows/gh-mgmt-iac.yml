@@ -171,6 +171,26 @@ jobs:
         echo "GH_CLIENT_SECRET=$CLIENT_SECRET" >> $GITHUB_ENV
         echo "GH_TOKEN=$TOKEN" >> $GITHUB_ENV
 
+    - name: SET THE IAC PARAMETERS
+      run: |
+        case ${{ github.event.inputs.selected_environment }} in
+          "test")
+        cat > ./.bicep/webapp/${{ github.event.inputs.selected_environment }}-parameters.json <<EOL
+        ${{vars.IAC_PARAMETERS_TEST}}
+        EOL
+          ;;
+          "uat")
+        cat > ./.bicep/webapp/${{ github.event.inputs.selected_environment }}-parameters.json <<EOL
+        ${{vars.IAC_PARAMETERS_UAT}}
+        EOL
+          ;;
+          "prod")
+        cat > ./.bicep/webapp/${{ github.event.inputs.selected_environment }}-parameters.json <<EOL
+        ${{vars.IAC_PARAMETERS_PROD}}
+        EOL
+          ;;
+        esac
+        
     - name: SUBSTITUTE VARIABLES
       uses: microsoft/variable-substitution@v1 
       with:
