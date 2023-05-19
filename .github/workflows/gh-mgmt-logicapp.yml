@@ -32,10 +32,12 @@ jobs:
             "prod")
                 echo "GH_DOMAIN=${{secrets.CUSTOM_DOMAIN_PROD}}}" >> $GITHUB_ENV
                 echo "ACTIVE_ENV=prod" >> $GITHUB_ENV
+                echo "LA_MANAGE_IDENTITY_NAME=${{secrets.LOGIC_APP_MANAGE_IDENTITY_PROD}}" >> $GITHUB_ENV
               ;;
             "test" | "uat")
                 echo "GH_DOMAIN=https://${{ env.PROJECT_NAME }}-${{env.ACTIVE_ENV}}.azurewebsites.net" >> $GITHUB_ENV
                 echo "ACTIVE_ENV=${{env.ACTIVE_ENV}}" >> $GITHUB_ENV
+                echo "LA_MANAGE_IDENTITY_NAME=${{secrets.LOGIC_APP_MANAGE_IDENTITY}}" >> $GITHUB_ENV
               ;;
           esac
         
@@ -52,7 +54,7 @@ jobs:
           subscriptionId: ${{ fromJSON(secrets.AZURE_CREDENTIALS)['subscriptionId'] }}
           resourceGroupName: ${{ secrets.AZURE_RG }}
           template: ./.bicep/logicapps/main.bicep
-          parameters: env=${{ env.ACTIVE_ENV }} laManageIdentityName=${{ secrets.LOGIC_APP_MANAGE_IDENTITY }}
+          parameters: env=${{ env.ACTIVE_ENV }} laManageIdentityName=${{ env.LA_MANAGE_IDENTITY_NAME }}
           failOnStdErr: false
           scope: resourcegroup
 
@@ -78,7 +80,7 @@ jobs:
           subscriptionId: ${{ fromJSON(secrets.AZURE_CREDENTIALS)['subscriptionId'] }}
           resourceGroupName: ${{ secrets.AZURE_RG }}
           template: ./.bicep/logicapps/connection.bicep
-          parameters: env=${{ env.ACTIVE_ENV }} storageAccountName=${{steps.deploy_main_bicep.outputs.accountName}} logicAppName=${{steps.deploy_main_bicep.outputs.logicAppName}} laManageIdentityName=${{ secrets.LOGIC_APP_MANAGE_IDENTITY }}
+          parameters: env=${{ env.ACTIVE_ENV }} storageAccountName=${{steps.deploy_main_bicep.outputs.accountName}} logicAppName=${{steps.deploy_main_bicep.outputs.logicAppName}} laManageIdentityName=${{ env.LA_MANAGE_IDENTITY_NAME }}
           failOnStdErr: false
           scope: resourcegroup
 
