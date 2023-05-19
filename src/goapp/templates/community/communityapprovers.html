@@ -20,11 +20,25 @@
                                             Approver Name :
                                         </td>
                                         <td>
-                                            <div x-html="approver.template"></div>
+                                            <div class="mt-1 sm:mt-0 sm:col-span-2">
+                                                <div 
+                                                    x-data="combobox({
+                                                            searchCallback: getAllUsers,
+                                                            searchTag: 'Start typing to query list of users',
+                                                            searchPlaceholder: 'Input name or email',
+                                                            id : 'mail',
+                                                            text : 'mail'
+                                                        })"
+                                                    x-modelable = "selected"
+                                                    x-model = "form.approver"
+                                                >
+                                                    <div x-html="template"></div>
+                                                </div>
+                                            </div>
                                         </td>
                                         <td align="right ">
-                                            <button type="button"
-                                                class="bg-orange-500  inline-flex justify-center py-2 px-4 rounded-md text-white"
+                                            <button type="button"      class="bg-orange-500  inline-flex justify-center py-2 px-4 rounded-md text-white"
+                                            :class="!isValid() ? 'bg-orange-100' : ''" x-bind:disabled="!isValid()"
                                                 @click="submit()">
                                                 Add Approver
                                             </button>
@@ -97,6 +111,21 @@
 <script src="/public/components/clsDropdown.js"></script>
 <script src="/public/components/combobox.js"></script>
 <script type="text/javascript">
+    async function getAllUsers(data){
+        
+        if (data == undefined) {
+            return []
+        }
+
+        const {search} = data;
+        if (search === null || search.trim() === ""){
+            return []
+        }
+
+        const res = await fetch(`/api/search/users/${search}`)
+        const users = await res.json()
+        return users
+    }
     function data() {
         return {   
             search: '',
@@ -166,18 +195,25 @@
                     'datapush()')
             },
             submit() {
-                if (this.approver.selected != "") {
+                console.log(   this.form)
+                var dd = new clsDropdown()
+
+                this.approver.data = this.form.approver[0]
+
                     var modal = Alpine.store('master').modal
                     modal.update('loading', 'Saving', 'Please wait.', '', '')
                     if (!this.form.id) {
                         this.form.id = 0
 
                     }
-
+                    this.form.name =this.form.approver[0].id
                     postData = this.form;
+                    console.log(   "postData")
+                    console.log(   postData)
                     Alpine.store('master').postData('/api/communityapprovers/update', postData, "Your community approvers has been updated.",
                         "Close")
-                }
+
+      
 
 
             },
@@ -233,15 +269,19 @@
                     })
 
             },
-            get isValid() {
-                if (
-                    (this.form.name
+             isValid() {
+                if(this.form.approver.length == 0) return false;
 
-                    )) {
-                    return true
-                } else {
-                    return false
-                }
+         
+                return true
+                // if (
+                //     (this.form.name
+
+                //     )) {
+                //     return true
+                // } else {
+                //     return false
+                // }
             }, getCommunityApprover() {
 
 
@@ -280,7 +320,7 @@
                 await this.getUsersList()
                 await this.getCommunityApprover()
                 modal.visible = false
-
+        
             },
             get getapprovers() {
                 if (!this.search) {
