@@ -246,7 +246,7 @@
                 </div>
                 <div class="mt-3 overflow-hidden text-sm text-gray-500" x-show="repository.statusLoaded && !repository.approvalStatus && repository.RepositorySource==='GitHub'">
                   <span x-show="hasApprovers">
-                    No approval data found for this repository. <a class="text-indigo-600" x-bind:href="'/repositories/makepublic/' + repository.Id">Click to request</a> to make this repository public.
+                    No approval data found for this repository. <span x-show="repository.Visibility==='Private'"><a class="text-indigo-600" x-bind:href="'/repositories/makepublic/' + repository.Id">Click to request</a> to make this repository public.</span>
                   </span>
                   <span x-show="!hasApprovers">
                     There are no approvers set to review requests to make a repository public. You may contact the app admin to resolve this issue.

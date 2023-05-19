@@ -219,12 +219,13 @@ func Projects_IsExisting_By_GithubId(body models.TypNewProjectReqBody) bool {
 	}
 }
 
-func PopulateProjectsApproval(id int64) (ProjectApprovals []models.TypProjectApprovals) {
+func PopulateProjectsApproval(id int64, email string) (ProjectApprovals []models.TypProjectApprovals) {
 	db := ConnectDb()
 	defer db.Close()
 
 	param := map[string]interface{}{
 		"ProjectId": id,
+		"CreatedBy": email,
 	}
 	result, _ := db.ExecuteStoredProcedureWithResult("PR_ProjectsApproval_Populate", param)
 	for _, v := range result {

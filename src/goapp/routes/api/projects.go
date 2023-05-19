@@ -356,7 +356,7 @@ func RequestMakePublic(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	go RequestApproval(id)
+	go RequestApproval(id, username.(string))
 }
 
 func ImportReposToDatabase(w http.ResponseWriter, r *http.Request) {
@@ -570,8 +570,9 @@ func indexRepo(repo gh.Repo) {
 	}
 }
 
-func RequestApproval(id int64) {
-	projectApprovals := ghmgmt.PopulateProjectsApproval(id)
+func RequestApproval(id int64, email string) {
+
+	projectApprovals := ghmgmt.PopulateProjectsApproval(id, email)
 
 	for _, v := range projectApprovals {
 		if v.RequestStatus == "New" {
