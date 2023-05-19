@@ -167,6 +167,7 @@ func RepoOwnerScan(w http.ResponseWriter, r *http.Request) {
 			fmt.Println("Checking number of owners of " + repo.Name)
 			owners := GetRepoCollaborators(org, repo.Name, "admin", "direct")
 			if len(owners) < 2 {
+				fmt.Println(repo.Name + " has less than 2 owners")
 				repoOnwerDeficient = append(repoOnwerDeficient, repo.Name)
 				for _, owner := range owners {
 					email, _ = db.UsersGetEmail(*owner.Login)
@@ -411,7 +412,6 @@ func EmailOspoOwnerDeficient(Email string, org string, reponame []string) {
 }
 
 func EmailcoownerDeficient(Email string, Org string, reponame string) {
-	e := time.Now()
 	var body string
 	var link string
 	link = "https://github.com/" + Org + "/" + reponame + "/settings/access"
@@ -426,7 +426,6 @@ func EmailcoownerDeficient(Email string, Org string, reponame string) {
 	}
 
 	email.SendEmail(m)
-	fmt.Printf(" less than 2 owner  on %s was sent.", e)
 }
 
 func stringInArray(a string, list []string) bool {
