@@ -255,7 +255,7 @@
                     .then(r => {
                         r.json().then(body => {
                             this.formUpdate.id = body[0]["Id"]
-                            this.formUpdate.disabled = true // (body[0]["Disabled"]==='false')
+                            this.formUpdate.disabled = true  
                             this.formUpdate.name = body[0]["ApproverUserPrincipalName"]
 
                             this.approver.selected = this.form.name
@@ -271,19 +271,9 @@
             },
              isValid() {
                 if(this.form.approver.length == 0) return false;
-
-         
                 return true
-                // if (
-                //     (this.form.name
-
-                //     )) {
-                //     return true
-                // } else {
-                //     return false
-                // }
+               
             }, getCommunityApprover() {
-
 
                 fetch('/api/communityapprovers/GetCommunityApproversList')
                     .then(r => {
@@ -331,7 +321,7 @@
                  
                 return this.approvers.filter(p => p.ApproverUserPrincipalName.toLowerCase().includes(this.search.toLowerCase()))
         }
-             //   return this.approvers
+        
 
             }
         }
