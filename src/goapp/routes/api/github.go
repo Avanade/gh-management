@@ -153,7 +153,7 @@ func ClearOrgMembers(w http.ResponseWriter, r *http.Request) {
 }
 
 func RepoOwnerScan(w http.ResponseWriter, r *http.Request) {
-
+	fmt.Println("REPOOWNERSSCAN TRIGGERED...")
 	organizationsOpen := [...]string{os.Getenv("GH_ORG_OPENSOURCE"), os.Getenv("GH_ORG_INNERSOURCE")}
 	var repoOnwerDeficient []string
 	var email string
@@ -164,12 +164,12 @@ func RepoOwnerScan(w http.ResponseWriter, r *http.Request) {
 		repos, _ := githubAPI.GetRepositoriesFromOrganization(org)
 
 		for _, repo := range repos {
+			fmt.Println("Checking number of owners of " + repo.Name)
 			owners := GetRepoCollaborators(org, repo.Name, "admin", "direct")
 			if len(owners) < 2 {
 				repoOnwerDeficient = append(repoOnwerDeficient, repo.Name)
 				for _, owner := range owners {
 					email, _ = db.UsersGetEmail(*owner.Login)
-					fmt.Println(email)
 					if email != "" {
 						EmailcoownerDeficient(email, org, repo.Name)
 					}
@@ -181,6 +181,7 @@ func RepoOwnerScan(w http.ResponseWriter, r *http.Request) {
 			EmailOspoOwnerDeficient(EmailSupport, org, repoOnwerDeficient)
 		}
 	}
+	fmt.Println("REPOOWNERSSCAN SUCCESSFUL")
 
 }
 
