@@ -1,0 +1,46 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "imageName": {"value": ""},
+        "appServicePlanName": {"value": ""},
+        "projectName": {"value": ""},
+        "activeEnv": {"value": ""},
+        "sqlServerName": {"value": ""},
+        "containerServer": {"value": ""},
+        "appServiceSettings": {
+            "value": {
+                "WEBSITES_ENABLE_APP_SERVICE_STORAGE":"",
+                "DOCKER_REGISTRY_SERVER_URL":"",
+                "DOCKER_REGISTRY_SERVER_USERNAME":"",
+                "DOCKER_REGISTRY_SERVER_PASSWORD":"",
+
+                "TENANT_ID":"",
+                "CLIENT_ID":"",
+                "CLIENT_SECRET":"",
+                "HOME_URL":"",
+                "GH_CLIENT_ID":"",
+                "GH_CLIENT_SECRET":"",
+                "GH_TOKEN":"",
+                "GHMGMTDB_CONNECTION_STRING":"",
+                "EMAIL_ENDPOINT":"",
+                
+                "GH_ORG_INNERSOURCE":"",
+                "GH_ORG_OPENSOURCE":"",
+                "GH_REPO_TEMPLATE":"",
+                "GH_REPO_TEMPLATE_NAME":"",
+                "APPROVAL_SYSTEM_APP_URL":"",
+                "APPROVAL_SYSTEM_APP_BaseURL":"",
+                "APPROVAL_SYSTEM_APP_ID":"",
+                "APPROVAL_SYSTEM_APP_MODULE_PROJECTS":"",
+                "APPROVAL_SYSTEM_APP_MODULE_COMMUNITY":"",
+                "GH_AZURE_AD_GROUP":"",
+                "GH_AZURE_AD_ADMIN_GROUP":"",
+                "EMAIL_SUPPORT":"",
+                "SUMMARY_REPORT_TRIGGER":"",
+                "EMAIL_SUMMARY_REPORT":"",
+                "CONTENT_SECURITY_POLICY":""
+            }
+        }
+    }
+}

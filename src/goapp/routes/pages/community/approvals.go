@@ -56,7 +56,7 @@ func ApprovalSystemRequestCommunity(data models.TypCommunityApprovals) error {
 		// var res *http.Response
 
 		bodyTemplate := `<p>Hi |ApproverUserPrincipalName|!</p>
-		<p>|RequesterName| is requesting for a new |CommunityIsExternal| community and is now pending for approval.</p>
+		<p>|RequesterName| is requesting for a new |CommunityType| community and is now pending for approval.</p>
 		<p>Below are the details:</p>
 		<table>
 			<tr>
@@ -79,17 +79,9 @@ func ApprovalSystemRequestCommunity(data models.TypCommunityApprovals) error {
 		<p>For more information, send an email to <a href="mailto:|RequesterUserPrincipalName|">|RequesterUserPrincipalName|</a></p>
 		`
 
-		var isExternal string
-
-		if data.CommunityIsExternal {
-			isExternal = "external"
-		} else {
-			isExternal = "internal"
-		}
-
 		replacer := strings.NewReplacer("|ApproverUserPrincipalName|", data.ApproverUserPrincipalName,
 			"|RequesterName|", data.RequesterName,
-			"|CommunityIsExternal|", isExternal,
+			"|CommunityType|", data.CommunityType,
 			"|CommunityName|", data.CommunityName,
 			"|CommunityUrl|", data.CommunityUrl,
 			"|CommunityDescription|", data.CommunityDescription,

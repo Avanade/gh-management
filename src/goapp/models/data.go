@@ -192,7 +192,7 @@ type TypCommunityApprovals struct {
 	CommunityDescription       string
 	CommunityNotes             string
 	CommunityTradeAssocId      string
-	CommunityIsExternal        bool
+	CommunityType              string
 	RequesterName              string
 	RequesterGivenName         string
 	RequesterSurName           string

@@ -53,7 +53,7 @@ jobs:
         with:
           subscriptionId: ${{ fromJSON(secrets.AZURE_CREDENTIALS)['subscriptionId'] }}
           resourceGroupName: ${{ secrets.AZURE_RG }}
-          template: ./.bicep/logicapps/main.bicep
+          template: ./.bicep/logicapps/deployGhMgmtLogicApp.bicep
           parameters: env=${{ env.ACTIVE_ENV }} laManageIdentityName=${{ env.LA_MANAGE_IDENTITY_NAME }}
           failOnStdErr: false
           scope: resourcegroup
