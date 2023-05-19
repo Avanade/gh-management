@@ -177,8 +177,8 @@ func main() {
 	muxAdmin.Handle("/externallinks/{action:add}/", loadAdminPage(rtAdmin.ExternalLinksForm))
 	muxAdmin.Handle("/externallinks/{action:view|edit}/{id}", loadAdminPage(rtAdmin.ExternalLinksForm))
 	//EXTERNAL LINKS API
-	muxApi.HandleFunc("/externallinks/create", rtApi.CreateExternalLinks).Methods("POST")
-	muxApi.HandleFunc("/externallinks/update/{id}", rtApi.UpdateExternalLinks).Methods("PUT")
+	muxApi.Handle("/externallinks/create", loadAdminPage(rtApi.CreateExternalLinks)).Methods("POST")
+	muxApi.Handle("/externallinks/update/{id}", loadAdminPage(rtApi.UpdateExternalLinks)).Methods("PUT")
 	muxApi.Handle("/externallinks/", loadAdminPage(rtApi.GetExternalLinks))
 	muxApi.Handle("/externallinks/enabled", loadAdminPage(rtApi.GetExternalLinksAllEnabled))
 	muxApi.Handle("/externallinks/{id}", loadAdminPage(rtApi.GetExternalLinksById))
@@ -186,7 +186,6 @@ func main() {
 
 	muxApi.HandleFunc("/approvals/project/callback", rtProjects.UpdateApprovalStatusProjects).Methods("POST")
 	muxApi.HandleFunc("/approvals/project/reassign/callback", rtProjects.UpdateApprovalReassignApprover)
-	muxApi.HandleFunc("/approvals/community/callback", rtProjects.UpdateApprovalStatusCommunity).Methods("POST")
 	muxApi.HandleFunc("/approvals/community/callback", rtProjects.UpdateApprovalStatusCommunity).Methods("POST")
 	muxApi.HandleFunc("/communityapprovers/update", rtCommunity.CommunityApproversListUpdate)
 	muxApi.HandleFunc("/communityapprovers/GetCommunityApproversList", rtCommunity.GetCommunityApproversList)
