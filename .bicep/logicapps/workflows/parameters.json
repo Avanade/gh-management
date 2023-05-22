@@ -2,5 +2,9 @@
     "GHMgmDomain": {
         "type": "String",
         "value": "https://example.com"
+    },
+    "ManagedIdentityName": {
+        "type": "String",
+        "value": ""
     }
 }

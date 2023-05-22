@@ -64,6 +64,7 @@ jobs:
           files: ./.bicep/logicapps/workflows/parameters.json
         env:
           GHMgmDomain.value: ${{ env.GH_DOMAIN }}
+          ManagedIdentityName.value: ${{ env.LA_MANAGE_IDENTITY_NAME }}
           
       - name: Upload Logic App Workflows
         uses: azure/CLI@v1
