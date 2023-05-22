@@ -30,7 +30,7 @@ jobs:
         run: |
           case ${{ github.event.inputs.selected_environment }} in
             "prod")
-                echo "GH_DOMAIN=${{secrets.CUSTOM_DOMAIN_PROD}}}" >> $GITHUB_ENV
+                echo "GH_DOMAIN=${{secrets.CUSTOM_DOMAIN_PROD}}" >> $GITHUB_ENV
                 echo "ACTIVE_ENV=prod" >> $GITHUB_ENV
                 echo "LA_MANAGE_IDENTITY_NAME=${{secrets.LOGIC_APP_MANAGE_IDENTITY_PROD}}" >> $GITHUB_ENV
               ;;
