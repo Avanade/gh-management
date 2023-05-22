@@ -8,7 +8,7 @@
           "uri": "@concat(parameters('GHMgmDomain'), '/api/checkAvaInnerSource')",
           "method": "GET",
           "authentication": {
-            "identity": "/subscriptions/59d64684-e7c9-4397-8982-6b775a473b74/resourcegroups/OpenTech_GitHub_Mgmt/providers/Microsoft.ManagedIdentity/userAssignedIdentities/GhManagementLAI",
+            "identity": "@concat('/subscriptions/59d64684-e7c9-4397-8982-6b775a473b74/resourcegroups/OpenTech_GitHub_Mgmt/providers/Microsoft.ManagedIdentity/userAssignedIdentities/', parameters('ManagedIdentityName'))",
             "type": "ManagedServiceIdentity"
           }
         },
