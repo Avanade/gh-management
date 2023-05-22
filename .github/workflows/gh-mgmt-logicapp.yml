@@ -1,3 +1,4 @@
+name: Deploy Logic App Workflows
 run-name: Deploy Logic App Workflows [${{inputs.selected_environment}}]
 
 on:
