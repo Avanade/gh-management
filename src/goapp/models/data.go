@@ -22,9 +22,8 @@ type TypGitHubUser struct {
 }
 
 type TypHeaders struct {
-	Menu          []TypMenu
-	ExternalLinks []TypMenu
-	Page          string
+	Menu []TypMenu
+	Page string
 }
 
 type TypMenu struct {
@@ -32,6 +31,29 @@ type TypMenu struct {
 	Url      string
 	IconPath string
 	External bool
+}
+
+type ExternalLinksIcon struct {
+	IconName string
+	IconPath string
+}
+
+type ExternalLinksData struct {
+	Data string
+}
+
+type TypExternalLinks struct {
+	Id int `json:"id"`
+
+	IconSVG   string `json:"iconsvg"`
+	Hyperlink string `json:"hyperlink"`
+	LinkName  string `json:"linkname"`
+
+	Enabled    string `json:"enabled"`
+	Created    string `json:"created"`
+	CreatedBy  string `json:"createdBy"`
+	Modified   string `json:"modified"`
+	ModifiedBy string `json:"modifiedBy"`
 }
 
 type TypNewProjectReqBody struct {
@@ -64,6 +86,8 @@ type TypCommunity struct {
 	Notes                  string                `json:"notes"`
 	TradeAssocId           string                `json:"tradeAssocId"`
 	IsExternal             bool                  `json:"isExternal"`
+	CommunityType          string                `json:"CommunityType"`
+	ChannelId              string                `json:"ChannelId"`
 	OnBoardingInstructions string                `json:"onBoardingInstructions"`
 	Created                string                `json:"created"`
 	CreatedBy              string                `json:"createdBy"`
@@ -168,7 +192,7 @@ type TypCommunityApprovals struct {
 	CommunityDescription       string
 	CommunityNotes             string
 	CommunityTradeAssocId      string
-	CommunityIsExternal        bool
+	CommunityType              string
 	RequesterName              string
 	RequesterGivenName         string
 	RequesterSurName           string

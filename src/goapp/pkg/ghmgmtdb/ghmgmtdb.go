@@ -82,12 +82,9 @@ func ConnectDb() *sql.DB {
 // PROJECTS
 func PRProjectsInsert(body models.TypNewProjectReqBody, user string) (id int64) {
 
-	cp := sql.ConnectionParam{
+	db := ConnectDb()
+	defer db.Close()
 
-		ConnectionString: os.Getenv("GHMGMTDB_CONNECTION_STRING"),
-	}
-
-	db, _ := sql.Init(cp)
 	param := map[string]interface{}{
 		"GithubId":                body.GithubId,
 		"Name":                    body.Name,
@@ -109,12 +106,8 @@ func PRProjectsInsert(body models.TypNewProjectReqBody, user string) (id int64) 
 }
 
 func ProjectInsertByImport(param map[string]interface{}) error {
-	cp := sql.ConnectionParam{
-
-		ConnectionString: os.Getenv("GHMGMTDB_CONNECTION_STRING"),
-	}
-
-	db, _ := sql.Init(cp)
+	db := ConnectDb()
+	defer db.Close()
 
 	_, err := db.ExecuteStoredProcedure("dbo.PR_Projects_Insert", param)
 	if err != nil {
@@ -124,12 +117,8 @@ func ProjectInsertByImport(param map[string]interface{}) error {
 }
 
 func ProjectUpdateByImport(param map[string]interface{}) error {
-	cp := sql.ConnectionParam{
-
-		ConnectionString: os.Getenv("GHMGMTDB_CONNECTION_STRING"),
-	}
-
-	db, _ := sql.Init(cp)
+	db := ConnectDb()
+	defer db.Close()
 
 	_, err := db.ExecuteStoredProcedure("dbo.PR_Projects_Update_Repo_Info", param)
 	if err != nil {
@@ -140,12 +129,9 @@ func ProjectUpdateByImport(param map[string]interface{}) error {
 
 func PRProjectsUpdate(body models.TypNewProjectReqBody, user string) (id int64) {
 
-	cp := sql.ConnectionParam{
+	db := ConnectDb()
+	defer db.Close()
 
-		ConnectionString: os.Getenv("GHMGMTDB_CONNECTION_STRING"),
-	}
-
-	db, _ := sql.Init(cp)
 	param := map[string]interface{}{
 		"ID":                      body.Id,
 		"Name":                    body.Name,
@@ -166,12 +152,9 @@ func PRProjectsUpdate(body models.TypNewProjectReqBody, user string) (id int64) 
 
 func PRProjectsUpdateLegalQuestions(body models.TypeMakeProjectPublicReqBody, user string) {
 
-	cp := sql.ConnectionParam{
+	db := ConnectDb()
+	defer db.Close()
 
-		ConnectionString: os.Getenv("GHMGMTDB_CONNECTION_STRING"),
-	}
-
-	db, _ := sql.Init(cp)
 	param := map[string]interface{}{
 		"Id":                         body.Id,
 		"Newcontribution":            body.Newcontribution,
@@ -191,11 +174,8 @@ func PRProjectsUpdateLegalQuestions(body models.TypeMakeProjectPublicReqBody, us
 
 func Projects_IsExisting(body models.TypNewProjectReqBody) bool {
 
-	cp := sql.ConnectionParam{
-		ConnectionString: os.Getenv("GHMGMTDB_CONNECTION_STRING"),
-	}
-
-	db, _ := sql.Init(cp)
+	db := ConnectDb()
+	defer db.Close()
 
 	param := map[string]interface{}{
 
@@ -218,11 +198,8 @@ func Projects_IsExisting(body models.TypNewProjectReqBody) bool {
 
 func Projects_IsExisting_By_GithubId(body models.TypNewProjectReqBody) bool {
 
-	cp := sql.ConnectionParam{
-		ConnectionString: os.Getenv("GHMGMTDB_CONNECTION_STRING"),
-	}
-
-	db, _ := sql.Init(cp)
+	db := ConnectDb()
+	defer db.Close()
 
 	param := map[string]interface{}{
 		"GithubId": body.GithubId,
@@ -242,12 +219,13 @@ func Projects_IsExisting_By_GithubId(body models.TypNewProjectReqBody) bool {
 	}
 }
 
-func PopulateProjectsApproval(id int64) (ProjectApprovals []models.TypProjectApprovals) {
+func PopulateProjectsApproval(id int64, email string) (ProjectApprovals []models.TypProjectApprovals) {
 	db := ConnectDb()
 	defer db.Close()
 
 	param := map[string]interface{}{
 		"ProjectId": id,
+		"CreatedBy": email,
 	}
 	result, _ := db.ExecuteStoredProcedureWithResult("PR_ProjectsApproval_Populate", param)
 	for _, v := range result {
@@ -843,11 +821,8 @@ func GetAllActiveApprovers() interface{} {
 // USERS
 func Users_Get_GHUser(UserPrincipalName string) (GHUser string) {
 
-	cp := sql.ConnectionParam{
-		ConnectionString: os.Getenv("GHMGMTDB_CONNECTION_STRING"),
-	}
-
-	db, _ := sql.Init(cp)
+	db := ConnectDb()
+	defer db.Close()
 
 	param := map[string]interface{}{
 
@@ -867,11 +842,8 @@ func Users_Get_GHUser(UserPrincipalName string) (GHUser string) {
 
 func GetUserByGitHubId(GitHubId string) ([]map[string]interface{}, error) {
 
-	cp := sql.ConnectionParam{
-		ConnectionString: os.Getenv("GHMGMTDB_CONNECTION_STRING"),
-	}
-
-	db, _ := sql.Init(cp)
+	db := ConnectDb()
+	defer db.Close()
 
 	param := map[string]interface{}{
 
@@ -889,11 +861,8 @@ func GetUserByGitHubId(GitHubId string) ([]map[string]interface{}, error) {
 
 func GetUserByGitHubUsername(GitHubUser string) ([]map[string]interface{}, error) {
 
-	cp := sql.ConnectionParam{
-		ConnectionString: os.Getenv("GHMGMTDB_CONNECTION_STRING"),
-	}
-
-	db, _ := sql.Init(cp)
+	db := ConnectDb()
+	defer db.Close()
 
 	param := map[string]interface{}{
 
@@ -911,11 +880,8 @@ func GetUserByGitHubUsername(GitHubUser string) ([]map[string]interface{}, error
 
 func GetUserByUserPrincipal(UserPrincipalName string) ([]map[string]interface{}, error) {
 
-	cp := sql.ConnectionParam{
-		ConnectionString: os.Getenv("GHMGMTDB_CONNECTION_STRING"),
-	}
-
-	db, _ := sql.Init(cp)
+	db := ConnectDb()
+	defer db.Close()
 
 	param := map[string]interface{}{
 
@@ -947,11 +913,8 @@ func IsUserAdmin(userPrincipalName string) bool {
 // COMMUNITIES
 func Communities_AddMember(CommunityId int, UserPrincipalName string) error {
 
-	cp := sql.ConnectionParam{
-		ConnectionString: os.Getenv("GHMGMTDB_CONNECTION_STRING"),
-	}
-
-	db, _ := sql.Init(cp)
+	db := ConnectDb()
+	defer db.Close()
 
 	param := map[string]interface{}{
 		"CommunityId":       CommunityId,
@@ -971,11 +934,8 @@ func Communities_AddMember(CommunityId int, UserPrincipalName string) error {
 
 func Communities_Related(CommunityId int64) (data []models.TypRelatedCommunities, err error) {
 
-	cp := sql.ConnectionParam{
-		ConnectionString: os.Getenv("GHMGMTDB_CONNECTION_STRING"),
-	}
-
-	db, _ := sql.Init(cp)
+	db := ConnectDb()
+	defer db.Close()
 
 	param := map[string]interface{}{
 
@@ -1001,11 +961,8 @@ func Communities_Related(CommunityId int64) (data []models.TypRelatedCommunities
 }
 
 func Community_Sponsors(CommunityId int64) (data []models.TypCommunitySponsorsList, err error) {
-	cp := sql.ConnectionParam{
-		ConnectionString: os.Getenv("GHMGMTDB_CONNECTION_STRING"),
-	}
-
-	db, _ := sql.Init(cp)
+	db := ConnectDb()
+	defer db.Close()
 
 	param := map[string]interface{}{
 
@@ -1032,11 +989,8 @@ func Community_Sponsors(CommunityId int64) (data []models.TypCommunitySponsorsLi
 }
 
 func Community_Info(CommunityId int64) (data models.TypCommunityOnBoarding, err error) {
-	cp := sql.ConnectionParam{
-		ConnectionString: os.Getenv("GHMGMTDB_CONNECTION_STRING"),
-	}
-
-	db, _ := sql.Init(cp)
+	db := ConnectDb()
+	defer db.Close()
 
 	param := map[string]interface{}{
 
@@ -1061,11 +1015,8 @@ func Community_Info(CommunityId int64) (data models.TypCommunityOnBoarding, err 
 }
 
 func Community_Onboarding_AddMember(CommunityId int64, UserPrincipalName string) (err error) {
-	cp := sql.ConnectionParam{
-		ConnectionString: os.Getenv("GHMGMTDB_CONNECTION_STRING"),
-	}
-
-	db, _ := sql.Init(cp)
+	db := ConnectDb()
+	defer db.Close()
 
 	param := map[string]interface{}{
 
@@ -1082,11 +1033,8 @@ func Community_Onboarding_AddMember(CommunityId int64, UserPrincipalName string)
 }
 
 func Community_Onboarding_RemoveMember(CommunityId int64, UserPrincipalName string) (err error) {
-	cp := sql.ConnectionParam{
-		ConnectionString: os.Getenv("GHMGMTDB_CONNECTION_STRING"),
-	}
-
-	db, _ := sql.Init(cp)
+	db := ConnectDb()
+	defer db.Close()
 
 	param := map[string]interface{}{
 
@@ -1103,11 +1051,8 @@ func Community_Onboarding_RemoveMember(CommunityId int64, UserPrincipalName stri
 }
 
 func Community_Membership_IsMember(CommunityId int64, UserPrincipalName string) (isMember bool, err error) {
-	cp := sql.ConnectionParam{
-		ConnectionString: os.Getenv("GHMGMTDB_CONNECTION_STRING"),
-	}
-
-	db, _ := sql.Init(cp)
+	db := ConnectDb()
+	defer db.Close()
 
 	param := map[string]interface{}{
 
@@ -1168,7 +1113,7 @@ func PopulateCommunityApproval(id int64) (CommunityApprovals []models.TypCommuni
 			CommunityDescription:       v["CommunityDescription"].(string),
 			CommunityNotes:             v["CommunityNotes"].(string),
 			CommunityTradeAssocId:      v["CommunityTradeAssocId"].(string),
-			CommunityIsExternal:        v["CommunityIsExternal"].(bool),
+			CommunityType:              v["CommunityType"].(string),
 			RequesterName:              v["RequesterName"].(string),
 			RequesterGivenName:         v["RequesterGivenName"].(string),
 			RequesterSurName:           v["RequesterSurName"].(string),
@@ -1197,7 +1142,7 @@ func GetFailedCommunityApprovalRequests() (CommunityApprovals []models.TypCommun
 			CommunityDescription:       v["CommunityDescription"].(string),
 			CommunityNotes:             v["CommunityNotes"].(string),
 			CommunityTradeAssocId:      v["CommunityTradeAssocId"].(string),
-			CommunityIsExternal:        v["CommunityIsExternal"].(bool),
+			CommunityType:              v["CommunityType"].(string),
 			RequesterName:              v["RequesterName"].(string),
 			RequesterGivenName:         v["RequesterGivenName"].(string),
 			RequesterSurName:           v["RequesterSurName"].(string),
@@ -1442,7 +1387,34 @@ func GetRepoOwnersRecordByRepoId(id int64) (RepoOwner []models.TypRepoOwner, err
 		RepoOwner = append(RepoOwner, data)
 	}
 	return RepoOwner, nil
+}
 
+func GetGitHubRepositories() ([]map[string]interface{}, error) {
+	db := ConnectDb()
+	defer db.Close()
+
+	result, err := db.ExecuteStoredProcedureWithResult("PR_Projects_SelectAllGitHub", nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return result, nil
+}
+
+func GetRepoOwnersByProjectIdWithGHUsername(id int64) ([]map[string]interface{}, error) {
+	db := ConnectDb()
+	defer db.Close()
+
+	param := map[string]interface{}{
+		"ProjectId": id,
+	}
+
+	result, err := db.ExecuteStoredProcedureWithResult("PR_RepoOwners_SelectGHUser_ByRepoId", param)
+	if err != nil {
+		return nil, err
+	}
+
+	return result, nil
 }
 
 func DeleteRepoOwnerRecordByUserAndProjectId(id int64, userPrincipalName string) error {

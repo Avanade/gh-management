@@ -80,9 +80,11 @@ func processApprovalProjects(r *http.Request, module string) error {
 		return err
 	}
 
-	projectApproval := ghmgmt.GetProjectApprovalByGUID(req.ItemId)
+	if module == "projects" {
+		projectApproval := ghmgmt.GetProjectApprovalByGUID(req.ItemId)
 
-	go checkAllRequests(projectApproval.ProjectId)
+		go checkAllRequests(projectApproval.ProjectId)
+	}
 	return nil
 }
 

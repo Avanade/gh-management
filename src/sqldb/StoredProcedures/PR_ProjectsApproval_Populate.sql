@@ -1,5 +1,7 @@
 CREATE PROCEDURE [dbo].[PR_ProjectsApproval_Populate]
-    @ProjectId INT
+    @ProjectId INT,
+	@CreatedBy VARCHAR(100)
+
 AS
 
 INSERT INTO ProjectApprovals
@@ -13,7 +15,7 @@ INSERT INTO ProjectApprovals
 		ModifiedBy
 	)
 	
-SELECT @ProjectId, T.Id, T.ApproverUserPrincipalName, 1, 'For Review - ' + T.[Name], P.CreatedBy, P.CreatedBy
+SELECT @ProjectId, T.Id, T.ApproverUserPrincipalName, 1, 'For Review - ' + T.[Name], @CreatedBy, @CreatedBy
 FROM Projects P, ApprovalTypes T
 WHERE T.ApproverUserPrincipalName IS NOT NULL AND T.IsActive = 1 AND T.IsArchived = 0
 AND P.Id = @ProjectId

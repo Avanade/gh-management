@@ -7,7 +7,6 @@ import (
 	models "main/models"
 	ghmgmt "main/pkg/ghmgmtdb"
 	gh "main/pkg/github"
-	githubAPI "main/pkg/github"
 	session "main/pkg/session"
 	"main/pkg/sql"
 	"net/http"
@@ -42,7 +41,8 @@ func GetUserProjects(w http.ResponseWriter, r *http.Request) {
 	// Get project list
 	params := make(map[string]interface{})
 	params["UserPrincipalName"] = username
-	projects, err := db.ExecuteStoredProcedureWithResult("PR_Projects_Select_ByUserPrincipalName", params)
+
+	projects, err := ghmgmt.ProjectsSelectByUserPrincipalName(params)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -99,7 +99,8 @@ func GetRequestStatusByProject(w http.ResponseWriter, r *http.Request) {
 	// Get project list
 	params := make(map[string]interface{})
 	params["Id"] = id
-	projects, err := db.ExecuteStoredProcedureWithResult("PR_ProjectApprovals_Select_ById", params)
+
+	projects, err := ghmgmt.ProjectApprovalsSelectById(params)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -355,7 +356,7 @@ func RequestMakePublic(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	RequestApproval(id)
+	go RequestApproval(id, username.(string))
 }
 
 func ImportReposToDatabase(w http.ResponseWriter, r *http.Request) {
@@ -473,6 +474,7 @@ func InitIndexOrgRepos(w http.ResponseWriter, r *http.Request) {
 }
 
 func IndexOrgRepos(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("INDEX ORGANIZATION REPOSITORIES TRIGGERED...")
 	var repos []gh.Repo
 
 	orgs := []string{os.Getenv("GH_ORG_INNERSOURCE"), os.Getenv("GH_ORG_OPENSOURCE")}
@@ -490,64 +492,87 @@ func IndexOrgRepos(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var wg sync.WaitGroup
+	maxGoroutines := 50
+	guard := make(chan struct{}, maxGoroutines)
 
 	for _, repo := range repos {
+		guard <- struct{}{}
 		wg.Add(1)
-		go func(repo gh.Repo) {
-			defer wg.Done()
-
-			visibilityId := 3
-			if repo.Visibility == "private" {
-				visibilityId = 1
-			} else if repo.Visibility == "internal" {
-				visibilityId = 2
-			}
-
-			param := map[string]interface{}{
-				"GithubId":            repo.GithubId,
-				"Name":                repo.Name,
-				"Description":         repo.Description,
-				"IsArchived":          repo.IsArchived,
-				"VisibilityId":        visibilityId,
-				"TFSProjectReference": repo.TFSProjectReference,
-				"Created":             repo.Created.Format("2006-01-02 15:04:05"),
-			}
-
-			isExisting := ghmgmt.Projects_IsExisting_By_GithubId(models.TypNewProjectReqBody{GithubId: repo.GithubId})
-
-			var err error
-
-			if isExisting {
-				userdata := ghmgmt.GetProjectByGithubId(repo.GithubId)
-				param["Id"] = userdata[0]["Id"]
-
-				err = ghmgmt.ProjectUpdateByImport(param)
-				if userdata[0]["CreatedBy"] != nil {
-					RepoOwners, _ := ghmgmt.RepoOwnersByUserAndProjectId(param["Id"].(int64), userdata[0]["CreatedBy"].(string))
-					if len(RepoOwners) < 1 {
-						error := ghmgmt.RepoOwnersInsert(param["Id"].(int64), userdata[0]["CreatedBy"].(string))
-						if error != nil {
-
-							fmt.Println(error)
-						}
-					}
-				}
-			} else {
-				err = ghmgmt.ProjectInsertByImport(param)
-			}
-
-			if err != nil {
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-			}
+		go func(r gh.Repo) {
+			indexRepo(r)
+			<-guard
+			wg.Done()
 		}(repo)
 	}
-
 	wg.Wait()
+
 	w.WriteHeader(http.StatusOK)
+	fmt.Println("INDEX ORGANIZATION REPOSITORIES SUCCESSFUL")
 }
 
-func RequestApproval(id int64) {
-	projectApprovals := ghmgmt.PopulateProjectsApproval(id)
+func indexRepo(repo gh.Repo) {
+	fmt.Println("Indexing " + repo.Name + "...")
+
+	visibilityId := 3
+	if repo.Visibility == "private" {
+		visibilityId = 1
+	} else if repo.Visibility == "internal" {
+		visibilityId = 2
+	}
+
+	param := map[string]interface{}{
+		"GithubId":            repo.GithubId,
+		"Name":                repo.Name,
+		"Description":         repo.Description,
+		"IsArchived":          repo.IsArchived,
+		"VisibilityId":        visibilityId,
+		"TFSProjectReference": repo.TFSProjectReference,
+		"Created":             repo.Created.Format("2006-01-02 15:04:05"),
+	}
+
+	isExisting := ghmgmt.Projects_IsExisting_By_GithubId(models.TypNewProjectReqBody{GithubId: repo.GithubId})
+
+	if isExisting {
+		project := ghmgmt.GetProjectByGithubId(repo.GithubId)
+		param["Id"] = project[0]["Id"]
+
+		err := ghmgmt.ProjectUpdateByImport(param)
+		if err != nil {
+			return
+		}
+
+		// Get direct admin collaborators
+		repoUrl := strings.Replace(repo.TFSProjectReference, "https://", "", -1)
+		repoUrlSub := strings.Split(repoUrl, "/")
+
+		token := os.Getenv("GH_TOKEN")
+
+		collaborators := gh.RepositoriesListCollaborators(token, repoUrlSub[1], repo.Name, "admin", "direct")
+		// Get userprincipal from database
+		for _, admin := range collaborators {
+			users, err := ghmgmt.GetUserByGitHubId(strconv.FormatInt(*admin.ID, 10))
+			if err != nil {
+				return
+			}
+
+			//Insert to repoowners table
+			if len(users) > 0 {
+				if len(users) > 0 {
+					ghmgmt.RepoOwnersInsert(project[0]["Id"].(int64), users[0]["UserPrincipalName"].(string))
+				}
+			}
+		}
+	} else {
+		err := ghmgmt.ProjectInsertByImport(param)
+		if err != nil {
+			return
+		}
+	}
+}
+
+func RequestApproval(id int64, email string) {
+
+	projectApprovals := ghmgmt.PopulateProjectsApproval(id, email)
 
 	for _, v := range projectApprovals {
 		if v.RequestStatus == "New" {
@@ -669,41 +694,66 @@ func ReprocessRequestApproval() {
 }
 
 func RepoOwnersCleanup(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("REPO OWNERS CLEANUP TRIGGERED...")
 	token := os.Getenv("GH_TOKEN")
-	RepoUsers, _ := ghmgmt.SelectAllRepoNameAndOwners()
-	organizations := [...]string{os.Getenv("GH_ORG_INNERSOURCE"), os.Getenv("GH_ORG_OPENSOURCE")}
+
+	// Get all repos from database
+	repos, err := ghmgmt.GetGitHubRepositories()
+	if err != nil {
+		fmt.Printf(err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
 	var wg sync.WaitGroup
-	for _, RepoUser := range RepoUsers {
+	maxGoroutines := 50
+	guard := make(chan struct{}, maxGoroutines)
+
+	for _, repo := range repos {
+		guard <- struct{}{}
 		wg.Add(1)
-		func(RepoUser models.TypRepoOwner) {
-			fmt.Println("Project ID : " + strconv.FormatInt(RepoUser.Id, 10))
-			isAdmin := false
-			validRepo := false
-			for _, organization := range organizations {
-				RepoAdmins_ := githubAPI.RepositoriesListCollaborators(token, organization, RepoUser.RepoName, "admin", "direct")
-				if len(RepoAdmins_) > 0 {
-					for _, list := range RepoAdmins_ {
-						validRepo = true
-						email, _ := ghmgmt.UsersGetEmail(*list.Login)
-						if RepoUser.UserPrincipalName == email {
-							isAdmin = true
-						}
-					}
-				}
-			}
-
-			if validRepo && !isAdmin {
-				err := ghmgmt.DeleteRepoOwnerRecordByUserAndProjectId(RepoUser.Id, RepoUser.UserPrincipalName)
-
-				if err != nil {
-					http.Error(w, err.Error(), http.StatusInternalServerError)
-				}
-			}
-			defer wg.Done()
-
-		}(RepoUser)
+		go func(r map[string]interface{}) {
+			cleanupRepoOwners(r, token)
+			<-guard
+			wg.Done()
+		}(repo)
 	}
 	wg.Wait()
+	w.WriteHeader(http.StatusOK)
+	fmt.Println("REPO OWNERS CLEANUP SUCCESSFUL")
+}
+
+func cleanupRepoOwners(repo map[string]interface{}, token string) {
+	fmt.Println("Checking owners of : " + repo["Name"].(string))
+
+	// Get admins of the repository
+	repoUrl := strings.Replace(repo["TFSProjectReference"].(string), "https://", "", -1)
+	repoUrlSub := strings.Split(repoUrl, "/")
+
+	admins := gh.RepositoriesListCollaborators(token, repoUrlSub[1], repo["Name"].(string), "admin", "direct")
+
+	// Get owners of the repo on the database
+	owners, err := ghmgmt.GetRepoOwnersByProjectIdWithGHUsername(repo["Id"].(int64))
+	if err != nil {
+		fmt.Printf(err.Error())
+		return
+	}
+
+	// Check if owner is on the admin list
+	for _, owner := range owners {
+		isAdmin := false
+		for _, admin := range admins {
+			if owner["GitHubUser"].(string) == *admin.Login {
+				isAdmin = true
+				break
+			}
+		}
+
+		// if owner is not on the list of admins
+		if !isAdmin {
+			ghmgmt.DeleteRepoOwnerRecordByUserAndProjectId(repo["Id"].(int64), owner["UserPrincipalName"].(string))
+		}
+	}
 }
 
 type RepositoryList struct {
