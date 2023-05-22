@@ -180,7 +180,7 @@ func main() {
 	muxApi.Handle("/externallinks/create", loadAdminPage(rtApi.CreateExternalLinks)).Methods("POST")
 	muxApi.Handle("/externallinks/update/{id}", loadAdminPage(rtApi.UpdateExternalLinks)).Methods("PUT")
 	muxApi.Handle("/externallinks/", loadAdminPage(rtApi.GetExternalLinks))
-	muxApi.Handle("/externallinks/enabled", loadAdminPage(rtApi.GetExternalLinksAllEnabled))
+	muxApi.Handle("/externallinks/enabled", loadAzAuthPage(rtApi.GetExternalLinksAllEnabled))
 	muxApi.Handle("/externallinks/{id}", loadAdminPage(rtApi.GetExternalLinksById))
 	muxApi.Handle("/externallinks/{action:delete}/{id}", loadAdminPage(rtApi.ExternalLinksDelete))
 
