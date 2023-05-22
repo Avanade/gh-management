@@ -1,3 +1,4 @@
+name: Deploy GH MGMT Container
 run-name: Deploy GH MGMT Container [${{inputs.selected_environment}}]
 
 on:
