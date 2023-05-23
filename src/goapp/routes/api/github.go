@@ -205,6 +205,11 @@ func AddCollaborator(w http.ResponseWriter, r *http.Request) {
 	if len(repoList) > 0 {
 		repo := repoList[0]
 
+		if repo.TFSProjectReference == "" {
+			http.Error(w, "Repository doesn't exists on GitHub organization.", http.StatusNotFound)
+			return
+		}
+
 		repoUrl := strings.Replace(repo.TFSProjectReference, "https://", "", -1)
 		repoUrlSub := strings.Split(repoUrl, "/")
 
@@ -270,6 +275,11 @@ func RemoveCollaborator(w http.ResponseWriter, r *http.Request) {
 
 	if len(repoList) > 0 {
 		repo := repoList[0]
+
+		if repo.TFSProjectReference == "" {
+			http.Error(w, "Repository doesn't exists on GitHub organization.", http.StatusNotFound)
+			return
+		}
 
 		repoUrl := strings.Replace(repo.TFSProjectReference, "https://", "", -1)
 		repoUrlSub := strings.Split(repoUrl, "/")
