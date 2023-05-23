@@ -5,7 +5,6 @@ import (
 	"crypto/rsa"
 	"fmt"
 	"log"
-	"main/pkg/envvar"
 	"net/http"
 	"os"
 	"strings"
@@ -24,7 +23,7 @@ type Authenticator struct {
 	Ctx      context.Context
 }
 
-func NewAuthenticator() (*Authenticator, error) {
+func NewAuthenticator(host string) (*Authenticator, error) {
 	ctx := context.Background()
 	provider, err := oidc.NewProvider(ctx, "https://login.microsoftonline.com/"+os.Getenv("TENANT_ID")+"/v2.0")
 	if err != nil {
@@ -35,7 +34,7 @@ func NewAuthenticator() (*Authenticator, error) {
 	conf := oauth2.Config{
 		ClientID:     os.Getenv("CLIENT_ID"),
 		ClientSecret: os.Getenv("CLIENT_SECRET"),
-		RedirectURL:  envvar.GetEnvVar("HOME_URL", "http://localhost:8080") + "/login/azure/callback",
+		RedirectURL:  "http://" + host + "/login/azure/callback",
 		Endpoint:     provider.Endpoint(),
 		Scopes:       []string{oidc.ScopeOpenID, oidc.ScopeOfflineAccess, "profile"},
 	}
