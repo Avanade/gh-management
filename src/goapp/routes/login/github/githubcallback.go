@@ -36,7 +36,7 @@ func GithubCallbackHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ghauth := auth.GetGitHubOauthConfig()
+	ghauth := auth.GetGitHubOauthConfig(r.Host)
 
 	// Exchange temporary code for access token
 	code := r.URL.Query().Get("code")
