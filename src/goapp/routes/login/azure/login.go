@@ -35,7 +35,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	authenticator, err := auth.NewAuthenticator(r.URL.Scheme, r.Host)
+	authenticator, err := auth.NewAuthenticator(r.Host)
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)

@@ -51,7 +51,7 @@ func IsAuthenticated(w http.ResponseWriter, r *http.Request, next http.HandlerFu
 
 	} else {
 		// If there is a user profile saved
-		authenticator, err := auth.NewAuthenticator(r.URL.Scheme, r.Host)
+		authenticator, err := auth.NewAuthenticator(r.Host)
 
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
