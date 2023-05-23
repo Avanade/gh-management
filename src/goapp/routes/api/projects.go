@@ -136,6 +136,10 @@ func GetRepoCollaboratorsByRepoId(w http.ResponseWriter, r *http.Request) {
 		repo := repoList[0]
 
 		if repo.RepositorySource == "GitHub" {
+			if repo.TFSProjectReference == "" {
+				http.Error(w, "Repository not found.", http.StatusNotFound)
+				return
+			}
 			repoUrl := strings.Replace(repo.TFSProjectReference, "https://", "", -1)
 			repoUrlSub := strings.Split(repoUrl, "/")
 
@@ -567,6 +571,31 @@ func indexRepo(repo gh.Repo) {
 		if err != nil {
 			return
 		}
+
+		project := ghmgmt.GetProjectByGithubId(repo.GithubId)
+		param["Id"] = project[0]["Id"]
+
+		// Get direct admin collaborators
+		repoUrl := strings.Replace(repo.TFSProjectReference, "https://", "", -1)
+		repoUrlSub := strings.Split(repoUrl, "/")
+
+		token := os.Getenv("GH_TOKEN")
+
+		collaborators := gh.RepositoriesListCollaborators(token, repoUrlSub[1], repo.Name, "admin", "direct")
+		// Get userprincipal from database
+		for _, admin := range collaborators {
+			users, err := ghmgmt.GetUserByGitHubId(strconv.FormatInt(*admin.ID, 10))
+			if err != nil {
+				return
+			}
+
+			//Insert to repoowners table
+			if len(users) > 0 {
+				if len(users) > 0 {
+					ghmgmt.RepoOwnersInsert(project[0]["Id"].(int64), users[0]["UserPrincipalName"].(string))
+				}
+			}
+		}
 	}
 }
 
@@ -725,6 +754,22 @@ func RepoOwnersCleanup(w http.ResponseWriter, r *http.Request) {
 
 func cleanupRepoOwners(repo map[string]interface{}, token string) {
 	fmt.Println("Checking owners of : " + repo["Name"].(string))
+
+	if repo["TFSProjectReference"] == nil {
+		// Get owners of the repo on the database
+		owners, err := ghmgmt.GetRepoOwnersByProjectIdWithGHUsername(repo["Id"].(int64))
+		if err != nil {
+			fmt.Printf(err.Error())
+			return
+		}
+
+		// Check if owner is on the admin list
+		for _, owner := range owners {
+			ghmgmt.DeleteRepoOwnerRecordByUserAndProjectId(repo["Id"].(int64), owner["UserPrincipalName"].(string))
+		}
+
+		return
+	}
 
 	// Get admins of the repository
 	repoUrl := strings.Replace(repo["TFSProjectReference"].(string), "https://", "", -1)
