@@ -1,6 +1,8 @@
 package routes
 
 import (
+	"fmt"
+	"main/pkg/envvar"
 	session "main/pkg/session"
 	"net/http"
 	"net/url"
@@ -30,7 +32,8 @@ func LogoutHandler(w http.ResponseWriter, r *http.Request) {
 		session.RemoveGitHubAccount(w, r)
 	}
 
-	logoutUrl, err := url.Parse("https://login.microsoftonline.com/" + os.Getenv("TENANT_ID") + "/oauth2/logout?client_id=" + os.Getenv("CLIENT_ID") + "&post_logout_redirect_uri=" + os.Getenv("HOME_URL"))
+	homeUrl := fmt.Sprint(envvar.GetEnvVar("SCHEME", "https"), "://", r.Host)
+	logoutUrl, err := url.Parse("https://login.microsoftonline.com/" + os.Getenv("TENANT_ID") + "/oauth2/logout?client_id=" + os.Getenv("CLIENT_ID") + "&post_logout_redirect_uri=" + homeUrl)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
