@@ -522,6 +522,8 @@ func ClearOrgRepos(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	removedProjects := []string{}
+
 	var wg sync.WaitGroup
 	maxGoroutines := 50
 	guard := make(chan struct{}, maxGoroutines)
@@ -532,29 +534,38 @@ func ClearOrgRepos(w http.ResponseWriter, r *http.Request) {
 		go func(p map[string]interface{}) {
 			projectId := p["Id"].(int)
 			repoName := p["Name"].(string)
-			RemoveRepoIfNotExist(projectId, repoName)
+			isRemoved := RemoveRepoIfNotExist(projectId, repoName)
+			if isRemoved {
+				removedProjects = append(removedProjects, repoName)
+			}
 			<-guard
 			wg.Done()
 		}(project)
 	}
 	wg.Wait()
 
+	if len(removedProjects) > 0 {
+		emailSupport := os.Getenv("EMAIL_SUPPORT")
+		EmailAdminDeletedProjects(emailSupport, removedProjects)
+	}
+
 	w.WriteHeader(http.StatusOK)
 	fmt.Println("INDEX ORGANIZATION REPOSITORIES SUCCESSFUL")
 }
 
-func RemoveRepoIfNotExist(projectId int, repoName string) {
+func RemoveRepoIfNotExist(projectId int, repoName string) bool {
 	isExist, err := gh.Repo_IsExisting(repoName)
 	if err != nil {
 		fmt.Println(err.Error(), " | REPO NAME : ", repoName)
-		return
+		return false
 	}
 
 	if !isExist {
 		err := ghmgmt.DeleteProjectById(projectId)
 		fmt.Println(err.Error())
-		return
+		return true
 	}
+	return false
 }
 
 func indexRepo(repo gh.Repo) {
