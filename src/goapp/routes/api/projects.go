@@ -514,6 +514,49 @@ func IndexOrgRepos(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("INDEX ORGANIZATION REPOSITORIES SUCCESSFUL")
 }
 
+func ClearOrgRepos(w http.ResponseWriter, r *http.Request) {
+	projects, err := ghmgmt.Projects_ByRepositorySource("GitHub")
+	if err != nil {
+		fmt.Println(err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	var wg sync.WaitGroup
+	maxGoroutines := 50
+	guard := make(chan struct{}, maxGoroutines)
+
+	for _, project := range projects {
+		guard <- struct{}{}
+		wg.Add(1)
+		go func(p map[string]interface{}) {
+			projectId := p["Id"].(int)
+			repoName := p["Name"].(string)
+			RemoveRepoIfNotExist(projectId, repoName)
+			<-guard
+			wg.Done()
+		}(project)
+	}
+	wg.Wait()
+
+	w.WriteHeader(http.StatusOK)
+	fmt.Println("INDEX ORGANIZATION REPOSITORIES SUCCESSFUL")
+}
+
+func RemoveRepoIfNotExist(projectId int, repoName string) {
+	isExist, err := gh.Repo_IsExisting(repoName)
+	if err != nil {
+		fmt.Println(err.Error(), " | REPO NAME : ", repoName)
+		return
+	}
+
+	if !isExist {
+		err := ghmgmt.DeleteProjectById(projectId)
+		fmt.Println(err.Error())
+		return
+	}
+}
+
 func indexRepo(repo gh.Repo) {
 	fmt.Println("Indexing " + repo.Name + "...")
 
