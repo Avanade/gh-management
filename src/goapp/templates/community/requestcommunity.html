@@ -220,9 +220,9 @@
                     <span>How To Join</span>
                 </button>
             </span>
-            <button type="button" x-show="mode=='view'"
+            <button type="button" x-show="mode=='view' && ('{{.Email}}' === communityCreatedBy)"
                 class="bg-orange-500  inline-flex justify-center py-2 px-4 rounded-md text-white"
-                :class="!isValid ? 'bg-orange-100' : ''"
+                :class="!isValid && ('{{.Email}}' !== communityCreatedBy) ? 'bg-orange-100' : ''"
                 x-bind:disabled="!isValid && ('{{.Email}}' !== communityCreatedBy)" @click="mode='edit'">
                 <span x-show="form.id">Edit Community</span>
             </button>
