@@ -199,6 +199,10 @@ type TypCommunityApprovals struct {
 	RequesterUserPrincipalName string
 	ApproverUserPrincipalName  string
 	ApprovalDescription        string
+	ApproveUrl                 string
+	RejectUrl                  string
+	ApproveText                string
+	RejectText                 string
 }
 
 type TypCategory struct {

@@ -144,7 +144,7 @@ func UpdateApprovalReassignApprover(w http.ResponseWriter, r *http.Request) {
 		"Username":      req.Username,
 	}
 
-	result, err2 := db.ExecuteStoredProcedureWithResult("PR_ProjectsApproval_Update_ApproverUserPrincipalName", param)
+	result, err2 := ghmgmt.ProjectsApprovalUpdateApproverUserPrincipalName(param)
 	if err2 != nil {
 		http.Error(w, err2.Error(), http.StatusInternalServerError)
 		return
@@ -271,6 +271,143 @@ func SendReassignEmail(data models.TypProjectApprovals) error {
 	body := replacer.Replace(bodyTemplate)
 	m := email.TypEmailMessage{
 		Subject: fmt.Sprintf("[GH-Management] New Project For Review - %v", data.ProjectName),
+		Body:    body,
+		To:      data.ApproverUserPrincipalName,
+	}
+
+	_, errEmail := email.SendEmail(m)
+
+	if errEmail != nil {
+		return errEmail
+	}
+	return errEmail
+}
+
+func UpdateCommunityApprovalReassignApprover(w http.ResponseWriter, r *http.Request) {
+	var req models.TypUpdateApprovalReAssign
+	err := json.NewDecoder(r.Body).Decode(&req)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	// Connect to database
+	dbConnectionParam := sql.ConnectionParam{
+		ConnectionString: os.Getenv("GHMGMTDB_CONNECTION_STRING"),
+	}
+
+	db, err := sql.Init(dbConnectionParam)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	defer db.Close()
+
+	param := map[string]interface{}{
+		"Id":            req.Id,
+		"ApproverEmail": req.ApproverEmail,
+		"Username":      req.Username,
+	}
+	//projectApproval := ghmgmt.GetProjectApprovalByGUID(req.ItemId)
+	//result, err2 := db.ExecuteStoredProcedureWithResult("PR_ProjectsApproval_Update_ApproverUserPrincipalName", param)
+	result, err2 := ghmgmt.CommunityApprovalslUpdateApproverUserPrincipalName(param)
+	if err2 != nil {
+		http.Error(w, err2.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	for _, v := range result {
+		data := models.TypCommunityApprovals{
+			Id:                         v["Id"].(int64),
+			CommunityId:                v["CommunityId"].(int64),
+			CommunityName:              v["ProjectName"].(string),
+			CommunityDescription:       v["ProjectDescription"].(string),
+			RequesterGivenName:         v["RequesterGivenName"].(string),
+			RequesterSurName:           v["RequesterSurName"].(string),
+			RequesterName:              v["RequesterName"].(string),
+			RequesterUserPrincipalName: v["RequesterUserPrincipalName"].(string),
+			CommunityUrl:               v["Url"].(string),
+			CommunityNotes:             v["Notes"].(string),
+			ApproverUserPrincipalName:  v["ApproverUserPrincipalName"].(string),
+			ApprovalDescription:        v["ApprovalDescription"].(string),
+
+			//RequestStatus: v["RequestStatus"].(string),
+		}
+		data.ApproveUrl = fmt.Sprintf("%s/response/%s/%s/%s/1", os.Getenv("APPROVAL_SYSTEM_APP_BaseURL"), req.ApplicationId, req.ApplicationModuleId, req.ItemId)
+		data.RejectUrl = fmt.Sprintf("%s/response/%s/%s/%s/0", os.Getenv("APPROVAL_SYSTEM_APP_BaseURL"), req.ApplicationId, req.ApplicationModuleId, req.ItemId)
+		data.ApproveText = req.ApproveText
+		data.RejectText = req.RejectText
+
+		err = SendReassignEmailCommunity(data)
+
+	}
+	w.WriteHeader(http.StatusOK)
+}
+
+func SendReassignEmailCommunity(data models.TypCommunityApprovals) error {
+
+	bodyTemplate := `<p>Hi |ApproverUserPrincipalName|!</p>
+		<p>|RequesterName| is requesting for a new |CommunityType| community and is now pending for approval.</p>
+		<p>Below are the details:</p>
+		<table>
+			<tr>
+				<td style="font-weight: bold;">Community Name<td>
+				<td style="font-size:larger">|CommunityName|<td>
+			</tr>
+			<tr>
+				<td style="font-weight: bold;">Url<td>
+				<td style="font-size:larger">|CommunityUrl|<td>
+			</tr>
+			<tr>
+				<td style="font-weight: bold;">Description<td>
+				<td style="font-size:larger">|CommunityDescription|<td>
+			</tr>
+			<tr>
+				<td style="font-weight: bold;">Notes<td>
+				<td style="font-size:larger">|CommunityNotes|<td>
+			</tr>
+		</table>
+		<p>For more information, send an email to <a href="mailto:|RequesterUserPrincipalName|">|RequesterUserPrincipalName|</a></p>
+
+		<table style="margin: 10px 0;width:100%; text-align: center;">
+        <tr>
+            <td colspan="5" style="padding: 5px 0;">To process your response, click any of the buttons below:</td>
+        </tr>
+        
+        <tr style="color: white;">
+            <td style="padding: 5px 0px; width: 20%; "></td>
+            <td style="padding: 5px 0px; width: 26%; background-color: green;">
+                <a href="|ApproveUrl|" style="color: white;">
+                    |ApproveText|
+                </a>
+            </td>
+            <td style="padding: 5px 0px; width: 8%; "></td>
+            <td style="padding: 5px 0px; width: 26%; background-color: red;">
+                <a href="|RejectUrl|" style="color: white;">
+                    |RejectText|
+                </a>
+            </td>
+            <td style="padding: 5px 0px; width: 20%; "></td>
+        </tr>
+    </table>
+		`
+
+	replacer := strings.NewReplacer("|ApproverUserPrincipalName|", data.ApproverUserPrincipalName,
+		"|RequesterName|", data.RequesterName,
+		"|CommunityType|", data.CommunityType,
+		"|CommunityName|", data.CommunityName,
+		"|CommunityUrl|", data.CommunityUrl,
+		"|CommunityDescription|", data.CommunityDescription,
+		"|CommunityNotes|", data.CommunityNotes,
+		"|RequesterUserPrincipalName|", data.RequesterUserPrincipalName,
+		"|ApproveUrl|", data.ApproveUrl,
+		"|RejectUrl|", data.RejectUrl,
+		"|ApproveText|", data.ApproveText,
+		"|RejectText|", data.RejectText,
+	)
+	body := replacer.Replace(bodyTemplate)
+	m := email.TypEmailMessage{
+		Subject: fmt.Sprintf("[GH-Management] New Community For Approval - %v", data.CommunityName),
 		Body:    body,
 		To:      data.ApproverUserPrincipalName,
 	}
