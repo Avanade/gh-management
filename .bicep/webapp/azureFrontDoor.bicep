@@ -37,8 +37,10 @@ resource frontDoor 'Microsoft.Network/frontDoors@2021-06-01' = {
         name: healthProbeSettingsName
         properties: {
           path: '/'
-          protocol: 'Http'
-          intervalInSeconds: 120
+          protocol: 'Https'
+          intervalInSeconds: 30
+          enabledState: 'Enabled'
+          healthProbeMethod: 'Head'
         }
       }
     ]
@@ -83,11 +85,10 @@ resource frontDoor 'Microsoft.Network/frontDoors@2021-06-01' = {
             '/*'
           ]
           routeConfiguration: {
-            '@odata.type': '#Microsoft.Azure.FrontDoor.Models.FrontdoorForwardingConfiguration'
-            forwardingProtocol: 'MatchRequest'
-            backendPool: {
-              id: resourceId('Microsoft.Network/frontDoors/backEndPools', frontDoorName, backendPoolName)
-            }
+            redirectType: 'Found'
+            redirectProtocol: 'HttpsOnly'
+            customHost: 'ava-gh-mgmt-test.azurewebsites.net'
+            '@odata.type': '#Microsoft.Azure.FrontDoor.Models.FrontdoorRedirectConfiguration'
           }
           enabledState: 'Enabled'
         }
