@@ -2,6 +2,8 @@ param frontDoorName string
 param backendAddress string
 param customDomain string = ''
 
+param activeEnv string
+
 var withCustomDomain = !empty(customDomain)
 
 var defaultFrontEndEndpointName = 'azurefd-net'
@@ -108,5 +110,16 @@ resource frontDoor 'Microsoft.Network/frontDoors@2021-06-01' = {
         }
       }
     ]
+  }
+}
+
+//TAGS
+resource frontDoorTags 'Microsoft.Resources/tags@2022-09-01' = {
+  name: 'default'
+  scope: frontDoor
+  properties: {
+    tags: {
+      env : activeEnv
+    }
   }
 }

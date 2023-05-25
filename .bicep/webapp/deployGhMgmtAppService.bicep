@@ -6,6 +6,9 @@ param projectName string
 
 param imageName string
 
+param runDeployFrontDoor bool
+param frontDoorCustomDomain string
+
 @allowed([
   'test'
   'uat'
@@ -74,12 +77,13 @@ module sqlServerFirewalls '../sql/sqlServerFirewallRules.bicep' = {
   }
 }
 
-module ghmgmtFrontDoor 'deployFrontDoor.bicep' = {
+module ghmgmtFrontDoor 'deployFrontDoor.bicep' = if(runDeployFrontDoor){
   name: 'frontdoor'
   params: {
     backendAddress: ghmgmtAppService.properties.defaultHostName
     frontDoorName: '${projectName}fd-${activeEnv}'
-    customDomain: 'ghmgmt-test.mysamplecustomdomain.org'
+    customDomain: frontDoorCustomDomain
+    activeEnv: activeEnv
   }
 }
 
