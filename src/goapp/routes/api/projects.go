@@ -532,9 +532,9 @@ func ClearOrgRepos(w http.ResponseWriter, r *http.Request) {
 		guard <- struct{}{}
 		wg.Add(1)
 		go func(p map[string]interface{}) {
-			projectId := p["Id"].(int)
+			projectId := p["Id"].(int64)
 			repoName := p["Name"].(string)
-			isRemoved := RemoveRepoIfNotExist(projectId, repoName)
+			isRemoved := RemoveRepoIfNotExist(int(projectId), repoName)
 			if isRemoved {
 				removedProjects = append(removedProjects, repoName)
 			}
@@ -550,7 +550,7 @@ func ClearOrgRepos(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusOK)
-	fmt.Println("INDEX ORGANIZATION REPOSITORIES SUCCESSFUL")
+	fmt.Println(" SUCCESSFULLY INDEXED ORGANIZATION REPOSITORIES")
 }
 
 func RemoveRepoIfNotExist(projectId int, repoName string) bool {
@@ -562,7 +562,10 @@ func RemoveRepoIfNotExist(projectId int, repoName string) bool {
 
 	if !isExist {
 		err := ghmgmt.DeleteProjectById(projectId)
-		fmt.Println(err.Error())
+		if err != nil {
+			fmt.Println(err.Error())
+			return false
+		}
 		return true
 	}
 	return false

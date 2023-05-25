@@ -195,7 +195,7 @@ func Projects_ByRepositorySource(repositorySource string) ([]map[string]interfac
 		"RepositorySource": repositorySource,
 	}
 
-	result, err := db.ExecuteStoredProcedureWithResult("dbo.PR_Projects_Select_ByRepositorySource", param)
+	result, err := db.ExecuteStoredProcedureWithResult("PR_Projects_Select_ByRepositorySource", param)
 	if err != nil {
 		return nil, err
 	}
