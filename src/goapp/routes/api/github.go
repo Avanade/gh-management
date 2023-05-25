@@ -329,6 +329,24 @@ func EmailAdmin(admin string, adminemail string, reponame string, outisideCollab
 	fmt.Printf(" GitHub Repo Collaborators Scan on %s was sent.", e)
 }
 
+func EmailAdminDeletedProjects(to string, repos []string) {
+	repoList := "</p> <table  >"
+	for _, repo := range repos {
+		repoList = repoList + " <tr> <td>" + repo + " </td></tr>"
+	}
+	repoList = repoList + " </table  > <p>"
+
+	body := fmt.Sprintf("The following repositories were removed from the database as they no longer exist on %s and %s GitHub organizations: %s", os.Getenv("GH_ORG_INNERSOURCE"), os.Getenv("GH_ORG_OPENSOURCE"), repoList)
+
+	m := email.TypEmailMessage{
+		Subject: "List of Deleted Repo",
+		Body:    body,
+		To:      to,
+	}
+
+	email.SendEmail(m)
+}
+
 func EmailAdminConvertToColaborator(Email string, outisideCollab []string) {
 	e := time.Now()
 	var body string
