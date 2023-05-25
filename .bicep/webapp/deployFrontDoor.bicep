@@ -9,6 +9,21 @@ var customFrontEndEndpointName = 'custom-domain'
 
 var frontEndEndpointName = withCustomDomain ? customFrontEndEndpointName : defaultFrontEndEndpointName
 
+var frontEndEndpoints = [{
+  name: defaultFrontEndEndpointName
+  properties: {
+    hostName: '${frontDoorName}.azurefd.net'
+    sessionAffinityEnabledState: 'Disabled'
+  }
+}
+{
+  name: customFrontEndEndpointName
+  properties: {
+    hostName: customDomain
+    sessionAffinityEnabledState: 'Disabled'
+  }
+}]
+
 var loadBalancingSettingsName = 'loadBalancingSettings'
 var healthProbeSettingsName = 'healthProbeSettings'
 var routingRuleName = 'routingRule'
@@ -19,22 +34,7 @@ resource frontDoor 'Microsoft.Network/frontDoors@2021-06-01' = {
   location: 'global'
   properties: {
     enabledState: 'Enabled'
-    frontendEndpoints: [
-      {
-        name: defaultFrontEndEndpointName
-        properties: {
-          hostName: '${frontDoorName}.azurefd.net'
-          sessionAffinityEnabledState: 'Disabled'
-        }
-      }
-      withCustomDomain ? {
-        name: customFrontEndEndpointName
-        properties: {
-          hostName: customDomain
-          sessionAffinityEnabledState: 'Disabled'
-        }
-      } : {}
-    ]
+    frontendEndpoints: withCustomDomain ? frontEndEndpoints : [frontEndEndpoints[0]]
     loadBalancingSettings: [
       {
         name: loadBalancingSettingsName
