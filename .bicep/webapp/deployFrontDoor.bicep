@@ -2,7 +2,7 @@ param frontDoorName string
 param backendAddress string
 param customDomain string = ''
 
-var withCustomDomain = customDomain != ''
+var withCustomDomain = !empty(customDomain)
 
 var defaultFrontEndEndpointName = 'azurefd-net'
 var customFrontEndEndpointName = 'custom-domain'
