@@ -74,6 +74,14 @@ module sqlServerFirewalls '../sql/sqlServerFirewallRules.bicep' = {
   }
 }
 
+module ghmgmtFrontDoor 'azureFrontDoor.bicep' = {
+  name: 'frontdoor'
+  params: {
+    backendAddress: ghmgmtAppService.properties.defaultHostName
+    frontDoorName: '${appServiceName}fd${activeEnv}'
+  }
+}
+
 // TAGS
 resource ghmgmtAppServicePlanTags 'Microsoft.Resources/tags@2022-09-01' = {
   name: 'default'
