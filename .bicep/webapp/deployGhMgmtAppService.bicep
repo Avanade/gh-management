@@ -74,7 +74,7 @@ module sqlServerFirewalls '../sql/sqlServerFirewallRules.bicep' = {
   }
 }
 
-module ghmgmtFrontDoor 'azureFrontDoor.bicep' = {
+module ghmgmtFrontDoor 'deployFrontDoor.bicep' = {
   name: 'frontdoor'
   params: {
     backendAddress: ghmgmtAppService.properties.defaultHostName

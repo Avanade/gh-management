@@ -1,7 +1,13 @@
 param frontDoorName string
 param backendAddress string
+param customDomain string = ''
+
+var withCustomDomain = customDomain != ''
 
 var defaultFrontEndEndpointName = 'azurefd-net'
+var customFrontEndEndpointName = 'custom-domain'
+
+var frontEndEndpointName = withCustomDomain ? customFrontEndEndpointName : defaultFrontEndEndpointName
 
 var loadBalancingSettingsName = 'loadBalancingSettings'
 var healthProbeSettingsName = 'healthProbeSettings'
@@ -21,6 +27,13 @@ resource frontDoor 'Microsoft.Network/frontDoors@2021-06-01' = {
           sessionAffinityEnabledState: 'Disabled'
         }
       }
+      withCustomDomain ? {
+        name: customFrontEndEndpointName
+        properties: {
+          hostName: customDomain
+          sessionAffinityEnabledState: 'Disabled'
+        }
+      } : {}
     ]
     loadBalancingSettings: [
       {
@@ -74,7 +87,7 @@ resource frontDoor 'Microsoft.Network/frontDoors@2021-06-01' = {
         properties: {
           frontendEndpoints: [
             {
-              id: resourceId('Microsoft.Network/frontDoors/frontEndEndpoints', frontDoorName, defaultFrontEndEndpointName)
+              id: resourceId('Microsoft.Network/frontDoors/frontEndEndpoints', frontDoorName, frontEndEndpointName)
             }
           ]
           acceptedProtocols: [
