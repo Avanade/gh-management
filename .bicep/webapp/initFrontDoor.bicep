@@ -1,9 +1,7 @@
 param frontDoorName string
 param backendAddress string
-param customDomain string = 'ghmgmttest.mysamplecustomdomain.org'
 
 var defaultFrontEndEndpointName = 'azurefd-net'
-var customFrontEndEndpointName = 'custom-domain'
 
 var loadBalancingSettingsName = 'loadBalancingSettings'
 var healthProbeSettingsName = 'healthProbeSettings'
@@ -20,13 +18,6 @@ resource frontDoor 'Microsoft.Network/frontDoors@2021-06-01' = {
         name: defaultFrontEndEndpointName
         properties: {
           hostName: '${frontDoorName}.azurefd.net'
-          sessionAffinityEnabledState: 'Disabled'
-        }
-      }
-      {
-        name: customFrontEndEndpointName
-        properties: {
-          hostName: customDomain
           sessionAffinityEnabledState: 'Disabled'
         }
       }
@@ -83,7 +74,7 @@ resource frontDoor 'Microsoft.Network/frontDoors@2021-06-01' = {
         properties: {
           frontendEndpoints: [
             {
-              id: resourceId('Microsoft.Network/frontDoors/frontEndEndpoints', frontDoorName, customFrontEndEndpointName)
+              id: resourceId('Microsoft.Network/frontDoors/frontEndEndpoints', frontDoorName, defaultFrontEndEndpointName)
             }
           ]
           acceptedProtocols: [
@@ -94,10 +85,11 @@ resource frontDoor 'Microsoft.Network/frontDoors@2021-06-01' = {
             '/*'
           ]
           routeConfiguration: {
-            redirectType: 'Found'
-            redirectProtocol: 'HttpsOnly'
-            customHost: backendAddress
-            '@odata.type': '#Microsoft.Azure.FrontDoor.Models.FrontdoorRedirectConfiguration'
+            '@odata.type': '#Microsoft.Azure.FrontDoor.Models.FrontdoorForwardingConfiguration'
+            forwardingProtocol: 'MatchRequest'
+            backendPool: {
+              id: resourceId('Microsoft.Network/frontDoors/backEndPools', frontDoorName, backendPoolName)
+            }
           }
           enabledState: 'Enabled'
         }
