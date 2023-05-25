@@ -79,6 +79,7 @@ module ghmgmtFrontDoor 'deployFrontDoor.bicep' = {
   params: {
     backendAddress: ghmgmtAppService.properties.defaultHostName
     frontDoorName: '${projectName}fd-${activeEnv}'
+    customDomain: 'ghmgmt-test.mysamplecustomdomain.org'
   }
 }
 
