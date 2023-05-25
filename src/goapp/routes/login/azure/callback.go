@@ -30,7 +30,7 @@ func CallbackHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//Retrieve token
-	authenticator, err := auth.NewAuthenticator()
+	authenticator, err := auth.NewAuthenticator(r.Host)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

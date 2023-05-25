@@ -13,12 +13,13 @@ import (
 )
 
 // Set up OAuth2 Configurations for GitHub Authentication
-func GetGitHubOauthConfig() *oauth2.Config {
+func GetGitHubOauthConfig(host string) *oauth2.Config {
+	homeUrl := fmt.Sprint(envvar.GetEnvVar("SCHEME", "https"), "://", host)
 	oauthConf := &oauth2.Config{
 		ClientID:     os.Getenv("GH_CLIENT_ID"),
 		ClientSecret: os.Getenv("GH_CLIENT_SECRET"),
 		Scopes:       []string{"user:email", "repo"},
-		RedirectURL:  envvar.GetEnvVar("HOME_URL", "http://localhost:8080") + "/login/github/callback",
+		RedirectURL:  homeUrl + "/login/github/callback",
 		Endpoint:     githuboauth.Endpoint,
 	}
 	return oauthConf
