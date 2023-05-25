@@ -78,7 +78,7 @@ module ghmgmtFrontDoor 'azureFrontDoor.bicep' = {
   name: 'frontdoor'
   params: {
     backendAddress: ghmgmtAppService.properties.defaultHostName
-    frontDoorName: '${appServiceName}fd${activeEnv}'
+    frontDoorName: '${projectName}fd${activeEnv}'
   }
 }
 
