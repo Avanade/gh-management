@@ -105,6 +105,21 @@ func PRProjectsInsert(body models.TypNewProjectReqBody, user string) (id int64) 
 	return
 }
 
+func DeleteProjectById(id int) error {
+	db := ConnectDb()
+	defer db.Close()
+
+	param := map[string]interface{}{
+		"Id": id,
+	}
+	_, err := db.ExecuteStoredProcedure("dbo.PR_Projects_Delete_ById", param)
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+	return nil
+}
+
 func ProjectInsertByImport(param map[string]interface{}) error {
 	db := ConnectDb()
 	defer db.Close()
@@ -170,6 +185,21 @@ func PRProjectsUpdateLegalQuestions(body models.TypeMakeProjectPublicReqBody, us
 	}
 
 	return
+}
+
+func Projects_ByRepositorySource(repositorySource string) ([]map[string]interface{}, error) {
+	db := ConnectDb()
+	defer db.Close()
+
+	param := map[string]interface{}{
+		"RepositorySource": repositorySource,
+	}
+
+	result, err := db.ExecuteStoredProcedureWithResult("PR_Projects_Select_ByRepositorySource", param)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
 }
 
 func Projects_IsExisting(body models.TypNewProjectReqBody) bool {
