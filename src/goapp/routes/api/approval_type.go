@@ -18,6 +18,7 @@ type ApprovalTypeDto struct {
 	Name                      string `json:"name"`
 	ApproverUserPrincipalName string `json:"approver_user_principal_name"`
 	IsActive                  bool   `json:"is_active"`
+	IsArchived                bool   `json:"is_archived"`
 }
 
 func GetApprovalTypes(w http.ResponseWriter, r *http.Request) {
@@ -112,4 +113,41 @@ func EditApprovalTypeById(w http.ResponseWriter, r *http.Request) {
 	}
 	approvalTypeDto.Id = approvalTypeId
 	json.NewEncoder(w).Encode(approvalTypeDto)
+}
+
+func SetIsArchivedApprovalTypeById(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+
+	sessionaz, _ := session.Store.Get(r, "auth-session")
+	iprofile := sessionaz.Values["profile"]
+	profile := iprofile.(map[string]interface{})
+	username := fmt.Sprint(profile["preferred_username"])
+
+	var approvalTypeDto ApprovalTypeDto
+	json.NewDecoder(r.Body).Decode(&approvalTypeDto)
+
+	id, _ := strconv.Atoi(vars["id"])
+	approvalTypeId, _, err := db.SetIsArchiveApprovalTypeById(models.ApprovalType{
+		Id:                        id,
+		Name:                      approvalTypeDto.Name,
+		ApproverUserPrincipalName: approvalTypeDto.ApproverUserPrincipalName,
+		IsArchived:                approvalTypeDto.IsArchived,
+		ModifiedBy:                username,
+	})
+
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+	}
+	approvalTypeDto.Id = approvalTypeId
+	json.NewEncoder(w).Encode(approvalTypeDto)
+}
+
+func GetActiveApprovalTypes(w http.ResponseWriter, r *http.Request) {
+	var data interface{}
+
+	data = db.GetAllActiveApprovers()
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(data)
 }

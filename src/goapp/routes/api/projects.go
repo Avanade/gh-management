@@ -11,9 +11,10 @@ import (
 	"main/pkg/sql"
 	"net/http"
 	"os"
-	"sort"
 	"strconv"
 	"strings"
+	"sync"
+	"time"
 
 	"github.com/gorilla/mux"
 )
@@ -40,7 +41,16 @@ func GetUserProjects(w http.ResponseWriter, r *http.Request) {
 	// Get project list
 	params := make(map[string]interface{})
 	params["UserPrincipalName"] = username
-	projects, err := db.ExecuteStoredProcedureWithResult("PR_Projects_Select_ByUserPrincipalName", params)
+
+	projects, err := ghmgmt.ProjectsSelectByUserPrincipalName(params)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	s, _ := json.Marshal(projects)
+	var list []Repo
+	err = json.Unmarshal(s, &list)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -48,7 +58,21 @@ func GetUserProjects(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusOK)
 	w.Header().Set("Content-Type", "application/json")
-	jsonResp, err := json.Marshal(projects)
+	jsonResp, err := json.Marshal(list)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.Write(jsonResp)
+}
+
+func GetUsersWithGithub(w http.ResponseWriter, r *http.Request) {
+
+	users := ghmgmt.GetUsersWithGithub()
+
+	w.WriteHeader(http.StatusOK)
+	w.Header().Set("Content-Type", "application/json")
+	jsonResp, err := json.Marshal(users)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -75,7 +99,8 @@ func GetRequestStatusByProject(w http.ResponseWriter, r *http.Request) {
 	// Get project list
 	params := make(map[string]interface{})
 	params["Id"] = id
-	projects, err := db.ExecuteStoredProcedureWithResult("PR_ProjectApprovals_Select_ById", params)
+
+	projects, err := ghmgmt.ProjectApprovalsSelectById(params)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -84,6 +109,112 @@ func GetRequestStatusByProject(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	w.Header().Set("Content-Type", "application/json")
 	jsonResp, err := json.Marshal(projects)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.Write(jsonResp)
+}
+
+func GetRepoCollaboratorsByRepoId(w http.ResponseWriter, r *http.Request) {
+	req := mux.Vars(r)
+	id, _ := strconv.ParseInt(req["id"], 10, 64)
+
+	// Get repository
+	data := ghmgmt.GetProjectById(id)
+	s, _ := json.Marshal(data)
+	var repoList []Repo
+	err := json.Unmarshal(s, &repoList)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	var result []Collaborator
+
+	if len(repoList) > 0 {
+		repo := repoList[0]
+
+		if repo.RepositorySource == "GitHub" {
+			if repo.TFSProjectReference == "" {
+				http.Error(w, "Repository not found.", http.StatusNotFound)
+				return
+			}
+			repoUrl := strings.Replace(repo.TFSProjectReference, "https://", "", -1)
+			repoUrlSub := strings.Split(repoUrl, "/")
+
+			token := os.Getenv("GH_TOKEN")
+
+			collaborators := gh.RepositoriesListCollaborators(token, repoUrlSub[1], repo.Name, "", "direct")
+			outsideCollaborators := gh.RepositoriesListCollaborators(token, repoUrlSub[1], repo.Name, "", "outside")
+			var outsideCollaboratorsUsernames []string
+			for _, x := range outsideCollaborators {
+				outsideCollaboratorsUsernames = append(outsideCollaboratorsUsernames, *x.Login)
+			}
+
+			for _, collaborator := range collaborators {
+
+				// Identify if user is an outside collaborator
+				isOutsideCollab := false
+				for _, x := range outsideCollaboratorsUsernames {
+					if *collaborator.Login == x {
+						isOutsideCollab = true
+						break
+					}
+				}
+
+				collabResult := Collaborator{
+					Id:                    collaborator.GetID(),
+					Role:                  *collaborator.RoleName,
+					GitHubUsername:        *collaborator.Login,
+					IsOutsideCollaborator: isOutsideCollab,
+				}
+
+				//Get user name and email address
+				users, err := ghmgmt.GetUserByGitHubId(strconv.FormatInt(*collaborator.ID, 10))
+				if err != nil {
+					http.Error(w, err.Error(), http.StatusInternalServerError)
+					return
+				}
+
+				if len(users) > 0 {
+					collabResult.Name = users[0]["Name"].(string)
+					collabResult.Email = users[0]["UserPrincipalName"].(string)
+				}
+
+				result = append(result, collabResult)
+			}
+		} else {
+			var collabResult Collaborator
+
+			repoOwner, err := ghmgmt.GetRepoOwnersRecordByRepoId(int64(repo.Id))
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+
+			if len(repoOwner) > 0 {
+				users, err := ghmgmt.GetUserByUserPrincipal(repoOwner[0].UserPrincipalName)
+				if err != nil {
+					http.Error(w, err.Error(), http.StatusInternalServerError)
+					return
+				}
+
+				if len(users) > 0 {
+					collabResult.Name = users[0]["Name"].(string)
+				}
+
+				collabResult.Email = repoOwner[0].UserPrincipalName
+				result = append(result, collabResult)
+			}
+
+		}
+
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Header().Set("Content-Type", "application/json")
+	jsonResp, err := json.Marshal(result)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -126,30 +257,29 @@ func ArchiveProject(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
-func GetAvanadeProjects(w http.ResponseWriter, r *http.Request) {
-	var allRepos []gh.Repo
+func GetAllRepositories(w http.ResponseWriter, r *http.Request) {
 
-	organizations := []string{os.Getenv("GH_ORG_INNERSOURCE"), os.Getenv("GH_ORG_OPENSOURCE")}
+	params := r.URL.Query()
+	search := params["search"][0]
+	offset, _ := strconv.Atoi(params["offset"][0])
 
-	for _, org := range organizations {
-		repos, err := gh.GetRepositoriesFromOrganization(org)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-
-		if repos != nil {
-			allRepos = append(allRepos, repos...)
-		}
+	// Get repository list
+	data := ghmgmt.Repos_Select_ByOffsetAndFilter(offset, search)
+	s, _ := json.Marshal(data)
+	var list []Repo
+	err := json.Unmarshal(s, &list)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
-
-	sort.Slice(allRepos[:], func(i, j int) bool {
-		return strings.ToLower(allRepos[i].Name) < strings.ToLower(allRepos[j].Name)
-	})
+	result := RepositoryList{
+		Data:  list,
+		Total: ghmgmt.Repos_TotalCount_BySearchTerm(search),
+	}
 
 	w.WriteHeader(http.StatusOK)
 	w.Header().Set("Content-Type", "application/json")
-	jsonResp, err := json.Marshal(allRepos)
+	jsonResp, err := json.Marshal(result)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -172,6 +302,8 @@ func SetVisibility(w http.ResponseWriter, r *http.Request) {
 	innersource := os.Getenv("GH_ORG_INNERSOURCE")
 	opensource := os.Getenv("GH_ORG_OPENSOURCE")
 
+	id, err := strconv.ParseInt(projectId, 10, 64)
+
 	if currentState == "Public" {
 		// Set repo to desired visibility then move to innersource
 		err := gh.SetProjectVisibility(project, desiredState, opensource)
@@ -181,6 +313,10 @@ func SetVisibility(w http.ResponseWriter, r *http.Request) {
 		}
 
 		gh.TransferRepository(project, opensource, innersource)
+
+		time.Sleep(3 * time.Second)
+		repoResp, _ := gh.GetRepository(project, innersource)
+		ghmgmt.UpdateTFSProjectReferenceById(id, repoResp.GetHTMLURL())
 	} else {
 		// Set repo to desired visibility
 		err := gh.SetProjectVisibility(project, desiredState, innersource)
@@ -191,7 +327,6 @@ func SetVisibility(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Update database
-	id, err := strconv.ParseInt(projectId, 10, 64)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -225,11 +360,305 @@ func RequestMakePublic(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	go RequestApproval(id)
+	go RequestApproval(id, username.(string))
 }
 
-func RequestApproval(id int64) {
-	projectApprovals := ghmgmt.PopulateProjectsApproval(id)
+func ImportReposToDatabase(w http.ResponseWriter, r *http.Request) {
+	var allRepos []gh.Repo
+
+	organizations := []string{os.Getenv("GH_ORG_INNERSOURCE"), os.Getenv("GH_ORG_OPENSOURCE")}
+
+	for _, org := range organizations {
+		repos, err := gh.GetRepositoriesFromOrganization(org)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		if repos != nil {
+			allRepos = append(allRepos, repos...)
+		}
+	}
+
+	var wg sync.WaitGroup
+
+	for _, repo := range allRepos {
+		wg.Add(1)
+
+		go func(repo gh.Repo) {
+			defer wg.Done()
+			e := ghmgmt.Projects_IsExisting(models.TypNewProjectReqBody{Name: repo.Name})
+
+			if !e {
+				visibilityId := 3
+				if repo.Visibility == "private" {
+					visibilityId = 1
+				} else if repo.Visibility == "internal" {
+					visibilityId = 2
+				}
+
+				param := map[string]interface{}{
+					"GithubId":     repo.GithubId,
+					"Name":         repo.Name,
+					"Description":  repo.Description,
+					"IsArchived":   repo.IsArchived,
+					"VisibilityId": visibilityId,
+					"Created":      repo.Created.Format("2006-01-02 15:04:05"),
+				}
+
+				err := ghmgmt.ProjectInsertByImport(param)
+				if err != nil {
+					http.Error(w, err.Error(), http.StatusInternalServerError)
+				}
+			}
+
+		}(repo)
+	}
+}
+
+func InitIndexOrgRepos(w http.ResponseWriter, r *http.Request) {
+	var repos []gh.Repo
+
+	orgs := []string{os.Getenv("GH_ORG_INNERSOURCE"), os.Getenv("GH_ORG_OPENSOURCE")}
+
+	for _, org := range orgs {
+		reposByOrg, err := gh.GetRepositoriesFromOrganization(org)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		if reposByOrg != nil {
+			repos = append(repos, reposByOrg...)
+		}
+	}
+
+	var wg sync.WaitGroup
+
+	for _, repo := range repos {
+		wg.Add(1)
+		go func(repo gh.Repo) {
+			defer wg.Done()
+
+			visibilityId := 3
+			if repo.Visibility == "private" {
+				visibilityId = 1
+			} else if repo.Visibility == "internal" {
+				visibilityId = 2
+			}
+
+			param := map[string]interface{}{
+				"GithubId":     repo.GithubId,
+				"Name":         repo.Name,
+				"Description":  repo.Description,
+				"IsArchived":   repo.IsArchived,
+				"VisibilityId": visibilityId,
+				"Created":      repo.Created.Format("2006-01-02 15:04:05"),
+			}
+
+			isExisting := ghmgmt.Projects_IsExisting(models.TypNewProjectReqBody{Name: repo.Name})
+
+			var err error
+
+			if isExisting {
+				param["Id"] = ghmgmt.GetProjectByName(repo.Name)[0]["Id"]
+				err = ghmgmt.ProjectUpdateByImport(param)
+			} else {
+				err = ghmgmt.ProjectInsertByImport(param)
+			}
+
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+			}
+		}(repo)
+	}
+
+	wg.Wait()
+	w.WriteHeader(http.StatusOK)
+}
+
+func IndexOrgRepos(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("INDEX ORGANIZATION REPOSITORIES TRIGGERED...")
+	var repos []gh.Repo
+
+	orgs := []string{os.Getenv("GH_ORG_INNERSOURCE"), os.Getenv("GH_ORG_OPENSOURCE")}
+
+	for _, org := range orgs {
+		reposByOrg, err := gh.GetRepositoriesFromOrganization(org)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		if reposByOrg != nil {
+			repos = append(repos, reposByOrg...)
+		}
+	}
+
+	var wg sync.WaitGroup
+	maxGoroutines := 50
+	guard := make(chan struct{}, maxGoroutines)
+
+	for _, repo := range repos {
+		guard <- struct{}{}
+		wg.Add(1)
+		go func(r gh.Repo) {
+			indexRepo(r)
+			<-guard
+			wg.Done()
+		}(repo)
+	}
+	wg.Wait()
+
+	w.WriteHeader(http.StatusOK)
+	fmt.Println("INDEX ORGANIZATION REPOSITORIES SUCCESSFUL")
+}
+
+func ClearOrgRepos(w http.ResponseWriter, r *http.Request) {
+	projects, err := ghmgmt.Projects_ByRepositorySource("GitHub")
+	if err != nil {
+		fmt.Println(err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	removedProjects := []string{}
+
+	var wg sync.WaitGroup
+	maxGoroutines := 50
+	guard := make(chan struct{}, maxGoroutines)
+
+	for _, project := range projects {
+		guard <- struct{}{}
+		wg.Add(1)
+		go func(p map[string]interface{}) {
+			projectId := p["Id"].(int64)
+			repoName := p["Name"].(string)
+			isRemoved := RemoveRepoIfNotExist(int(projectId), repoName)
+			if isRemoved {
+				removedProjects = append(removedProjects, repoName)
+			}
+			<-guard
+			wg.Done()
+		}(project)
+	}
+	wg.Wait()
+
+	if len(removedProjects) > 0 {
+		emailSupport := os.Getenv("EMAIL_SUPPORT")
+		EmailAdminDeletedProjects(emailSupport, removedProjects)
+	}
+
+	w.WriteHeader(http.StatusOK)
+	fmt.Println(" SUCCESSFULLY INDEXED ORGANIZATION REPOSITORIES")
+}
+
+func RemoveRepoIfNotExist(projectId int, repoName string) bool {
+	isExist, err := gh.Repo_IsExisting(repoName)
+	if err != nil {
+		fmt.Println(err.Error(), " | REPO NAME : ", repoName)
+		return false
+	}
+
+	if !isExist {
+		err := ghmgmt.DeleteProjectById(projectId)
+		if err != nil {
+			fmt.Println(err.Error())
+			return false
+		}
+		return true
+	}
+	return false
+}
+
+func indexRepo(repo gh.Repo) {
+	fmt.Println("Indexing " + repo.Name + "...")
+
+	visibilityId := 3
+	if repo.Visibility == "private" {
+		visibilityId = 1
+	} else if repo.Visibility == "internal" {
+		visibilityId = 2
+	}
+
+	param := map[string]interface{}{
+		"GithubId":            repo.GithubId,
+		"Name":                repo.Name,
+		"Description":         repo.Description,
+		"IsArchived":          repo.IsArchived,
+		"VisibilityId":        visibilityId,
+		"TFSProjectReference": repo.TFSProjectReference,
+		"Created":             repo.Created.Format("2006-01-02 15:04:05"),
+	}
+
+	isExisting := ghmgmt.Projects_IsExisting_By_GithubId(models.TypNewProjectReqBody{GithubId: repo.GithubId})
+
+	if isExisting {
+		project := ghmgmt.GetProjectByGithubId(repo.GithubId)
+		param["Id"] = project[0]["Id"]
+
+		err := ghmgmt.ProjectUpdateByImport(param)
+		if err != nil {
+			return
+		}
+
+		// Get direct admin collaborators
+		repoUrl := strings.Replace(repo.TFSProjectReference, "https://", "", -1)
+		repoUrlSub := strings.Split(repoUrl, "/")
+
+		token := os.Getenv("GH_TOKEN")
+
+		collaborators := gh.RepositoriesListCollaborators(token, repoUrlSub[1], repo.Name, "admin", "direct")
+		// Get userprincipal from database
+		for _, admin := range collaborators {
+			users, err := ghmgmt.GetUserByGitHubId(strconv.FormatInt(*admin.ID, 10))
+			if err != nil {
+				return
+			}
+
+			//Insert to repoowners table
+			if len(users) > 0 {
+				if len(users) > 0 {
+					ghmgmt.RepoOwnersInsert(project[0]["Id"].(int64), users[0]["UserPrincipalName"].(string))
+				}
+			}
+		}
+	} else {
+		err := ghmgmt.ProjectInsertByImport(param)
+		if err != nil {
+			return
+		}
+
+		project := ghmgmt.GetProjectByGithubId(repo.GithubId)
+		param["Id"] = project[0]["Id"]
+
+		// Get direct admin collaborators
+		repoUrl := strings.Replace(repo.TFSProjectReference, "https://", "", -1)
+		repoUrlSub := strings.Split(repoUrl, "/")
+
+		token := os.Getenv("GH_TOKEN")
+
+		collaborators := gh.RepositoriesListCollaborators(token, repoUrlSub[1], repo.Name, "admin", "direct")
+		// Get userprincipal from database
+		for _, admin := range collaborators {
+			users, err := ghmgmt.GetUserByGitHubId(strconv.FormatInt(*admin.ID, 10))
+			if err != nil {
+				return
+			}
+
+			//Insert to repoowners table
+			if len(users) > 0 {
+				if len(users) > 0 {
+					ghmgmt.RepoOwnersInsert(project[0]["Id"].(int64), users[0]["UserPrincipalName"].(string))
+				}
+			}
+		}
+	}
+}
+
+func RequestApproval(id int64, email string) {
+
+	projectApprovals := ghmgmt.PopulateProjectsApproval(id, email)
 
 	for _, v := range projectApprovals {
 		if v.RequestStatus == "New" {
@@ -237,7 +666,6 @@ func RequestApproval(id int64) {
 			handleError(err)
 		}
 	}
-
 }
 
 func ApprovalSystemRequest(data models.TypProjectApprovals) error {
@@ -257,8 +685,8 @@ func ApprovalSystemRequest(data models.TypProjectApprovals) error {
 				<td style="font-size:larger">|ProjectName|<td>
 			</tr>
 			<tr>
-				<td style="font-weight: bold;">CoOwner<td>
-				<td style="font-size:larger">|CoownerName|<td>
+				<td style="font-weight: bold;">Requested by<td>
+				<td style="font-size:larger">|Requester|<td>
 			</tr>
 			<tr>
 				<td style="font-weight: bold;">Description<td>
@@ -271,7 +699,7 @@ func ApprovalSystemRequest(data models.TypProjectApprovals) error {
 				<td style="font-size:larger">|Newcontribution|<td>
 			</tr>
 			<tr>
-				<td style="font-weight: bold;">Who is sponsoring this OSS contribution?<td>
+				<td style="font-weight: bold;">Who is sponsoring thapprovalsyscois OSS contribution?<td>
 				<td style="font-size:larger">|OSSsponsor|<td>
 			</tr>
 			<tr>
@@ -293,7 +721,7 @@ func ApprovalSystemRequest(data models.TypProjectApprovals) error {
 			"|RequesterName|", data.RequesterName,
 			"|ApprovalType|", data.ApprovalType,
 			"|ProjectName|", data.ProjectName,
-			"|CoownerName|", data.CoownerName,
+			"|Requester|", data.RequesterName,
 			"|ProjectDescription|", data.ProjectDescription,
 			"|RequesterUserPrincipalName|", data.RequesterUserPrincipalName,
 
@@ -349,4 +777,116 @@ func ReprocessRequestApproval() {
 	for _, v := range projectApprovals {
 		go ApprovalSystemRequest(v)
 	}
+}
+
+func RepoOwnersCleanup(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("REPO OWNERS CLEANUP TRIGGERED...")
+	token := os.Getenv("GH_TOKEN")
+
+	// Get all repos from database
+	repos, err := ghmgmt.GetGitHubRepositories()
+	if err != nil {
+		fmt.Printf(err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	var wg sync.WaitGroup
+	maxGoroutines := 50
+	guard := make(chan struct{}, maxGoroutines)
+
+	for _, repo := range repos {
+		guard <- struct{}{}
+		wg.Add(1)
+		go func(r map[string]interface{}) {
+			cleanupRepoOwners(r, token)
+			<-guard
+			wg.Done()
+		}(repo)
+	}
+	wg.Wait()
+	w.WriteHeader(http.StatusOK)
+	fmt.Println("REPO OWNERS CLEANUP SUCCESSFUL")
+}
+
+func cleanupRepoOwners(repo map[string]interface{}, token string) {
+	fmt.Println("Checking owners of : " + repo["Name"].(string))
+
+	if repo["TFSProjectReference"] == nil {
+		// Get owners of the repo on the database
+		owners, err := ghmgmt.GetRepoOwnersByProjectIdWithGHUsername(repo["Id"].(int64))
+		if err != nil {
+			fmt.Printf(err.Error())
+			return
+		}
+
+		// Check if owner is on the admin list
+		for _, owner := range owners {
+			ghmgmt.DeleteRepoOwnerRecordByUserAndProjectId(repo["Id"].(int64), owner["UserPrincipalName"].(string))
+		}
+
+		return
+	}
+
+	// Get admins of the repository
+	repoUrl := strings.Replace(repo["TFSProjectReference"].(string), "https://", "", -1)
+	repoUrlSub := strings.Split(repoUrl, "/")
+
+	admins := gh.RepositoriesListCollaborators(token, repoUrlSub[1], repo["Name"].(string), "admin", "direct")
+
+	// Get owners of the repo on the database
+	owners, err := ghmgmt.GetRepoOwnersByProjectIdWithGHUsername(repo["Id"].(int64))
+	if err != nil {
+		fmt.Printf(err.Error())
+		return
+	}
+
+	// Check if owner is on the admin list
+	for _, owner := range owners {
+		isAdmin := false
+		for _, admin := range admins {
+			if owner["GitHubUser"].(string) == *admin.Login {
+				isAdmin = true
+				break
+			}
+		}
+
+		// if owner is not on the list of admins
+		if !isAdmin {
+			ghmgmt.DeleteRepoOwnerRecordByUserAndProjectId(repo["Id"].(int64), owner["UserPrincipalName"].(string))
+		}
+	}
+}
+
+type RepositoryList struct {
+	Data  []Repo `json:"data"`
+	Total int    `json:"total"`
+}
+
+type Repo struct {
+	Id                     int    `json:"Id"`
+	Name                   string `json:"Name"`
+	Description            string `json:"Description"`
+	IsArchived             bool   `json:"IsArchived"`
+	Created                string `json:"Created"`
+	RepositorySource       string `json:"RepositorySource"`
+	TFSProjectReference    string `json:"TFSProjectReference"`
+	Visibility             string `json:"Visibility"`
+	ApprovalStatus         bool   `json:"ApprovalStatus"`
+	ApprovalStatusId       int    `json:"ApprovalStatusId"`
+	CoOwner                string `json:CoOwner`
+	ConfirmAvaIP           bool   `json:ConfirmAvaIP`
+	ConfirmEnabledSecurity bool   `json:ConfirmEnabledSecurity`
+	CreatedBy              string `json:CreatedBy`
+	Modified               string `json:Modified`
+	ModifiedBy             string `json: ModifiedBy`
+}
+
+type Collaborator struct {
+	Id                    int64  `json:"id"`
+	Name                  string `json:"name"`
+	Email                 string `json:"email"`
+	Role                  string `json:"role"`
+	GitHubUsername        string `json:"ghUsername`
+	IsOutsideCollaborator bool   `json:"isOutsideCollaborator"`
 }

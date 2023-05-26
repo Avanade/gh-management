@@ -1,6 +1,6 @@
-﻿Create PROCEDURE [dbo].[PR_Projects_Select_ByName]
+﻿CREATE PROCEDURE [dbo].[PR_Projects_Select_ByName]
 (
-	@Name varchar(50)
+	@Name VARCHAR(50)
 )
 AS
 BEGIN

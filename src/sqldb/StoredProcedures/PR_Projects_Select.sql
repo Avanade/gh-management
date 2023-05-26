@@ -1,4 +1,4 @@
-﻿Create PROCEDURE [dbo].[PR_Projects_Select]
+﻿CREATE PROCEDURE [dbo].[PR_Projects_Select]
 
 AS
 BEGIN
@@ -18,7 +18,7 @@ SELECT [Id],
        [Created],
        [CreatedBy],
        [Modified],
-       [ModifiedBy]
+       [ModifiedBy] 
   FROM 
        [dbo].[Projects]
 

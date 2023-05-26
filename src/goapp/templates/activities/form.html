@@ -46,7 +46,9 @@
                                         id : 'Id',
                                         text : 'Name',
                                         label : 'Type*',
-                                        isInsertable : true
+                                        isInsertable : true,
+                                        searchTag : 'If the activity type is not on the list, type it in the box and press enter.',
+                                        searchPlaceholder : 'Search or add a new item'
                                     })"
                                 x-modelable = "selected"
                                 x-model = "form.type"
@@ -67,7 +69,9 @@
                                         id : 'Id',
                                         text : 'Name',
                                         label : 'Primary Contribution Area*',
-                                        isInsertable : true
+                                        isInsertable : false,
+                                        searchTag : '',
+                                        searchPlaceholder : 'Search an item'
                                     })"
                                 x-modelable = "selected"
                                 x-model = "form.primary_contribution_area"
@@ -83,8 +87,10 @@
                                         text : 'Name',
                                         label : 'Additional Contribution Areas',
                                         isMultiple : true,
-                                        isInsertable : true,
-                                        isDisplayItem : true
+                                        isInsertable : false,
+                                        isDisplayItem : true,
+                                        searchTag : '',
+                                        searchPlaceholder : 'Search an item'
                                     })"
                                 x-modelable = "selected"
                                 x-model = "form.additional_contribution_areas"
@@ -167,7 +173,7 @@
                 toggleShowOption : 'false',
                 form : {
                     community : [],
-                    date : '',
+                    date : new Date().toISOString().split('T')[0],
                     activity_name : '',
                     type : [],
                     url : '',
@@ -216,7 +222,6 @@
                     return false
                 },
                 showOption() {
-                    console.log(this.toggleShowOption)
                     this.form.help = [];
                     this.form.helpDetails = "";
                     return this.toggleShowOption == 'true'
@@ -245,7 +250,7 @@
         }
 
         async function getCommunity(){
-            const res = await fetch('/community')
+            const res = await fetch('/api/community/all')
 
             const data = await res.json()
             return data
@@ -262,7 +267,7 @@
             const res = await fetch('/api/contributionarea')
 
             const data =  await res.json()
-            return data
+            return data.data
         }
         
         async function getActivityById(id){

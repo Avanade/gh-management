@@ -1,7 +1,5 @@
 CREATE PROCEDURE [dbo].[PR_CommunityApprovals_Select_Failed]
-
 AS
-
 SELECT
 CA.Id,
 C.Id [CommunityId],
@@ -10,7 +8,7 @@ C.Url [CommunityUrl],
 C.Description [CommunityDescription],
 C.Notes [CommunityNotes],
 C.TradeAssocId [CommunityTradeAssocId],
-C.IsExternal [CommunityIsExternal],
+C.CommunityType [CommunityType],
 UC.[Name] [RequesterName],
 UC.GivenName [RequesterGivenName],
 UC.SurName [RequesterSurName],

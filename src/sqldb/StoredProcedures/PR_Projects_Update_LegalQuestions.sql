@@ -1,12 +1,12 @@
 ﻿CREATE PROCEDURE PR_Projects_Update_LegalQuestions
 (
-		@Id Int,
-		@ModifiedBy varchar(100),
-		@Newcontribution varchar(50),
-		@OSSsponsor varchar(50),
-		@Avanadeofferingsassets varchar(50),
-		@Willbecommercialversion varchar(50),
-		@OSSContributionInformation varchar(50)
+		@Id INT,
+		@ModifiedBy VARCHAR(100),
+		@Newcontribution VARCHAR(50),
+		@OSSsponsor VARCHAR(50),
+		@Avanadeofferingsassets VARCHAR(50),
+		@Willbecommercialversion VARCHAR(50),
+		@OSSContributionInformation VARCHAR(1000)
 )
 AS
 BEGIN

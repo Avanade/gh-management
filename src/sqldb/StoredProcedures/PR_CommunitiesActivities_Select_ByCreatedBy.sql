@@ -1,10 +1,5 @@
-/****** Object:  StoredProcedure [dbo].[PR_CommunityActivities_Select_ById]    Script Date: 29/06/2022 19:41:35 ******/
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
 CREATE PROCEDURE [dbo].[PR_CommunityActivities_Select_ByCreatedBy] (
-	@CreatedBy varchar(50)
+	@CreatedBy VARCHAR(50)
 )
 AS
 BEGIN

@@ -1,42 +1,60 @@
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
+CREATE PROCEDURE [dbo].[PR_Search_communities_projects_users]
 
-Create Procedure [dbo].[PR_Search_communities_projects_users]
-
-@searchText varchar (100),
-@offSet int = 0,
-@rowCount int = 0
-
-as 
+@searchText VARCHAR (100),
+@offSet INT = 0,
+@rowCount INT = 0,
+@userprincipal VARCHAR (100) = null
+AS 
 
 SELECT
-	'Users' [Source],[Name],
-	 UserPrincipalName [Description]
-FROM [dbo].[Users]
-WHERE [Name] LIKE '%'+@searchText+'%'
-OR [UserPrincipalName] LIKE '%'+@searchText+'%'
-
-
-UNION
-
-SELECT 
-	'Projects' [Source], [Name],
-	CoOwner [Description]
-FROM [dbo].[Projects]
-WHERE [Name] LIKE '%'+@searchText+'%'
-OR [CoOwner] LIKE '%'+@searchText+'%'
+		'Users' [Source],[Name],
+		UserPrincipalName [Description],
+		Users.GitHubId [Id]
+FROM	[dbo].[Users]
+WHERE	[Name] LIKE '%'+@searchText+'%'
+		OR [UserPrincipalName] LIKE '%'+@searchText+'%'
 
 UNION
 
 SELECT 
-	'Communities' [Source],[Name],
-	 [Description]
-FROM [dbo].[Communities]
-WHERE [Name] LIKE '%'+@searchText+'%'
-OR [Description] LIKE '%'+@searchText+'%'
+		'Repositories' [Source], [Name],
+			CASE
+				WHEN [CreatedBy] IS NULL THEN [RepositorySource]
+				ELSE [RepositorySource] + ' - ' + [CreatedBy]
+			END [Description],
+				P.Id [ID]
+FROM	[dbo].[Projects] P
+	INNER JOIN RepoOwners RO ON P.Id = RO.ProjectId  
+WHERE	[Name] LIKE '%'+@searchText+'%'
+		OR RO.UserPrincipalName
+		LIKE '%'+@searchText+'%'
 
+UNION
+
+SELECT 
+		'Communities' [Source],c.[Name],
+		[Description],
+		c.[Id]
+FROM	[dbo].[Communities] c
+  	INNER JOIN ApprovalStatus T ON c.ApprovalStatusId = T.Id
+WHERE	(
+			(
+				c.[Name] LIKE '%'+@searchText+'%'
+				OR [Description] LIKE '%'+@searchText+'%' 
+			)
+
+			AND c.ApprovalStatusId = 5
+		)
+		OR
+		(
+			(
+				c.[Name] LIKE '%'+@searchText+'%'
+				OR [Description] LIKE '%'+@searchText+'%' 
+			)
+
+			AND c.CreatedBy = @userprincipal
+		)
+	
 ORDER BY [Name]
 OFFSET @offSet ROWS
 FETCH NEXT @rowCount ROWS ONLY

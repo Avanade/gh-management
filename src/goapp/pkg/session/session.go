@@ -51,7 +51,7 @@ func IsAuthenticated(w http.ResponseWriter, r *http.Request, next http.HandlerFu
 
 	} else {
 		// If there is a user profile saved
-		authenticator, err := auth.NewAuthenticator()
+		authenticator, err := auth.NewAuthenticator(r.Host)
 
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -79,7 +79,7 @@ func IsAuthenticated(w http.ResponseWriter, r *http.Request, next http.HandlerFu
 				}
 
 				// Log out the user if the attempt to refresh the token failed
-				http.Redirect(w, r, "/logout", http.StatusTemporaryRedirect)
+				http.Redirect(w, r, "/logout/azure", http.StatusTemporaryRedirect)
 
 			} else if newToken != nil {
 				// fmt.Printf("TOKEN REFRESHED\n")
@@ -102,24 +102,36 @@ func IsAuthenticated(w http.ResponseWriter, r *http.Request, next http.HandlerFu
 
 func IsGHAuthenticated(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
 	// Check session if there is saved user profile
+	url := fmt.Sprintf("/gitredirect?redirect=%v", r.URL)
 	session, err := Store.Get(r, "gh-auth-session")
 	if err != nil {
 		c := http.Cookie{
 			Name:   "gh-auth-session",
 			MaxAge: -1}
 		http.SetCookie(w, &c)
-		http.Redirect(w, r, "/login/github", http.StatusTemporaryRedirect)
+		http.Redirect(w, r, url, http.StatusTemporaryRedirect)
 		return
 	}
 
 	if _, ok := session.Values["ghProfile"]; !ok || !session.Values["ghIsValid"].(bool) {
 
 		// Asks user to login if there is no saved user profile
-		http.Redirect(w, r, "/error/ghlogin", http.StatusTemporaryRedirect)
-
+		http.Redirect(w, r, url, http.StatusTemporaryRedirect)
 	} else {
 		next(w, r)
 	}
+}
+
+func IsGuidAuthenticated(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
+	// Check header if authenticated
+	_, err := auth.VerifyAccessToken(r)
+	// RETURN ERROR
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	// RETURN SUCCESS
+	next(w, r)
 }
 
 func GetGitHubUserData(w http.ResponseWriter, r *http.Request) (models.TypGitHubUser, error) {
@@ -188,6 +200,15 @@ func RemoveGitHubAccount(w http.ResponseWriter, r *http.Request) error {
 	return nil
 }
 
+func IsUserAdminMW(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
+	isAdmin, _ := IsUserAdmin(w, r)
+	if isAdmin {
+		next(w, r)
+	} else {
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+	}
+}
+
 // Check if user is an admin
 func IsUserAdmin(w http.ResponseWriter, r *http.Request) (bool, error) {
 	session, err := Store.Get(r, "auth-session")
@@ -200,6 +221,20 @@ func IsUserAdmin(w http.ResponseWriter, r *http.Request) (bool, error) {
 		isUserAdmin = session.Values["isUserAdmin"].(bool)
 	}
 	return isUserAdmin, nil
+}
+
+// Get user photo
+func GetUserPhoto(w http.ResponseWriter, r *http.Request) (bool, string, error) {
+	session, err := Store.Get(r, "auth-session")
+	if err != nil {
+		return false, "", err
+	}
+
+	if session.Values["userHasPhoto"] != nil {
+		return session.Values["userHasPhoto"].(bool), fmt.Sprintf("%s", session.Values["userPhoto"]), nil
+	} else {
+		return false, "", nil
+	}
 }
 
 type ErrorDetails struct {

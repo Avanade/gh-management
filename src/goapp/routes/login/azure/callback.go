@@ -11,6 +11,7 @@ import (
 
 	auth "main/pkg/authentication"
 	ghmgmt "main/pkg/ghmgmtdb"
+	"main/pkg/msgraph"
 	session "main/pkg/session"
 )
 
@@ -29,7 +30,7 @@ func CallbackHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//Retrieve token
-	authenticator, err := auth.NewAuthenticator()
+	authenticator, err := auth.NewAuthenticator(r.Host)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -73,8 +74,15 @@ func CallbackHandler(w http.ResponseWriter, r *http.Request) {
 	session.Values["profile"] = profile
 	session.Values["refresh_token"] = token.RefreshToken
 	session.Values["expiry"] = token.Expiry.UTC().Format("2006-01-02 15:04:05")
-	isAdmin := ghmgmt.IsUserAdmin(userPrincipalName)
+	isAdmin, _ := msgraph.IsUserAdmin(fmt.Sprintf("%s", profile["oid"]))
 	session.Values["isUserAdmin"] = isAdmin
+	hasPhoto, userPhoto, err := msgraph.GetUserPhoto(fmt.Sprintf("%s", profile["oid"]))
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	session.Values["userHasPhoto"] = hasPhoto
+	session.Values["userPhoto"] = userPhoto
 	errS := session.Save(r, w)
 
 	// Insert Azure User

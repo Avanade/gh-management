@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"main/models"
 	"main/pkg/sql"
-	"strconv"
-
 	"os"
+	"strconv"
+	"time"
 )
 
 func GetUsersWithGithub() interface{} {
@@ -82,20 +82,20 @@ func ConnectDb() *sql.DB {
 // PROJECTS
 func PRProjectsInsert(body models.TypNewProjectReqBody, user string) (id int64) {
 
-	cp := sql.ConnectionParam{
+	db := ConnectDb()
+	defer db.Close()
 
-		ConnectionString: os.Getenv("GHMGMTDB_CONNECTION_STRING"),
-	}
-
-	db, _ := sql.Init(cp)
 	param := map[string]interface{}{
-
-		"Name":                   body.Name,
-		"CoOwner":                body.Coowner,
-		"Description":            body.Description,
-		"ConfirmAvaIP":           body.ConfirmAvaIP,
-		"ConfirmEnabledSecurity": body.ConfirmSecIPScan,
-		"CreatedBy":              user,
+		"GithubId":                body.GithubId,
+		"Name":                    body.Name,
+		"CoOwner":                 body.Coowner,
+		"Description":             body.Description,
+		"ConfirmAvaIP":            body.ConfirmAvaIP,
+		"ConfirmEnabledSecurity":  body.ConfirmSecIPScan,
+		"ConfirmNotClientProject": body.ConfirmNotClientProject,
+		"CreatedBy":               user,
+		"VisibilityId":            body.Visibility,
+		"TFSProjectReference":     body.TFSProjectReference,
 	}
 	result, err := db.ExecuteStoredProcedureWithResult("dbo.PR_Projects_Insert", param)
 	if err != nil {
@@ -105,22 +105,57 @@ func PRProjectsInsert(body models.TypNewProjectReqBody, user string) (id int64) 
 	return
 }
 
+func DeleteProjectById(id int) error {
+	db := ConnectDb()
+	defer db.Close()
+
+	param := map[string]interface{}{
+		"Id": id,
+	}
+	_, err := db.ExecuteStoredProcedure("dbo.PR_Projects_Delete_ById", param)
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+	return nil
+}
+
+func ProjectInsertByImport(param map[string]interface{}) error {
+	db := ConnectDb()
+	defer db.Close()
+
+	_, err := db.ExecuteStoredProcedure("dbo.PR_Projects_Insert", param)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func ProjectUpdateByImport(param map[string]interface{}) error {
+	db := ConnectDb()
+	defer db.Close()
+
+	_, err := db.ExecuteStoredProcedure("dbo.PR_Projects_Update_Repo_Info", param)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func PRProjectsUpdate(body models.TypNewProjectReqBody, user string) (id int64) {
 
-	cp := sql.ConnectionParam{
+	db := ConnectDb()
+	defer db.Close()
 
-		ConnectionString: os.Getenv("GHMGMTDB_CONNECTION_STRING"),
-	}
-
-	db, _ := sql.Init(cp)
 	param := map[string]interface{}{
-		"ID":                     body.Id,
-		"Name":                   body.Name,
-		"CoOwner":                body.Coowner,
-		"Description":            body.Description,
-		"ConfirmAvaIP":           body.ConfirmAvaIP,
-		"ConfirmEnabledSecurity": body.ConfirmSecIPScan,
-		"ModifiedBy":             user,
+		"ID":                      body.Id,
+		"Name":                    body.Name,
+		"CoOwner":                 body.Coowner,
+		"Description":             body.Description,
+		"ConfirmAvaIP":            body.ConfirmAvaIP,
+		"ConfirmEnabledSecurity":  body.ConfirmSecIPScan,
+		"ConfirmNotClientProject": body.ConfirmNotClientProject,
+		"ModifiedBy":              user,
 	}
 	_, err := db.ExecuteStoredProcedure("dbo.PR_Projects_Update", param)
 	if err != nil {
@@ -132,12 +167,9 @@ func PRProjectsUpdate(body models.TypNewProjectReqBody, user string) (id int64) 
 
 func PRProjectsUpdateLegalQuestions(body models.TypeMakeProjectPublicReqBody, user string) {
 
-	cp := sql.ConnectionParam{
+	db := ConnectDb()
+	defer db.Close()
 
-		ConnectionString: os.Getenv("GHMGMTDB_CONNECTION_STRING"),
-	}
-
-	db, _ := sql.Init(cp)
 	param := map[string]interface{}{
 		"Id":                         body.Id,
 		"Newcontribution":            body.Newcontribution,
@@ -155,13 +187,25 @@ func PRProjectsUpdateLegalQuestions(body models.TypeMakeProjectPublicReqBody, us
 	return
 }
 
-func Projects_IsExisting(body models.TypNewProjectReqBody) bool {
+func Projects_ByRepositorySource(repositorySource string) ([]map[string]interface{}, error) {
+	db := ConnectDb()
+	defer db.Close()
 
-	cp := sql.ConnectionParam{
-		ConnectionString: os.Getenv("GHMGMTDB_CONNECTION_STRING"),
+	param := map[string]interface{}{
+		"RepositorySource": repositorySource,
 	}
 
-	db, _ := sql.Init(cp)
+	result, err := db.ExecuteStoredProcedureWithResult("PR_Projects_Select_ByRepositorySource", param)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
+func Projects_IsExisting(body models.TypNewProjectReqBody) bool {
+
+	db := ConnectDb()
+	defer db.Close()
 
 	param := map[string]interface{}{
 
@@ -182,12 +226,36 @@ func Projects_IsExisting(body models.TypNewProjectReqBody) bool {
 	}
 }
 
-func PopulateProjectsApproval(id int64) (ProjectApprovals []models.TypProjectApprovals) {
+func Projects_IsExisting_By_GithubId(body models.TypNewProjectReqBody) bool {
+
+	db := ConnectDb()
+	defer db.Close()
+
+	param := map[string]interface{}{
+		"GithubId": body.GithubId,
+	}
+
+	result, err := db.ExecuteStoredProcedureWithResult("dbo.PR_Projects_IsExisting_By_GithubId", param)
+
+	if err != nil {
+		fmt.Println(err)
+		return false
+	}
+
+	if result[0]["Result"] == "1" {
+		return true
+	} else {
+		return false
+	}
+}
+
+func PopulateProjectsApproval(id int64, email string) (ProjectApprovals []models.TypProjectApprovals) {
 	db := ConnectDb()
 	defer db.Close()
 
 	param := map[string]interface{}{
 		"ProjectId": id,
+		"CreatedBy": email,
 	}
 	result, _ := db.ExecuteStoredProcedureWithResult("PR_ProjectsApproval_Populate", param)
 	for _, v := range result {
@@ -195,16 +263,11 @@ func PopulateProjectsApproval(id int64) (ProjectApprovals []models.TypProjectApp
 			Id:                         v["Id"].(int64),
 			ProjectId:                  v["ProjectId"].(int64),
 			ProjectName:                v["ProjectName"].(string),
-			ProjectCoowner:             v["ProjectCoowner"].(string),
 			ProjectDescription:         v["ProjectDescription"].(string),
 			RequesterGivenName:         v["RequesterGivenName"].(string),
 			RequesterSurName:           v["RequesterSurName"].(string),
 			RequesterName:              v["RequesterName"].(string),
 			RequesterUserPrincipalName: v["RequesterUserPrincipalName"].(string),
-			CoownerGivenName:           v["CoownerGivenName"].(string),
-			CoownerSurName:             v["CoownerSurName"].(string),
-			CoownerName:                v["CoownerName"].(string),
-			CoownerUserPrincipalName:   v["CoownerUserPrincipalName"].(string),
 			ApprovalTypeId:             v["ApprovalTypeId"].(int64),
 			ApprovalType:               v["ApprovalType"].(string),
 			ApproverUserPrincipalName:  v["ApproverUserPrincipalName"].(string),
@@ -325,6 +388,21 @@ func ProjectsApprovalUpdateGUID(id int64, ApprovalSystemGUID string) {
 	db.ExecuteStoredProcedure("PR_ProjectsApproval_Update_ApprovalSystemGUID", param)
 }
 
+func GetProjectForRepoOwner() (RepoOwner []models.TypRepoOwner) {
+	db := ConnectDb()
+	defer db.Close()
+
+	result, _ := db.ExecuteStoredProcedureWithResult("PR_Projects_ToRepoOwners", nil)
+
+	for _, v := range result {
+		data := models.TypRepoOwner{
+			Id:                v["Id"].(int64),
+			UserPrincipalName: v["UserPrincipalName"].(string),
+		}
+		RepoOwner = append(RepoOwner, data)
+	}
+	return RepoOwner
+}
 func GetProjectByName(projectName string) []map[string]interface{} {
 	db := ConnectDb()
 	defer db.Close()
@@ -336,6 +414,61 @@ func GetProjectByName(projectName string) []map[string]interface{} {
 	result, _ := db.ExecuteStoredProcedureWithResult("PR_Projects_Select_ByName", param)
 
 	return result
+}
+
+func GetProjectById(id int64) []map[string]interface{} {
+	db := ConnectDb()
+	defer db.Close()
+
+	param := map[string]interface{}{
+		"Id": id,
+	}
+
+	result, _ := db.ExecuteStoredProcedureWithResult("PR_Projects_Select_ById", param)
+
+	return result
+}
+
+func GetProjectByGithubId(githubId int64) []map[string]interface{} {
+	db := ConnectDb()
+	defer db.Close()
+
+	param := map[string]interface{}{
+		"GithubId": githubId,
+	}
+
+	result, _ := db.ExecuteStoredProcedureWithResult("PR_Projects_Select_ByGithubId", param)
+
+	return result
+}
+
+func Repos_Select_ByOffsetAndFilter(offset int, search string) []map[string]interface{} {
+	db := ConnectDb()
+	defer db.Close()
+
+	param := map[string]interface{}{
+		"Offset": offset,
+		"Search": search,
+	}
+
+	result, _ := db.ExecuteStoredProcedureWithResult("PR_Repositories_Select_ByOffsetAndFilter", param)
+	return result
+}
+
+func Repos_TotalCount_BySearchTerm(search string) int {
+	db := ConnectDb()
+	defer db.Close()
+
+	param := map[string]interface{}{
+		"search": search,
+	}
+
+	result, _ := db.ExecuteStoredProcedureWithResult("PR_Repositories_TotalCount_BySearchTerm", param)
+	total, err := strconv.Atoi(fmt.Sprint(result[0]["Total"]))
+	if err != nil {
+		return 0
+	}
+	return total
 }
 
 func UpdateProjectIsArchived(id int64, isArchived bool) error {
@@ -370,6 +503,50 @@ func UpdateProjectVisibilityId(id int64, visibilityId int64) error {
 	}
 
 	return nil
+}
+
+func UpdateTFSProjectReferenceById(id int64, tFSProjectReference string) error {
+	db := ConnectDb()
+	defer db.Close()
+
+	param := map[string]interface{}{
+		"Id":                  id,
+		"TFSProjectReference": tFSProjectReference,
+	}
+
+	_, err := db.ExecuteStoredProcedure("PR_Projects_Update_TFSProjectReference_ById", param)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func GetRequestedReposByDateRange(start time.Time, end time.Time) ([]models.TypBasicRepo, error) {
+	var RequestedRepos []models.TypBasicRepo
+	db := ConnectDb()
+	defer db.Close()
+
+	param := map[string]interface{}{
+		"Start": start.Format("2006-01-02"),
+		"End":   end.Format("2006-01-02"),
+	}
+
+	result, err := db.ExecuteStoredProcedureWithResult("PR_Projects_Select_By_DateRange", param)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, v := range result {
+		data := models.TypBasicRepo{
+			Name:        v["Name"].(string),
+			Requestor:   v["CreatedBy"].(string),
+			Description: v["Description"].(string),
+		}
+		RequestedRepos = append(RequestedRepos, data)
+	}
+
+	return RequestedRepos, nil
 }
 
 // ACTIVITIES
@@ -448,12 +625,13 @@ func CommunitiesActivities_TotalCount() int {
 	return total
 }
 
-func CommunitiesActivities_TotalCount_ByCreatedBy(createdBy string) int {
+func CommunitiesActivities_TotalCount_ByCreatedBy(createdBy, search string) int {
 	db := ConnectDb()
 	defer db.Close()
 
 	param := map[string]interface{}{
 		"CreatedBy": createdBy,
+		"Search":    search,
 	}
 
 	result, _ := db.ExecuteStoredProcedureWithResult("[PR_CommunityActivities_TotalCount_ByCreatedBy]", param)
@@ -554,15 +732,74 @@ func CommunityActivitiesContributionAreas_Insert(body models.CommunityActivities
 	return id, nil
 }
 
-func ContributionAreas_Select() interface{} {
+func ContributionAreas_Select() (interface{}, error) {
 	db := ConnectDb()
 	defer db.Close()
 
 	result, err := db.ExecuteStoredProcedureWithResult("PR_ContributionAreas_Select", nil)
 	if err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
+func ContributionAreas_SelectByFilter(offset, filter int, orderby, ordertype, search string) (interface{}, error) {
+	db := ConnectDb()
+	defer db.Close()
+
+	param := map[string]interface{}{
+		"Offset":    offset,
+		"Filter":    filter,
+		"Search":    search,
+		"OrderBy":   orderby,
+		"OrderType": ordertype,
+	}
+
+	result, err := db.ExecuteStoredProcedureWithResult("PR_ContributionAreas_Select_ByFilter", param)
+	if err != nil {
+		return nil, err
+	}
+
+	return result, nil
+}
+
+func SelectTotalContributionAreas() int {
+	db := ConnectDb()
+	defer db.Close()
+
+	result, _ := db.ExecuteStoredProcedureWithResult("PR_ContributionAreas_TotalCount", nil)
+	total, err := strconv.Atoi(fmt.Sprint(result[0]["Total"]))
+	if err != nil {
+		return 0
+	}
+	return total
+}
+
+func GetContributionAreaById(id int) interface{} {
+	db := ConnectDb()
+	defer db.Close()
+
+	param := map[string]interface{}{
+		"Id": id,
+	}
+
+	result, err := db.ExecuteStoredProcedureWithResult("PR_ContributionAreas_SelectById", param)
+	if err != nil {
 		return err
 	}
 	return result
+}
+
+func UpdateContributionAreaById(id int, name string, username string) {
+	db := ConnectDb()
+	defer db.Close()
+
+	param := map[string]interface{}{
+		"Id":         id,
+		"Name":       name,
+		"ModifiedBy": username,
+	}
+	db.ExecuteStoredProcedure("PR_ContributionAreas_Update_ById", param)
 }
 
 func AdditionalContributionAreas_Select(activityId int) interface{} {
@@ -600,14 +837,22 @@ func ContributionAreas_Insert(name, createdBy string) (int, error) {
 	return id, nil
 }
 
-//USERS
+func GetAllActiveApprovers() interface{} {
+	db := ConnectDb()
+	defer db.Close()
+
+	result, err := db.ExecuteStoredProcedureWithResult("PR_ApprovalTypes_SelectAllActive", nil)
+	if err != nil {
+		return err
+	}
+	return result
+}
+
+// USERS
 func Users_Get_GHUser(UserPrincipalName string) (GHUser string) {
 
-	cp := sql.ConnectionParam{
-		ConnectionString: os.Getenv("GHMGMTDB_CONNECTION_STRING"),
-	}
-
-	db, _ := sql.Init(cp)
+	db := ConnectDb()
+	defer db.Close()
 
 	param := map[string]interface{}{
 
@@ -623,6 +868,63 @@ func Users_Get_GHUser(UserPrincipalName string) (GHUser string) {
 
 	GHUser = result[0]["GitHubUser"].(string)
 	return GHUser
+}
+
+func GetUserByGitHubId(GitHubId string) ([]map[string]interface{}, error) {
+
+	db := ConnectDb()
+	defer db.Close()
+
+	param := map[string]interface{}{
+
+		"GitHubId": GitHubId,
+	}
+
+	result, err := db.ExecuteStoredProcedureWithResult("PR_Users_Select_ByGitHubId", param)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return result, nil
+}
+
+func GetUserByGitHubUsername(GitHubUser string) ([]map[string]interface{}, error) {
+
+	db := ConnectDb()
+	defer db.Close()
+
+	param := map[string]interface{}{
+
+		"GitHubUser": GitHubUser,
+	}
+
+	result, err := db.ExecuteStoredProcedureWithResult("PR_Users_Select_ByGitHubUsers", param)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return result, nil
+}
+
+func GetUserByUserPrincipal(UserPrincipalName string) ([]map[string]interface{}, error) {
+
+	db := ConnectDb()
+	defer db.Close()
+
+	param := map[string]interface{}{
+
+		"UserPrincipalName": UserPrincipalName,
+	}
+
+	result, err := db.ExecuteStoredProcedureWithResult("PR_Users_Select_ByUserPrincipalName", param)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return result, nil
 }
 
 func IsUserAdmin(userPrincipalName string) bool {
@@ -641,11 +943,8 @@ func IsUserAdmin(userPrincipalName string) bool {
 // COMMUNITIES
 func Communities_AddMember(CommunityId int, UserPrincipalName string) error {
 
-	cp := sql.ConnectionParam{
-		ConnectionString: os.Getenv("GHMGMTDB_CONNECTION_STRING"),
-	}
-
-	db, _ := sql.Init(cp)
+	db := ConnectDb()
+	defer db.Close()
 
 	param := map[string]interface{}{
 		"CommunityId":       CommunityId,
@@ -665,11 +964,8 @@ func Communities_AddMember(CommunityId int, UserPrincipalName string) error {
 
 func Communities_Related(CommunityId int64) (data []models.TypRelatedCommunities, err error) {
 
-	cp := sql.ConnectionParam{
-		ConnectionString: os.Getenv("GHMGMTDB_CONNECTION_STRING"),
-	}
-
-	db, _ := sql.Init(cp)
+	db := ConnectDb()
+	defer db.Close()
 
 	param := map[string]interface{}{
 
@@ -695,11 +991,8 @@ func Communities_Related(CommunityId int64) (data []models.TypRelatedCommunities
 }
 
 func Community_Sponsors(CommunityId int64) (data []models.TypCommunitySponsorsList, err error) {
-	cp := sql.ConnectionParam{
-		ConnectionString: os.Getenv("GHMGMTDB_CONNECTION_STRING"),
-	}
-
-	db, _ := sql.Init(cp)
+	db := ConnectDb()
+	defer db.Close()
 
 	param := map[string]interface{}{
 
@@ -726,11 +1019,8 @@ func Community_Sponsors(CommunityId int64) (data []models.TypCommunitySponsorsLi
 }
 
 func Community_Info(CommunityId int64) (data models.TypCommunityOnBoarding, err error) {
-	cp := sql.ConnectionParam{
-		ConnectionString: os.Getenv("GHMGMTDB_CONNECTION_STRING"),
-	}
-
-	db, _ := sql.Init(cp)
+	db := ConnectDb()
+	defer db.Close()
 
 	param := map[string]interface{}{
 
@@ -745,20 +1035,18 @@ func Community_Info(CommunityId int64) (data models.TypCommunityOnBoarding, err 
 	}
 
 	data = models.TypCommunityOnBoarding{
-		Id:   result[0]["Id"].(int64),
-		Name: result[0]["Name"].(string),
-		Url:  result[0]["Url"].(string),
+		Id:                     result[0]["Id"].(int64),
+		Name:                   result[0]["Name"].(string),
+		OnBoardingInstructions: result[0]["OnBoardingInstructions"].(string),
+		Url:                    result[0]["Url"].(string),
 	}
 
 	return
 }
 
 func Community_Onboarding_AddMember(CommunityId int64, UserPrincipalName string) (err error) {
-	cp := sql.ConnectionParam{
-		ConnectionString: os.Getenv("GHMGMTDB_CONNECTION_STRING"),
-	}
-
-	db, _ := sql.Init(cp)
+	db := ConnectDb()
+	defer db.Close()
 
 	param := map[string]interface{}{
 
@@ -775,11 +1063,8 @@ func Community_Onboarding_AddMember(CommunityId int64, UserPrincipalName string)
 }
 
 func Community_Onboarding_RemoveMember(CommunityId int64, UserPrincipalName string) (err error) {
-	cp := sql.ConnectionParam{
-		ConnectionString: os.Getenv("GHMGMTDB_CONNECTION_STRING"),
-	}
-
-	db, _ := sql.Init(cp)
+	db := ConnectDb()
+	defer db.Close()
 
 	param := map[string]interface{}{
 
@@ -796,11 +1081,8 @@ func Community_Onboarding_RemoveMember(CommunityId int64, UserPrincipalName stri
 }
 
 func Community_Membership_IsMember(CommunityId int64, UserPrincipalName string) (isMember bool, err error) {
-	cp := sql.ConnectionParam{
-		ConnectionString: os.Getenv("GHMGMTDB_CONNECTION_STRING"),
-	}
-
-	db, _ := sql.Init(cp)
+	db := ConnectDb()
+	defer db.Close()
 
 	param := map[string]interface{}{
 
@@ -861,7 +1143,7 @@ func PopulateCommunityApproval(id int64) (CommunityApprovals []models.TypCommuni
 			CommunityDescription:       v["CommunityDescription"].(string),
 			CommunityNotes:             v["CommunityNotes"].(string),
 			CommunityTradeAssocId:      v["CommunityTradeAssocId"].(string),
-			CommunityIsExternal:        v["CommunityIsExternal"].(bool),
+			CommunityType:              v["CommunityType"].(string),
 			RequesterName:              v["RequesterName"].(string),
 			RequesterGivenName:         v["RequesterGivenName"].(string),
 			RequesterSurName:           v["RequesterSurName"].(string),
@@ -890,7 +1172,7 @@ func GetFailedCommunityApprovalRequests() (CommunityApprovals []models.TypCommun
 			CommunityDescription:       v["CommunityDescription"].(string),
 			CommunityNotes:             v["CommunityNotes"].(string),
 			CommunityTradeAssocId:      v["CommunityTradeAssocId"].(string),
-			CommunityIsExternal:        v["CommunityIsExternal"].(bool),
+			CommunityType:              v["CommunityType"].(string),
 			RequesterName:              v["RequesterName"].(string),
 			RequesterGivenName:         v["RequesterGivenName"].(string),
 			RequesterSurName:           v["RequesterSurName"].(string),
@@ -1011,4 +1293,172 @@ func UpdateApprovalType(approvalType models.ApprovalType) (int, error) {
 		return 0, err
 	}
 	return int(result[0]["Id"].(int64)), nil
+}
+
+func SetIsArchiveApprovalTypeById(approvalType models.ApprovalType) (int, bool, error) {
+	db := ConnectDb()
+	defer db.Close()
+
+	param := map[string]interface{}{
+		"Id":                        approvalType.Id,
+		"Name":                      approvalType.Name,
+		"ApproverUserPrincipalName": approvalType.ApproverUserPrincipalName,
+		"IsArchived":                approvalType.IsArchived,
+		"ModifiedBy":                approvalType.ModifiedBy,
+	}
+
+	result, err := db.ExecuteStoredProcedureWithResult("PR_ApprovalTypes_Update_IsArchived_ById", param)
+	if err != nil {
+		return 0, false, err
+	}
+
+	return int(result[0]["Id"].(int64)), result[0]["Status"].(bool), nil
+}
+
+func UsersGetEmail(GithubUser string) (string, error) {
+	db := ConnectDb()
+	defer db.Close()
+
+	param := map[string]interface{}{
+		"GithubUser": GithubUser,
+	}
+
+	result, err := db.ExecuteStoredProcedureWithResult("PR_Users_GetEmailByGitHubUsername", param)
+	if err != nil {
+		return "0", err
+	}
+	if len(result) == 0 {
+		return "", nil
+	} else {
+		return result[0]["UserPrincipalName"].(string), err
+	}
+
+}
+
+func RepoOwnersInsert(ProjectId int64, userPrincipalName string) error {
+	db := ConnectDb()
+	defer db.Close()
+
+	param := map[string]interface{}{
+		"ProjectId":         ProjectId,
+		"UserPrincipalName": userPrincipalName,
+	}
+
+	_, err := db.ExecuteStoredProcedure("PR_RepoOwners_Insert", param)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func RepoOwnersByUserAndProjectId(id int64, userPrincipalName string) (RepoOwner []models.TypRepoOwner, err error) {
+	db := ConnectDb()
+	defer db.Close()
+
+	param := map[string]interface{}{
+		"ProjectId":         id,
+		"UserPrincipalName": userPrincipalName,
+	}
+	result, err := db.ExecuteStoredProcedureWithResult("PR_RepoOwners_Select_ByUserAndProjectId", param)
+	if err != nil {
+		println(err)
+	}
+
+	for _, v := range result {
+		data := models.TypRepoOwner{
+			Id:                v["ProjectId"].(int64),
+			UserPrincipalName: v["UserPrincipalName"].(string),
+		}
+		RepoOwner = append(RepoOwner, data)
+	}
+	return RepoOwner, err
+
+}
+
+func SelectAllRepoNameAndOwners() (RepoOwner []models.TypRepoOwner, err error) {
+	db := ConnectDb()
+	defer db.Close()
+
+	result, err := db.ExecuteStoredProcedureWithResult("PR_RepoOwners_SelectAllRepoNameAndOwners", nil)
+	if err != nil {
+		println(err)
+	}
+
+	for _, v := range result {
+		data := models.TypRepoOwner{
+			Id:                v["ProjectId"].(int64),
+			RepoName:          v["Name"].(string),
+			UserPrincipalName: v["UserPrincipalName"].(string),
+		}
+		RepoOwner = append(RepoOwner, data)
+	}
+	return RepoOwner, err
+
+}
+
+func GetRepoOwnersRecordByRepoId(id int64) (RepoOwner []models.TypRepoOwner, err error) {
+	db := ConnectDb()
+	defer db.Close()
+
+	param := map[string]interface{}{
+		"ProjectId": id,
+	}
+	result, err := db.ExecuteStoredProcedureWithResult("PR_RepoOwners_Select_ByRepoId", param)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, v := range result {
+		data := models.TypRepoOwner{
+			Id:                v["ProjectId"].(int64),
+			UserPrincipalName: v["UserPrincipalName"].(string),
+		}
+		RepoOwner = append(RepoOwner, data)
+	}
+	return RepoOwner, nil
+}
+
+func GetGitHubRepositories() ([]map[string]interface{}, error) {
+	db := ConnectDb()
+	defer db.Close()
+
+	result, err := db.ExecuteStoredProcedureWithResult("PR_Projects_SelectAllGitHub", nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return result, nil
+}
+
+func GetRepoOwnersByProjectIdWithGHUsername(id int64) ([]map[string]interface{}, error) {
+	db := ConnectDb()
+	defer db.Close()
+
+	param := map[string]interface{}{
+		"ProjectId": id,
+	}
+
+	result, err := db.ExecuteStoredProcedureWithResult("PR_RepoOwners_SelectGHUser_ByRepoId", param)
+	if err != nil {
+		return nil, err
+	}
+
+	return result, nil
+}
+
+func DeleteRepoOwnerRecordByUserAndProjectId(id int64, userPrincipalName string) error {
+	db := ConnectDb()
+	defer db.Close()
+
+	param := map[string]interface{}{
+		"ProjectId":         id,
+		"UserPrincipalName": userPrincipalName,
+	}
+	_, err := db.ExecuteStoredProcedure("PR_RepoOwners_Delete_ByUserAndProjectId", param)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

@@ -70,7 +70,7 @@ func GetActivities(w http.ResponseWriter, r *http.Request) {
 		ordertype := params["ordertype"][0]
 		result = ActivitiesDto{
 			Data:  db.CommunitiesActivities_Select_ByOffsetAndFilterAndCreatedBy(offset, filter, orderby, ordertype, search, username),
-			Total: db.CommunitiesActivities_TotalCount_ByCreatedBy(username),
+			Total: db.CommunitiesActivities_TotalCount_ByCreatedBy(username, search),
 		}
 	} else {
 		result = ActivitiesDto{
@@ -98,7 +98,7 @@ func CreateActivity(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// CHECK ACTIVITY TYPE IF EXIST / INSERT IF NOT EXIST
-	if body.Type.Id != 0 {
+	if body.Type.Id == 0 {
 		id, err := db.ActivityTypes_Insert(body.Type.Name)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)

@@ -1,5 +1,5 @@
 CREATE PROCEDURE [dbo].[PR_Projects_Update_IsArchived_ById]
-  @Id Int,
+  @Id INT,
 	@IsArchived BIT
 AS
 

@@ -1,6 +1,6 @@
-﻿Create PROCEDURE [dbo].[PR_Projects_Select_ByUserPrincipalName]
+﻿CREATE PROCEDURE [dbo].[PR_Projects_Select_ByUserPrincipalName]
 (
-	@UserPrincipalName varchar(100)
+	@UserPrincipalName VARCHAR(100)
 )
 AS
 BEGIN
@@ -9,6 +9,7 @@ BEGIN
 	SET NOCOUNT ON;
 
     -- Insert statements for procedure here
+
 SELECT [p].[Id],
        [p].[Name],
        [CoOwner],
@@ -22,11 +23,15 @@ SELECT [p].[Id],
        [Modified],
        [ModifiedBy],
        [ApprovalStatusId],
-       [v].[Name] AS 'Visibility'
+       [v].[Name] AS 'Visibility',
+       [p].[RepositorySource],
+	  [p].[TFSProjectReference]
   FROM 
-       [dbo].[Projects] AS p
-  LEFT JOIN [dbo].[Visibility] AS v ON p.VisibilityId = v.Id
+   [dbo].[RepoOwners] AS RO
+   LEFT JOIN [dbo].[Projects] AS p  ON  RO.ProjectId = p.Id
+   LEFT JOIN [dbo].[Visibility] AS v ON p.VisibilityId = v.Id
+ 
   WHERE  
-       [CreatedBy] = @UserPrincipalName
+   RO.UserPrincipalName =@UserPrincipalName
   ORDER BY [Created] DESC
 END

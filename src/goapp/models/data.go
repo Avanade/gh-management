@@ -5,6 +5,8 @@ type TypPageData struct {
 	Profile   interface{}
 	ProfileGH TypGitHubUser
 	Content   interface{}
+	HasPhoto  bool
+	UserPhoto string
 }
 
 type TypGitHubUser struct {
@@ -20,24 +22,53 @@ type TypGitHubUser struct {
 }
 
 type TypHeaders struct {
-	Menu          []TypMenu
-	ExternalLinks []TypMenu
-	Page          string
+	Menu     []TypMenu
+	Title    string
+	LogoPath string
+	Page     string
 }
 
 type TypMenu struct {
 	Name     string
 	Url      string
 	IconPath string
+	External bool
+}
+
+type ExternalLinksIcon struct {
+	IconName string
+	IconPath string
+}
+
+type ExternalLinksData struct {
+	Data string
+}
+
+type TypExternalLinks struct {
+	Id int `json:"id"`
+
+	IconSVG   string `json:"iconsvg"`
+	Hyperlink string `json:"hyperlink"`
+	LinkName  string `json:"linkname"`
+
+	Enabled    string `json:"enabled"`
+	Created    string `json:"created"`
+	CreatedBy  string `json:"createdBy"`
+	Modified   string `json:"modified"`
+	ModifiedBy string `json:"modifiedBy"`
 }
 
 type TypNewProjectReqBody struct {
-	Id               string `json:"id"`
-	Name             string `json:"name"`
-	Coowner          string `json:"coowner"`
-	Description      string `json:"description"`
-	ConfirmAvaIP     bool   `json:"confirmAvaIP"`
-	ConfirmSecIPScan bool   `json:"confirmSecIPScan"`
+	Id                      string `json:"id"`
+	GithubId                int64  `json:"githubId"`
+	Name                    string `json:"name"`
+	Coowner                 string `json:"coowner"`
+	Description             string `json:"description"`
+	ConfirmAvaIP            bool   `json:"confirmAvaIP"`
+	ConfirmSecIPScan        bool   `json:"confirmSecIPScan"`
+	ConfirmNotClientProject bool   `json:"ConfirmNotClientProject"`
+	TFSProjectReference     string
+	Visibility              int
 }
 
 type TypeMakeProjectPublicReqBody struct {
@@ -50,19 +81,24 @@ type TypeMakeProjectPublicReqBody struct {
 }
 
 type TypCommunity struct {
-	Id           int           `json:"id"`
-	Name         string        `json:"name"`
-	Url          string        `json:"url"`
-	Description  string        `json:"description"`
-	Notes        string        `json:"notes"`
-	TradeAssocId string        `json:"tradeAssocId"`
-	IsExternal   bool          `json:"isExternal"`
-	Created      string        `json:"created"`
-	CreatedBy    string        `json:"createdBy"`
-	Modified     string        `json:"modified"`
-	ModifiedBy   string        `json:"modifiedBy"`
-	Sponsors     []TypSponsors `json:"sponsors"`
-	Tags         []string      `json:"tags"`
+	Id                     int                   `json:"id"`
+	Name                   string                `json:"name"`
+	Url                    string                `json:"url"`
+	Description            string                `json:"description"`
+	Notes                  string                `json:"notes"`
+	TradeAssocId           string                `json:"tradeAssocId"`
+	IsExternal             bool                  `json:"isExternal"`
+	CommunityType          string                `json:"CommunityType"`
+	ChannelId              string                `json:"ChannelId"`
+	OnBoardingInstructions string                `json:"onBoardingInstructions"`
+	Created                string                `json:"created"`
+	CreatedBy              string                `json:"createdBy"`
+	Modified               string                `json:"modified"`
+	ModifiedBy             string                `json:"modifiedBy"`
+	Sponsors               []TypSponsors         `json:"sponsors"`
+	Tags                   []string              `json:"tags"`
+	CommunitiesExternal    []TypRelatedCommunity `json:"communitiesExternal"`
+	CommunitiesInternal    []TypRelatedCommunity `json:"communitiesInternal"`
 }
 
 type TypCommunitySponsors struct {
@@ -98,6 +134,10 @@ type TypProjectApprovals struct {
 	Willbecommercialversion    string
 	OSSContributionInformation string
 	RequestStatus              string
+	ApproveUrl                 string
+	RejectUrl                  string
+	ApproveText                string
+	RejectText                 string
 }
 
 type TypApprovalSystemPost struct {
@@ -138,11 +178,12 @@ type TypCommunitySponsorsList struct {
 }
 
 type TypCommunityOnBoarding struct {
-	Id          int64                      `json:"Id"`
-	Name        string                     `json:"Name"`
-	Url         string                     `json:"Url"`
-	Sponsors    []TypCommunitySponsorsList `json:"Sponsors"`
-	Communities []TypRelatedCommunities    `json:"Communities"`
+	Id                     int64                      `json:"Id"`
+	Name                   string                     `json:"Name"`
+	Url                    string                     `json:"Url"`
+	OnBoardingInstructions string                     `json:"OnBoardingInstructions"`
+	Sponsors               []TypCommunitySponsorsList `json:"Sponsors"`
+	Communities            []TypRelatedCommunities    `json:"Communities"`
 }
 
 type TypCommunityApprovals struct {
@@ -153,13 +194,17 @@ type TypCommunityApprovals struct {
 	CommunityDescription       string
 	CommunityNotes             string
 	CommunityTradeAssocId      string
-	CommunityIsExternal        bool
+	CommunityType              string
 	RequesterName              string
 	RequesterGivenName         string
 	RequesterSurName           string
 	RequesterUserPrincipalName string
 	ApproverUserPrincipalName  string
 	ApprovalDescription        string
+	ApproveUrl                 string
+	RejectUrl                  string
+	ApproveText                string
+	RejectText                 string
 }
 
 type TypCategory struct {
@@ -173,13 +218,44 @@ type TypCategory struct {
 }
 
 type TypCategoryArticles struct {
-	Id         int    `json:"id"`
-	Name       string `json:"name"`
-	Url        string `json:"Url"`
-	Body       string `json:"Body"`
-	CategoryId int    `json:"CategoryId"`
-	Created    string `json:"created"`
-	CreatedBy  string `json:"createdBy"`
-	Modified   string `json:"modified"`
-	ModifiedBy string `json:"modifiedBy"`
+	Id           int    `json:"id"`
+	Name         string `json:"name"`
+	Url          string `json:"Url"`
+	Body         string `json:"Body"`
+	CategoryId   int    `json:"CategoryId"`
+	CategoryName string `json:"CategoryName"`
+	Created      string `json:"created"`
+	CreatedBy    string `json:"createdBy"`
+	Modified     string `json:"modified"`
+	ModifiedBy   string `json:"modifiedBy"`
+}
+type TypCommunityApprovers struct {
+	Id                        int    `json:"id"`
+	ApproverUserPrincipalName string `json:"name"`
+	Disabled                  bool   `json:"disabled"`
+	Created                   string `json:"created"`
+	CreatedBy                 string `json:"createdBy"`
+	Modified                  string `json:"modified"`
+	ModifiedBy                string `json:"modifiedBy"`
+}
+
+type TypRelatedCommunity struct {
+	ParentCommunityId  int `json:"ParentCommunityId"`
+	RelatedCommunityId int `json:"RelatedCommunityId"`
+}
+
+type TypUpdateApprovalReAssign struct {
+	Id                  string `json:"id"`
+	ApproverEmail       string `json:"ApproverEmail"`
+	Username            string `json:"Username"`
+	ApplicationId       string `json:"ApplicationId"`
+	ApplicationModuleId string `json:"ApplicationModuleId"`
+	ItemId              string `json:"itemId"`
+	ApproveText         string `json:"ApproveText"`
+	RejectText          string `json:"RejectText"`
+}
+type TypRepoOwner struct {
+	Id                int64
+	RepoName          string
+	UserPrincipalName string
 }

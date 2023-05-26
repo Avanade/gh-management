@@ -1,8 +1,3 @@
-/****** Object:  StoredProcedure [dbo].[PR_CommunityActivities_Select_ByOffsetAndFilterAndCreatedBy]    Script Date: 04/07/2022 11:07:07 pm ******/
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
 CREATE PROCEDURE [dbo].[PR_CommunityActivities_Select_ByOffsetAndFilterAndCreatedBy](
 	@Offset int = 0,
 	@Filter int = 10,
@@ -37,10 +32,10 @@ BEGIN
 	  LEFT JOIN [dbo].[ContributionAreas] AS car ON car.Id = caca.ContributionAreaId
 	  WHERE
 		(
-			ca.Name LIKE '%'+@search+'%' OR
-			c.Name LIKE '%'+@search+'%' OR
-			a.Name LIKE '%'+@search+'%' OR
-			car.Name LIKE '%'+@search+'%'
+			ca.Name LIKE '%'+@Search+'%' OR
+			c.Name LIKE '%'+@Search+'%' OR
+			a.Name LIKE '%'+@Search+'%' OR
+			car.Name LIKE '%'+@Search+'%'
 		) AND ca.CreatedBy = @CreatedBy
 	  ORDER BY
 		CASE WHEN @OrderType='ASC' THEN

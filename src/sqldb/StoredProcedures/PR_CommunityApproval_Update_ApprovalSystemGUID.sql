@@ -1,9 +1,7 @@
-Create PROCEDURE [dbo].[PR_CommunityApproval_Update_ApprovalSystemGUID]
+CREATE PROCEDURE [dbo].[PR_CommunityApproval_Update_ApprovalSystemGUID]
     @Id INT,
     @ApprovalSystemGUID UNIQUEIDENTIFIER
-
 AS
-
 UPDATE CommunityApprovals
 SET
     ApprovalStatusId = 2,

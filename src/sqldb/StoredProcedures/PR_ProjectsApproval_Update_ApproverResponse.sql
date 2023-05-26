@@ -2,7 +2,7 @@ CREATE PROCEDURE [dbo].[PR_ProjectsApproval_Update_ApproverResponse]
 (
   @ApprovalSystemGUID UNIQUEIDENTIFIER,
   @ApprovalStatusId INT,
-  @ApprovalRemarks varchar(255),
+  @ApprovalRemarks VARCHAR(255),
   @ApprovalDate DATETIME
 )
 AS

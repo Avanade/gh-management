@@ -1,9 +1,9 @@
-create PROCEDURE [dbo].[PR_Category_Update]
+CREATE PROCEDURE [dbo].[PR_Category_Update]
 (
-			@Id int,
-			@Name varchar(50),	
-			@CreatedBy  varchar(50),
-			@ModifiedBy  varchar(50) 
+			@Id INT,
+			@Name VARCHAR(50),	
+			@CreatedBy  VARCHAR(50),
+			@ModifiedBy  VARCHAR(50) 
 		 
 ) AS
 BEGIN
@@ -13,7 +13,5 @@ UPDATE [dbo].[Category]
 	   [CreatedBy] = @CreatedBy,
 	   [Modified] = GETDATE(),
 	   [ModifiedBy] = @ModifiedBy
- WHERE  [Id] = @Id
-
- 
-end
+ WHERE  [Id] = @Id 
+END

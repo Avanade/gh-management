@@ -1,9 +1,4 @@
-/****** Object:  StoredProcedure [dbo].[PR_ApprovalTypes_Update_ById]    Script Date: 6/26/2022 4:28:13 PM ******/
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-Create PROCEDURE [dbo].[PR_ApprovalTypes_Update_ById] 
+CREATE PROCEDURE [dbo].[PR_ApprovalTypes_Update_ById] 
 (
 	@Id INT,
 	@Name VARCHAR(50),
@@ -13,12 +8,29 @@ Create PROCEDURE [dbo].[PR_ApprovalTypes_Update_ById]
 )
 AS
 BEGIN
-	UPDATE [dbo].[ApprovalTypes]
-	   SET [Name] = @Name
-		  ,[ApproverUserPrincipalName] = @ApproverUserPrincipalName
-		  ,[IsActive] = @IsActive
-		  ,[Modified] = GETDATE()
-		  ,[ModifiedBy] = @ModifiedBy
-	 WHERE Id = @Id
-	 SELECT @Id Id
+	DECLARE @Status AS BIT
+	DECLARE @IsExist AS INT
+	SET @IsExist = (
+		SELECT COUNT(*) FROM [dbo].[ApprovalTypes] WHERE 
+			Id != @Id AND
+			Name=@Name AND 
+			ApproverUserPrincipalName=@ApproverUserPrincipalName AND 
+			IsArchived = 0
+	)
+	SET @Status = 0
+
+	IF @IsExist = 0
+	BEGIN
+		UPDATE [dbo].[ApprovalTypes]
+		SET [Name] = @Name
+			,[ApproverUserPrincipalName] = @ApproverUserPrincipalName
+			,[IsActive] = @IsActive
+			,[Modified] = GETDATE()
+			,[ModifiedBy] = @ModifiedBy
+		WHERE Id = @Id
+		
+		SET @Status = 1
+	END
+
+	SELECT @Id Id, @Status Status
 END

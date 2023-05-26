@@ -1,16 +1,9 @@
-/****** Object:  StoredProcedure [dbo].[PR_CommunityActivitiesContributionAreas_Insert]    Script Date: 6/16/2022 3:42:50 PM ******/
-SET ANSI_NULLS ON
-GO
-
-SET QUOTED_IDENTIFIER ON
-GO
-
 CREATE PROCEDURE [dbo].[PR_CommunityActivitiesContributionAreas_Insert]
 (
-	@CommunityActivityId int,
-	@ContributionAreaId int,
-	@IsPrimary bit,
-	@CreatedBy varchar(50)
+	@CommunityActivityId INT,
+	@ContributionAreaId INT,
+	@IsPrimary BIT,
+	@CreatedBy VARCHAR(50)
 )
 AS
 BEGIN

@@ -15,7 +15,8 @@ INSERT INTO CommunityApprovals
 SELECT @CommunityId, CAL.ApproverUserPrincipalName, 1, 'For Approval - ' + C.[Name], C.CreatedBy, C.CreatedBy
 FROM Communities C, CommunityApproversList CAL
 WHERE C.Id = @CommunityId
+AND CAL.Disabled =0
 
 UPDATE Communities SET ApprovalStatusId = 2, Modified = GETDATE() WHERE Id = @CommunityId
 
-exec PR_CommunityApprovals_Select_ById @CommunityId
+EXEC PR_CommunityApprovals_Select_ById @CommunityId

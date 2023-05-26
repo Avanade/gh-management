@@ -1,4 +1,4 @@
-﻿Create PROCEDURE [dbo].[PR_CommunityMembers_Select_ByCommunityId]
+﻿CREATE PROCEDURE [dbo].[PR_CommunityMembers_Select_ByCommunityId]
 (
   @CommunityId INT
 )
@@ -9,7 +9,7 @@ BEGIN
 	SET NOCOUNT ON;
 
     -- Insert statements for procedure here
-SELECT CM.[Id],
+SELECT
        CM.[CommunityId],
        CM.[UserPrincipalName],
        U.[Name]

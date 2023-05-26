@@ -6,9 +6,9 @@
 <div x-data="data()">
     <form onsubmit="event.preventDefault()" autocomplete="off">
         <fieldset>
-            <h3 class="text-lg font-medium leading-6 text-gray-900">Make Project Public</h3>
+            <h3 class="text-lg font-medium leading-6 text-gray-900">Make Repository Public</h3>
             <p class="mt-1 text-sm text-gray-500">
-            Before a project becomes public, it needs to undergo intellectual property, legal and security approvals. Answer the following questions to proceed with the request.
+            Before a repository becomes public, it needs to undergo intellectual property, legal and security approvals. Answer the following questions to proceed with the request.
             </p>
             <div class="flex flex flex-col md:flex-row mt-7">
                 <div class="basis-1/2 md:base-full  md:flex-row mx-3 self-center">
@@ -88,9 +88,10 @@
                 <div class="basis-1/2 md:base-full md:flex-row mx-3 self-center">
                     <div class="ml-3">
                         <div class="mt-1">
-                            <input type="text" maxlength="50" name="osscontributionInformation" id="osscontributionInformation"
+                            <textarea maxlength="1000" name="osscontributionInformation" id="osscontributionInformation" rows="3"
                                 x-model="form.osscontributionInformation"
                                 class="mt-1 block w-full shadow-sm text-sm border-gray-300 rounded-md text-gray-900 py-2 pl-3 pr-12">
+                            </textarea>
                         </div>
                     </div>
                 </div>
@@ -106,7 +107,7 @@
             </div>
             <div class="ml-3">
                 <button type="button"
-                    class="bg-orange-500  inline-flex justify-center py-2 px-4 rounded-md text-white" @click="goto('/projects')">
+                    class="bg-orange-500  inline-flex justify-center py-2 px-4 rounded-md text-white" @click="goto('/repositories')">
                     <span>Cancel</span>
                 </button>
             </div>
@@ -121,7 +122,7 @@
         let path = window.location.pathname
         return {
             form: {
-                id: path.replace('/projects/makepublic/',''),
+                id: path.replace('/repositories/makepublic/',''),
                 newcontribution: '',
                 osssponsor: '',
                 avanadeofferingsassets: '',
@@ -132,7 +133,7 @@
             submit() {
                 Alpine.store('master').modal.reset()
                 Alpine.store('master').modal.show()
-                Alpine.store('master').postData("/api/projects/request/public", this.form, "Your request has been submitted.", "Go to your project list", "/projects")
+                Alpine.store('master').postData("/api/repositories/request/public", this.form, "Your request has been submitted.", "Go to your repository list", "/repositories")
             },
             get isValid() {
                 if(this.form.sponsorOptions.length>0) {

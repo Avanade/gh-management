@@ -1,0 +1,69 @@
+{
+    "definition": {
+        "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+        "actions": {
+            "HTTP_CLEAR_ORG_REPO": {
+                "inputs": {
+                    "authentication": {
+                        "identity": "@concat('/subscriptions/59d64684-e7c9-4397-8982-6b775a473b74/resourcegroups/OpenTech_GitHub_Mgmt/providers/Microsoft.ManagedIdentity/userAssignedIdentities/', parameters('ManagedIdentityName'))",
+                        "type": "ManagedServiceIdentity"
+                    },
+                    "method": "GET",
+                    "uri": "@concat(parameters('GHMgmDomain'), '/api/clearorgrepos')"
+                },
+                "runAfter": {
+                    "HTTP__OWNER_CLEANUP": [
+                        "SUCCEEDED"
+                    ]
+                },
+                "type": "Http"
+            },
+            "HTTP_INDEX_ORG_REPO": {
+                "inputs": {
+                    "authentication": {
+                        "identity": "@concat('/subscriptions/59d64684-e7c9-4397-8982-6b775a473b74/resourcegroups/OpenTech_GitHub_Mgmt/providers/Microsoft.ManagedIdentity/userAssignedIdentities/', parameters('ManagedIdentityName'))",
+                        "type": "ManagedServiceIdentity"
+                    },
+                    "method": "GET",
+                    "uri": "@concat(parameters('GHMgmDomain'), '/api/indexorgrepos')"
+                },
+                "runAfter": {},
+                "trackedProperties": {},
+                "type": "Http"
+            },
+            "HTTP__OWNER_CLEANUP": {
+                "inputs": {
+                    "authentication": {
+                        "identity": "@concat('/subscriptions/59d64684-e7c9-4397-8982-6b775a473b74/resourcegroups/OpenTech_GitHub_Mgmt/providers/Microsoft.ManagedIdentity/userAssignedIdentities/', parameters('ManagedIdentityName'))",
+                        "type": "ManagedServiceIdentity"
+                    },
+                    "method": "GET",
+                    "uri": "@concat(parameters('GHMgmDomain'), '/api/RepoOwnersCleanup')"
+                },
+                "runAfter": {
+                    "HTTP_INDEX_ORG_REPO": [
+                        "Succeeded"
+                    ]
+                },
+                "type": "Http"
+            }
+        },
+        "contentVersion": "1.0.0.0",
+        "outputs": {},
+        "triggers": {
+            "Recurrence": {
+                "recurrence": {
+                    "frequency": "Week",
+                    "interval": 1,
+                    "schedule": {
+                        "weekDays": [
+                            "Sunday"
+                        ]
+                    }
+                },
+                "type": "Recurrence"
+            }
+        }
+    },
+    "kind": "Stateful"
+}
