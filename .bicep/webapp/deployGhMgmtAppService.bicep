@@ -77,11 +77,11 @@ module sqlServerFirewalls '../sql/sqlServerFirewallRules.bicep' = {
   }
 }
 
-var backendAddress = activeEnv == 'prod' ? first (
-  filter (
-    ghmgmtAppService.properties.hostNameSslStates, e => e.sslState == 'SniEnabled'
-  )
-)!.name : ghmgmtAppService.properties.defaultHostName
+var hostNameSslStates = filter(
+  ghmgmtAppService.properties.hostNameSslStates, e => e.sslState == 'SniEnabled'
+)
+
+var backendAddress = length(hostNameSslStates) > 0 ? first (hostNameSslStates)!.name : ghmgmtAppService.properties.defaultHostName
 
 module ghmgmtFrontDoor 'deployFrontDoor.bicep' = if(runDeployFrontDoor) {
   name: 'frontdoor'
