@@ -35,6 +35,8 @@ func UseTemplate(w *http.ResponseWriter, r *http.Request, page string, pageData 
 	}
 
 	approvalSystemUrl := os.Getenv("APPROVAL_SYSTEM_APP_URL")
+	title := os.Getenv("APP_TITLE")
+	logoPath := os.Getenv("APP_LOGO_PATH")
 	// Data on master page
 	var menu []models.TypMenu
 	menu = append(menu, models.TypMenu{Name: "Dashboard", Url: "/", IconPath: "/public/icons/dashboard.svg", External: false})
@@ -47,7 +49,7 @@ func UseTemplate(w *http.ResponseWriter, r *http.Request, page string, pageData 
 		menu = append(menu, models.TypMenu{Name: "Admin", Url: "/admin", IconPath: "/public/icons/lock.svg", External: false})
 	}
 
-	masterPageData := models.TypHeaders{Menu: menu, Page: getUrlPath(r.URL.Path)}
+	masterPageData := models.TypHeaders{Title: title, LogoPath: logoPath, Menu: menu, Page: getUrlPath(r.URL.Path)}
 
 	data := models.TypPageData{
 		Header:    masterPageData,

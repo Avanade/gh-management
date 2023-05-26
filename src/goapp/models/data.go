@@ -22,8 +22,10 @@ type TypGitHubUser struct {
 }
 
 type TypHeaders struct {
-	Menu []TypMenu
-	Page string
+	Menu     []TypMenu
+	Title    string
+	LogoPath string
+	Page     string
 }
 
 type TypMenu struct {
