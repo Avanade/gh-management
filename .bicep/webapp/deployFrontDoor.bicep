@@ -100,11 +100,10 @@ resource frontDoor 'Microsoft.Network/frontDoors@2021-06-01' = {
             '/*'
           ]
           routeConfiguration: {
-            '@odata.type': '#Microsoft.Azure.FrontDoor.Models.FrontdoorForwardingConfiguration'
-            forwardingProtocol: 'MatchRequest'
-            backendPool: {
-              id: resourceId('Microsoft.Network/frontDoors/backEndPools', frontDoorName, backendPoolName)
-            }
+            redirectType: 'Found'
+            redirectProtocol: 'HttpsOnly'
+            customHost: backendAddress
+            '@odata.type': '#Microsoft.Azure.FrontDoor.Models.FrontdoorRedirectConfiguration'
           }
           enabledState: 'Enabled'
         }
