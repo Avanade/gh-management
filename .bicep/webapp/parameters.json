@@ -10,6 +10,9 @@
         "containerServer": {"value": ""},
         "appServiceSettings": {
             "value": {
+                "APP_TITLE":"",
+                "APP_LOGO_PATH":"",
+
                 "WEBSITES_ENABLE_APP_SERVICE_STORAGE":"",
                 "DOCKER_REGISTRY_SERVER_URL":"",
                 "DOCKER_REGISTRY_SERVER_USERNAME":"",
