@@ -232,7 +232,7 @@ func OrganizationInvitation(token string, username string, org string) *github.I
 func ListOutsideCollaborators(token string, org string) []*github.User {
 	client := createClient(token)
 
-	options := &github.ListOutsideCollaboratorsOptions{ListOptions: github.ListOptions{PerPage: 1}}
+	options := &github.ListOutsideCollaboratorsOptions{ListOptions: github.ListOptions{PerPage: 30}}
 
 	var collaborators []*github.User
 	for {
