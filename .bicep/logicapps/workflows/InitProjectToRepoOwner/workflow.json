@@ -9,7 +9,7 @@
                         "type": "ManagedServiceIdentity"
                     },
                     "method": "GET",
-                    "uri": "@concat(parameters('GHMgmDomain'), '/api/projectToRepoOwner')"
+                    "uri": "@concat(parameters('GHMgmDomain'), '/api/init/projectToRepoOwner')"
                 },
                 "runAfter": {},
                 "trackedProperties": {},

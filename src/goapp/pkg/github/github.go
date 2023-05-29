@@ -1,6 +1,8 @@
 package githubAPI
 
 import (
+	"log"
+
 	"context"
 	"fmt"
 	"main/models"
@@ -230,11 +232,24 @@ func OrganizationInvitation(token string, username string, org string) *github.I
 func ListOutsideCollaborators(token string, org string) []*github.User {
 	client := createClient(token)
 
-	options := *&github.ListOutsideCollaboratorsOptions{}
+	options := &github.ListOutsideCollaboratorsOptions{ListOptions: github.ListOptions{PerPage: 30}}
 
-	collabs, _, _ := client.Organizations.ListOutsideCollaborators(context.Background(), org, &options)
+	var collaborators []*github.User
+	for {
+		collabs, resp, err := client.Organizations.ListOutsideCollaborators(context.Background(), org, options)
+		if err != nil {
+			log.Printf("ERROR : %s", err.Error())
+			return nil
+		}
 
-	return collabs
+		collaborators = append(collaborators, collabs...)
+		if resp.NextPage == 0 {
+			break
+		}
+		options.Page = resp.NextPage
+	}
+
+	return collaborators
 }
 func RemoveOutsideCollaborator(token string, org string, username string) *github.Response {
 	client := createClient(token)
@@ -271,19 +286,44 @@ func RemoveOrganizationsMember(token string, org string, username string) *githu
 }
 func RepositoriesListCollaborators(token string, org string, repo string, role string, affiliations string) []*github.User {
 	client := createClient(token)
-	options := *&github.ListCollaboratorsOptions{Permission: role, Affiliation: affiliations}
-	ListCollabs, _, _ := client.Repositories.ListCollaborators(context.Background(), org, repo, &options)
-	return ListCollabs
+	options := &github.ListCollaboratorsOptions{Permission: role, Affiliation: affiliations, ListOptions: github.ListOptions{PerPage: 30}}
+
+	var collaborators []*github.User
+	for {
+		listCollaborators, resp, err := client.Repositories.ListCollaborators(context.Background(), org, repo, options)
+		if err != nil {
+			log.Printf("ERROR : %s", err.Error())
+			return nil
+		}
+
+		collaborators = append(collaborators, listCollaborators...)
+		if resp.NextPage == 0 {
+			break
+		}
+		options.Page = resp.NextPage
+	}
+	return collaborators
 }
 func OrgListMembers(token string, org string) []*github.User {
 	client := createClient(token)
 
-	ListCollabs, _, err := client.Organizations.ListMembers(context.Background(), org, nil)
+	opts := &github.ListMembersOptions{ListOptions: github.ListOptions{PerPage: 30}}
 
-	if err != nil {
+	var members []*github.User
 
-		fmt.Println(err)
+	for {
+		listMembers, resp, err := client.Organizations.ListMembers(context.Background(), org, opts)
+		if err != nil {
+			log.Printf("ERROR : %s", err.Error())
+			return nil
+		}
+
+		members = append(members, listMembers...)
+		if resp.NextPage == 0 {
+			break
+		}
+		opts.Page = resp.NextPage
 	}
 
-	return ListCollabs
+	return members
 }
