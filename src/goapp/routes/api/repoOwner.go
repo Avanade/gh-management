@@ -7,7 +7,7 @@ import (
 	ghmgmt "main/pkg/ghmgmtdb"
 )
 
-func ProjectToRepoOwner(w http.ResponseWriter, r *http.Request) {
+func InitProjectToRepoOwner(w http.ResponseWriter, r *http.Request) {
 
 	ProjectOwnersForRepoOwners := ghmgmt.GetProjectForRepoOwner()
 
