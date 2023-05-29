@@ -286,9 +286,23 @@ func RemoveOrganizationsMember(token string, org string, username string) *githu
 }
 func RepositoriesListCollaborators(token string, org string, repo string, role string, affiliations string) []*github.User {
 	client := createClient(token)
-	options := *&github.ListCollaboratorsOptions{Permission: role, Affiliation: affiliations}
-	ListCollabs, _, _ := client.Repositories.ListCollaborators(context.Background(), org, repo, &options)
-	return ListCollabs
+	options := &github.ListCollaboratorsOptions{Permission: role, Affiliation: affiliations, ListOptions: github.ListOptions{PerPage: 30}}
+
+	var collaborators []*github.User
+	for {
+		listCollaborators, resp, err := client.Repositories.ListCollaborators(context.Background(), org, repo, options)
+		if err != nil {
+			log.Printf("ERROR : %s", err.Error())
+			return nil
+		}
+
+		collaborators = append(collaborators, listCollaborators...)
+		if resp.NextPage == 0 {
+			break
+		}
+		options.Page = resp.NextPage
+	}
+	return collaborators
 }
 func OrgListMembers(token string, org string) []*github.User {
 	client := createClient(token)
