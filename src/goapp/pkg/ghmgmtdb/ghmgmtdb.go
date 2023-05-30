@@ -1463,6 +1463,25 @@ func DeleteRepoOwnerRecordByUserAndProjectId(id int64, userPrincipalName string)
 	return nil
 }
 
+func SearchCommunitiesProjectsUsers(searchText, offSet, rowCount, username string) ([]map[string]interface{}, error) {
+	db := ConnectDb()
+	defer db.Close()
+
+	params := map[string]interface{}{
+		"searchText":    searchText,
+		"offSet":        offSet,
+		"rowCount":      rowCount,
+		"userprincipal": username,
+	}
+
+	result, err := db.ExecuteStoredProcedureWithResult("PR_Search_communities_projects_users", params)
+	if err != nil {
+		return nil, err
+	}
+
+	return result, err
+}
+
 func GetCommunityApprovers() ([]map[string]interface{}, error) {
 	db := ConnectDb()
 	defer db.Close()
