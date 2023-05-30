@@ -159,7 +159,7 @@ func main() {
 	muxApi.Handle("/RepoOwnerScan", loadGuidAuthApi(rtApi.RepoOwnerScan)).Methods("GET")
 	muxApi.Handle("/CommunityInitCommunityType", loadGuidAuthApi(rtApi.CommunityInitCommunityType)).Methods("GET")
 	// API FOR ProjectToRepoOwner APP
-	muxApi.Handle("/projectToRepoOwner", loadGuidAuthApi(rtApi.ProjectToRepoOwner)).Methods("GET")
+	muxApi.Handle("/init/projectToRepoOwner", loadGuidAuthApi(rtApi.InitProjectToRepoOwner)).Methods("GET")
 	muxApi.Handle("/RepoOwnersCleanup", loadGuidAuthApi(rtApi.RepoOwnersCleanup)).Methods("GET")
 	muxAdmin := mux.PathPrefix("/admin").Subrouter()
 	muxAdmin.Handle("", loadAdminPage(rtAdmin.AdminIndex))
