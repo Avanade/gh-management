@@ -75,7 +75,7 @@ func processApprovalProjects(r *http.Request, module string) error {
 		spName = "PR_CommunityApproval_Update_ApproverResponse"
 	}
 
-	_, err = db.ExecuteStoredProcedure(spName, params)
+	_, err = ghmgmt.UpdateApprovalApproverResponse(spName, req.ItemId, req.Remarks, req.ResponseDate, approvalStatusId)
 	if err != nil {
 		return err
 	}

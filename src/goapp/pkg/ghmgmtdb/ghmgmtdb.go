@@ -1541,3 +1541,22 @@ func UpdateCommunityApproversById(id int, disabled bool, approverUserPrincipalNa
 
 	return true, nil
 }
+
+func UpdateApprovalApproverResponse(storedProcedure, itemId, remarks, responseDate string, approvalStatusId int) (bool, error) {
+	db := ConnectDb()
+	defer db.Close()
+
+	params := map[string]interface{}{
+		"ApprovalSystemGUID": itemId,
+		"ApprovalStatusId":   approvalStatusId,
+		"ApprovalRemarks":    remarks,
+		"ApprovalDate":       responseDate,
+	}
+
+	_, err := db.ExecuteStoredProcedure(storedProcedure, params)
+	if err != nil {
+		return false, err
+	}
+
+	return true, nil
+}
