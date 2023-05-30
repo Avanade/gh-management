@@ -5,9 +5,14 @@ import (
 	"fmt"
 )
 
-func CommunitiesSelectByID(params map[string]interface{}) ([]map[string]interface{}, error) {
+func CommunitiesSelectByID(id string) ([]map[string]interface{}, error) {
 	db := ConnectDb()
 	defer db.Close()
+
+	params := map[string]interface{}{
+		"Id": id,
+	}
+
 	result, err := db.ExecuteStoredProcedureWithResult("dbo.PR_Communities_select_byID", params)
 	if err != nil {
 		fmt.Println(err)
@@ -15,7 +20,6 @@ func CommunitiesSelectByID(params map[string]interface{}) ([]map[string]interfac
 
 	return result, err
 }
-
 func CommunitiesInsert(params map[string]interface{}) ([]map[string]interface{}, error) {
 	db := ConnectDb()
 	defer db.Close()
@@ -27,7 +31,6 @@ func CommunitiesInsert(params map[string]interface{}) ([]map[string]interface{},
 
 	return result, err
 }
-
 func CommunitySponsorsInsert(params map[string]interface{}) (sql.Result, error) {
 	db := ConnectDb()
 	defer db.Close()
@@ -38,7 +41,6 @@ func CommunitySponsorsInsert(params map[string]interface{}) (sql.Result, error) 
 
 	return result, err
 }
-
 func RelatedCommunitiesDelete(params map[string]interface{}) (sql.Result, error) {
 	db := ConnectDb()
 	defer db.Close()
@@ -59,7 +61,6 @@ func RelatedCommunitiesInsert(params map[string]interface{}) (sql.Result, error)
 
 	return result, err
 }
-
 func CommunityTagsInsert(params map[string]interface{}) (sql.Result, error) {
 	db := ConnectDb()
 	defer db.Close()
@@ -70,7 +71,6 @@ func CommunityTagsInsert(params map[string]interface{}) (sql.Result, error) {
 
 	return result, err
 }
-
 func CommunitiesUpdate(params map[string]interface{}) (sql.Result, error) {
 	db := ConnectDb()
 	defer db.Close()
@@ -114,7 +114,6 @@ func CommunitiesInitCommunityType(params map[string]interface{}) ([]map[string]i
 
 	return result, err
 }
-
 func CommunitySponsorsSelect(params map[string]interface{}) ([]map[string]interface{}, error) {
 	db := ConnectDb()
 	defer db.Close()
@@ -168,15 +167,42 @@ func RelatedCommunitiesSelect(params map[string]interface{}) ([]map[string]inter
 
 	return result, err
 }
-
 func CommunityIManageExecuteSelect(params map[string]interface{}) ([]map[string]interface{}, error) {
 	db := ConnectDb()
 	defer db.Close()
-	
+
 	result, err := db.ExecuteStoredProcedureWithResult("dbo.PR_Communities_select_IManage", params)
 	if err != nil {
 		fmt.Println(err)
 	}
 
 	return result, err
+}
+func MyCommunitites(username string) ([]map[string]interface{}, error) {
+	db := ConnectDb()
+	defer db.Close()
+
+	params := map[string]interface{}{
+		"UserPrincipalName": username,
+	}
+	result, err := db.ExecuteStoredProcedureWithResult("PR_Communities_select_my", params)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+func CommunitiesByCreatedBy(createdBy string) ([]map[string]interface{}, error) {
+	db := ConnectDb()
+	defer db.Close()
+
+	param := map[string]interface{}{
+
+		"CreatedBy": createdBy,
+	}
+
+	result, err := db.ExecuteStoredProcedureWithResult("PR_Communities_select", param)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
 }

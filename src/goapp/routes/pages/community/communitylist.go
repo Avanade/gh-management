@@ -2,12 +2,11 @@ package routes
 
 import (
 	"encoding/json"
+	ghmgmt "main/pkg/ghmgmtdb"
 	session "main/pkg/session"
-	"main/pkg/sql"
 	template "main/pkg/template"
 	"net/http"
-	"os"
-	ghmgmt "main/pkg/ghmgmtdb"
+
 	"github.com/gorilla/mux"
 )
 
@@ -25,25 +24,8 @@ func GetUserCommunitylist(w http.ResponseWriter, r *http.Request) {
 	sessionaz, _ := session.Store.Get(r, "auth-session")
 	iprofile := sessionaz.Values["profile"]
 	profile := iprofile.(map[string]interface{})
-	username := profile["preferred_username"]
-	dbConnectionParam := sql.ConnectionParam{
-		ConnectionString: os.Getenv("GHMGMTDB_CONNECTION_STRING"),
-	}
-
-	db, err := sql.Init(dbConnectionParam)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	defer db.Close()
-
-	// Get project list
-	param := map[string]interface{}{
-
-		"CreatedBy": username,
-	}
-
-	Communities, err := db.ExecuteStoredProcedureWithResult("PR_Communities_select", param)
+	username := profile["preferred_username"].(string)
+	Communities, err := ghmgmt.CommunitiesByCreatedBy(username)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -64,22 +46,9 @@ func GetMyCommunitylist(w http.ResponseWriter, r *http.Request) {
 	sessionaz, _ := session.Store.Get(r, "auth-session")
 	iprofile := sessionaz.Values["profile"]
 	profile := iprofile.(map[string]interface{})
-	username := profile["preferred_username"]
+	username := profile["preferred_username"].(string)
 
-	dbConnectionParam := sql.ConnectionParam{
-		ConnectionString: os.Getenv("GHMGMTDB_CONNECTION_STRING"),
-	}
-
-	db, err := sql.Init(dbConnectionParam)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	defer db.Close()
-
-	params := make(map[string]interface{})
-	params["UserPrincipalName"] = username
-	Communities, err := db.ExecuteStoredProcedureWithResult("PR_Communities_select_my", params)
+	Communities, err := ghmgmt.MyCommunitites(username)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -125,23 +94,7 @@ func GetUserCommunity(w http.ResponseWriter, r *http.Request) {
 	req := mux.Vars(r)
 	id := req["id"]
 
-	dbConnectionParam := sql.ConnectionParam{
-		ConnectionString: os.Getenv("GHMGMTDB_CONNECTION_STRING"),
-	}
-
-	db, err := sql.Init(dbConnectionParam)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	defer db.Close()
-
-	param := map[string]interface{}{
-
-		"Id": id,
-	}
-
-	Communities, err := db.ExecuteStoredProcedureWithResult("PR_Communities_select_byID", param)
+	Communities, err := ghmgmt.CommunitiesSelectByID(id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
