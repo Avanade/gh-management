@@ -75,7 +75,7 @@ func processApprovalProjects(r *http.Request, module string) error {
 		spName = "PR_CommunityApproval_Update_ApproverResponse"
 	}
 
-	_, err = db.ExecuteStoredProcedure(spName, params)
+	_, err = ghmgmt.UpdateApprovalApproverResponse(spName, req.ItemId, req.Remarks, req.ResponseDate, approvalStatusId)
 	if err != nil {
 		return err
 	}
@@ -266,8 +266,6 @@ func SendReassignEmail(data models.TypProjectApprovals) error {
 		"|RejectText|", data.RejectText,
 	)
 
-	//buf := new(bytes.Buffer)
-	//body := buf.String()
 	body := replacer.Replace(bodyTemplate)
 	m := email.TypEmailMessage{
 		Subject: fmt.Sprintf("[GH-Management] New Project For Review - %v", data.ProjectName),
@@ -308,8 +306,6 @@ func UpdateCommunityApprovalReassignApprover(w http.ResponseWriter, r *http.Requ
 		"ApproverEmail": req.ApproverEmail,
 		"Username":      req.Username,
 	}
-	//projectApproval := ghmgmt.GetProjectApprovalByGUID(req.ItemId)
-	//result, err2 := db.ExecuteStoredProcedureWithResult("PR_ProjectsApproval_Update_ApproverUserPrincipalName", param)
 	result, err2 := ghmgmt.CommunityApprovalslUpdateApproverUserPrincipalName(param)
 	if err2 != nil {
 		http.Error(w, err2.Error(), http.StatusInternalServerError)
@@ -330,8 +326,6 @@ func UpdateCommunityApprovalReassignApprover(w http.ResponseWriter, r *http.Requ
 			CommunityNotes:             v["Notes"].(string),
 			ApproverUserPrincipalName:  v["ApproverUserPrincipalName"].(string),
 			ApprovalDescription:        v["ApprovalDescription"].(string),
-
-			//RequestStatus: v["RequestStatus"].(string),
 		}
 		data.ApproveUrl = fmt.Sprintf("%s/response/%s/%s/%s/1", os.Getenv("APPROVAL_SYSTEM_APP_BaseURL"), req.ApplicationId, req.ApplicationModuleId, req.ItemId)
 		data.RejectUrl = fmt.Sprintf("%s/response/%s/%s/%s/0", os.Getenv("APPROVAL_SYSTEM_APP_BaseURL"), req.ApplicationId, req.ApplicationModuleId, req.ItemId)

@@ -68,11 +68,7 @@ func CategoryAPIHandler(w http.ResponseWriter, r *http.Request) {
 
 		}
 	case "GET":
-		param := map[string]interface{}{
-
-			"Id": body.Id,
-		}
-		_, err := ghmgmt.CommunitiesSelectByID(param)
+		_, err := ghmgmt.CommunitiesSelectByID(strconv.Itoa(body.Id))
 		if err != nil {
 			fmt.Println(err)
 		}

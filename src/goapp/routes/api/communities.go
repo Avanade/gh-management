@@ -8,11 +8,9 @@ import (
 	ghmgmt "main/pkg/ghmgmtdb"
 	"main/pkg/msgraph"
 	session "main/pkg/session"
-	"main/pkg/sql"
 	comm "main/routes/pages/community"
 	"net/http"
 	"net/mail"
-	"os"
 	"strconv"
 	"strings"
 
@@ -160,11 +158,7 @@ func CommunityAPIHandler(w http.ResponseWriter, r *http.Request) {
 		}(body.ChannelId)
 
 	case "GET":
-		param := map[string]interface{}{
-
-			"Id": body.Id,
-		}
-		_, err := ghmgmt.CommunitiesSelectByID(param)
+		_, err := ghmgmt.CommunitiesSelectByID(strconv.Itoa(body.Id))
 		if err != nil {
 			fmt.Println(err)
 		}
@@ -301,11 +295,7 @@ func MyCommunityAPIHandler(w http.ResponseWriter, r *http.Request) {
 			go comm.RequestCommunityApproval(int64(id))
 		}
 	case "GET":
-		param := map[string]interface{}{
-
-			"Id": body.Id,
-		}
-		_, err := ghmgmt.CommunitiesSelectByID(param)
+		_, err := ghmgmt.CommunitiesSelectByID(strconv.Itoa(body.Id))
 		if err != nil {
 			fmt.Println(err)
 		}
@@ -334,18 +324,6 @@ func GetRequestStatusByCommunity(w http.ResponseWriter, r *http.Request) {
 	req := mux.Vars(r)
 	id := req["id"]
 
-	// Connect to database
-	dbConnectionParam := sql.ConnectionParam{
-		ConnectionString: os.Getenv("GHMGMTDB_CONNECTION_STRING"),
-	}
-
-	db, err := sql.Init(dbConnectionParam)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	defer db.Close()
-
 	// Get project list
 	params := make(map[string]interface{})
 	params["Id"] = id
@@ -372,16 +350,6 @@ func GetCommunitiesIsexternal(w http.ResponseWriter, r *http.Request) {
 	iprofile := sessionaz.Values["profile"]
 	profile := iprofile.(map[string]interface{})
 	username := profile["preferred_username"]
-	dbConnectionParam := sql.ConnectionParam{
-		ConnectionString: os.Getenv("GHMGMTDB_CONNECTION_STRING"),
-	}
-
-	db, err := sql.Init(dbConnectionParam)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	defer db.Close()
 
 	param := map[string]interface{}{
 
@@ -406,18 +374,7 @@ func GetCommunitiesIsexternal(w http.ResponseWriter, r *http.Request) {
 	w.Write(jsonResp)
 }
 func CommunityInitCommunityType(w http.ResponseWriter, r *http.Request) {
-	dbConnectionParam := sql.ConnectionParam{
-		ConnectionString: os.Getenv("GHMGMTDB_CONNECTION_STRING"),
-	}
-
-	db, err := sql.Init(dbConnectionParam)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	defer db.Close()
-
-	_, err = ghmgmt.CommunitiesInitCommunityType(nil)
+	_, err := ghmgmt.CommunitiesInitCommunityType(nil)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
