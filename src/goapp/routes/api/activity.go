@@ -5,7 +5,7 @@ import (
 	"fmt"
 	models "main/models"
 	email "main/pkg/email"
-	db "main/pkg/ghmgmtdb"
+	ghmgmt "main/pkg/ghmgmtdb"
 	session "main/pkg/session"
 	"net/http"
 	"os"
@@ -69,13 +69,13 @@ func GetActivities(w http.ResponseWriter, r *http.Request) {
 		orderby := params["orderby"][0]
 		ordertype := params["ordertype"][0]
 		result = ActivitiesDto{
-			Data:  db.CommunitiesActivities_Select_ByOffsetAndFilterAndCreatedBy(offset, filter, orderby, ordertype, search, username),
-			Total: db.CommunitiesActivities_TotalCount_ByCreatedBy(username, search),
+			Data:  ghmgmt.CommunitiesActivities_Select_ByOffsetAndFilterAndCreatedBy(offset, filter, orderby, ordertype, search, username),
+			Total: ghmgmt.CommunitiesActivities_TotalCount_ByCreatedBy(username, search),
 		}
 	} else {
 		result = ActivitiesDto{
-			Data:  db.CommunitiesActivities_Select(),
-			Total: db.CommunitiesActivities_TotalCount(),
+			Data:  ghmgmt.CommunitiesActivities_Select(),
+			Total: ghmgmt.CommunitiesActivities_TotalCount(),
 		}
 	}
 
@@ -99,7 +99,7 @@ func CreateActivity(w http.ResponseWriter, r *http.Request) {
 
 	// CHECK ACTIVITY TYPE IF EXIST / INSERT IF NOT EXIST
 	if body.Type.Id == 0 {
-		id, err := db.ActivityTypes_Insert(body.Type.Name)
+		id, err := ghmgmt.ActivityTypes_Insert(body.Type.Name)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
@@ -109,7 +109,7 @@ func CreateActivity(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// COMMUNITY ACTIVITY
-	communityActivityId, err := db.CommunitiesActivities_Insert(models.Activity{
+	communityActivityId, err := ghmgmt.CommunitiesActivities_Insert(models.Activity{
 		Name:        body.Name,
 		Url:         body.Url,
 		Date:        body.Date,
@@ -162,7 +162,7 @@ func CreateActivity(w http.ResponseWriter, r *http.Request) {
 func GetActivityById(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id, _ := strconv.Atoi(vars["id"])
-	result, err := db.CommunitiesActivities_Select_ById(id)
+	result, err := ghmgmt.CommunitiesActivities_Select_ById(id)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 	}
@@ -173,7 +173,7 @@ func GetActivityById(w http.ResponseWriter, r *http.Request) {
 
 func insertCommunityActivitiesContributionArea(ca ItemDto, caca models.CommunityActivitiesContributionAreas) error {
 	if ca.Id == 0 {
-		id, err := db.ContributionAreas_Insert(ca.Name, caca.CreatedBy)
+		id, err := ghmgmt.ContributionAreas_Insert(ca.Name, caca.CreatedBy)
 		if err != nil {
 			return err
 		}
@@ -181,7 +181,7 @@ func insertCommunityActivitiesContributionArea(ca ItemDto, caca models.Community
 		caca.ContributionAreaId = id
 	}
 
-	_, err := db.CommunityActivitiesContributionAreas_Insert(models.CommunityActivitiesContributionAreas{
+	_, err := ghmgmt.CommunityActivitiesContributionAreas_Insert(models.CommunityActivitiesContributionAreas{
 		CommunityActivityId: caca.CommunityActivityId,
 		ContributionAreaId:  caca.ContributionAreaId,
 		IsPrimary:           caca.IsPrimary,
@@ -196,7 +196,7 @@ func insertCommunityActivitiesContributionArea(ca ItemDto, caca models.Community
 
 func processHelp(activityId int, username string, h HelpDto) error {
 	// INSERT
-	_, err := db.CommunityActivitiesHelpTypes_Insert(activityId, h.Id, h.Details)
+	_, err := ghmgmt.CommunityActivitiesHelpTypes_Insert(activityId, h.Id, h.Details)
 	if err != nil {
 		return err
 	}

@@ -24,7 +24,7 @@ SELECT
 			END [Description],
 				P.Id [ID]
 FROM	[dbo].[Projects] P
-	INNER JOIN RepoOwners RO ON P.Id = RO.ProjectId  
+	LEFT JOIN RepoOwners RO ON P.Id = RO.ProjectId  
 WHERE	[Name] LIKE '%'+@searchText+'%'
 		OR RO.UserPrincipalName
 		LIKE '%'+@searchText+'%'
@@ -36,7 +36,7 @@ SELECT
 		[Description],
 		c.[Id]
 FROM	[dbo].[Communities] c
-  	INNER JOIN ApprovalStatus T ON c.ApprovalStatusId = T.Id
+  	LEFT JOIN ApprovalStatus T ON c.ApprovalStatusId = T.Id
 WHERE	(
 			(
 				c.[Name] LIKE '%'+@searchText+'%'

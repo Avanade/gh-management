@@ -4,13 +4,13 @@ import (
 	"encoding/json"
 
 	session "main/pkg/session"
-	"main/pkg/sql"
 	template "main/pkg/template"
 	"net/http"
-	"os"
 
 	"fmt"
 	models "main/models"
+
+	db "main/pkg/ghmgmtdb"
 
 	"github.com/gorilla/mux"
 )
@@ -24,23 +24,7 @@ func GetCommunityApproversById(w http.ResponseWriter, r *http.Request) {
 	req := mux.Vars(r)
 	id := req["id"]
 
-	dbConnectionParam := sql.ConnectionParam{
-		ConnectionString: os.Getenv("GHMGMTDB_CONNECTION_STRING"),
-	}
-
-	db, err := sql.Init(dbConnectionParam)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	defer db.Close()
-
-	param := map[string]interface{}{
-
-		"Id": id,
-	}
-
-	approvers, err := db.ExecuteStoredProcedureWithResult("PR_CommunityApproversList_select_byId", param)
+	approvers, err := db.GetCommunityApproversById(id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -58,19 +42,7 @@ func GetCommunityApproversById(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetCommunityApproversList(w http.ResponseWriter, r *http.Request) {
-
-	dbConnectionParam := sql.ConnectionParam{
-		ConnectionString: os.Getenv("GHMGMTDB_CONNECTION_STRING"),
-	}
-
-	db, err := sql.Init(dbConnectionParam)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	defer db.Close()
-
-	approvers, err := db.ExecuteStoredProcedureWithResult("PR_CommunityApproversList_select", nil)
+	approvers, err := db.GetCommunityApprovers()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -88,19 +60,7 @@ func GetCommunityApproversList(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetAllActiveCommunityApprovers(w http.ResponseWriter, r *http.Request) {
-
-	dbConnectionParam := sql.ConnectionParam{
-		ConnectionString: os.Getenv("GHMGMTDB_CONNECTION_STRING"),
-	}
-
-	db, err := sql.Init(dbConnectionParam)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	defer db.Close()
-
-	approvers, err := db.ExecuteStoredProcedureWithResult("PR_CommunityApproversList_SelectAllActive", nil)
+	approvers, err := db.GetActiveCommunityApprovers()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -121,7 +81,7 @@ func CommunityApproversListUpdate(w http.ResponseWriter, r *http.Request) {
 	sessionaz, _ := session.Store.Get(r, "auth-session")
 	iprofile := sessionaz.Values["profile"]
 	profile := iprofile.(map[string]interface{})
-	username := profile["preferred_username"]
+	username := profile["preferred_username"].(string)
 	var body models.TypCommunityApprovers
 
 	err := json.NewDecoder(r.Body).Decode(&body)
@@ -129,31 +89,15 @@ func CommunityApproversListUpdate(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		fmt.Println(err)
-
 		return
 	}
 
-	cp := sql.ConnectionParam{
-
-		ConnectionString: os.Getenv("GHMGMTDB_CONNECTION_STRING"),
+	_, errDb := db.UpdateCommunityApproversById(body.Id, body.Disabled, body.ApproverUserPrincipalName, username)
+	if errDb != nil {
+		if errDb != nil {
+			http.Error(w, errDb.Error(), http.StatusBadRequest)
+			fmt.Println(errDb)
+			return
+		}
 	}
-	db, _ := sql.Init(cp)
-	defer db.Close()
-
-	param1 := map[string]interface{}{
-
-		"ApproverUserPrincipalName": body.ApproverUserPrincipalName,
-		"Disabled":                  body.Disabled,
-		"CreatedBy":                 username,
-		"ModifiedBy":                username,
-		"Id":                        body.Id,
-	}
-
-	__, err := db.ExecuteStoredProcedureWithResult("PR_CommunityApproversList_Insert", param1)
-	if err != nil {
-		fmt.Println(__)
-		fmt.Println(err)
-
-	}
-
 }
