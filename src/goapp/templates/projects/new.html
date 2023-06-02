@@ -2,7 +2,24 @@
 
 
 <div id="pageTitle">Request a repository</div>
-
+{{ if not .isInnersourceMember }}
+<div class="bg-red-50 p-4 mb-3">
+    <div class="flex">
+      <div class="flex-shrink-0">
+        <svg class="h-5 w-5 text-red-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+          <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+        </svg>
+      </div>
+      <div class="ml-3 flex-1 md:flex md:justify-between">
+        <p class="text-sm text-red-700">
+            "An invitation to join <a href="https://github.com/orgs/{{.innersourceOrg}}/invitation" class="font-medium text-red-700 hover:text-red-600" target="_blank">{{.innersourceOrg}}</a> and
+            <a href="https://github.com/orgs/{{.opensourceOrg}}/invitation" class="font-medium text-red-700 hover:text-red-600" target="_blank">{{.opensourceOrg}}</a> was created. You need to join the
+            <a href="https://github.com/orgs/{{.innersourceOrg}}/invitation" class="font-medium text-red-700 hover:text-red-600" target="_blank">{{.innersourceOrg}}</a> so you get added to the repository you'll request."
+        </p>
+      </div>
+    </div>
+</div>
+{{ end }}
 <div x-data="data()" x-init="onload()">
     <form onsubmit="event.preventDefault()" autocomplete="off">
         <fieldset x-bind:disabled="mode=='view'">
