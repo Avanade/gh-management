@@ -10,9 +10,12 @@
 )">
     <div x-html="template"></div>
 </div>
-<div x-data="data()" x-init="onload()">
+<div x-data="data()" x-init="onload(
+    {{.isInnersourceMember}},
+    {{.isOpensourceMember}}
+)">
     <form onsubmit="event.preventDefault()" autocomplete="off">
-        <fieldset x-bind:disabled="mode=='view'">
+        <fieldset x-bind:disabled="mode=='view' || isNotMember">
             <h3 class="text-lg font-medium leading-6 text-gray-900">Repository information</h3>
             <p class="mt-1 text-sm text-gray-500">
             All repositories start on Avanade’s innersource on GitHub. Once you have identified a business sponsor, and
@@ -252,7 +255,11 @@
             coowner: {
                 show: false,
             },
+            isInnersourceMember : false,
+            isOpensourceOrgMember : false,
             submit() {
+                if(this.isNotMember()) return;
+                
                 Alpine.store('master').modal.reset()
                 Alpine.store('master').modal.show()
                 if (!this.form.id)
@@ -264,9 +271,10 @@
             showName(userPrincipalName, githubUser) {
                 return userPrincipalName.includes(this.form.coowner) || githubUser.includes(this.form.coowner) ? true : false
             },
-
-
-
+            isNotMember(){
+                console.log(!this.isInnersourceMember || !this.isOpensourceOrgMember)
+                return !this.isInnersourceMember || !this.isOpensourceOrgMember
+            },
             get isValid() {
                 if (
                     !!this.form.name &&
@@ -311,11 +319,17 @@
                     return false
                 }
             },
-            async onload() {
+            async onload(
+                isInnersourceMember, 
+                isOpensourceOrgMember
+            ) {
                 var modal = Alpine.store('master').modal
                 modal.update('loading', 'Loading', 'Please wait', '', '')
 
                 this.form.id = '{{.Id}}'
+                this.isInnersourceMember = isInnersourceMember;
+                this.isOpensourceOrgMember = isOpensourceOrgMember;
+
                 if (this.form.id) {
                     this.mode = 'view'
                     await fetch('/api/repositories/' + '{{.Id}}')
@@ -367,11 +381,11 @@
                 const opensourceOrgLink = this.getOrgInvitationLink(this.openSourceOrg)
                 
                 if(!this.isInnersourceMember && !this.isOpensourceOrgMember){
-                    return `An invitation to join ${innersourceOrgLink} and ${opensourceOrgLink} was created. You need to join the ${innersourceOrgLink} so you get added to the repository you'll request.`
+                    return `You have a pending invitation to ${innersourceOrgLink} and ${opensourceOrgLink}. You need to join these organizations before you can request for a repository.`
                 } else if(!this.isInnersourceMember){
-                    return `An invitation to join ${innersourceOrgLink} was created. You need to join this organization so you get added to the repository you'll request.`
+                    return `You have a pending invitation to ${innersourceOrgLink}. You need to join these organizations before you can request for a repository.`
                 } else if(!this.isOpensourceMember){
-                    return `An invitation to join ${opensourceOrgLink} was created. You need to join this organization so you won't get tagged as an outside collaborator.`
+                    return `You have a pending invitation to ${opensourceOrgLink}. You need to join these organizations before you can request for a repository.`
                 }
             },
             getOrgInvitationLink(orgName){
