@@ -5,11 +5,13 @@ import (
 	"fmt"
 	"log"
 	auth "main/pkg/authentication"
+	"main/pkg/email"
 	githubAPI "main/pkg/github"
 	session "main/pkg/session"
 	"net/http"
 	"os"
 	"strconv"
+	"time"
 
 	"golang.org/x/oauth2"
 
@@ -91,7 +93,7 @@ func GithubCallbackHandler(w http.ResponseWriter, r *http.Request) {
 	session.Values["ghIsDirect"] = isDirect
 	session.Values["ghIsEnterpriseMember"] = isEnterpriseMember
 
-	CheckMembership(ghUser, &id)
+	CheckMembership(userPrincipalName, ghUser, &id)
 
 	err = session.Save(r, w)
 	if err != nil {
@@ -100,7 +102,6 @@ func GithubCallbackHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	http.Redirect(w, r, "/", http.StatusSeeOther)
-
 }
 
 func GithubForceSaveHandler(w http.ResponseWriter, r *http.Request) {
@@ -152,15 +153,48 @@ func GithubForceSaveHandler(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
-func CheckMembership(ghusername string, id *int64) {
+func CheckMembership(userPrincipalName, ghusername string, id *int64) {
 	token := os.Getenv("GH_TOKEN")
 	inner, outer, _ := githubAPI.OrganizationsIsMember(token, ghusername)
 	if !inner {
 		githubAPI.OrganizationInvitation(token, ghusername, os.Getenv("GH_ORG_INNERSOURCE"))
-
 	}
 	if !outer {
 		githubAPI.OrganizationInvitation(token, ghusername, os.Getenv("GH_ORG_OPENSOURCE"))
 
 	}
+	EmailAcceptOrgInvitation(userPrincipalName, ghusername, inner, outer)
+}
+
+func EmailAcceptOrgInvitation(userEmail, ghUsername string, isInnersourceOrgMember, isOpensourceOrgMember bool) {
+	opensourceLink := orgInvitationLink(os.Getenv("GH_ORG_OPENSOURCE"))
+	innersourceLink := orgInvitationLink(os.Getenv("GH_ORG_INNERSOURCE"))
+
+	body := fmt.Sprintf("Hello %s, <br>", ghUsername)
+
+	if !isInnersourceOrgMember && !isOpensourceOrgMember {
+		body = body + fmt.Sprintf("<p>An invitation to join %s and %s was created. You need to join the %s so you get added to the repository you'll request.</p>", innersourceLink, opensourceLink, innersourceLink)
+	} else if !isInnersourceOrgMember {
+		body = body + fmt.Sprintf("<p>An invitation to join %s was created. You need to join this organization so you get added to the repository you'll request.</p>", innersourceLink)
+	} else if !isOpensourceOrgMember {
+		body = body + fmt.Sprintf("<p>An invitation to join %s was created. You need to join this organization so you won't get tagged as an outside collaborator.</p>", opensourceLink)
+	} else {
+		return
+	}
+
+	body = body + "<br>OSPO"
+
+	m := email.TypEmailMessage{
+		Subject: "Github Organizations Invitation",
+		Body:    body,
+		To:      userEmail,
+	}
+
+	email.SendEmail(m)
+	fmt.Printf("GitHub Organization Invitation on %s was sent.", time.Now())
+}
+
+func orgInvitationLink(org string) string {
+	url := fmt.Sprintf("https://github.com/orgs/%s/invitation", org)
+	return fmt.Sprintf("<a href='%s'>%s</a>", url, org)
 }
