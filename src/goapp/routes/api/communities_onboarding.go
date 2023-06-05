@@ -2,6 +2,7 @@ package routes
 
 import (
 	"encoding/json"
+	"log"
 	db "main/pkg/ghmgmtdb"
 	session "main/pkg/session"
 	"net/http"
@@ -35,13 +36,13 @@ func GetCommunityOnBoardingInfo(w http.ResponseWriter, r *http.Request) {
 			"Community": info,
 		}
 
-		// result := db.PRContributionAreas_Select()
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 
 		jsonResp, err := json.Marshal(data)
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			log.Println(err.Error())
+			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
 		w.Write(jsonResp)
@@ -61,7 +62,8 @@ func GetCommunities(w http.ResponseWriter, r *http.Request) {
 
 	jsonResp, err := json.Marshal(result)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		log.Println(err.Error())
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 	w.Write(jsonResp)
@@ -77,7 +79,8 @@ func GetCommunityMembers(w http.ResponseWriter, r *http.Request) {
 
 	jsonResp, err := json.Marshal(result)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		log.Println(err.Error())
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 	w.Write(jsonResp)

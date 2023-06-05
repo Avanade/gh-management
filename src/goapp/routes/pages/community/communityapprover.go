@@ -2,13 +2,12 @@ package routes
 
 import (
 	"encoding/json"
+	"log"
 
+	models "main/models"
 	session "main/pkg/session"
 	template "main/pkg/template"
 	"net/http"
-
-	"fmt"
-	models "main/models"
 
 	db "main/pkg/ghmgmtdb"
 
@@ -26,6 +25,7 @@ func GetCommunityApproversById(w http.ResponseWriter, r *http.Request) {
 
 	approvers, err := db.GetCommunityApproversById(id)
 	if err != nil {
+		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -34,6 +34,7 @@ func GetCommunityApproversById(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	jsonResp, err := json.Marshal(approvers)
 	if err != nil {
+		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -44,6 +45,7 @@ func GetCommunityApproversById(w http.ResponseWriter, r *http.Request) {
 func GetCommunityApproversList(w http.ResponseWriter, r *http.Request) {
 	approvers, err := db.GetCommunityApprovers()
 	if err != nil {
+		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -52,6 +54,7 @@ func GetCommunityApproversList(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	jsonResp, err := json.Marshal(approvers)
 	if err != nil {
+		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -62,6 +65,7 @@ func GetCommunityApproversList(w http.ResponseWriter, r *http.Request) {
 func GetAllActiveCommunityApprovers(w http.ResponseWriter, r *http.Request) {
 	approvers, err := db.GetActiveCommunityApprovers()
 	if err != nil {
+		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -70,6 +74,7 @@ func GetAllActiveCommunityApprovers(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	jsonResp, err := json.Marshal(approvers)
 	if err != nil {
+		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -85,19 +90,16 @@ func CommunityApproversListUpdate(w http.ResponseWriter, r *http.Request) {
 	var body models.TypCommunityApprovers
 
 	err := json.NewDecoder(r.Body).Decode(&body)
-
 	if err != nil {
+		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusBadRequest)
-		fmt.Println(err)
 		return
 	}
 
-	_, errDb := db.UpdateCommunityApproversById(body.Id, body.Disabled, body.ApproverUserPrincipalName, username)
-	if errDb != nil {
-		if errDb != nil {
-			http.Error(w, errDb.Error(), http.StatusBadRequest)
-			fmt.Println(errDb)
-			return
-		}
+	_, err = db.UpdateCommunityApproversById(body.Id, body.Disabled, body.ApproverUserPrincipalName, username)
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 }

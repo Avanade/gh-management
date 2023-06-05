@@ -3,6 +3,7 @@ package routes
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"main/pkg/email"
 	db "main/pkg/ghmgmtdb"
 	githubAPI "main/pkg/github"
@@ -32,7 +33,13 @@ func CheckAvaOpenSource(w http.ResponseWriter, r *http.Request) {
 	org := os.Getenv("GH_ORG_OPENSOURCE")
 	var OutsideCollabsUsers []string
 	token := os.Getenv("GH_TOKEN")
-	repos, _ := githubAPI.GetRepositoriesFromOrganization(org)
+	repos, err := githubAPI.GetRepositoriesFromOrganization(org)
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
 	Outsidecollabs := githubAPI.ListOutsideCollaborators(token, org)
 	for _, list := range Outsidecollabs {
 		OutsideCollabsUsers = append(OutsideCollabsUsers, *list.Login)
@@ -66,6 +73,7 @@ func CheckAvaOpenSource(w http.ResponseWriter, r *http.Request) {
 			for _, admin := range Adminmember {
 				email, err := db.UsersGetEmail(admin)
 				if err != nil {
+					log.Println(err.Error())
 					http.Error(w, err.Error(), http.StatusInternalServerError)
 					return
 				}
@@ -87,9 +95,19 @@ func ClearOrgMembers(w http.ResponseWriter, r *http.Request) {
 	var ConvertedOutsidecollabsList []string
 	users := githubAPI.OrgListMembers(token, organization)
 	for _, list := range users {
-		email, _ := db.UsersGetEmail(*list.Login)
+		email, err := db.UsersGetEmail(*list.Login)
+		if err != nil {
+			log.Println(err.Error())
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
 		if len(email) > 0 {
-			activeuser, _ := msgraph.ActiveUsers(email)
+			activeuser, err := msgraph.ActiveUsers(email)
+			if err != nil {
+				log.Println(err.Error())
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
 			if activeuser == nil {
 				githubAPI.RemoveOrganizationsMember(token, organization, *list.Login)
 
@@ -106,7 +124,12 @@ func ClearOrgMembers(w http.ResponseWriter, r *http.Request) {
 
 	usersOpenorg := githubAPI.OrgListMembers(token, organizationsOpen)
 	for _, list := range usersOpenorg {
-		email, _ := db.UsersGetEmail(*list.Login)
+		email, err := db.UsersGetEmail(*list.Login)
+		if err != nil {
+			log.Println(err.Error())
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
 		if len(email) > 0 {
 			activeuser, _ := msgraph.ActiveUsers(email)
 			if activeuser == nil {
@@ -117,7 +140,6 @@ func ClearOrgMembers(w http.ResponseWriter, r *http.Request) {
 			githubAPI.ConvertMemberToOutsideCollaborator(token, organizationsOpen, *list.Login)
 			ConvertedOutsidecollabsList = append(ConvertedOutsidecollabsList, *list.Login)
 		}
-
 	}
 
 	if len(ConvertedOutsidecollabsList) > 0 {
@@ -161,7 +183,12 @@ func RepoOwnerScan(w http.ResponseWriter, r *http.Request) {
 	for _, org := range organizationsOpen {
 
 		repoOnwerDeficient = nil
-		repos, _ := githubAPI.GetRepositoriesFromOrganization(org)
+		repos, err := githubAPI.GetRepositoriesFromOrganization(org)
+		if err != nil {
+			log.Println(err.Error())
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
 
 		for _, repo := range repos {
 			fmt.Println("Checking number of owners of " + repo.Name)
@@ -170,7 +197,13 @@ func RepoOwnerScan(w http.ResponseWriter, r *http.Request) {
 				fmt.Println(repo.Name + " has less than 2 owners")
 				repoOnwerDeficient = append(repoOnwerDeficient, repo.Name)
 				for _, owner := range owners {
-					email, _ = db.UsersGetEmail(*owner.Login)
+					email, err = db.UsersGetEmail(*owner.Login)
+					if err != nil {
+						log.Println(err.Error())
+						http.Error(w, err.Error(), http.StatusInternalServerError)
+						return
+					}
+
 					if email != "" {
 						EmailcoownerDeficient(email, org, repo.Name)
 					}
@@ -194,10 +227,16 @@ func AddCollaborator(w http.ResponseWriter, r *http.Request) {
 
 	// Get repository
 	data := db.GetProjectById(id)
-	s, _ := json.Marshal(data)
-	var repoList []Repo
-	err := json.Unmarshal(s, &repoList)
+	s, err := json.Marshal(data)
 	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	var repoList []Repo
+	err = json.Unmarshal(s, &repoList)
+	if err != nil {
+		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -219,6 +258,7 @@ func AddCollaborator(w http.ResponseWriter, r *http.Request) {
 		if (isInnersource && isMember) || (!isInnersource) {
 			_, err := githubAPI.AddCollaborator(repoUrlSub[1], repo.Name, ghUser, permission)
 			if err != nil {
+				log.Println(err.Error())
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
 			}
@@ -234,6 +274,7 @@ func AddCollaborator(w http.ResponseWriter, r *http.Request) {
 				if len(users) > 0 {
 					rec, err := db.RepoOwnersByUserAndProjectId(id, users[0]["UserPrincipalName"].(string))
 					if err != nil {
+						log.Println(err.Error())
 						http.Error(w, err.Error(), http.StatusInternalServerError)
 						return
 					}
@@ -241,6 +282,7 @@ func AddCollaborator(w http.ResponseWriter, r *http.Request) {
 					if len(rec) > 0 {
 						err := db.DeleteRepoOwnerRecordByUserAndProjectId(id, users[0]["UserPrincipalName"].(string))
 						if err != nil {
+							log.Println(err.Error())
 							http.Error(w, err.Error(), http.StatusInternalServerError)
 							return
 						}
@@ -265,10 +307,16 @@ func RemoveCollaborator(w http.ResponseWriter, r *http.Request) {
 
 	// Get repository
 	data := db.GetProjectById(id)
-	s, _ := json.Marshal(data)
-	var repoList []Repo
-	err := json.Unmarshal(s, &repoList)
+	s, err := json.Marshal(data)
 	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	var repoList []Repo
+	err = json.Unmarshal(s, &repoList)
+	if err != nil {
+		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -286,6 +334,7 @@ func RemoveCollaborator(w http.ResponseWriter, r *http.Request) {
 
 		_, err := githubAPI.RemoveCollaborator(repoUrlSub[1], repo.Name, ghUser, permission)
 		if err != nil {
+			log.Println(err.Error())
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
@@ -296,6 +345,7 @@ func RemoveCollaborator(w http.ResponseWriter, r *http.Request) {
 			if len(users) > 0 {
 				err = db.DeleteRepoOwnerRecordByUserAndProjectId(id, users[0]["UserPrincipalName"].(string))
 				if err != nil {
+					log.Println(err.Error())
 					http.Error(w, err.Error(), http.StatusInternalServerError)
 					return
 				}
@@ -454,13 +504,4 @@ func EmailcoownerDeficient(Email string, Org string, reponame string) {
 	}
 
 	email.SendEmail(m)
-}
-
-func stringInArray(a string, list []string) bool {
-	for _, b := range list {
-		if b == a {
-			return true
-		}
-	}
-	return false
 }

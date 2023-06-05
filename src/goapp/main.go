@@ -57,6 +57,9 @@ func main() {
 	// Create session and GitHubClient
 	session.InitializeSession()
 
+	// Setup logging format
+	log.SetFlags(log.LstdFlags | log.Lshortfile)
+
 	mux := mux.NewRouter()
 	mux.PathPrefix("/public/").Handler(http.StripPrefix("/public/", http.FileServer(http.Dir("./public/"))))
 	mux.Handle("/", loadAzAuthPage(rtPages.HomeHandler))

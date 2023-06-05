@@ -3,6 +3,7 @@ package routes
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	models "main/models"
 	email "main/pkg/email"
 	ghmgmt "main/pkg/ghmgmtdb"
@@ -15,23 +16,23 @@ import (
 )
 
 type ActivitiesDto struct {
-	Data  interface{} `json: "data"`
-	Total int         `json: "total"`
+	Data  interface{} `json:"data"`
+	Total int         `json:"total"`
 }
 
 type ActivityDto struct {
-	Name        string  `json: "name"`
-	Url         string  `json: "url"`
-	Date        string  `json: "date"`
-	Type        ItemDto `json: "type"`
-	CommunityId int     `json: "communityid"`
+	Name        string  `json:"name"`
+	Url         string  `json:"url"`
+	Date        string  `json:"date"`
+	Type        ItemDto `json:"type"`
+	CommunityId int     `json:"communityid"`
 	CreatedBy   string
 	ModifiedBy  string
 
-	PrimaryContributionArea     ItemDto   `json: "primarycontributionarea"`
-	AdditionalContributionAreas []ItemDto `json: "additionalcontributionareas"`
+	PrimaryContributionArea     ItemDto   `json:"primarycontributionarea"`
+	AdditionalContributionAreas []ItemDto `json:"additionalcontributionareas"`
 
-	Help HelpDto `json: "help"`
+	Help HelpDto `json:"help"`
 }
 
 type HelpDto struct {
@@ -40,8 +41,8 @@ type HelpDto struct {
 }
 
 type ItemDto struct {
-	Id   int    `json: "id"`
-	Name string `json: "name"`
+	Id   int    `json:"id"`
+	Name string `json:"name"`
 }
 
 type CommunityActivitiesContributionAreasDto struct {
@@ -93,6 +94,7 @@ func CreateActivity(w http.ResponseWriter, r *http.Request) {
 	var body ActivityDto
 	err := json.NewDecoder(r.Body).Decode(&body)
 	if err != nil {
+		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -101,6 +103,7 @@ func CreateActivity(w http.ResponseWriter, r *http.Request) {
 	if body.Type.Id == 0 {
 		id, err := ghmgmt.ActivityTypes_Insert(body.Type.Name)
 		if err != nil {
+			log.Println(err.Error())
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
@@ -118,6 +121,7 @@ func CreateActivity(w http.ResponseWriter, r *http.Request) {
 		CreatedBy:   username,
 	})
 	if err != nil {
+		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -125,6 +129,7 @@ func CreateActivity(w http.ResponseWriter, r *http.Request) {
 	if body.Help.Id != 0 {
 		errHelp := processHelp(communityActivityId, username, body.Help)
 		if errHelp != nil {
+			log.Println(err.Error())
 			http.Error(w, errHelp.Error(), http.StatusBadRequest)
 			return
 		}
@@ -138,6 +143,7 @@ func CreateActivity(w http.ResponseWriter, r *http.Request) {
 		CreatedBy:           username,
 	})
 	if err != nil {
+		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -151,6 +157,7 @@ func CreateActivity(w http.ResponseWriter, r *http.Request) {
 			CreatedBy:           username,
 		})
 		if err != nil {
+			log.Println(err.Error())
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
@@ -164,7 +171,9 @@ func GetActivityById(w http.ResponseWriter, r *http.Request) {
 	id, _ := strconv.Atoi(vars["id"])
 	result, err := ghmgmt.CommunitiesActivities_Select_ById(id)
 	if err != nil {
+		log.Println(err.Error())
 		w.WriteHeader(http.StatusBadRequest)
+		return
 	}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)

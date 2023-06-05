@@ -2,6 +2,7 @@ package routes
 
 import (
 	"encoding/json"
+	"log"
 	session "main/pkg/session"
 	"net/http"
 
@@ -14,7 +15,6 @@ import (
 
 func SearchHandler(w http.ResponseWriter, r *http.Request) {
 
-	//users := db.GetUsersWithGithub()
 	template.UseTemplate(&w, r, "search/search", nil)
 
 }
@@ -32,6 +32,7 @@ func GetSearchResults(w http.ResponseWriter, r *http.Request) {
 
 	searchResults, err := db.SearchCommunitiesProjectsUsers(searchText, offSet, rowCount, username)
 	if err != nil {
+		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -40,6 +41,7 @@ func GetSearchResults(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	jsonResp, err := json.Marshal(searchResults)
 	if err != nil {
+		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}

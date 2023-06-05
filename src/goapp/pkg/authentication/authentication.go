@@ -52,6 +52,10 @@ func NewAuthenticator(host string) (*Authenticator, error) {
 func VerifyAccessToken(r *http.Request) (*jwt.Token, error) {
 	tokenString := strings.Split(r.Header.Get("Authorization"), "Bearer ")[1]
 	keySet, err := jwk.Fetch(r.Context(), "https://login.microsoftonline.com/common/discovery/v2.0/keys")
+	if err != nil {
+		log.Println(err.Error())
+		return nil, err
+	}
 
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		if token.Method.Alg() != jwa.RS256.String() {
@@ -77,6 +81,7 @@ func VerifyAccessToken(r *http.Request) (*jwt.Token, error) {
 	})
 
 	if err != nil {
+		log.Println(err.Error())
 		return nil, err
 	}
 

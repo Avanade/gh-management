@@ -3,6 +3,7 @@ package routes
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"strconv"
 
@@ -13,12 +14,12 @@ import (
 )
 
 type ContributionAreaDto struct {
-	Id         int    `json:id`
-	Name       string `json:name`
-	Created    string `json:created`
-	CreatedBy  string `json:createdBy`
-	Modified   string `json:modified`
-	ModifiedBy string `json:modifiedBy`
+	Id         int    `json:"id"`
+	Name       string `json:"name"`
+	Created    string `json:"created"`
+	CreatedBy  string `json:"createdBy"`
+	Modified   string `json:"modified"`
+	ModifiedBy string `json:"modifiedBy"`
 }
 
 func GetContributionAreas(w http.ResponseWriter, r *http.Request) {
@@ -37,7 +38,9 @@ func GetContributionAreas(w http.ResponseWriter, r *http.Request) {
 	} else {
 		result, err := db.ContributionAreas_Select()
 		if err != nil {
-			w.WriteHeader(http.StatusBadRequest)
+			log.Println(err.Error())
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
 		}
 		data = result
 	}
@@ -57,7 +60,12 @@ func GetContributionAreas(w http.ResponseWriter, r *http.Request) {
 
 func GetContributionAreaById(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	id, _ := strconv.Atoi(vars["id"])
+	id, err := strconv.Atoi(vars["id"])
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 
 	result := db.GetContributionAreaById(id)
 	w.Header().Set("Content-Type", "application/json")
@@ -67,7 +75,12 @@ func GetContributionAreaById(w http.ResponseWriter, r *http.Request) {
 
 func GetContributionAreasByActivityId(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	activityId, _ := strconv.Atoi(vars["id"])
+	activityId, err := strconv.Atoi(vars["id"])
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 
 	result := db.AdditionalContributionAreas_Select(activityId)
 	w.Header().Set("Content-Type", "application/json")
@@ -86,7 +99,9 @@ func CreateContributionAreas(w http.ResponseWriter, r *http.Request) {
 
 	id, err := db.ContributionAreas_Insert(contributionArea.Name, username)
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
+		log.Println(err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 	contributionArea.Id = id
 	json.NewEncoder(w).Encode(contributionArea)

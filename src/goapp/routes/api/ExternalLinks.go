@@ -2,23 +2,20 @@ package routes
 
 import (
 	"encoding/json"
-	"fmt"
+	"log"
 	models "main/models"
-	session "main/pkg/session"
-	// "main/pkg/sql"
-
-	"net/http"
-	// "os"
 	ghmgmt "main/pkg/ghmgmtdb"
+	session "main/pkg/session"
+	"net/http"
+
 	"github.com/gorilla/mux"
 )
-
-
 
 func GetExternalLinks(w http.ResponseWriter, r *http.Request) {
 
 	ExternalLinks, err := ghmgmt.ExternalLinksExecuteSelect()
 	if err != nil {
+		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -27,6 +24,7 @@ func GetExternalLinks(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	jsonResp, err := json.Marshal(ExternalLinks)
 	if err != nil {
+		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -41,6 +39,7 @@ func GetExternalLinksAllEnabled(w http.ResponseWriter, r *http.Request) {
 
 	ExternalLinks, err := ghmgmt.ExternalLinksExecuteAllEnabled(param)
 	if err != nil {
+		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -49,11 +48,12 @@ func GetExternalLinksAllEnabled(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	jsonResp, err := json.Marshal(ExternalLinks)
 	if err != nil {
+		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	w.Write(jsonResp)	
+	w.Write(jsonResp)
 }
 
 func GetExternalLinksById(w http.ResponseWriter, r *http.Request) {
@@ -66,6 +66,7 @@ func GetExternalLinksById(w http.ResponseWriter, r *http.Request) {
 
 	ExternalLinks, err := ghmgmt.ExternalLinksExecuteById(param)
 	if err != nil {
+		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -74,6 +75,7 @@ func GetExternalLinksById(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	jsonResp, err := json.Marshal(ExternalLinks)
 	if err != nil {
+		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -89,8 +91,8 @@ func CreateExternalLinks(w http.ResponseWriter, r *http.Request) {
 
 	err := json.NewDecoder(r.Body).Decode(&data)
 	if err != nil {
+		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusBadRequest)
-		fmt.Println(err)
 		return
 	}
 
@@ -102,10 +104,11 @@ func CreateExternalLinks(w http.ResponseWriter, r *http.Request) {
 		"CreatedBy": username,
 	}
 
-	__, err := ghmgmt.ExternalLinksExecuteCreate(params)
+	_, err = ghmgmt.ExternalLinksExecuteCreate(params)
 	if err != nil {
-		fmt.Println(__)
-		fmt.Println(err)
+		log.Println(err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 }
 
@@ -118,8 +121,8 @@ func UpdateExternalLinks(w http.ResponseWriter, r *http.Request) {
 
 	err := json.NewDecoder(r.Body).Decode(&body)
 	if err != nil {
+		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusBadRequest)
-		fmt.Println(err)
 		return
 	}
 
@@ -132,9 +135,10 @@ func UpdateExternalLinks(w http.ResponseWriter, r *http.Request) {
 		"ModifiedBy": username,
 	}
 
-	_, err2 := ghmgmt.ExternalLinksExecuteUpdate(params)
+	_, err = ghmgmt.ExternalLinksExecuteUpdate(params)
 	if err != nil {
-		fmt.Println(err2)
+		log.Println(err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 }
@@ -143,15 +147,13 @@ func ExternalLinksDelete(w http.ResponseWriter, r *http.Request) {
 	req := mux.Vars(r)
 	id := req["id"]
 
-	// cp := sql.ConnectionParam{
-	// 	ConnectionString: os.Getenv("GHMGMTDB_CONNECTION_STRING"),
-	// }
-	// db, err := sql.Init(cp)
 	param := map[string]interface{}{
 		"Id": id,
 	}
-	_, error := ghmgmt.ExternalLinksExecuteDelete(param)
-	if error != nil {
-		fmt.Println(error)
+	_, err := ghmgmt.ExternalLinksExecuteDelete(param)
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 }

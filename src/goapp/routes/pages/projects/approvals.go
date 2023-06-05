@@ -3,11 +3,11 @@ package routes
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	models "main/models"
 	email "main/pkg/email"
 	ghmgmt "main/pkg/ghmgmtdb"
 	gh "main/pkg/github"
-	"main/pkg/sql"
 	"net/http"
 	"os"
 	"strings"
@@ -17,6 +17,7 @@ import (
 func UpdateApprovalStatusProjects(w http.ResponseWriter, r *http.Request) {
 	err := processApprovalProjects(r, "projects")
 	if err != nil {
+		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -26,6 +27,7 @@ func UpdateApprovalStatusProjects(w http.ResponseWriter, r *http.Request) {
 func UpdateApprovalStatusCommunity(w http.ResponseWriter, r *http.Request) {
 	err := processApprovalProjects(r, "community")
 	if err != nil {
+		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -43,17 +45,6 @@ func processApprovalProjects(r *http.Request, module string) error {
 
 	const REJECTED = 3
 	const APPROVED = 5
-
-	// Connect to database
-	dbConnectionParam := sql.ConnectionParam{
-		ConnectionString: os.Getenv("GHMGMTDB_CONNECTION_STRING"),
-	}
-
-	db, err := sql.Init(dbConnectionParam)
-	if err != nil {
-		return err
-	}
-	defer db.Close()
 
 	//Update approval status on database
 	approvalStatusId := APPROVED
@@ -122,21 +113,10 @@ func UpdateApprovalReassignApprover(w http.ResponseWriter, r *http.Request) {
 	var req models.TypUpdateApprovalReAssign
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
+		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	// Connect to database
-	dbConnectionParam := sql.ConnectionParam{
-		ConnectionString: os.Getenv("GHMGMTDB_CONNECTION_STRING"),
-	}
-
-	db, err := sql.Init(dbConnectionParam)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	defer db.Close()
 
 	param := map[string]interface{}{
 		"Id":            req.Id,
@@ -144,9 +124,10 @@ func UpdateApprovalReassignApprover(w http.ResponseWriter, r *http.Request) {
 		"Username":      req.Username,
 	}
 
-	result, err2 := ghmgmt.ProjectsApprovalUpdateApproverUserPrincipalName(param)
-	if err2 != nil {
-		http.Error(w, err2.Error(), http.StatusInternalServerError)
+	result, err := ghmgmt.ProjectsApprovalUpdateApproverUserPrincipalName(param)
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
@@ -177,6 +158,11 @@ func UpdateApprovalReassignApprover(w http.ResponseWriter, r *http.Request) {
 		data.RejectText = req.RejectText
 
 		err = SendReassignEmail(data)
+		if err != nil {
+			log.Println(err.Error())
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
 
 	}
 	w.WriteHeader(http.StatusOK)
@@ -273,42 +259,32 @@ func SendReassignEmail(data models.TypProjectApprovals) error {
 		To:      data.ApproverUserPrincipalName,
 	}
 
-	_, errEmail := email.SendEmail(m)
+	_, err := email.SendEmail(m)
 
-	if errEmail != nil {
-		return errEmail
+	if err != nil {
+		return err
 	}
-	return errEmail
+	return nil
 }
 
 func UpdateCommunityApprovalReassignApprover(w http.ResponseWriter, r *http.Request) {
 	var req models.TypUpdateApprovalReAssign
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
+		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	// Connect to database
-	dbConnectionParam := sql.ConnectionParam{
-		ConnectionString: os.Getenv("GHMGMTDB_CONNECTION_STRING"),
-	}
-
-	db, err := sql.Init(dbConnectionParam)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	defer db.Close()
 
 	param := map[string]interface{}{
 		"Id":            req.Id,
 		"ApproverEmail": req.ApproverEmail,
 		"Username":      req.Username,
 	}
-	result, err2 := ghmgmt.CommunityApprovalslUpdateApproverUserPrincipalName(param)
-	if err2 != nil {
-		http.Error(w, err2.Error(), http.StatusInternalServerError)
+	result, err := ghmgmt.CommunityApprovalslUpdateApproverUserPrincipalName(param)
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
@@ -333,6 +309,11 @@ func UpdateCommunityApprovalReassignApprover(w http.ResponseWriter, r *http.Requ
 		data.RejectText = req.RejectText
 
 		err = SendReassignEmailCommunity(data)
+		if err != nil {
+			log.Println(err.Error())
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
 
 	}
 	w.WriteHeader(http.StatusOK)
@@ -406,10 +387,10 @@ func SendReassignEmailCommunity(data models.TypCommunityApprovals) error {
 		To:      data.ApproverUserPrincipalName,
 	}
 
-	_, errEmail := email.SendEmail(m)
+	_, err := email.SendEmail(m)
 
-	if errEmail != nil {
-		return errEmail
+	if err != nil {
+		return err
 	}
-	return errEmail
+	return nil
 }

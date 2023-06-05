@@ -3,6 +3,7 @@ package routes
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	auth "main/pkg/authentication"
 	githubAPI "main/pkg/github"
 	session "main/pkg/session"
@@ -19,6 +20,7 @@ import (
 func GithubCallbackHandler(w http.ResponseWriter, r *http.Request) {
 	sessionaz, err := session.Store.Get(r, "auth-session")
 	if err != nil {
+		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -27,11 +29,13 @@ func GithubCallbackHandler(w http.ResponseWriter, r *http.Request) {
 
 	session, err := session.Store.Get(r, "gh-auth-session")
 	if err != nil {
+		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	if r.URL.Query().Get("state") != state {
+		log.Println("Invalid state paramerer")
 		http.Error(w, "Invalid state parameter", http.StatusBadRequest)
 		return
 	}
@@ -43,6 +47,7 @@ func GithubCallbackHandler(w http.ResponseWriter, r *http.Request) {
 
 	ghAccessToken, err := ghauth.Exchange(oauth2.NoContext, code)
 	if err != nil {
+		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -56,6 +61,7 @@ func GithubCallbackHandler(w http.ResponseWriter, r *http.Request) {
 	var p map[string]interface{}
 	err = json.Unmarshal([]byte(ghProfile), &p)
 	if err != nil {
+		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -65,12 +71,19 @@ func GithubCallbackHandler(w http.ResponseWriter, r *http.Request) {
 	ghId := strconv.FormatFloat(p["id"].(float64), 'f', 0, 64)
 	ghUser := fmt.Sprintf("%s", p["login"])
 	id, err := strconv.ParseInt(ghId, 10, 64)
-	resultUUG, errUUG := ghmgmt.UpdateUserGithub(userPrincipalName, ghId, ghUser, 0)
-	if errUUG != nil {
-		http.Error(w, errUUG.Error(), http.StatusInternalServerError)
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	session.Values["ghIsValid"] = resultUUG["IsValid"].(bool)
+
+	result, err := ghmgmt.UpdateUserGithub(userPrincipalName, ghId, ghUser, 0)
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	session.Values["ghIsValid"] = result["IsValid"].(bool)
 
 	isDirect, _ := msgraph.IsDirectMember(fmt.Sprintf("%s", azProfile["oid"]))
 	isEnterpriseMember, _ := msgraph.IsGithubEnterpriseMember(fmt.Sprintf("%s", azProfile["oid"]))
@@ -81,6 +94,10 @@ func GithubCallbackHandler(w http.ResponseWriter, r *http.Request) {
 	CheckMembership(ghUser, &id)
 
 	err = session.Save(r, w)
+	if err != nil {
+		log.Panicln(err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
 
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 
@@ -89,12 +106,14 @@ func GithubCallbackHandler(w http.ResponseWriter, r *http.Request) {
 func GithubForceSaveHandler(w http.ResponseWriter, r *http.Request) {
 	sessionaz, err := session.Store.Get(r, "auth-session")
 	if err != nil {
+		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	// Check session and state
 	session, err := session.Store.Get(r, "gh-auth-session")
 	if err != nil {
+		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -104,6 +123,7 @@ func GithubForceSaveHandler(w http.ResponseWriter, r *http.Request) {
 	var p map[string]interface{}
 	err = json.Unmarshal([]byte(ghProfile), &p)
 	if err != nil {
+		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -114,14 +134,20 @@ func GithubForceSaveHandler(w http.ResponseWriter, r *http.Request) {
 	ghId := strconv.FormatFloat(p["id"].(float64), 'f', 0, 64)
 	ghUser := fmt.Sprintf("%s", p["login"])
 
-	resultUUG, errUUG := ghmgmt.UpdateUserGithub(userPrincipalName, ghId, ghUser, 1)
-	if errUUG != nil {
-		http.Error(w, errUUG.Error(), http.StatusInternalServerError)
+	result, err := ghmgmt.UpdateUserGithub(userPrincipalName, ghId, ghUser, 1)
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	session.Values["ghIsValid"] = resultUUG["IsValid"].(bool)
+	session.Values["ghIsValid"] = result["IsValid"].(bool)
 
 	err = session.Save(r, w)
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }

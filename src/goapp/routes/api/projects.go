@@ -4,11 +4,11 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"log"
 	models "main/models"
 	ghmgmt "main/pkg/ghmgmtdb"
 	gh "main/pkg/github"
 	session "main/pkg/session"
-	"main/pkg/sql"
 	"net/http"
 	"os"
 	"strconv"
@@ -26,32 +26,27 @@ func GetUserProjects(w http.ResponseWriter, r *http.Request) {
 	profile := iprofile.(map[string]interface{})
 	username := profile["preferred_username"]
 
-	// Connect to database
-	dbConnectionParam := sql.ConnectionParam{
-		ConnectionString: os.Getenv("GHMGMTDB_CONNECTION_STRING"),
-	}
-
-	db, err := sql.Init(dbConnectionParam)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	defer db.Close()
-
 	// Get project list
 	params := make(map[string]interface{})
 	params["UserPrincipalName"] = username
 
 	projects, err := ghmgmt.ProjectsSelectByUserPrincipalName(params)
 	if err != nil {
+		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	s, _ := json.Marshal(projects)
+	s, err := json.Marshal(projects)
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 	var list []Repo
 	err = json.Unmarshal(s, &list)
 	if err != nil {
+		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -60,6 +55,7 @@ func GetUserProjects(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	jsonResp, err := json.Marshal(list)
 	if err != nil {
+		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -74,6 +70,7 @@ func GetUsersWithGithub(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	jsonResp, err := json.Marshal(users)
 	if err != nil {
+		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -84,24 +81,13 @@ func GetRequestStatusByProject(w http.ResponseWriter, r *http.Request) {
 	req := mux.Vars(r)
 	id := req["id"]
 
-	// Connect to database
-	dbConnectionParam := sql.ConnectionParam{
-		ConnectionString: os.Getenv("GHMGMTDB_CONNECTION_STRING"),
-	}
-
-	db, err := sql.Init(dbConnectionParam)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	defer db.Close()
-
 	// Get project list
 	params := make(map[string]interface{})
 	params["Id"] = id
 
 	projects, err := ghmgmt.ProjectApprovalsSelectById(params)
 	if err != nil {
+		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -110,6 +96,7 @@ func GetRequestStatusByProject(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	jsonResp, err := json.Marshal(projects)
 	if err != nil {
+		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -118,14 +105,25 @@ func GetRequestStatusByProject(w http.ResponseWriter, r *http.Request) {
 
 func GetRepoCollaboratorsByRepoId(w http.ResponseWriter, r *http.Request) {
 	req := mux.Vars(r)
-	id, _ := strconv.ParseInt(req["id"], 10, 64)
+	id, err := strconv.ParseInt(req["id"], 10, 64)
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 
 	// Get repository
 	data := ghmgmt.GetProjectById(id)
-	s, _ := json.Marshal(data)
-	var repoList []Repo
-	err := json.Unmarshal(s, &repoList)
+	s, err := json.Marshal(data)
 	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	var repoList []Repo
+	err = json.Unmarshal(s, &repoList)
+	if err != nil {
+		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -173,6 +171,7 @@ func GetRepoCollaboratorsByRepoId(w http.ResponseWriter, r *http.Request) {
 				//Get user name and email address
 				users, err := ghmgmt.GetUserByGitHubId(strconv.FormatInt(*collaborator.ID, 10))
 				if err != nil {
+					log.Println(err.Error())
 					http.Error(w, err.Error(), http.StatusInternalServerError)
 					return
 				}
@@ -189,6 +188,7 @@ func GetRepoCollaboratorsByRepoId(w http.ResponseWriter, r *http.Request) {
 
 			repoOwner, err := ghmgmt.GetRepoOwnersRecordByRepoId(int64(repo.Id))
 			if err != nil {
+				log.Println(err.Error())
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
 			}
@@ -196,6 +196,7 @@ func GetRepoCollaboratorsByRepoId(w http.ResponseWriter, r *http.Request) {
 			if len(repoOwner) > 0 {
 				users, err := ghmgmt.GetUserByUserPrincipal(repoOwner[0].UserPrincipalName)
 				if err != nil {
+					log.Println(err.Error())
 					http.Error(w, err.Error(), http.StatusInternalServerError)
 					return
 				}
@@ -216,6 +217,7 @@ func GetRepoCollaboratorsByRepoId(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	jsonResp, err := json.Marshal(result)
 	if err != nil {
+		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -237,12 +239,14 @@ func ArchiveProject(w http.ResponseWriter, r *http.Request) {
 	if archive == "1" {
 		err := gh.ArchiveProject(project, archive == "1", organization)
 		if err != nil {
+			log.Println(err.Error())
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 	} else {
 		isArchived, err := gh.IsArchived(project, organization)
 		if err != nil {
+			log.Println(err.Error())
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
@@ -252,7 +256,12 @@ func ArchiveProject(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	id, _ := strconv.ParseInt(projectId, 10, 64)
+	id, err := strconv.ParseInt(projectId, 10, 64)
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 	ghmgmt.UpdateProjectIsArchived(id, archive == "1")
 	w.WriteHeader(http.StatusOK)
 }
@@ -261,14 +270,20 @@ func GetAllRepositories(w http.ResponseWriter, r *http.Request) {
 
 	params := r.URL.Query()
 	search := params["search"][0]
-	offset, _ := strconv.Atoi(params["offset"][0])
+	offset, err := strconv.Atoi(params["offset"][0])
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 
 	// Get repository list
 	data := ghmgmt.Repos_Select_ByOffsetAndFilter(offset, search)
 	s, _ := json.Marshal(data)
 	var list []Repo
-	err := json.Unmarshal(s, &list)
+	err = json.Unmarshal(s, &list)
 	if err != nil {
+		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -281,6 +296,7 @@ func GetAllRepositories(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	jsonResp, err := json.Marshal(result)
 	if err != nil {
+		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -303,6 +319,11 @@ func SetVisibility(w http.ResponseWriter, r *http.Request) {
 	opensource := os.Getenv("GH_ORG_OPENSOURCE")
 
 	id, err := strconv.ParseInt(projectId, 10, 64)
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 
 	if currentState == "Public" {
 		// Set repo to desired visibility then move to innersource
@@ -315,8 +336,18 @@ func SetVisibility(w http.ResponseWriter, r *http.Request) {
 		gh.TransferRepository(project, opensource, innersource)
 
 		time.Sleep(3 * time.Second)
-		repoResp, _ := gh.GetRepository(project, innersource)
-		ghmgmt.UpdateTFSProjectReferenceById(id, repoResp.GetHTMLURL())
+		repoResp, err := gh.GetRepository(project, innersource)
+		if err != nil {
+			log.Println(err.Error())
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		err = ghmgmt.UpdateTFSProjectReferenceById(id, repoResp.GetHTMLURL())
+		if err != nil {
+			log.Println(err.Error())
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
 	} else {
 		// Set repo to desired visibility
 		err := gh.SetProjectVisibility(project, desiredState, innersource)
@@ -324,12 +355,6 @@ func SetVisibility(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "Failed to make the repository "+desiredState, http.StatusInternalServerError)
 			return
 		}
-	}
-
-	// Update database
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
 	}
 
 	ghmgmt.UpdateProjectVisibilityId(id, int64(visibilityId))
@@ -348,7 +373,8 @@ func RequestMakePublic(w http.ResponseWriter, r *http.Request) {
 
 	err := json.NewDecoder(r.Body).Decode(&body)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		log.Println(err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
@@ -356,6 +382,7 @@ func RequestMakePublic(w http.ResponseWriter, r *http.Request) {
 
 	id, err := strconv.ParseInt(body.Id, 10, 64)
 	if err != nil {
+		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -371,6 +398,7 @@ func ImportReposToDatabase(w http.ResponseWriter, r *http.Request) {
 	for _, org := range organizations {
 		repos, err := gh.GetRepositoriesFromOrganization(org)
 		if err != nil {
+			log.Println(err.Error())
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
@@ -408,10 +436,10 @@ func ImportReposToDatabase(w http.ResponseWriter, r *http.Request) {
 
 				err := ghmgmt.ProjectInsertByImport(param)
 				if err != nil {
+					log.Println(err.Error())
 					http.Error(w, err.Error(), http.StatusInternalServerError)
 				}
 			}
-
 		}(repo)
 	}
 }
@@ -424,6 +452,7 @@ func InitIndexOrgRepos(w http.ResponseWriter, r *http.Request) {
 	for _, org := range orgs {
 		reposByOrg, err := gh.GetRepositoriesFromOrganization(org)
 		if err != nil {
+			log.Println(err.Error())
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
@@ -468,6 +497,7 @@ func InitIndexOrgRepos(w http.ResponseWriter, r *http.Request) {
 			}
 
 			if err != nil {
+				log.Println(err.Error())
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 			}
 		}(repo)
@@ -486,6 +516,7 @@ func IndexOrgRepos(w http.ResponseWriter, r *http.Request) {
 	for _, org := range orgs {
 		reposByOrg, err := gh.GetRepositoriesFromOrganization(org)
 		if err != nil {
+			log.Println(err.Error())
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
@@ -599,6 +630,7 @@ func indexRepo(repo gh.Repo) {
 
 		err := ghmgmt.ProjectUpdateByImport(param)
 		if err != nil {
+			log.Println(err.Error())
 			return
 		}
 
@@ -613,6 +645,7 @@ func indexRepo(repo gh.Repo) {
 		for _, admin := range collaborators {
 			users, err := ghmgmt.GetUserByGitHubId(strconv.FormatInt(*admin.ID, 10))
 			if err != nil {
+				log.Println(err.Error())
 				return
 			}
 
@@ -626,6 +659,7 @@ func indexRepo(repo gh.Repo) {
 	} else {
 		err := ghmgmt.ProjectInsertByImport(param)
 		if err != nil {
+			log.Println(err.Error())
 			return
 		}
 
@@ -643,6 +677,7 @@ func indexRepo(repo gh.Repo) {
 		for _, admin := range collaborators {
 			users, err := ghmgmt.GetUserByGitHubId(strconv.FormatInt(*admin.ID, 10))
 			if err != nil {
+				log.Println(err.Error())
 				return
 			}
 
@@ -663,7 +698,10 @@ func RequestApproval(id int64, email string) {
 	for _, v := range projectApprovals {
 		if v.RequestStatus == "New" {
 			err := ApprovalSystemRequest(v)
-			handleError(err)
+			if err != nil {
+				log.Println("ID:" + strconv.FormatInt(v.Id, 10) + " " + err.Error())
+				return
+			}
 		}
 	}
 }
@@ -758,17 +796,15 @@ func ApprovalSystemRequest(data models.TypProjectApprovals) error {
 
 func getHttpPostResponseStatus(url string, data interface{}, ch chan *http.Response) {
 	jsonReq, err := json.Marshal(data)
+	if err != nil {
+		log.Println(err.Error())
+		ch <- nil
+	}
 	res, err := http.Post(url, "application/json; charset=utf-8", bytes.NewBuffer(jsonReq))
 	if err != nil {
 		ch <- nil
 	}
 	ch <- res
-}
-
-func handleError(err error) {
-	if err != nil {
-		fmt.Printf("ERROR: %+v", err)
-	}
 }
 
 func ReprocessRequestApproval() {
@@ -786,7 +822,7 @@ func RepoOwnersCleanup(w http.ResponseWriter, r *http.Request) {
 	// Get all repos from database
 	repos, err := ghmgmt.GetGitHubRepositories()
 	if err != nil {
-		fmt.Printf(err.Error())
+		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -816,7 +852,7 @@ func cleanupRepoOwners(repo map[string]interface{}, token string) {
 		// Get owners of the repo on the database
 		owners, err := ghmgmt.GetRepoOwnersByProjectIdWithGHUsername(repo["Id"].(int64))
 		if err != nil {
-			fmt.Printf(err.Error())
+			log.Println(err.Error())
 			return
 		}
 
@@ -837,7 +873,7 @@ func cleanupRepoOwners(repo map[string]interface{}, token string) {
 	// Get owners of the repo on the database
 	owners, err := ghmgmt.GetRepoOwnersByProjectIdWithGHUsername(repo["Id"].(int64))
 	if err != nil {
-		fmt.Printf(err.Error())
+		log.Println(err.Error())
 		return
 	}
 
@@ -874,12 +910,12 @@ type Repo struct {
 	Visibility             string `json:"Visibility"`
 	ApprovalStatus         bool   `json:"ApprovalStatus"`
 	ApprovalStatusId       int    `json:"ApprovalStatusId"`
-	CoOwner                string `json:CoOwner`
-	ConfirmAvaIP           bool   `json:ConfirmAvaIP`
-	ConfirmEnabledSecurity bool   `json:ConfirmEnabledSecurity`
-	CreatedBy              string `json:CreatedBy`
-	Modified               string `json:Modified`
-	ModifiedBy             string `json: ModifiedBy`
+	CoOwner                string `json:"CoOwner"`
+	ConfirmAvaIP           bool   `json:"ConfirmAvaIP"`
+	ConfirmEnabledSecurity bool   `json:"ConfirmEnabledSecurity"`
+	CreatedBy              string `json:"CreatedBy"`
+	Modified               string `json:"Modified"`
+	ModifiedBy             string `json:"ModifiedBy"`
 }
 
 type Collaborator struct {
@@ -887,6 +923,6 @@ type Collaborator struct {
 	Name                  string `json:"name"`
 	Email                 string `json:"email"`
 	Role                  string `json:"role"`
-	GitHubUsername        string `json:"ghUsername`
+	GitHubUsername        string `json:"ghUsername"`
 	IsOutsideCollaborator bool   `json:"isOutsideCollaborator"`
 }

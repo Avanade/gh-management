@@ -2,6 +2,7 @@ package routes
 
 import (
 	"encoding/json"
+	"log"
 	ghmgmt "main/pkg/ghmgmtdb"
 	session "main/pkg/session"
 	template "main/pkg/template"
@@ -11,14 +12,8 @@ import (
 )
 
 func CommunitylistHandler(w http.ResponseWriter, r *http.Request) {
-	//	fmt.Println("CommunitylistHandler")
 	template.UseTemplate(&w, r, "community/communitylist", nil)
 }
-
-// func CommunityApproverHandler(w http.ResponseWriter, r *http.Request) {
-// 	fmt.Println("CommunityApproverHandler")
-// 	template.UseTemplate(&w, r, "community/communityapprovers", nil)
-// }
 
 func GetUserCommunitylist(w http.ResponseWriter, r *http.Request) {
 	sessionaz, _ := session.Store.Get(r, "auth-session")
@@ -27,6 +22,7 @@ func GetUserCommunitylist(w http.ResponseWriter, r *http.Request) {
 	username := profile["preferred_username"].(string)
 	Communities, err := ghmgmt.CommunitiesByCreatedBy(username)
 	if err != nil {
+		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -35,6 +31,7 @@ func GetUserCommunitylist(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	jsonResp, err := json.Marshal(Communities)
 	if err != nil {
+		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -50,6 +47,7 @@ func GetMyCommunitylist(w http.ResponseWriter, r *http.Request) {
 
 	Communities, err := ghmgmt.MyCommunitites(username)
 	if err != nil {
+		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -58,6 +56,7 @@ func GetMyCommunitylist(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	jsonResp, err := json.Marshal(Communities)
 	if err != nil {
+		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -75,6 +74,7 @@ func GetCommunityIManagelist(w http.ResponseWriter, r *http.Request) {
 	params["UserPrincipalName"] = username
 	Communities, err := ghmgmt.CommunityIManageExecuteSelect(params)
 	if err != nil {
+		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -83,6 +83,7 @@ func GetCommunityIManagelist(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	jsonResp, err := json.Marshal(Communities)
 	if err != nil {
+		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -96,6 +97,7 @@ func GetUserCommunity(w http.ResponseWriter, r *http.Request) {
 
 	Communities, err := ghmgmt.CommunitiesSelectByID(id)
 	if err != nil {
+		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -104,6 +106,7 @@ func GetUserCommunity(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	jsonResp, err := json.Marshal(Communities)
 	if err != nil {
+		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
