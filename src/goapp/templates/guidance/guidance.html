@@ -51,12 +51,13 @@
 
                 <div class="flex items-center justify-between right-0">
                   <div class="ml-2 flex-shrink-0 flex">
-
+                    <div x-show="{{.IsAdmin}}">
                     <a :href="/guidance/+category.Id">
                       <p class="flex items-center text-sm text-gray-500  font-bold cursor-pointer">
                         Edit
                       </p>
                     </a>
+                    </div>
                   </div>
                 </div>
 
