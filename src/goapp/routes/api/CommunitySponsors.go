@@ -3,10 +3,11 @@ package routes
 import (
 	"encoding/json"
 	"log"
-	models "main/models"
-	ghmgmt "main/pkg/ghmgmtdb"
-	session "main/pkg/session"
 	"net/http"
+
+	"main/models"
+	db "main/pkg/ghmgmtdb"
+	"main/pkg/session"
 
 	"github.com/gorilla/mux"
 )
@@ -34,7 +35,7 @@ func CommunitySponsorsAPIHandler(w http.ResponseWriter, r *http.Request) {
 			"CreatedBy":         username,
 		}
 
-		_, err := ghmgmt.CommunitySponsorsInsert(param)
+		_, err := db.CommunitySponsorsInsert(param)
 		if err != nil {
 			log.Println(err.Error())
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -47,14 +48,13 @@ func CommunitySponsorsAPIHandler(w http.ResponseWriter, r *http.Request) {
 			"UserPrincipalName": body.UserPrincipalName,
 			"CreatedBy":         username,
 		}
-		_, err := ghmgmt.CommunitySponsorsUpdate(param)
+		_, err := db.CommunitySponsorsUpdate(param)
 		if err != nil {
 			log.Println(err.Error())
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 	}
-
 }
 
 func CommunitySponsorsPerCommunityId(w http.ResponseWriter, r *http.Request) {
@@ -67,7 +67,7 @@ func CommunitySponsorsPerCommunityId(w http.ResponseWriter, r *http.Request) {
 		"CommunityId": id,
 	}
 
-	CommunitySponsors, err := ghmgmt.CommunitySponsorsSelectByCommunityId(param)
+	CommunitySponsors, err := db.CommunitySponsorsSelectByCommunityId(param)
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)

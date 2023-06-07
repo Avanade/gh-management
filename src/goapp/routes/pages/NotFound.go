@@ -1,8 +1,9 @@
 package routes
 
 import (
-	template "main/pkg/template"
 	"net/http"
+
+	"main/pkg/template"
 )
 
 func NotFoundHandler(w http.ResponseWriter, r *http.Request) {

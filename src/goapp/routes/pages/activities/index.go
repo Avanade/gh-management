@@ -2,9 +2,10 @@ package routes
 
 import (
 	"log"
-	session "main/pkg/session"
-	template "main/pkg/template"
 	"net/http"
+
+	"main/pkg/session"
+	"main/pkg/template"
 )
 
 func ActivitiesHandler(w http.ResponseWriter, r *http.Request) {

@@ -2,9 +2,10 @@ package routes
 
 import (
 	"log"
-	auth "main/pkg/authentication"
-	session "main/pkg/session"
 	"net/http"
+
+	auth "main/pkg/authentication"
+	"main/pkg/session"
 )
 
 func GithubLoginHandler(w http.ResponseWriter, r *http.Request) {

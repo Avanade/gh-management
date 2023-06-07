@@ -8,7 +8,7 @@ import (
 	"strconv"
 
 	db "main/pkg/ghmgmtdb"
-	session "main/pkg/session"
+	"main/pkg/session"
 
 	"github.com/gorilla/mux"
 )

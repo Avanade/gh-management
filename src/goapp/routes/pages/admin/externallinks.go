@@ -1,11 +1,11 @@
 package routes
 
 import (
-	template "main/pkg/template"
 	"net/http"
-
 	"strconv"
 	"strings"
+
+	"main/pkg/template"
 
 	"github.com/gorilla/mux"
 )

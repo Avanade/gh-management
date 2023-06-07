@@ -3,17 +3,18 @@ package routes
 import (
 	"encoding/json"
 	"log"
-	models "main/models"
-	ghmgmt "main/pkg/ghmgmtdb"
-	session "main/pkg/session"
 	"net/http"
+
+	"main/models"
+	db "main/pkg/ghmgmtdb"
+	"main/pkg/session"
 
 	"github.com/gorilla/mux"
 )
 
 func GetExternalLinks(w http.ResponseWriter, r *http.Request) {
 
-	ExternalLinks, err := ghmgmt.ExternalLinksExecuteSelect()
+	ExternalLinks, err := db.ExternalLinksExecuteSelect()
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -37,7 +38,7 @@ func GetExternalLinksAllEnabled(w http.ResponseWriter, r *http.Request) {
 		"Enabled": true,
 	}
 
-	ExternalLinks, err := ghmgmt.ExternalLinksExecuteAllEnabled(param)
+	ExternalLinks, err := db.ExternalLinksExecuteAllEnabled(param)
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -64,7 +65,7 @@ func GetExternalLinksById(w http.ResponseWriter, r *http.Request) {
 		"Id": id,
 	}
 
-	ExternalLinks, err := ghmgmt.ExternalLinksExecuteById(param)
+	ExternalLinks, err := db.ExternalLinksExecuteById(param)
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -104,7 +105,7 @@ func CreateExternalLinks(w http.ResponseWriter, r *http.Request) {
 		"CreatedBy": username,
 	}
 
-	_, err = ghmgmt.ExternalLinksExecuteCreate(params)
+	_, err = db.ExternalLinksExecuteCreate(params)
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -135,7 +136,7 @@ func UpdateExternalLinks(w http.ResponseWriter, r *http.Request) {
 		"ModifiedBy": username,
 	}
 
-	_, err = ghmgmt.ExternalLinksExecuteUpdate(params)
+	_, err = db.ExternalLinksExecuteUpdate(params)
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -150,7 +151,7 @@ func ExternalLinksDelete(w http.ResponseWriter, r *http.Request) {
 	param := map[string]interface{}{
 		"Id": id,
 	}
-	_, err := ghmgmt.ExternalLinksExecuteDelete(param)
+	_, err := db.ExternalLinksExecuteDelete(param)
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)

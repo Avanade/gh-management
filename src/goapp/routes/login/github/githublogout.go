@@ -2,8 +2,9 @@ package routes
 
 import (
 	"log"
-	session "main/pkg/session"
 	"net/http"
+
+	"main/pkg/session"
 )
 
 func GitHubLogoutHandler(w http.ResponseWriter, r *http.Request) {

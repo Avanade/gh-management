@@ -4,14 +4,15 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	models "main/models"
-	email "main/pkg/email"
-	ghmgmt "main/pkg/ghmgmtdb"
-	gh "main/pkg/github"
 	"net/http"
 	"os"
 	"strings"
 	"time"
+
+	"main/models"
+	"main/pkg/email"
+	db "main/pkg/ghmgmtdb"
+	ghAPI "main/pkg/github"
 )
 
 func UpdateApprovalStatusProjects(w http.ResponseWriter, r *http.Request) {
@@ -66,13 +67,13 @@ func processApprovalProjects(r *http.Request, module string) error {
 		spName = "PR_CommunityApproval_Update_ApproverResponse"
 	}
 
-	_, err = ghmgmt.UpdateApprovalApproverResponse(spName, req.ItemId, req.Remarks, req.ResponseDate, approvalStatusId)
+	_, err = db.UpdateApprovalApproverResponse(spName, req.ItemId, req.Remarks, req.ResponseDate, approvalStatusId)
 	if err != nil {
 		return err
 	}
 
 	if module == "projects" {
-		projectApproval := ghmgmt.GetProjectApprovalByGUID(req.ItemId)
+		projectApproval := db.GetProjectApprovalByGUID(req.ItemId)
 
 		go checkAllRequests(projectApproval.ProjectId)
 	}
@@ -83,7 +84,7 @@ func checkAllRequests(id int64) {
 	allApproved := true
 
 	// Check if all requests are approved
-	projectApprovals := ghmgmt.GetProjectApprovalsByProjectId(id)
+	projectApprovals := db.GetProjectApprovalsByProjectId(id)
 	repo := projectApprovals[0].ProjectName
 	for _, a := range projectApprovals {
 		if a.RequestStatus != "Approved" {
@@ -97,15 +98,15 @@ func checkAllRequests(id int64) {
 	if allApproved {
 		owner := os.Getenv("GH_ORG_INNERSOURCE")
 		newOwner := os.Getenv("GH_ORG_OPENSOURCE")
-		gh.TransferRepository(repo, owner, newOwner)
+		ghAPI.TransferRepository(repo, owner, newOwner)
 
 		time.Sleep(3 * time.Second)
-		gh.SetProjectVisibility(repo, "public", newOwner)
+		ghAPI.SetProjectVisibility(repo, "public", newOwner)
 
-		ghmgmt.UpdateProjectVisibilityId(id, PUBLIC)
+		db.UpdateProjectVisibilityId(id, PUBLIC)
 
-		repoResp, _ := gh.GetRepository(repo, newOwner)
-		ghmgmt.UpdateTFSProjectReferenceById(id, repoResp.GetHTMLURL())
+		repoResp, _ := ghAPI.GetRepository(repo, newOwner)
+		db.UpdateTFSProjectReferenceById(id, repoResp.GetHTMLURL())
 	}
 }
 
@@ -124,7 +125,7 @@ func UpdateApprovalReassignApprover(w http.ResponseWriter, r *http.Request) {
 		"Username":      req.Username,
 	}
 
-	result, err := ghmgmt.ProjectsApprovalUpdateApproverUserPrincipalName(param)
+	result, err := db.ProjectsApprovalUpdateApproverUserPrincipalName(param)
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -281,7 +282,7 @@ func UpdateCommunityApprovalReassignApprover(w http.ResponseWriter, r *http.Requ
 		"ApproverEmail": req.ApproverEmail,
 		"Username":      req.Username,
 	}
-	result, err := ghmgmt.CommunityApprovalslUpdateApproverUserPrincipalName(param)
+	result, err := db.CommunityApprovalslUpdateApproverUserPrincipalName(param)
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)

@@ -3,10 +3,11 @@ package routes
 import (
 	"encoding/json"
 	"log"
-	ghmgmt "main/pkg/ghmgmtdb"
-	session "main/pkg/session"
-	template "main/pkg/template"
 	"net/http"
+
+	db "main/pkg/ghmgmtdb"
+	"main/pkg/session"
+	"main/pkg/template"
 
 	"github.com/gorilla/mux"
 )
@@ -20,7 +21,7 @@ func GetUserCommunitylist(w http.ResponseWriter, r *http.Request) {
 	iprofile := sessionaz.Values["profile"]
 	profile := iprofile.(map[string]interface{})
 	username := profile["preferred_username"].(string)
-	Communities, err := ghmgmt.CommunitiesByCreatedBy(username)
+	Communities, err := db.CommunitiesByCreatedBy(username)
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -45,7 +46,7 @@ func GetMyCommunitylist(w http.ResponseWriter, r *http.Request) {
 	profile := iprofile.(map[string]interface{})
 	username := profile["preferred_username"].(string)
 
-	Communities, err := ghmgmt.MyCommunitites(username)
+	Communities, err := db.MyCommunitites(username)
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -72,7 +73,7 @@ func GetCommunityIManagelist(w http.ResponseWriter, r *http.Request) {
 
 	params := make(map[string]interface{})
 	params["UserPrincipalName"] = username
-	Communities, err := ghmgmt.CommunityIManageExecuteSelect(params)
+	Communities, err := db.CommunityIManageExecuteSelect(params)
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -95,7 +96,7 @@ func GetUserCommunity(w http.ResponseWriter, r *http.Request) {
 	req := mux.Vars(r)
 	id := req["id"]
 
-	Communities, err := ghmgmt.CommunitiesSelectByID(id)
+	Communities, err := db.CommunitiesSelectByID(id)
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)

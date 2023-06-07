@@ -3,8 +3,9 @@ package routes
 import (
 	"encoding/json"
 	"log"
-	ghmgmt "main/pkg/ghmgmtdb"
 	"net/http"
+
+	db "main/pkg/ghmgmtdb"
 
 	"github.com/gorilla/mux"
 )
@@ -19,7 +20,7 @@ func CommunityTagPerCommunityId(w http.ResponseWriter, r *http.Request) {
 		"CommunityId": id,
 	}
 
-	CommunityTags, err := ghmgmt.CommunityTagsSelectByCommunityId(param)
+	CommunityTags, err := db.CommunityTagsSelectByCommunityId(param)
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)

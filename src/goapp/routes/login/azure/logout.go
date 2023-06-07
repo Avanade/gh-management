@@ -3,11 +3,12 @@ package routes
 import (
 	"fmt"
 	"log"
-	"main/pkg/envvar"
-	session "main/pkg/session"
 	"net/http"
 	"net/url"
 	"os"
+
+	"main/pkg/envvar"
+	"main/pkg/session"
 )
 
 func LogoutHandler(w http.ResponseWriter, r *http.Request) {

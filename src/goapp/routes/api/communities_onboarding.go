@@ -3,10 +3,11 @@ package routes
 import (
 	"encoding/json"
 	"log"
-	db "main/pkg/ghmgmtdb"
-	session "main/pkg/session"
 	"net/http"
 	"strconv"
+
+	db "main/pkg/ghmgmtdb"
+	"main/pkg/session"
 
 	"github.com/gorilla/mux"
 )

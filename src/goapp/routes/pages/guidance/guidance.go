@@ -2,10 +2,10 @@ package routes
 
 import (
 	"log"
-	template "main/pkg/template"
 	"net/http"
 
-	session "main/pkg/session"
+	"main/pkg/session"
+	"main/pkg/template"
 
 	"github.com/gorilla/mux"
 )

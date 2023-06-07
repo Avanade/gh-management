@@ -2,8 +2,9 @@ package routes
 
 import (
 	"log"
-	template "main/pkg/template"
 	"net/http"
+
+	"main/pkg/template"
 )
 
 func HomeHandler(w http.ResponseWriter, r *http.Request) {

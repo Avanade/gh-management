@@ -4,19 +4,19 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	auth "main/pkg/authentication"
-	"main/pkg/email"
-	githubAPI "main/pkg/github"
-	session "main/pkg/session"
 	"net/http"
 	"os"
 	"strconv"
 	"time"
 
-	"golang.org/x/oauth2"
-
-	ghmgmt "main/pkg/ghmgmtdb"
+	auth "main/pkg/authentication"
+	"main/pkg/email"
+	db "main/pkg/ghmgmtdb"
+	ghAPI "main/pkg/github"
 	"main/pkg/msgraph"
+	"main/pkg/session"
+
+	"golang.org/x/oauth2"
 )
 
 func GithubCallbackHandler(w http.ResponseWriter, r *http.Request) {
@@ -79,7 +79,7 @@ func GithubCallbackHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	result, err := ghmgmt.UpdateUserGithub(userPrincipalName, ghId, ghUser, 0)
+	result, err := db.UpdateUserGithub(userPrincipalName, ghId, ghUser, 0)
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -135,7 +135,7 @@ func GithubForceSaveHandler(w http.ResponseWriter, r *http.Request) {
 	ghId := strconv.FormatFloat(p["id"].(float64), 'f', 0, 64)
 	ghUser := fmt.Sprintf("%s", p["login"])
 
-	result, err := ghmgmt.UpdateUserGithub(userPrincipalName, ghId, ghUser, 1)
+	result, err := db.UpdateUserGithub(userPrincipalName, ghId, ghUser, 1)
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -155,12 +155,12 @@ func GithubForceSaveHandler(w http.ResponseWriter, r *http.Request) {
 
 func CheckMembership(userPrincipalName, ghusername string, id *int64) {
 	token := os.Getenv("GH_TOKEN")
-	inner, outer, _ := githubAPI.OrganizationsIsMember(token, ghusername)
+	inner, outer, _ := ghAPI.OrganizationsIsMember(token, ghusername)
 	if !inner {
-		githubAPI.OrganizationInvitation(token, ghusername, os.Getenv("GH_ORG_INNERSOURCE"))
+		ghAPI.OrganizationInvitation(token, ghusername, os.Getenv("GH_ORG_INNERSOURCE"))
 	}
 	if !outer {
-		githubAPI.OrganizationInvitation(token, ghusername, os.Getenv("GH_ORG_OPENSOURCE"))
+		ghAPI.OrganizationInvitation(token, ghusername, os.Getenv("GH_ORG_OPENSOURCE"))
 
 	}
 	EmailAcceptOrgInvitation(userPrincipalName, ghusername, inner, outer)
