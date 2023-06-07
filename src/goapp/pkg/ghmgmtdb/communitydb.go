@@ -3,6 +3,8 @@ package ghmgmt
 import (
 	"database/sql"
 	"fmt"
+	"main/models"
+	"strconv"
 )
 
 func CommunitiesSelectByID(id string) ([]map[string]interface{}, error) {
@@ -20,6 +22,7 @@ func CommunitiesSelectByID(id string) ([]map[string]interface{}, error) {
 
 	return result, err
 }
+
 func CommunitiesInsert(params map[string]interface{}) ([]map[string]interface{}, error) {
 	db := ConnectDb()
 	defer db.Close()
@@ -31,6 +34,7 @@ func CommunitiesInsert(params map[string]interface{}) ([]map[string]interface{},
 
 	return result, err
 }
+
 func CommunitySponsorsInsert(params map[string]interface{}) (sql.Result, error) {
 	db := ConnectDb()
 	defer db.Close()
@@ -41,6 +45,7 @@ func CommunitySponsorsInsert(params map[string]interface{}) (sql.Result, error) 
 
 	return result, err
 }
+
 func RelatedCommunitiesDelete(params map[string]interface{}) (sql.Result, error) {
 	db := ConnectDb()
 	defer db.Close()
@@ -51,6 +56,7 @@ func RelatedCommunitiesDelete(params map[string]interface{}) (sql.Result, error)
 
 	return result, err
 }
+
 func RelatedCommunitiesInsert(params map[string]interface{}) (sql.Result, error) {
 	db := ConnectDb()
 	defer db.Close()
@@ -61,6 +67,7 @@ func RelatedCommunitiesInsert(params map[string]interface{}) (sql.Result, error)
 
 	return result, err
 }
+
 func CommunityTagsInsert(params map[string]interface{}) (sql.Result, error) {
 	db := ConnectDb()
 	defer db.Close()
@@ -71,6 +78,7 @@ func CommunityTagsInsert(params map[string]interface{}) (sql.Result, error) {
 
 	return result, err
 }
+
 func CommunitiesUpdate(params map[string]interface{}) (sql.Result, error) {
 	db := ConnectDb()
 	defer db.Close()
@@ -81,6 +89,7 @@ func CommunitiesUpdate(params map[string]interface{}) (sql.Result, error) {
 
 	return result, err
 }
+
 func CommunityApprovalsSelectById(params map[string]interface{}) ([]map[string]interface{}, error) {
 	db := ConnectDb()
 	defer db.Close()
@@ -92,6 +101,7 @@ func CommunityApprovalsSelectById(params map[string]interface{}) ([]map[string]i
 
 	return result, err
 }
+
 func CommunitiesIsexternal(params map[string]interface{}) ([]map[string]interface{}, error) {
 	db := ConnectDb()
 	defer db.Close()
@@ -103,6 +113,7 @@ func CommunitiesIsexternal(params map[string]interface{}) ([]map[string]interfac
 
 	return result, err
 }
+
 func CommunitiesInitCommunityType(params map[string]interface{}) ([]map[string]interface{}, error) {
 	db := ConnectDb()
 	defer db.Close()
@@ -114,6 +125,7 @@ func CommunitiesInitCommunityType(params map[string]interface{}) ([]map[string]i
 
 	return result, err
 }
+
 func CommunitySponsorsSelect(params map[string]interface{}) ([]map[string]interface{}, error) {
 	db := ConnectDb()
 	defer db.Close()
@@ -125,6 +137,7 @@ func CommunitySponsorsSelect(params map[string]interface{}) ([]map[string]interf
 
 	return result, err
 }
+
 func CommunitySponsorsUpdate(params map[string]interface{}) ([]map[string]interface{}, error) {
 	db := ConnectDb()
 	defer db.Close()
@@ -136,6 +149,7 @@ func CommunitySponsorsUpdate(params map[string]interface{}) ([]map[string]interf
 
 	return result, err
 }
+
 func CommunitySponsorsSelectByCommunityId(params map[string]interface{}) ([]map[string]interface{}, error) {
 	db := ConnectDb()
 	defer db.Close()
@@ -147,6 +161,7 @@ func CommunitySponsorsSelectByCommunityId(params map[string]interface{}) ([]map[
 
 	return result, err
 }
+
 func CommunityTagsSelectByCommunityId(params map[string]interface{}) ([]map[string]interface{}, error) {
 	db := ConnectDb()
 	defer db.Close()
@@ -157,6 +172,7 @@ func CommunityTagsSelectByCommunityId(params map[string]interface{}) ([]map[stri
 
 	return result, err
 }
+
 func RelatedCommunitiesSelect(params map[string]interface{}) ([]map[string]interface{}, error) {
 	db := ConnectDb()
 	defer db.Close()
@@ -167,6 +183,7 @@ func RelatedCommunitiesSelect(params map[string]interface{}) ([]map[string]inter
 
 	return result, err
 }
+
 func CommunityIManageExecuteSelect(params map[string]interface{}) ([]map[string]interface{}, error) {
 	db := ConnectDb()
 	defer db.Close()
@@ -178,6 +195,7 @@ func CommunityIManageExecuteSelect(params map[string]interface{}) ([]map[string]
 
 	return result, err
 }
+
 func MyCommunitites(username string) ([]map[string]interface{}, error) {
 	db := ConnectDb()
 	defer db.Close()
@@ -191,6 +209,7 @@ func MyCommunitites(username string) ([]map[string]interface{}, error) {
 	}
 	return result, nil
 }
+
 func CommunitiesByCreatedBy(createdBy string) ([]map[string]interface{}, error) {
 	db := ConnectDb()
 	defer db.Close()
@@ -205,4 +224,273 @@ func CommunitiesByCreatedBy(createdBy string) ([]map[string]interface{}, error) 
 		return nil, err
 	}
 	return result, nil
+}
+
+func CommunityApprovalslUpdateApproverUserPrincipalName(params map[string]interface{}) ([]map[string]interface{}, error) {
+	db := ConnectDb()
+	defer db.Close()
+
+	result, err := db.ExecuteStoredProcedureWithResult("dbo.PR_CommunityApprovals_Update_ApproverUserPrincipalName", params)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	return result, err
+}
+
+func Communities_AddMember(CommunityId int, UserPrincipalName string) error {
+
+	db := ConnectDb()
+	defer db.Close()
+
+	param := map[string]interface{}{
+		"CommunityId":       CommunityId,
+		"UserPrincipalName": UserPrincipalName,
+	}
+
+	_, err := db.ExecuteStoredProcedure("dbo.PR_CommunityMembers_Insert", param)
+
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+
+	return nil
+
+}
+
+func Communities_Related(CommunityId int64) (data []models.TypRelatedCommunities, err error) {
+
+	db := ConnectDb()
+	defer db.Close()
+
+	param := map[string]interface{}{
+
+		"CommunityId": CommunityId,
+	}
+
+	result, err := db.ExecuteStoredProcedureWithResult("dbo.PR_Communities_Select_Related", param)
+
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	for _, v := range result {
+		d := models.TypRelatedCommunities{
+			Name:       v["Name"].(string),
+			Url:        v["Url"].(string),
+			IsExternal: v["IsExternal"].(bool),
+		}
+		data = append(data, d)
+	}
+	return
+}
+
+func Community_Sponsors(CommunityId int64) (data []models.TypCommunitySponsorsList, err error) {
+	db := ConnectDb()
+	defer db.Close()
+
+	param := map[string]interface{}{
+
+		"CommunityId": CommunityId,
+	}
+
+	result, err := db.ExecuteStoredProcedureWithResult("dbo.PR_CommunitySponsors_Select_By_CommunityId", param)
+
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	for _, v := range result {
+		d := models.TypCommunitySponsorsList{
+			Name:      v["Name"].(string),
+			GivenName: v["GivenName"].(string),
+			SurName:   v["SurName"].(string),
+			Email:     v["UserPrincipalName"].(string),
+		}
+		data = append(data, d)
+	}
+	return
+}
+
+func Community_Info(CommunityId int64) (data models.TypCommunityOnBoarding, err error) {
+	db := ConnectDb()
+	defer db.Close()
+
+	param := map[string]interface{}{
+
+		"Id": CommunityId,
+	}
+
+	result, err := db.ExecuteStoredProcedureWithResult("dbo.PR_Communities_select_byID", param)
+
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	data = models.TypCommunityOnBoarding{
+		Id:                     result[0]["Id"].(int64),
+		Name:                   result[0]["Name"].(string),
+		OnBoardingInstructions: result[0]["OnBoardingInstructions"].(string),
+		Url:                    result[0]["Url"].(string),
+	}
+
+	return
+}
+
+func Community_Onboarding_AddMember(CommunityId int64, UserPrincipalName string) (err error) {
+	db := ConnectDb()
+	defer db.Close()
+
+	param := map[string]interface{}{
+
+		"CommunityId":       CommunityId,
+		"UserPrincipalName": UserPrincipalName,
+	}
+
+	_, err = db.ExecuteStoredProcedure("dbo.PR_CommunityMembers_Insert", param)
+
+	if err != nil {
+		fmt.Println(err)
+	}
+	return
+}
+
+func Community_Onboarding_RemoveMember(CommunityId int64, UserPrincipalName string) (err error) {
+	db := ConnectDb()
+	defer db.Close()
+
+	param := map[string]interface{}{
+
+		"CommunityId":       CommunityId,
+		"UserPrincipalName": UserPrincipalName,
+	}
+
+	_, err = db.ExecuteStoredProcedure("dbo.PR_CommunityMembers_Remove", param)
+
+	if err != nil {
+		fmt.Println(err)
+	}
+	return
+}
+
+func Community_Membership_IsMember(CommunityId int64, UserPrincipalName string) (isMember bool, err error) {
+	db := ConnectDb()
+	defer db.Close()
+
+	param := map[string]interface{}{
+
+		"CommunityId":       CommunityId,
+		"UserPrincipalName": UserPrincipalName,
+	}
+
+	result, err := db.ExecuteStoredProcedureWithResult("dbo.PR_CommunityMembers_IsExisting", param)
+
+	if err != nil {
+		fmt.Println(err)
+	}
+	isExisting := strconv.FormatInt(result[0]["IsExisting"].(int64), 2)
+	isMember, _ = strconv.ParseBool(isExisting)
+	return
+}
+
+func GetCommunities() interface{} {
+	db := ConnectDb()
+	defer db.Close()
+
+	result, err := db.ExecuteStoredProcedureWithResult("PR_Communities_select", nil)
+	if err != nil {
+		return err
+	}
+	return result
+}
+
+func GetCommunityMembers(id int64) interface{} {
+	db := ConnectDb()
+	defer db.Close()
+
+	param := map[string]interface{}{
+		"CommunityId": id,
+	}
+
+	result, err := db.ExecuteStoredProcedureWithResult("PR_CommunityMembers_Select_ByCommunityId", param)
+	if err != nil {
+		return err
+	}
+	return result
+}
+
+func PopulateCommunityApproval(id int64) (CommunityApprovals []models.TypCommunityApprovals) {
+	db := ConnectDb()
+	defer db.Close()
+
+	param := map[string]interface{}{
+		"CommunityId": id,
+	}
+	result, _ := db.ExecuteStoredProcedureWithResult("PR_CommunityApprovals_Populate", param)
+
+	for _, v := range result {
+		data := models.TypCommunityApprovals{
+			Id:                         v["Id"].(int64),
+			CommunityId:                v["CommunityId"].(int64),
+			CommunityName:              v["CommunityName"].(string),
+			CommunityUrl:               v["CommunityUrl"].(string),
+			CommunityDescription:       v["CommunityDescription"].(string),
+			CommunityNotes:             v["CommunityNotes"].(string),
+			CommunityTradeAssocId:      v["CommunityTradeAssocId"].(string),
+			CommunityType:              v["CommunityType"].(string),
+			RequesterName:              v["RequesterName"].(string),
+			RequesterGivenName:         v["RequesterGivenName"].(string),
+			RequesterSurName:           v["RequesterSurName"].(string),
+			RequesterUserPrincipalName: v["RequesterUserPrincipalName"].(string),
+			ApproverUserPrincipalName:  v["ApproverUserPrincipalName"].(string),
+			ApprovalDescription:        v["ApprovalDescription"].(string),
+		}
+		CommunityApprovals = append(CommunityApprovals, data)
+	}
+
+	return
+}
+
+func GetFailedCommunityApprovalRequests() (CommunityApprovals []models.TypCommunityApprovals) {
+	db := ConnectDb()
+	defer db.Close()
+
+	result, _ := db.ExecuteStoredProcedureWithResult("PR_CommunityApprovals_Select_Failed", nil)
+
+	for _, v := range result {
+		data := models.TypCommunityApprovals{
+			Id:                         v["Id"].(int64),
+			CommunityId:                v["CommunityId"].(int64),
+			CommunityName:              v["CommunityName"].(string),
+			CommunityUrl:               v["CommunityUrl"].(string),
+			CommunityDescription:       v["CommunityDescription"].(string),
+			CommunityNotes:             v["CommunityNotes"].(string),
+			CommunityTradeAssocId:      v["CommunityTradeAssocId"].(string),
+			CommunityType:              v["CommunityType"].(string),
+			RequesterName:              v["RequesterName"].(string),
+			RequesterGivenName:         v["RequesterGivenName"].(string),
+			RequesterSurName:           v["RequesterSurName"].(string),
+			RequesterUserPrincipalName: v["RequesterUserPrincipalName"].(string),
+			ApproverUserPrincipalName:  v["ApproverUserPrincipalName"].(string),
+			ApprovalDescription:        v["ApprovalDescription"].(string),
+		}
+		CommunityApprovals = append(CommunityApprovals, data)
+	}
+
+	return
+}
+
+func CommunityApprovalUpdateGUID(id int64, ApprovalSystemGUID string) {
+	db := ConnectDb()
+	defer db.Close()
+
+	param := map[string]interface{}{
+		"Id":                 id,
+		"ApprovalSystemGUID": ApprovalSystemGUID,
+	}
+	db.ExecuteStoredProcedure("PR_CommunityApproval_Update_ApprovalSystemGUID", param)
 }
