@@ -43,7 +43,7 @@ func CategoryAPIHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		id, _ := strconv.Atoi(fmt.Sprint(result[0]["Id"]))
+		id, err := strconv.Atoi(fmt.Sprint(result[0]["Id"]))
 		if err != nil {
 			log.Println(err.Error())
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -197,8 +197,6 @@ func CategoryArticlesUpdate(w http.ResponseWriter, r *http.Request) {
 	result, err := ghmgmt.CategoryInsert(param1)
 	if err != nil {
 		log.Println(err.Error())
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
 	}
 
 	id2, _ := strconv.Atoi(fmt.Sprint(result[0]["Id"]))

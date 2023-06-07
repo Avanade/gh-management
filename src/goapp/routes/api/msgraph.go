@@ -9,10 +9,6 @@ import (
 	"github.com/gorilla/mux"
 )
 
-type FilterDto struct {
-	Search string `json:"search"`
-}
-
 func GetAllUserFromActiveDirectory(w http.ResponseWriter, r *http.Request) {
 	users, err := msgraph.GetAllUsers()
 	if err != nil {

@@ -178,15 +178,15 @@
                               <tr>
                                 <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm text-gray-900 sm:pl-0" x-text="item.name===''? '-':item.name"></td>
                                 <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                                  <span x-text="item.GitHubUsername"></span> <br> <span x-show="item.isOutsideCollaborator" class="text-xs font-light italic">Outside Collaborator</span>
+                                  <span x-text="item.ghUsername"></span> <br> <span x-show="item.isOutsideCollaborator" class="text-xs font-light italic">Outside Collaborator</span>
                                 </td>
                                 <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500" x-text="item.email===''? '-':item.email"></td>
                                 <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500" x-text="item.role"></td>
                                 <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm sm:pr-0">
-                                  <a class="text-indigo-600 hover:text-indigo-900 hover:cursor-pointer" @click="updateCollaborator(repository.Id, item.GitHubUsername, item.role);">
+                                  <a class="text-indigo-600 hover:text-indigo-900 hover:cursor-pointer" @click="updateCollaborator(repository.Id, item.ghUsername, item.role);">
                                     Update
                                   </a> |
-                                  <a class="text-indigo-600 hover:text-indigo-900 hover:cursor-pointer" @click="removeCollaborator(repository.Id, item.GitHubUsername, item.role)">
+                                  <a class="text-indigo-600 hover:text-indigo-900 hover:cursor-pointer" @click="removeCollaborator(repository.Id, item.ghUsername, item.role)">
                                     Remove
                                   </a>
                                 </td>
@@ -443,16 +443,16 @@
                               <tr>
                                 <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm text-gray-900 sm:pl-0" x-text="item.name===''? '-':item.name"></td>
                                 <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                                  <span x-text="item.GitHubUsername"></span> <br> <span x-show="item.isOutsideCollaborator" class="text-xs font-light italic">Outside Collaborator</span>
+                                  <span x-text="item.ghUsername"></span> <br> <span x-show="item.isOutsideCollaborator" class="text-xs font-light italic">Outside Collaborator</span>
                                 </td>
                                 <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500" x-text="item.email===''? '-':item.email"></td>
                                 <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500" x-text="item.role"></td>
                                 {{ if .isAdmin }}
                                 <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm sm:pr-0">
-                                  <a class="text-indigo-600 hover:text-indigo-900 hover:cursor-pointer" @click="updateCollaborator(repository.Id, item.GitHubUsername, item.role);">
+                                  <a class="text-indigo-600 hover:text-indigo-900 hover:cursor-pointer" @click="updateCollaborator(repository.Id, item.ghUsername, item.role);">
                                     Update
                                   </a> | 
-                                  <a href="#" class="text-indigo-600 hover:text-indigo-900 hover:cursor-pointer" @click="removeCollaborator(repository.Id, item.GitHubUsername, item.role)">
+                                  <a href="#" class="text-indigo-600 hover:text-indigo-900 hover:cursor-pointer" @click="removeCollaborator(repository.Id, item.ghUsername, item.role)">
                                     Remove
                                   </a>
                                 </td>

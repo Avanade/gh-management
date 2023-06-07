@@ -1,7 +1,6 @@
 package routes
 
 import (
-	"log"
 	"main/pkg/template"
 	"net/http"
 	"strconv"
@@ -16,12 +15,7 @@ func ListContributionAreas(w http.ResponseWriter, r *http.Request) {
 
 func ContributionAreasForm(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	id, err := strconv.Atoi(vars["id"])
-	if err != nil {
-		log.Println(err.Error())
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
+	id, _ := strconv.Atoi(vars["id"])
 
 	action := vars["action"]
 	template.UseTemplate(&w, r, "admin/contributionareas/form", struct {

@@ -52,15 +52,11 @@ func CommunityAPIHandler(w http.ResponseWriter, r *http.Request) {
 		result, err := ghmgmt.CommunitiesInsert(param)
 		if err != nil {
 			log.Println(err.Error())
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
 		}
 
 		id, _ := strconv.Atoi(fmt.Sprint(result[0]["Id"]))
 		if err != nil {
 			log.Println(err.Error())
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
 		}
 
 		for _, s := range body.Sponsors {
@@ -82,8 +78,6 @@ func CommunityAPIHandler(w http.ResponseWriter, r *http.Request) {
 
 			if err != nil {
 				log.Println(err.Error())
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return
 			}
 		}
 
@@ -107,8 +101,6 @@ func CommunityAPIHandler(w http.ResponseWriter, r *http.Request) {
 			_, err := ghmgmt.RelatedCommunitiesInsert(RelatedCommunities)
 			if err != nil {
 				log.Println(err.Error())
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return
 			}
 		}
 
@@ -120,8 +112,6 @@ func CommunityAPIHandler(w http.ResponseWriter, r *http.Request) {
 			_, err := ghmgmt.RelatedCommunitiesInsert(param)
 			if err != nil {
 				log.Println(err.Error())
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return
 			}
 		}
 
@@ -133,8 +123,6 @@ func CommunityAPIHandler(w http.ResponseWriter, r *http.Request) {
 			_, err := ghmgmt.CommunityTagsInsert(Tagsparam)
 			if err != nil {
 				log.Println(err.Error())
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return
 			}
 		}
 		if body.Id == 0 {
@@ -145,8 +133,6 @@ func CommunityAPIHandler(w http.ResponseWriter, r *http.Request) {
 			TeamMembers, err := msgraph.GetTeamsMembers(body.ChannelId, "")
 			if err != nil {
 				log.Println(err.Error())
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return
 			}
 
 			if len(TeamMembers) > 0 {
@@ -218,8 +204,6 @@ func MyCommunityAPIHandler(w http.ResponseWriter, r *http.Request) {
 		result, err := ghmgmt.CommunitiesInsert(param)
 		if err != nil {
 			log.Println(err.Error())
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
 		}
 
 		id, _ := strconv.Atoi(fmt.Sprint(result[0]["Id"]))
@@ -245,8 +229,6 @@ func MyCommunityAPIHandler(w http.ResponseWriter, r *http.Request) {
 			_, err = ghmgmt.CommunitySponsorsInsert(sponsorsparam)
 			if err != nil {
 				log.Println(err.Error())
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return
 			}
 
 		}
@@ -260,8 +242,6 @@ func MyCommunityAPIHandler(w http.ResponseWriter, r *http.Request) {
 			_, err := ghmgmt.CommunityTagsInsert(Tagsparam)
 			if err != nil {
 				log.Println(err.Error())
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return
 			}
 
 		}
@@ -275,8 +255,6 @@ func MyCommunityAPIHandler(w http.ResponseWriter, r *http.Request) {
 			_, err := ghmgmt.RelatedCommunitiesInsert(RelatedCommunities)
 			if err != nil {
 				log.Println(err.Error())
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return
 			}
 		}
 
@@ -290,8 +268,6 @@ func MyCommunityAPIHandler(w http.ResponseWriter, r *http.Request) {
 			_, err := ghmgmt.RelatedCommunitiesInsert(param)
 			if err != nil {
 				log.Println(err.Error())
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return
 			}
 		}
 
