@@ -47,6 +47,9 @@ func main() {
 	// Create session and GitHubClient
 	session.InitializeSession()
 
+	// Setup logging format
+	log.SetFlags(log.LstdFlags | log.Lshortfile)
+
 	// SETUP ROUTES
 	mux := mux.NewRouter()
 	setPageRoutes(mux)

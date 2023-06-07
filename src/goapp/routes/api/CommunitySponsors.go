@@ -2,13 +2,11 @@ package routes
 
 import (
 	"encoding/json"
-	"fmt"
+	"log"
 	models "main/models"
 	ghmgmt "main/pkg/ghmgmtdb"
 	session "main/pkg/session"
-	"main/pkg/sql"
 	"net/http"
-	"os"
 
 	"github.com/gorilla/mux"
 )
@@ -22,7 +20,8 @@ func CommunitySponsorsAPIHandler(w http.ResponseWriter, r *http.Request) {
 	var body models.TypCommunitySponsors
 	err := json.NewDecoder(r.Body).Decode(&body)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		log.Println(err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
@@ -37,7 +36,9 @@ func CommunitySponsorsAPIHandler(w http.ResponseWriter, r *http.Request) {
 
 		_, err := ghmgmt.CommunitySponsorsInsert(param)
 		if err != nil {
-			fmt.Println(err)
+			log.Println(err.Error())
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
 		}
 
 	case "PUT":
@@ -48,7 +49,9 @@ func CommunitySponsorsAPIHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		_, err := ghmgmt.CommunitySponsorsUpdate(param)
 		if err != nil {
-			fmt.Println(err)
+			log.Println(err.Error())
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
 		}
 	}
 
@@ -57,16 +60,6 @@ func CommunitySponsorsAPIHandler(w http.ResponseWriter, r *http.Request) {
 func CommunitySponsorsPerCommunityId(w http.ResponseWriter, r *http.Request) {
 	req := mux.Vars(r)
 	id := req["id"]
-	dbConnectionParam := sql.ConnectionParam{
-		ConnectionString: os.Getenv("GHMGMTDB_CONNECTION_STRING"),
-	}
-
-	db, err := sql.Init(dbConnectionParam)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	defer db.Close()
 
 	// Get project list
 	param := map[string]interface{}{
@@ -76,6 +69,7 @@ func CommunitySponsorsPerCommunityId(w http.ResponseWriter, r *http.Request) {
 
 	CommunitySponsors, err := ghmgmt.CommunitySponsorsSelectByCommunityId(param)
 	if err != nil {
+		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -84,6 +78,7 @@ func CommunitySponsorsPerCommunityId(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	jsonResp, err := json.Marshal(CommunitySponsors)
 	if err != nil {
+		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}

@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"log"
 	auth "main/pkg/authentication"
 	session "main/pkg/session"
 	"net/http"
@@ -9,6 +10,8 @@ import (
 func GithubLoginHandler(w http.ResponseWriter, r *http.Request) {
 	state, err := session.GetState(w, r)
 	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 

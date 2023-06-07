@@ -3,6 +3,7 @@ package routes
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	db "main/pkg/ghmgmtdb"
 	session "main/pkg/session"
 	"net/http"
@@ -37,7 +38,9 @@ func GetApprovalTypes(w http.ResponseWriter, r *http.Request) {
 	} else {
 		result, err := db.SelectApprovalTypes()
 		if err != nil {
-			w.WriteHeader(http.StatusBadRequest)
+			log.Println(err.Error())
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
 		}
 		data = result
 	}
@@ -60,7 +63,9 @@ func GetApprovalTypeById(w http.ResponseWriter, r *http.Request) {
 	id, _ := strconv.Atoi(vars["id"])
 	result, err := db.SelectApprovalTypeById(id)
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
+		log.Println(err.Error())
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
 	}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
@@ -82,7 +87,9 @@ func CreateApprovalType(w http.ResponseWriter, r *http.Request) {
 		CreatedBy:                 username,
 	})
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
+		log.Println(err.Error())
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
 	}
 	approvalTypeDto.Id = id
 	json.NewEncoder(w).Encode(approvalTypeDto)
@@ -99,7 +106,12 @@ func EditApprovalTypeById(w http.ResponseWriter, r *http.Request) {
 	var approvalTypeDto ApprovalTypeDto
 	json.NewDecoder(r.Body).Decode(&approvalTypeDto)
 
-	id, _ := strconv.Atoi(vars["id"])
+	id, err := strconv.Atoi(vars["id"])
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
 	approvalTypeId, err := db.UpdateApprovalType(models.ApprovalType{
 		Id:                        id,
 		Name:                      approvalTypeDto.Name,
@@ -107,9 +119,10 @@ func EditApprovalTypeById(w http.ResponseWriter, r *http.Request) {
 		IsActive:                  approvalTypeDto.IsActive,
 		CreatedBy:                 username,
 	})
-
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
+		log.Println(err.Error())
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
 	}
 	approvalTypeDto.Id = approvalTypeId
 	json.NewEncoder(w).Encode(approvalTypeDto)
@@ -126,7 +139,13 @@ func SetIsArchivedApprovalTypeById(w http.ResponseWriter, r *http.Request) {
 	var approvalTypeDto ApprovalTypeDto
 	json.NewDecoder(r.Body).Decode(&approvalTypeDto)
 
-	id, _ := strconv.Atoi(vars["id"])
+	id, err := strconv.Atoi(vars["id"])
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
 	approvalTypeId, _, err := db.SetIsArchiveApprovalTypeById(models.ApprovalType{
 		Id:                        id,
 		Name:                      approvalTypeDto.Name,
@@ -136,16 +155,17 @@ func SetIsArchivedApprovalTypeById(w http.ResponseWriter, r *http.Request) {
 	})
 
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
+		log.Println(err.Error())
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
 	}
 	approvalTypeDto.Id = approvalTypeId
 	json.NewEncoder(w).Encode(approvalTypeDto)
 }
 
 func GetActiveApprovalTypes(w http.ResponseWriter, r *http.Request) {
-	var data interface{}
 
-	data = db.GetAllActiveApprovers()
+	data := db.GetAllActiveApprovers()
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)

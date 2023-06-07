@@ -2,9 +2,8 @@ package routes
 
 import (
 	"encoding/json"
-	"fmt"
+	"log"
 	models "main/models"
-	db "main/pkg/ghmgmtdb"
 	ghmgmtdb "main/pkg/ghmgmtdb"
 	githubAPI "main/pkg/github"
 	session "main/pkg/session"
@@ -20,7 +19,6 @@ import (
 func ProjectsNewHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "GET":
-
 		req := mux.Vars(r)
 		id := req["id"]
 
@@ -31,8 +29,7 @@ func ProjectsNewHandler(w http.ResponseWriter, r *http.Request) {
 		username := profile["preferred_username"]
 		isInnersourceMember, isOpensourceMember, _ := githubAPI.OrganizationsIsMember(os.Getenv("GH_TOKEN"), sessiongh.Username)
 
-		users := db.GetUsersWithGithub()
-
+		users := ghmgmtdb.GetUsersWithGithub()
 		data := map[string]interface{}{
 			"Id":                  id,
 			"users":               users,
@@ -54,7 +51,8 @@ func ProjectsNewHandler(w http.ResponseWriter, r *http.Request) {
 
 		err := json.NewDecoder(r.Body).Decode(&body)
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusBadRequest)
+			log.Println(err.Error())
+			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 
@@ -91,7 +89,7 @@ func ProjectsNewHandler(w http.ResponseWriter, r *http.Request) {
 
 			repo, errRepo := githubAPI.CreatePrivateGitHubRepository(body, username.(string))
 			if errRepo != nil {
-				fmt.Println(errRepo)
+				log.Println(errRepo.Error())
 				httpResponseError(w, http.StatusInternalServerError, "There is a problem creating the GitHub repository.")
 				return
 			}
@@ -113,11 +111,13 @@ func ProjectsNewHandler(w http.ResponseWriter, r *http.Request) {
 			// Add  requestor and coowner as repo admins
 			err = AddCollaboratorToRequestedRepo(username.(string), body.Name, repoId)
 			if err != nil {
+				log.Println(err.Error())
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
 			}
 			err = AddCollaboratorToRequestedRepo(body.Coowner, body.Name, repoId)
 			if err != nil {
+				log.Println(err.Error())
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
 			}
@@ -151,7 +151,7 @@ func ProjectsHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "GET":
 
-		users := db.GetUsersWithGithub()
+		users := ghmgmtdb.GetUsersWithGithub()
 		data := map[string]interface{}{
 			"Id":    id,
 			"users": users,
@@ -169,9 +169,8 @@ func ProjectsHandler(w http.ResponseWriter, r *http.Request) {
 
 		err := json.NewDecoder(r.Body).Decode(&body)
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusBadRequest)
-
-			fmt.Println(err.Error())
+			log.Println(err.Error())
+			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 
@@ -179,20 +178,17 @@ func ProjectsHandler(w http.ResponseWriter, r *http.Request) {
 
 		w.WriteHeader(http.StatusOK)
 	}
-
-}
-
-func handleError(err error) {
-	if err != nil {
-		fmt.Printf("ERROR: %+v", err)
-	}
 }
 
 func httpResponseError(w http.ResponseWriter, code int, errorMessage string) {
 	w.Header().Set("Content-Type", "text/html")
 	w.WriteHeader(code)
 	response, err := json.Marshal(errorMessage)
-	handleError(err)
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 	w.Write(response)
 }
 

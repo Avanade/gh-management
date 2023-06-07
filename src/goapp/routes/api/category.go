@@ -3,12 +3,11 @@ package routes
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	models "main/models"
 	ghmgmt "main/pkg/ghmgmtdb"
 	session "main/pkg/session"
-	"main/pkg/sql"
 	"net/http"
-	"os"
 	"strconv"
 
 	"github.com/gorilla/mux"
@@ -22,9 +21,8 @@ func CategoryAPIHandler(w http.ResponseWriter, r *http.Request) {
 	var body models.TypCategory
 	err := json.NewDecoder(r.Body).Decode(&body)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		fmt.Println(err)
-
+		log.Println(err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
@@ -40,13 +38,18 @@ func CategoryAPIHandler(w http.ResponseWriter, r *http.Request) {
 
 		result, err := ghmgmt.CategoryInsert(param)
 		if err != nil {
-			fmt.Println(err)
+			log.Println(err.Error())
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
 		}
-		id, _ := strconv.Atoi(fmt.Sprint(result[0]["Id"]))
 
+		id, err := strconv.Atoi(fmt.Sprint(result[0]["Id"]))
 		if err != nil {
-			fmt.Println(err)
+			log.Println(err.Error())
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
 		}
+
 		for _, c := range body.CategoryArticles {
 
 			CategoryArticles := map[string]interface{}{
@@ -62,35 +65,20 @@ func CategoryAPIHandler(w http.ResponseWriter, r *http.Request) {
 
 			_, err := ghmgmt.CategoryArticlesInsert(CategoryArticles)
 			if err != nil {
-				fmt.Println(err)
-
+				log.Println(err.Error())
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
 			}
-
-		}
-	case "GET":
-		_, err := ghmgmt.CommunitiesSelectByID(strconv.Itoa(body.Id))
-		if err != nil {
-			fmt.Println(err)
 		}
 	}
 }
 
 func CategoryListAPIHandler(w http.ResponseWriter, r *http.Request) {
-	dbConnectionParam := sql.ConnectionParam{
-		ConnectionString: os.Getenv("GHMGMTDB_CONNECTION_STRING"),
-	}
-
-	db, err := sql.Init(dbConnectionParam)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	defer db.Close()
 
 	// Get project list
-
 	Communities, err := ghmgmt.CategorySelect()
 	if err != nil {
+		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -99,6 +87,7 @@ func CategoryListAPIHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	jsonResp, err := json.Marshal(Communities)
 	if err != nil {
+		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -111,23 +100,12 @@ func GetCategoryArticlesById(w http.ResponseWriter, r *http.Request) {
 	req := mux.Vars(r)
 	id := req["id"]
 
-	// Connect to database
-	dbConnectionParam := sql.ConnectionParam{
-		ConnectionString: os.Getenv("GHMGMTDB_CONNECTION_STRING"),
-	}
-
-	db, err := sql.Init(dbConnectionParam)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	defer db.Close()
-
 	// Get project list
 	params := make(map[string]interface{})
 	params["Id"] = id
 	CategoryArticles, err := ghmgmt.CategoryArticlesselectById(params)
 	if err != nil {
+		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -136,6 +114,7 @@ func GetCategoryArticlesById(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	jsonResp, err := json.Marshal(CategoryArticles)
 	if err != nil {
+		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -146,24 +125,13 @@ func GetCategoryArticlesByArticlesID(w http.ResponseWriter, r *http.Request) {
 	req := mux.Vars(r)
 	id := req["id"]
 
-	// Connect to database
-	dbConnectionParam := sql.ConnectionParam{
-		ConnectionString: os.Getenv("GHMGMTDB_CONNECTION_STRING"),
-	}
-
-	db, err := sql.Init(dbConnectionParam)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	defer db.Close()
-
 	// Get project list
 	params := make(map[string]interface{})
 	params["Id"] = id
 
 	CategoryArticles, err := ghmgmt.CategoryArticlesSelectByArticlesID(params)
 	if err != nil {
+		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -172,6 +140,7 @@ func GetCategoryArticlesByArticlesID(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	jsonResp, err := json.Marshal(CategoryArticles)
 	if err != nil {
+		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -182,23 +151,12 @@ func GetCategoryByID(w http.ResponseWriter, r *http.Request) {
 	req := mux.Vars(r)
 	id := req["id"]
 
-	// Connect to database
-	dbConnectionParam := sql.ConnectionParam{
-		ConnectionString: os.Getenv("GHMGMTDB_CONNECTION_STRING"),
-	}
-
-	db, err := sql.Init(dbConnectionParam)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	defer db.Close()
-
 	// Get project list
 	params := make(map[string]interface{})
 	params["Id"] = id
 	Category, err := ghmgmt.CategorySelectById(params)
 	if err != nil {
+		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -207,6 +165,7 @@ func GetCategoryByID(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	jsonResp, err := json.Marshal(Category)
 	if err != nil {
+		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -219,12 +178,11 @@ func CategoryArticlesUpdate(w http.ResponseWriter, r *http.Request) {
 	profile := iprofile.(map[string]interface{})
 	username := profile["preferred_username"]
 	var body models.TypCategoryArticles
-	//var body models.TypCategory
+
 	err := json.NewDecoder(r.Body).Decode(&body)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		fmt.Println(err)
-
+		log.Println(err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
@@ -238,9 +196,9 @@ func CategoryArticlesUpdate(w http.ResponseWriter, r *http.Request) {
 
 	result, err := ghmgmt.CategoryInsert(param1)
 	if err != nil {
-		fmt.Println(err)
-
+		log.Println(err.Error())
 	}
+
 	id2, _ := strconv.Atoi(fmt.Sprint(result[0]["Id"]))
 	param := map[string]interface{}{
 		"Id":         body.Id,
@@ -252,9 +210,10 @@ func CategoryArticlesUpdate(w http.ResponseWriter, r *http.Request) {
 		"ModifiedBy": username,
 	}
 
-	err2 := ghmgmt.CategoryArticlesUpdate(param)
-	if err2 != nil {
-		fmt.Println(err)
+	err = ghmgmt.CategoryArticlesUpdate(param)
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
@@ -266,29 +225,27 @@ func CategoryUpdate(w http.ResponseWriter, r *http.Request) {
 	iprofile := sessionaz.Values["profile"]
 	profile := iprofile.(map[string]interface{})
 	username := profile["preferred_username"]
-	//var body models.TypCategoryArticles
+
 	var body models.TypCategory
 
 	err := json.NewDecoder(r.Body).Decode(&body)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		fmt.Println(err)
-
+		log.Println(err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	param1 := map[string]interface{}{
-
 		"Name":       body.Name,
 		"CreatedBy":  username,
 		"ModifiedBy": username,
 		"Id":         body.Id,
 	}
 
-	_, err2 := ghmgmt.CategoryInsert(param1)
+	_, err = ghmgmt.CategoryInsert(param1)
 	if err != nil {
-		fmt.Println(err2)
-
+		log.Println(err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 

@@ -16,6 +16,7 @@ func ListApprovalTypes(w http.ResponseWriter, r *http.Request) {
 func ApprovalTypeForm(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id, _ := strconv.Atoi(vars["id"])
+
 	action := vars["action"]
 	template.UseTemplate(&w, r, "admin/approvaltypes/form", struct {
 		Id     int

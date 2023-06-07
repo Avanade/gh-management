@@ -1,9 +1,9 @@
 package routes
 
 import (
+	"log"
 	"net/http"
 
-	"fmt"
 	ghmgmt "main/pkg/ghmgmtdb"
 )
 
@@ -15,10 +15,11 @@ func InitProjectToRepoOwner(w http.ResponseWriter, r *http.Request) {
 
 		RepoOwners, _ := ghmgmt.RepoOwnersByUserAndProjectId(ProjectOwnerForRepoOwner.Id, ProjectOwnerForRepoOwner.UserPrincipalName)
 		if len(RepoOwners) < 1 {
-			error := ghmgmt.RepoOwnersInsert(ProjectOwnerForRepoOwner.Id, ProjectOwnerForRepoOwner.UserPrincipalName)
-			if error != nil {
-
-				fmt.Println(error)
+			err := ghmgmt.RepoOwnersInsert(ProjectOwnerForRepoOwner.Id, ProjectOwnerForRepoOwner.UserPrincipalName)
+			if err != nil {
+				log.Println(err.Error())
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
 			}
 		}
 	}

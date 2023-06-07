@@ -4,23 +4,24 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"log"
 	models "main/models"
 	ghmgmtdb "main/pkg/ghmgmtdb"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
 )
 
-func handleError(err error) {
-	if err != nil {
-		fmt.Printf("ERROR: %+v", err)
-	}
-}
-
 func getHttpPostResponseStatus(url string, data interface{}, ch chan *http.Response) {
 	jsonReq, err := json.Marshal(data)
+	if err != nil {
+		log.Println(err.Error())
+		ch <- nil
+	}
 	res, err := http.Post(url, "application/json; charset=utf-8", bytes.NewBuffer(jsonReq))
 	if err != nil {
+		log.Println(err.Error())
 		ch <- nil
 	}
 	ch <- res
@@ -32,6 +33,7 @@ func RequestCommunityApproval(id int64) error {
 	for _, v := range communityApprovals {
 		err := ApprovalSystemRequestCommunity(v)
 		if err != nil {
+			log.Println("ID:" + strconv.FormatInt(v.Id, 10) + " " + err.Error())
 			return err
 		}
 	}
@@ -105,6 +107,7 @@ func ApprovalSystemRequestCommunity(data models.TypCommunityApprovals) error {
 			var res models.TypApprovalSystemPostResponse
 			err := json.NewDecoder(r.Body).Decode(&res)
 			if err != nil {
+				log.Println(err.Error())
 				return err
 			}
 
