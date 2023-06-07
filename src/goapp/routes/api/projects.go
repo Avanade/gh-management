@@ -565,7 +565,13 @@ func ClearOrgRepos(w http.ResponseWriter, r *http.Request) {
 		go func(p map[string]interface{}) {
 			projectId := p["Id"].(int64)
 			repoName := p["Name"].(string)
-			isRemoved := RemoveRepoIfNotExist(int(projectId), repoName)
+			var isGithubIdNil bool
+			if p["GithubId"] == nil {
+				isGithubIdNil = true
+			} else {
+				isGithubIdNil = false
+			}
+			isRemoved := RemoveRepoIfNotExist(int(projectId), repoName, isGithubIdNil)
 			if isRemoved {
 				removedProjects = append(removedProjects, repoName)
 			}
@@ -584,14 +590,14 @@ func ClearOrgRepos(w http.ResponseWriter, r *http.Request) {
 	fmt.Println(" SUCCESSFULLY INDEXED ORGANIZATION REPOSITORIES")
 }
 
-func RemoveRepoIfNotExist(projectId int, repoName string) bool {
+func RemoveRepoIfNotExist(projectId int, repoName string, isGithubIdNil bool) bool {
 	isExist, err := gh.Repo_IsExisting(repoName)
 	if err != nil {
 		fmt.Println(err.Error(), " | REPO NAME : ", repoName)
 		return false
 	}
 
-	if !isExist {
+	if !isExist || isGithubIdNil {
 		err := ghmgmt.DeleteProjectById(projectId)
 		if err != nil {
 			fmt.Println(err.Error())
