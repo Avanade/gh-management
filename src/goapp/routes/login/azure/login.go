@@ -7,7 +7,7 @@ import (
 	"net/http"
 
 	auth "main/pkg/authentication"
-	session "main/pkg/session"
+	"main/pkg/session"
 )
 
 func LoginHandler(w http.ResponseWriter, r *http.Request) {

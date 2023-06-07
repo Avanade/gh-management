@@ -14,7 +14,6 @@ import (
 	"github.com/golang-jwt/jwt"
 	"github.com/lestrrat-go/jwx/jwa"
 	"github.com/lestrrat-go/jwx/jwk"
-
 	"golang.org/x/oauth2"
 )
 

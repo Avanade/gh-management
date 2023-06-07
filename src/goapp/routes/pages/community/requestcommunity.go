@@ -1,9 +1,10 @@
 package routes
 
 import (
-	session "main/pkg/session"
-	template "main/pkg/template"
 	"net/http"
+
+	"main/pkg/session"
+	"main/pkg/template"
 
 	"github.com/gorilla/mux"
 )

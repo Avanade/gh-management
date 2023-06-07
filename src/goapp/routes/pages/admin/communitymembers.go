@@ -1,8 +1,9 @@
 package routes
 
 import (
-	"main/pkg/template"
 	"net/http"
+
+	"main/pkg/template"
 )
 
 func ListCommunityMembers(w http.ResponseWriter, r *http.Request) {

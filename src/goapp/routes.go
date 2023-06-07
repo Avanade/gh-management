@@ -1,6 +1,8 @@
 package main
 
 import (
+	"net/http"
+
 	rtApi "main/routes/api"
 	rtAzure "main/routes/login/azure"
 	rtGithub "main/routes/login/github"
@@ -11,7 +13,6 @@ import (
 	rtGuidance "main/routes/pages/guidance"
 	rtProjects "main/routes/pages/projects"
 	rtSearch "main/routes/pages/search"
-	"net/http"
 
 	"github.com/gorilla/mux"
 )

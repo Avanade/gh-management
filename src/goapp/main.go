@@ -4,22 +4,19 @@ import (
 	"context"
 	"fmt"
 	"log"
-	session "main/pkg/session"
-	"os"
-
-	//rtGithubAPi "main/routes/login/github"
-	rtPages "main/routes/pages"
-	reports "main/routes/timerjobs"
 	"net/http"
+	"os"
 	"strconv"
 	"time"
 
-	"github.com/gorilla/mux"
-	"github.com/unrolled/secure"
-
 	ev "main/pkg/envvar"
+	"main/pkg/session"
+	rtPages "main/routes/pages"
+	reports "main/routes/timerjobs"
 
+	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
+	"github.com/unrolled/secure"
 )
 
 func main() {

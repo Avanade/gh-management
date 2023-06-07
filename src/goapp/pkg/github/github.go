@@ -1,10 +1,9 @@
 package githubAPI
 
 import (
-	"log"
-
 	"context"
 	"fmt"
+	"log"
 	"main/models"
 	"os"
 	"strings"

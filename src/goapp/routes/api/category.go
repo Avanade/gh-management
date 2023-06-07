@@ -4,11 +4,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	models "main/models"
-	ghmgmt "main/pkg/ghmgmtdb"
-	session "main/pkg/session"
 	"net/http"
 	"strconv"
+
+	"main/models"
+	db "main/pkg/ghmgmtdb"
+	"main/pkg/session"
 
 	"github.com/gorilla/mux"
 )
@@ -36,7 +37,7 @@ func CategoryAPIHandler(w http.ResponseWriter, r *http.Request) {
 			"Id":         body.Id,
 		}
 
-		result, err := ghmgmt.CategoryInsert(param)
+		result, err := db.CategoryInsert(param)
 		if err != nil {
 			log.Println(err.Error())
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -63,7 +64,7 @@ func CategoryAPIHandler(w http.ResponseWriter, r *http.Request) {
 				"ModifiedBy":  username,
 			}
 
-			_, err := ghmgmt.CategoryArticlesInsert(CategoryArticles)
+			_, err := db.CategoryArticlesInsert(CategoryArticles)
 			if err != nil {
 				log.Println(err.Error())
 				http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -76,7 +77,7 @@ func CategoryAPIHandler(w http.ResponseWriter, r *http.Request) {
 func CategoryListAPIHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Get project list
-	Communities, err := ghmgmt.CategorySelect()
+	Communities, err := db.CategorySelect()
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -103,7 +104,7 @@ func GetCategoryArticlesById(w http.ResponseWriter, r *http.Request) {
 	// Get project list
 	params := make(map[string]interface{})
 	params["Id"] = id
-	CategoryArticles, err := ghmgmt.CategoryArticlesselectById(params)
+	CategoryArticles, err := db.CategoryArticlesselectById(params)
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -129,7 +130,7 @@ func GetCategoryArticlesByArticlesID(w http.ResponseWriter, r *http.Request) {
 	params := make(map[string]interface{})
 	params["Id"] = id
 
-	CategoryArticles, err := ghmgmt.CategoryArticlesSelectByArticlesID(params)
+	CategoryArticles, err := db.CategoryArticlesSelectByArticlesID(params)
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -154,7 +155,7 @@ func GetCategoryByID(w http.ResponseWriter, r *http.Request) {
 	// Get project list
 	params := make(map[string]interface{})
 	params["Id"] = id
-	Category, err := ghmgmt.CategorySelectById(params)
+	Category, err := db.CategorySelectById(params)
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -194,7 +195,7 @@ func CategoryArticlesUpdate(w http.ResponseWriter, r *http.Request) {
 		"Id":         body.CategoryId,
 	}
 
-	result, err := ghmgmt.CategoryInsert(param1)
+	result, err := db.CategoryInsert(param1)
 	if err != nil {
 		log.Println(err.Error())
 	}
@@ -210,7 +211,7 @@ func CategoryArticlesUpdate(w http.ResponseWriter, r *http.Request) {
 		"ModifiedBy": username,
 	}
 
-	err = ghmgmt.CategoryArticlesUpdate(param)
+	err = db.CategoryArticlesUpdate(param)
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -242,7 +243,7 @@ func CategoryUpdate(w http.ResponseWriter, r *http.Request) {
 		"Id":         body.Id,
 	}
 
-	_, err = ghmgmt.CategoryInsert(param1)
+	_, err = db.CategoryInsert(param1)
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)

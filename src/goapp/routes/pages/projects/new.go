@@ -3,15 +3,16 @@ package routes
 import (
 	"encoding/json"
 	"log"
-	models "main/models"
-	ghmgmtdb "main/pkg/ghmgmtdb"
-	githubAPI "main/pkg/github"
-	session "main/pkg/session"
-	template "main/pkg/template"
+	"main/models"
 	"net/http"
 	"os"
 	"regexp"
 	"strings"
+
+	db "main/pkg/ghmgmtdb"
+	ghAPI "main/pkg/github"
+	"main/pkg/session"
+	"main/pkg/template"
 
 	"github.com/gorilla/mux"
 )
@@ -27,9 +28,9 @@ func ProjectsNewHandler(w http.ResponseWriter, r *http.Request) {
 		iprofile := sessionaz.Values["profile"]
 		profile := iprofile.(map[string]interface{})
 		username := profile["preferred_username"]
-		isInnersourceMember, isOpensourceMember, _ := githubAPI.OrganizationsIsMember(os.Getenv("GH_TOKEN"), sessiongh.Username)
+		isInnersourceMember, isOpensourceMember, _ := ghAPI.OrganizationsIsMember(os.Getenv("GH_TOKEN"), sessiongh.Username)
 
-		users := ghmgmtdb.GetUsersWithGithub()
+		users := db.GetUsersWithGithub()
 		data := map[string]interface{}{
 			"Id":                  id,
 			"users":               users,
@@ -67,8 +68,8 @@ func ProjectsNewHandler(w http.ResponseWriter, r *http.Request) {
 		var existsDb bool
 		var existsGH bool
 		dashedProjName := strings.ReplaceAll(body.Name, " ", "-")
-		go func() { checkDB <- ghmgmtdb.Projects_IsExisting(body) }()
-		go func() { b, _ := githubAPI.Repo_IsExisting(dashedProjName); checkGH <- b }()
+		go func() { checkDB <- db.Projects_IsExisting(body) }()
+		go func() { b, _ := ghAPI.Repo_IsExisting(dashedProjName); checkGH <- b }()
 
 		existsDb = <-checkDB
 		existsGH = <-checkGH
@@ -81,13 +82,13 @@ func ProjectsNewHandler(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 		} else {
-			isOrgAllowInternalRepo, err := githubAPI.IsOrgAllowInternalRepo()
+			isOrgAllowInternalRepo, err := ghAPI.IsOrgAllowInternalRepo()
 			if err != nil {
 				httpResponseError(w, http.StatusBadRequest, "There is a problem checking if the organization is enterprise or not.")
 				return
 			}
 
-			repo, errRepo := githubAPI.CreatePrivateGitHubRepository(body, username.(string))
+			repo, errRepo := ghAPI.CreatePrivateGitHubRepository(body, username.(string))
 			if errRepo != nil {
 				log.Println(errRepo.Error())
 				httpResponseError(w, http.StatusInternalServerError, "There is a problem creating the GitHub repository.")
@@ -99,14 +100,14 @@ func ProjectsNewHandler(w http.ResponseWriter, r *http.Request) {
 
 			if isOrgAllowInternalRepo {
 				innersource := os.Getenv("GH_ORG_INNERSOURCE")
-				err := githubAPI.SetProjectVisibility(repo.GetName(), "internal", innersource)
+				err := ghAPI.SetProjectVisibility(repo.GetName(), "internal", innersource)
 				if err != nil {
 					return
 				}
 				body.Visibility = 2
 			}
 
-			repoId := ghmgmtdb.PRProjectsInsert(body, username.(string))
+			repoId := db.PRProjectsInsert(body, username.(string))
 
 			// Add  requestor and coowner as repo admins
 			err = AddCollaboratorToRequestedRepo(username.(string), body.Name, repoId)
@@ -129,14 +130,14 @@ func ProjectsNewHandler(w http.ResponseWriter, r *http.Request) {
 
 func AddCollaboratorToRequestedRepo(user string, repo string, repoId int64) error {
 	innersource := os.Getenv("GH_ORG_INNERSOURCE")
-	gHUser := ghmgmtdb.Users_Get_GHUser(user)
-	isInnersourceMember, _, _ := githubAPI.OrganizationsIsMember(os.Getenv("GH_TOKEN"), gHUser)
+	gHUser := db.Users_Get_GHUser(user)
+	isInnersourceMember, _, _ := ghAPI.OrganizationsIsMember(os.Getenv("GH_TOKEN"), gHUser)
 	if isInnersourceMember {
-		_, err := githubAPI.AddCollaborator(innersource, repo, gHUser, "admin")
+		_, err := ghAPI.AddCollaborator(innersource, repo, gHUser, "admin")
 		if err != nil {
 			return err
 		}
-		err = ghmgmtdb.RepoOwnersInsert(repoId, user)
+		err = db.RepoOwnersInsert(repoId, user)
 		if err != nil {
 			return err
 		}
@@ -151,7 +152,7 @@ func ProjectsHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "GET":
 
-		users := ghmgmtdb.GetUsersWithGithub()
+		users := db.GetUsersWithGithub()
 		data := map[string]interface{}{
 			"Id":    id,
 			"users": users,
@@ -174,7 +175,7 @@ func ProjectsHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		ghmgmtdb.PRProjectsUpdate(body, username.(string))
+		db.PRProjectsUpdate(body, username.(string))
 
 		w.WriteHeader(http.StatusOK)
 	}

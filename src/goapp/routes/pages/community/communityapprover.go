@@ -3,13 +3,12 @@ package routes
 import (
 	"encoding/json"
 	"log"
-
-	models "main/models"
-	session "main/pkg/session"
-	template "main/pkg/template"
 	"net/http"
 
+	"main/models"
 	db "main/pkg/ghmgmtdb"
+	"main/pkg/session"
+	"main/pkg/template"
 
 	"github.com/gorilla/mux"
 )

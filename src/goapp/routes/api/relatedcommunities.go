@@ -3,9 +3,10 @@ package routes
 import (
 	"encoding/json"
 	"log"
-	models "main/models"
-	ghmgmt "main/pkg/ghmgmtdb"
 	"net/http"
+
+	"main/models"
+	db "main/pkg/ghmgmtdb"
 
 	"github.com/gorilla/mux"
 )
@@ -27,7 +28,7 @@ func RelatedCommunitiesInsert(w http.ResponseWriter, r *http.Request) {
 		"RelatedCommunityId": body.RelatedCommunityId,
 	}
 
-	approvers, err := ghmgmt.RelatedCommunitiesInsert(param)
+	approvers, err := db.RelatedCommunitiesInsert(param)
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -63,7 +64,7 @@ func RelatedCommunitiesDelete(w http.ResponseWriter, r *http.Request) {
 		"RelatedCommunityId": body.RelatedCommunityId,
 	}
 
-	approvers, err := ghmgmt.RelatedCommunitiesDelete(param)
+	approvers, err := db.RelatedCommunitiesDelete(param)
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -92,7 +93,7 @@ func RelatedCommunitiesSelect(w http.ResponseWriter, r *http.Request) {
 		"ParentCommunityId": id,
 	}
 
-	approvers, err := ghmgmt.RelatedCommunitiesSelect(param)
+	approvers, err := db.RelatedCommunitiesSelect(param)
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)

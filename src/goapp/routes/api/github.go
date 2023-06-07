@@ -4,15 +4,16 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	"main/pkg/email"
-	db "main/pkg/ghmgmtdb"
-	githubAPI "main/pkg/github"
-	"main/pkg/msgraph"
 	"net/http"
 	"os"
 	"strconv"
 	"strings"
 	"time"
+
+	"main/pkg/email"
+	db "main/pkg/ghmgmtdb"
+	ghAPI "main/pkg/github"
+	"main/pkg/msgraph"
 
 	"github.com/google/go-github/v50/github"
 	"github.com/gorilla/mux"
@@ -23,9 +24,9 @@ func CheckAvaInnerSource(w http.ResponseWriter, r *http.Request) {
 	org := os.Getenv("GH_ORG_INNERSOURCE")
 	token := os.Getenv("GH_TOKEN")
 
-	collabs := githubAPI.ListOutsideCollaborators(token, org)
+	collabs := ghAPI.ListOutsideCollaborators(token, org)
 	for _, collab := range collabs {
-		githubAPI.RemoveOutsideCollaborator(token, org, *collab.Login)
+		ghAPI.RemoveOutsideCollaborator(token, org, *collab.Login)
 	}
 }
 
@@ -33,14 +34,14 @@ func CheckAvaOpenSource(w http.ResponseWriter, r *http.Request) {
 	org := os.Getenv("GH_ORG_OPENSOURCE")
 	var OutsideCollabsUsers []string
 	token := os.Getenv("GH_TOKEN")
-	repos, err := githubAPI.GetRepositoriesFromOrganization(org)
+	repos, err := ghAPI.GetRepositoriesFromOrganization(org)
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	Outsidecollabs := githubAPI.ListOutsideCollaborators(token, org)
+	Outsidecollabs := ghAPI.ListOutsideCollaborators(token, org)
 	for _, list := range Outsidecollabs {
 		OutsideCollabsUsers = append(OutsideCollabsUsers, *list.Login)
 	}
@@ -51,7 +52,7 @@ func CheckAvaOpenSource(w http.ResponseWriter, r *http.Request) {
 		var Adminmember []string
 		RepoOutsideCollabsList = nil
 
-		RepoCollabs := githubAPI.RepositoriesListCollaborators(token, org, collab.Name, "", "direct")
+		RepoCollabs := ghAPI.RepositoriesListCollaborators(token, org, collab.Name, "", "direct")
 		for _, list := range RepoCollabs {
 
 			RepoCollabsUserNames = append(RepoCollabsUserNames, *list.Login)
@@ -83,7 +84,6 @@ func CheckAvaOpenSource(w http.ResponseWriter, r *http.Request) {
 		}
 
 	}
-
 }
 
 func ClearOrgMembers(w http.ResponseWriter, r *http.Request) {
@@ -93,7 +93,7 @@ func ClearOrgMembers(w http.ResponseWriter, r *http.Request) {
 	organization := os.Getenv("GH_ORG_INNERSOURCE")
 	EmailSupport := os.Getenv("EMAIL_SUPPORT")
 	var ConvertedOutsidecollabsList []string
-	users := githubAPI.OrgListMembers(token, organization)
+	users := ghAPI.OrgListMembers(token, organization)
 	for _, list := range users {
 		email, err := db.UsersGetEmail(*list.Login)
 		if err != nil {
@@ -109,11 +109,11 @@ func ClearOrgMembers(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 			if activeuser == nil {
-				githubAPI.RemoveOrganizationsMember(token, organization, *list.Login)
+				ghAPI.RemoveOrganizationsMember(token, organization, *list.Login)
 
 			}
 		} else {
-			githubAPI.RemoveOrganizationsMember(token, organization, *list.Login)
+			ghAPI.RemoveOrganizationsMember(token, organization, *list.Login)
 
 		}
 
@@ -122,7 +122,7 @@ func ClearOrgMembers(w http.ResponseWriter, r *http.Request) {
 	// Convert users who are not employees to an outside collaborator
 	organizationsOpen := os.Getenv("GH_ORG_OPENSOURCE")
 
-	usersOpenorg := githubAPI.OrgListMembers(token, organizationsOpen)
+	usersOpenorg := ghAPI.OrgListMembers(token, organizationsOpen)
 	for _, list := range usersOpenorg {
 		email, err := db.UsersGetEmail(*list.Login)
 		if err != nil {
@@ -133,11 +133,11 @@ func ClearOrgMembers(w http.ResponseWriter, r *http.Request) {
 		if len(email) > 0 {
 			activeuser, _ := msgraph.ActiveUsers(email)
 			if activeuser == nil {
-				githubAPI.ConvertMemberToOutsideCollaborator(token, organizationsOpen, *list.Login)
+				ghAPI.ConvertMemberToOutsideCollaborator(token, organizationsOpen, *list.Login)
 				ConvertedOutsidecollabsList = append(ConvertedOutsidecollabsList, *list.Login)
 			}
 		} else {
-			githubAPI.ConvertMemberToOutsideCollaborator(token, organizationsOpen, *list.Login)
+			ghAPI.ConvertMemberToOutsideCollaborator(token, organizationsOpen, *list.Login)
 			ConvertedOutsidecollabsList = append(ConvertedOutsidecollabsList, *list.Login)
 		}
 	}
@@ -147,7 +147,7 @@ func ClearOrgMembers(w http.ResponseWriter, r *http.Request) {
 		EmailAdminConvertToColaborator(EmailSupport, ConvertedOutsidecollabsList)
 
 		// Email repo admins with converted users
-		repos, _ := githubAPI.GetRepositoriesFromOrganization(organizationsOpen)
+		repos, _ := ghAPI.GetRepositoriesFromOrganization(organizationsOpen)
 		for _, repo := range repos {
 
 			RepoAdmins := GetRepoCollaborators(organizationsOpen, repo.Name, "admin", "direct")
@@ -171,7 +171,6 @@ func ClearOrgMembers(w http.ResponseWriter, r *http.Request) {
 
 		}
 	}
-
 }
 
 func RepoOwnerScan(w http.ResponseWriter, r *http.Request) {
@@ -183,7 +182,7 @@ func RepoOwnerScan(w http.ResponseWriter, r *http.Request) {
 	for _, org := range organizationsOpen {
 
 		repoOnwerDeficient = nil
-		repos, err := githubAPI.GetRepositoriesFromOrganization(org)
+		repos, err := ghAPI.GetRepositoriesFromOrganization(org)
 		if err != nil {
 			log.Println(err.Error())
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -216,7 +215,6 @@ func RepoOwnerScan(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	fmt.Println("REPOOWNERSSCAN SUCCESSFUL")
-
 }
 
 func AddCollaborator(w http.ResponseWriter, r *http.Request) {
@@ -253,10 +251,10 @@ func AddCollaborator(w http.ResponseWriter, r *http.Request) {
 		repoUrlSub := strings.Split(repoUrl, "/")
 
 		isInnersource := strings.EqualFold(repoUrlSub[1], os.Getenv("GH_ORG_INNERSOURCE"))
-		isMember, _, _ := githubAPI.OrganizationsIsMember(os.Getenv("GH_TOKEN"), ghUser)
+		isMember, _, _ := ghAPI.OrganizationsIsMember(os.Getenv("GH_TOKEN"), ghUser)
 
 		if (isInnersource && isMember) || (!isInnersource) {
-			_, err := githubAPI.AddCollaborator(repoUrlSub[1], repo.Name, ghUser, permission)
+			_, err := ghAPI.AddCollaborator(repoUrlSub[1], repo.Name, ghUser, permission)
 			if err != nil {
 				log.Println(err.Error())
 				http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -296,7 +294,6 @@ func AddCollaborator(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-
 }
 
 func RemoveCollaborator(w http.ResponseWriter, r *http.Request) {
@@ -332,7 +329,7 @@ func RemoveCollaborator(w http.ResponseWriter, r *http.Request) {
 		repoUrl := strings.Replace(repo.TFSProjectReference, "https://", "", -1)
 		repoUrlSub := strings.Split(repoUrl, "/")
 
-		_, err := githubAPI.RemoveCollaborator(repoUrlSub[1], repo.Name, ghUser, permission)
+		_, err := ghAPI.RemoveCollaborator(repoUrlSub[1], repo.Name, ghUser, permission)
 		if err != nil {
 			log.Println(err.Error())
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -354,7 +351,6 @@ func RemoveCollaborator(w http.ResponseWriter, r *http.Request) {
 
 		w.WriteHeader(http.StatusOK)
 	}
-
 }
 
 func EmailAdmin(admin string, adminemail string, reponame string, outisideCollab []string) {
@@ -455,7 +451,7 @@ func GetRepoCollaborators(org string, repo string, role string, affiliations str
 
 	token := os.Getenv("GH_TOKEN")
 
-	Repocollabs := githubAPI.RepositoriesListCollaborators(token, org, repo, role, affiliations)
+	Repocollabs := ghAPI.RepositoriesListCollaborators(token, org, repo, role, affiliations)
 
 	return Repocollabs
 }

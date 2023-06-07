@@ -10,9 +10,9 @@ import (
 	"github.com/coreos/go-oidc"
 
 	auth "main/pkg/authentication"
-	ghmgmt "main/pkg/ghmgmtdb"
+	db "main/pkg/ghmgmtdb"
 	"main/pkg/msgraph"
-	session "main/pkg/session"
+	"main/pkg/session"
 )
 
 func CallbackHandler(w http.ResponseWriter, r *http.Request) {
@@ -96,7 +96,7 @@ func CallbackHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Insert Azure User
 	name := fmt.Sprint(profile["name"])
-	err = ghmgmt.InsertUser(userPrincipalName, name, "", "", "")
+	err = db.InsertUser(userPrincipalName, name, "", "", "")
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)

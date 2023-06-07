@@ -3,14 +3,13 @@ package routes
 import (
 	"encoding/json"
 	"log"
-	session "main/pkg/session"
 	"net/http"
 
 	db "main/pkg/ghmgmtdb"
+	"main/pkg/session"
+	"main/pkg/template"
 
 	"github.com/gorilla/mux"
-
-	template "main/pkg/template"
 )
 
 func SearchHandler(w http.ResponseWriter, r *http.Request) {
