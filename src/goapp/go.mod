@@ -43,6 +43,7 @@ require (
 require (
 	github.com/Azure/azure-sdk-for-go/sdk/azidentity v1.0.0
 	github.com/golang/protobuf v1.4.2 // indirect
+	github.com/google/go-github v17.0.0+incompatible
 	github.com/google/go-github/v42 v42.0.0
 	github.com/gorilla/sessions v1.2.1
 	github.com/lestrrat-go/jwx v1.2.25
