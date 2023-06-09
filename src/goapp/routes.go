@@ -55,7 +55,7 @@ func setPageRoutes(mux *mux.Router) {
 
 	// AUTHENTICATION
 	mux.HandleFunc("/loginredirect", rtPages.LoginRedirectHandler).Methods("GET")
-	mux.HandleFunc("/gitredirect", rtPages.GitredirectHandler).Methods("GET")
+	mux.HandleFunc("/gitredirect", rtPages.GitRedirectHandler).Methods("GET")
 	// AZURE
 	mux.HandleFunc("/login/azure", rtAzure.LoginHandler)
 	mux.HandleFunc("/login/azure/callback", rtAzure.CallbackHandler)

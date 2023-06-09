@@ -46,14 +46,6 @@ type ItemDto struct {
 	Name string `json:"name"`
 }
 
-type CommunityActivitiesContributionAreasDto struct {
-	CommunityActivityId int
-	ContributionAreaId  int
-	IsPrimary           bool
-	CreatedBy           string
-	ModifiedBy          string
-}
-
 func GetActivities(w http.ResponseWriter, r *http.Request) {
 	sessionaz, _ := session.Store.Get(r, "auth-session")
 	iprofile := sessionaz.Values["profile"]

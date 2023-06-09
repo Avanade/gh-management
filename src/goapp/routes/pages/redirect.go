@@ -21,7 +21,7 @@ func LoginRedirectHandler(w http.ResponseWriter, r *http.Request) {
 	tmpl.Execute(w, data)
 }
 
-func GitredirectHandler(w http.ResponseWriter, r *http.Request) {
+func GitRedirectHandler(w http.ResponseWriter, r *http.Request) {
 	q := r.URL.Query()
 	redirect := "/"
 	if len(q["redirect"]) > 0 {

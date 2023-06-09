@@ -39,6 +39,7 @@ func GetUserCommunitylist(w http.ResponseWriter, r *http.Request) {
 
 	w.Write(jsonResp)
 }
+
 func GetMyCommunitylist(w http.ResponseWriter, r *http.Request) {
 	// Get email address of the user
 	sessionaz, _ := session.Store.Get(r, "auth-session")

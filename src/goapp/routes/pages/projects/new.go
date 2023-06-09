@@ -17,6 +17,10 @@ import (
 	"github.com/gorilla/mux"
 )
 
+type TypErrorJsonReturnDto struct {
+	Error string `json:"error"`
+}
+
 func ProjectsNewHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "GET":
@@ -57,8 +61,8 @@ func ProjectsNewHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		if !isRepoNameValid(body.Name) {
-			httpResponseError(w, http.StatusBadRequest, "Invalid repository name.")
+		if !IsRepoNameValid(body.Name) {
+			HttpResponseError(w, http.StatusBadRequest, "Invalid repository name.")
 			return
 		}
 
@@ -75,23 +79,23 @@ func ProjectsNewHandler(w http.ResponseWriter, r *http.Request) {
 		existsGH = <-checkGH
 		if existsDb || existsGH {
 			if existsDb {
-				httpResponseError(w, http.StatusBadRequest, "The project name is existing in the database.")
+				HttpResponseError(w, http.StatusBadRequest, "The project name is existing in the database.")
 				return
 			} else if existsGH {
-				httpResponseError(w, http.StatusBadRequest, "The project name is existing in Github.")
+				HttpResponseError(w, http.StatusBadRequest, "The project name is existing in Github.")
 				return
 			}
 		} else {
 			isOrgAllowInternalRepo, err := ghAPI.IsOrgAllowInternalRepo()
 			if err != nil {
-				httpResponseError(w, http.StatusBadRequest, "There is a problem checking if the organization is enterprise or not.")
+				HttpResponseError(w, http.StatusBadRequest, "There is a problem checking if the organization is enterprise or not.")
 				return
 			}
 
 			repo, errRepo := ghAPI.CreatePrivateGitHubRepository(body, username.(string))
 			if errRepo != nil {
 				log.Println(errRepo.Error())
-				httpResponseError(w, http.StatusInternalServerError, "There is a problem creating the GitHub repository.")
+				HttpResponseError(w, http.StatusInternalServerError, "There is a problem creating the GitHub repository.")
 				return
 			}
 			body.GithubId = repo.GetID()
@@ -126,23 +130,6 @@ func ProjectsNewHandler(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusOK)
 		}
 	}
-}
-
-func AddCollaboratorToRequestedRepo(user string, repo string, repoId int64) error {
-	innersource := os.Getenv("GH_ORG_INNERSOURCE")
-	gHUser := db.Users_Get_GHUser(user)
-	isInnersourceMember, _, _ := ghAPI.OrganizationsIsMember(os.Getenv("GH_TOKEN"), gHUser)
-	if isInnersourceMember {
-		_, err := ghAPI.AddCollaborator(innersource, repo, gHUser, "admin")
-		if err != nil {
-			return err
-		}
-		err = db.RepoOwnersInsert(repoId, user)
-		if err != nil {
-			return err
-		}
-	}
-	return nil
 }
 
 func ProjectsHandler(w http.ResponseWriter, r *http.Request) {
@@ -181,7 +168,7 @@ func ProjectsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func httpResponseError(w http.ResponseWriter, code int, errorMessage string) {
+func HttpResponseError(w http.ResponseWriter, code int, errorMessage string) {
 	w.Header().Set("Content-Type", "text/html")
 	w.WriteHeader(code)
 	response, err := json.Marshal(errorMessage)
@@ -193,7 +180,24 @@ func httpResponseError(w http.ResponseWriter, code int, errorMessage string) {
 	w.Write(response)
 }
 
-func isRepoNameValid(value string) bool {
+func AddCollaboratorToRequestedRepo(user string, repo string, repoId int64) error {
+	innersource := os.Getenv("GH_ORG_INNERSOURCE")
+	gHUser := db.Users_Get_GHUser(user)
+	isInnersourceMember, _, _ := ghAPI.OrganizationsIsMember(os.Getenv("GH_TOKEN"), gHUser)
+	if isInnersourceMember {
+		_, err := ghAPI.AddCollaborator(innersource, repo, gHUser, "admin")
+		if err != nil {
+			return err
+		}
+		err = db.RepoOwnersInsert(repoId, user)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func IsRepoNameValid(value string) bool {
 	regex := regexp.MustCompile(`^([a-zA-Z0-9\-\_]|\.{3,}|\.{1,}[a-zA-Z0-9\-\_])([a-zA-Z0-9\-\_\.]+)?`)
 	matched := regex.FindAllString(value, 1)
 
@@ -202,8 +206,4 @@ func isRepoNameValid(value string) bool {
 	}
 
 	return matched[0] == value
-}
-
-type TypErrorJsonReturn struct {
-	Error string `json:"error"`
 }

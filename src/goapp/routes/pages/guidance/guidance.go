@@ -34,6 +34,7 @@ func CategoriesHandler(w http.ResponseWriter, r *http.Request) {
 
 	template.UseTemplate(&w, r, "/guidance/categories", nil)
 }
+
 func CategoryUpdateHandler(w http.ResponseWriter, r *http.Request) {
 
 	req := mux.Vars(r)
@@ -54,6 +55,7 @@ func CategoryUpdateHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	template.UseTemplate(&w, r, "/guidance/categoryupdate", data)
 }
+
 func ArticleHandler(w http.ResponseWriter, r *http.Request) {
 	req := mux.Vars(r)
 	id := req["id"]

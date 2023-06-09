@@ -94,7 +94,6 @@ func CategoryListAPIHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Write(jsonResp)
-
 }
 
 func GetCategoryArticlesById(w http.ResponseWriter, r *http.Request) {
@@ -217,7 +216,6 @@ func CategoryArticlesUpdate(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-
 }
 
 func CategoryUpdate(w http.ResponseWriter, r *http.Request) {
@@ -249,5 +247,4 @@ func CategoryUpdate(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-
 }
