@@ -3,7 +3,6 @@ package routes
 import (
 	"encoding/json"
 	"log"
-	"main/models"
 	"net/http"
 	"os"
 	"regexp"
@@ -52,7 +51,7 @@ func ProjectsNewHandler(w http.ResponseWriter, r *http.Request) {
 		username := profile["preferred_username"]
 		r.ParseForm()
 
-		var body models.TypNewProjectReqBody
+		var body db.Project
 
 		err := json.NewDecoder(r.Body).Decode(&body)
 		if err != nil {
@@ -72,8 +71,8 @@ func ProjectsNewHandler(w http.ResponseWriter, r *http.Request) {
 		var existsDb bool
 		var existsGH bool
 		dashedProjName := strings.ReplaceAll(body.Name, " ", "-")
-		go func() { checkDB <- db.Projects_IsExisting(body) }()
-		go func() { b, _ := ghAPI.Repo_IsExisting(dashedProjName); checkGH <- b }()
+		go func() { checkDB <- db.Projects_IsExisting(body.Name) }()
+		go func() { b, _ := ghAPI.IsRepoExisting(dashedProjName); checkGH <- b }()
 
 		existsDb = <-checkDB
 		existsGH = <-checkGH
@@ -92,7 +91,7 @@ func ProjectsNewHandler(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 
-			repo, errRepo := ghAPI.CreatePrivateGitHubRepository(body, username.(string))
+			repo, errRepo := ghAPI.CreatePrivateGitHubRepository(body.Name, body.Description, username.(string))
 			if errRepo != nil {
 				log.Println(errRepo.Error())
 				HttpResponseError(w, http.StatusInternalServerError, "There is a problem creating the GitHub repository.")
@@ -153,7 +152,7 @@ func ProjectsHandler(w http.ResponseWriter, r *http.Request) {
 		username := profile["preferred_username"]
 		r.ParseForm()
 
-		var body models.TypNewProjectReqBody
+		var body db.Project
 
 		err := json.NewDecoder(r.Body).Decode(&body)
 		if err != nil {

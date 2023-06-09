@@ -11,7 +11,6 @@ import (
 	"strconv"
 	"strings"
 
-	"main/models"
 	db "main/pkg/ghmgmtdb"
 	"main/pkg/msgraph"
 	"main/pkg/session"
@@ -20,12 +19,66 @@ import (
 	"github.com/thedatashed/xlsxreader"
 )
 
+type CommunityDto struct {
+	Id                     int                   `json:"id"`
+	Name                   string                `json:"name"`
+	Url                    string                `json:"url"`
+	Description            string                `json:"description"`
+	Notes                  string                `json:"notes"`
+	TradeAssocId           string                `json:"tradeAssocId"`
+	IsExternal             bool                  `json:"isExternal"`
+	CommunityType          string                `json:"CommunityType"`
+	ChannelId              string                `json:"ChannelId"`
+	OnBoardingInstructions string                `json:"onBoardingInstructions"`
+	Created                string                `json:"created"`
+	CreatedBy              string                `json:"createdBy"`
+	Modified               string                `json:"modified"`
+	ModifiedBy             string                `json:"modifiedBy"`
+	Sponsors               []SponsorDto          `json:"sponsors"`
+	Tags                   []string              `json:"tags"`
+	CommunitiesExternal    []RelatedCommunityDto `json:"communitiesExternal"`
+	CommunitiesInternal    []RelatedCommunityDto `json:"communitiesInternal"`
+}
+
+type SponsorDto struct {
+	DisplayName string `json:"displayName"`
+	Mail        string `json:"mail"`
+}
+
+type RelatedCommunityDto struct {
+	ParentCommunityId  int `json:"ParentCommunityId"`
+	RelatedCommunityId int `json:"RelatedCommunityId"`
+}
+
+type CommunitySponsorsDto struct {
+	Id                string `json:"id"`
+	CommunityId       string `json:"communityId"`
+	UserPrincipalName string `json:"userprincipalname"`
+	Created           string `json:"created"`
+	CreatedBy         string `json:"createdBy"`
+	Modified          string `json:"modified"`
+	ModifiedBy        string `json:"modifiedBy"`
+}
+
+type CommunityApprovalSystemPostResponseDto struct {
+	ItemId string `json:"itemId"`
+}
+
+type CommunityApprovalSystemPost struct {
+	ApplicationId       string
+	ApplicationModuleId string
+	Email               string
+	Subject             string
+	Body                string
+	RequesterEmail      string
+}
+
 func CommunityAPIHandler(w http.ResponseWriter, r *http.Request) {
 	sessionaz, _ := session.Store.Get(r, "auth-session")
 	iprofile := sessionaz.Values["profile"]
 	profile := iprofile.(map[string]interface{})
 	username := profile["preferred_username"]
-	var body models.TypCommunity
+	var body CommunityDto
 	err := json.NewDecoder(r.Body).Decode(&body)
 	if err != nil {
 		log.Println(err.Error())
@@ -177,7 +230,7 @@ func MyCommunityAPIHandler(w http.ResponseWriter, r *http.Request) {
 	iprofile := sessionaz.Values["profile"]
 	profile := iprofile.(map[string]interface{})
 	username := profile["preferred_username"]
-	var body models.TypCommunity
+	var body CommunityDto
 	err := json.NewDecoder(r.Body).Decode(&body)
 	if err != nil {
 		log.Println(err.Error())
@@ -509,7 +562,7 @@ func CommunitySponsorsAPIHandler(w http.ResponseWriter, r *http.Request) {
 	profile := iprofile.(map[string]interface{})
 	username := profile["preferred_username"]
 
-	var body models.TypCommunitySponsors
+	var body CommunitySponsorsDto
 	err := json.NewDecoder(r.Body).Decode(&body)
 	if err != nil {
 		log.Println(err.Error())
@@ -608,7 +661,7 @@ func CommunityTagPerCommunityId(w http.ResponseWriter, r *http.Request) {
 
 func RelatedCommunitiesInsert(w http.ResponseWriter, r *http.Request) {
 
-	var body models.TypRelatedCommunity
+	var body RelatedCommunityDto
 
 	err := json.NewDecoder(r.Body).Decode(&body)
 	if err != nil {
@@ -644,7 +697,7 @@ func RelatedCommunitiesInsert(w http.ResponseWriter, r *http.Request) {
 
 func RelatedCommunitiesDelete(w http.ResponseWriter, r *http.Request) {
 
-	var body models.TypRelatedCommunity
+	var body RelatedCommunityDto
 
 	err := json.NewDecoder(r.Body).Decode(&body)
 	if err != nil {
@@ -728,7 +781,7 @@ func ReprocessRequestCommunityApproval() {
 	}
 }
 
-func ApprovalSystemRequestCommunity(data models.TypCommunityApprovals) error {
+func ApprovalSystemRequestCommunity(data db.CommunityApproval) error {
 
 	url := os.Getenv("APPROVAL_SYSTEM_APP_URL")
 	if url != "" {
@@ -771,7 +824,7 @@ func ApprovalSystemRequestCommunity(data models.TypCommunityApprovals) error {
 		)
 		body := replacer.Replace(bodyTemplate)
 
-		postParams := models.TypApprovalSystemPost{
+		postParams := CommunityApprovalSystemPost{
 			ApplicationId:       os.Getenv("APPROVAL_SYSTEM_APP_ID"),
 			ApplicationModuleId: os.Getenv("APPROVAL_SYSTEM_APP_MODULE_COMMUNITY"),
 			Email:               data.ApproverUserPrincipalName,
@@ -783,7 +836,7 @@ func ApprovalSystemRequestCommunity(data models.TypCommunityApprovals) error {
 		go getHttpPostResponseStatus(url, postParams, ch)
 		r := <-ch
 		if r != nil {
-			var res models.TypApprovalSystemPostResponse
+			var res CommunityApprovalSystemPostResponseDto
 			err := json.NewDecoder(r.Body).Decode(&res)
 			if err != nil {
 				log.Println(err.Error())

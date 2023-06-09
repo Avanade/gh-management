@@ -2,9 +2,18 @@ package ghmgmt
 
 import (
 	"fmt"
-	"main/models"
 	"strconv"
 )
+
+type Activity struct {
+	Name        string
+	Url         string
+	Date        string
+	TypeId      int
+	CommunityId int
+	CreatedBy   string
+	ModifiedBy  string
+}
 
 func CommunitiesActivities_Select() interface{} {
 	db := ConnectDb()
@@ -45,7 +54,7 @@ func CommunitiesActivities_Select_ByOffsetAndFilterAndCreatedBy(offset, filter i
 	return result
 }
 
-func CommunitiesActivities_Insert(body models.Activity) (int, error) {
+func CommunitiesActivities_Insert(body Activity) (int, error) {
 	db := ConnectDb()
 	defer db.Close()
 

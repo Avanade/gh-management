@@ -12,7 +12,6 @@ import (
 	"sync"
 	"time"
 
-	"main/models"
 	db "main/pkg/ghmgmtdb"
 	ghAPI "main/pkg/github"
 	"main/pkg/session"
@@ -52,6 +51,37 @@ type CollaboratorDto struct {
 	Role                  string `json:"role"`
 	GitHubUsername        string `json:"ghUsername"`
 	IsOutsideCollaborator bool   `json:"isOutsideCollaborator"`
+}
+
+type ProjectApprovalSystemPostResponseDto struct {
+	ItemId string `json:"itemId"`
+}
+
+type ProjectRequest struct {
+	Id                         string `json:"id"`
+	Newcontribution            string `json:"newcontribution"`
+	OSSsponsor                 string `json:"osssponsor"`
+	Avanadeofferingsassets     string `json:"avanadeofferingsassets"`
+	Willbecommercialversion    string `json:"willbecommercialversion"`
+	OSSContributionInformation string `json:"osscontributionInformation"`
+}
+
+type ProjectApprovalSystemPostDto struct {
+	ApplicationId       string
+	ApplicationModuleId string
+	Email               string
+	Subject             string
+	Body                string
+	RequesterEmail      string
+}
+
+type RequestMakePublicDto struct {
+	Id                         string `json:"id"`
+	Newcontribution            string `json:"newcontribution"`
+	OSSsponsor                 string `json:"osssponsor"`
+	Avanadeofferingsassets     string `json:"avanadeofferingsassets"`
+	Willbecommercialversion    string `json:"willbecommercialversion"`
+	OSSContributionInformation string `json:"osscontributionInformation"`
 }
 
 func GetUserProjects(w http.ResponseWriter, r *http.Request) {
@@ -404,7 +434,7 @@ func RequestMakePublic(w http.ResponseWriter, r *http.Request) {
 	username := profile["preferred_username"]
 	r.ParseForm()
 
-	var body models.TypeMakeProjectPublicReqBody
+	var body RequestMakePublicDto
 
 	err := json.NewDecoder(r.Body).Decode(&body)
 	if err != nil {
@@ -413,9 +443,18 @@ func RequestMakePublic(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	db.PRProjectsUpdateLegalQuestions(body, username.(string))
+	projectRequest := db.ProjectRequest{
+		Id:                         body.Id,
+		Newcontribution:            body.Newcontribution,
+		OSSsponsor:                 body.OSSsponsor,
+		Avanadeofferingsassets:     body.Avanadeofferingsassets,
+		Willbecommercialversion:    body.Willbecommercialversion,
+		OSSContributionInformation: body.OSSContributionInformation,
+	}
 
-	id, err := strconv.ParseInt(body.Id, 10, 64)
+	db.PRProjectsUpdateLegalQuestions(projectRequest, username.(string))
+
+	id, err := strconv.ParseInt(projectRequest.Id, 10, 64)
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -450,7 +489,7 @@ func ImportReposToDatabase(w http.ResponseWriter, r *http.Request) {
 
 		go func(repo ghAPI.Repo) {
 			defer wg.Done()
-			e := db.Projects_IsExisting(models.TypNewProjectReqBody{Name: repo.Name})
+			e := db.Projects_IsExisting(repo.Name)
 
 			if !e {
 				visibilityId := 3
@@ -520,7 +559,7 @@ func InitIndexOrgRepos(w http.ResponseWriter, r *http.Request) {
 				"Created":      repo.Created.Format("2006-01-02 15:04:05"),
 			}
 
-			isExisting := db.Projects_IsExisting(models.TypNewProjectReqBody{Name: repo.Name})
+			isExisting := db.Projects_IsExisting(repo.Name)
 
 			var err error
 
@@ -868,7 +907,7 @@ func CleanupRepoOwners(repo map[string]interface{}, token string) {
 }
 
 func RemoveRepoIfNotExist(projectId int, repoName string, isGithubIdNil bool) bool {
-	isExist, err := ghAPI.Repo_IsExisting(repoName)
+	isExist, err := ghAPI.IsRepoExisting(repoName)
 	if err != nil {
 		fmt.Println(err.Error(), " | REPO NAME : ", repoName)
 		return false
@@ -905,7 +944,7 @@ func IndexRepo(repo ghAPI.Repo) {
 		"Created":             repo.Created.Format("2006-01-02 15:04:05"),
 	}
 
-	isExisting := db.Projects_IsExisting_By_GithubId(models.TypNewProjectReqBody{GithubId: repo.GithubId})
+	isExisting := db.Projects_IsExisting_By_GithubId(repo.GithubId)
 
 	if isExisting {
 		project := db.GetProjectByGithubId(repo.GithubId)
@@ -989,7 +1028,7 @@ func RequestApproval(id int64, email string) {
 	}
 }
 
-func ApprovalSystemRequest(data models.TypProjectApprovals) error {
+func ApprovalSystemRequest(data db.ProjectApproval) error {
 
 	url := os.Getenv("APPROVAL_SYSTEM_APP_URL")
 	if url != "" {
@@ -1053,7 +1092,7 @@ func ApprovalSystemRequest(data models.TypProjectApprovals) error {
 			"|OSSContributionInformation|", data.OSSContributionInformation,
 		)
 		body := replacer.Replace(bodyTemplate)
-		postParams := models.TypApprovalSystemPost{
+		postParams := ProjectApprovalSystemPostDto{
 			ApplicationId:       os.Getenv("APPROVAL_SYSTEM_APP_ID"),
 			ApplicationModuleId: os.Getenv("APPROVAL_SYSTEM_APP_MODULE_PROJECTS"),
 			Email:               data.ApproverUserPrincipalName,
@@ -1065,7 +1104,7 @@ func ApprovalSystemRequest(data models.TypProjectApprovals) error {
 		go getHttpPostResponseStatus(url, postParams, ch)
 		r := <-ch
 		if r != nil {
-			var res models.TypApprovalSystemPostResponse
+			var res ProjectApprovalSystemPostResponseDto
 			err := json.NewDecoder(r.Body).Decode(&res)
 			if err != nil {
 				return err

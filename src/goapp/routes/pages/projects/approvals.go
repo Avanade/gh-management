@@ -9,11 +9,28 @@ import (
 	"strings"
 	"time"
 
-	"main/models"
 	"main/pkg/email"
 	db "main/pkg/ghmgmtdb"
 	ghAPI "main/pkg/github"
 )
+
+type ApprovalReAssignRequestBody struct {
+	Id                  string `json:"id"`
+	ApproverEmail       string `json:"ApproverEmail"`
+	Username            string `json:"Username"`
+	ApplicationId       string `json:"ApplicationId"`
+	ApplicationModuleId string `json:"ApplicationModuleId"`
+	ItemId              string `json:"itemId"`
+	ApproveText         string `json:"ApproveText"`
+	RejectText          string `json:"RejectText"`
+}
+
+type ApprovalStatusRequestBody struct {
+	ItemId       string `json:"itemId"`
+	IsApproved   bool   `json:"isApproved"`
+	Remarks      string `json:"Remarks"`
+	ResponseDate string `json:"responseDate"`
+}
 
 func UpdateApprovalStatusProjects(w http.ResponseWriter, r *http.Request) {
 	err := ProcessApprovalProjects(r, "projects")
@@ -36,7 +53,7 @@ func UpdateApprovalStatusCommunity(w http.ResponseWriter, r *http.Request) {
 }
 
 func UpdateApprovalReassignApprover(w http.ResponseWriter, r *http.Request) {
-	var req models.TypUpdateApprovalReAssign
+	var req ApprovalReAssignRequestBody
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
 		log.Println(err.Error())
@@ -58,7 +75,7 @@ func UpdateApprovalReassignApprover(w http.ResponseWriter, r *http.Request) {
 	}
 
 	for _, v := range result {
-		data := models.TypProjectApprovals{
+		data := db.ProjectApproval{
 			Id:                         v["Id"].(int64),
 			ProjectId:                  v["ProjectId"].(int64),
 			ProjectName:                v["ProjectName"].(string),
@@ -95,7 +112,7 @@ func UpdateApprovalReassignApprover(w http.ResponseWriter, r *http.Request) {
 }
 
 func UpdateCommunityApprovalReassignApprover(w http.ResponseWriter, r *http.Request) {
-	var req models.TypUpdateApprovalReAssign
+	var req ApprovalReAssignRequestBody
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
 		log.Println(err.Error())
@@ -116,7 +133,7 @@ func UpdateCommunityApprovalReassignApprover(w http.ResponseWriter, r *http.Requ
 	}
 
 	for _, v := range result {
-		data := models.TypCommunityApprovals{
+		data := db.CommunityApproval{
 			Id:                         v["Id"].(int64),
 			CommunityId:                v["CommunityId"].(int64),
 			CommunityName:              v["ProjectName"].(string),
@@ -146,7 +163,7 @@ func UpdateCommunityApprovalReassignApprover(w http.ResponseWriter, r *http.Requ
 	w.WriteHeader(http.StatusOK)
 }
 
-func SendReassignEmail(data models.TypProjectApprovals) error {
+func SendReassignEmail(data db.ProjectApproval) error {
 
 	bodyTemplate := `<p>Hi |ApproverUserPrincipalName|!</p>
 		<p>|RequesterName| is requesting for a new project and is now pending for |ApprovalType| review.</p>
@@ -231,7 +248,7 @@ func SendReassignEmail(data models.TypProjectApprovals) error {
 	)
 
 	body := replacer.Replace(bodyTemplate)
-	m := email.TypEmailMessage{
+	m := email.EmailMessage{
 		Subject: fmt.Sprintf("[GH-Management] New Project For Review - %v", data.ProjectName),
 		Body:    body,
 		To:      data.ApproverUserPrincipalName,
@@ -248,7 +265,7 @@ func SendReassignEmail(data models.TypProjectApprovals) error {
 func ProcessApprovalProjects(r *http.Request, module string) error {
 
 	// Decode payload
-	var req models.TypUpdateApprovalStatusReqBody
+	var req ApprovalStatusRequestBody
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
 		return err
@@ -320,7 +337,7 @@ func CheckAllRequests(id int64) {
 	}
 }
 
-func SendReassignEmailCommunity(data models.TypCommunityApprovals) error {
+func SendReassignEmailCommunity(data db.CommunityApproval) error {
 
 	bodyTemplate := `<p>Hi |ApproverUserPrincipalName|!</p>
 		<p>|RequesterName| is requesting for a new |CommunityType| community and is now pending for approval.</p>
@@ -382,7 +399,7 @@ func SendReassignEmailCommunity(data models.TypCommunityApprovals) error {
 		"|RejectText|", data.RejectText,
 	)
 	body := replacer.Replace(bodyTemplate)
-	m := email.TypEmailMessage{
+	m := email.EmailMessage{
 		Subject: fmt.Sprintf("[GH-Management] New Community For Approval - %v", data.CommunityName),
 		Body:    body,
 		To:      data.ApproverUserPrincipalName,

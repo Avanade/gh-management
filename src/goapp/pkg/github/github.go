@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"main/models"
 	"os"
 	"strings"
 
@@ -12,7 +11,21 @@ import (
 	"golang.org/x/oauth2"
 )
 
-func createClient(token string) *github.Client {
+type Repo struct {
+	GithubId            int64            `json:"id"`
+	FullName            string           `json:"repoFullName"`
+	Name                string           `json:"repoName"`
+	Link                string           `json:"repoLink"`
+	Org                 string           `json:"org"`
+	Description         string           `json:"description"`
+	Private             bool             `json:"private"`
+	Created             github.Timestamp `json:"created"`
+	IsArchived          bool             `json:"archived"`
+	Visibility          string           `json:"visibility"`
+	TFSProjectReference string
+}
+
+func CreateClient(token string) *github.Client {
 	// create github oauth client from token
 	ctx := context.Background()
 	ts := oauth2.StaticTokenSource(
@@ -22,13 +35,13 @@ func createClient(token string) *github.Client {
 	return github.NewClient(tc)
 }
 
-func CreatePrivateGitHubRepository(data models.TypNewProjectReqBody, requestor string) (*github.Repository, error) {
-	client := createClient(os.Getenv("GH_TOKEN"))
+func CreatePrivateGitHubRepository(name, description, requestor string) (*github.Repository, error) {
+	client := CreateClient(os.Getenv("GH_TOKEN"))
 	owner := os.Getenv("GH_ORG_INNERSOURCE")
 	repoRequest := &github.TemplateRepoRequest{
-		Name:        &data.Name,
+		Name:        &name,
 		Owner:       &owner,
-		Description: &data.Description,
+		Description: &description,
 		Private:     github.Bool(true),
 	}
 
@@ -41,7 +54,7 @@ func CreatePrivateGitHubRepository(data models.TypNewProjectReqBody, requestor s
 }
 
 func IsOrgAllowInternalRepo() (bool, error) {
-	client := createClient(os.Getenv("GH_TOKEN"))
+	client := CreateClient(os.Getenv("GH_TOKEN"))
 	orgName := os.Getenv("GH_ORG_INNERSOURCE")
 	org, _, err := client.Organizations.Get(context.Background(), orgName)
 	if err != nil {
@@ -51,7 +64,7 @@ func IsOrgAllowInternalRepo() (bool, error) {
 }
 
 func AddCollaborator(owner string, repo string, user string, permission string) (*github.Response, error) {
-	client := createClient(os.Getenv("GH_TOKEN"))
+	client := CreateClient(os.Getenv("GH_TOKEN"))
 	opts := &github.RepositoryAddCollaboratorOptions{
 		Permission: permission,
 	}
@@ -64,7 +77,7 @@ func AddCollaborator(owner string, repo string, user string, permission string) 
 }
 
 func RemoveCollaborator(owner string, repo string, user string, permission string) (*github.Response, error) {
-	client := createClient(os.Getenv("GH_TOKEN"))
+	client := CreateClient(os.Getenv("GH_TOKEN"))
 
 	resp, err := client.Repositories.RemoveCollaborator(context.Background(), owner, repo, user)
 	if err != nil {
@@ -74,7 +87,7 @@ func RemoveCollaborator(owner string, repo string, user string, permission strin
 }
 
 func GetRepository(repoName string, org string) (*github.Repository, error) {
-	client := createClient(os.Getenv("GH_TOKEN"))
+	client := CreateClient(os.Getenv("GH_TOKEN"))
 	owner := org
 	repo, _, err := client.Repositories.Get(context.Background(), owner, repoName)
 	if err != nil {
@@ -92,7 +105,7 @@ func IsArchived(repoName string, org string) (bool, error) {
 	return repo.GetArchived(), nil
 }
 
-func Repo_IsExisting(repoName string) (bool, error) {
+func IsRepoExisting(repoName string) (bool, error) {
 	exists := false
 	organizations := []string{os.Getenv("GH_ORG_INNERSOURCE"), os.Getenv("GH_ORG_OPENSOURCE")}
 
@@ -113,7 +126,7 @@ func Repo_IsExisting(repoName string) (bool, error) {
 }
 
 func GetRepositoriesFromOrganization(org string) ([]Repo, error) {
-	client := createClient(os.Getenv("GH_TOKEN"))
+	client := CreateClient(os.Getenv("GH_TOKEN"))
 	var allRepos []*github.Repository
 	opt := &github.RepositoryListByOrgOptions{Type: "all", Sort: "full_name", ListOptions: github.ListOptions{PerPage: 30}}
 
@@ -155,7 +168,7 @@ func GetRepositoriesFromOrganization(org string) ([]Repo, error) {
 }
 
 func SetProjectVisibility(projectName string, visibility string, org string) error {
-	client := createClient(os.Getenv("GH_TOKEN"))
+	client := CreateClient(os.Getenv("GH_TOKEN"))
 	opt := &github.Repository{Visibility: github.String(visibility)}
 
 	_, _, err := client.Repositories.Edit(context.Background(), org, projectName, opt)
@@ -164,11 +177,10 @@ func SetProjectVisibility(projectName string, visibility string, org string) err
 
 	}
 	return nil
-
 }
 
 func ArchiveProject(projectName string, archive bool, org string) error {
-	client := createClient(os.Getenv("GH_TOKEN"))
+	client := CreateClient(os.Getenv("GH_TOKEN"))
 	opt := &github.Repository{Archived: github.Bool(archive)}
 
 	_, _, err := client.Repositories.Edit(context.Background(), org, projectName, opt)
@@ -176,11 +188,10 @@ func ArchiveProject(projectName string, archive bool, org string) error {
 		return err
 	}
 	return nil
-
 }
 
 func TransferRepository(repo string, owner string, newOwner string) (*github.Repository, error) {
-	client := createClient(os.Getenv("GH_TOKEN"))
+	client := CreateClient(os.Getenv("GH_TOKEN"))
 	opt := github.TransferRequest{NewOwner: newOwner}
 
 	resp, _, err := client.Repositories.Transfer(context.Background(), owner, repo, opt)
@@ -190,22 +201,8 @@ func TransferRepository(repo string, owner string, newOwner string) (*github.Rep
 	return resp, nil
 }
 
-type Repo struct {
-	GithubId            int64            `json:"id"`
-	FullName            string           `json:"repoFullName"`
-	Name                string           `json:"repoName"`
-	Link                string           `json:"repoLink"`
-	Org                 string           `json:"org"`
-	Description         string           `json:"description"`
-	Private             bool             `json:"private"`
-	Created             github.Timestamp `json:"created"`
-	IsArchived          bool             `json:"archived"`
-	Visibility          string           `json:"visibility"`
-	TFSProjectReference string
-}
-
 func OrganizationsIsMember(token string, GHUser string) (bool, bool, error) {
-	client := createClient(token)
+	client := CreateClient(token)
 	OrgInnerSource := os.Getenv("GH_ORG_INNERSOURCE")
 	OrgInnerSourceIsMember, _, err := client.Organizations.IsMember(context.Background(), OrgInnerSource, GHUser)
 
@@ -215,7 +212,7 @@ func OrganizationsIsMember(token string, GHUser string) (bool, bool, error) {
 }
 
 func OrganizationInvitation(token string, username string, org string) *github.Invitation {
-	client := createClient(token)
+	client := CreateClient(token)
 	Email := ""
 	Role := "direct_member"
 	teamid := []int64{}
@@ -229,7 +226,7 @@ func OrganizationInvitation(token string, username string, org string) *github.I
 }
 
 func ListOutsideCollaborators(token string, org string) []*github.User {
-	client := createClient(token)
+	client := CreateClient(token)
 
 	options := &github.ListOutsideCollaboratorsOptions{ListOptions: github.ListOptions{PerPage: 30}}
 
@@ -250,8 +247,9 @@ func ListOutsideCollaborators(token string, org string) []*github.User {
 
 	return collaborators
 }
+
 func RemoveOutsideCollaborator(token string, org string, username string) *github.Response {
-	client := createClient(token)
+	client := CreateClient(token)
 
 	repons, err := client.Organizations.RemoveOutsideCollaborator(context.Background(), org, username)
 
@@ -261,8 +259,9 @@ func RemoveOutsideCollaborator(token string, org string, username string) *githu
 	}
 	return repons
 }
+
 func ConvertMemberToOutsideCollaborator(token string, org string, username string) *github.Response {
-	client := createClient(token)
+	client := CreateClient(token)
 
 	repons, err := client.Organizations.ConvertMemberToOutsideCollaborator(context.Background(), org, username)
 	if err != nil {
@@ -273,7 +272,7 @@ func ConvertMemberToOutsideCollaborator(token string, org string, username strin
 }
 
 func RemoveOrganizationsMember(token string, org string, username string) *github.Response {
-	client := createClient(token)
+	client := CreateClient(token)
 
 	repons, err := client.Organizations.RemoveMember(context.Background(), org, username)
 
@@ -283,8 +282,9 @@ func RemoveOrganizationsMember(token string, org string, username string) *githu
 	}
 	return repons
 }
+
 func RepositoriesListCollaborators(token string, org string, repo string, role string, affiliations string) []*github.User {
-	client := createClient(token)
+	client := CreateClient(token)
 	options := &github.ListCollaboratorsOptions{Permission: role, Affiliation: affiliations, ListOptions: github.ListOptions{PerPage: 30}}
 
 	var collaborators []*github.User
@@ -303,8 +303,9 @@ func RepositoriesListCollaborators(token string, org string, repo string, role s
 	}
 	return collaborators
 }
+
 func OrgListMembers(token string, org string) []*github.User {
-	client := createClient(token)
+	client := CreateClient(token)
 
 	opts := &github.ListMembersOptions{ListOptions: github.ListOptions{PerPage: 30}}
 

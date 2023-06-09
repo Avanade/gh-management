@@ -14,8 +14,35 @@ import (
 	"time"
 )
 
+type TokenResponse struct {
+	TokenType    string `json:"token_type"`
+	ExpiresIn    int    `json:"expires_in"`
+	ExtExpiresIn int    `json:"ext_expires_in"`
+	AccessToken  string `json:"access_token"`
+}
+
+type ListUSersResponse struct {
+	DataContext string `json:"@odata.context"`
+	Value       []User `json:"value"`
+}
+
+type User struct {
+	Name       string   `json:"displayName"`
+	Email      string   `json:"mail"`
+	OtherMails []string `json:"otherMails"`
+}
+
+type ADGroupsResponse struct {
+	Value []ADGroup `json:"value"`
+}
+
+type ADGroup struct {
+	Id   string `json:"id"`
+	Name string `json:"displayName"`
+}
+
 func GetAzGroupIdByName(groupName string) (string, error) {
-	accessToken, err := getToken()
+	accessToken, err := GetToken()
 	if err != nil {
 		return "", err
 	}
@@ -51,9 +78,8 @@ func GetAzGroupIdByName(groupName string) (string, error) {
 	return listGroupResponse.Value[0].Id, nil
 }
 
-// Search user by name and mail
 func SearchUsers(search string) ([]User, error) {
-	accessToken, err := getToken()
+	accessToken, err := GetToken()
 	if err != nil {
 		return nil, err
 	}
@@ -104,9 +130,8 @@ func SearchUsers(search string) ([]User, error) {
 	return users, nil
 }
 
-// Get all users from the active directory
 func GetAllUsers() ([]User, error) {
-	accessToken, err := getToken()
+	accessToken, err := GetToken()
 	if err != nil {
 		return nil, err
 	}
@@ -146,7 +171,7 @@ func GetAllUsers() ([]User, error) {
 }
 
 func IsDirectMember(user string) (bool, error) {
-	accessToken, err := getToken()
+	accessToken, err := GetToken()
 	if err != nil {
 		return false, err
 	}
@@ -181,10 +206,8 @@ func IsDirectMember(user string) (bool, error) {
 	return !strings.Contains(data.UserPrincipalName, "#EXT#"), nil
 }
 
-// Get all users from the active directory
-// string user accepts user id and user principal name
 func IsGithubEnterpriseMember(user string) (bool, error) {
-	accessToken, err := getToken()
+	accessToken, err := GetToken()
 	if err != nil {
 		return false, err
 	}
@@ -241,7 +264,7 @@ func IsGithubEnterpriseMember(user string) (bool, error) {
 }
 
 func IsUserAdmin(user string) (bool, error) {
-	accessToken, err := getToken()
+	accessToken, err := GetToken()
 	if err != nil {
 		return false, err
 	}
@@ -298,7 +321,7 @@ func IsUserAdmin(user string) (bool, error) {
 }
 
 func GetUserPhoto(user string) (bool, string, error) {
-	accessToken, err := getToken()
+	accessToken, err := GetToken()
 	if err != nil {
 		return false, "", err
 	}
@@ -333,8 +356,7 @@ func GetUserPhoto(user string) (bool, string, error) {
 	return true, userPhotoBase64, nil
 }
 
-// Get Access Token for the Application
-func getToken() (string, error) {
+func GetToken() (string, error) {
 
 	urlPath := fmt.Sprintf("https://login.microsoftonline.com/%s/oauth2/v2.0/token", os.Getenv("TENANT_ID"))
 	client := &http.Client{
@@ -370,9 +392,8 @@ func getToken() (string, error) {
 	return tokenResponse.AccessToken, nil
 }
 
-// Search user by name and mail
 func ActiveUsers(search string) ([]User, error) {
-	accessToken, err := getToken()
+	accessToken, err := GetToken()
 	if err != nil {
 		return nil, err
 	}
@@ -421,7 +442,7 @@ func ActiveUsers(search string) ([]User, error) {
 }
 
 func GetTeamsMembers(ChannelId string, token string) ([]User, error) {
-	accessToken, err := getToken()
+	accessToken, err := GetToken()
 	if err != nil {
 		return nil, err
 	}
@@ -459,31 +480,4 @@ func GetTeamsMembers(ChannelId string, token string) ([]User, error) {
 	}
 
 	return users, nil
-}
-
-type TokenResponse struct {
-	TokenType    string `json:"token_type"`
-	ExpiresIn    int    `json:"expires_in"`
-	ExtExpiresIn int    `json:"ext_expires_in"`
-	AccessToken  string `json:"access_token"`
-}
-
-type ListUSersResponse struct {
-	DataContext string `json:"@odata.context"`
-	Value       []User `json:"value"`
-}
-
-type User struct {
-	Name       string   `json:"displayName"`
-	Email      string   `json:"mail"`
-	OtherMails []string `json:"otherMails"`
-}
-
-type ADGroupsResponse struct {
-	Value []ADGroup `json:"value"`
-}
-
-type ADGroup struct {
-	Id   string `json:"id"`
-	Name string `json:"displayName"`
 }

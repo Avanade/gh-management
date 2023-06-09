@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"strconv"
 
-	"main/models"
 	db "main/pkg/ghmgmtdb"
 	"main/pkg/session"
 
@@ -80,7 +79,7 @@ func CreateApprovalType(w http.ResponseWriter, r *http.Request) {
 
 	var approvalTypeDto ApprovalTypeDto
 	json.NewDecoder(r.Body).Decode(&approvalTypeDto)
-	id, err := db.InsertApprovalType(models.ApprovalType{
+	id, err := db.InsertApprovalType(db.ApprovalType{
 		Name:                      approvalTypeDto.Name,
 		ApproverUserPrincipalName: approvalTypeDto.ApproverUserPrincipalName,
 		IsActive:                  approvalTypeDto.IsActive,
@@ -112,7 +111,7 @@ func EditApprovalTypeById(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	approvalTypeId, err := db.UpdateApprovalType(models.ApprovalType{
+	approvalTypeId, err := db.UpdateApprovalType(db.ApprovalType{
 		Id:                        id,
 		Name:                      approvalTypeDto.Name,
 		ApproverUserPrincipalName: approvalTypeDto.ApproverUserPrincipalName,
@@ -146,7 +145,7 @@ func SetIsArchivedApprovalTypeById(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	approvalTypeId, _, err := db.SetIsArchiveApprovalTypeById(models.ApprovalType{
+	approvalTypeId, _, err := db.SetIsArchiveApprovalTypeById(db.ApprovalType{
 		Id:                        id,
 		Name:                      approvalTypeDto.Name,
 		ApproverUserPrincipalName: approvalTypeDto.ApproverUserPrincipalName,

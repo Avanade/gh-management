@@ -5,13 +5,22 @@ import (
 	"log"
 	"net/http"
 
-	"main/models"
 	db "main/pkg/ghmgmtdb"
 	"main/pkg/session"
 	"main/pkg/template"
 
 	"github.com/gorilla/mux"
 )
+
+type CommunityApprovers struct {
+	Id                        int    `json:"id"`
+	ApproverUserPrincipalName string `json:"name"`
+	Disabled                  bool   `json:"disabled"`
+	Created                   string `json:"created"`
+	CreatedBy                 string `json:"createdBy"`
+	Modified                  string `json:"modified"`
+	ModifiedBy                string `json:"modifiedBy"`
+}
 
 func CommunityApproverHandler(w http.ResponseWriter, r *http.Request) {
 
@@ -86,7 +95,7 @@ func CommunityApproversListUpdate(w http.ResponseWriter, r *http.Request) {
 	iprofile := sessionaz.Values["profile"]
 	profile := iprofile.(map[string]interface{})
 	username := profile["preferred_username"].(string)
-	var body models.TypCommunityApprovers
+	var body CommunityApprovers
 
 	err := json.NewDecoder(r.Body).Decode(&body)
 	if err != nil {
