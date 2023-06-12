@@ -7,7 +7,13 @@ import (
 	"os"
 )
 
-func SendEmail(msg TypEmailMessage) (*http.Response, error) {
+type EmailMessage struct {
+	To      string
+	Subject string
+	Body    string
+}
+
+func SendEmail(msg EmailMessage) (*http.Response, error) {
 	endpoint := os.Getenv("EMAIL_ENDPOINT")
 
 	postBody, _ := json.Marshal(map[string]string{
@@ -21,19 +27,4 @@ func SendEmail(msg TypEmailMessage) (*http.Response, error) {
 		return nil, err
 	}
 	return resp, nil
-}
-
-type TypEmailMessage struct {
-	To      string
-	Subject string
-	Body    string
-}
-
-type TypEmailData struct {
-	Subject     string
-	Body        string
-	ApproveText string
-	RejectText  string
-	ApproveUrl  string
-	RejectUrl   string
 }

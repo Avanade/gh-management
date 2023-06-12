@@ -2,11 +2,18 @@ package ghmgmt
 
 import (
 	"fmt"
-	"main/models"
 	"strconv"
 )
 
-func CommunityActivitiesContributionAreas_Insert(body models.CommunityActivitiesContributionAreas) (int, error) {
+type CommunityActivitiesContributionAreas struct {
+	CommunityActivityId int
+	ContributionAreaId  int
+	IsPrimary           bool
+	CreatedBy           string
+	ModifiedBy          string
+}
+
+func CommunityActivitiesContributionAreas_Insert(body CommunityActivitiesContributionAreas) (int, error) {
 	db := ConnectDb()
 	defer db.Close()
 

@@ -3,9 +3,51 @@ package ghmgmt
 import (
 	"database/sql"
 	"fmt"
-	"main/models"
 	"strconv"
 )
+
+type CommunityApproval struct {
+	Id                         int64
+	CommunityId                int64
+	CommunityName              string
+	CommunityUrl               string
+	CommunityDescription       string
+	CommunityNotes             string
+	CommunityTradeAssocId      string
+	CommunityType              string
+	RequesterName              string
+	RequesterGivenName         string
+	RequesterSurName           string
+	RequesterUserPrincipalName string
+	ApproverUserPrincipalName  string
+	ApprovalDescription        string
+	ApproveUrl                 string
+	RejectUrl                  string
+	ApproveText                string
+	RejectText                 string
+}
+
+type CommunityOnBoarding struct {
+	Id                     int64              `json:"Id"`
+	Name                   string             `json:"Name"`
+	Url                    string             `json:"Url"`
+	OnBoardingInstructions string             `json:"OnBoardingInstructions"`
+	Sponsors               []CommunitySponsor `json:"Sponsors"`
+	Communities            []RelatedCommunity `json:"Communities"`
+}
+
+type CommunitySponsor struct {
+	Name      string `json:"Name"`
+	GivenName string `json:"GivenName"`
+	SurName   string `json:"SurName"`
+	Email     string `json:"Email"`
+}
+
+type RelatedCommunity struct {
+	Name       string `json:"Name"`
+	Url        string `json:"Url"`
+	IsExternal bool   `json:"IsExternal"`
+}
 
 func CommunitiesSelectByID(id string) ([]map[string]interface{}, error) {
 	db := ConnectDb()
@@ -259,7 +301,7 @@ func Communities_AddMember(CommunityId int, UserPrincipalName string) error {
 
 }
 
-func Communities_Related(CommunityId int64) (data []models.TypRelatedCommunities, err error) {
+func Communities_Related(CommunityId int64) (data []RelatedCommunity, err error) {
 
 	db := ConnectDb()
 	defer db.Close()
@@ -277,7 +319,7 @@ func Communities_Related(CommunityId int64) (data []models.TypRelatedCommunities
 	}
 
 	for _, v := range result {
-		d := models.TypRelatedCommunities{
+		d := RelatedCommunity{
 			Name:       v["Name"].(string),
 			Url:        v["Url"].(string),
 			IsExternal: v["IsExternal"].(bool),
@@ -287,7 +329,7 @@ func Communities_Related(CommunityId int64) (data []models.TypRelatedCommunities
 	return
 }
 
-func Community_Sponsors(CommunityId int64) (data []models.TypCommunitySponsorsList, err error) {
+func Community_Sponsors(CommunityId int64) (data []CommunitySponsor, err error) {
 	db := ConnectDb()
 	defer db.Close()
 
@@ -304,7 +346,7 @@ func Community_Sponsors(CommunityId int64) (data []models.TypCommunitySponsorsLi
 	}
 
 	for _, v := range result {
-		d := models.TypCommunitySponsorsList{
+		d := CommunitySponsor{
 			Name:      v["Name"].(string),
 			GivenName: v["GivenName"].(string),
 			SurName:   v["SurName"].(string),
@@ -315,7 +357,7 @@ func Community_Sponsors(CommunityId int64) (data []models.TypCommunitySponsorsLi
 	return
 }
 
-func Community_Info(CommunityId int64) (data models.TypCommunityOnBoarding, err error) {
+func Community_Info(CommunityId int64) (data CommunityOnBoarding, err error) {
 	db := ConnectDb()
 	defer db.Close()
 
@@ -331,7 +373,7 @@ func Community_Info(CommunityId int64) (data models.TypCommunityOnBoarding, err 
 		return
 	}
 
-	data = models.TypCommunityOnBoarding{
+	data = CommunityOnBoarding{
 		Id:                     result[0]["Id"].(int64),
 		Name:                   result[0]["Name"].(string),
 		OnBoardingInstructions: result[0]["OnBoardingInstructions"].(string),
@@ -423,7 +465,7 @@ func GetCommunityMembers(id int64) interface{} {
 	return result
 }
 
-func PopulateCommunityApproval(id int64) (CommunityApprovals []models.TypCommunityApprovals) {
+func PopulateCommunityApproval(id int64) (CommunityApprovals []CommunityApproval) {
 	db := ConnectDb()
 	defer db.Close()
 
@@ -433,7 +475,7 @@ func PopulateCommunityApproval(id int64) (CommunityApprovals []models.TypCommuni
 	result, _ := db.ExecuteStoredProcedureWithResult("PR_CommunityApprovals_Populate", param)
 
 	for _, v := range result {
-		data := models.TypCommunityApprovals{
+		data := CommunityApproval{
 			Id:                         v["Id"].(int64),
 			CommunityId:                v["CommunityId"].(int64),
 			CommunityName:              v["CommunityName"].(string),
@@ -455,14 +497,14 @@ func PopulateCommunityApproval(id int64) (CommunityApprovals []models.TypCommuni
 	return
 }
 
-func GetFailedCommunityApprovalRequests() (CommunityApprovals []models.TypCommunityApprovals) {
+func GetFailedCommunityApprovalRequests() (CommunityApprovals []CommunityApproval) {
 	db := ConnectDb()
 	defer db.Close()
 
 	result, _ := db.ExecuteStoredProcedureWithResult("PR_CommunityApprovals_Select_Failed", nil)
 
 	for _, v := range result {
-		data := models.TypCommunityApprovals{
+		data := CommunityApproval{
 			Id:                         v["Id"].(int64),
 			CommunityId:                v["CommunityId"].(int64),
 			CommunityName:              v["CommunityName"].(string),

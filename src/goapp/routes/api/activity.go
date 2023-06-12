@@ -8,7 +8,6 @@ import (
 	"os"
 	"strconv"
 
-	"main/models"
 	"main/pkg/email"
 	db "main/pkg/ghmgmtdb"
 	"main/pkg/session"
@@ -44,14 +43,6 @@ type HelpDto struct {
 type ItemDto struct {
 	Id   int    `json:"id"`
 	Name string `json:"name"`
-}
-
-type CommunityActivitiesContributionAreasDto struct {
-	CommunityActivityId int
-	ContributionAreaId  int
-	IsPrimary           bool
-	CreatedBy           string
-	ModifiedBy          string
 }
 
 func GetActivities(w http.ResponseWriter, r *http.Request) {
@@ -113,7 +104,7 @@ func CreateActivity(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// COMMUNITY ACTIVITY
-	communityActivityId, err := db.CommunitiesActivities_Insert(models.Activity{
+	communityActivityId, err := db.CommunitiesActivities_Insert(db.Activity{
 		Name:        body.Name,
 		Url:         body.Url,
 		Date:        body.Date,
@@ -137,7 +128,7 @@ func CreateActivity(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// PRIMARY CONTRIBUTION AREA
-	err = insertCommunityActivitiesContributionArea(body.PrimaryContributionArea, models.CommunityActivitiesContributionAreas{
+	err = insertCommunityActivitiesContributionArea(body.PrimaryContributionArea, db.CommunityActivitiesContributionAreas{
 		CommunityActivityId: communityActivityId,
 		ContributionAreaId:  body.PrimaryContributionArea.Id,
 		IsPrimary:           true,
@@ -151,7 +142,7 @@ func CreateActivity(w http.ResponseWriter, r *http.Request) {
 
 	// ADDITIONAL CONTRIBUTION AREA
 	for _, contributionArea := range body.AdditionalContributionAreas {
-		err = insertCommunityActivitiesContributionArea(contributionArea, models.CommunityActivitiesContributionAreas{
+		err = insertCommunityActivitiesContributionArea(contributionArea, db.CommunityActivitiesContributionAreas{
 			CommunityActivityId: communityActivityId,
 			ContributionAreaId:  contributionArea.Id,
 			IsPrimary:           false,
@@ -181,7 +172,7 @@ func GetActivityById(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(result)
 }
 
-func insertCommunityActivitiesContributionArea(ca ItemDto, caca models.CommunityActivitiesContributionAreas) error {
+func insertCommunityActivitiesContributionArea(ca ItemDto, caca db.CommunityActivitiesContributionAreas) error {
 	if ca.Id == 0 {
 		id, err := db.ContributionAreas_Insert(ca.Name, caca.CreatedBy)
 		if err != nil {
@@ -191,7 +182,7 @@ func insertCommunityActivitiesContributionArea(ca ItemDto, caca models.Community
 		caca.ContributionAreaId = id
 	}
 
-	_, err := db.CommunityActivitiesContributionAreas_Insert(models.CommunityActivitiesContributionAreas{
+	_, err := db.CommunityActivitiesContributionAreas_Insert(db.CommunityActivitiesContributionAreas{
 		CommunityActivityId: caca.CommunityActivityId,
 		ContributionAreaId:  caca.ContributionAreaId,
 		IsPrimary:           caca.IsPrimary,
@@ -211,7 +202,7 @@ func processHelp(activityId int, username string, h HelpDto) error {
 		return err
 	}
 	// SEND EMAIL
-	emailData := email.TypEmailMessage{
+	emailData := email.EmailMessage{
 		To:      os.Getenv("EMAIL_SUPPORT"),
 		Subject: h.Name,
 		Body:    fmt.Sprintf("<p><b>FROM</b> : %s</p> \n<p><b>TYPE</b> : %s</p> \n<p><b>DETAILS</b> : %s</p>", username, h.Name, h.Details),

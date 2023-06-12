@@ -1,6 +1,10 @@
 package ghmgmt
 
-import "main/models"
+type RepoOwner struct {
+	Id                int64
+	RepoName          string
+	UserPrincipalName string
+}
 
 func RepoOwnersInsert(ProjectId int64, userPrincipalName string) error {
 	db := ConnectDb()
@@ -19,7 +23,7 @@ func RepoOwnersInsert(ProjectId int64, userPrincipalName string) error {
 	return nil
 }
 
-func RepoOwnersByUserAndProjectId(id int64, userPrincipalName string) (RepoOwner []models.TypRepoOwner, err error) {
+func RepoOwnersByUserAndProjectId(id int64, userPrincipalName string) (repoOwner []RepoOwner, err error) {
 	db := ConnectDb()
 	defer db.Close()
 
@@ -33,16 +37,16 @@ func RepoOwnersByUserAndProjectId(id int64, userPrincipalName string) (RepoOwner
 	}
 
 	for _, v := range result {
-		data := models.TypRepoOwner{
+		data := RepoOwner{
 			Id:                v["ProjectId"].(int64),
 			UserPrincipalName: v["UserPrincipalName"].(string),
 		}
-		RepoOwner = append(RepoOwner, data)
+		repoOwner = append(repoOwner, data)
 	}
-	return RepoOwner, err
+	return repoOwner, err
 }
 
-func SelectAllRepoNameAndOwners() (RepoOwner []models.TypRepoOwner, err error) {
+func SelectAllRepoNameAndOwners() (repoOwner []RepoOwner, err error) {
 	db := ConnectDb()
 	defer db.Close()
 
@@ -52,17 +56,17 @@ func SelectAllRepoNameAndOwners() (RepoOwner []models.TypRepoOwner, err error) {
 	}
 
 	for _, v := range result {
-		data := models.TypRepoOwner{
+		data := RepoOwner{
 			Id:                v["ProjectId"].(int64),
 			RepoName:          v["Name"].(string),
 			UserPrincipalName: v["UserPrincipalName"].(string),
 		}
-		RepoOwner = append(RepoOwner, data)
+		repoOwner = append(repoOwner, data)
 	}
-	return RepoOwner, err
+	return repoOwner, err
 }
 
-func GetRepoOwnersRecordByRepoId(id int64) (RepoOwner []models.TypRepoOwner, err error) {
+func GetRepoOwnersRecordByRepoId(id int64) (repoOwner []RepoOwner, err error) {
 	db := ConnectDb()
 	defer db.Close()
 
@@ -75,13 +79,13 @@ func GetRepoOwnersRecordByRepoId(id int64) (RepoOwner []models.TypRepoOwner, err
 	}
 
 	for _, v := range result {
-		data := models.TypRepoOwner{
+		data := RepoOwner{
 			Id:                v["ProjectId"].(int64),
 			UserPrincipalName: v["UserPrincipalName"].(string),
 		}
-		RepoOwner = append(RepoOwner, data)
+		repoOwner = append(repoOwner, data)
 	}
-	return RepoOwner, nil
+	return repoOwner, nil
 }
 
 func GetRepoOwnersByProjectIdWithGHUsername(id int64) ([]map[string]interface{}, error) {

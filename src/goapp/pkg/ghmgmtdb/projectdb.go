@@ -2,10 +2,67 @@ package ghmgmt
 
 import (
 	"fmt"
-	"main/models"
 	"strconv"
 	"time"
 )
+
+type Repository struct {
+	Name        string
+	Requestor   string
+	Description string
+}
+
+type ProjectRequest struct {
+	Id                         string
+	Newcontribution            string
+	OSSsponsor                 string
+	Avanadeofferingsassets     string
+	Willbecommercialversion    string
+	OSSContributionInformation string
+}
+
+type ProjectApproval struct {
+	Id                         int64
+	ProjectId                  int64
+	ProjectName                string
+	ProjectCoowner             string
+	ProjectDescription         string
+	RequesterName              string
+	RequesterGivenName         string
+	RequesterSurName           string
+	RequesterUserPrincipalName string
+	CoownerName                string
+	CoownerGivenName           string
+	CoownerSurName             string
+	CoownerUserPrincipalName   string
+	ApprovalTypeId             int64
+	ApprovalType               string
+	ApproverUserPrincipalName  string
+	ApprovalDescription        string
+	Newcontribution            string
+	OSSsponsor                 string
+	Avanadeofferingsassets     string
+	Willbecommercialversion    string
+	OSSContributionInformation string
+	RequestStatus              string
+	ApproveUrl                 string
+	RejectUrl                  string
+	ApproveText                string
+	RejectText                 string
+}
+
+type Project struct {
+	Id                      string
+	GithubId                int64
+	Name                    string
+	Coowner                 string
+	Description             string
+	ConfirmAvaIP            bool
+	ConfirmSecIPScan        bool
+	ConfirmNotClientProject bool
+	TFSProjectReference     string
+	Visibility              int
+}
 
 func ProjectApprovalsSelectById(params map[string]interface{}) ([]map[string]interface{}, error) {
 	db := ConnectDb()
@@ -43,22 +100,22 @@ func ProjectsApprovalUpdateApproverUserPrincipalName(params map[string]interface
 	return result, err
 }
 
-func PRProjectsInsert(body models.TypNewProjectReqBody, user string) (id int64) {
+func PRProjectsInsert(project Project, user string) (id int64) {
 
 	db := ConnectDb()
 	defer db.Close()
 
 	param := map[string]interface{}{
-		"GithubId":                body.GithubId,
-		"Name":                    body.Name,
-		"CoOwner":                 body.Coowner,
-		"Description":             body.Description,
-		"ConfirmAvaIP":            body.ConfirmAvaIP,
-		"ConfirmEnabledSecurity":  body.ConfirmSecIPScan,
-		"ConfirmNotClientProject": body.ConfirmNotClientProject,
+		"GithubId":                project.GithubId,
+		"Name":                    project.Name,
+		"CoOwner":                 project.Coowner,
+		"Description":             project.Description,
+		"ConfirmAvaIP":            project.ConfirmAvaIP,
+		"ConfirmEnabledSecurity":  project.ConfirmSecIPScan,
+		"ConfirmNotClientProject": project.ConfirmNotClientProject,
 		"CreatedBy":               user,
-		"VisibilityId":            body.Visibility,
-		"TFSProjectReference":     body.TFSProjectReference,
+		"VisibilityId":            project.Visibility,
+		"TFSProjectReference":     project.TFSProjectReference,
 	}
 	result, err := db.ExecuteStoredProcedureWithResult("dbo.PR_Projects_Insert", param)
 	if err != nil {
@@ -105,19 +162,19 @@ func ProjectUpdateByImport(param map[string]interface{}) error {
 	return nil
 }
 
-func PRProjectsUpdate(body models.TypNewProjectReqBody, user string) (id int64) {
+func PRProjectsUpdate(project Project, user string) (id int64) {
 
 	db := ConnectDb()
 	defer db.Close()
 
 	param := map[string]interface{}{
-		"ID":                      body.Id,
-		"Name":                    body.Name,
-		"CoOwner":                 body.Coowner,
-		"Description":             body.Description,
-		"ConfirmAvaIP":            body.ConfirmAvaIP,
-		"ConfirmEnabledSecurity":  body.ConfirmSecIPScan,
-		"ConfirmNotClientProject": body.ConfirmNotClientProject,
+		"ID":                      project.Id,
+		"Name":                    project.Name,
+		"CoOwner":                 project.Coowner,
+		"Description":             project.Description,
+		"ConfirmAvaIP":            project.ConfirmAvaIP,
+		"ConfirmEnabledSecurity":  project.ConfirmSecIPScan,
+		"ConfirmNotClientProject": project.ConfirmNotClientProject,
 		"ModifiedBy":              user,
 	}
 	_, err := db.ExecuteStoredProcedure("dbo.PR_Projects_Update", param)
@@ -128,18 +185,18 @@ func PRProjectsUpdate(body models.TypNewProjectReqBody, user string) (id int64) 
 	return
 }
 
-func PRProjectsUpdateLegalQuestions(body models.TypeMakeProjectPublicReqBody, user string) {
+func PRProjectsUpdateLegalQuestions(projectRequest ProjectRequest, user string) {
 
 	db := ConnectDb()
 	defer db.Close()
 
 	param := map[string]interface{}{
-		"Id":                         body.Id,
-		"Newcontribution":            body.Newcontribution,
-		"OSSsponsor":                 body.OSSsponsor,
-		"Avanadeofferingsassets":     body.Avanadeofferingsassets,
-		"Willbecommercialversion":    body.Willbecommercialversion,
-		"OSSContributionInformation": body.OSSContributionInformation,
+		"Id":                         projectRequest.Id,
+		"Newcontribution":            projectRequest.Newcontribution,
+		"OSSsponsor":                 projectRequest.OSSsponsor,
+		"Avanadeofferingsassets":     projectRequest.Avanadeofferingsassets,
+		"Willbecommercialversion":    projectRequest.Willbecommercialversion,
+		"OSSContributionInformation": projectRequest.OSSContributionInformation,
 		"ModifiedBy":                 user,
 	}
 	_, err := db.ExecuteStoredProcedure("PR_Projects_Update_LegalQuestions", param)
@@ -163,14 +220,14 @@ func Projects_ByRepositorySource(repositorySource string) ([]map[string]interfac
 	return result, nil
 }
 
-func Projects_IsExisting(body models.TypNewProjectReqBody) bool {
+func Projects_IsExisting(name string) bool {
 
 	db := ConnectDb()
 	defer db.Close()
 
 	param := map[string]interface{}{
 
-		"Name": body.Name,
+		"Name": name,
 	}
 
 	result, err := db.ExecuteStoredProcedureWithResult("dbo.PR_Projects_IsExisting", param)
@@ -187,13 +244,13 @@ func Projects_IsExisting(body models.TypNewProjectReqBody) bool {
 	}
 }
 
-func Projects_IsExisting_By_GithubId(body models.TypNewProjectReqBody) bool {
+func Projects_IsExisting_By_GithubId(githubId int64) bool {
 
 	db := ConnectDb()
 	defer db.Close()
 
 	param := map[string]interface{}{
-		"GithubId": body.GithubId,
+		"GithubId": githubId,
 	}
 
 	result, err := db.ExecuteStoredProcedureWithResult("dbo.PR_Projects_IsExisting_By_GithubId", param)
@@ -210,7 +267,7 @@ func Projects_IsExisting_By_GithubId(body models.TypNewProjectReqBody) bool {
 	}
 }
 
-func PopulateProjectsApproval(id int64, email string) (ProjectApprovals []models.TypProjectApprovals) {
+func PopulateProjectsApproval(id int64, email string) (projectApprovals []ProjectApproval) {
 	db := ConnectDb()
 	defer db.Close()
 
@@ -220,7 +277,7 @@ func PopulateProjectsApproval(id int64, email string) (ProjectApprovals []models
 	}
 	result, _ := db.ExecuteStoredProcedureWithResult("PR_ProjectsApproval_Populate", param)
 	for _, v := range result {
-		data := models.TypProjectApprovals{
+		data := ProjectApproval{
 			Id:                         v["Id"].(int64),
 			ProjectId:                  v["ProjectId"].(int64),
 			ProjectName:                v["ProjectName"].(string),
@@ -240,20 +297,20 @@ func PopulateProjectsApproval(id int64, email string) (ProjectApprovals []models
 			OSSContributionInformation: v["OSSContributionInformation"].(string),
 			RequestStatus:              v["RequestStatus"].(string),
 		}
-		ProjectApprovals = append(ProjectApprovals, data)
+		projectApprovals = append(projectApprovals, data)
 	}
 
 	return
 }
 
-func GetFailedProjectApprovalRequests() (ProjectApprovals []models.TypProjectApprovals) {
+func GetFailedProjectApprovalRequests() (projectApprovals []ProjectApproval) {
 	db := ConnectDb()
 	defer db.Close()
 
 	result, _ := db.ExecuteStoredProcedureWithResult("PR_ProjectApprovals_Select_Failed", nil)
 
 	for _, v := range result {
-		data := models.TypProjectApprovals{
+		data := ProjectApproval{
 			Id:                         v["Id"].(int64),
 			ProjectId:                  v["ProjectId"].(int64),
 			ProjectName:                v["ProjectName"].(string),
@@ -278,13 +335,13 @@ func GetFailedProjectApprovalRequests() (ProjectApprovals []models.TypProjectApp
 			OSSContributionInformation: v["OSSContributionInformation"].(string),
 			RequestStatus:              v["RequestStatus"].(string),
 		}
-		ProjectApprovals = append(ProjectApprovals, data)
+		projectApprovals = append(projectApprovals, data)
 	}
 
 	return
 }
 
-func GetProjectApprovalsByProjectId(id int64) (ProjectApprovals []models.TypProjectApprovals) {
+func GetProjectApprovalsByProjectId(id int64) (projectApprovals []ProjectApproval) {
 	db := ConnectDb()
 	defer db.Close()
 
@@ -295,7 +352,7 @@ func GetProjectApprovalsByProjectId(id int64) (ProjectApprovals []models.TypProj
 	result, _ := db.ExecuteStoredProcedureWithResult("PR_ProjectApprovals_Select_By_ProjectId", param)
 
 	for _, v := range result {
-		data := models.TypProjectApprovals{
+		data := ProjectApproval{
 			Id:                        v["Id"].(int64),
 			ProjectId:                 v["ProjectId"].(int64),
 			ProjectName:               v["ProjectName"].(string),
@@ -305,13 +362,13 @@ func GetProjectApprovalsByProjectId(id int64) (ProjectApprovals []models.TypProj
 			ApprovalDescription:       v["ApprovalDescription"].(string),
 			RequestStatus:             v["RequestStatus"].(string),
 		}
-		ProjectApprovals = append(ProjectApprovals, data)
+		projectApprovals = append(projectApprovals, data)
 	}
 
 	return
 }
 
-func GetProjectApprovalByGUID(id string) (ProjectApproval models.TypProjectApprovals) {
+func GetProjectApprovalByGUID(id string) (projectApproval ProjectApproval) {
 	db := ConnectDb()
 	defer db.Close()
 
@@ -322,7 +379,7 @@ func GetProjectApprovalByGUID(id string) (ProjectApproval models.TypProjectAppro
 	result, _ := db.ExecuteStoredProcedureWithResult("PR_ProjectApprovals_Select_By_ApprovalSystemGUID", param)
 
 	for _, v := range result {
-		data := models.TypProjectApprovals{
+		projectApproval = ProjectApproval{
 			Id:                        v["Id"].(int64),
 			ProjectId:                 v["ProjectId"].(int64),
 			ProjectName:               v["ProjectName"].(string),
@@ -332,7 +389,6 @@ func GetProjectApprovalByGUID(id string) (ProjectApproval models.TypProjectAppro
 			ApprovalDescription:       v["ApprovalDescription"].(string),
 			RequestStatus:             v["RequestStatus"].(string),
 		}
-		ProjectApproval = data
 	}
 
 	return
@@ -349,21 +405,22 @@ func ProjectsApprovalUpdateGUID(id int64, ApprovalSystemGUID string) {
 	db.ExecuteStoredProcedure("PR_ProjectsApproval_Update_ApprovalSystemGUID", param)
 }
 
-func GetProjectForRepoOwner() (RepoOwner []models.TypRepoOwner) {
+func GetProjectForRepoOwner() (repoOwner []RepoOwner) {
 	db := ConnectDb()
 	defer db.Close()
 
 	result, _ := db.ExecuteStoredProcedureWithResult("PR_Projects_ToRepoOwners", nil)
 
 	for _, v := range result {
-		data := models.TypRepoOwner{
+		data := RepoOwner{
 			Id:                v["Id"].(int64),
 			UserPrincipalName: v["UserPrincipalName"].(string),
 		}
-		RepoOwner = append(RepoOwner, data)
+		repoOwner = append(repoOwner, data)
 	}
-	return RepoOwner
+	return repoOwner
 }
+
 func GetProjectByName(projectName string) []map[string]interface{} {
 	db := ConnectDb()
 	defer db.Close()
@@ -483,8 +540,8 @@ func UpdateTFSProjectReferenceById(id int64, tFSProjectReference string) error {
 	return nil
 }
 
-func GetRequestedReposByDateRange(start time.Time, end time.Time) ([]models.TypBasicRepo, error) {
-	var RequestedRepos []models.TypBasicRepo
+func GetRequestedReposByDateRange(start time.Time, end time.Time) ([]Repository, error) {
+	var requestedRepos []Repository
 	db := ConnectDb()
 	defer db.Close()
 
@@ -499,15 +556,15 @@ func GetRequestedReposByDateRange(start time.Time, end time.Time) ([]models.TypB
 	}
 
 	for _, v := range result {
-		data := models.TypBasicRepo{
+		data := Repository{
 			Name:        v["Name"].(string),
 			Requestor:   v["CreatedBy"].(string),
 			Description: v["Description"].(string),
 		}
-		RequestedRepos = append(RequestedRepos, data)
+		requestedRepos = append(requestedRepos, data)
 	}
 
-	return RequestedRepos, nil
+	return requestedRepos, nil
 }
 
 func GetGitHubRepositories() ([]map[string]interface{}, error) {

@@ -7,19 +7,41 @@ import (
 	"net/http"
 	"strconv"
 
-	"main/models"
 	db "main/pkg/ghmgmtdb"
 	"main/pkg/session"
 
 	"github.com/gorilla/mux"
 )
 
+type CategoryDto struct {
+	Id               int                   `json:"id"`
+	Name             string                `json:"name"`
+	Created          string                `json:"created"`
+	CreatedBy        string                `json:"createdBy"`
+	Modified         string                `json:"modified"`
+	ModifiedBy       string                `json:"modifiedBy"`
+	CategoryArticles []CategoryArticlesDto `json:"categoryArticles"`
+}
+
+type CategoryArticlesDto struct {
+	Id           int    `json:"id"`
+	Name         string `json:"name"`
+	Url          string `json:"Url"`
+	Body         string `json:"Body"`
+	CategoryId   int    `json:"CategoryId"`
+	CategoryName string `json:"CategoryName"`
+	Created      string `json:"created"`
+	CreatedBy    string `json:"createdBy"`
+	Modified     string `json:"modified"`
+	ModifiedBy   string `json:"modifiedBy"`
+}
+
 func CategoryAPIHandler(w http.ResponseWriter, r *http.Request) {
 	sessionaz, _ := session.Store.Get(r, "auth-session")
 	iprofile := sessionaz.Values["profile"]
 	profile := iprofile.(map[string]interface{})
 	username := profile["preferred_username"]
-	var body models.TypCategory
+	var body CategoryDto
 	err := json.NewDecoder(r.Body).Decode(&body)
 	if err != nil {
 		log.Println(err.Error())
@@ -94,7 +116,6 @@ func CategoryListAPIHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Write(jsonResp)
-
 }
 
 func GetCategoryArticlesById(w http.ResponseWriter, r *http.Request) {
@@ -178,7 +199,7 @@ func CategoryArticlesUpdate(w http.ResponseWriter, r *http.Request) {
 	iprofile := sessionaz.Values["profile"]
 	profile := iprofile.(map[string]interface{})
 	username := profile["preferred_username"]
-	var body models.TypCategoryArticles
+	var body CategoryArticlesDto
 
 	err := json.NewDecoder(r.Body).Decode(&body)
 	if err != nil {
@@ -217,7 +238,6 @@ func CategoryArticlesUpdate(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-
 }
 
 func CategoryUpdate(w http.ResponseWriter, r *http.Request) {
@@ -227,7 +247,7 @@ func CategoryUpdate(w http.ResponseWriter, r *http.Request) {
 	profile := iprofile.(map[string]interface{})
 	username := profile["preferred_username"]
 
-	var body models.TypCategory
+	var body CategoryDto
 
 	err := json.NewDecoder(r.Body).Decode(&body)
 	if err != nil {
@@ -249,5 +269,4 @@ func CategoryUpdate(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-
 }

@@ -15,6 +15,7 @@ func CategoryInsert(params map[string]interface{}) ([]map[string]interface{}, er
 
 	return result, err
 }
+
 func CategoryArticlesInsert(params map[string]interface{}) ([]map[string]interface{}, error) {
 	db := ConnectDb()
 	defer db.Close()
@@ -26,6 +27,7 @@ func CategoryArticlesInsert(params map[string]interface{}) ([]map[string]interfa
 
 	return result, err
 }
+
 func CategorySelect() ([]map[string]interface{}, error) {
 	db := ConnectDb()
 	defer db.Close()
@@ -37,6 +39,7 @@ func CategorySelect() ([]map[string]interface{}, error) {
 
 	return result, err
 }
+
 func CategoryArticlesselectById(params map[string]interface{}) ([]map[string]interface{}, error) {
 	db := ConnectDb()
 	defer db.Close()
@@ -48,6 +51,7 @@ func CategoryArticlesselectById(params map[string]interface{}) ([]map[string]int
 
 	return result, err
 }
+
 func CategoryArticlesSelectByArticlesID(params map[string]interface{}) ([]map[string]interface{}, error) {
 	db := ConnectDb()
 	defer db.Close()
@@ -59,6 +63,7 @@ func CategoryArticlesSelectByArticlesID(params map[string]interface{}) ([]map[st
 
 	return result, err
 }
+
 func CategorySelectById(params map[string]interface{}) ([]map[string]interface{}, error) {
 	db := ConnectDb()
 	defer db.Close()
@@ -70,6 +75,7 @@ func CategorySelectById(params map[string]interface{}) ([]map[string]interface{}
 
 	return result, err
 }
+
 func CategoryArticlesUpdate(params map[string]interface{}) error {
 	db := ConnectDb()
 	defer db.Close()

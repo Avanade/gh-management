@@ -2,9 +2,20 @@ package ghmgmt
 
 import (
 	"fmt"
-	"main/models"
 	"strconv"
 )
+
+type ApprovalType struct {
+	Id                        int
+	Name                      string
+	ApproverUserPrincipalName string
+	IsActive                  bool
+	IsArchived                bool
+	Created                   string
+	CreatedBy                 string
+	Modified                  string
+	ModifiedBy                string
+}
 
 func GetAllActiveApprovers() interface{} {
 	db := ConnectDb()
@@ -77,7 +88,7 @@ func SelectApprovalTypeById(id int) (interface{}, error) {
 	return &result[0], nil
 }
 
-func InsertApprovalType(approvalType models.ApprovalType) (int, error) {
+func InsertApprovalType(approvalType ApprovalType) (int, error) {
 	db := ConnectDb()
 	defer db.Close()
 
@@ -95,7 +106,7 @@ func InsertApprovalType(approvalType models.ApprovalType) (int, error) {
 	return int(result[0]["Id"].(int64)), nil
 }
 
-func UpdateApprovalType(approvalType models.ApprovalType) (int, error) {
+func UpdateApprovalType(approvalType ApprovalType) (int, error) {
 	db := ConnectDb()
 	defer db.Close()
 
@@ -114,7 +125,7 @@ func UpdateApprovalType(approvalType models.ApprovalType) (int, error) {
 	return int(result[0]["Id"].(int64)), nil
 }
 
-func SetIsArchiveApprovalTypeById(approvalType models.ApprovalType) (int, bool, error) {
+func SetIsArchiveApprovalTypeById(approvalType ApprovalType) (int, bool, error) {
 	db := ConnectDb()
 	defer db.Close()
 

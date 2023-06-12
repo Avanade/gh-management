@@ -15,7 +15,6 @@ import (
 func SearchHandler(w http.ResponseWriter, r *http.Request) {
 
 	template.UseTemplate(&w, r, "search/search", nil)
-
 }
 
 func GetSearchResults(w http.ResponseWriter, r *http.Request) {

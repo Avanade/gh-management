@@ -55,7 +55,7 @@ func setPageRoutes(mux *mux.Router) {
 
 	// AUTHENTICATION
 	mux.HandleFunc("/loginredirect", rtPages.LoginRedirectHandler).Methods("GET")
-	mux.HandleFunc("/gitredirect", rtPages.GitredirectHandler).Methods("GET")
+	mux.HandleFunc("/gitredirect", rtPages.GitRedirectHandler).Methods("GET")
 	// AZURE
 	mux.HandleFunc("/login/azure", rtAzure.LoginHandler)
 	mux.HandleFunc("/login/azure/callback", rtAzure.CallbackHandler)
@@ -181,15 +181,11 @@ func setApiRoutes(mux *mux.Router) {
 	muxApi.HandleFunc("/communityapprovers/GetCommunityApproversList/{id}", rtCommunity.GetCommunityApproversById)
 
 	// API FOR LOGIC APP
-	muxApi.Handle("/importGitHubReposToDatabase", loadAzAuthPage(rtApi.ImportReposToDatabase))
-	muxApi.Handle("/init/indexorgrepos", loadGuidAuthApi(rtApi.InitIndexOrgRepos)).Methods("GET")
 	muxApi.Handle("/indexorgrepos", loadGuidAuthApi(rtApi.IndexOrgRepos)).Methods("GET")
 	muxApi.Handle("/clearorgrepos", loadGuidAuthApi(rtApi.ClearOrgRepos)).Methods("GET")
 	muxApi.Handle("/checkAvaInnerSource", loadGuidAuthApi(rtApi.CheckAvaInnerSource)).Methods("GET")
 	muxApi.Handle("/checkAvaOpenSource", loadGuidAuthApi(rtApi.CheckAvaOpenSource)).Methods("GET")
 	muxApi.Handle("/clearOrgMembers", loadGuidAuthApi(rtApi.ClearOrgMembers)).Methods("GET")
 	muxApi.Handle("/RepoOwnerScan", loadGuidAuthApi(rtApi.RepoOwnerScan)).Methods("GET")
-	muxApi.Handle("/CommunityInitCommunityType", loadGuidAuthApi(rtApi.CommunityInitCommunityType)).Methods("GET")
-	muxApi.Handle("/init/projectToRepoOwner", loadGuidAuthApi(rtApi.InitProjectToRepoOwner)).Methods("GET")
 	muxApi.Handle("/RepoOwnersCleanup", loadGuidAuthApi(rtApi.RepoOwnersCleanup)).Methods("GET")
 }

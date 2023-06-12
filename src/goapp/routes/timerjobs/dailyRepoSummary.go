@@ -8,10 +8,15 @@ import (
 	"text/template"
 	"time"
 
-	"main/models"
 	"main/pkg/email"
 	db "main/pkg/ghmgmtdb"
 )
+
+type RequestedRepositorySummary struct {
+	Date         string
+	Organization string
+	Repos        []db.Repository
+}
 
 // Executes function `f` offsetted by `o`.
 func ScheduleJob(ctx context.Context, o time.Duration, f func()) {
@@ -39,7 +44,6 @@ func ScheduleJob(ctx context.Context, o time.Duration, f func()) {
 			return
 		}
 	}
-
 }
 
 func DailySummaryReport() {
@@ -59,7 +63,7 @@ func DailySummaryReport() {
 		return
 	}
 
-	var data models.TypRequestedRepoSummary
+	var data RequestedRepositorySummary
 
 	data.Date = e.Format("January 02, 2006")
 	data.Organization = o
@@ -78,7 +82,7 @@ func DailySummaryReport() {
 	}
 
 	body := buf.String()
-	m := email.TypEmailMessage{
+	m := email.EmailMessage{
 		Subject: "Requested Repositories",
 		Body:    body,
 		To:      recipient,

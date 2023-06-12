@@ -3,12 +3,34 @@ package template
 import (
 	"fmt"
 	"html/template"
-	"main/models"
 	session "main/pkg/session"
 	"net/http"
 	"os"
 	"strings"
 )
+
+type PageData struct {
+	Header    interface{}
+	Profile   interface{}
+	ProfileGH interface{}
+	Content   interface{}
+	HasPhoto  bool
+	UserPhoto string
+}
+
+type Headers struct {
+	Menu     []Menu
+	Title    string
+	LogoPath string
+	Page     string
+}
+
+type Menu struct {
+	Name     string
+	Url      string
+	IconPath string
+	External bool
+}
 
 // This parses the master page layout and the required page template.
 func UseTemplate(w *http.ResponseWriter, r *http.Request, page string, pageData interface{}) error {
@@ -38,20 +60,20 @@ func UseTemplate(w *http.ResponseWriter, r *http.Request, page string, pageData 
 	title := os.Getenv("APP_TITLE")
 	logoPath := os.Getenv("APP_LOGO_PATH")
 	// Data on master page
-	var menu []models.TypMenu
-	menu = append(menu, models.TypMenu{Name: "Dashboard", Url: "/", IconPath: "/public/icons/dashboard.svg", External: false})
-	menu = append(menu, models.TypMenu{Name: "Repositories", Url: "/repositories", IconPath: "/public/icons/projects.svg", External: false})
-	menu = append(menu, models.TypMenu{Name: "Communities", Url: "/communities/list", IconPath: "/public/icons/communities.svg", External: false})
-	menu = append(menu, models.TypMenu{Name: "Activities", Url: "/activities", IconPath: "/public/icons/activity.svg", External: false})
-	menu = append(menu, models.TypMenu{Name: "Guidance", Url: "/guidance", IconPath: "/public/icons/guidance.svg", External: false})
-	menu = append(menu, models.TypMenu{Name: "Approvals", Url: approvalSystemUrl, IconPath: "/public/icons/approvals.svg", External: true})
+	var menu []Menu
+	menu = append(menu, Menu{Name: "Dashboard", Url: "/", IconPath: "/public/icons/dashboard.svg", External: false})
+	menu = append(menu, Menu{Name: "Repositories", Url: "/repositories", IconPath: "/public/icons/projects.svg", External: false})
+	menu = append(menu, Menu{Name: "Communities", Url: "/communities/list", IconPath: "/public/icons/communities.svg", External: false})
+	menu = append(menu, Menu{Name: "Activities", Url: "/activities", IconPath: "/public/icons/activity.svg", External: false})
+	menu = append(menu, Menu{Name: "Guidance", Url: "/guidance", IconPath: "/public/icons/guidance.svg", External: false})
+	menu = append(menu, Menu{Name: "Approvals", Url: approvalSystemUrl, IconPath: "/public/icons/approvals.svg", External: true})
 	if isAdmin {
-		menu = append(menu, models.TypMenu{Name: "Admin", Url: "/admin", IconPath: "/public/icons/lock.svg", External: false})
+		menu = append(menu, Menu{Name: "Admin", Url: "/admin", IconPath: "/public/icons/lock.svg", External: false})
 	}
 
-	masterPageData := models.TypHeaders{Title: title, LogoPath: logoPath, Menu: menu, Page: getUrlPath(r.URL.Path)}
+	masterPageData := Headers{Title: title, LogoPath: logoPath, Menu: menu, Page: GetUrlPath(r.URL.Path)}
 
-	data := models.TypPageData{
+	data := PageData{
 		Header:    masterPageData,
 		Profile:   sessionaz.Values["profile"],
 		ProfileGH: sessiongh,
@@ -64,7 +86,8 @@ func UseTemplate(w *http.ResponseWriter, r *http.Request, page string, pageData 
 			fmt.Sprintf("templates/%v.html", page)))
 	return tmpl.Execute(*w, data)
 }
-func getUrlPath(path string) string {
+
+func GetUrlPath(path string) string {
 	p := strings.Split(path, "/")
 	if p[1] == "" {
 		return "Dashboard"

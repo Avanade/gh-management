@@ -10,5 +10,4 @@ func GetEnvVar(envVarName string, defaultValue string) string {
 		return os.Getenv(envVarName)
 	}
 	return defaultValue
-
 }

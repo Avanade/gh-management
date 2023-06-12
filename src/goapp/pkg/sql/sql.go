@@ -13,7 +13,6 @@ type DB struct {
 	*sql.DB
 }
 
-// Connection Parameters
 type ConnectionParam struct {
 	ConnectionString string
 	Server           string
@@ -23,7 +22,6 @@ type ConnectionParam struct {
 	Database         string
 }
 
-// Connection
 func Init(cp ConnectionParam) (*DB, error) {
 	connString := cp.ConnectionString
 	// Build connection string if property connection string is not set
@@ -67,7 +65,6 @@ func (db *DB) ExecuteStoredProcedure(procedure string, params map[string]interfa
 	return result, nil
 }
 
-// Add comment
 func (db *DB) ExecuteStoredProcedureWithResult(procedure string, params map[string]interface{}) ([]map[string]interface{}, error) {
 	var args []interface{}
 

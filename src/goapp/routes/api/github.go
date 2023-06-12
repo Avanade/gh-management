@@ -224,7 +224,7 @@ func EmailAdmin(admin string, adminemail string, reponame string, outisideCollab
 	Collablist = Collablist + " </table  > <p>"
 	body := fmt.Sprintf("<p>Hello %s ,  </p>  \n<p>This is to inform you that your Github repository <b> %s </b> has %d outside collaborator/s. </p> %s  This email was sent to the admins of the repository.  </p> \n <p>OSPO</p>", admin, link, len(outisideCollab), Collablist)
 
-	m := email.TypEmailMessage{
+	m := email.EmailMessage{
 		Subject: "GitHub Repo Collaborators Scan",
 		Body:    body,
 		To:      adminemail,
@@ -244,7 +244,7 @@ func EmailAdminDeletedProjects(to string, repos []string) {
 
 	body := fmt.Sprintf("The following repositories were removed from the database as they no longer exist on %s and %s GitHub organizations: %s", os.Getenv("GH_ORG_INNERSOURCE"), os.Getenv("GH_ORG_OPENSOURCE"), repoList)
 
-	m := email.TypEmailMessage{
+	m := email.EmailMessage{
 		Subject: "List of Deleted Repo",
 		Body:    body,
 		To:      to,
@@ -269,7 +269,7 @@ func EmailAdminConvertToColaborator(Email string, outisideCollab []string) {
 		body = fmt.Sprintf("<p>Hello %s ,  </p>  \n<p>This is to inform you that %d GitHub user on Avanade was converted to an outside collaborator. </p> %s  ", Email, len(outisideCollab), Collablist)
 	}
 
-	m := email.TypEmailMessage{
+	m := email.EmailMessage{
 		Subject: "GitHub Organization Scan",
 		Body:    body,
 		To:      Email,
@@ -299,7 +299,7 @@ func EmailRepoAdminConvertToColaborator(Email string, reponame string, outisideC
 		body = fmt.Sprintf("<p>Hello %s ,  </p>  \n<p>This is to inform you that <b> %d </b> GitHub users on your GitHub repo %s were converted to outside collaborators. </p> %s This email was sent to the admins of the repository. </p> \n <p>OSPO</p>", Email, len(outisideCollab), link, Collablist)
 	}
 
-	m := email.TypEmailMessage{
+	m := email.EmailMessage{
 		Subject: "GitHub Organization Scan",
 		Body:    body,
 		To:      Email,
@@ -329,7 +329,7 @@ func EmailOspoOwnerDeficient(Email string, org string, reponame []string) {
 	} else {
 		body = fmt.Sprintf("<p>Hello %s ,  </p>  \n<p>This is to inform you that <b> %d </b> repositories on %s need to add a co-owner.</p> %s   </p>  ", Email, len(reponame), org, reponamelist)
 	}
-	m := email.TypEmailMessage{
+	m := email.EmailMessage{
 		Subject: "Repository Owners Scan",
 		Body:    body,
 		To:      Email,
@@ -348,7 +348,7 @@ func EmailcoownerDeficient(Email string, Org string, reponame string) {
 
 	body = fmt.Sprintf("<p>Hello %s ,  </p>  \n<p>This is to inform you that you are the only admin on %s  GitHub repository. We recommend at least 2 admins on each repository. Click %s to add a co-owner.</p> \n <p>OSPO</p>", Email, reponame, link)
 
-	m := email.TypEmailMessage{
+	m := email.EmailMessage{
 		Subject: "Repository Owners Scan",
 		Body:    body,
 		To:      Email,

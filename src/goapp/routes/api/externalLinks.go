@@ -5,12 +5,25 @@ import (
 	"log"
 	"net/http"
 
-	"main/models"
 	db "main/pkg/ghmgmtdb"
 	"main/pkg/session"
 
 	"github.com/gorilla/mux"
 )
+
+type ExternalLinksDto struct {
+	Id int `json:"id"`
+
+	IconSVG   string `json:"iconsvg"`
+	Hyperlink string `json:"hyperlink"`
+	LinkName  string `json:"linkname"`
+
+	Enabled    string `json:"enabled"`
+	Created    string `json:"created"`
+	CreatedBy  string `json:"createdBy"`
+	Modified   string `json:"modified"`
+	ModifiedBy string `json:"modifiedBy"`
+}
 
 func GetExternalLinks(w http.ResponseWriter, r *http.Request) {
 
@@ -88,7 +101,7 @@ func CreateExternalLinks(w http.ResponseWriter, r *http.Request) {
 	iprofile := sessionaz.Values["profile"]
 	profile := iprofile.(map[string]interface{})
 	username := profile["preferred_username"]
-	var data models.TypExternalLinks
+	var data ExternalLinksDto
 
 	err := json.NewDecoder(r.Body).Decode(&data)
 	if err != nil {
@@ -118,7 +131,7 @@ func UpdateExternalLinks(w http.ResponseWriter, r *http.Request) {
 	iprofile := sessionaz.Values["profile"]
 	profile := iprofile.(map[string]interface{})
 	username := profile["preferred_username"]
-	var body models.TypExternalLinks
+	var body ExternalLinksDto
 
 	err := json.NewDecoder(r.Body).Decode(&body)
 	if err != nil {

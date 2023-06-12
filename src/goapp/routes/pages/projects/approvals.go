@@ -9,14 +9,31 @@ import (
 	"strings"
 	"time"
 
-	"main/models"
 	"main/pkg/email"
 	db "main/pkg/ghmgmtdb"
 	ghAPI "main/pkg/github"
 )
 
+type ApprovalReAssignRequestBody struct {
+	Id                  string `json:"id"`
+	ApproverEmail       string `json:"ApproverEmail"`
+	Username            string `json:"Username"`
+	ApplicationId       string `json:"ApplicationId"`
+	ApplicationModuleId string `json:"ApplicationModuleId"`
+	ItemId              string `json:"itemId"`
+	ApproveText         string `json:"ApproveText"`
+	RejectText          string `json:"RejectText"`
+}
+
+type ApprovalStatusRequestBody struct {
+	ItemId       string `json:"itemId"`
+	IsApproved   bool   `json:"isApproved"`
+	Remarks      string `json:"Remarks"`
+	ResponseDate string `json:"responseDate"`
+}
+
 func UpdateApprovalStatusProjects(w http.ResponseWriter, r *http.Request) {
-	err := processApprovalProjects(r, "projects")
+	err := ProcessApprovalProjects(r, "projects")
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -26,7 +43,7 @@ func UpdateApprovalStatusProjects(w http.ResponseWriter, r *http.Request) {
 }
 
 func UpdateApprovalStatusCommunity(w http.ResponseWriter, r *http.Request) {
-	err := processApprovalProjects(r, "community")
+	err := ProcessApprovalProjects(r, "community")
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -35,83 +52,8 @@ func UpdateApprovalStatusCommunity(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
-func processApprovalProjects(r *http.Request, module string) error {
-
-	// Decode payload
-	var req models.TypUpdateApprovalStatusReqBody
-	err := json.NewDecoder(r.Body).Decode(&req)
-	if err != nil {
-		return err
-	}
-
-	const REJECTED = 3
-	const APPROVED = 5
-
-	//Update approval status on database
-	approvalStatusId := APPROVED
-	if !req.IsApproved {
-		approvalStatusId = REJECTED
-	}
-
-	params := make(map[string]interface{})
-	params["ApprovalSystemGUID"] = req.ItemId
-	params["ApprovalStatusId"] = approvalStatusId
-	params["ApprovalRemarks"] = req.Remarks
-	params["ApprovalDate"] = req.ResponseDate
-
-	var spName string
-	switch module {
-	case "projects":
-		spName = "PR_ProjectsApproval_Update_ApproverResponse"
-	case "community":
-		spName = "PR_CommunityApproval_Update_ApproverResponse"
-	}
-
-	_, err = db.UpdateApprovalApproverResponse(spName, req.ItemId, req.Remarks, req.ResponseDate, approvalStatusId)
-	if err != nil {
-		return err
-	}
-
-	if module == "projects" {
-		projectApproval := db.GetProjectApprovalByGUID(req.ItemId)
-
-		go checkAllRequests(projectApproval.ProjectId)
-	}
-	return nil
-}
-
-func checkAllRequests(id int64) {
-	allApproved := true
-
-	// Check if all requests are approved
-	projectApprovals := db.GetProjectApprovalsByProjectId(id)
-	repo := projectApprovals[0].ProjectName
-	for _, a := range projectApprovals {
-		if a.RequestStatus != "Approved" {
-			allApproved = false
-			break
-		}
-	}
-
-	// If all are approved, move repository to OpenSource and make public
-	const PUBLIC = 3
-	if allApproved {
-		owner := os.Getenv("GH_ORG_INNERSOURCE")
-		newOwner := os.Getenv("GH_ORG_OPENSOURCE")
-		ghAPI.TransferRepository(repo, owner, newOwner)
-
-		time.Sleep(3 * time.Second)
-		ghAPI.SetProjectVisibility(repo, "public", newOwner)
-
-		db.UpdateProjectVisibilityId(id, PUBLIC)
-
-		repoResp, _ := ghAPI.GetRepository(repo, newOwner)
-		db.UpdateTFSProjectReferenceById(id, repoResp.GetHTMLURL())
-	}
-}
-
 func UpdateApprovalReassignApprover(w http.ResponseWriter, r *http.Request) {
-	var req models.TypUpdateApprovalReAssign
+	var req ApprovalReAssignRequestBody
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
 		log.Println(err.Error())
@@ -133,7 +75,7 @@ func UpdateApprovalReassignApprover(w http.ResponseWriter, r *http.Request) {
 	}
 
 	for _, v := range result {
-		data := models.TypProjectApprovals{
+		data := db.ProjectApproval{
 			Id:                         v["Id"].(int64),
 			ProjectId:                  v["ProjectId"].(int64),
 			ProjectName:                v["ProjectName"].(string),
@@ -169,7 +111,59 @@ func UpdateApprovalReassignApprover(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
-func SendReassignEmail(data models.TypProjectApprovals) error {
+func UpdateCommunityApprovalReassignApprover(w http.ResponseWriter, r *http.Request) {
+	var req ApprovalReAssignRequestBody
+	err := json.NewDecoder(r.Body).Decode(&req)
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	param := map[string]interface{}{
+		"Id":            req.Id,
+		"ApproverEmail": req.ApproverEmail,
+		"Username":      req.Username,
+	}
+	result, err := db.CommunityApprovalslUpdateApproverUserPrincipalName(param)
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	for _, v := range result {
+		data := db.CommunityApproval{
+			Id:                         v["Id"].(int64),
+			CommunityId:                v["CommunityId"].(int64),
+			CommunityName:              v["ProjectName"].(string),
+			CommunityDescription:       v["ProjectDescription"].(string),
+			RequesterGivenName:         v["RequesterGivenName"].(string),
+			RequesterSurName:           v["RequesterSurName"].(string),
+			RequesterName:              v["RequesterName"].(string),
+			RequesterUserPrincipalName: v["RequesterUserPrincipalName"].(string),
+			CommunityUrl:               v["Url"].(string),
+			CommunityNotes:             v["Notes"].(string),
+			ApproverUserPrincipalName:  v["ApproverUserPrincipalName"].(string),
+			ApprovalDescription:        v["ApprovalDescription"].(string),
+		}
+		data.ApproveUrl = fmt.Sprintf("%s/response/%s/%s/%s/1", os.Getenv("APPROVAL_SYSTEM_APP_BaseURL"), req.ApplicationId, req.ApplicationModuleId, req.ItemId)
+		data.RejectUrl = fmt.Sprintf("%s/response/%s/%s/%s/0", os.Getenv("APPROVAL_SYSTEM_APP_BaseURL"), req.ApplicationId, req.ApplicationModuleId, req.ItemId)
+		data.ApproveText = req.ApproveText
+		data.RejectText = req.RejectText
+
+		err = SendReassignEmailCommunity(data)
+		if err != nil {
+			log.Println(err.Error())
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+	}
+	w.WriteHeader(http.StatusOK)
+}
+
+func SendReassignEmail(data db.ProjectApproval) error {
 
 	bodyTemplate := `<p>Hi |ApproverUserPrincipalName|!</p>
 		<p>|RequesterName| is requesting for a new project and is now pending for |ApprovalType| review.</p>
@@ -254,7 +248,7 @@ func SendReassignEmail(data models.TypProjectApprovals) error {
 	)
 
 	body := replacer.Replace(bodyTemplate)
-	m := email.TypEmailMessage{
+	m := email.EmailMessage{
 		Subject: fmt.Sprintf("[GH-Management] New Project For Review - %v", data.ProjectName),
 		Body:    body,
 		To:      data.ApproverUserPrincipalName,
@@ -268,59 +262,82 @@ func SendReassignEmail(data models.TypProjectApprovals) error {
 	return nil
 }
 
-func UpdateCommunityApprovalReassignApprover(w http.ResponseWriter, r *http.Request) {
-	var req models.TypUpdateApprovalReAssign
+func ProcessApprovalProjects(r *http.Request, module string) error {
+
+	// Decode payload
+	var req ApprovalStatusRequestBody
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
-		log.Println(err.Error())
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+		return err
 	}
 
-	param := map[string]interface{}{
-		"Id":            req.Id,
-		"ApproverEmail": req.ApproverEmail,
-		"Username":      req.Username,
+	const REJECTED = 3
+	const APPROVED = 5
+
+	//Update approval status on database
+	approvalStatusId := APPROVED
+	if !req.IsApproved {
+		approvalStatusId = REJECTED
 	}
-	result, err := db.CommunityApprovalslUpdateApproverUserPrincipalName(param)
+
+	params := make(map[string]interface{})
+	params["ApprovalSystemGUID"] = req.ItemId
+	params["ApprovalStatusId"] = approvalStatusId
+	params["ApprovalRemarks"] = req.Remarks
+	params["ApprovalDate"] = req.ResponseDate
+
+	var spName string
+	switch module {
+	case "projects":
+		spName = "PR_ProjectsApproval_Update_ApproverResponse"
+	case "community":
+		spName = "PR_CommunityApproval_Update_ApproverResponse"
+	}
+
+	_, err = db.UpdateApprovalApproverResponse(spName, req.ItemId, req.Remarks, req.ResponseDate, approvalStatusId)
 	if err != nil {
-		log.Println(err.Error())
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+		return err
 	}
 
-	for _, v := range result {
-		data := models.TypCommunityApprovals{
-			Id:                         v["Id"].(int64),
-			CommunityId:                v["CommunityId"].(int64),
-			CommunityName:              v["ProjectName"].(string),
-			CommunityDescription:       v["ProjectDescription"].(string),
-			RequesterGivenName:         v["RequesterGivenName"].(string),
-			RequesterSurName:           v["RequesterSurName"].(string),
-			RequesterName:              v["RequesterName"].(string),
-			RequesterUserPrincipalName: v["RequesterUserPrincipalName"].(string),
-			CommunityUrl:               v["Url"].(string),
-			CommunityNotes:             v["Notes"].(string),
-			ApproverUserPrincipalName:  v["ApproverUserPrincipalName"].(string),
-			ApprovalDescription:        v["ApprovalDescription"].(string),
-		}
-		data.ApproveUrl = fmt.Sprintf("%s/response/%s/%s/%s/1", os.Getenv("APPROVAL_SYSTEM_APP_BaseURL"), req.ApplicationId, req.ApplicationModuleId, req.ItemId)
-		data.RejectUrl = fmt.Sprintf("%s/response/%s/%s/%s/0", os.Getenv("APPROVAL_SYSTEM_APP_BaseURL"), req.ApplicationId, req.ApplicationModuleId, req.ItemId)
-		data.ApproveText = req.ApproveText
-		data.RejectText = req.RejectText
+	if module == "projects" {
+		projectApproval := db.GetProjectApprovalByGUID(req.ItemId)
 
-		err = SendReassignEmailCommunity(data)
-		if err != nil {
-			log.Println(err.Error())
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-
+		go CheckAllRequests(projectApproval.ProjectId)
 	}
-	w.WriteHeader(http.StatusOK)
+	return nil
 }
 
-func SendReassignEmailCommunity(data models.TypCommunityApprovals) error {
+func CheckAllRequests(id int64) {
+	allApproved := true
+
+	// Check if all requests are approved
+	projectApprovals := db.GetProjectApprovalsByProjectId(id)
+	repo := projectApprovals[0].ProjectName
+	for _, a := range projectApprovals {
+		if a.RequestStatus != "Approved" {
+			allApproved = false
+			break
+		}
+	}
+
+	// If all are approved, move repository to OpenSource and make public
+	const PUBLIC = 3
+	if allApproved {
+		owner := os.Getenv("GH_ORG_INNERSOURCE")
+		newOwner := os.Getenv("GH_ORG_OPENSOURCE")
+		ghAPI.TransferRepository(repo, owner, newOwner)
+
+		time.Sleep(3 * time.Second)
+		ghAPI.SetProjectVisibility(repo, "public", newOwner)
+
+		db.UpdateProjectVisibilityId(id, PUBLIC)
+
+		repoResp, _ := ghAPI.GetRepository(repo, newOwner)
+		db.UpdateTFSProjectReferenceById(id, repoResp.GetHTMLURL())
+	}
+}
+
+func SendReassignEmailCommunity(data db.CommunityApproval) error {
 
 	bodyTemplate := `<p>Hi |ApproverUserPrincipalName|!</p>
 		<p>|RequesterName| is requesting for a new |CommunityType| community and is now pending for approval.</p>
@@ -382,7 +399,7 @@ func SendReassignEmailCommunity(data models.TypCommunityApprovals) error {
 		"|RejectText|", data.RejectText,
 	)
 	body := replacer.Replace(bodyTemplate)
-	m := email.TypEmailMessage{
+	m := email.EmailMessage{
 		Subject: fmt.Sprintf("[GH-Management] New Community For Approval - %v", data.CommunityName),
 		Body:    body,
 		To:      data.ApproverUserPrincipalName,
