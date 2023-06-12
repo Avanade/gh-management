@@ -69,7 +69,7 @@ func DailySummaryReport() {
 	data.Organization = o
 	data.Repos = r
 
-	t, err := template.ParseFiles("templates/reports/requestedRepoSummary.html")
+	t, err := template.ParseFiles("templates/reports/requestedreposummary.html")
 	if err != nil {
 		fmt.Println("An error occured while parsing email template.")
 		return
