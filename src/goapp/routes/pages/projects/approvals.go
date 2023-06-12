@@ -95,8 +95,8 @@ func UpdateApprovalReassignApprover(w http.ResponseWriter, r *http.Request) {
 			OSSContributionInformation: v["OSSContributionInformation"].(string),
 			RequestStatus:              v["RequestStatus"].(string),
 		}
-		data.ApproveUrl = fmt.Sprintf("%s/response/%s/%s/%s/1", os.Getenv("APPROVAL_SYSTEM_APP_BaseURL"), req.ApplicationId, req.ApplicationModuleId, req.ItemId)
-		data.RejectUrl = fmt.Sprintf("%s/response/%s/%s/%s/0", os.Getenv("APPROVAL_SYSTEM_APP_BaseURL"), req.ApplicationId, req.ApplicationModuleId, req.ItemId)
+		data.ApproveUrl = fmt.Sprintf("%s/response/%s/%s/%s/1", os.Getenv("APPROVAL_SYSTEM_APP_URL"), req.ApplicationId, req.ApplicationModuleId, req.ItemId)
+		data.RejectUrl = fmt.Sprintf("%s/response/%s/%s/%s/0", os.Getenv("APPROVAL_SYSTEM_APP_URL"), req.ApplicationId, req.ApplicationModuleId, req.ItemId)
 		data.ApproveText = req.ApproveText
 		data.RejectText = req.RejectText
 
@@ -147,8 +147,8 @@ func UpdateCommunityApprovalReassignApprover(w http.ResponseWriter, r *http.Requ
 			ApproverUserPrincipalName:  v["ApproverUserPrincipalName"].(string),
 			ApprovalDescription:        v["ApprovalDescription"].(string),
 		}
-		data.ApproveUrl = fmt.Sprintf("%s/response/%s/%s/%s/1", os.Getenv("APPROVAL_SYSTEM_APP_BaseURL"), req.ApplicationId, req.ApplicationModuleId, req.ItemId)
-		data.RejectUrl = fmt.Sprintf("%s/response/%s/%s/%s/0", os.Getenv("APPROVAL_SYSTEM_APP_BaseURL"), req.ApplicationId, req.ApplicationModuleId, req.ItemId)
+		data.ApproveUrl = fmt.Sprintf("%s/response/%s/%s/%s/1", os.Getenv("APPROVAL_SYSTEM_APP_URL"), req.ApplicationId, req.ApplicationModuleId, req.ItemId)
+		data.RejectUrl = fmt.Sprintf("%s/response/%s/%s/%s/0", os.Getenv("APPROVAL_SYSTEM_APP_URL"), req.ApplicationId, req.ApplicationModuleId, req.ItemId)
 		data.ApproveText = req.ApproveText
 		data.RejectText = req.RejectText
 
