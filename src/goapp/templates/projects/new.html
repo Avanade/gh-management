@@ -10,12 +10,9 @@
 )">
     <div x-html="template"></div>
 </div>
-<div x-data="data()" x-init="onload(
-    {{.isInnersourceMember}},
-    {{.isOpensourceMember}}
-)">
+<div x-data="data({{.isInnersourceMember}},{{.isOpensourceMember}})">
     <form onsubmit="event.preventDefault()" autocomplete="off">
-        <fieldset x-bind:disabled="mode=='view' || isNotMember">
+        <fieldset x-bind:disabled="isNotMember">
             <h3 class="text-lg font-medium leading-6 text-gray-900">Repository information</h3>
             <p class="mt-1 text-sm text-gray-500">
             All repositories start on Avanade’s innersource on GitHub. Once you have identified a business sponsor, and
@@ -28,12 +25,11 @@
 
             <div class="flex flex flex-col md:flex-row ">
                 <div class="basis-1/2 md:base-full  md:flex-row mx-3">
-                    <div class="flex flex-col  ">
+                    <div class="flex flex-col">
                         <div>
                             <h3 class="block text-sm font-medium text-gray-700">Repository Name</h3>
                         </div>
                         <div> <input type="text" name="name" id="name" x-model="form.name" maxlength="50"
-                                x-bind:disabled="mode=='edit'"
                                 class="mt-1 focus:ring-orange-500 focus:border-orange-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md border-2">
                         </div>
                         <div class="mt-0 text-xs text-red-500">
@@ -129,8 +125,7 @@
                             <h3 class="block text-sm font-medium text-gray-700">Repository description</h3>
                         </div>
                         <div>
-                            <textarea name="description" id="description" x-model="form.description" rows="3"
-                                x-bind:disabled="mode=='edit'" maxlength="350"
+                            <textarea name="description" id="description" x-model="form.description" rows="3" maxlength="350"
                                 class="mt-1 focus:ring-orange-500 focus:border-orange-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md  border-2">
                         </textarea>
                         </div>
@@ -207,31 +202,11 @@
         </div>
         <div>
             <div align="right">
-                <button type="button" x-show="mode=='view'"
-                    class="bg-orange-500  inline-flex justify-center py-2 px-4 rounded-md text-white"
-                    :class="!isValid ? 'bg-orange-100' : ''" x-bind:disabled="!isValid" @click="mode='edit'">
-
-                    <span x-show="form.id">Edit Repository</span>
-
-                </button>
-                <button type="submit" x-show="mode!='view'"
+                <button type="submit"
                     class="bg-orange-500  inline-flex justify-center py-2 px-4 rounded-md text-white"
                     :class="!isValid ? 'bg-orange-100' : ''" x-bind:disabled="!isValid" @click="submit()">
-
-                    <span x-show="!form.id">Submit</span>
-                    <span x-show="form.id">Update repository</span>
-
-                </button>  
-                <span x-show="form.id">
-                <button type="button" x-show="mode=='edit'"
-                    class="bg-orange-500  inline-flex justify-center py-2 px-4 rounded-md text-white"
-                    :class="!isValid ? 'bg-orange-100' : ''" x-bind:disabled="!isValid" @click="onload()">
-
-
-                    <span x-show="form.id">Cancel</span>
-
+                    <span>Submit</span>
                 </button>
-            </span>
             </div>
         </div>
     </form>
@@ -240,10 +215,11 @@
 </div>
 <script src="/public/components/combobox.js"></script>
 <script type="text/javascript">
-    function data() {
+    const data = (
+        isInnersourceMember, 
+        isOpensourceOrgMember
+    ) => {
         return {
-            mode:
-                'view',
             form: {
                 name: '',
                 coowner: '',
@@ -257,22 +233,25 @@
             },
             isInnersourceMember : false,
             isOpensourceOrgMember : false,
+            async init() {
+                var modal = Alpine.store('master').modal
+                modal.update('loading', 'Loading', 'Please wait', '', '')
+                this.isInnersourceMember = isInnersourceMember;
+                this.isOpensourceOrgMember = isOpensourceOrgMember;
+                modal.visible = false
+            },
             submit() {
                 if(this.isNotMember()) return;
                 
                 Alpine.store('master').modal.reset()
                 Alpine.store('master').modal.show()
-                if (!this.form.id)
-                    Alpine.store('master').postData("/repositories/new", this.form, "Your repository has been created.", "Go to your repository list", "/repositories")
-                else
-                    Alpine.store('master').postData("/repositories/" + this.form.id, this.form, "Your repository has been created.", "Go to your repository list", "/repositories")
+                Alpine.store('master').postData("/api/repositories", this.form, "Your repository has been created.", "Go to your repository list", "/repositories")
 
             },
             showName(userPrincipalName, githubUser) {
                 return userPrincipalName.includes(this.form.coowner) || githubUser.includes(this.form.coowner) ? true : false
             },
             isNotMember(){
-                console.log(!this.isInnersourceMember || !this.isOpensourceOrgMember)
                 return !this.isInnersourceMember || !this.isOpensourceOrgMember
             },
             get isValid() {
@@ -318,40 +297,6 @@
                 } else {
                     return false
                 }
-            },
-            async onload(
-                isInnersourceMember, 
-                isOpensourceOrgMember
-            ) {
-                var modal = Alpine.store('master').modal
-                modal.update('loading', 'Loading', 'Please wait', '', '')
-
-                this.form.id = '{{.Id}}'
-                this.isInnersourceMember = isInnersourceMember;
-                this.isOpensourceOrgMember = isOpensourceOrgMember;
-
-                if (this.form.id) {
-                    this.mode = 'view'
-                    await fetch('/api/repositories/' + '{{.Id}}')
-                        .then(r => {
-                            r.json().then(body => {
-
-                                this.form.name = body[0]["ProjectName"]
-                                this.form.coowner = body[0]["ProjectCoowner"]
-                                this.form.description = body[0]["ProjectDescription"]
-                                this.form.confirmAvaIP = body[0]["ConfirmAvaIP"]
-                                this.form.confirmSecIPScan = body[0]["ConfirmEnabledSecurity"]
-                                this.form.confirmNotClientProject = body[0]["ConfirmNotClientProject"]
-                            });
-                        })
-                        .catch(e => {
-                            console.log(e)
-                         
-                        })
-                } else {
-                    this.mode = 'new'
-                }
-                modal.visible = false
             }
         }
     }
