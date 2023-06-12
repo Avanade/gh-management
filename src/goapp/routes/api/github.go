@@ -26,7 +26,7 @@ func CheckAvaInnerSource(w http.ResponseWriter, r *http.Request) {
 
 func CheckAvaOpenSource(w http.ResponseWriter, r *http.Request) {
 	org := os.Getenv("GH_ORG_OPENSOURCE")
-	var OutsideCollabsUsers []string
+	var outsideCollabsUsers []string
 	token := os.Getenv("GH_TOKEN")
 	repos, err := ghAPI.GetRepositoriesFromOrganization(org)
 	if err != nil {
@@ -35,44 +35,44 @@ func CheckAvaOpenSource(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	Outsidecollabs := ghAPI.ListOutsideCollaborators(token, org)
-	for _, list := range Outsidecollabs {
-		OutsideCollabsUsers = append(OutsideCollabsUsers, *list.Login)
+	outsidecollabs := ghAPI.ListOutsideCollaborators(token, org)
+	for _, list := range outsidecollabs {
+		outsideCollabsUsers = append(outsideCollabsUsers, *list.Login)
 	}
-	var RepoOutsideCollabsList []string
+	var repoOutsideCollabsList []string
 	for _, collab := range repos {
-		var RepoCollabsUserNames []string
+		var repoCollabsUserNames []string
 
-		var Adminmember []string
-		RepoOutsideCollabsList = nil
+		var adminmember []string
+		repoOutsideCollabsList = nil
 
-		RepoCollabs := ghAPI.RepositoriesListCollaborators(token, org, collab.Name, "", "direct")
-		for _, list := range RepoCollabs {
+		repoCollabs := ghAPI.RepositoriesListCollaborators(token, org, collab.Name, "", "direct")
+		for _, list := range repoCollabs {
 
-			RepoCollabsUserNames = append(RepoCollabsUserNames, *list.Login)
+			repoCollabsUserNames = append(repoCollabsUserNames, *list.Login)
 			if *list.RoleName == "admin" {
-				Adminmember = append(Adminmember, *list.Login)
+				adminmember = append(adminmember, *list.Login)
 
 			}
 		}
 
-		for _, list := range RepoCollabsUserNames {
-			for _, Outsidelist := range OutsideCollabsUsers {
-				if list == Outsidelist {
-					RepoOutsideCollabsList = append(RepoOutsideCollabsList, Outsidelist)
+		for _, list := range repoCollabsUserNames {
+			for _, outsidelist := range outsideCollabsUsers {
+				if list == outsidelist {
+					repoOutsideCollabsList = append(repoOutsideCollabsList, outsidelist)
 				}
 			}
 		}
-		if len(RepoOutsideCollabsList) > 0 {
+		if len(repoOutsideCollabsList) > 0 {
 
-			for _, admin := range Adminmember {
+			for _, admin := range adminmember {
 				email, err := db.UsersGetEmail(admin)
 				if err != nil {
 					log.Println(err.Error())
 					http.Error(w, err.Error(), http.StatusInternalServerError)
 					return
 				}
-				EmailAdmin(admin, email, collab.Name, RepoOutsideCollabsList)
+				EmailAdmin(admin, email, collab.Name, repoOutsideCollabsList)
 			}
 
 		}
@@ -85,8 +85,8 @@ func ClearOrgMembers(w http.ResponseWriter, r *http.Request) {
 
 	// Remove GitHub users from innersource who are not employees
 	organization := os.Getenv("GH_ORG_INNERSOURCE")
-	EmailSupport := os.Getenv("EMAIL_SUPPORT")
-	var ConvertedOutsidecollabsList []string
+	emailSupport := os.Getenv("EMAIL_SUPPORT")
+	var convertedOutsideCollabsList []string
 	users := ghAPI.OrgListMembers(token, organization)
 	for _, list := range users {
 		email, err := db.UsersGetEmail(*list.Login)
@@ -96,13 +96,13 @@ func ClearOrgMembers(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		if len(email) > 0 {
-			activeuser, err := msgraph.ActiveUsers(email)
+			activeUser, err := msgraph.ActiveUsers(email)
 			if err != nil {
 				log.Println(err.Error())
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
 			}
-			if activeuser == nil {
+			if activeUser == nil {
 				ghAPI.RemoveOrganizationsMember(token, organization, *list.Login)
 
 			}
@@ -116,8 +116,8 @@ func ClearOrgMembers(w http.ResponseWriter, r *http.Request) {
 	// Convert users who are not employees to an outside collaborator
 	organizationsOpen := os.Getenv("GH_ORG_OPENSOURCE")
 
-	usersOpenorg := ghAPI.OrgListMembers(token, organizationsOpen)
-	for _, list := range usersOpenorg {
+	usersOpenOrg := ghAPI.OrgListMembers(token, organizationsOpen)
+	for _, list := range usersOpenOrg {
 		email, err := db.UsersGetEmail(*list.Login)
 		if err != nil {
 			log.Println(err.Error())
@@ -125,41 +125,41 @@ func ClearOrgMembers(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		if len(email) > 0 {
-			activeuser, _ := msgraph.ActiveUsers(email)
-			if activeuser == nil {
+			activeUser, _ := msgraph.ActiveUsers(email)
+			if activeUser == nil {
 				ghAPI.ConvertMemberToOutsideCollaborator(token, organizationsOpen, *list.Login)
-				ConvertedOutsidecollabsList = append(ConvertedOutsidecollabsList, *list.Login)
+				convertedOutsideCollabsList = append(convertedOutsideCollabsList, *list.Login)
 			}
 		} else {
 			ghAPI.ConvertMemberToOutsideCollaborator(token, organizationsOpen, *list.Login)
-			ConvertedOutsidecollabsList = append(ConvertedOutsidecollabsList, *list.Login)
+			convertedOutsideCollabsList = append(convertedOutsideCollabsList, *list.Login)
 		}
 	}
 
-	if len(ConvertedOutsidecollabsList) > 0 {
-		// Email list of new outside collaborators to ospo
-		EmailAdminConvertToColaborator(EmailSupport, ConvertedOutsidecollabsList)
+	if len(convertedOutsideCollabsList) > 0 {
+		// to list of new outside collaborators to ospo
+		EmailAdminConvertToColaborator(emailSupport, convertedOutsideCollabsList)
 
-		// Email repo admins with converted users
+		// to repo admins with converted users
 		repos, _ := ghAPI.GetRepositoriesFromOrganization(organizationsOpen)
 		for _, repo := range repos {
 
-			RepoAdmins := GetRepoCollaborators(organizationsOpen, repo.Name, "admin", "direct")
-			Repocollabs := GetRepoCollaborators(organizationsOpen, repo.Name, "", "direct")
-			var ConvertedInRepo []string
-			for _, collab1 := range ConvertedOutsidecollabsList {
-				for _, collab2 := range Repocollabs {
-					if collab1 == *collab2.Login {
-						ConvertedInRepo = append(ConvertedInRepo, collab1)
+			repoAdmins := GetRepoCollaborators(organizationsOpen, repo.Name, "admin", "direct")
+			repoCollabs := GetRepoCollaborators(organizationsOpen, repo.Name, "", "direct")
+			var convertedInRepo []string
+			for _, convertedOutsideCollab := range convertedOutsideCollabsList {
+				for _, repoCollab := range repoCollabs {
+					if convertedOutsideCollab == *repoCollab.Login {
+						convertedInRepo = append(convertedInRepo, convertedOutsideCollab)
 					}
 				}
 			}
 
-			for _, collab := range RepoAdmins {
-				collabemail, _ := db.UsersGetEmail(*collab.Login)
+			for _, collab := range repoAdmins {
+				collabEmail, _ := db.UsersGetEmail(*collab.Login)
 
-				if len(ConvertedInRepo) > 0 {
-					EmailRepoAdminConvertToColaborator(collabemail, repo.Name, ConvertedInRepo)
+				if len(convertedInRepo) > 0 {
+					EmailRepoAdminConvertToColaborator(collabEmail, repo.Name, convertedInRepo)
 				}
 			}
 
@@ -172,7 +172,7 @@ func RepoOwnerScan(w http.ResponseWriter, r *http.Request) {
 	organizationsOpen := [...]string{os.Getenv("GH_ORG_OPENSOURCE"), os.Getenv("GH_ORG_INNERSOURCE")}
 	var repoOnwerDeficient []string
 	var email string
-	EmailSupport := os.Getenv("EMAIL_SUPPORT")
+	emailSupport := os.Getenv("EMAIL_SUPPORT")
 	for _, org := range organizationsOpen {
 
 		repoOnwerDeficient = nil
@@ -205,7 +205,7 @@ func RepoOwnerScan(w http.ResponseWriter, r *http.Request) {
 		}
 
 		if len(repoOnwerDeficient) > 0 {
-			EmailOspoOwnerDeficient(EmailSupport, org, repoOnwerDeficient)
+			EmailOspoOwnerDeficient(emailSupport, org, repoOnwerDeficient)
 		}
 	}
 	fmt.Println("REPOOWNERSSCAN SUCCESSFUL")
@@ -217,12 +217,12 @@ func EmailAdmin(admin string, adminemail string, reponame string, outisideCollab
 
 	link := "https://github.com/" + os.Getenv("GH_ORG_OPENSOURCE") + "/" + reponame
 	link = "<a href=\"" + link + "\">" + reponame + "</a>"
-	Collablist := "</p> <table  >"
+	collabList := "</p> <table  >"
 	for _, collab := range outisideCollab {
-		Collablist = Collablist + " <tr> <td>" + collab + " </td></tr>"
+		collabList = collabList + " <tr> <td>" + collab + " </td></tr>"
 	}
-	Collablist = Collablist + " </table  > <p>"
-	body := fmt.Sprintf("<p>Hello %s ,  </p>  \n<p>This is to inform you that your Github repository <b> %s </b> has %d outside collaborator/s. </p> %s  This email was sent to the admins of the repository.  </p> \n <p>OSPO</p>", admin, link, len(outisideCollab), Collablist)
+	collabList = collabList + " </table  > <p>"
+	body := fmt.Sprintf("<p>Hello %s ,  </p>  \n<p>This is to inform you that your Github repository <b> %s </b> has %d outside collaborator/s. </p> %s  This email was sent to the admins of the repository.  </p> \n <p>OSPO</p>", admin, link, len(outisideCollab), collabList)
 
 	m := email.EmailMessage{
 		Subject: "GitHub Repo Collaborators Scan",
@@ -254,25 +254,25 @@ func EmailAdminDeletedProjects(to string, repos []string) {
 }
 
 // List of users converted into outside collaborators to Repo Owner
-func EmailAdminConvertToColaborator(Email string, outisideCollab []string) {
+func EmailAdminConvertToColaborator(to string, outisideCollab []string) {
 	e := time.Now()
 	var body string
-	Collablist := "</p> <table  >"
+	collabList := "</p> <table  >"
 	for _, collab := range outisideCollab {
-		Collablist = Collablist + " <tr> <td>" + collab + " </td></tr>"
+		collabList = collabList + " <tr> <td>" + collab + " </td></tr>"
 	}
-	Collablist = Collablist + " </table  > <p>"
+	collabList = collabList + " </table  > <p>"
 	if len(outisideCollab) == 1 {
-		body = fmt.Sprintf("<p>Hello %s ,  </p>  \n<p>This is to inform you that %d GitHub user on Avanade was converted as an outside collaborator. </p> %s  ", Email, len(outisideCollab), Collablist)
+		body = fmt.Sprintf("<p>Hello %s ,  </p>  \n<p>This is to inform you that %d GitHub user on Avanade was converted as an outside collaborator. </p> %s  ", to, len(outisideCollab), collabList)
 	} else {
 
-		body = fmt.Sprintf("<p>Hello %s ,  </p>  \n<p>This is to inform you that %d GitHub user on Avanade was converted to an outside collaborator. </p> %s  ", Email, len(outisideCollab), Collablist)
+		body = fmt.Sprintf("<p>Hello %s ,  </p>  \n<p>This is to inform you that %d GitHub user on Avanade was converted to an outside collaborator. </p> %s  ", to, len(outisideCollab), collabList)
 	}
 
 	m := email.EmailMessage{
 		Subject: "GitHub Organization Scan",
 		Body:    body,
-		To:      Email,
+		To:      to,
 	}
 
 	email.SendEmail(m)
@@ -280,29 +280,29 @@ func EmailAdminConvertToColaborator(Email string, outisideCollab []string) {
 }
 
 // List of users converted into outside collaborators to OSPO
-func EmailRepoAdminConvertToColaborator(Email string, reponame string, outisideCollab []string) {
+func EmailRepoAdminConvertToColaborator(to string, repoName string, outisideCollab []string) {
 	e := time.Now()
 	var body string
-	link := "https://github.com/" + os.Getenv("GH_ORG_OPENSOURCE") + "/" + reponame
-	link = "<a href=\"" + link + "\">" + reponame + "</a>"
-	Collablist := "</p> <table  >"
+	link := "https://github.com/" + os.Getenv("GH_ORG_OPENSOURCE") + "/" + repoName
+	link = "<a href=\"" + link + "\">" + repoName + "</a>"
+	collabList := "</p> <table  >"
 	for _, collab := range outisideCollab {
-		Collablist = Collablist + " <tr> <td>" + collab + " </td></tr>"
+		collabList = collabList + " <tr> <td>" + collab + " </td></tr>"
 	}
 
-	Collablist = Collablist + " </table  > <p>"
+	collabList = collabList + " </table  > <p>"
 	if len(outisideCollab) == 1 {
-		body = fmt.Sprintf("<p>Hello %s ,  </p>  \n<p>This is to inform you that <b> %d </b> GitHub user on your GitHub repo %s was converted to an outside collaborator. </p> %s This email was sent to the admins of the repository. </p> \n <p>OSPO</p>", Email, len(outisideCollab), link, Collablist)
+		body = fmt.Sprintf("<p>Hello %s ,  </p>  \n<p>This is to inform you that <b> %d </b> GitHub user on your GitHub repo %s was converted to an outside collaborator. </p> %s This email was sent to the admins of the repository. </p> \n <p>OSPO</p>", to, len(outisideCollab), link, collabList)
 
 	} else {
 
-		body = fmt.Sprintf("<p>Hello %s ,  </p>  \n<p>This is to inform you that <b> %d </b> GitHub users on your GitHub repo %s were converted to outside collaborators. </p> %s This email was sent to the admins of the repository. </p> \n <p>OSPO</p>", Email, len(outisideCollab), link, Collablist)
+		body = fmt.Sprintf("<p>Hello %s ,  </p>  \n<p>This is to inform you that <b> %d </b> GitHub users on your GitHub repo %s were converted to outside collaborators. </p> %s This email was sent to the admins of the repository. </p> \n <p>OSPO</p>", to, len(outisideCollab), link, collabList)
 	}
 
 	m := email.EmailMessage{
 		Subject: "GitHub Organization Scan",
 		Body:    body,
-		To:      Email,
+		To:      to,
 	}
 
 	email.SendEmail(m)
@@ -310,29 +310,29 @@ func EmailRepoAdminConvertToColaborator(Email string, reponame string, outisideC
 }
 
 // List of repos with less than 2 owners to OSPO
-func EmailOspoOwnerDeficient(Email string, org string, reponame []string) {
+func EmailOspoOwnerDeficient(to string, org string, repoName []string) {
 	e := time.Now()
 	var body string
 	var link string
 
-	reponamelist := "</p> <table  >"
-	for _, repo := range reponame {
+	repoNameList := "</p> <table  >"
+	for _, repo := range repoName {
 		link = "https://github.com/" + org + "/" + repo + "/settings/access"
 		link = "<a href=\"" + link + "\">" + repo + "</a>"
-		reponamelist = reponamelist + " <tr> <td>" + link + " </td></tr>"
+		repoNameList = repoNameList + " <tr> <td>" + link + " </td></tr>"
 	}
 
-	reponamelist = reponamelist + " </table  > <p>"
-	if len(reponame) == 1 {
-		body = fmt.Sprintf("<p>Hello %s ,  </p>  \n<p>This is to inform you that <b> %d </b> repository on %s needs to add a co-owner.</p> %s   </p>  ", Email, len(reponame), org, reponamelist)
+	repoNameList = repoNameList + " </table  > <p>"
+	if len(repoName) == 1 {
+		body = fmt.Sprintf("<p>Hello %s ,  </p>  \n<p>This is to inform you that <b> %d </b> repository on %s needs to add a co-owner.</p> %s   </p>  ", to, len(repoName), org, repoNameList)
 
 	} else {
-		body = fmt.Sprintf("<p>Hello %s ,  </p>  \n<p>This is to inform you that <b> %d </b> repositories on %s need to add a co-owner.</p> %s   </p>  ", Email, len(reponame), org, reponamelist)
+		body = fmt.Sprintf("<p>Hello %s ,  </p>  \n<p>This is to inform you that <b> %d </b> repositories on %s need to add a co-owner.</p> %s   </p>  ", to, len(repoName), org, repoNameList)
 	}
 	m := email.EmailMessage{
 		Subject: "Repository Owners Scan",
 		Body:    body,
-		To:      Email,
+		To:      to,
 	}
 
 	email.SendEmail(m)
@@ -340,18 +340,18 @@ func EmailOspoOwnerDeficient(Email string, org string, reponame []string) {
 }
 
 // List of repos with less than 2 owners to repo owner
-func EmailcoownerDeficient(Email string, Org string, reponame string) {
+func EmailcoownerDeficient(to string, Org string, reponame string) {
 	var body string
 	var link string
 	link = "https://github.com/" + Org + "/" + reponame + "/settings/access"
 	link = "<a href=\"" + link + "\"> here </a>"
 
-	body = fmt.Sprintf("<p>Hello %s ,  </p>  \n<p>This is to inform you that you are the only admin on %s  GitHub repository. We recommend at least 2 admins on each repository. Click %s to add a co-owner.</p> \n <p>OSPO</p>", Email, reponame, link)
+	body = fmt.Sprintf("<p>Hello %s ,  </p>  \n<p>This is to inform you that you are the only admin on %s  GitHub repository. We recommend at least 2 admins on each repository. Click %s to add a co-owner.</p> \n <p>OSPO</p>", to, reponame, link)
 
 	m := email.EmailMessage{
 		Subject: "Repository Owners Scan",
 		Body:    body,
-		To:      Email,
+		To:      to,
 	}
 
 	email.SendEmail(m)

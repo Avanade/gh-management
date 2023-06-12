@@ -73,7 +73,7 @@ func CategoryAPIHandler(w http.ResponseWriter, r *http.Request) {
 
 	for _, c := range body.CategoryArticles {
 
-		CategoryArticles := map[string]interface{}{
+		categoryArticles := map[string]interface{}{
 
 			"Id":          0,
 			"Name ":       c.Name,
@@ -84,7 +84,7 @@ func CategoryAPIHandler(w http.ResponseWriter, r *http.Request) {
 			"ModifiedBy":  username,
 		}
 
-		_, err := db.CategoryArticlesInsert(CategoryArticles)
+		_, err := db.CategoryArticlesInsert(categoryArticles)
 		if err != nil {
 			log.Println(err.Error())
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -96,7 +96,7 @@ func CategoryAPIHandler(w http.ResponseWriter, r *http.Request) {
 func CategoryListAPIHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Get project list
-	Communities, err := db.CategorySelect()
+	communities, err := db.CategorySelect()
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -105,7 +105,7 @@ func CategoryListAPIHandler(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusOK)
 	w.Header().Set("Content-Type", "application/json")
-	jsonResp, err := json.Marshal(Communities)
+	jsonResp, err := json.Marshal(communities)
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -122,7 +122,7 @@ func GetCategoryArticlesById(w http.ResponseWriter, r *http.Request) {
 	// Get project list
 	params := make(map[string]interface{})
 	params["Id"] = id
-	CategoryArticles, err := db.CategoryArticlesselectById(params)
+	categoryArticles, err := db.CategoryArticlesselectById(params)
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -131,7 +131,7 @@ func GetCategoryArticlesById(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusOK)
 	w.Header().Set("Content-Type", "application/json")
-	jsonResp, err := json.Marshal(CategoryArticles)
+	jsonResp, err := json.Marshal(categoryArticles)
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -148,7 +148,7 @@ func GetCategoryArticlesByArticlesID(w http.ResponseWriter, r *http.Request) {
 	params := make(map[string]interface{})
 	params["Id"] = id
 
-	CategoryArticles, err := db.CategoryArticlesSelectByArticlesID(params)
+	categoryArticles, err := db.CategoryArticlesSelectByArticlesID(params)
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -157,7 +157,7 @@ func GetCategoryArticlesByArticlesID(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusOK)
 	w.Header().Set("Content-Type", "application/json")
-	jsonResp, err := json.Marshal(CategoryArticles)
+	jsonResp, err := json.Marshal(categoryArticles)
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -173,7 +173,7 @@ func GetCategoryByID(w http.ResponseWriter, r *http.Request) {
 	// Get project list
 	params := make(map[string]interface{})
 	params["Id"] = id
-	Category, err := db.CategorySelectById(params)
+	category, err := db.CategorySelectById(params)
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -182,7 +182,7 @@ func GetCategoryByID(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusOK)
 	w.Header().Set("Content-Type", "application/json")
-	jsonResp, err := json.Marshal(Category)
+	jsonResp, err := json.Marshal(category)
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -205,7 +205,7 @@ func CategoryArticlesUpdate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	param1 := map[string]interface{}{
+	params := map[string]interface{}{
 
 		"Name":       body.CategoryName,
 		"CreatedBy":  username,
@@ -213,18 +213,18 @@ func CategoryArticlesUpdate(w http.ResponseWriter, r *http.Request) {
 		"Id":         body.CategoryId,
 	}
 
-	result, err := db.CategoryInsert(param1)
+	result, err := db.CategoryInsert(params)
 	if err != nil {
 		log.Println(err.Error())
 	}
 
-	id2, _ := strconv.Atoi(fmt.Sprint(result[0]["Id"]))
+	id, _ := strconv.Atoi(fmt.Sprint(result[0]["Id"]))
 	param := map[string]interface{}{
 		"Id":         body.Id,
 		"Name":       body.Name,
 		"Url":        body.Url,
 		"Body":       body.Body,
-		"CategoryId": id2,
+		"CategoryId": id,
 		"CreatedBy":  username,
 		"ModifiedBy": username,
 	}
@@ -253,14 +253,14 @@ func CategoryUpdate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	param1 := map[string]interface{}{
+	params := map[string]interface{}{
 		"Name":       body.Name,
 		"CreatedBy":  username,
 		"ModifiedBy": username,
 		"Id":         body.Id,
 	}
 
-	_, err = db.CategoryInsert(param1)
+	_, err = db.CategoryInsert(params)
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)

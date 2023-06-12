@@ -825,9 +825,9 @@ func GetRepoCollaborators(org string, repo string, role string, affiliations str
 
 	token := os.Getenv("GH_TOKEN")
 
-	Repocollabs := ghAPI.RepositoriesListCollaborators(token, org, repo, role, affiliations)
+	repoCollabs := ghAPI.RepositoriesListCollaborators(token, org, repo, role, affiliations)
 
-	return Repocollabs
+	return repoCollabs
 }
 
 func CleanupRepoOwners(repo map[string]interface{}, token string) {
