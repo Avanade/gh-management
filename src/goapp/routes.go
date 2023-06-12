@@ -33,8 +33,8 @@ func setPageRoutes(mux *mux.Router) {
 
 	// REPOSITORIES PAGE
 	mux.Handle("/repositories", loadAzGHAuthPage(rtProjects.Projects))
-	mux.Handle("/repositories/new", loadAzGHAuthPage(rtProjects.ProjectsNewHandler))
-	mux.Handle("/repositories/{id}", loadAzGHAuthPage(rtProjects.ProjectsHandler))
+	mux.Handle("/repositories/new", loadAzGHAuthPage(rtProjects.NewProject))
+	mux.Handle("/repositories/{id}", loadAzGHAuthPage(rtProjects.ProjectById))
 	mux.Handle("/repositories/makepublic/{id}", loadAzGHAuthPage(rtProjects.MakePublic))
 
 	// GUIDANCE PAGE
@@ -104,7 +104,7 @@ func setApiRoutes(mux *mux.Router) {
 	muxApi.Handle("/activity/{id}", loadAzGHAuthPage(rtApi.GetActivityById)).Methods("GET")
 
 	// COMMUNITIES API
-	muxApi.Handle("/community", loadAzGHAuthPage(rtApi.CommunityAPIHandler))
+	muxApi.Handle("/community", loadAzGHAuthPage(rtApi.CommunityAPIHandler)).Methods("POST")
 	muxApi.Handle("/communitySponsors", loadAzGHAuthPage(rtApi.CommunitySponsorsAPIHandler))
 	muxApi.Handle("/CommunitySponsorsPerCommunityId/{id}", loadAzGHAuthPage(rtApi.CommunitySponsorsPerCommunityId))
 	muxApi.Handle("/CommunityTagPerCommunityId/{id}", loadAzGHAuthPage(rtApi.CommunityTagPerCommunityId))
@@ -128,7 +128,7 @@ func setApiRoutes(mux *mux.Router) {
 	muxApi.Handle("/contributionarea/activity/{id}", loadAzGHAuthPage(rtApi.GetContributionAreasByActivityId)).Methods("GET")
 
 	// CATEGORIES API
-	muxApi.Handle("/Category", loadAzGHAuthPage(rtApi.CategoryAPIHandler))
+	muxApi.Handle("/Category", loadAzGHAuthPage(rtApi.CategoryAPIHandler)).Methods("POST")
 	muxApi.Handle("/Category/list", loadAzGHAuthPage(rtApi.CategoryListAPIHandler))
 	muxApi.Handle("/Category/update", loadAzGHAuthPage(rtApi.CategoryUpdate))
 	muxApi.Handle("/Category/{id}", loadAzGHAuthPage(rtApi.GetCategoryByID))
@@ -139,6 +139,8 @@ func setApiRoutes(mux *mux.Router) {
 	muxApi.Handle("/CategoryArticlesUpdate", loadAzGHAuthPage(rtApi.CategoryArticlesUpdate))
 
 	// REPOSITORIES API
+	muxApi.Handle("/repositories", loadAzGHAuthPage(rtApi.RequestRepository)).Methods("POST")
+	muxApi.Handle("/repositories/{id}", loadAzGHAuthPage(rtApi.UpdateRepositoryById)).Methods("PUT")
 	muxApi.Handle("/repositories/list", loadAzGHAuthPage(rtApi.GetUserProjects))
 	muxApi.Handle("/repositories/{id}", loadAzGHAuthPage(rtApi.GetRequestStatusByProject))
 	muxApi.Handle("/repositories/request/public", loadAzGHAuthPage(rtApi.RequestMakePublic))

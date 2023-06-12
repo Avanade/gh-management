@@ -49,49 +49,46 @@ func CategoryAPIHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	switch r.Method {
-	case "POST":
-		param := map[string]interface{}{
+	param := map[string]interface{}{
 
-			"Name":       body.Name,
-			"CreatedBy":  username,
-			"ModifiedBy": username,
-			"Id":         body.Id,
+		"Name":       body.Name,
+		"CreatedBy":  username,
+		"ModifiedBy": username,
+		"Id":         body.Id,
+	}
+
+	result, err := db.CategoryInsert(param)
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	id, err := strconv.Atoi(fmt.Sprint(result[0]["Id"]))
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	for _, c := range body.CategoryArticles {
+
+		CategoryArticles := map[string]interface{}{
+
+			"Id":          0,
+			"Name ":       c.Name,
+			"Url":         c.Url,
+			"Body":        c.Body,
+			"CategoryId ": id,
+			"CreatedBy":   username,
+			"ModifiedBy":  username,
 		}
 
-		result, err := db.CategoryInsert(param)
+		_, err := db.CategoryArticlesInsert(CategoryArticles)
 		if err != nil {
 			log.Println(err.Error())
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
-		}
-
-		id, err := strconv.Atoi(fmt.Sprint(result[0]["Id"]))
-		if err != nil {
-			log.Println(err.Error())
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-
-		for _, c := range body.CategoryArticles {
-
-			CategoryArticles := map[string]interface{}{
-
-				"Id":          0,
-				"Name ":       c.Name,
-				"Url":         c.Url,
-				"Body":        c.Body,
-				"CategoryId ": id,
-				"CreatedBy":   username,
-				"ModifiedBy":  username,
-			}
-
-			_, err := db.CategoryArticlesInsert(CategoryArticles)
-			if err != nil {
-				log.Println(err.Error())
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return
-			}
 		}
 	}
 }
