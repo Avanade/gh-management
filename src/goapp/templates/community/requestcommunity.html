@@ -29,7 +29,7 @@
 
                         </div>
                         <div x-data="combobox({
-                                ajax : getCommunityType,
+                                data : getCommunityType(),
                                 id : 'id',
                                 text : 'name',
                                 isMultiple : false,
@@ -159,7 +159,6 @@
                                         ajax : getCommunitiesinternals,
                                         id : 'id',
                                         text : 'name',
-                                     
                                         isMultiple : 'true',
                                         isDisplayItem : 'true'
                                     })" x-modelable="selected" x-model="form.communitiesInternal">
@@ -177,7 +176,6 @@
                                     ajax : getCommunitiesisexternals,
                                     id : 'id',
                                     text : 'name',
-                                    
                                     isMultiple : 'true',
                                     isDisplayItem : 'true'
                                 })" x-modelable="selected" x-model="form.communitiesExternal">
@@ -283,12 +281,12 @@
     async function getCommunitiesisexternals() {
         const res = await fetch('/api/community/getCommunitiesisexternal/1')
         const data = await res.json()
-        return data.filter(item => {return item.id != {{.Id}}})
+        return data.filter(item => {return item.id != '{{.Id}}'})
     }
     async function getCommunitiesinternals() {
         const res = await fetch('/api/community/getCommunitiesisexternal/0')
         const data = await res.json()
-        return data.filter(item => {return item.id != {{.Id}}})
+        return data.filter(item => {return item.id != '{{.Id}}'})
     }
     async function getAllUsers(data) {
 

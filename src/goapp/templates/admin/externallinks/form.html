@@ -103,7 +103,7 @@
             action: '',
             id: null,
             form: {
-                Id: {{.Id}},
+                Id: '',
                 IconSVG: '',
                 Hyperlink: '',
                 LinkName: '',
@@ -113,8 +113,9 @@
             testing: [],
             CategoryList: false,
             async init() {
-                this.action = action,
-                    this.id = id
+                this.action = action
+                this.id = id
+                this.form.Id = id
 
                 if (this.action.toLowerCase() == 'add') {
                     this.form.IconSVG = 'Select Icon'
