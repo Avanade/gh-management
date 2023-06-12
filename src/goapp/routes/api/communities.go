@@ -414,15 +414,6 @@ func GetCommunitiesIsexternal(w http.ResponseWriter, r *http.Request) {
 	w.Write(jsonResp)
 }
 
-func CommunityInitCommunityType(w http.ResponseWriter, r *http.Request) {
-	_, err := db.CommunitiesInitCommunityType(nil)
-	if err != nil {
-		log.Println(err.Error())
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-}
-
 func ProcessCommunityMembersListExcel(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Process Community Members List By Excel triggered.")
 	vars := mux.Vars(r)
