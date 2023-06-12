@@ -8,7 +8,8 @@
         <fieldset>
             <h3 class="text-lg font-medium leading-6 text-gray-900">Make Repository Public</h3>
             <p class="mt-1 text-sm text-gray-500">
-            Before a repository becomes public, it needs to undergo intellectual property, legal and security approvals. Answer the following questions to proceed with the request.
+                Before a repository becomes public, it needs to undergo intellectual property, legal and security
+                approvals. Answer the following questions to proceed with the request.
             </p>
             <div class="flex flex flex-col md:flex-row mt-7">
                 <div class="basis-1/2 md:base-full  md:flex-row mx-3 self-center">
@@ -18,8 +19,8 @@
                     </div>
                 </div>
                 <div class="basis-1/2 self-center">
-                    <select class="rounded-md ml-3 mt-1 text-sm text-gray-900 border-gray-300" name="newcontribution" id="newcontribution"
-                        x-model="form.newcontribution">
+                    <select class="rounded-md ml-3 mt-1 text-sm text-gray-900 border-gray-300" name="newcontribution"
+                        id="newcontribution" x-model="form.newcontribution">
                         <option value="" selected disabled hidden> -- SELECT -- </option>
                         <option value="Yes">Yes</option>
                         <option value="No">No</option>
@@ -54,8 +55,8 @@
                     </div>
                 </div>
                 <div class="basis-1/2 self-center">
-                    <select class="rounded-md ml-3 mt-1 text-sm text-gray-900 border-gray-300" name="avanadeofferingsassets" id="avanadeofferingsassets"
-                        x-model="form.avanadeofferingsassets">
+                    <select class="rounded-md ml-3 mt-1 text-sm text-gray-900 border-gray-300"
+                        name="avanadeofferingsassets" id="avanadeofferingsassets" x-model="form.avanadeofferingsassets">
                         <option value="" selected disabled hidden> -- SELECT -- </option>
                         <option value="Yes">Yes</option>
                         <option value="No">No</option>
@@ -70,7 +71,8 @@
                     </div>
                 </div>
                 <div class="basis-1/2 self-center">
-                    <select class="rounded-md ml-3 mt-1 text-sm text-gray-900 border-gray-300" name="willbecommercialversion" id="willbecommercialversion"
+                    <select class="rounded-md ml-3 mt-1 text-sm text-gray-900 border-gray-300"
+                        name="willbecommercialversion" id="willbecommercialversion"
                         x-model="form.willbecommercialversion">
                         <option value="" selected disabled hidden> -- SELECT -- </option>
                         <option value="Yes">Yes</option>
@@ -88,26 +90,25 @@
                 <div class="basis-1/2 md:base-full md:flex-row mx-3 self-center">
                     <div class="ml-3">
                         <div class="mt-1">
-                            <textarea maxlength="1000" name="osscontributionInformation" id="osscontributionInformation" rows="3"
-                                x-model="form.osscontributionInformation"
+                            <textarea maxlength="1000" name="osscontributionInformation" id="osscontributionInformation"
+                                rows="3" x-model="form.osscontributionInformation"
                                 class="mt-1 block w-full shadow-sm text-sm border-gray-300 rounded-md text-gray-900 py-2 pl-3 pr-12">
                             </textarea>
                         </div>
                     </div>
                 </div>
-            </div>  
+            </div>
         </fieldset>
         <div class="flex mt-7 justify-end">
             <div align="right">
-                <button type="submit"
-                    class="bg-orange-500  inline-flex justify-center py-2 px-4 rounded-md text-white"
+                <button type="submit" class="bg-orange-500  inline-flex justify-center py-2 px-4 rounded-md text-white"
                     :class="!isValid ? 'bg-orange-100' : ''" x-bind:disabled="!isValid" @click="submit()">
                     <span>Submit</span>
-                </button>  
+                </button>
             </div>
             <div class="ml-3">
-                <button type="button"
-                    class="bg-orange-500  inline-flex justify-center py-2 px-4 rounded-md text-white" @click="goto('/repositories')">
+                <button type="button" class="bg-orange-500  inline-flex justify-center py-2 px-4 rounded-md text-white"
+                    @click="goto('/repositories')">
                     <span>Cancel</span>
                 </button>
             </div>
@@ -122,7 +123,7 @@
         let path = window.location.pathname
         return {
             form: {
-                id: path.replace('/repositories/makepublic/',''),
+                id: path.replace('/repositories/makepublic/', ''),
                 newcontribution: '',
                 osssponsor: '',
                 avanadeofferingsassets: '',
@@ -133,10 +134,11 @@
             submit() {
                 Alpine.store('master').modal.reset()
                 Alpine.store('master').modal.show()
-                Alpine.store('master').postData("/api/repositories/request/public", this.form, "Your request has been submitted.", "Go to your repository list", "/repositories")
+                Alpine.store('master').postData("/api/repositories/request/public", this.form,
+                    "Your request has been submitted.", "Go to your repository list", "/repositories")
             },
             get isValid() {
-                if(this.form.sponsorOptions.length>0) {
+                if (this.form.sponsorOptions.length > 0) {
                     this.form.osssponsor = this.form.sponsorOptions[0]["text"].toString()
                 }
                 if (
@@ -155,18 +157,37 @@
         }
     }
     async function getSponsorOptions() {
-        const data = [
-            { id: "1", text: "Solution Area - Applications and Infrastructure" },
-            { id: "2", text: "Solution Area - Business Applications" },
-            { id: "3", text: "Solution Area - Data & AI" },
-            { id: "4", text: "Solution Area - Modern Workplace" },
-            { id: "5", text: "Business Group - Advisory" },
-            { id: "6", text: "ITS" },
-            { id: "7", text: "Office of the CTO" },
+        const data = [{
+                id: "1",
+                text: "Solution Area - Applications and Infrastructure"
+            },
+            {
+                id: "2",
+                text: "Solution Area - Business Applications"
+            },
+            {
+                id: "3",
+                text: "Solution Area - Data & AI"
+            },
+            {
+                id: "4",
+                text: "Solution Area - Modern Workplace"
+            },
+            {
+                id: "5",
+                text: "Business Group - Advisory"
+            },
+            {
+                id: "6",
+                text: "ITS"
+            },
+            {
+                id: "7",
+                text: "Office of the CTO"
+            },
         ]
 
         return data
     }
-
 </script>
 {{ end }}
