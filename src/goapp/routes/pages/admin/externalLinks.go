@@ -11,7 +11,7 @@ import (
 )
 
 func ExternalLinksHandler(w http.ResponseWriter, r *http.Request) {
-	template.UseTemplate(&w, r, "admin/externallinks", nil)
+	template.UseTemplate(&w, r, "admin/externallinks/index", nil)
 }
 func ExternalLinksForm(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
