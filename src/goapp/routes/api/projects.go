@@ -62,7 +62,7 @@ type ProjectRequest struct {
 	Id                         string `json:"id"`
 	Newcontribution            string `json:"newcontribution"`
 	OSSsponsor                 string `json:"osssponsor"`
-	Avanadeofferingsassets     string `json:"avanadeofferingsassets"`
+	Offeringsassets            string `json:"avanadeofferingsassets"`
 	Willbecommercialversion    string `json:"willbecommercialversion"`
 	OSSContributionInformation string `json:"osscontributionInformation"`
 }
@@ -80,7 +80,7 @@ type RequestMakePublicDto struct {
 	Id                         string `json:"id"`
 	Newcontribution            string `json:"newcontribution"`
 	OSSsponsor                 string `json:"osssponsor"`
-	Avanadeofferingsassets     string `json:"avanadeofferingsassets"`
+	Offeringsassets            string `json:"avanadeofferingsassets"`
 	Willbecommercialversion    string `json:"willbecommercialversion"`
 	OSSContributionInformation string `json:"osscontributionInformation"`
 }
@@ -555,7 +555,7 @@ func RequestMakePublic(w http.ResponseWriter, r *http.Request) {
 		Id:                         body.Id,
 		Newcontribution:            body.Newcontribution,
 		OSSsponsor:                 body.OSSsponsor,
-		Avanadeofferingsassets:     body.Avanadeofferingsassets,
+		Offeringsassets:            body.Offeringsassets,
 		Willbecommercialversion:    body.Willbecommercialversion,
 		OSSContributionInformation: body.OSSContributionInformation,
 	}
@@ -1060,7 +1060,7 @@ func ApprovalSystemRequest(data db.ProjectApproval) error {
 
 			"|Newcontribution|", data.Newcontribution,
 			"|OSSsponsor|", data.OSSsponsor,
-			"|Avanadeofferingsassets|", data.Avanadeofferingsassets,
+			"|Avanadeofferingsassets|", data.Offeringsassets,
 			"|Willbecommercialversion|", data.Willbecommercialversion,
 			"|OSSContributionInformation|", data.OSSContributionInformation,
 		)

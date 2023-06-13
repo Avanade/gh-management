@@ -90,7 +90,7 @@ func UpdateApprovalReassignApprover(w http.ResponseWriter, r *http.Request) {
 			ApprovalDescription:        v["ApprovalDescription"].(string),
 			Newcontribution:            v["newcontribution"].(string),
 			OSSsponsor:                 v["OSSsponsor"].(string),
-			Avanadeofferingsassets:     v["Avanadeofferingsassets"].(string),
+			Offeringsassets:            v["Avanadeofferingsassets"].(string),
 			Willbecommercialversion:    v["Willbecommercialversion"].(string),
 			OSSContributionInformation: v["OSSContributionInformation"].(string),
 			RequestStatus:              v["RequestStatus"].(string),
@@ -238,7 +238,7 @@ func SendReassignEmail(data db.ProjectApproval) error {
 
 		"|Newcontribution|", data.Newcontribution,
 		"|OSSsponsor|", data.OSSsponsor,
-		"|Avanadeofferingsassets|", data.Avanadeofferingsassets,
+		"|Avanadeofferingsassets|", data.Offeringsassets,
 		"|Willbecommercialversion|", data.Willbecommercialversion,
 		"|OSSContributionInformation|", data.OSSContributionInformation,
 		"|ApproveUrl|", data.ApproveUrl,
