@@ -121,25 +121,25 @@ func CommunityAPIHandler(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 
-			sponsorsparam := map[string]interface{}{
+			sponsorsParam := map[string]interface{}{
 
 				"CommunityId":        id,
 				"UserPrincipalName ": s.Mail,
 				"CreatedBy":          username,
 			}
 
-			_, err := db.CommunitySponsorsInsert(sponsorsparam)
+			_, err := db.CommunitySponsorsInsert(sponsorsParam)
 
 			if err != nil {
 				log.Println(err.Error())
 			}
 		}
 
-		deleteparam := map[string]interface{}{
+		deleteParam := map[string]interface{}{
 
 			"ParentCommunityId": id,
 		}
-		_, err = db.RelatedCommunitiesDelete(deleteparam)
+		_, err = db.RelatedCommunitiesDelete(deleteParam)
 		if err != nil {
 			log.Println(err.Error())
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -147,12 +147,12 @@ func CommunityAPIHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		for _, t := range body.CommunitiesExternal {
-			RelatedCommunities := map[string]interface{}{
+			relatedCommunities := map[string]interface{}{
 				"ParentCommunityId":   id,
 				"RelatedCommunityId ": t.RelatedCommunityId,
 			}
 
-			_, err := db.RelatedCommunitiesInsert(RelatedCommunities)
+			_, err := db.RelatedCommunitiesInsert(relatedCommunities)
 			if err != nil {
 				log.Println(err.Error())
 			}
@@ -170,11 +170,11 @@ func CommunityAPIHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		for _, t := range body.Tags {
-			Tagsparam := map[string]interface{}{
+			tagsParam := map[string]interface{}{
 				"CommunityId": id,
 				"Tag ":        t,
 			}
-			_, err := db.CommunityTagsInsert(Tagsparam)
+			_, err := db.CommunityTagsInsert(tagsParam)
 			if err != nil {
 				log.Println(err.Error())
 			}
@@ -184,14 +184,14 @@ func CommunityAPIHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		go func(channelId string) {
-			TeamMembers, err := msgraph.GetTeamsMembers(body.ChannelId, "")
+			teamMembers, err := msgraph.GetTeamsMembers(body.ChannelId, "")
 			if err != nil {
 				log.Println(err.Error())
 			}
 
-			if len(TeamMembers) > 0 {
-				for _, TeamMember := range TeamMembers {
-					db.Communities_AddMember(id, TeamMember.Email)
+			if len(teamMembers) > 0 {
+				for _, teamMember := range teamMembers {
+					db.Communities_AddMember(id, teamMember.Email)
 				}
 			}
 		}(body.ChannelId)
@@ -274,12 +274,12 @@ func MyCommunityAPIHandler(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 
-			sponsorsparam := map[string]interface{}{
+			sponsorsParam := map[string]interface{}{
 				"CommunityId":        id,
 				"UserPrincipalName ": s.Mail,
 				"CreatedBy":          username,
 			}
-			_, err = db.CommunitySponsorsInsert(sponsorsparam)
+			_, err = db.CommunitySponsorsInsert(sponsorsParam)
 			if err != nil {
 				log.Println(err.Error())
 			}
@@ -288,11 +288,11 @@ func MyCommunityAPIHandler(w http.ResponseWriter, r *http.Request) {
 
 		for _, t := range body.Tags {
 
-			Tagsparam := map[string]interface{}{
+			tagsParam := map[string]interface{}{
 				"CommunityId": id,
 				"Tag ":        t,
 			}
-			_, err := db.CommunityTagsInsert(Tagsparam)
+			_, err := db.CommunityTagsInsert(tagsParam)
 			if err != nil {
 				log.Println(err.Error())
 			}
@@ -300,12 +300,12 @@ func MyCommunityAPIHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		for _, t := range body.CommunitiesExternal {
-			RelatedCommunities := map[string]interface{}{
+			relatedCommunities := map[string]interface{}{
 
 				"ParentCommunityId":   id,
 				"RelatedCommunityId ": t.RelatedCommunityId,
 			}
-			_, err := db.RelatedCommunitiesInsert(RelatedCommunities)
+			_, err := db.RelatedCommunitiesInsert(relatedCommunities)
 			if err != nil {
 				log.Println(err.Error())
 			}
@@ -383,7 +383,7 @@ func GetRequestStatusByCommunity(w http.ResponseWriter, r *http.Request) {
 
 func GetCommunitiesIsexternal(w http.ResponseWriter, r *http.Request) {
 	req := mux.Vars(r)
-	isexternal := req["isexternal"]
+	isExternal := req["isexternal"]
 	sessionaz, _ := session.Store.Get(r, "auth-session")
 	iprofile := sessionaz.Values["profile"]
 	profile := iprofile.(map[string]interface{})
@@ -391,11 +391,11 @@ func GetCommunitiesIsexternal(w http.ResponseWriter, r *http.Request) {
 
 	param := map[string]interface{}{
 
-		"isexternal":        isexternal,
+		"isexternal":        isExternal,
 		"UserPrincipalName": username,
 	}
 
-	Communities, err := db.CommunitiesIsexternal(param)
+	communities, err := db.CommunitiesIsexternal(param)
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -404,7 +404,7 @@ func GetCommunitiesIsexternal(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusOK)
 	w.Header().Set("Content-Type", "application/json")
-	jsonResp, err := json.Marshal(Communities)
+	jsonResp, err := json.Marshal(communities)
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -602,7 +602,7 @@ func CommunitySponsorsPerCommunityId(w http.ResponseWriter, r *http.Request) {
 		"CommunityId": id,
 	}
 
-	CommunitySponsors, err := db.CommunitySponsorsSelectByCommunityId(param)
+	communitySponsors, err := db.CommunitySponsorsSelectByCommunityId(param)
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -611,7 +611,7 @@ func CommunitySponsorsPerCommunityId(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusOK)
 	w.Header().Set("Content-Type", "application/json")
-	jsonResp, err := json.Marshal(CommunitySponsors)
+	jsonResp, err := json.Marshal(communitySponsors)
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -631,7 +631,7 @@ func CommunityTagPerCommunityId(w http.ResponseWriter, r *http.Request) {
 		"CommunityId": id,
 	}
 
-	CommunityTags, err := db.CommunityTagsSelectByCommunityId(param)
+	communityTags, err := db.CommunityTagsSelectByCommunityId(param)
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -640,7 +640,7 @@ func CommunityTagPerCommunityId(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusOK)
 	w.Header().Set("Content-Type", "application/json")
-	jsonResp, err := json.Marshal(CommunityTags)
+	jsonResp, err := json.Marshal(communityTags)
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)

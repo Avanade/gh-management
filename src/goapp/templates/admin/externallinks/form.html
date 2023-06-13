@@ -2,7 +2,7 @@
 <form x-data="ExternalLinksForm({
     action : '{{ .Action }}',
     id : '{{ .Id }}'
-})" >
+})">
     <div>
         <div class="relative">
             <div>
@@ -11,10 +11,10 @@
             <fieldset x-bind:disabled="action.toLowerCase() == 'view' ">
                 <div class="mt-4 space-y-8 divide-y divide-gray-200 sm:space-y-5">
                     <div class="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-t sm:border-gray-200 sm:pt-5">
-                        <label for="Name" class="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2"> Icon </label>
+                        <label for="Name" class="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2"> Icon
+                        </label>
                         <div class="mt-1 sm:mt-0 sm:col-span-2">
-                            <div
-                                x-data="combobox({ 
+                            <div x-data="combobox({ 
                                 ajax : getExternalIcons,
                                 id: 'id' ,
                                 text: 'name',
@@ -22,23 +22,26 @@
                                 isInsertable: false,
                                 isDisplayItem : false,
                                 displaySearch: false
-                                })"
-                                x-modelable="selected" x-model="testing">
+                                })" x-modelable="selected" x-model="testing">
                                 <div x-html="template"></div>
                             </div>
                         </div>
                     </div>
                     <div class="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-t sm:border-gray-200 sm:pt-5">
-                        <label for="Name" class="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2"> Hyperlink </label>
+                        <label for="Name" class="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2"> Hyperlink
+                        </label>
                         <div class="mt-1 sm:mt-0 sm:col-span-2">
-                            <input x-model="form.Hyperlink" type="text" name="Name" id="Name" autocomplete="nope" class="block w-full shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm border-gray-300 rounded-md">
+                            <input x-model="form.Hyperlink" type="text" name="Name" id="Name" autocomplete="nope"
+                                class="block w-full shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm border-gray-300 rounded-md">
                             <span> </span>
                         </div>
                     </div>
                     <div class="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-t sm:border-gray-200 sm:pt-5">
-                        <label for="Name" class="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2"> Link Name </label>
+                        <label for="Name" class="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2"> Link Name
+                        </label>
                         <div class="mt-1 sm:mt-0 sm:col-span-2">
-                            <input x-model="form.LinkName" type="text" name="Name" id="Name" autocomplete="nope" class="block w-full shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm border-gray-300 rounded-md">
+                            <input x-model="form.LinkName" type="text" name="Name" id="Name" autocomplete="nope"
+                                class="block w-full shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm border-gray-300 rounded-md">
                             <span> </span>
 
                         </div>
@@ -46,40 +49,47 @@
 
                     <div class="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-baseline">
                         <div>
-                            <div class="text-base font-medium text-gray-900 sm:text-sm sm:text-gray-700" id="label-notifications">Status</div>
-                            </div>
-                            <div class="sm:col-span-2">
+                            <div class="text-base font-medium text-gray-900 sm:text-sm sm:text-gray-700"
+                                id="label-notifications">Status</div>
+                        </div>
+                        <div class="sm:col-span-2">
                             <div class="max-w-lg">
                                 <div class="mt-4 space-y-4">
-                                <div class="flex items-center">
-                                    <input x-model="form.Enabled" value="true" type="radio" class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300">
-                                    <label for="active" class="ml-3 block text-sm font-medium text-gray-700"> Active </label>
-                                </div>
-                                <div class="flex items-center">
-                                    <input  x-model="form.Enabled" value="false" type="radio" class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300">
-                                    <label for="not_active" class="ml-3 block text-sm font-medium text-gray-700"> Not Active </label>
-                                </div>
+                                    <div class="flex items-center">
+                                        <input x-model="form.Enabled" value="true" type="radio"
+                                            class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300">
+                                        <label for="active" class="ml-3 block text-sm font-medium text-gray-700"> Active
+                                        </label>
+                                    </div>
+                                    <div class="flex items-center">
+                                        <input x-model="form.Enabled" value="false" type="radio"
+                                            class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300">
+                                        <label for="not_active" class="ml-3 block text-sm font-medium text-gray-700">
+                                            Not Active </label>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
 
                 </div>
-            
+
             </fieldset>
         </div>
     </div>
 
-<div class="pt-5">
-    <div class="flex justify-end">
-        <a href="/admin/externallinks" type="button" class="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">Back</a>
+    <div class="pt-5">
+        <div class="flex justify-end">
+            <a href="/admin/externallinks" type="button"
+                class="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">Back</a>
 
-        <button @click.prevent="onSubmitHandler()" class="ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 disabled:bg-orange-200" x-bind:class=" action == 'View'? 'hidden' : '' "
-        >
-        Submit
-        </button>
+            <button @click.prevent="onSubmitHandler()"
+                class="ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 disabled:bg-orange-200"
+                x-bind:class=" action == 'View'? 'hidden' : '' ">
+                Submit
+            </button>
+        </div>
     </div>
-</div>
 
 </form>
 
@@ -88,23 +98,24 @@
     function ExternalLinksForm({
         action = 'view',
         id = null
-    }){
+    }) {
         return {
             action: '',
             id: null,
-            form : {
-                Id: {{ .Id }},
+            form: {
+                Id: '',
                 IconSVG: '',
                 Hyperlink: '',
                 LinkName: '',
                 Enabled: '',
-            },
+            },  
             showIcons: false,
             testing: [],
             CategoryList: false,
             async init() {
-                this.action = action,
+                this.action = action
                 this.id = id
+                this.form.Id = id
 
                 if (this.action.toLowerCase() == 'add') {
                     this.form.IconSVG = 'Select Icon'
@@ -120,7 +131,12 @@
                 modal.visible = false
 
                 const data = this.getExternalIcons();
-                this.testing = data.filter((v) => v.iconpath == externallinks[0].IconSVG).map((v)=>{return{"id": v.id, "text":v.name} });
+                this.testing = data.filter((v) => v.iconpath == externallinks[0].IconSVG).map((v) => {
+                    return {
+                        "id": v.id,
+                        "text": v.name
+                    }
+                });
 
                 this.form.IconSVG = externallinks[0].IconSVG
                 this.form.Hyperlink = externallinks[0].Hyperlink
@@ -128,79 +144,79 @@
                 this.form.Enabled = externallinks[0].Enabled.toString()
             },
             getExternalIcons() {
-                let Externals = [
-                    {   
+                let Externals = [{
                         "id": 0,
                         "name": "arrow-trending-up",
                         "iconpath": "/public/icons/ExternalLinks/arrow-trending-up.svg"
                     },
-                                        {
+                    {
                         "id": 1,
                         "name": "at-symbol",
                         "iconpath": "/public/icons/ExternalLinks/at-symbol.svg"
                     },
-                                        {
+                    {
                         "id": 2,
                         "name": "bell-alert",
                         "iconpath": "/public/icons/ExternalLinks/bell-alert.svg"
                     },
-                                        {
+                    {
                         "id": 3,
                         "name": "bolt",
                         "iconpath": "/public/icons/ExternalLinks/bolt.svg"
                     },
-                                        {
+                    {
                         "id": 4,
                         "name": "bookmark-square",
                         "iconpath": "/public/icons/ExternalLinks/bookmark-square.svg"
-                    },        
-                                        {
+                    },
+                    {
                         "id": 5,
                         "name": "chat-bar-square",
                         "iconpath": "/public/icons/ExternalLinks/chat-bar-square.svg"
-                    },             
-                                        {
+                    },
+                    {
                         "id": 6,
                         "name": "calendar",
                         "iconpath": "/public/icons/ExternalLinks/calendar.svg"
-                    },   
-                                        {
+                    },
+                    {
                         "id": 7,
                         "name": "calendar-days",
                         "iconpath": "/public/icons/ExternalLinks/calendar-days.svg"
-                    },      
-                                        {
+                    },
+                    {
                         "id": 8,
                         "name": "microphone",
                         "iconpath": "/public/icons/ExternalLinks/microphone.svg"
-                    },         
-                                        {      
+                    },
+                    {
                         "id": 9,
                         "name": "stack",
                         "iconpath": "/public/icons/ExternalLinks/stack.svg"
-                    },                                                                  
-                    ]
+                    },
+                ]
                 return Externals
             },
             onSubmitHandler() {
                 const data = this.getExternalIcons();
                 this.form.IconSVG = data.find((v) => v.id == this.testing[0].id).iconpath;
-                switch(this.action.toLowerCase()) {
+                switch (this.action.toLowerCase()) {
                     case 'add':
-                    console.log(this.form.IconSVG)
+                        console.log(this.form.IconSVG)
                         Alpine.store('master').modal.show()
-                        Alpine.store('master').postData(`/api/externallinks/create`, this.form, "External links has been added.", "Go to list of external links", "/admin/externallinks")
-                    break;
+                        Alpine.store('master').postData(`/api/externallinks/create`, this.form,
+                            "External links has been added.", "Go to list of external links", "/admin/externallinks"
+                            )
+                        break;
                     case 'edit':
                         Alpine.store('master').modal.show()
-                        Alpine.store('master').putData(`/api/externallinks/update/`+ this.id ,this.form, "External Link has been saved.", "Go to list of external link", "/admin/externallinks")
-                    break;
+                        Alpine.store('master').putData(`/api/externallinks/update/` + this.id, this.form,
+                            "External Link has been saved.", "Go to list of external link", "/admin/externallinks")
+                        break;
                 }
-            },
-            
+            }
+
         }
     }
 </script>
 {{ end }}
-
-

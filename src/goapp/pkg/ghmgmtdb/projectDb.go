@@ -16,7 +16,7 @@ type ProjectRequest struct {
 	Id                         string
 	Newcontribution            string
 	OSSsponsor                 string
-	Avanadeofferingsassets     string
+	Offeringsassets            string
 	Willbecommercialversion    string
 	OSSContributionInformation string
 }
@@ -41,7 +41,7 @@ type ProjectApproval struct {
 	ApprovalDescription        string
 	Newcontribution            string
 	OSSsponsor                 string
-	Avanadeofferingsassets     string
+	Offeringsassets            string
 	Willbecommercialversion    string
 	OSSContributionInformation string
 	RequestStatus              string
@@ -194,7 +194,7 @@ func PRProjectsUpdateLegalQuestions(projectRequest ProjectRequest, user string) 
 		"Id":                         projectRequest.Id,
 		"Newcontribution":            projectRequest.Newcontribution,
 		"OSSsponsor":                 projectRequest.OSSsponsor,
-		"Avanadeofferingsassets":     projectRequest.Avanadeofferingsassets,
+		"Avanadeofferingsassets":     projectRequest.Offeringsassets,
 		"Willbecommercialversion":    projectRequest.Willbecommercialversion,
 		"OSSContributionInformation": projectRequest.OSSContributionInformation,
 		"ModifiedBy":                 user,
@@ -292,7 +292,7 @@ func PopulateProjectsApproval(id int64, email string) (projectApprovals []Projec
 			ApprovalDescription:        v["ApprovalDescription"].(string),
 			Newcontribution:            v["newcontribution"].(string),
 			OSSsponsor:                 v["OSSsponsor"].(string),
-			Avanadeofferingsassets:     v["Avanadeofferingsassets"].(string),
+			Offeringsassets:            v["Avanadeofferingsassets"].(string),
 			Willbecommercialversion:    v["Willbecommercialversion"].(string),
 			OSSContributionInformation: v["OSSContributionInformation"].(string),
 			RequestStatus:              v["RequestStatus"].(string),
@@ -330,7 +330,7 @@ func GetFailedProjectApprovalRequests() (projectApprovals []ProjectApproval) {
 			ApprovalDescription:        v["ApprovalDescription"].(string),
 			Newcontribution:            v["newcontribution"].(string),
 			OSSsponsor:                 v["OSSsponsor"].(string),
-			Avanadeofferingsassets:     v["Avanadeofferingsassets"].(string),
+			Offeringsassets:            v["Avanadeofferingsassets"].(string),
 			Willbecommercialversion:    v["Willbecommercialversion"].(string),
 			OSSContributionInformation: v["OSSContributionInformation"].(string),
 			RequestStatus:              v["RequestStatus"].(string),

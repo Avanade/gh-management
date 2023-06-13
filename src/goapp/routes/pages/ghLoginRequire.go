@@ -7,5 +7,5 @@ import (
 )
 
 func GHLoginRequire(w http.ResponseWriter, r *http.Request) {
-	template.UseTemplate(&w, r, "GHLoginRequire", nil)
+	template.UseTemplate(&w, r, "ghloginrequire", nil)
 }

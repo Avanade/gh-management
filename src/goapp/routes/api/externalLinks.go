@@ -27,7 +27,7 @@ type ExternalLinksDto struct {
 
 func GetExternalLinks(w http.ResponseWriter, r *http.Request) {
 
-	ExternalLinks, err := db.ExternalLinksExecuteSelect()
+	externalLinks, err := db.ExternalLinksExecuteSelect()
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -36,7 +36,7 @@ func GetExternalLinks(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusOK)
 	w.Header().Set("Content-Type", "application/json")
-	jsonResp, err := json.Marshal(ExternalLinks)
+	jsonResp, err := json.Marshal(externalLinks)
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -51,7 +51,7 @@ func GetExternalLinksAllEnabled(w http.ResponseWriter, r *http.Request) {
 		"Enabled": true,
 	}
 
-	ExternalLinks, err := db.ExternalLinksExecuteAllEnabled(param)
+	externalLinks, err := db.ExternalLinksExecuteAllEnabled(param)
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -60,7 +60,7 @@ func GetExternalLinksAllEnabled(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusOK)
 	w.Header().Set("Content-Type", "application/json")
-	jsonResp, err := json.Marshal(ExternalLinks)
+	jsonResp, err := json.Marshal(externalLinks)
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -78,7 +78,7 @@ func GetExternalLinksById(w http.ResponseWriter, r *http.Request) {
 		"Id": id,
 	}
 
-	ExternalLinks, err := db.ExternalLinksExecuteById(param)
+	externalLinks, err := db.ExternalLinksExecuteById(param)
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -87,7 +87,7 @@ func GetExternalLinksById(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusOK)
 	w.Header().Set("Content-Type", "application/json")
-	jsonResp, err := json.Marshal(ExternalLinks)
+	jsonResp, err := json.Marshal(externalLinks)
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)

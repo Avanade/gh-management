@@ -29,7 +29,7 @@
 
                         </div>
                         <div x-data="combobox({
-                                ajax : getCommunityType,
+                                data : getCommunityType(),
                                 id : 'id',
                                 text : 'name',
                                 isMultiple : false,
@@ -159,7 +159,6 @@
                                         ajax : getCommunitiesinternals,
                                         id : 'id',
                                         text : 'name',
-                                     
                                         isMultiple : 'true',
                                         isDisplayItem : 'true'
                                     })" x-modelable="selected" x-model="form.communitiesInternal">
@@ -170,13 +169,13 @@
                 <div class="basis-1/2 md:base-full  md:flex-row mx-3">
                     <div class="flex flex-col  ">
                         <div>
-                            <span class="mt-4 block text-sm font-medium text-gray-700">Related External Communities</span> 
+                            <span class="mt-4 block text-sm font-medium text-gray-700">Related External
+                                Communities</span>
                         </div>
                         <div x-data="combobox({
                                     ajax : getCommunitiesisexternals,
                                     id : 'id',
                                     text : 'name',
-                                    
                                     isMultiple : 'true',
                                     isDisplayItem : 'true'
                                 })" x-modelable="selected" x-model="form.communitiesExternal">
@@ -282,12 +281,12 @@
     async function getCommunitiesisexternals() {
         const res = await fetch('/api/community/getCommunitiesisexternal/1')
         const data = await res.json()
-        return data.filter(item => {return item.id != {{.Id}}})
+        return data.filter(item => {return item.id != '{{.Id}}'})
     }
     async function getCommunitiesinternals() {
         const res = await fetch('/api/community/getCommunitiesisexternal/0')
         const data = await res.json()
-        return data.filter(item => {return item.id != {{.Id}}})
+        return data.filter(item => {return item.id != '{{.Id}}'})
     }
     async function getAllUsers(data) {
 

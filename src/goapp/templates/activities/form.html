@@ -1,47 +1,49 @@
 {{ define "content" }}
-    <div id="pageTitle">{{ .Action }} an Activity</div>
+<div id="pageTitle">{{ .Action }} an Activity</div>
 
-    <form x-data="activityForm({
+<form x-data="activityForm({
         action : '{{ .Action }}',
         id : '{{ .Id }}'
-    })" class="space-y-8 divide-y divide-gray-200" @keydown="(e) => { if(e.keyCode == 13) {e.preventDefault(); return} ; }">
-        <fieldset x-bind:disabled="action.toLowerCase() == 'view'">
-            <div class="space-y-8 divide-y divide-gray-200 sm:space-y-5">
+    })" class="space-y-8 divide-y divide-gray-200"
+    @keydown="(e) => { if(e.keyCode == 13) {e.preventDefault(); return} ; }">
+    <fieldset x-bind:disabled="action.toLowerCase() == 'view'">
+        <div class="space-y-8 divide-y divide-gray-200 sm:space-y-5">
+            <div>
                 <div>
-                    <div>
-                        <h3 class="text-lg leading-6 font-medium text-gray-900">Activity Information​</h3>
-                        <p class="mt-1 max-w-2xl text-sm text-gray-500">Activities are contributions to any non-Avanade community. These contributions might include speaking or attending an event or user-group, submitting a blog, participating on a panel, or creating content for that community.  ​</p>
-                    </div>
-                    <div class="mt-6 grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
-                        <div class="sm:col-span-3">
-                            <div 
-                                x-data="combobox({
+                    <h3 class="text-lg leading-6 font-medium text-gray-900">Activity Information​</h3>
+                    <p class="mt-1 max-w-2xl text-sm text-gray-500">Activities are contributions to any non-Avanade
+                        community. These contributions might include speaking or attending an event or user-group,
+                        submitting a blog, participating on a panel, or creating content for that community. ​</p>
+                </div>
+                <div class="mt-6 grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
+                    <div class="sm:col-span-3">
+                        <div x-data="combobox({
                                         ajax : getCommunity,
                                         id : 'Id',
                                         text : 'Name',
                                         label : 'Community*'
-                                    })"
-                                x-modelable = "selected"
-                                x-model = "form.community"
-                            >
-                                <div x-html="template"></div>
-                            </div>
+                                    })" x-modelable="selected" x-model="form.community">
+                            <div x-html="template"></div>
                         </div>
-                        <div class="sm:col-span-3">
-                            <label for="date" class="block text-sm font-medium text-gray-700"> Date </label>
-                            <div class="mt-1">
-                                <input x-model="form.date" type="date" name="date" id="date" autocomplete="family-name" class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md">
-                            </div>
+                    </div>
+                    <div class="sm:col-span-3">
+                        <label for="date" class="block text-sm font-medium text-gray-700"> Date </label>
+                        <div class="mt-1">
+                            <input x-model="form.date" type="date" name="date" id="date" autocomplete="family-name"
+                                class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md">
                         </div>
-                        <div class="sm:col-span-6">
-                            <label for="activity_name" class="block text-sm font-medium text-gray-700"> Activity Name* </label>
-                            <div class="mt-1">
-                                <input x-model="form.activity_name" type="text" name="activity_name" id="activity_name" autocomplete="activity_name" class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md">
-                            </div>
+                    </div>
+                    <div class="sm:col-span-6">
+                        <label for="activity_name" class="block text-sm font-medium text-gray-700"> Activity Name*
+                        </label>
+                        <div class="mt-1">
+                            <input x-model="form.activity_name" type="text" name="activity_name" id="activity_name"
+                                autocomplete="activity_name"
+                                class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md">
                         </div>
-                        <div class="sm:col-span-3">
-                            <div 
-                                x-data="combobox({
+                    </div>
+                    <div class="sm:col-span-3">
+                        <div x-data="combobox({
                                         ajax: getTypes,
                                         id : 'Id',
                                         text : 'Name',
@@ -49,22 +51,19 @@
                                         isInsertable : true,
                                         searchTag : 'If the activity type is not on the list, type it in the box and press enter.',
                                         searchPlaceholder : 'Search or add a new item'
-                                    })"
-                                x-modelable = "selected"
-                                x-model = "form.type"
-                            >
-                                <div x-html="template"></div>
-                            </div>
+                                    })" x-modelable="selected" x-model="form.type">
+                            <div x-html="template"></div>
                         </div>
-                        <div class="sm:col-span-3">
-                            <label for="url" class="block text-sm font-medium text-gray-700"> URL (if applicable) </label>
-                            <div class="mt-1">
-                                <input x-model="form.url" type="text" name="url" id="url" autocomplete="family-name" class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md">
-                            </div>
+                    </div>
+                    <div class="sm:col-span-3">
+                        <label for="url" class="block text-sm font-medium text-gray-700"> URL (if applicable) </label>
+                        <div class="mt-1">
+                            <input x-model="form.url" type="text" name="url" id="url" autocomplete="family-name"
+                                class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md">
                         </div>
-                        <div class="sm:col-span-3">
-                            <div 
-                                x-data="combobox({
+                    </div>
+                    <div class="sm:col-span-3">
+                        <div x-data="combobox({
                                         ajax: getContributionAreas,
                                         id : 'Id',
                                         text : 'Name',
@@ -72,16 +71,12 @@
                                         isInsertable : false,
                                         searchTag : '',
                                         searchPlaceholder : 'Search an item'
-                                    })"
-                                x-modelable = "selected"
-                                x-model = "form.primary_contribution_area"
-                            >
-                                <div x-html="template"></div>
-                            </div>
+                                    })" x-modelable="selected" x-model="form.primary_contribution_area">
+                            <div x-html="template"></div>
                         </div>
-                        <div class="sm:col-span-3">
-                            <div 
-                                x-data="combobox({
+                    </div>
+                    <div class="sm:col-span-3">
+                        <div x-data="combobox({
                                         ajax: getContributionAreas,
                                         id : 'Id',
                                         text : 'Name',
@@ -91,41 +86,43 @@
                                         isDisplayItem : true,
                                         searchTag : '',
                                         searchPlaceholder : 'Search an item'
-                                    })"
-                                x-modelable = "selected"
-                                x-model = "form.additional_contribution_areas"
-                            >
-                                <div x-html="template"></div>
-                            </div>
+                                    })" x-modelable="selected" x-model="form.additional_contribution_areas">
+                            <div x-html="template"></div>
                         </div>
-                        <template x-if="action.toLowerCase() == 'add'">
-                            <div class="sm:col-span-6 pt-2 sm:pt-2 border-t-2 border-gray-100">
-                                <div role="group" aria-labelledby="label-notifications">
-                                    <div class="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-baseline">
+                    </div>
+                    <template x-if="action.toLowerCase() == 'add'">
+                        <div class="sm:col-span-6 pt-2 sm:pt-2 border-t-2 border-gray-100">
+                            <div role="group" aria-labelledby="label-notifications">
+                                <div class="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-baseline">
                                     <div>
                                         <label class="text-base font-medium text-gray-900">Help</label>
                                         <p class="text-sm leading-5 text-gray-500">Do you need any help?</p>
                                         <fieldset class="mt-4">
                                             <legend class="sr-only">Notification method</legend>
                                             <div class="space-y-4 sm:flex sm:items-center sm:space-y-0 sm:space-x-10">
-                                            <div class="flex items-center w-1/2">
-                                                <input x-bind:checked="toggleShowOption == 'true'" x-model="toggleShowOption" value="true" id="sms" name="notification-method" type="radio" class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300">
-                                                <label for="sms" class="ml-3 block text-sm font-medium text-gray-700 w-full"> Yes </label>
-                                            </div>
-                                            <div class="flex items-center w-1/2">
-                                                <input  x-bind:checked="toggleShowOption == 'false'" x-model="toggleShowOption" value="false" id="push" name="notification-method" type="radio" class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300">
-                                                <label for="push" class="ml-3 block text-sm font-medium text-gray-700 w-full"> No </label>
-                                            </div>
+                                                <div class="flex items-center w-1/2">
+                                                    <input x-bind:checked="toggleShowOption == 'true'"
+                                                        x-model="toggleShowOption" value="true" id="sms"
+                                                        name="notification-method" type="radio"
+                                                        class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300">
+                                                    <label for="sms"
+                                                        class="ml-3 block text-sm font-medium text-gray-700 w-full"> Yes
+                                                    </label>
+                                                </div>
+                                                <div class="flex items-center w-1/2">
+                                                    <input x-bind:checked="toggleShowOption == 'false'"
+                                                        x-model="toggleShowOption" value="false" id="push"
+                                                        name="notification-method" type="radio"
+                                                        class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300">
+                                                    <label for="push"
+                                                        class="ml-3 block text-sm font-medium text-gray-700 w-full"> No
+                                                    </label>
+                                                </div>
                                             </div>
                                         </fieldset>
                                     </div>
-                                    <div 
-                                        class="sm:col-span-2"
-                                        x-show = "showOption"
-                                        x-transition
-                                    >
-                                        <div 
-                                            x-data="combobox({
+                                    <div class="sm:col-span-2" x-show="showOption" x-transition>
+                                        <div x-data="combobox({
                                                     data : [
                                                         { id : 1, text : 'Sales Opportunity'},
                                                         { id : 2, text : 'Marketing Opportunity'},
@@ -133,151 +130,190 @@
                                                     ],
                                                     label : 'Options*',
                                                     displaySearch : false
-                                                })"
-                                            x-modelable = "selected"
-                                            x-model = "form.help"
-                                        >
+                                                })" x-modelable="selected" x-model="form.help">
                                             <div x-html="template"></div>
                                         </div>
                                         <div class="mt-3">
-                                            <label for="helpDetails" class="block text-sm font-medium text-gray-700"> Details (Optional) </label>
+                                            <label for="helpDetails" class="block text-sm font-medium text-gray-700">
+                                                Details (Optional) </label>
                                             <div class="mt-1">
-                                                <input x-model="form.helpDetails" type="text" name="helpDetails" id="helpDetails" autocomplete="family-name" class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md">
+                                                <input x-model="form.helpDetails" type="text" name="helpDetails"
+                                                    id="helpDetails" autocomplete="family-name"
+                                                    class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md">
                                             </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                        </template>
-                    </div>
+                    </template>
                 </div>
             </div>
-            <div class="pt-5">
-                <div class="flex justify-end">
-                    <a href="/activities" type="button" class="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">Back</a>
-                    <button 
-                        @click="onSubmit" 
-                        class="ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 disabled:bg-orange-200"
-                        x-bind:disabled="!isValid()":class="action == 'View' ? 'hidden' : ''">Submit</button>
-                </div>
+        </div>
+        <div class="pt-5">
+            <div class="flex justify-end">
+                <a href="/activities" type="button"
+                    class="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">Back</a>
+                <button @click="onSubmit"
+                    class="ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 disabled:bg-orange-200"
+                    x-bind:disabled="!isValid()" :class="action == 'View' ? 'hidden' : ''">Submit</button>
             </div>
-        </fieldset>
-    </form>
+        </div>
+    </fieldset>
+</form>
 
-    <script src="/public/components/combobox.js"></script>
-    <script type="text/javascript">
-        function activityForm({action = 'view', id = null}) {
-            return {
-                action : '',
-                id : null,
-                toggleShowOption : 'false',
-                form : {
-                    community : [],
-                    date : new Date().toISOString().split('T')[0],
-                    activity_name : '',
-                    type : [],
-                    url : '',
-                    primary_contribution_area : [],
-                    additional_contribution_areas : [],
-                    help : [],
-                    helpDetails : ""
-                },
-                async init() {
-                    this.action = action,
+<script src="/public/components/combobox.js"></script>
+<script type="text/javascript">
+    function activityForm({
+        action = 'view',
+        id = null
+    }) {
+        return {
+            action: '',
+            id: null,
+            toggleShowOption: 'false',
+            form: {
+                community: [],
+                date: new Date().toISOString().split('T')[0],
+                activity_name: '',
+                type: [],
+                url: '',
+                primary_contribution_area: [],
+                additional_contribution_areas: [],
+                help: [],
+                helpDetails: ""
+            },
+            async init() {
+                this.action = action,
                     this.id = id
 
-                    if (this.action.toLowerCase() == 'add') return;
+                if (this.action.toLowerCase() == 'add') return;
 
-                    var modal = Alpine.store('master').modal
-                    modal.update('loading', 'Loading', 'Please wait for a moment.', '', '')
+                var modal = Alpine.store('master').modal
+                modal.update('loading', 'Loading', 'Please wait for a moment.', '', '')
 
-                    const data = await getActivityById(this.id)
-                    const additionalContributionAreas= await getAdditionalContributionAreasByActivityId(this.id);
+                const data = await getActivityById(this.id)
+                const additionalContributionAreas = await getAdditionalContributionAreasByActivityId(this.id);
 
-                    const date = new Date(data.Date)
+                const date = new Date(data.Date)
 
-                    this.form = {
-                        community : [{ id : data.CommunityId, text : data.CommunityName}],
-                        date : `${date.getFullYear()}-${("0" + date.getMonth()).slice(-2)}-${("0" + date.getDate()).slice(-2)}`,
-                        activity_name : data.Name,
-                        type : [{ id : data.ActivityTypeId, text : data.TypeName}],
-                        url : data.Url,
-                        primary_contribution_area : [{ id : data.PrimaryContributionAreaId, text : data.PrimaryContributionAreaName}],
-                        additional_contribution_areas : additionalContributionAreas.map(i => { return {id : i.ContributionAreaId, text : i.Name}})
-                    }
-
-                    modal.visible = false;
-                },
-                isValid() {
-                    if(
-                        this.form.community.length > 0 &&
-                        this.form.date &&
-                        this.form.activity_name &&
-                        this.form.type.length > 0 &&
-                        this.form.primary_contribution_area.length > 0 &&
-                        ((this.toggleShowOption == 'true' && this.form.help.length > 0) || this.toggleShowOption == 'false')
-                    ){
-                            return true
-                    }
-                    return false
-                },
-                showOption() {
-                    this.form.help = [];
-                    this.form.helpDetails = "";
-                    return this.toggleShowOption == 'true'
-                },
-                onSubmit(e) {
-                    e.preventDefault();
-                    const data = {
-                        'communityid' : this.form.community[0].id,
-                        'date' : this.form.date,
-                        'name' : this.form.activity_name,
-                        'type' : this.form.type.map(e => { return { id : e.id, name : e.text }})[0],
-                        'url' : this.form.url,
-
-                        'primarycontributionarea' : this.form.primary_contribution_area.map(e => { return { id : e.id, name : e.text }})[0],
-                        'additionalcontributionareas' : this.form.additional_contribution_areas.map(e => { return { id : e.id, name : e.text }})
-                    }
-
-                    if(this.toggleShowOption === 'true'){
-                        data.help = this.form.help.map(e => { return { id : e.id, name : e.text, details : this.form.helpDetails }})[0]
-                    }
-
-                    Alpine.store('master').modal.show()
-                    Alpine.store('master').postData("/api/activity", data, "Your activity has been added.", "Go to your activity list", "/activities")                
+                this.form = {
+                    community: [{
+                        id: data.CommunityId,
+                        text: data.CommunityName
+                    }],
+                    date: `${date.getFullYear()}-${("0" + date.getMonth()).slice(-2)}-${("0" + date.getDate()).slice(-2)}`,
+                    activity_name: data.Name,
+                    type: [{
+                        id: data.ActivityTypeId,
+                        text: data.TypeName
+                    }],
+                    url: data.Url,
+                    primary_contribution_area: [{
+                        id: data.PrimaryContributionAreaId,
+                        text: data.PrimaryContributionAreaName
+                    }],
+                    additional_contribution_areas: additionalContributionAreas.map(i => {
+                        return {
+                            id: i.ContributionAreaId,
+                            text: i.Name
+                        }
+                    })
                 }
+
+                modal.visible = false;
+            },
+            isValid() {
+                if (
+                    this.form.community.length > 0 &&
+                    this.form.date &&
+                    this.form.activity_name &&
+                    this.form.type.length > 0 &&
+                    this.form.primary_contribution_area.length > 0 &&
+                    ((this.toggleShowOption == 'true' && this.form.help.length > 0) || this.toggleShowOption == 'false')
+                ) {
+                    return true
+                }
+                return false
+            },
+            showOption() {
+                this.form.help = [];
+                this.form.helpDetails = "";
+                return this.toggleShowOption == 'true'
+            },
+            onSubmit(e) {
+                e.preventDefault();
+                const data = {
+                    'communityid': this.form.community[0].id,
+                    'date': this.form.date,
+                    'name': this.form.activity_name,
+                    'type': this.form.type.map(e => {
+                        return {
+                            id: e.id,
+                            name: e.text
+                        }
+                    })[0],
+                    'url': this.form.url,
+
+                    'primarycontributionarea': this.form.primary_contribution_area.map(e => {
+                        return {
+                            id: e.id,
+                            name: e.text
+                        }
+                    })[0],
+                    'additionalcontributionareas': this.form.additional_contribution_areas.map(e => {
+                        return {
+                            id: e.id,
+                            name: e.text
+                        }
+                    })
+                }
+
+                if (this.toggleShowOption === 'true') {
+                    data.help = this.form.help.map(e => {
+                        return {
+                            id: e.id,
+                            name: e.text,
+                            details: this.form.helpDetails
+                        }
+                    })[0]
+                }
+
+                Alpine.store('master').modal.show()
+                Alpine.store('master').postData("/api/activity", data, "Your activity has been added.",
+                    "Go to your activity list", "/activities")
             }
         }
+    }
 
-        async function getCommunity(){
-            const res = await fetch('/api/community/all')
+    async function getCommunity() {
+        const res = await fetch('/api/community/all')
 
-            const data = await res.json()
-            return data
-        }
+        const data = await res.json()
+        return data
+    }
 
-        async function getTypes(){
-            const res = await fetch('/api/activity/type')
+    async function getTypes() {
+        const res = await fetch('/api/activity/type')
 
-            const data = await res.json()
-            return data
-        }
+        const data = await res.json()
+        return data
+    }
 
-        async function getContributionAreas(){
-            const res = await fetch('/api/contributionarea')
+    async function getContributionAreas() {
+        const res = await fetch('/api/contributionarea')
 
-            const data =  await res.json()
-            return data.data
-        }
-        
-        async function getActivityById(id){
-            const res = await fetch(`/api/activity/${id}`)
-            return res.json()
-        }
+        const data = await res.json()
+        return data.data
+    }
 
-        async function getAdditionalContributionAreasByActivityId(activityId){
-            const res = await fetch(`/api/contributionarea/activity/${activityId}`)
-            return res.json()
-        }
-        </script>
+    async function getActivityById(id) {
+        const res = await fetch(`/api/activity/${id}`)
+        return res.json()
+    }
+
+    async function getAdditionalContributionAreasByActivityId(activityId) {
+        const res = await fetch(`/api/contributionarea/activity/${activityId}`)
+        return res.json()
+    }
+</script>
 {{ end }}
