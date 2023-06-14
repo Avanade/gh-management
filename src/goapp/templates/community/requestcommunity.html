@@ -569,6 +569,8 @@
                 postData.tags = this.form.tags.map(i => i.text);
                 listsponsors = this.form.sponsors;
 
+                postData.CommunityType = this.form.CommunityTypes[0]["text"]
+
                 postData.sponsors = this.form.sponsors.map(v => {
                     return {
                         "displayName": v.text,
