@@ -1,7 +1,7 @@
 {{ define "content" }}
 <form x-data="ExternalLinksForm({
     action : '{{ .Action }}',
-    id : '{{ .Id }}'
+    id : {{ .Id }}
 })">
     <div>
         <div class="relative">
@@ -114,7 +114,7 @@
             CategoryList: false,
             async init() {
                 this.action = action
-                this.id = id
+                this.id = id.toString()
                 this.form.Id = id
 
                 if (this.action.toLowerCase() == 'add') {
