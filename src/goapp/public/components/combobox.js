@@ -179,7 +179,7 @@ const combobox = ({
                                     </button>
                                 </span>
                             </template>
-                        </<div>
+                        </div>
                     </div>`
     }
 }

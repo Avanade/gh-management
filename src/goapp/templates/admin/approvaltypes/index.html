@@ -1,21 +1,23 @@
 {{ define "content" }}
-    <div id="pageTitle">
-        Admin Tools
-    </div>
-    <div class="px-4 sm:px-6 lg:px-8">
-        <div class="sm:flex sm:items-center">
-            <div class="sm:flex-auto">
+<div id="pageTitle">
+    Admin Tools
+</div>
+<div class="px-4 sm:px-6 lg:px-8">
+    <div class="sm:flex sm:items-center">
+        <div class="sm:flex-auto">
             <h1 class="text-xl font-semibold text-gray-900">List of Approval Types</h1>
             <!-- <p class="mt-2 text-sm text-gray-700">Description here...</p> -->
-            </div>
-            <div class="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
-            <a href="/admin/approvaltype/add" class="inline-flex items-center justify-center rounded-md border border-transparent bg-orange-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 sm:w-auto">Add Approval Type</a>
-            </div>
         </div>
-        <div class="mt-8 flex flex-col">
-            <div class="-my-2 -mx-4 overflow-x-auto sm:-mx-6 lg:-mx-8">
-                <div class="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
-                    <div x-data="table({
+        <div class="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
+            <a href="/admin/approvaltype/add"
+                class="inline-flex items-center justify-center rounded-md border border-transparent bg-orange-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 sm:w-auto">Add
+                Approval Type</a>
+        </div>
+    </div>
+    <div class="mt-8 flex flex-col">
+        <div class="-my-2 -mx-4 overflow-x-auto sm:-mx-6 lg:-mx-8">
+            <div class="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
+                <div x-data="table({
                     callback : getApprovalTypes,
                     data : 'data',
                     total : 'total',
@@ -44,16 +46,16 @@
                         }
                     ]
                     })">
-                        <div x-html="template"></div>
-                    </div>
+                    <div x-html="template"></div>
                 </div>
             </div>
         </div>
     </div>
-    <script src="/public/components/table.js"></script>
-    <script type="text/javascript">
-        function renderAction(value) {
-            return `<div class="flex">
+</div>
+<script src="/public/components/table.js"></script>
+<script type="text/javascript">
+    function renderAction(value) {
+        return `<div class="flex">
                         <a href="/admin/approvaltype/view/${value}">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-blue-500">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
@@ -71,13 +73,15 @@
                             </svg>
                         </a>
                     </div>`
-        }
-        async function getApprovalTypes(e){
-            const offset = e.filter * e.page;
-            const search = encodeURIComponent(e.search)
-            const res = await fetch(`/api/approval/types?filter=${e.filter}&offset=${offset}&search=${search}&orderby=${e.orderby}&ordertype=${e.ordertype}`)
-            const data = await res.json()
-            return data
-        }
-    </script>
+    }
+    async function getApprovalTypes(e) {
+        const offset = e.filter * e.page;
+        const search = encodeURIComponent(e.search)
+        const res = await fetch(
+            `/api/approval/types?filter=${e.filter}&offset=${offset}&search=${search}&orderby=${e.orderby}&ordertype=${e.ordertype}`
+            )
+        const data = await res.json()
+        return data
+    }
+</script>
 {{ end }}

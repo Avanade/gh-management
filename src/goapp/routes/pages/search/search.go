@@ -2,21 +2,19 @@ package routes
 
 import (
 	"encoding/json"
-	session "main/pkg/session"
-	"main/pkg/sql"
+	"log"
 	"net/http"
-	"os"
+
+	db "main/pkg/ghmgmtdb"
+	"main/pkg/session"
+	"main/pkg/template"
 
 	"github.com/gorilla/mux"
-
-	template "main/pkg/template"
 )
 
 func SearchHandler(w http.ResponseWriter, r *http.Request) {
 
-	//users := db.GetUsersWithGithub()
 	template.UseTemplate(&w, r, "search/search", nil)
-
 }
 
 func GetSearchResults(w http.ResponseWriter, r *http.Request) {
@@ -28,30 +26,11 @@ func GetSearchResults(w http.ResponseWriter, r *http.Request) {
 	sessionaz, _ := session.Store.Get(r, "auth-session")
 	iprofile := sessionaz.Values["profile"]
 	profile := iprofile.(map[string]interface{})
-	username := profile["preferred_username"]
-	// Connect to database
-	dbConnectionParam := sql.ConnectionParam{
-		ConnectionString: os.Getenv("GHMGMTDB_CONNECTION_STRING"),
-	}
+	username := profile["preferred_username"].(string)
 
-	db, err := sql.Init(dbConnectionParam)
+	searchResults, err := db.SearchCommunitiesProjectsUsers(searchText, offSet, rowCount, username)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	defer db.Close()
-
-	// Get Search List from SP
-	//searchTextParam := make(map[string]interface{})
-	params := map[string]interface{}{
-		"searchText":    searchText,
-		"offSet":        offSet,
-		"rowCount":      rowCount,
-		"userprincipal": username,
-	}
-
-	searchResults, err := db.ExecuteStoredProcedureWithResult("PR_Search_communities_projects_users", params)
-	if err != nil {
+		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -60,6 +39,7 @@ func GetSearchResults(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	jsonResp, err := json.Marshal(searchResults)
 	if err != nil {
+		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}

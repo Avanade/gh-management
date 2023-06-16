@@ -2,34 +2,43 @@
 
 
 <div id="pageTitle">Request a repository</div>
-
-<div x-data="data()" x-init="onload()">
+<div x-data="message(
+    {{.isInnersourceMember}},
+    {{.isOpensourceMember}},
+    '{{.innersourceOrg}}',
+    '{{.opensourceOrg}}'
+)">
+    <div x-html="template"></div>
+</div>
+<div x-data="data({{.isInnersourceMember}},{{.isOpensourceMember}})">
     <form onsubmit="event.preventDefault()" autocomplete="off">
-        <fieldset x-bind:disabled="mode=='view'">
+        <fieldset x-bind:disabled="isNotMember">
             <h3 class="text-lg font-medium leading-6 text-gray-900">Repository information</h3>
             <p class="mt-1 text-sm text-gray-500">
-            All repositories start on Avanade’s innersource on GitHub. Once you have identified a business sponsor, and
-            submitted
-            your first automated security scan, you can request to move the repository to open source. If you open source
-            this
-            application, it will be displayed publicly, so think carefully.
+                All repositories start on Avanade’s innersource on GitHub. Once you have identified a business sponsor,
+                and
+                submitted
+                your first automated security scan, you can request to move the repository to open source. If you open
+                source
+                this
+                application, it will be displayed publicly, so think carefully.
             </p>
             <br>
 
             <div class="flex flex flex-col md:flex-row ">
                 <div class="basis-1/2 md:base-full  md:flex-row mx-3">
-                    <div class="flex flex-col  ">
+                    <div class="flex flex-col">
                         <div>
                             <h3 class="block text-sm font-medium text-gray-700">Repository Name</h3>
                         </div>
                         <div> <input type="text" name="name" id="name" x-model="form.name" maxlength="50"
-                                x-bind:disabled="mode=='edit'"
                                 class="mt-1 focus:ring-orange-500 focus:border-orange-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md border-2">
                         </div>
                         <div class="mt-0 text-xs text-red-500">
                             Symbols and whitespaces are not allowed except for underscore '_', dash '-' and period '.'.
                         </div>
-                        <div class="mt-1 text-sm text-gray-500">The title should represent what the asset does. Avoid acronyms, code names and the use of the word
+                        <div class="mt-1 text-sm text-gray-500">The title should represent what the asset does. Avoid
+                            acronyms, code names and the use of the word
                             &#39;Avanade&#39;. <br>
                         </div>
                     </div>
@@ -60,39 +69,40 @@
 
                                 <ul class="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm"
                                     id="options" x-show="coowner.show" role="listbox">
-                                    <div class="italic text-sm text-gray-500 p-3">Only users with associated GH account are displayed</div>
+                                    <div class="italic text-sm text-gray-500 p-3">Only users with associated GH account
+                                        are displayed</div>
                                     {{$email := .email}}
                                     {{range $user := .users}}
-                                        {{if ne $email $user.UserPrincipalName}}
-                                            <li x-show="showName('{{$user.UserPrincipalName}}', '{{$user.GithubUser}}')"
-                                                class="relative cursor-default select-none py-2 pl-3 pr-9 text-gray-900"
-                                                id="option-0" role="option"
-                                                @click="form.coowner = '{{$user.UserPrincipalName}}'; coowner.show = !coowner.show"
-                                                tabindex="-1">
-                                                <div class="flex">
+                                    {{if ne $email $user.UserPrincipalName}}
+                                    <li x-show="showName('{{$user.UserPrincipalName}}', '{{$user.GithubUser}}')"
+                                        class="relative cursor-default select-none py-2 pl-3 pr-9 text-gray-900"
+                                        id="option-0" role="option"
+                                        @click="form.coowner = '{{$user.UserPrincipalName}}'; coowner.show = !coowner.show"
+                                        tabindex="-1">
+                                        <div class="flex">
 
-                                                    <span class="truncate">
-                                                        {{$user.UserPrincipalName}}
-                                                    </span>
+                                            <span class="truncate">
+                                                {{$user.UserPrincipalName}}
+                                            </span>
 
-                                                    <span class="ml-2 truncate text-gray-500">
-                                                        &nbsp@{{$user.GitHubUser}}
-                                                    </span>
-                                                </div>
+                                            <span class="ml-2 truncate text-gray-500">
+                                                &nbsp@{{$user.GitHubUser}}
+                                            </span>
+                                        </div>
 
-                                                <span x-show="showCheck('{{$user.UserPrincipalName}}')"
-                                                    class="absolute inset-y-0 right-0 flex items-center pr-4 text-indigo-600">
-                                                    <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
-                                                        fill="currentColor" aria-hidden="true">
-                                                        <path fill-rule="evenodd"
-                                                            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                                            clip-rule="evenodd" />
-                                                    </svg>
-                                                </span>
+                                        <span x-show="showCheck('{{$user.UserPrincipalName}}')"
+                                            class="absolute inset-y-0 right-0 flex items-center pr-4 text-indigo-600">
+                                            <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
+                                                fill="currentColor" aria-hidden="true">
+                                                <path fill-rule="evenodd"
+                                                    d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                                    clip-rule="evenodd" />
+                                            </svg>
+                                        </span>
 
 
-                                            </li>
-                                        {{ end }}
+                                    </li>
+                                    {{ end }}
                                     {{ end }}
 
                                 </ul>
@@ -100,7 +110,8 @@
                         </div>
                         <!-- END OF CO-OWNER CB... -->
 
-                        <div class="mt-1 text-sm text-gray-500">All repositories must have two or more owners, to ensure that security alerts can be dealt with
+                        <div class="mt-1 text-sm text-gray-500">All repositories must have two or more owners, to ensure
+                            that security alerts can be dealt with
                             promptly.<div>
                                 <h3 class="text-lg font-medium leading-6 text-gray-900"> <br> </h3>
                             </div>
@@ -120,11 +131,12 @@
                         </div>
                         <div>
                             <textarea name="description" id="description" x-model="form.description" rows="3"
-                                x-bind:disabled="mode=='edit'" maxlength="350"
+                                maxlength="350"
                                 class="mt-1 focus:ring-orange-500 focus:border-orange-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md  border-2">
                         </textarea>
                         </div>
-                        <div class="mt-1 text-sm text-gray-500">Be verbose in the description. Describe what the asset does and how it achieves this. If
+                        <div class="mt-1 text-sm text-gray-500">Be verbose in the description. Describe what the asset
+                            does and how it achieves this. If
                             your
                             improves an existing product or approach then be sure to explicitly state how it does this.
                             Provide
@@ -135,8 +147,8 @@
                     <div class="flex flex-col ">
                     </div>
                 </div>
-            </div>          
-            
+            </div>
+
             <div class="flex items-start mt-5 ml-3">
                 <div class="flex items-center h-5">
                     <input id="confirm1" name="confirmAvaIP" type="checkbox" x-model="form.confirmAvaIP"
@@ -167,19 +179,22 @@
 
             <div class="flex items-start mt-1 ml-3">
                 <div class="flex items-center h-5">
-                    <input id="confirm3" name="confirmNotClientProject" type="checkbox" x-model="form.confirmNotClientProject"
+                    <input id="confirm3" name="confirmNotClientProject" type="checkbox"
+                        x-model="form.confirmNotClientProject"
                         class="focus:ring-orange-500 h-4 w-4 text-orange-600 border-gray-300 rounded">
                 </div>
                 <div class="ml-3 text-sm">
 
-                    <p class="text-gray-900">I confirm this repository is not going to be used to deliver a client project.
+                    <p class="text-gray-900">I confirm this repository is not going to be used to deliver a client
+                        project.
                     </p>
                 </div>
             </div>
-            
+
         </fieldset>
         <br>
-        <p class="ml-3 mt-1 text-sm text-gray-900"> Repositories will be automatically created in Avanade innersource, and you will receive a Teams notification
+        <p class="ml-3 mt-1 text-sm text-gray-900"> Repositories will be automatically created in Avanade innersource,
+            and you will receive a Teams notification
             with a link to the repository.<br />
             You can also view your repository under the repositories tab.
         </p>
@@ -188,8 +203,10 @@
             <div class="flex justify-center">
                 <div class="ml-3 flex text-center max-w-4xl">
                     <p class="text-sm text-red-700">
-                        Before any innersource code can be used on other projects, as the asset owner you must follow 
-                        <a class="text-blue-700" target="_blank" href="***REMOVED***">Avanade's guidelines</a>
+                        Before any innersource code can be used on other projects, as the asset owner you must follow
+                        <a class="text-blue-700" target="_blank"
+                            href="***REMOVED***">Avanade's
+                            guidelines</a>
                         , covering export compliance, OSS scans, IP reviews, security and data privacy.
                     </p>
                 </div>
@@ -197,31 +214,10 @@
         </div>
         <div>
             <div align="right">
-                <button type="button" x-show="mode=='view'"
-                    class="bg-orange-500  inline-flex justify-center py-2 px-4 rounded-md text-white"
-                    :class="!isValid ? 'bg-orange-100' : ''" x-bind:disabled="!isValid" @click="mode='edit'">
-
-                    <span x-show="form.id">Edit Repository</span>
-
-                </button>
-                <button type="submit" x-show="mode!='view'"
-                    class="bg-orange-500  inline-flex justify-center py-2 px-4 rounded-md text-white"
+                <button type="submit" class="bg-orange-500  inline-flex justify-center py-2 px-4 rounded-md text-white"
                     :class="!isValid ? 'bg-orange-100' : ''" x-bind:disabled="!isValid" @click="submit()">
-
-                    <span x-show="!form.id">Submit</span>
-                    <span x-show="form.id">Update repository</span>
-
-                </button>  
-                <span x-show="form.id">
-                <button type="button" x-show="mode=='edit'"
-                    class="bg-orange-500  inline-flex justify-center py-2 px-4 rounded-md text-white"
-                    :class="!isValid ? 'bg-orange-100' : ''" x-bind:disabled="!isValid" @click="onload()">
-
-
-                    <span x-show="form.id">Cancel</span>
-
+                    <span>Submit</span>
                 </button>
-            </span>
             </div>
         </div>
     </form>
@@ -230,10 +226,11 @@
 </div>
 <script src="/public/components/combobox.js"></script>
 <script type="text/javascript">
-    function data() {
+    const data = (
+        isInnersourceMember,
+        isOpensourceOrgMember
+    ) => {
         return {
-            mode:
-                'view',
             form: {
                 name: '',
                 coowner: '',
@@ -245,21 +242,31 @@
             coowner: {
                 show: false,
             },
+            isInnersourceMember: false,
+            isOpensourceOrgMember: false,
+            async init() {
+                var modal = Alpine.store('master').modal
+                modal.update('loading', 'Loading', 'Please wait', '', '')
+                this.isInnersourceMember = isInnersourceMember;
+                this.isOpensourceOrgMember = isOpensourceOrgMember;
+                modal.visible = false
+            },
             submit() {
+                if (this.isNotMember()) return;
+
                 Alpine.store('master').modal.reset()
                 Alpine.store('master').modal.show()
-                if (!this.form.id)
-                    Alpine.store('master').postData("/repositories/new", this.form, "Your repository has been created.", "Go to your repository list", "/repositories")
-                else
-                    Alpine.store('master').postData("/repositories/" + this.form.id, this.form, "Your repository has been created.", "Go to your repository list", "/repositories")
+                Alpine.store('master').postData("/api/repositories", this.form, "Your repository has been created.",
+                    "Go to your repository list", "/repositories")
 
             },
             showName(userPrincipalName, githubUser) {
-                return userPrincipalName.includes(this.form.coowner) || githubUser.includes(this.form.coowner) ? true : false
+                return userPrincipalName.includes(this.form.coowner) || githubUser.includes(this.form.coowner) ?
+                    true : false
             },
-
-
-
+            isNotMember() {
+                return !this.isInnersourceMember || !this.isOpensourceOrgMember
+            },
             get isValid() {
                 if (
                     !!this.form.name &&
@@ -284,13 +291,13 @@
                 this.form.coowner = ""
             },
 
-            validateRepositoryName(value){
-                if(value.length >= 100)
+            validateRepositoryName(value) {
+                if (value.length >= 100)
                     return false
 
                 const regEx = /^([a-zA-Z0-9\-\_]|\.{3,}|\.{1,}[a-zA-Z0-9\-\_])([a-zA-Z0-9\-\_\.]+)?/;
                 const matchValue = value.match(regEx);
-                
+
                 if (matchValue == null)
                     return false
 
@@ -303,35 +310,61 @@
                 } else {
                     return false
                 }
-            },
-            async onload() {
-                var modal = Alpine.store('master').modal
-                modal.update('loading', 'Loading', 'Please wait', '', '')
-
-                this.form.id = '{{.Id}}'
-                if (this.form.id) {
-                    this.mode = 'view'
-                    await fetch('/api/repositories/' + '{{.Id}}')
-                        .then(r => {
-                            r.json().then(body => {
-
-                                this.form.name = body[0]["ProjectName"]
-                                this.form.coowner = body[0]["ProjectCoowner"]
-                                this.form.description = body[0]["ProjectDescription"]
-                                this.form.confirmAvaIP = body[0]["ConfirmAvaIP"]
-                                this.form.confirmSecIPScan = body[0]["ConfirmEnabledSecurity"]
-                                this.form.confirmNotClientProject = body[0]["ConfirmNotClientProject"]
-                            });
-                        })
-                        .catch(e => {
-                            console.log(e)
-                         
-                        })
-                } else {
-                    this.mode = 'new'
-                }
-                modal.visible = false
             }
+        }
+    }
+
+    const message = (
+        isInnersourceMember,
+        isOpensourceOrgMember,
+        innersourceOrg,
+        openSourceOrg
+    ) => {
+        return {
+            isInnersourceMember: false,
+            isOpensourceOrgMember: false,
+            innersourceOrg: "",
+            openSourceOrg: "",
+            init() {
+                this.isInnersourceMember = isInnersourceMember;
+                this.isOpensourceOrgMember = isOpensourceOrgMember;
+                this.innersourceOrg = innersourceOrg;
+                this.openSourceOrg = openSourceOrg;
+            },
+            isDisplayMessage() {
+                return !this.isInnersourceMember || !this.isOpensourceOrgMember
+            },
+            displayMessage() {
+                const innersourceOrgLink = this.getOrgInvitationLink(this.innersourceOrg)
+                const opensourceOrgLink = this.getOrgInvitationLink(this.openSourceOrg)
+
+                if (!this.isInnersourceMember && !this.isOpensourceOrgMember) {
+                    return `You have a pending invitation to ${innersourceOrgLink} and ${opensourceOrgLink}. You need to join these organizations before you can request for a repository.`
+                } else if (!this.isInnersourceMember) {
+                    return `You have a pending invitation to ${innersourceOrgLink}. You need to join these organizations before you can request for a repository.`
+                } else if (!this.isOpensourceMember) {
+                    return `You have a pending invitation to ${opensourceOrgLink}. You need to join these organizations before you can request for a repository.`
+                }
+            },
+            getOrgInvitationLink(orgName) {
+                return `<a href="https://github.com/orgs/${orgName}/invitation" target="_blank"><b>${orgName}</b></a>`
+            },
+            template: `<template x-if="isDisplayMessage">
+                            <div class="bg-red-50 p-4 mb-3">
+                                <div class="flex">
+                                    <div class="flex-shrink-0">
+                                        <svg class="h-5 w-5 text-red-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                                        </svg>
+                                    </div>
+                                    <div class="ml-3 flex-1 md:flex md:justify-between">
+                                        <p class="text-sm text-red-700">
+                                            <span x-html="displayMessage"></span>
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>`
         }
     }
 </script>

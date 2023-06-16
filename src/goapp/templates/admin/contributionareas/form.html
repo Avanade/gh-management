@@ -3,51 +3,51 @@
     action : '{{ .Action }}',
     id : '{{ .Id }}'
 })" class="space-y-8 divide-y divide-gray-200">
-<fieldset x-bind:disabled="action.toLowerCase() == 'view'">
-    <div class="space-y-8 divide-y divide-gray-200 sm:space-y-5">
-        <div>
+    <fieldset x-bind:disabled="action.toLowerCase() == 'view'">
+        <div class="space-y-8 divide-y divide-gray-200 sm:space-y-5">
             <div>
-                <h3 class="text-lg leading-6 font-medium text-gray-900">{{ .Action }} Contribution Area</h3>
-                <!-- <p class="mt-1 max-w-2xl text-sm text-gray-500">Description...</p> -->
+                <div>
+                    <h3 class="text-lg leading-6 font-medium text-gray-900">{{ .Action }} Contribution Area</h3>
+                    <!-- <p class="mt-1 max-w-2xl text-sm text-gray-500">Description...</p> -->
+                </div>
+            </div>
+            <div class="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-t sm:border-gray-200 sm:pt-5">
+                <label for="Name" class="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2"> Name </label>
+                <div class="mt-1 sm:mt-0 sm:col-span-2">
+                    <input x-model="form.name" type="text" name="Name" id="Name" autocomplete="given-name"
+                        class="block w-full shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm border-gray-300 rounded-md">
+                </div>
             </div>
         </div>
-        <div class="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-t sm:border-gray-200 sm:pt-5">
-            <label for="Name" class="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2"> Name </label>
-            <div class="mt-1 sm:mt-0 sm:col-span-2">
-                <input x-model="form.name" type="text" name="Name" id="Name" autocomplete="given-name" class="block w-full shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm border-gray-300 rounded-md">
+        <div class="pt-5">
+            <div class="flex justify-end">
+                <a href="/admin/contributionarea" type="button"
+                    class="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">Back</a>
+                <button @click.prevent="onSubmitHandler"
+                    class="ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 disabled:bg-orange-200"
+                    x-bind:disabled="!isValid()" :class="action == 'View' ? 'hidden' : ''">Submit</button>
             </div>
         </div>
-    </div>
-    <div class="pt-5">
-        <div class="flex justify-end">
-            <a href="/admin/contributionarea" type="button" class="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">Back</a>
-            <button 
-                @click.prevent="onSubmitHandler" 
-                class="ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 disabled:bg-orange-200"
-                x-bind:disabled="!isValid()":class="action == 'View' ? 'hidden' : ''">Submit</button>
-        </div>
-    </div>
-</fieldset>
+    </fieldset>
 </form>
 
 <script type="text/javascript">
-
     function contributionAreaForm({
         action = 'view',
         id = null
-    }){
+    }) {
 
         return {
             action: '',
             id: null,
-            form : {
-                name : '',
-                approver : [],
-                status : null,
+            form: {
+                name: '',
+                approver: [],
+                status: null,
             },
-            async init(){
+            async init() {
                 this.action = action,
-                this.id = id
+                    this.id = id
 
                 if (this.action.toLowerCase() == 'add') return;
 
@@ -63,26 +63,29 @@
                 modal.visible = false;
             },
             isValid() {
-                if(this.form.name)
-                {
-                        return true
+                if (this.form.name) {
+                    return true
                 }
                 return false
             },
-            onSubmitHandler(){
+            onSubmitHandler() {
                 const data = {
-                            id: this.id,
-                            name : this.form.name,
-                        }
+                    id: this.id,
+                    name: this.form.name,
+                }
                 switch (this.action.toLowerCase()) {
                     case 'add':
                         Alpine.store('master').modal.show()
-                        Alpine.store('master').postData("/api/contributionarea", data, "Contribution area has been added.", "Go to list of contribution areas", "/admin/contributionarea")
+                        Alpine.store('master').postData("/api/contributionarea", data,
+                            "Contribution area has been added.", "Go to list of contribution areas",
+                            "/admin/contributionarea")
                         break;
-                
+
                     case 'edit':
                         Alpine.store('master').modal.show()
-                        Alpine.store('master').putData(`/api/contributionarea`, data, "Contribution area has been saved.", "Go to list of Contribution areas", "/admin/contributionarea")
+                        Alpine.store('master').putData(`/api/contributionarea`, data,
+                            "Contribution area has been saved.", "Go to list of Contribution areas",
+                            "/admin/contributionarea")
                         break;
                 }
             }

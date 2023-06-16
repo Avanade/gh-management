@@ -4,13 +4,19 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"main/models"
-	email "main/pkg/email"
-	ghmgmt "main/pkg/ghmgmtdb"
 	"os"
 	"text/template"
 	"time"
+
+	"main/pkg/email"
+	db "main/pkg/ghmgmtdb"
 )
+
+type RequestedRepositorySummary struct {
+	Date         string
+	Organization string
+	Repos        []db.Repository
+}
 
 // Executes function `f` offsetted by `o`.
 func ScheduleJob(ctx context.Context, o time.Duration, f func()) {
@@ -38,7 +44,6 @@ func ScheduleJob(ctx context.Context, o time.Duration, f func()) {
 			return
 		}
 	}
-
 }
 
 func DailySummaryReport() {
@@ -47,7 +52,7 @@ func DailySummaryReport() {
 	o := os.Getenv("GH_ORG_INNERSOURCE")
 	recipient := os.Getenv("EMAIL_SUMMARY_REPORT")
 
-	r, err := ghmgmt.GetRequestedReposByDateRange(s, e)
+	r, err := db.GetRequestedReposByDateRange(s, e)
 	if err != nil {
 		fmt.Println("An error occured while pulling the list of projects by date range.")
 		return
@@ -58,13 +63,13 @@ func DailySummaryReport() {
 		return
 	}
 
-	var data models.TypRequestedRepoSummary
+	var data RequestedRepositorySummary
 
 	data.Date = e.Format("January 02, 2006")
 	data.Organization = o
 	data.Repos = r
 
-	t, err := template.ParseFiles("templates/reports/requestedRepoSummary.html")
+	t, err := template.ParseFiles("templates/reports/requestedreposummary.html")
 	if err != nil {
 		fmt.Println("An error occured while parsing email template.")
 		return
@@ -77,7 +82,7 @@ func DailySummaryReport() {
 	}
 
 	body := buf.String()
-	m := email.TypEmailMessage{
+	m := email.EmailMessage{
 		Subject: "Requested Repositories",
 		Body:    body,
 		To:      recipient,

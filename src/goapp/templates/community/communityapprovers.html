@@ -21,24 +21,21 @@
                                         </td>
                                         <td>
                                             <div class="mt-1 sm:mt-0 sm:col-span-2">
-                                                <div 
-                                                    x-data="combobox({
+                                                <div x-data="combobox({
                                                             searchCallback: getAllUsers,
                                                             searchTag: 'Start typing to query list of users',
                                                             searchPlaceholder: 'Input name or email',
                                                             id : 'mail',
                                                             text : 'mail'
-                                                        })"
-                                                    x-modelable = "selected"
-                                                    x-model = "form.approver"
-                                                >
+                                                        })" x-modelable="selected" x-model="form.approver">
                                                     <div x-html="template"></div>
                                                 </div>
                                             </div>
                                         </td>
                                         <td align="right ">
-                                            <button type="button"      class="bg-orange-500  inline-flex justify-center py-2 px-4 rounded-md text-white"
-                                            :class="!isValid() ? 'bg-orange-100' : ''" x-bind:disabled="!isValid()"
+                                            <button type="button"
+                                                class="bg-orange-500  inline-flex justify-center py-2 px-4 rounded-md text-white"
+                                                :class="!isValid() ? 'bg-orange-100' : ''" x-bind:disabled="!isValid()"
                                                 @click="submit()">
                                                 Add Approver
                                             </button>
@@ -60,44 +57,44 @@
             </fieldset>
 
         </div>
-   
+
         <div class="my-5 flex rounded-md shadow-sm">
             <div class="relative flex items-stretch flex-grow focus-within:z-10">
-              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 20 20"
-                  stroke="currentColor" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
-              </div>
-              <input  x-model="search" @keyup="getapprovers" type="text" name="searchTerm" id="searchTerm"
-                class="focus:ring-indigo-500 focus:border-indigo-500 block w-full rounded-md pl-10 sm:text-sm border-gray-300"
-                placeholder="Find a approver">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" fill="none"
+                        viewBox="0 0 20 20" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                </div>
+                <input x-model="search" @keyup="getapprovers" type="text" name="searchTerm" id="searchTerm"
+                    class="focus:ring-indigo-500 focus:border-indigo-500 block w-full rounded-md pl-10 sm:text-sm border-gray-300"
+                    placeholder="Find a approver">
             </div>
-          </div>
+        </div>
         <div x-show="getapprovers">
             <div class="px-4 py-4 sm:px-6 hover:bg-gray-50 cursor-pointer border px-2 py-2" style="display: flex; ">
-                <div style="flex-grow: 1;"  class=" w-1/12"    x-data="{ display: 'ID  ' }" x-text="display">  </div>
-                <div style="flex-grow: 1;"  class="  w-9/12" x-data="{ display: 'Name  ' }" x-text="display">   </div>
-                <div style="flex-grow: 1;" class=" w-2/12"  x-data="{ display: '   Status' }" x-text="display"> </div>
+                <div style="flex-grow: 1;" class=" w-1/12" x-data="{ display: 'ID  ' }" x-text="display"> </div>
+                <div style="flex-grow: 1;" class="  w-9/12" x-data="{ display: 'Name  ' }" x-text="display"> </div>
+                <div style="flex-grow: 1;" class=" w-2/12" x-data="{ display: '   Status' }" x-text="display"> </div>
 
             </div>
             <template x-for="(appro, i) in getapprovers">
 
                 <div class="px-4 py-4 sm:px-6 hover:bg-gray-50 cursor-pointer border px-2 py-2" style="display: flex; ">
-                    <div style="flex-grow: 1;" class="  w-1/12"  x-text="appro.Id"> </div>
-                    <div style="flex-grow: 1 ;" class="  w-9/12" x-text="appro.ApproverUserPrincipalName" > </div>
-                    <div style="flex-grow: 2; align-self: start;" class="  w-2/12" >
-                        <input type="checkbox" x-data="{ enable: appro.Disabled ? false  : true }" 
-                        name="Disabled" id="Disabled" x-model="enable"
-                        x-text="enable"
-                        @click="update2(appro.Id , appro.ApproverUserPrincipalName ,enable)">
+                    <div style="flex-grow: 1;" class="  w-1/12" x-text="appro.Id"> </div>
+                    <div style="flex-grow: 1 ;" class="  w-9/12" x-text="appro.ApproverUserPrincipalName"> </div>
+                    <div style="flex-grow: 2; align-self: start;" class="  w-2/12">
+                        <input type="checkbox" x-data="{ enable: appro.Disabled ? false  : true }" name="Disabled"
+                            id="Disabled" x-model="enable" x-text="enable"
+                            @click="update2(appro.Id , appro.ApproverUserPrincipalName ,enable)">
                         <!-- <input type="checkbox" name="Disabled" id="Disabled" x-model="!appro.Disabled"
                             x-text="!appro.Disabled"
                             @click="update2(appro.Id , appro.ApproverUserPrincipalName ,appro.Disabled )"> -->
-                         <!-- <span x-data="{ display: '   Status' }"  x-text="appro.Disabled"> </span>  -->
-                          <span x-text="appro.Disabled ? 'Inactive' : 'Active'"></span>
-                          
-                       <!-- <span  > Active</span></template>
+                        <!-- <span x-data="{ display: '   Status' }"  x-text="appro.Disabled"> </span>  -->
+                        <span x-text="appro.Disabled ? 'Inactive' : 'Active'"></span>
+
+                        <!-- <span  > Active</span></template>
                         <span  > Inactiv</span> -->
                     </div>
 
@@ -111,14 +108,16 @@
 <script src="/public/components/clsDropdown.js"></script>
 <script src="/public/components/combobox.js"></script>
 <script type="text/javascript">
-    async function getAllUsers(data){
-        
+    async function getAllUsers(data) {
+
         if (data == undefined) {
             return []
         }
 
-        const {search} = data;
-        if (search === null || search.trim() === ""){
+        const {
+            search
+        } = data;
+        if (search === null || search.trim() === "") {
             return []
         }
 
@@ -126,11 +125,11 @@
         const users = await res.json()
         return users
     }
+
     function data() {
-        return {   
+        return {
             search: '',
-            mode:
-                'view',
+            mode: 'view',
             form: {
                 id: '{{.Id}}',
                 name: '',
@@ -147,8 +146,7 @@
                 id: '{{.Id}}',
                 name: '',
                 disabled: false
-            }
-            ,
+            },
             approvers: {
                 id: '{{.Id}}',
                 approverUserPrincipalName: '',
@@ -168,18 +166,17 @@
                 return this.approver.data.filter(i => {
                     return !this.form.approver.includes(i)
                 })
-            }
-            ,
+            },
             async getUsersList() {
 
 
                 await fetch('/api/allusers').then(j => j.json()
-                    .then(data => {
+                        .then(data => {
 
-                        this.approver.data = data
+                            this.approver.data = data
 
-                      
-                    }))
+
+                        }))
                     .catch(() => {
                         Alpine.store('master').modal.update('error', 'Error', 'Please try again', '', '')
 
@@ -195,25 +192,26 @@
                     'datapush()')
             },
             submit() {
-                console.log(   this.form)
+                console.log(this.form)
                 var dd = new clsDropdown()
 
                 this.approver.data = this.form.approver[0]
 
-                    var modal = Alpine.store('master').modal
-                    modal.update('loading', 'Saving', 'Please wait.', '', '')
-                    if (!this.form.id) {
-                        this.form.id = 0
+                var modal = Alpine.store('master').modal
+                modal.update('loading', 'Saving', 'Please wait.', '', '')
+                if (!this.form.id) {
+                    this.form.id = 0
 
-                    }
-                    this.form.name =this.form.approver[0].id
-                    postData = this.form;
-                    console.log(   "postData")
-                    console.log(   postData)
-                    Alpine.store('master').postData('/api/communityapprovers/update', postData, "Your community approvers has been updated.",
-                        "Close")
+                }
+                this.form.name = this.form.approver[0].id
+                postData = this.form;
+                console.log("postData")
+                console.log(postData)
+                Alpine.store('master').postData('/api/communityapprovers/update', postData,
+                    "Your community approvers has been updated.",
+                    "Close")
 
-      
+
 
 
             },
@@ -225,26 +223,30 @@
                         this.form.id = 0
 
                     }
-             
+
                     postData = this.form;
-                    Alpine.store('master').postData('/api/communityapprovers/update', postData, "Your community approvers has been updated.",
+                    Alpine.store('master').postData('/api/communityapprovers/update', postData,
+                        "Your community approvers has been updated.",
                         "update communityapprovers")
                 }
 
 
             },
             update2(id, ApproverUserPrincipalName, disabled) {
-             
-                if (disabled == true) { this.formUpdate.disabled = true }
-                else { this.formUpdate.disabled = false }
+
+                if (disabled == true) {
+                    this.formUpdate.disabled = true
+                } else {
+                    this.formUpdate.disabled = false
+                }
                 this.formUpdate.id = id
                 this.formUpdate.name = ApproverUserPrincipalName
                 postData2 = this.formUpdate;
-                Alpine.store('master').postData('/api/communityapprovers/update', postData2, "Your community approvers has been updated.",
+                Alpine.store('master').postData('/api/communityapprovers/update', postData2,
+                    "Your community approvers has been updated.",
                     "Close")
-              
-            }
-            ,
+
+            },
             async GetformUpdate(id) {
 
                 this.approver.selected = "";
@@ -255,7 +257,7 @@
                     .then(r => {
                         r.json().then(body => {
                             this.formUpdate.id = body[0]["Id"]
-                            this.formUpdate.disabled = true  
+                            this.formUpdate.disabled = true
                             this.formUpdate.name = body[0]["ApproverUserPrincipalName"]
 
                             this.approver.selected = this.form.name
@@ -263,17 +265,18 @@
                     }).then(
 
 
-                )
+                    )
                     .catch(e => {
 
                     })
 
             },
-             isValid() {
-                if(this.form.approver.length == 0) return false;
+            isValid() {
+                if (this.form.approver.length == 0) return false;
                 return true
-               
-            }, getCommunityApprover() {
+
+            },
+            getCommunityApprover() {
 
                 fetch('/api/communityapprovers/GetCommunityApproversList')
                     .then(r => {
@@ -294,7 +297,7 @@
 
                 this.form.name = this.approver.selected
 
-            
+
             },
             async onLoad() {
                 var modal = Alpine.store('master').modal
@@ -310,18 +313,18 @@
                 await this.getUsersList()
                 await this.getCommunityApprover()
                 modal.visible = false
-        
+
             },
             get getapprovers() {
                 if (!this.search) {
-                 
-                return this.approvers
+
+                    return this.approvers
+                } else {
+
+                    return this.approvers.filter(p => p.ApproverUserPrincipalName.toLowerCase().includes(this.search
+                        .toLowerCase()))
                 }
-                else {
-                 
-                return this.approvers.filter(p => p.ApproverUserPrincipalName.toLowerCase().includes(this.search.toLowerCase()))
-        }
-        
+
 
             }
         }
@@ -341,7 +344,7 @@
         const res = await fetch('/api/Category/list')
 
         const data = await res.json()
-    
+
         return data
 
 
