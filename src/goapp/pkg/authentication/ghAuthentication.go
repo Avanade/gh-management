@@ -18,7 +18,7 @@ func GetGitHubOauthConfig(host string) *oauth2.Config {
 	oauthConf := &oauth2.Config{
 		ClientID:     os.Getenv("GH_CLIENT_ID"),
 		ClientSecret: os.Getenv("GH_CLIENT_SECRET"),
-		Scopes:       []string{"user:email", "repo"},
+		Scopes:       []string{"user:email"},
 		RedirectURL:  homeUrl + "/login/github/callback",
 		Endpoint:     githuboauth.Endpoint,
 	}
