@@ -12,13 +12,12 @@
                             <h3 class="text-lg font-medium leading-6 text-gray-900">Category</h3>
                         </div>
                         <div>
-                            
+
                         </div>
-                        <div> <input type="text" name="category" id="category" x-model="form.name"
-                                maxlength="50"  
+                        <div> <input type="text" name="category" id="category" x-model="form.name" maxlength="50"
                                 class="mt-1 focus:ring-orange-500 focus:border-orange-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md border-2">
 
-                        </div> 
+                        </div>
 
                     </div>
                     <div>
@@ -26,7 +25,7 @@
                     </div>
                 </div>
             </div>
-            
+
         </fieldset>
         <div>
             <div align="right">
@@ -69,14 +68,13 @@
 <script type="text/javascript">
     function data() {
         return {
-            mode:
-                'view',
-           form: {
-                 id: '{{.Id}}',
-                 name: '',
-              
-             },  
-            
+            mode: 'view',
+            form: {
+                id: '{{.Id}}',
+                name: '',
+
+            },
+
             categoryArticle: {
                 id: '{{.Id}}',
                 name: '',
@@ -84,19 +82,19 @@
                 body: '',
                 categoryId: 0,
                 CategoryName: ''
-            }, 
+            },
             submit() {
                 var modal = Alpine.store('master').modal
-               // modal.update('loading', 'Saving', 'Please wait.', '', '')
+                // modal.update('loading', 'Saving', 'Please wait.', '', '')
                 if (!this.form.id) {
                     this.form.id = 0
 
                 }
-      
-            
-                postData = this.form;   
+
+
+                postData = this.form;
                 Alpine.store('master').postData('/api/Category/update', postData, "Your category has been Updated.",
-                      "Go to category list" , "/guidance")
+                    "Go to category list", "/guidance")
 
             },
 
@@ -110,13 +108,13 @@
                     return false
                 }
             },
-           
+
             async onLoad() {
                 var modal = Alpine.store('master').modal
                 modal.update('loading', 'Loading', 'Please wait', '', '')
                 if (this.form.id) {
                     this.mode = 'view'
-                
+
                     await fetch('/api/Category/' + '{{.Id}}')
                         .then(r => {
                             r.json().then(body => {
@@ -128,17 +126,13 @@
                             console.log(e)
 
                         })
- 
+
                     modal.visible = false
-                }
-
-
-                else {
+                } else {
                     this.mode = 'edit'
                 }
             }
         }
     }
-   
 </script>
 {{ end }}

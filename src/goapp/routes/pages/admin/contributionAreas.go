@@ -1,10 +1,11 @@
 package routes
 
 import (
-	"main/pkg/template"
 	"net/http"
 	"strconv"
 	"strings"
+
+	"main/pkg/template"
 
 	"github.com/gorilla/mux"
 )
@@ -16,6 +17,7 @@ func ListContributionAreas(w http.ResponseWriter, r *http.Request) {
 func ContributionAreasForm(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id, _ := strconv.Atoi(vars["id"])
+
 	action := vars["action"]
 	template.UseTemplate(&w, r, "admin/contributionareas/form", struct {
 		Id     int

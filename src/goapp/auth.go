@@ -1,13 +1,13 @@
 package main
 
 import (
-	ev "main/pkg/envvar"
-	session "main/pkg/session"
-	rtApi "main/routes/api"
-	rtCommunity "main/routes/pages/community"
 	"net/http"
 	"strconv"
 	"time"
+
+	ev "main/pkg/envvar"
+	"main/pkg/session"
+	rtApi "main/routes/api"
 
 	"github.com/codegangsta/negroni"
 )
@@ -72,7 +72,7 @@ func checkFailedApprovalRequests() {
 	if freq > "0" {
 		for range time.NewTicker(time.Duration(freqInt) * time.Minute).C {
 			go rtApi.ReprocessRequestApproval()
-			go rtCommunity.ReprocessRequestCommunityApproval()
+			go rtApi.ReprocessRequestCommunityApproval()
 		}
 	}
 }

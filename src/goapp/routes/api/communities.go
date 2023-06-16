@@ -3,32 +3,86 @@ package routes
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
-	models "main/models"
-	ghmgmt "main/pkg/ghmgmtdb"
-	"main/pkg/msgraph"
-	session "main/pkg/session"
-	comm "main/routes/pages/community"
+	"io"
+	"log"
 	"net/http"
 	"net/mail"
+	"os"
 	"strconv"
 	"strings"
+
+	db "main/pkg/ghmgmtdb"
+	"main/pkg/msgraph"
+	"main/pkg/session"
 
 	"github.com/gorilla/mux"
 	"github.com/thedatashed/xlsxreader"
 )
+
+type CommunityDto struct {
+	Id                     int                   `json:"id"`
+	Name                   string                `json:"name"`
+	Url                    string                `json:"url"`
+	Description            string                `json:"description"`
+	Notes                  string                `json:"notes"`
+	TradeAssocId           string                `json:"tradeAssocId"`
+	IsExternal             bool                  `json:"isExternal"`
+	CommunityType          string                `json:"CommunityType"`
+	ChannelId              string                `json:"ChannelId"`
+	OnBoardingInstructions string                `json:"onBoardingInstructions"`
+	Created                string                `json:"created"`
+	CreatedBy              string                `json:"createdBy"`
+	Modified               string                `json:"modified"`
+	ModifiedBy             string                `json:"modifiedBy"`
+	Sponsors               []SponsorDto          `json:"sponsors"`
+	Tags                   []string              `json:"tags"`
+	CommunitiesExternal    []RelatedCommunityDto `json:"communitiesExternal"`
+	CommunitiesInternal    []RelatedCommunityDto `json:"communitiesInternal"`
+}
+
+type SponsorDto struct {
+	DisplayName string `json:"displayName"`
+	Mail        string `json:"mail"`
+}
+
+type RelatedCommunityDto struct {
+	ParentCommunityId  int `json:"ParentCommunityId"`
+	RelatedCommunityId int `json:"RelatedCommunityId"`
+}
+
+type CommunitySponsorsDto struct {
+	Id                string `json:"id"`
+	CommunityId       string `json:"communityId"`
+	UserPrincipalName string `json:"userprincipalname"`
+	Created           string `json:"created"`
+	CreatedBy         string `json:"createdBy"`
+	Modified          string `json:"modified"`
+	ModifiedBy        string `json:"modifiedBy"`
+}
+
+type CommunityApprovalSystemPostResponseDto struct {
+	ItemId string `json:"itemId"`
+}
+
+type CommunityApprovalSystemPost struct {
+	ApplicationId       string
+	ApplicationModuleId string
+	Email               string
+	Subject             string
+	Body                string
+	RequesterEmail      string
+}
 
 func CommunityAPIHandler(w http.ResponseWriter, r *http.Request) {
 	sessionaz, _ := session.Store.Get(r, "auth-session")
 	iprofile := sessionaz.Values["profile"]
 	profile := iprofile.(map[string]interface{})
 	username := profile["preferred_username"]
-	var body models.TypCommunity
+	var body CommunityDto
 	err := json.NewDecoder(r.Body).Decode(&body)
 	if err != nil {
+		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusBadRequest)
-		fmt.Println(err)
-		fmt.Println(body)
 		return
 	}
 
@@ -49,123 +103,109 @@ func CommunityAPIHandler(w http.ResponseWriter, r *http.Request) {
 			"Id":                     body.Id,
 		}
 
-		result, err := ghmgmt.CommunitiesInsert(param)
+		result, err := db.CommunitiesInsert(param)
 		if err != nil {
-			fmt.Println(err)
+			log.Println(err.Error())
 		}
-		id, _ := strconv.Atoi(fmt.Sprint(result[0]["Id"]))
 
+		id, _ := strconv.Atoi(fmt.Sprint(result[0]["Id"]))
 		if err != nil {
-			fmt.Println(err)
+			log.Println(err.Error())
 		}
 
 		for _, s := range body.Sponsors {
-			errIU := ghmgmt.InsertUser(s.Mail, s.DisplayName, "", "", "")
-			if errIU != nil {
-				http.Error(w, errIU.Error(), http.StatusInternalServerError)
+			err = db.InsertUser(s.Mail, s.DisplayName, "", "", "")
+			if err != nil {
+				log.Println(err.Error())
+				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
 			}
 
-			sponsorsparam := map[string]interface{}{
+			sponsorsParam := map[string]interface{}{
 
 				"CommunityId":        id,
 				"UserPrincipalName ": s.Mail,
 				"CreatedBy":          username,
 			}
 
-			_, err := ghmgmt.CommunitySponsorsInsert(sponsorsparam)
+			_, err := db.CommunitySponsorsInsert(sponsorsParam)
 
 			if err != nil {
-				fmt.Println(err)
-
+				log.Println(err.Error())
 			}
-
 		}
 
-		deleteparam := map[string]interface{}{
+		deleteParam := map[string]interface{}{
 
 			"ParentCommunityId": id,
 		}
-		_, error := ghmgmt.RelatedCommunitiesDelete(deleteparam)
+		_, err = db.RelatedCommunitiesDelete(deleteParam)
 		if err != nil {
-
-			fmt.Println(error)
+			log.Println(err.Error())
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
 		}
 
 		for _, t := range body.CommunitiesExternal {
-
-			RelatedCommunities := map[string]interface{}{
-
+			relatedCommunities := map[string]interface{}{
 				"ParentCommunityId":   id,
 				"RelatedCommunityId ": t.RelatedCommunityId,
 			}
 
-			_, err := ghmgmt.RelatedCommunitiesInsert(RelatedCommunities)
+			_, err := db.RelatedCommunitiesInsert(relatedCommunities)
 			if err != nil {
-
-				fmt.Println(err)
+				log.Println(err.Error())
 			}
-
 		}
 
 		for _, t := range body.CommunitiesInternal {
-
 			param := map[string]interface{}{
-
 				"ParentCommunityId":   id,
 				"RelatedCommunityId ": t.RelatedCommunityId,
 			}
-			_, err := ghmgmt.RelatedCommunitiesInsert(param)
+			_, err := db.RelatedCommunitiesInsert(param)
 			if err != nil {
-
-				fmt.Println(err)
+				log.Println(err.Error())
 			}
-
 		}
+
 		for _, t := range body.Tags {
-
-			Tagsparam := map[string]interface{}{
-
+			tagsParam := map[string]interface{}{
 				"CommunityId": id,
 				"Tag ":        t,
 			}
-			_, err := ghmgmt.CommunityTagsInsert(Tagsparam)
+			_, err := db.CommunityTagsInsert(tagsParam)
 			if err != nil {
-
-				fmt.Println(err)
+				log.Println(err.Error())
 			}
-
 		}
 		if body.Id == 0 {
-			go comm.RequestCommunityApproval(int64(id))
+			go RequestCommunityApproval(int64(id))
 		}
 
 		go func(channelId string) {
-			TeamMembers, err := msgraph.GetTeamsMembers(body.ChannelId, "")
+			teamMembers, err := msgraph.GetTeamsMembers(body.ChannelId, "")
 			if err != nil {
-
-				fmt.Println(err)
-				return
+				log.Println(err.Error())
 			}
-			if len(TeamMembers) > 0 {
 
-				for _, TeamMember := range TeamMembers {
-
-					ghmgmt.Communities_AddMember(id, TeamMember.Email)
+			if len(teamMembers) > 0 {
+				for _, teamMember := range teamMembers {
+					db.Communities_AddMember(id, teamMember.Email)
 				}
 			}
-
 		}(body.ChannelId)
 
 	case "GET":
-		_, err := ghmgmt.CommunitiesSelectByID(strconv.Itoa(body.Id))
+		_, err := db.CommunitiesSelectByID(strconv.Itoa(body.Id))
 		if err != nil {
-			fmt.Println(err)
+			log.Println(err.Error())
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
 		}
 
 	case "PUT":
 		param := map[string]interface{}{
-
 			"Id":           body.Id,
 			"Name":         body.Name,
 			"Url":          body.Url,
@@ -176,12 +216,13 @@ func CommunityAPIHandler(w http.ResponseWriter, r *http.Request) {
 			"ModifiedBy":   body.ModifiedBy,
 		}
 
-		_, err := ghmgmt.CommunitiesUpdate(param)
+		_, err := db.CommunitiesUpdate(param)
 		if err != nil {
-			fmt.Println(err)
+			log.Println(err.Error())
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
 		}
 	}
-
 }
 
 func MyCommunityAPIHandler(w http.ResponseWriter, r *http.Request) {
@@ -189,19 +230,17 @@ func MyCommunityAPIHandler(w http.ResponseWriter, r *http.Request) {
 	iprofile := sessionaz.Values["profile"]
 	profile := iprofile.(map[string]interface{})
 	username := profile["preferred_username"]
-	var body models.TypCommunity
+	var body CommunityDto
 	err := json.NewDecoder(r.Body).Decode(&body)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		fmt.Println(err)
-		fmt.Println(body)
+		log.Println(err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	switch r.Method {
 	case "POST":
 		param := map[string]interface{}{
-
 			"Name":                   strings.TrimSpace(body.Name),
 			"Url":                    body.Url,
 			"Description":            body.Description,
@@ -215,65 +254,61 @@ func MyCommunityAPIHandler(w http.ResponseWriter, r *http.Request) {
 			"Id":                     body.Id,
 		}
 
-		result, err := ghmgmt.CommunitiesInsert(param)
+		result, err := db.CommunitiesInsert(param)
 		if err != nil {
-			fmt.Println(err)
+			log.Println(err.Error())
 		}
-		id, _ := strconv.Atoi(fmt.Sprint(result[0]["Id"]))
 
+		id, _ := strconv.Atoi(fmt.Sprint(result[0]["Id"]))
 		if err != nil {
-			fmt.Println(err)
+			log.Println(err.Error())
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
 		}
 
 		for _, s := range body.Sponsors {
-			errIU := ghmgmt.InsertUser(s.Mail, s.DisplayName, "", "", "")
-			if errIU != nil {
-				http.Error(w, errIU.Error(), http.StatusInternalServerError)
+			err := db.InsertUser(s.Mail, s.DisplayName, "", "", "")
+			if err != nil {
+				log.Println(err.Error())
+				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
 			}
 
-			sponsorsparam := map[string]interface{}{
-
+			sponsorsParam := map[string]interface{}{
 				"CommunityId":        id,
 				"UserPrincipalName ": s.Mail,
 				"CreatedBy":          username,
 			}
-			_, err := ghmgmt.CommunitySponsorsInsert(sponsorsparam)
+			_, err = db.CommunitySponsorsInsert(sponsorsParam)
 			if err != nil {
-				fmt.Println(err)
-
+				log.Println(err.Error())
 			}
 
 		}
 
 		for _, t := range body.Tags {
 
-			Tagsparam := map[string]interface{}{
-
+			tagsParam := map[string]interface{}{
 				"CommunityId": id,
 				"Tag ":        t,
 			}
-			_, err := ghmgmt.CommunityTagsInsert(Tagsparam)
+			_, err := db.CommunityTagsInsert(tagsParam)
 			if err != nil {
-
-				fmt.Println(err)
+				log.Println(err.Error())
 			}
 
 		}
 
 		for _, t := range body.CommunitiesExternal {
-
-			RelatedCommunities := map[string]interface{}{
+			relatedCommunities := map[string]interface{}{
 
 				"ParentCommunityId":   id,
 				"RelatedCommunityId ": t.RelatedCommunityId,
 			}
-			_, err := ghmgmt.RelatedCommunitiesInsert(RelatedCommunities)
+			_, err := db.RelatedCommunitiesInsert(relatedCommunities)
 			if err != nil {
-
-				fmt.Println(err)
+				log.Println(err.Error())
 			}
-
 		}
 
 		for _, t := range body.CommunitiesInternal {
@@ -283,21 +318,21 @@ func MyCommunityAPIHandler(w http.ResponseWriter, r *http.Request) {
 				"ParentCommunityId":   id,
 				"RelatedCommunityId ": t.RelatedCommunityId,
 			}
-			_, err := ghmgmt.RelatedCommunitiesInsert(param)
+			_, err := db.RelatedCommunitiesInsert(param)
 			if err != nil {
-
-				fmt.Println(err)
+				log.Println(err.Error())
 			}
-
 		}
 
 		if body.Id == 0 {
-			go comm.RequestCommunityApproval(int64(id))
+			go RequestCommunityApproval(int64(id))
 		}
 	case "GET":
-		_, err := ghmgmt.CommunitiesSelectByID(strconv.Itoa(body.Id))
+		_, err := db.CommunitiesSelectByID(strconv.Itoa(body.Id))
 		if err != nil {
-			fmt.Println(err)
+			log.Println(err.Error())
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
 		}
 
 	case "PUT":
@@ -312,12 +347,13 @@ func MyCommunityAPIHandler(w http.ResponseWriter, r *http.Request) {
 			"CreatedBy":    body.CreatedBy,
 			"ModifiedBy":   body.ModifiedBy,
 		}
-		_, err := ghmgmt.CommunitiesUpdate(param)
+		_, err := db.CommunitiesUpdate(param)
 		if err != nil {
-			fmt.Println(err)
+			log.Println(err.Error())
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
 		}
 	}
-
 }
 
 func GetRequestStatusByCommunity(w http.ResponseWriter, r *http.Request) {
@@ -327,8 +363,9 @@ func GetRequestStatusByCommunity(w http.ResponseWriter, r *http.Request) {
 	// Get project list
 	params := make(map[string]interface{})
 	params["Id"] = id
-	projects, err := ghmgmt.CommunityApprovalsSelectById(params)
+	projects, err := db.CommunityApprovalsSelectById(params)
 	if err != nil {
+		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -337,6 +374,7 @@ func GetRequestStatusByCommunity(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	jsonResp, err := json.Marshal(projects)
 	if err != nil {
+		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -345,7 +383,7 @@ func GetRequestStatusByCommunity(w http.ResponseWriter, r *http.Request) {
 
 func GetCommunitiesIsexternal(w http.ResponseWriter, r *http.Request) {
 	req := mux.Vars(r)
-	isexternal := req["isexternal"]
+	isExternal := req["isexternal"]
 	sessionaz, _ := session.Store.Get(r, "auth-session")
 	iprofile := sessionaz.Values["profile"]
 	profile := iprofile.(map[string]interface{})
@@ -353,32 +391,27 @@ func GetCommunitiesIsexternal(w http.ResponseWriter, r *http.Request) {
 
 	param := map[string]interface{}{
 
-		"isexternal":        isexternal,
+		"isexternal":        isExternal,
 		"UserPrincipalName": username,
 	}
 
-	Communities, err := ghmgmt.CommunitiesIsexternal(param)
+	communities, err := db.CommunitiesIsexternal(param)
 	if err != nil {
+		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	w.WriteHeader(http.StatusOK)
 	w.Header().Set("Content-Type", "application/json")
-	jsonResp, err := json.Marshal(Communities)
+	jsonResp, err := json.Marshal(communities)
 	if err != nil {
+		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	w.Write(jsonResp)
-}
-func CommunityInitCommunityType(w http.ResponseWriter, r *http.Request) {
-	_, err := ghmgmt.CommunitiesInitCommunityType(nil)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
 }
 
 func ProcessCommunityMembersListExcel(w http.ResponseWriter, r *http.Request) {
@@ -391,6 +424,7 @@ func ProcessCommunityMembersListExcel(w http.ResponseWriter, r *http.Request) {
 
 	file, handler, err := r.FormFile("fileupload")
 	if err != nil {
+		log.Println(err.Error())
 		fmt.Println("Error Retrieving the File")
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -408,9 +442,9 @@ func ProcessCommunityMembersListExcel(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fileBytes, err := ioutil.ReadAll(file)
+	fileBytes, err := io.ReadAll(file)
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -419,7 +453,7 @@ func ProcessCommunityMembersListExcel(w http.ResponseWriter, r *http.Request) {
 		for _, cell := range row.Cells {
 			_, err := mail.ParseAddress(cell.Value)
 			if err == nil {
-				err = ghmgmt.Communities_AddMember(id, cell.Value)
+				err = db.Communities_AddMember(id, cell.Value)
 				if err == nil {
 					counter++
 				}
@@ -432,8 +466,376 @@ func ProcessCommunityMembersListExcel(w http.ResponseWriter, r *http.Request) {
 	}{NewMembers: counter}
 	jsonResp, err := json.Marshal(response)
 	if err != nil {
+		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	w.Write(jsonResp)
+}
+
+func GetCommunityOnBoardingInfo(w http.ResponseWriter, r *http.Request) {
+	params := mux.Vars(r)
+	id, _ := strconv.ParseInt(params["id"], 0, 64)
+
+	// Get email address of the user
+	sessionaz, _ := session.Store.Get(r, "auth-session")
+	iprofile := sessionaz.Values["profile"]
+	profile := iprofile.(map[string]interface{})
+	username := profile["preferred_username"]
+
+	switch r.Method {
+	case "GET":
+		related, _ := db.Communities_Related(id)
+		sponsors, _ := db.Community_Sponsors(id)
+		info, _ := db.Community_Info(id)
+		info.Sponsors = sponsors
+		info.Communities = related
+
+		isMember, _ := db.Community_Membership_IsMember(id, username.(string))
+
+		data := map[string]interface{}{
+			"IsMember":  isMember,
+			"Community": info,
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+
+		jsonResp, err := json.Marshal(data)
+		if err != nil {
+			log.Println(err.Error())
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		w.Write(jsonResp)
+
+	case "POST":
+		db.Community_Onboarding_AddMember(id, username.(string))
+	case "DELETE":
+		db.Community_Onboarding_RemoveMember(id, username.(string))
+	}
+}
+
+func GetCommunities(w http.ResponseWriter, r *http.Request) {
+	result := db.GetCommunities()
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+
+	jsonResp, err := json.Marshal(result)
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	w.Write(jsonResp)
+}
+
+func GetCommunityMembers(w http.ResponseWriter, r *http.Request) {
+	params := mux.Vars(r)
+	id, _ := strconv.ParseInt(params["id"], 0, 64)
+
+	result := db.GetCommunityMembers(id)
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+
+	jsonResp, err := json.Marshal(result)
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	w.Write(jsonResp)
+}
+
+func CommunitySponsorsAPIHandler(w http.ResponseWriter, r *http.Request) {
+	sessionaz, _ := session.Store.Get(r, "auth-session")
+	iprofile := sessionaz.Values["profile"]
+	profile := iprofile.(map[string]interface{})
+	username := profile["preferred_username"]
+
+	var body CommunitySponsorsDto
+	err := json.NewDecoder(r.Body).Decode(&body)
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	switch r.Method {
+	case "POST":
+		param := map[string]interface{}{
+
+			"CommunityId":       body.CommunityId,
+			"UserPrincipalName": body.UserPrincipalName,
+			"CreatedBy":         username,
+		}
+
+		_, err := db.CommunitySponsorsInsert(param)
+		if err != nil {
+			log.Println(err.Error())
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+	case "PUT":
+		param := map[string]interface{}{
+			"CommunityId":       body.CommunityId,
+			"UserPrincipalName": body.UserPrincipalName,
+			"CreatedBy":         username,
+		}
+		_, err := db.CommunitySponsorsUpdate(param)
+		if err != nil {
+			log.Println(err.Error())
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+	}
+}
+
+func CommunitySponsorsPerCommunityId(w http.ResponseWriter, r *http.Request) {
+	req := mux.Vars(r)
+	id := req["id"]
+
+	// Get project list
+	param := map[string]interface{}{
+
+		"CommunityId": id,
+	}
+
+	communitySponsors, err := db.CommunitySponsorsSelectByCommunityId(param)
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Header().Set("Content-Type", "application/json")
+	jsonResp, err := json.Marshal(communitySponsors)
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Write(jsonResp)
+}
+
+func CommunityTagPerCommunityId(w http.ResponseWriter, r *http.Request) {
+	req := mux.Vars(r)
+	id := req["id"]
+
+	// Get project list
+	param := map[string]interface{}{
+
+		"CommunityId": id,
+	}
+
+	communityTags, err := db.CommunityTagsSelectByCommunityId(param)
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Header().Set("Content-Type", "application/json")
+	jsonResp, err := json.Marshal(communityTags)
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Write(jsonResp)
+}
+
+func RelatedCommunitiesInsert(w http.ResponseWriter, r *http.Request) {
+
+	var body RelatedCommunityDto
+
+	err := json.NewDecoder(r.Body).Decode(&body)
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	param := map[string]interface{}{
+
+		"ParentCommunityId":  body.ParentCommunityId,
+		"RelatedCommunityId": body.RelatedCommunityId,
+	}
+
+	approvers, err := db.RelatedCommunitiesInsert(param)
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Header().Set("Content-Type", "application/json")
+	jsonResp, err := json.Marshal(approvers)
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Write(jsonResp)
+}
+
+func RelatedCommunitiesDelete(w http.ResponseWriter, r *http.Request) {
+
+	var body RelatedCommunityDto
+
+	err := json.NewDecoder(r.Body).Decode(&body)
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	param := map[string]interface{}{
+
+		"ParentCommunityId":  body.ParentCommunityId,
+		"RelatedCommunityId": body.RelatedCommunityId,
+	}
+
+	approvers, err := db.RelatedCommunitiesDelete(param)
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Header().Set("Content-Type", "application/json")
+	jsonResp, err := json.Marshal(approvers)
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Write(jsonResp)
+}
+
+func RelatedCommunitiesSelect(w http.ResponseWriter, r *http.Request) {
+
+	req := mux.Vars(r)
+	id := req["id"]
+
+	param := map[string]interface{}{
+
+		"ParentCommunityId": id,
+	}
+
+	approvers, err := db.RelatedCommunitiesSelect(param)
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Header().Set("Content-Type", "application/json")
+	jsonResp, err := json.Marshal(approvers)
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Write(jsonResp)
+}
+
+func RequestCommunityApproval(id int64) error {
+	communityApprovals := db.PopulateCommunityApproval(id)
+
+	for _, v := range communityApprovals {
+		err := ApprovalSystemRequestCommunity(v)
+		if err != nil {
+			log.Println("ID:" + strconv.FormatInt(v.Id, 10) + " " + err.Error())
+			return err
+		}
+	}
+	return nil
+}
+
+func ReprocessRequestCommunityApproval() {
+	projectApprovals := db.GetFailedCommunityApprovalRequests()
+
+	for _, v := range projectApprovals {
+		go ApprovalSystemRequestCommunity(v)
+	}
+}
+
+func ApprovalSystemRequestCommunity(data db.CommunityApproval) error {
+
+	url := os.Getenv("APPROVAL_SYSTEM_APP_URL")
+	if url != "" {
+		url = url + "/request"
+		ch := make(chan *http.Response)
+		// var res *http.Response
+
+		bodyTemplate := `<p>Hi |ApproverUserPrincipalName|!</p>
+		<p>|RequesterName| is requesting for a new |CommunityType| community and is now pending for approval.</p>
+		<p>Below are the details:</p>
+		<table>
+			<tr>
+				<td style="font-weight: bold;">Community Name<td>
+				<td style="font-size:larger">|CommunityName|<td>
+			</tr>
+			<tr>
+				<td style="font-weight: bold;">Url<td>
+				<td style="font-size:larger">|CommunityUrl|<td>
+			</tr>
+			<tr>
+				<td style="font-weight: bold;">Description<td>
+				<td style="font-size:larger">|CommunityDescription|<td>
+			</tr>
+			<tr>
+				<td style="font-weight: bold;">Notes<td>
+				<td style="font-size:larger">|CommunityNotes|<td>
+			</tr>
+		</table>
+		<p>For more information, send an email to <a href="mailto:|RequesterUserPrincipalName|">|RequesterUserPrincipalName|</a></p>
+		`
+
+		replacer := strings.NewReplacer("|ApproverUserPrincipalName|", data.ApproverUserPrincipalName,
+			"|RequesterName|", data.RequesterName,
+			"|CommunityType|", data.CommunityType,
+			"|CommunityName|", data.CommunityName,
+			"|CommunityUrl|", data.CommunityUrl,
+			"|CommunityDescription|", data.CommunityDescription,
+			"|CommunityNotes|", data.CommunityNotes,
+			"|RequesterUserPrincipalName|", data.RequesterUserPrincipalName,
+		)
+		body := replacer.Replace(bodyTemplate)
+
+		postParams := CommunityApprovalSystemPost{
+			ApplicationId:       os.Getenv("APPROVAL_SYSTEM_APP_ID"),
+			ApplicationModuleId: os.Getenv("APPROVAL_SYSTEM_APP_MODULE_COMMUNITY"),
+			Email:               data.ApproverUserPrincipalName,
+			Subject:             fmt.Sprintf("[GH-Management] New Community For Approval - %v", data.CommunityName),
+			Body:                body,
+			RequesterEmail:      data.RequesterUserPrincipalName,
+		}
+
+		go getHttpPostResponseStatus(url, postParams, ch)
+		r := <-ch
+		if r != nil {
+			var res CommunityApprovalSystemPostResponseDto
+			err := json.NewDecoder(r.Body).Decode(&res)
+			if err != nil {
+				log.Println(err.Error())
+				return err
+			}
+
+			db.CommunityApprovalUpdateGUID(data.Id, res.ItemId)
+		}
+	}
+	return nil
 }

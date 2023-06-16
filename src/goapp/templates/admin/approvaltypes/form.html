@@ -3,81 +3,87 @@
     action : '{{ .Action }}',
     id : '{{ .Id }}'
 })" class="space-y-8 divide-y divide-gray-200">
-<fieldset x-bind:disabled="action.toLowerCase() == 'view' || action.toLowerCase() == 'delete'">
-    <div class="space-y-8 divide-y divide-gray-200 sm:space-y-5">
-        <div>
+    <fieldset x-bind:disabled="action.toLowerCase() == 'view' || action.toLowerCase() == 'delete'">
+        <div class="space-y-8 divide-y divide-gray-200 sm:space-y-5">
             <div>
-                <h3 class="text-lg leading-6 font-medium text-gray-900">{{ .Action }} Approval Type</h3>
-                <!-- <p class="mt-1 max-w-2xl text-sm text-gray-500">Description...</p> -->
+                <div>
+                    <h3 class="text-lg leading-6 font-medium text-gray-900">{{ .Action }} Approval Type</h3>
+                    <!-- <p class="mt-1 max-w-2xl text-sm text-gray-500">Description...</p> -->
+                </div>
             </div>
-        </div>
-        <div class="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-t sm:border-gray-200 sm:pt-5">
-            <label for="Name" class="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2"> Name </label>
-            <div class="mt-1 sm:mt-0 sm:col-span-2">
-                <input x-model="form.name" type="text" name="Name" id="Name" autocomplete="given-name" class="block w-full shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm border-gray-300 rounded-md">
+            <div class="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-t sm:border-gray-200 sm:pt-5">
+                <label for="Name" class="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2"> Name </label>
+                <div class="mt-1 sm:mt-0 sm:col-span-2">
+                    <input x-model="form.name" type="text" name="Name" id="Name" autocomplete="given-name"
+                        class="block w-full shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm border-gray-300 rounded-md">
+                </div>
             </div>
-        </div>
-        <div class="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-t sm:border-gray-200 sm:pt-5">
-            <label for="Name" class="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2"> Approver </label>
-            <div class="mt-1 sm:mt-0 sm:col-span-2">
-                <div 
-                    x-data="combobox({
+            <div class="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-t sm:border-gray-200 sm:pt-5">
+                <label for="Name" class="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2"> Approver </label>
+                <div class="mt-1 sm:mt-0 sm:col-span-2">
+                    <div x-data="combobox({
                             searchCallback: getAllUsers,
                             searchTag: 'Start typing to query list of users',
                             searchPlaceholder: 'Input name or email',
                             id : 'mail',
                             text : 'mail'
-                        })"
-                    x-modelable = "selected"
-                    x-model = "form.approver"
-                >
-                    <div x-html="template"></div>
+                        })" x-modelable="selected" x-model="form.approver">
+                        <div x-html="template"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-baseline">
+                <div>
+                    <div class="text-base font-medium text-gray-900 sm:text-sm sm:text-gray-700"
+                        id="label-notifications">Status</div>
+                </div>
+                <div class="sm:col-span-2">
+                    <div class="max-w-lg">
+                        <!-- <p class="text-sm text-gray-500">Description here...</p> -->
+                        <div class="mt-4 space-y-4">
+                            <div class="flex items-center">
+                                <input x-model="form.status" value="true" type="radio"
+                                    class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300">
+                                <label for="active" class="ml-3 block text-sm font-medium text-gray-700"> Active
+                                </label>
+                            </div>
+                            <div class="flex items-center">
+                                <input x-model="form.status" value="false" type="radio"
+                                    class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300">
+                                <label for="not_active" class="ml-3 block text-sm font-medium text-gray-700"> Not Active
+                                </label>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-        <div class="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-baseline">
-            <div>
-              <div class="text-base font-medium text-gray-900 sm:text-sm sm:text-gray-700" id="label-notifications">Status</div>
-            </div>
-            <div class="sm:col-span-2">
-              <div class="max-w-lg">
-                <!-- <p class="text-sm text-gray-500">Description here...</p> -->
-                <div class="mt-4 space-y-4">
-                  <div class="flex items-center">
-                    <input  x-model="form.status" value="true" type="radio" class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300">
-                    <label for="active" class="ml-3 block text-sm font-medium text-gray-700"> Active </label>
-                  </div>
-                  <div class="flex items-center">
-                    <input  x-model="form.status" value="false" type="radio" class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300">
-                    <label for="not_active" class="ml-3 block text-sm font-medium text-gray-700"> Not Active </label>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+    </fieldset>
+    <div class="pt-5">
+        <div class="flex justify-end">
+            <a href="/admin/approvaltypes" type="button"
+                class="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">Back</a>
+            <button @click.prevent="onSubmitHandler"
+                class="ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 disabled:bg-orange-200"
+                x-bind:disabled="!isValid()" :class="action == 'View'? 'hidden' : ''">
+                <p x-text="action == 'Delete' ? 'Delete' : 'Submit'"></p>
+            </button>
+        </div>
     </div>
-</fieldset>
-<div class="pt-5">
-    <div class="flex justify-end">
-        <a href="/admin/approvaltypes" type="button" class="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">Back</a>
-        <button 
-            @click.prevent="onSubmitHandler" 
-            class="ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 disabled:bg-orange-200"
-            x-bind:disabled="!isValid()":class="action == 'View'? 'hidden' : ''"><p x-text="action == 'Delete' ? 'Delete' : 'Submit'"></p></button>
-    </div>
-</div>
 </form>
 
 <script src="/public/components/combobox.js"></script>
 <script type="text/javascript">
-    async function getAllUsers(data){
-  
+    async function getAllUsers(data) {
+
         if (data == undefined) {
             return []
         }
 
-        const {search} = data;
-        if (search === null || search.trim() === ""){
+        const {
+            search
+        } = data;
+        if (search === null || search.trim() === "") {
             return []
         }
 
@@ -89,19 +95,19 @@
     function approvalTypeForm({
         action = 'view',
         id = null
-    }){
+    }) {
 
         return {
             action: '',
             id: null,
-            form : {
-                name : '',
-                approver : [],
-                status : null,
+            form: {
+                name: '',
+                approver: [],
+                status: null,
             },
-            async init(){
+            async init() {
                 this.action = action,
-                this.id = id
+                    this.id = id
 
                 if (this.action.toLowerCase() == 'add') return;
 
@@ -112,50 +118,57 @@
                 const data = await res.json()
 
                 this.form.name = data.Name;
-                this.form.approver = [{'id' : data.ApproverUserPrincipalName, 'text' : data.ApproverUserPrincipalName}]
+                this.form.approver = [{
+                    'id': data.ApproverUserPrincipalName,
+                    'text': data.ApproverUserPrincipalName
+                }]
                 this.form.status = data.IsActive.toString();
 
                 modal.visible = false;
             },
             isValid() {
-                if(!this.form.name) false;
+                if (!this.form.name) false;
 
-                if(this.form.approver.length == 0) return false;
+                if (this.form.approver.length == 0) return false;
 
-                if(!this.form.approver[0].id) return false;
-                if(!this.form.approver[0].text) return false;
+                if (!this.form.approver[0].id) return false;
+                if (!this.form.approver[0].text) return false;
 
-                if(!this.form.status) return false;
+                if (!this.form.status) return false;
 
                 return true
             },
-            onSubmitHandler(){
-                if(!this.isValid()) {
+            onSubmitHandler() {
+                if (!this.isValid()) {
                     let modal = Alpine.store('master').modal
                     modal.update('error', 'Error message', 'Invalid input', '', '')
                     return;
                 }
 
                 const data = {
-                            name : this.form.name,
-                            approver_user_principal_name : this.form.approver[0].id,
-                            is_active : this.form.status == 'true'
-                        }
-                    
+                    name: this.form.name,
+                    approver_user_principal_name: this.form.approver[0].id,
+                    is_active: this.form.status == 'true'
+                }
+
                 switch (this.action.toLowerCase()) {
                     case 'add':
                         Alpine.store('master').modal.show()
-                        Alpine.store('master').postData("/api/approval/type", data, "Approval type has been added.", "Go to list of approval types", "/admin/approvaltypes")
+                        Alpine.store('master').postData("/api/approval/type", data, "Approval type has been added.",
+                            "Go to list of approval types", "/admin/approvaltypes")
                         break;
-                
+
                     case 'edit':
                         Alpine.store('master').modal.show()
-                        Alpine.store('master').putData(`/api/approval/type/${this.id}`, data, "Approval type has been saved.", "Go to list of approval types", "/admin/approvaltypes")
+                        Alpine.store('master').putData(`/api/approval/type/${this.id}`, data,
+                            "Approval type has been saved.", "Go to list of approval types", "/admin/approvaltypes")
                         break;
                     case 'delete':
                         data.is_archived = true
                         Alpine.store('master').modal.show()
-                        Alpine.store('master').putData(`/api/approval/type/${this.id}/archived`, data, "Approval type has been moved archive.", "Go to list of approval types", "/admin/approvaltypes")
+                        Alpine.store('master').putData(`/api/approval/type/${this.id}/archived`, data,
+                            "Approval type has been moved archive.", "Go to list of approval types",
+                            "/admin/approvaltypes")
                         break;
                 }
             }

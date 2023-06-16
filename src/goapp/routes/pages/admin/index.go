@@ -1,8 +1,9 @@
 package routes
 
 import (
-	"main/pkg/template"
 	"net/http"
+
+	"main/pkg/template"
 )
 
 func AdminIndex(w http.ResponseWriter, r *http.Request) {

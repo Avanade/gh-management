@@ -10,9 +10,9 @@ import (
 	"github.com/coreos/go-oidc"
 
 	auth "main/pkg/authentication"
-	ghmgmt "main/pkg/ghmgmtdb"
+	db "main/pkg/ghmgmtdb"
 	"main/pkg/msgraph"
-	session "main/pkg/session"
+	"main/pkg/session"
 )
 
 func CallbackHandler(w http.ResponseWriter, r *http.Request) {
@@ -20,6 +20,7 @@ func CallbackHandler(w http.ResponseWriter, r *http.Request) {
 	// Check session
 	session, err := session.Store.Get(r, "auth-session")
 	if err != nil {
+		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -32,6 +33,7 @@ func CallbackHandler(w http.ResponseWriter, r *http.Request) {
 	//Retrieve token
 	authenticator, err := auth.NewAuthenticator(r.Host)
 	if err != nil {
+		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -63,6 +65,7 @@ func CallbackHandler(w http.ResponseWriter, r *http.Request) {
 	// Get the userInfo
 	var profile map[string]interface{}
 	if err := idToken.Claims(&profile); err != nil {
+		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -78,23 +81,25 @@ func CallbackHandler(w http.ResponseWriter, r *http.Request) {
 	session.Values["isUserAdmin"] = isAdmin
 	hasPhoto, userPhoto, err := msgraph.GetUserPhoto(fmt.Sprintf("%s", profile["oid"]))
 	if err != nil {
+		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	session.Values["userHasPhoto"] = hasPhoto
 	session.Values["userPhoto"] = userPhoto
-	errS := session.Save(r, w)
-
-	// Insert Azure User
-	name := fmt.Sprint(profile["name"])
-	errIU := ghmgmt.InsertUser(userPrincipalName, name, "", "", "")
-	if errIU != nil {
-		http.Error(w, errIU.Error(), http.StatusInternalServerError)
+	err = session.Save(r, w)
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	if errS != nil {
-		http.Error(w, errS.Error(), http.StatusInternalServerError)
+	// Insert Azure User
+	name := fmt.Sprint(profile["name"])
+	err = db.InsertUser(userPrincipalName, name, "", "", "")
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 

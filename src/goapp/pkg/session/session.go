@@ -10,7 +10,6 @@ import (
 	"os"
 	"time"
 
-	"main/models"
 	auth "main/pkg/authentication"
 
 	"github.com/gorilla/sessions"
@@ -20,6 +19,23 @@ import (
 var (
 	Store *sessions.FilesystemStore
 )
+
+type GitHubUser struct {
+	LoggedIn           bool
+	Id                 int    `json:"id"`
+	Username           string `json:"login"`
+	NodeId             string `json:"node_id"`
+	AvatarUrl          string `json:"avatar_url"`
+	AccessToken        string
+	IsValid            bool
+	IsDirect           bool
+	IsEnterpriseMember bool
+}
+
+type ErrorDetails struct {
+	Error            string `json:"error"`
+	ErrorDescription string `json:"error_description"`
+}
 
 func InitializeSession() {
 	Store = sessions.NewFilesystemStore(os.TempDir(), []byte("secret"))
@@ -134,19 +150,19 @@ func IsGuidAuthenticated(w http.ResponseWriter, r *http.Request, next http.Handl
 	next(w, r)
 }
 
-func GetGitHubUserData(w http.ResponseWriter, r *http.Request) (models.TypGitHubUser, error) {
+func GetGitHubUserData(w http.ResponseWriter, r *http.Request) (GitHubUser, error) {
 	session, err := Store.Get(r, "gh-auth-session")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return models.TypGitHubUser{LoggedIn: false}, err
+		return GitHubUser{LoggedIn: false}, err
 	}
-	var gitHubUser models.TypGitHubUser
+	var gitHubUser GitHubUser
 
 	if _, ok := session.Values["ghProfile"]; ok {
 		err = json.Unmarshal([]byte(fmt.Sprintf("%s", session.Values["ghProfile"])), &gitHubUser)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return models.TypGitHubUser{LoggedIn: false}, err
+			return GitHubUser{LoggedIn: false}, err
 		}
 
 		if _, okIsValid := session.Values["ghIsValid"]; okIsValid {
@@ -209,7 +225,6 @@ func IsUserAdminMW(w http.ResponseWriter, r *http.Request, next http.HandlerFunc
 	}
 }
 
-// Check if user is an admin
 func IsUserAdmin(w http.ResponseWriter, r *http.Request) (bool, error) {
 	session, err := Store.Get(r, "auth-session")
 	if err != nil {
@@ -223,7 +238,6 @@ func IsUserAdmin(w http.ResponseWriter, r *http.Request) (bool, error) {
 	return isUserAdmin, nil
 }
 
-// Get user photo
 func GetUserPhoto(w http.ResponseWriter, r *http.Request) (bool, string, error) {
 	session, err := Store.Get(r, "auth-session")
 	if err != nil {
@@ -235,9 +249,4 @@ func GetUserPhoto(w http.ResponseWriter, r *http.Request) (bool, string, error) 
 	} else {
 		return false, "", nil
 	}
-}
-
-type ErrorDetails struct {
-	Error            string `json:"error"`
-	ErrorDescription string `json:"error_description"`
 }

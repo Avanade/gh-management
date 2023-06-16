@@ -2,11 +2,12 @@ package routes
 
 import (
 	"log"
-	template "main/pkg/template"
 	"net/http"
+
+	"main/pkg/template"
 )
 
 func HomeHandler(w http.ResponseWriter, r *http.Request) {
-	log.Printf("TEST : %s", "DISPLAY LOGS")
+	log.Printf("APP RUNNING")
 	template.UseTemplate(&w, r, "home", nil)
 }

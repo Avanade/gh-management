@@ -1,6 +1,8 @@
 package main
 
 import (
+	"net/http"
+
 	rtApi "main/routes/api"
 	rtAzure "main/routes/login/azure"
 	rtGithub "main/routes/login/github"
@@ -11,7 +13,6 @@ import (
 	rtGuidance "main/routes/pages/guidance"
 	rtProjects "main/routes/pages/projects"
 	rtSearch "main/routes/pages/search"
-	"net/http"
 
 	"github.com/gorilla/mux"
 )
@@ -32,8 +33,8 @@ func setPageRoutes(mux *mux.Router) {
 
 	// REPOSITORIES PAGE
 	mux.Handle("/repositories", loadAzGHAuthPage(rtProjects.Projects))
-	mux.Handle("/repositories/new", loadAzGHAuthPage(rtProjects.ProjectsNewHandler))
-	mux.Handle("/repositories/{id}", loadAzGHAuthPage(rtProjects.ProjectsHandler))
+	mux.Handle("/repositories/new", loadAzGHAuthPage(rtProjects.NewProject))
+	mux.Handle("/repositories/{id}", loadAzGHAuthPage(rtProjects.ProjectById))
 	mux.Handle("/repositories/makepublic/{id}", loadAzGHAuthPage(rtProjects.MakePublic))
 
 	// GUIDANCE PAGE
@@ -54,7 +55,7 @@ func setPageRoutes(mux *mux.Router) {
 
 	// AUTHENTICATION
 	mux.HandleFunc("/loginredirect", rtPages.LoginRedirectHandler).Methods("GET")
-	mux.HandleFunc("/gitredirect", rtPages.GitredirectHandler).Methods("GET")
+	mux.HandleFunc("/gitredirect", rtPages.GitRedirectHandler).Methods("GET")
 	// AZURE
 	mux.HandleFunc("/login/azure", rtAzure.LoginHandler)
 	mux.HandleFunc("/login/azure/callback", rtAzure.CallbackHandler)
@@ -103,7 +104,7 @@ func setApiRoutes(mux *mux.Router) {
 	muxApi.Handle("/activity/{id}", loadAzGHAuthPage(rtApi.GetActivityById)).Methods("GET")
 
 	// COMMUNITIES API
-	muxApi.Handle("/community", loadAzGHAuthPage(rtApi.CommunityAPIHandler))
+	muxApi.Handle("/community", loadAzGHAuthPage(rtApi.CommunityAPIHandler)).Methods("POST")
 	muxApi.Handle("/communitySponsors", loadAzGHAuthPage(rtApi.CommunitySponsorsAPIHandler))
 	muxApi.Handle("/CommunitySponsorsPerCommunityId/{id}", loadAzGHAuthPage(rtApi.CommunitySponsorsPerCommunityId))
 	muxApi.Handle("/CommunityTagPerCommunityId/{id}", loadAzGHAuthPage(rtApi.CommunityTagPerCommunityId))
@@ -127,7 +128,7 @@ func setApiRoutes(mux *mux.Router) {
 	muxApi.Handle("/contributionarea/activity/{id}", loadAzGHAuthPage(rtApi.GetContributionAreasByActivityId)).Methods("GET")
 
 	// CATEGORIES API
-	muxApi.Handle("/Category", loadAzGHAuthPage(rtApi.CategoryAPIHandler))
+	muxApi.Handle("/Category", loadAzGHAuthPage(rtApi.CategoryAPIHandler)).Methods("POST")
 	muxApi.Handle("/Category/list", loadAzGHAuthPage(rtApi.CategoryListAPIHandler))
 	muxApi.Handle("/Category/update", loadAzGHAuthPage(rtApi.CategoryUpdate))
 	muxApi.Handle("/Category/{id}", loadAzGHAuthPage(rtApi.GetCategoryByID))
@@ -138,6 +139,8 @@ func setApiRoutes(mux *mux.Router) {
 	muxApi.Handle("/CategoryArticlesUpdate", loadAzGHAuthPage(rtApi.CategoryArticlesUpdate))
 
 	// REPOSITORIES API
+	muxApi.Handle("/repositories", loadAzGHAuthPage(rtApi.RequestRepository)).Methods("POST")
+	muxApi.Handle("/repositories/{id}", loadAzGHAuthPage(rtApi.UpdateRepositoryById)).Methods("PUT")
 	muxApi.Handle("/repositories/list", loadAzGHAuthPage(rtApi.GetUserProjects))
 	muxApi.Handle("/repositories/{id}", loadAzGHAuthPage(rtApi.GetRequestStatusByProject))
 	muxApi.Handle("/repositories/request/public", loadAzGHAuthPage(rtApi.RequestMakePublic))
@@ -180,15 +183,11 @@ func setApiRoutes(mux *mux.Router) {
 	muxApi.HandleFunc("/communityapprovers/GetCommunityApproversList/{id}", rtCommunity.GetCommunityApproversById)
 
 	// API FOR LOGIC APP
-	muxApi.Handle("/importGitHubReposToDatabase", loadAzAuthPage(rtApi.ImportReposToDatabase))
-	muxApi.Handle("/init/indexorgrepos", loadGuidAuthApi(rtApi.InitIndexOrgRepos)).Methods("GET")
 	muxApi.Handle("/indexorgrepos", loadGuidAuthApi(rtApi.IndexOrgRepos)).Methods("GET")
 	muxApi.Handle("/clearorgrepos", loadGuidAuthApi(rtApi.ClearOrgRepos)).Methods("GET")
 	muxApi.Handle("/checkAvaInnerSource", loadGuidAuthApi(rtApi.CheckAvaInnerSource)).Methods("GET")
 	muxApi.Handle("/checkAvaOpenSource", loadGuidAuthApi(rtApi.CheckAvaOpenSource)).Methods("GET")
 	muxApi.Handle("/clearOrgMembers", loadGuidAuthApi(rtApi.ClearOrgMembers)).Methods("GET")
 	muxApi.Handle("/RepoOwnerScan", loadGuidAuthApi(rtApi.RepoOwnerScan)).Methods("GET")
-	muxApi.Handle("/CommunityInitCommunityType", loadGuidAuthApi(rtApi.CommunityInitCommunityType)).Methods("GET")
-	muxApi.Handle("/init/projectToRepoOwner", loadGuidAuthApi(rtApi.InitProjectToRepoOwner)).Methods("GET")
 	muxApi.Handle("/RepoOwnersCleanup", loadGuidAuthApi(rtApi.RepoOwnersCleanup)).Methods("GET")
 }
