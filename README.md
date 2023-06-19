@@ -42,7 +42,7 @@ This repository allows for basic self-service and automation of common workflows
     Client->>Business Logic: HTTP request
     Business Logic->>Business Logic: input validation
     Business Logic->>Database Service: data request
-    Database Service->>Database Provider: execute store procedure
+    Database Service->>Database Provider: execute stored procedure
     Database Provider->>Database Service: raw data result
     Database Service->>Database Service: parse raw data
     Database Service->>Business Logic: parsed data
