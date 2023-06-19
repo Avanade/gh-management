@@ -27,6 +27,38 @@ This repository allows for basic self-service and automation of common workflows
   - Request a new repository, and tracking of the ticket through approvals
   - Request permission for a code contribution of <50 lines
 
+## Architecture Overview
+![Architecture Diagram](./docs/diagrams/go-gh-mgmt.png)
+
+
+## Example Call Flow
+
+  ```mermaid
+  sequenceDiagram
+    participant Client
+    participant Business Logic
+    participant Database Service
+    participant Database Provider
+    participant GitHubAPI Service
+    participant GitHubAPI
+    Client->>Business Logic: HTTP request
+    Business Logic->>Business Logic: input validation
+    Business Logic->>Database Service: data request
+    Database Service->>Database Provider: execute stored procedure
+    Database Provider->>Database Service: raw data result
+    Database Service->>Database Service: parse raw data
+    Database Service->>Business Logic: parsed data
+    Business Logic->>GitHubAPI Service: GitHubAPI request
+    GitHubAPI Service->>GitHubAPI Service: Prepare request
+    GitHubAPI Service->>GitHubAPI: Execute API call
+    GitHubAPI->>GitHubAPI Service: raw data result
+    GitHubAPI Service->>GitHubAPI Service: parse raw data
+    GitHubAPI Service->>Business Logic: parsed data
+    Business Logic->>Business Logic:data calculations/transforms
+    Business Logic->>Business Logic: package data per user-facing contract
+    Business Logic->>Client: Request result
+  ```
+
 ## Licensing
 gh-management is available under the [MIT Licence](./LICENCE).
 
