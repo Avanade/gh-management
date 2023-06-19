@@ -37,8 +37,6 @@ This repository allows for basic self-service and automation of common workflows
     participant Database Provider
     participant GitHubAPI Service
     participant GitHubAPI
-    participant MSGraphAPI Service
-    participant MSGraphAPI
     Client->>Business Logic: HTTP request
     Business Logic->>Business Logic: input validation
     Business Logic->>Database Service: data request
@@ -52,12 +50,6 @@ This repository allows for basic self-service and automation of common workflows
     GitHubAPI->>GitHubAPI Service: raw data result
     GitHubAPI Service->>GitHubAPI Service: parse raw data
     GitHubAPI Service->>Business Logic: parsed data
-    Business Logic->>MSGraphAPI Service: MSGraphAPI request
-    MSGraphAPI Service->>MSGraphAPI Service: Prepare request
-    MSGraphAPI Service->>MSGraphAPI: Execute API call
-    MSGraphAPI->>MSGraphAPI Service: raw data result
-    MSGraphAPI Service->>MSGraphAPI Service: parse raw data
-    MSGraphAPI Service->>Business Logic: parsed data
     Business Logic->>Business Logic:data calculations/transforms
     Business Logic->>Business Logic: package data per user-facing contract
     Business Logic->>Client: Request result
