@@ -27,6 +27,10 @@ This repository allows for basic self-service and automation of common workflows
   - Request a new repository, and tracking of the ticket through approvals
   - Request permission for a code contribution of <50 lines
 
+## Architecture Overview
+![Architecture Diagram](./docs/diagrams/go-gh-mgmt.png)
+
+
 ## Example Call Flow
 
   ```mermaid
