@@ -58,6 +58,7 @@ This repository allows for basic self-service and automation of common workflows
     MSGraphAPI->>MSGraphAPI Service: raw data result
     MSGraphAPI Service->>MSGraphAPI Service: parse raw data
     MSGraphAPI Service->>Business Logic: parsed data
+    Business Logic->>Business Logic:data calculations/transforms
     Business Logic->>Business Logic: package data per user-facing contract
     Business Logic->>Client: Request result
   ```
