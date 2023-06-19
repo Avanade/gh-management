@@ -14,3 +14,8 @@
     - checks outside collaborators on each repository and sends a list to the repo admins
 - **RepoOwnserScan**
     - checks the number of admins on each repository then sends a list of repositories with less than 2 admins. Admins also receive an email encouraging them to add another admin to the repository.
+
+
+## Logic app workflows diagram
+
+![Logic App Workflows Diagram](../docs/diagrams/logicapp-workflows.png)
