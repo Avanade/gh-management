@@ -126,7 +126,7 @@ func RequestRepository(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	} else {
-		isOrgAllowInternalRepo, err := ghAPI.IsOrgAllowInternalRepo()
+		isEnterpriseOrg, err := ghAPI.IsEnterpriseOrg()
 		if err != nil {
 			HttpResponseError(w, http.StatusBadRequest, "There is a problem checking if the organization is enterprise or not.")
 			return
@@ -142,7 +142,7 @@ func RequestRepository(w http.ResponseWriter, r *http.Request) {
 		body.TFSProjectReference = repo.GetHTMLURL()
 		body.Visibility = 1
 
-		if isOrgAllowInternalRepo {
+		if isEnterpriseOrg {
 			innersource := os.Getenv("GH_ORG_INNERSOURCE")
 			err := ghAPI.SetProjectVisibility(repo.GetName(), "internal", innersource)
 			if err != nil {

@@ -53,14 +53,14 @@ func CreatePrivateGitHubRepository(name, description, requestor string) (*github
 	return repo, nil
 }
 
-func IsOrgAllowInternalRepo() (bool, error) {
+func IsEnterpriseOrg() (bool, error) {
 	client := CreateClient(os.Getenv("GH_TOKEN"))
 	orgName := os.Getenv("GH_ORG_INNERSOURCE")
 	org, _, err := client.Organizations.Get(context.Background(), orgName)
 	if err != nil {
 		return false, err
 	}
-	return *org.MembersCanCreateInternalRepos, err
+	return *org.Plan.Name == "enterprise", err
 }
 
 func AddCollaborator(owner string, repo string, user string, permission string) (*github.Response, error) {
