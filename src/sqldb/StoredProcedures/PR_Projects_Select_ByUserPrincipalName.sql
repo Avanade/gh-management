@@ -25,7 +25,8 @@ SELECT [p].[Id],
        [ApprovalStatusId],
        [v].[Name] AS 'Visibility',
        [p].[RepositorySource],
-	  [p].[TFSProjectReference]
+	     [p].[TFSProjectReference],
+       (SELECT STRING_AGG(r.Topic, ',') FROM dbo.RepoTopics AS r WHERE r.ProjectId=p.Id) AS "Topics"
   FROM 
    [dbo].[RepoOwners] AS RO
    LEFT JOIN [dbo].[Projects] AS p  ON  RO.ProjectId = p.Id

@@ -128,6 +128,14 @@
                   </p>
                 </div>
               </div>
+              <div class="flex flex-wrap mt-2">
+                <template x-if="repository.RepoTopics" >
+                  <template x-for="(topic) in repository.RepoTopics" >
+                    <div class="text-xs px-2 py-1 mr-2 mb-1 bg-sky-100 rounded-lg text-sky-800 items-center flex whitespace-nowrap" x-text="topic">
+                    </div>
+                  </template>
+                </template>
+              </div>
               <div class="mt-2 sm:flex">
                 <div class="sm:flex w-1/2">
                   <p class="flex items-center text-sm text-gray-500" title="Repository Source">
@@ -454,6 +462,14 @@
                     <span x-text="repository.Description"></span>
                   </p>
                 </div>
+              </div>
+              <div class="flex flex-wrap mt-2">
+                <template x-if="repository.RepoTopics" >
+                  <template x-for="(topic) in repository.RepoTopics" >
+                    <div class="text-xs px-2 py-1 mr-2 mb-1 bg-sky-100 rounded-lg text-sky-800 items-center flex whitespace-nowrap" x-text="topic">
+                    </div>
+                  </template>
+                </template>
               </div>
               <div class="mt-2 sm:flex">
                 <div class="sm:flex w-1/2">
