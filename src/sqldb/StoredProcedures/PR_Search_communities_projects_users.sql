@@ -25,9 +25,10 @@ SELECT
 				P.Id [ID]
 FROM	[dbo].[Projects] P
 	LEFT JOIN RepoOwners RO ON P.Id = RO.ProjectId  
+	LEFT JOIN RepoTopics RT ON P.Id = RT.ProjectId
 WHERE	[Name] LIKE '%'+@searchText+'%'
-		OR RO.UserPrincipalName
-		LIKE '%'+@searchText+'%'
+		OR RO.UserPrincipalName LIKE '%'+@searchText+'%'
+		OR RT.Topic LIKE '%'+@searchText+'%'
 
 UNION
 
