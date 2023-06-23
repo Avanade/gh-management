@@ -27,22 +27,23 @@ type RepositoryListDto struct {
 }
 
 type RepoDto struct {
-	Id                     int    `json:"Id"`
-	Name                   string `json:"Name"`
-	Description            string `json:"Description"`
-	IsArchived             bool   `json:"IsArchived"`
-	Created                string `json:"Created"`
-	RepositorySource       string `json:"RepositorySource"`
-	TFSProjectReference    string `json:"TFSProjectReference"`
-	Visibility             string `json:"Visibility"`
-	ApprovalStatus         bool   `json:"ApprovalStatus"`
-	ApprovalStatusId       int    `json:"ApprovalStatusId"`
-	CoOwner                string `json:"CoOwner"`
-	ConfirmAvaIP           bool   `json:"ConfirmAvaIP"`
-	ConfirmEnabledSecurity bool   `json:"ConfirmEnabledSecurity"`
-	CreatedBy              string `json:"CreatedBy"`
-	Modified               string `json:"Modified"`
-	ModifiedBy             string `json:"ModifiedBy"`
+	Id                     int      `json:"Id"`
+	Name                   string   `json:"Name"`
+	Description            string   `json:"Description"`
+	IsArchived             bool     `json:"IsArchived"`
+	Created                string   `json:"Created"`
+	RepositorySource       string   `json:"RepositorySource"`
+	TFSProjectReference    string   `json:"TFSProjectReference"`
+	Visibility             string   `json:"Visibility"`
+	ApprovalStatus         bool     `json:"ApprovalStatus"`
+	ApprovalStatusId       int      `json:"ApprovalStatusId"`
+	CoOwner                string   `json:"CoOwner"`
+	ConfirmAvaIP           bool     `json:"ConfirmAvaIP"`
+	ConfirmEnabledSecurity bool     `json:"ConfirmEnabledSecurity"`
+	CreatedBy              string   `json:"CreatedBy"`
+	Modified               string   `json:"Modified"`
+	ModifiedBy             string   `json:"ModifiedBy"`
+	Topics                 []string `json:"RepoTopics"`
 }
 
 type CollaboratorDto struct {
@@ -222,6 +223,12 @@ func GetUserProjects(w http.ResponseWriter, r *http.Request) {
 		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
+	}
+
+	for i := 0; i < len(list); i++ {
+		if projects[i]["Topics"] != nil {
+			list[i].Topics = strings.Split(projects[i]["Topics"].(string), ",")
+		}
 	}
 
 	w.WriteHeader(http.StatusOK)
@@ -460,6 +467,13 @@ func GetAllRepositories(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+
+	for i := 0; i < len(list); i++ {
+		if data[i]["Topics"] != nil {
+			list[i].Topics = strings.Split(data[i]["Topics"].(string), ",")
+		}
+	}
+
 	result := RepositoryListDto{
 		Data:  list,
 		Total: db.Repos_TotalCount_BySearchTerm(search),
