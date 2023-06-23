@@ -23,6 +23,7 @@ type Repo struct {
 	IsArchived          bool             `json:"archived"`
 	Visibility          string           `json:"visibility"`
 	TFSProjectReference string
+	Topics              []string
 }
 
 func CreateClient(token string) *github.Client {
@@ -160,6 +161,7 @@ func GetRepositoriesFromOrganization(org string) ([]Repo, error) {
 			IsArchived:          repo.GetArchived(),
 			Visibility:          repo.GetVisibility(),
 			TFSProjectReference: repo.GetHTMLURL(),
+			Topics:              repo.Topics,
 		}
 		repoList = append(repoList, r)
 	}
