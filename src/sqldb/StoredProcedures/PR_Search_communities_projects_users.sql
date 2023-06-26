@@ -17,18 +17,28 @@ WHERE	[Name] LIKE '%'+@searchText+'%'
 UNION
 
 SELECT 
-		'Repositories' [Source], [Name],
-			CASE
+'Repositories' [Source], [Name],
+			CONCAT(CASE
 				WHEN [CreatedBy] IS NULL THEN [RepositorySource]
 				ELSE [RepositorySource] + ' - ' + [CreatedBy]
-			END [Description],
-				P.Id [ID]
-FROM	[dbo].[Projects] P
-	LEFT JOIN RepoOwners RO ON P.Id = RO.ProjectId  
-	LEFT JOIN RepoTopics RT ON P.Id = RT.ProjectId
+			END,'|',(
+				SELECT STRING_AGG(Topic, ',') FROM RepoTopics WHERE ProjectId=Id
+			)) [Description],
+				Id [ID]
+FROM (SELECT 
+	Name, RepositorySource, CreatedBy, Id
+FROM 
+	Projects AS P 
+LEFT JOIN 
+	RepoOwners AS RO ON RO.ProjectId = P.Id
+LEFT JOIN 
+	RepoTopics RT ON RT.ProjectId = P.Id
 WHERE	[Name] LIKE '%'+@searchText+'%'
-		OR RO.UserPrincipalName LIKE '%'+@searchText+'%'
-		OR RT.Topic LIKE '%'+@searchText+'%'
+	OR 
+		RO.UserPrincipalName LIKE '%'+@searchText+'%'
+	OR 
+		RT.Topic LIKE '%'+@searchText+'%') AS Repository
+GROUP BY Name, CreatedBy, RepositorySource, Id
 
 UNION
 
@@ -37,7 +47,7 @@ SELECT
 		[Description],
 		c.[Id]
 FROM	[dbo].[Communities] c
-  	LEFT JOIN ApprovalStatus T ON c.ApprovalStatusId = T.Id
+	LEFT JOIN ApprovalStatus T ON c.ApprovalStatusId = T.Id
 WHERE	(
 			(
 				c.[Name] LIKE '%'+@searchText+'%'
