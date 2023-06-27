@@ -25,6 +25,9 @@
       </a>
     </div>
   </div>
+  <div x-data="popularTopics()">
+    <div x-html="template"></div>
+  </div>
   <div>
     <!-- SPINNER -->
     <div class="flex items-center justify-center h-40" x-show="showSpinner">
@@ -788,7 +791,131 @@
 
 
 <script src="/public/components/combobox.js"></script>
-<script>
+<script src="https://d3js.org/d3.v3.min.js"></script>
+<script src="https://rawgit.com/jasondavies/d3-cloud/master/build/d3.layout.cloud.js"></script>
+<script type="text/javascript">
+  const popularTopics = () => {
+    return {
+      topFivePopularTopics: [
+        // { Topics : '', Total : 0 }
+      ],
+      popularTopics: [
+        // { Topics : '', Total : 0 }
+      ],
+      totalClickedExpand: 0,
+      isShowWordCloud: false,
+      wordCloudButtonText: '+ Expand',
+      isDisabledExpandButton: false,
+      isShowWordCloudLoading: false,
+      wordCloud: undefined, // WORD CLOUD FUNCTION
+      async init() {
+        this.topFivePopularTopics = await getPopularTopics(5)
+      },
+      async onClickExpand() {
+        this.isDisabledExpandButton = true
+        this.isShowWordCloud = !this.isShowWordCloud
+        this.isShowWordCloudLoading = true
+
+        const getSizeBU = (totalPopularTopics) => {
+          if(totalPopularTopics > 46) {
+            console.log('1')
+            return 7
+            // return 1
+          }
+          else if(totalPopularTopics > 35) {
+            console.log('1.5')
+            return 8
+            // return 1.5
+          }
+          else if(totalPopularTopics > 20){
+            console.log('2')
+            return 9
+            // return 2
+          }
+          else {
+            console.log('3')
+            return 10
+            // return 3
+          }
+        }
+
+        const getSize = (total) => {
+          if(total > 46) {
+            console.log('1')
+            return 1
+            // return 1
+          }
+          else if(total > 35) {
+            console.log('1.5')
+            return 2
+            // return 1.5
+          }
+          else if(total > 20){
+            console.log('2')
+            return 3
+            // return 2
+          }
+          else {
+            console.log('3')
+            return 4
+            // return 3
+          }
+        }
+
+        if (this.totalClickedExpand == 0) {
+          const all = 0
+          this.totalClickedExpand++
+          this.popularTopics = await getPopularTopics(all)
+          console.log(this.popularTopics)
+          console.log(this.popularTopics.length)
+          const size = getSize(this.popularTopics.length)
+          this.wordCloud = wordCloud("#WordCloudContainer")
+          this.wordCloud.update(this.popularTopics.map((v, i) => {
+            return { text: v.Topic, size: v.Total * getSize(v.Total)}
+          }));
+        }
+        this.wordCloudButtonText = !this.isShowWordCloud ? '+ Expand' : '- Hide'
+        this.isDisabledExpandButton = false
+        this.isShowWordCloudLoading = false
+      },
+      template : `<div class="pt-1 pl-1">
+                    <span class="font-bold mr-2">Popular Topics</span>
+                    <template x-if="topFivePopularTopics.length != 0">
+                      <span>
+                        <template x-for="(popularTopic, index) in topFivePopularTopics">
+                          <span class="text-xs px-2 py-1 mr-2 bg-sky-100 rounded-lg text-sky-800 items-center" x-text="popularTopic.Topic">
+                          </span>
+                        </template>
+                        <span :disabled="isDisabledExpandButton" class="text-xs px-2 py-1 mr-2 rounded-lg border text-orange-500 items-center" @click="onClickExpand" x-text="wordCloudButtonText" >
+                        </span>
+                      </span>
+                    </template>
+                    <div class="flex items-center justify-center h-40" x-show="isShowWordCloudLoading">
+                      <svg role="status" class="w-8 h-8 mr-2 text-gray-200 animate-spin dark:text-gray-600 fill-[#FF5800]"
+                        viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path
+                          d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z"
+                          fill="currentColor" />
+                        <path
+                          d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z"
+                          fill="currentFill" />
+                      </svg>
+                    </div>
+                    <div class="w-full m-3" id="WordCloudContainer" x-show="isShowWordCloud" x-transition>
+                    </div>
+                  </div>`
+    }
+  }
+
+  const getPopularTopics = async (rowCount) => {
+    const res = await fetch(
+      `/api/repositories/topics/popular?offset=0&rowCount=${rowCount}`
+    )
+
+    const data = await res.json()
+    return data
+  }
+
   function myRepositoriesData() {
     return {
       showSpinner: true,
@@ -1080,5 +1207,81 @@
       },
     }
   }
+
+  function wordCloud(selector) {
+        var w = 960;
+        var h = 200;
+        var fill = d3.scale
+          .linear()
+          .domain([1, 10])
+          .range(["#FF5800", "#ff6615"]);
+
+        var svg = d3
+          .select(selector)
+          .append("svg")
+          .attr("width", "100%")
+          .attr("height", "100%")
+          .attr("viewBox", "0 0 " + w + " " + h)
+          .append("g")
+          .attr("transform", "translate(" + [w >> 1, h >> 1] + ")");
+
+        function draw(words) {
+          var cloud = svg.selectAll("g text").data(words, function (d) {
+            return d.text;
+          });
+
+          cloud
+            .enter()
+            .append("text")
+            .style("font-family", "sans-serif")
+            .style("fill", function (d, i) {
+              return fill(i);
+            })
+            .attr("text-anchor", "middle")
+            .attr("font-size", 1)
+            .text(function (d) {
+              return d.text;
+            });
+
+          cloud
+            .transition()
+            .duration(600)
+            .style("font-size", function (d) {
+              return d.size + "px";
+            })
+            .attr("transform", function (d) {
+              return "translate(" + [d.x, d.y] + ")rotate(" + d.rotate + ")";
+            })
+            .style("fill-opacity", 1);
+
+          cloud
+            .exit()
+            .transition()
+            .duration(200)
+            .style("fill-opacity", 1e-6)
+            .attr("font-size", 1)
+            .remove();
+        }
+
+        return {
+          update: function (words) {
+            d3.layout
+              .cloud()
+              .size([w, h])
+              .words(words)
+              .padding(5)
+              .rotate(function () {
+                return 0;
+              })
+              .spiral('rectangular')
+              .font("san-serif")
+              .fontSize(function (d) {
+                return d.size;
+              })
+              .on("end", draw)
+              .start();
+          }
+        }
+      }
 </script>
 {{ end }}

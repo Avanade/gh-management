@@ -578,34 +578,3 @@ func GetGitHubRepositories() ([]map[string]interface{}, error) {
 
 	return result, nil
 }
-
-func DeleteProjectTopics(projectId int) error {
-
-	db := ConnectDb()
-	defer db.Close()
-
-	param := map[string]interface{}{
-		"ProjectId": projectId,
-	}
-	_, err := db.ExecuteStoredProcedureWithResult("dbo.PR_RepoTopics_Delete_ByProjectId", param)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func InsertProjectTopics(projectId int, topic string) error {
-
-	db := ConnectDb()
-	defer db.Close()
-
-	param := map[string]interface{}{
-		"ProjectId": projectId,
-		"Topic":     topic,
-	}
-	_, err := db.ExecuteStoredProcedureWithResult("dbo.PR_RepoTopics_Insert", param)
-	if err != nil {
-		return err
-	}
-	return nil
-}
