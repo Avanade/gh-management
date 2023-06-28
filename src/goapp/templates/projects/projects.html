@@ -817,18 +817,23 @@
         this.isShowWordCloudLoading = true
 
         const getSize = (total) => {
-          const tempSize = 0
           if(total > 46) {
-            return 1 + tempSize
+            return 1
           }
           else if(total > 35) {
-            return 2 + tempSize
+            return 2
           }
           else if(total > 20){
-            return 3 + tempSize
+            return 3
+          }
+          else if(total > 10){
+            return 4
+          }
+          else if(total > 5){
+            return 5
           }
           else {
-            return 4 + tempSize
+            return 8
           }
         }
 
@@ -836,10 +841,10 @@
           const all = 0
           this.totalClickedExpand++
           this.popularTopics = await getPopularTopics(all)
-          const size = getSize(this.popularTopics.length)
           this.wordCloud = wordCloud("#WordCloudContainer")
+          const size = getSize(this.popularTopics[0].Total)
           this.wordCloud.update(this.popularTopics.map((v, i) => {
-            return { text: v.Topic, size: v.Total * getSize(v.Total)}
+            return { text: v.Topic, size: v.Total * size}
           }));
         }
         this.wordCloudButtonText = !this.isShowWordCloud ? 'Show more' : 'Show less'
