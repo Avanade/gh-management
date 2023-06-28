@@ -27,22 +27,23 @@ type RepositoryListDto struct {
 }
 
 type RepoDto struct {
-	Id                     int    `json:"Id"`
-	Name                   string `json:"Name"`
-	Description            string `json:"Description"`
-	IsArchived             bool   `json:"IsArchived"`
-	Created                string `json:"Created"`
-	RepositorySource       string `json:"RepositorySource"`
-	TFSProjectReference    string `json:"TFSProjectReference"`
-	Visibility             string `json:"Visibility"`
-	ApprovalStatus         bool   `json:"ApprovalStatus"`
-	ApprovalStatusId       int    `json:"ApprovalStatusId"`
-	CoOwner                string `json:"CoOwner"`
-	ConfirmAvaIP           bool   `json:"ConfirmAvaIP"`
-	ConfirmEnabledSecurity bool   `json:"ConfirmEnabledSecurity"`
-	CreatedBy              string `json:"CreatedBy"`
-	Modified               string `json:"Modified"`
-	ModifiedBy             string `json:"ModifiedBy"`
+	Id                     int      `json:"Id"`
+	Name                   string   `json:"Name"`
+	Description            string   `json:"Description"`
+	IsArchived             bool     `json:"IsArchived"`
+	Created                string   `json:"Created"`
+	RepositorySource       string   `json:"RepositorySource"`
+	TFSProjectReference    string   `json:"TFSProjectReference"`
+	Visibility             string   `json:"Visibility"`
+	ApprovalStatus         bool     `json:"ApprovalStatus"`
+	ApprovalStatusId       int      `json:"ApprovalStatusId"`
+	CoOwner                string   `json:"CoOwner"`
+	ConfirmAvaIP           bool     `json:"ConfirmAvaIP"`
+	ConfirmEnabledSecurity bool     `json:"ConfirmEnabledSecurity"`
+	CreatedBy              string   `json:"CreatedBy"`
+	Modified               string   `json:"Modified"`
+	ModifiedBy             string   `json:"ModifiedBy"`
+	Topics                 []string `json:"RepoTopics"`
 }
 
 type CollaboratorDto struct {
@@ -112,7 +113,7 @@ func RequestRepository(w http.ResponseWriter, r *http.Request) {
 	var existsDb bool
 	var existsGH bool
 	dashedProjName := strings.ReplaceAll(body.Name, " ", "-")
-	go func() { checkDB <- db.Projects_IsExisting(body.Name) }()
+	go func() { checkDB <- db.ProjectsIsExisting(body.Name) }()
 	go func() { b, _ := ghAPI.IsRepoExisting(dashedProjName); checkGH <- b }()
 
 	existsDb = <-checkDB
@@ -126,7 +127,7 @@ func RequestRepository(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	} else {
-		isOrgAllowInternalRepo, err := ghAPI.IsOrgAllowInternalRepo()
+		isEnterpriseOrg, err := ghAPI.IsEnterpriseOrg()
 		if err != nil {
 			HttpResponseError(w, http.StatusBadRequest, "There is a problem checking if the organization is enterprise or not.")
 			return
@@ -142,7 +143,7 @@ func RequestRepository(w http.ResponseWriter, r *http.Request) {
 		body.TFSProjectReference = repo.GetHTMLURL()
 		body.Visibility = 1
 
-		if isOrgAllowInternalRepo {
+		if isEnterpriseOrg {
 			innersource := os.Getenv("GH_ORG_INNERSOURCE")
 			err := ghAPI.SetProjectVisibility(repo.GetName(), "internal", innersource)
 			if err != nil {
@@ -222,6 +223,12 @@ func GetUserProjects(w http.ResponseWriter, r *http.Request) {
 		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
+	}
+
+	for i := 0; i < len(list); i++ {
+		if projects[i]["Topics"] != nil {
+			list[i].Topics = strings.Split(projects[i]["Topics"].(string), ",")
+		}
 	}
 
 	w.WriteHeader(http.StatusOK)
@@ -451,7 +458,7 @@ func GetAllRepositories(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Get repository list
-	data := db.Repos_Select_ByOffsetAndFilter(offset, search)
+	data := db.ReposSelectByOffsetAndFilter(offset, search)
 	s, _ := json.Marshal(data)
 	var list []RepoDto
 	err = json.Unmarshal(s, &list)
@@ -460,9 +467,16 @@ func GetAllRepositories(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+
+	for i := 0; i < len(list); i++ {
+		if data[i]["Topics"] != nil {
+			list[i].Topics = strings.Split(data[i]["Topics"].(string), ",")
+		}
+	}
+
 	result := RepositoryListDto{
 		Data:  list,
-		Total: db.Repos_TotalCount_BySearchTerm(search),
+		Total: db.ReposTotalCountBySearchTerm(search),
 	}
 
 	w.WriteHeader(http.StatusOK)
@@ -611,7 +625,7 @@ func IndexOrgRepos(w http.ResponseWriter, r *http.Request) {
 }
 
 func ClearOrgRepos(w http.ResponseWriter, r *http.Request) {
-	projects, err := db.Projects_ByRepositorySource("GitHub")
+	projects, err := db.ProjectsByRepositorySource("GitHub")
 	if err != nil {
 		fmt.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -917,11 +931,13 @@ func IndexRepo(repo ghAPI.Repo) {
 		"Created":             repo.Created.Format("2006-01-02 15:04:05"),
 	}
 
-	isExisting := db.Projects_IsExisting_By_GithubId(repo.GithubId)
+	isExisting := db.ProjectsIsExistingByGithubId(repo.GithubId)
+	var projectId int
 
 	if isExisting {
 		project := db.GetProjectByGithubId(repo.GithubId)
 		param["Id"] = project[0]["Id"]
+		projectId = int(project[0]["Id"].(int64))
 
 		err := db.ProjectUpdateByImport(param)
 		if err != nil {
@@ -960,6 +976,7 @@ func IndexRepo(repo ghAPI.Repo) {
 
 		project := db.GetProjectByGithubId(repo.GithubId)
 		param["Id"] = project[0]["Id"]
+		projectId = int(project[0]["Id"].(int64))
 
 		// Get direct admin collaborators
 		repoUrl := strings.Replace(repo.TFSProjectReference, "https://", "", -1)
@@ -981,6 +998,20 @@ func IndexRepo(repo ghAPI.Repo) {
 				if len(users) > 0 {
 					db.RepoOwnersInsert(project[0]["Id"].(int64), users[0]["UserPrincipalName"].(string))
 				}
+			}
+		}
+	}
+	if len(repo.Topics) > 0 {
+		err := db.DeleteProjectTopics(projectId)
+		if err != nil {
+			log.Println(err.Error())
+			return
+		}
+		for i := 0; i < len(repo.Topics); i++ {
+			err := db.InsertProjectTopics(projectId, repo.Topics[i])
+			if err != nil {
+				log.Println(err.Error())
+				return
 			}
 		}
 	}
@@ -1136,6 +1167,38 @@ func AddCollaboratorToRequestedRepo(user string, repo string, repoId int64) erro
 		}
 	}
 	return nil
+}
+
+func GetPopularTopics(w http.ResponseWriter, r *http.Request) {
+	params := r.URL.Query()
+	offset, err := strconv.Atoi(params["offset"][0])
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	rowCount, err := strconv.Atoi(params["rowCount"][0])
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	result, err := db.GetPopularTopics(offset, rowCount)
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Header().Set("Content-Type", "application/json")
+	jsonResp, err := json.Marshal(result)
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.Write(jsonResp)
 }
 
 func HttpResponseError(w http.ResponseWriter, code int, errorMessage string) {

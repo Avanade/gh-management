@@ -5,7 +5,7 @@ CREATE PROCEDURE [dbo].[PR_Repositories_Select_ByOffsetAndFilter](
 AS
 BEGIN
     SET NOCOUNT ON
-	SELECT [p].[Id],
+SELECT DISTINCT [p].[Id],
         [p].[Name],
         [p].[Description],
         [p].[IsArchived],
@@ -14,11 +14,14 @@ BEGIN
         [p].[TFSProjectReference],
         [v].[Name] AS "Visibility",
 		    [p].[CoOwner],
-        [p].[Createdby]
+        [p].[Createdby],
+        (SELECT STRING_AGG(r.Topic, ',') FROM dbo.RepoTopics AS r WHERE r.ProjectId=p.Id) AS "Topics"
 	  FROM [dbo].[Projects] AS p
 	  LEFT JOIN [dbo].[Visibility] AS v ON p.VisibilityId = v.Id
+    LEFT JOIN [dbo].[RepoTopics] AS rt ON rt.ProjectId = p.Id
     WHERE
-		p.Name LIKE '%'+@search+'%'
+		p.Name LIKE '%'+@search+'%' OR
+		rt.Topic LIKE '%'+@search+'%'
     ORDER BY
 		[p].[Name]
 	  OFFSET @Offset ROWS 

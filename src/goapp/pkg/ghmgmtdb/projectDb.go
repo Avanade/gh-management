@@ -205,7 +205,7 @@ func PRProjectsUpdateLegalQuestions(projectRequest ProjectRequest, user string) 
 	}
 }
 
-func Projects_ByRepositorySource(repositorySource string) ([]map[string]interface{}, error) {
+func ProjectsByRepositorySource(repositorySource string) ([]map[string]interface{}, error) {
 	db := ConnectDb()
 	defer db.Close()
 
@@ -220,7 +220,7 @@ func Projects_ByRepositorySource(repositorySource string) ([]map[string]interfac
 	return result, nil
 }
 
-func Projects_IsExisting(name string) bool {
+func ProjectsIsExisting(name string) bool {
 
 	db := ConnectDb()
 	defer db.Close()
@@ -244,7 +244,7 @@ func Projects_IsExisting(name string) bool {
 	}
 }
 
-func Projects_IsExisting_By_GithubId(githubId int64) bool {
+func ProjectsIsExistingByGithubId(githubId int64) bool {
 
 	db := ConnectDb()
 	defer db.Close()
@@ -460,7 +460,7 @@ func GetProjectByGithubId(githubId int64) []map[string]interface{} {
 	return result
 }
 
-func Repos_Select_ByOffsetAndFilter(offset int, search string) []map[string]interface{} {
+func ReposSelectByOffsetAndFilter(offset int, search string) []map[string]interface{} {
 	db := ConnectDb()
 	defer db.Close()
 
@@ -473,7 +473,7 @@ func Repos_Select_ByOffsetAndFilter(offset int, search string) []map[string]inte
 	return result
 }
 
-func Repos_TotalCount_BySearchTerm(search string) int {
+func ReposTotalCountBySearchTerm(search string) int {
 	db := ConnectDb()
 	defer db.Close()
 
