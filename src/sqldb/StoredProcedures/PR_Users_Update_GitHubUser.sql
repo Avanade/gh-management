@@ -32,6 +32,26 @@ BEGIN
             SELECT CONVERT(BIT, 1) [IsValid], @GitHubId [GitHubId], @GitHubUser [GitHubUser]
             RETURN 1
         END
+    ELSE IF EXISTS(
+        SELECT UserPrincipalName
+        FROM Users
+        WHERE
+        UserPrincipalName = @UserPrincipalName
+        AND GitHubId = @GitHubId AND GitHubUser != GitHubUser
+    )
+        BEGIN
+            UPDATE 
+                    [dbo].[Users]
+            SET
+                    [GitHubUser] = @GitHubUser,
+                    [Modified] = GETDATE(),
+                    [ModifiedBy] = @UserPrincipalName
+            WHERE  
+                    [UserPrincipalName] = @UserPrincipalName
+
+            SELECT CONVERT(BIT, 1) [IsValid], @GitHubId [GitHubId], @GitHubUser [GitHubUser]
+            RETURN 1
+        END
     ELSE
         BEGIN
             IF EXISTS (

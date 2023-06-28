@@ -836,8 +836,6 @@
           const all = 0
           this.totalClickedExpand++
           this.popularTopics = await getPopularTopics(all)
-          console.log(this.popularTopics)
-          console.log(this.popularTopics.length)
           const size = getSize(this.popularTopics.length)
           this.wordCloud = wordCloud("#WordCloudContainer")
           this.wordCloud.update(this.popularTopics.map((v, i) => {
