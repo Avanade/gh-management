@@ -25,7 +25,8 @@ BEGIN
 			[Created],
 			[CreatedBy],
 			[Modified],
-			[ModifiedBy]
+			[ModifiedBy],
+			[LastGithubLogin]
 			)
 		VALUES
 			(
@@ -37,7 +38,8 @@ BEGIN
 			GETDATE(),
 			@UserPrincipalName,
 			GETDATE(),
-			@UserPrincipalName
+			@UserPrincipalName,
+			GETDATE()
 			)
 	END
 END

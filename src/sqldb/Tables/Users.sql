@@ -10,5 +10,6 @@
     [Created] DATETIME NOT NULL DEFAULT getdate(), 
     [CreatedBy] VARCHAR(100) NULL, 
     [Modified] DATETIME NOT NULL DEFAULT getdate(), 
-    [ModifiedBy] VARCHAR(100) NULL
+    [ModifiedBy] VARCHAR(100) NULL,
+    [LastGithubLogin] DATETIME NOT NULL DEFAULT getdate()
 )

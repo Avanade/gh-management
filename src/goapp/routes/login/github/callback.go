@@ -93,7 +93,11 @@ func GithubCallbackHandler(w http.ResponseWriter, r *http.Request) {
 	session.Values["ghIsDirect"] = isDirect
 	session.Values["ghIsEnterpriseMember"] = isEnterpriseMember
 
-	CheckMembership(userPrincipalName, ghUser, &id)
+	lastGithubLogin := result["LastGithubLogin"].(time.Time)
+
+	if !DateEqual(lastGithubLogin) && result["IsValid"].(bool) {
+		CheckMembership(userPrincipalName, ghUser, &id)
+	}
 
 	err = session.Save(r, w)
 	if err != nil {
@@ -197,4 +201,10 @@ func EmailAcceptOrgInvitation(userEmail, ghUsername string, isInnersourceOrgMemb
 func OrgInvitationLink(org string) string {
 	url := fmt.Sprintf("https://github.com/orgs/%s/invitation", org)
 	return fmt.Sprintf("<a href='%s'>%s</a>", url, org)
+}
+
+func DateEqual(date time.Time) bool {
+	y1, m1, d1 := time.Now().Date()
+	y2, m2, d2 := date.Date()
+	return y1 == y2 && m1 == m2 && d1 == d2
 }
