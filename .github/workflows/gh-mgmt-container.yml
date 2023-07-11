@@ -18,32 +18,11 @@ env:
   APPSERVICE_NAME: ${{github.event.inputs.selected_environment}}-gh-mgmt-app
 
 jobs:
-  get-azure-credentials:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-
-      - name: Setup Azure Credentials and AD
-        run: |
-          echo CLIENT ID                          : ${{fromJSON(secrets.AZURE_CREDENTIALS)['clientId']}}
-          echo CLIENT SECRET                      : ${{fromJSON(secrets.AZURE_CREDENTIALS)['clientSecret']}}
-          echo SUBSCRIPTION ID                    : ${{fromJSON(secrets.AZURE_CREDENTIALS)['subscriptionId']}}
-          echo TENANT ID                          : ${{fromJSON(secrets.AZURE_CREDENTIALS)['tenantId']}}
-          echo ACTIVE DIRECTORY ENDPOINT URL      : ${{fromJSON(secrets.AZURE_CREDENTIALS)['activeDirectoryEndpointUrl']}}
-          echo RESOURCE MANAGER ENDPOINT URL      : ${{fromJSON(secrets.AZURE_CREDENTIALS)['resourceManagerEndpointUrl']}}
-          echo ACTIVE DIRECTORY GRAPH RESOURCE ID : ${{fromJSON(secrets.AZURE_CREDENTIALS)['activeDirectoryGraphResourceId']}}
-          echo SQL MANAGEMENT ENDPOINT URL        : ${{fromJSON(secrets.AZURE_CREDENTIALS)['sqlManagementEndpointUrl']}}
-          echo GALLERY ENDPOINT URL               : ${{fromJSON(secrets.AZURE_CREDENTIALS)['galleryEndpointUrl']}}
-          echo MANAGEMENT ENDPOINT URL            : ${{fromJSON(secrets.AZURE_CREDENTIALS)['managementEndpointUrl']}}
-
-
-
   build-and-deploy-in-acr:
     runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: ./src/goapp
-    if: ${{'0' == '1'}}
     steps:
       - uses: actions/checkout@v2
       - uses: azure/docker-login@v1
