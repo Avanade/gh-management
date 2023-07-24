@@ -23,7 +23,7 @@ SELECT DISTINCT [p].[Id],
 		p.Name LIKE '%'+@search+'%' OR
 		rt.Topic LIKE '%'+@search+'%'
     ORDER BY
-		[p].[Name]
+		[p].[Created] DESC
 	  OFFSET @Offset ROWS 
 	  FETCH NEXT 15 ROWS ONLY
 END
