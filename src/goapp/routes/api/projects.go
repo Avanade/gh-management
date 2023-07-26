@@ -40,6 +40,7 @@ type RepoDto struct {
 	CoOwner                string   `json:"CoOwner"`
 	ConfirmAvaIP           bool     `json:"ConfirmAvaIP"`
 	ConfirmEnabledSecurity bool     `json:"ConfirmEnabledSecurity"`
+	ECATTID                int      `json:"ECATTID"`
 	CreatedBy              string   `json:"CreatedBy"`
 	Modified               string   `json:"Modified"`
 	ModifiedBy             string   `json:"ModifiedBy"`
