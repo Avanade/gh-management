@@ -102,10 +102,10 @@
                         id="option-0" role="option" tabindex="-1">
                         <!-- ADD OR UPDATE ECATT ID -->
                         <template x-if="repository.ECATTID === 0">
-                          <span @click="" class="block truncate">Add ECATT ID</span>  
+                          <span @click="showECATTFormModal=true; form.repoId=repository.Id" class="block truncate">Add ECATT ID</span>  
                         </template>
                         <template x-if="repository.ECATTID !== 0">
-                          <span @click="" class="block truncate">Update ECATT ID</span>  
+                          <span @click="showECATTFormModal=true; form.repoId=repository.Id" class="block truncate">Update ECATT ID</span>  
                         </template>
                       </li>
                       <li x-show="repository.Visibility !== 'Private' && !repository.IsArchived"
@@ -826,20 +826,54 @@
     </div>
   </template>
 
-  <!-- <div x-data="modal({
-    title: 'TITLE',
-    body: 'BODY',
-    footer: 'FOOTER'
-  })">
-    <div x-html="template">
+  <template x-if="showECATTFormModal">
+    <div class="relative z-10" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+      <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity opacity-100"></div>
+    
+      <div class="fixed inset-0 z-10 overflow-y-auto">
+        <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+          <div class="relative transform overflow-hidden rounded-lg bg-white px-4 pb-4 pt-5 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg sm:p-6 opacity-100 translate-y-0 sm:scale-100">
+            
+            <div class="mt-1 sm:mt-2">
+              <h3 class="text-base font-semibold leading-6 text-gray-900" id="modal-title">SUBMIT ECATT ID</h3>
+              <div class="mt-2">
+                <form class="space-y-6" onsubmit="event.preventDefault()" autocomplete="off">
+                  <div class="space-y-8 divide-y divide-gray-200 sm:space-y-5">
+                      <div class="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-t sm:border-gray-200 sm:pt-5">
+                          <label for="EcattId" class="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2"> ECATT ID </label>
+                          <div class="mt-1 sm:mt-0 sm:col-span-2">
+                              <input x-model="form.ecattId" type="text" name="ECATTID" id="ECATTID"
+                                  class="block w-full shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm border-gray-300 rounded-md" />
+                          </div>
+                      </div>
+                  </div>
+                  <div class="mt-5 sm:mt-6">
+                    <button 
+                      @click="submitECATTID()"
+                      type="submit" 
+                      class="inline-flex justify-center rounded-md bg-[#FF5800] px-5 mr-2 py-2 text-sm font-semibold text-white shadow-sm  focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:bg-slate-300">
+                      Submit
+                    </button>
+                    <button
+                      @click="showECATTFormModal=false; form.ecattId=''"
+                      type="button"
+                      class="inline-flex justify-center rounded-md bg-gray-200 px-3 py-2 text-sm font-semibold text-gray-700 shadow-sm  focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
+                      Cancel
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
     </div>
-  </div> -->
-</div>
+  </template>
 
 
 <script src="/public/components/combobox.js"></script>
 <script src="/public/components/popup.js"></script>
-<script src="/public/components/modal.js"></script>
 <script src="https://d3js.org/d3.v3.min.js"></script>
 <script src="https://rawgit.com/jasondavies/d3-cloud/master/build/d3.layout.cloud.js"></script>
 <script type="text/javascript">
@@ -957,12 +991,14 @@
         repoId: '',
         ghUsername: '',
         permission: '',
+        ecattId: ''
       },
       combobox: {
         ghUsername: false,
         permission: false
       },
       showAddCollaboratorModal: false,
+      showECATTFormModal: false,
       githubUsers: [],
       mode: 'add',
       getUserRepositories() {
@@ -1227,6 +1263,15 @@
         Alpine.store('master').confirmationModal.update(title, message, f)
         Alpine.store('master').confirmationModal.show()
       },
+      submitECATTID() {
+        const data = {
+          ECATTID: parseInt(this.form.ecattId, 10)
+        }
+
+        Alpine.store('master').modal.show()
+        Alpine.store('master').putData(`/api/repositories/${this.form.repoId}/ecattid`, data,
+          "The ECATT ID was successfully submitted", "Close", "/repositories")
+      }
     }
   }
 
