@@ -185,6 +185,23 @@ func PRProjectsUpdate(project Project, user string) (id int64) {
 	return
 }
 
+func UpdateProjectEcattIdById(id, ecattId int, user string) error {
+	db := ConnectDb()
+	defer db.Close()
+
+	param := map[string]interface{}{
+		"Id":         id,
+		"ECATTID":    ecattId,
+		"ModifiedBy": user,
+	}
+
+	_, err := db.ExecuteStoredProcedure("PR_Projects_Update_ECATTID_ById", param)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func PRProjectsUpdateLegalQuestions(projectRequest ProjectRequest, user string) {
 
 	db := ConnectDb()
