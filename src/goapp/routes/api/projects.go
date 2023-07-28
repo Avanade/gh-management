@@ -40,6 +40,7 @@ type RepoDto struct {
 	CoOwner                string   `json:"CoOwner"`
 	ConfirmAvaIP           bool     `json:"ConfirmAvaIP"`
 	ConfirmEnabledSecurity bool     `json:"ConfirmEnabledSecurity"`
+	ECATTID                int      `json:"ECATTID"`
 	CreatedBy              string   `json:"CreatedBy"`
 	Modified               string   `json:"Modified"`
 	ModifiedBy             string   `json:"ModifiedBy"`
@@ -189,6 +190,34 @@ func UpdateRepositoryById(w http.ResponseWriter, r *http.Request) {
 	}
 
 	db.PRProjectsUpdate(body, username.(string))
+
+	w.WriteHeader(http.StatusOK)
+}
+
+func UpdateRepositoryEcattIdById(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+
+	sessionaz, _ := session.Store.Get(r, "auth-session")
+	iprofile := sessionaz.Values["profile"]
+	profile := iprofile.(map[string]interface{})
+	username := profile["preferred_username"]
+
+	id, err := strconv.Atoi(vars["id"])
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	var body RepoDto
+	err = json.NewDecoder(r.Body).Decode(&body)
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	db.UpdateProjectEcattIdById(id, body.ECATTID, username.(string))
 
 	w.WriteHeader(http.StatusOK)
 }

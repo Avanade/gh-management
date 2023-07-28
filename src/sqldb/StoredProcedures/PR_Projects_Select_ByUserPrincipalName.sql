@@ -26,6 +26,7 @@ SELECT [p].[Id],
        [v].[Name] AS 'Visibility',
        [p].[RepositorySource],
 	     [p].[TFSProjectReference],
+       [p].[ECATTID],
        (SELECT STRING_AGG(r.Topic, ',') FROM dbo.RepoTopics AS r WHERE r.ProjectId=p.Id) AS "Topics"
   FROM 
    [dbo].[RepoOwners] AS RO
