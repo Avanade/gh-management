@@ -309,8 +309,9 @@ class="cursor-pointer focus:outline-none"> */}}
           <p class="mb-1">${descriptionList[0]}</p>
           <template x-if="topics.length != 1">
             <template x-for="topic in topics">
-              <span class="text-xs mr-1 px-2 py-1 bg-sky-100 rounded-lg text-sky-800 items-center" x-text="topic">
-              </span>
+              <a x-bind:href="'/search?search=' + topic">
+                <span class="text-xs mr-1 px-2 py-1 bg-sky-100 rounded-lg text-sky-800 items-center" x-text="topic"></span>
+              </a>
             </template>
           </template>
         `
