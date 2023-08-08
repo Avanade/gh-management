@@ -7,13 +7,19 @@ AS
 	SELECT
 		'Users' [Source],
 		[Name],
-		UserPrincipalName [Description],
+		CONCAT(
+			'User Principal Name: ', [UserPrincipalName], ',',
+			'Github ID: ', CASE WHEN [GitHubId] IS NULL THEN 'N/A' ELSE [GitHubId] END, ',',
+			'Github User: ', CASE WHEN [GitHubUser] IS NULL THEN 'N/A' ELSE [GitHubUser] END
+		) [Description],
 		Users.GitHubId [Id]
 	FROM 
 		[dbo].[Users]
 	WHERE	
 		[Name] LIKE '%'+@searchText+'%' OR 
-		[UserPrincipalName] LIKE '%'+@searchText+'%'
+		[UserPrincipalName] LIKE '%'+@searchText+'%' OR
+		[GitHubId] LIKE '%'+@searchText+'%' OR
+		[GitHubUser] LIKE '%'+@searchText+'%'
 UNION
 	SELECT 
 		'Repositories' [Source], 
