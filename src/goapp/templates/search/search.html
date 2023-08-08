@@ -282,7 +282,6 @@ class="cursor-pointer focus:outline-none"> */}}
       get FilteredSearchBy() {
         if (this.SelectedSource == 'All') {
           return this.SearchBy
-          consol
           console.log("true searchby")
         } else {
           return this.SearchBy.filter(i => i.Source == this.SelectedSource)
