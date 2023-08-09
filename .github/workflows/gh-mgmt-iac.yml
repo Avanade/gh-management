@@ -124,12 +124,20 @@ jobs:
               echo "AD_TENANT_ID=${{secrets.AD_TENANT_ID}}" >> $GITHUB_ENV
               echo "AD_CLIENT_ID=${{secrets.AD_CLIENT_ID}}" >> $GITHUB_ENV
               echo "AD_CLIENT_SECRET=${{secrets.AD_CLIENT_SECRET}}" >> $GITHUB_ENV
+              echo "NOTIFICATION_TENANT_ID=${{secrets.NOTIFICATION_TENANT_ID}}" >> $GITHUB_ENV
+              echo "NOTIFICATION_CLIENT_ID=${{secrets.NOTIFICATION_CLIENT_ID}}" >> $GITHUB_ENV
+              echo "NOTIFICATION_CLIENT_SECRET=${{secrets.NOTIFICATION_CLIENT_SECRET}}" >> $GITHUB_ENV
+              echo "NOTIFICATION_SCOPE=${{secrets.NOTIFICATION_SCOPE}}" >> $GITHUB_ENV
             ;;
           "prod")
               echo "HOME_URL=${{ secrets.CUSTOM_DOMAIN_PROD}}" >> $GITHUB_ENV
               echo "AD_TENANT_ID=${{secrets.AD_TENANT_ID_PROD}}" >> $GITHUB_ENV
               echo "AD_CLIENT_ID=${{secrets.AD_CLIENT_ID_PROD}}" >> $GITHUB_ENV
               echo "AD_CLIENT_SECRET=${{secrets.AD_CLIENT_SECRET_PROD}}" >> $GITHUB_ENV
+              echo "NOTIFICATION_TENANT_ID=${{secrets.NOTIFICATION_TENANT_ID_PROD}}" >> $GITHUB_ENV
+              echo "NOTIFICATION_CLIENT_ID=${{secrets.NOTIFICATION_CLIENT_ID_PROD}}" >> $GITHUB_ENV
+              echo "NOTIFICATION_CLIENT_SECRET=${{secrets.NOTIFICATION_CLIENT_SECRET_PROD}}" >> $GITHUB_ENV
+              echo "NOTIFICATION_SCOPE=${{secrets.NOTIFICATION_SCOPE_PROD}}" >> $GITHUB_ENV
             ;;
         esac
 
@@ -218,6 +226,10 @@ jobs:
         parameters.appServiceSettings.value.TENANT_ID : ${{ env.AD_TENANT_ID }}
         parameters.appServiceSettings.value.CLIENT_ID : ${{ env.AD_CLIENT_ID }}
         parameters.appServiceSettings.value.CLIENT_SECRET : ${{ env.AD_CLIENT_SECRET }}
+        parameters.appServiceSettings.value.NOTIFICATION_TENANT_ID : ${{ env.NOTIFICATION_TENANT_ID }}
+        parameters.appServiceSettings.value.NOTIFICATION_CLIENT_ID : ${{ env.NOTIFICATION_CLIENT_ID }}
+        parameters.appServiceSettings.value.NOTIFICATION_CLIENT_SECRET : ${{ env.NOTIFICATION_CLIENT_SECRET }}
+        parameters.appServiceSettings.value.NOTIFICATION_SCOPE : ${{ env.NOTIFICATION_SCOPE }}
         parameters.appServiceSettings.value.HOME_URL : ${{env.HOME_URL}}
         parameters.appServiceSettings.value.EMAIL_ENDPOINT : ${{ secrets.EMAIL_ENDPOINT }}
         parameters.appServiceSettings.value.GH_CLIENT_ID : ${{ env.GH_CLIENT_ID }}

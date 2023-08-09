@@ -21,6 +21,12 @@
                 "TENANT_ID":"",
                 "CLIENT_ID":"",
                 "CLIENT_SECRET":"",
+
+                "NOTIFICATION_TENANT_ID":"",
+                "NOTIFICATION_CLIENT_ID":"",
+                "NOTIFICATION_CLIENT_SECRET":"",
+                "NOTIFICATION_SCOPE":"",
+
                 "HOME_URL":"",
                 "GH_CLIENT_ID":"",
                 "GH_CLIENT_SECRET":"",
