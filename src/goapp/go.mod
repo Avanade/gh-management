@@ -31,6 +31,7 @@ require (
 
 require (
 	github.com/golang/protobuf v1.4.2 // indirect
+	github.com/google/uuid v1.3.0
 	github.com/gorilla/sessions v1.2.1
 	github.com/lestrrat-go/jwx v1.2.26
 	github.com/pquerna/cachecontrol v0.1.0 // indirect

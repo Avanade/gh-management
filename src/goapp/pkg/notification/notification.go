@@ -1,6 +1,7 @@
 package notification
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -9,6 +10,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 type Response struct {
@@ -16,6 +19,81 @@ type Response struct {
 	ExpiresIn    int    `json:"expires_in"`
 	ExtExpiresIn int    `json:"ext_expires_in"`
 	AccessToken  string `json:"access_token"`
+}
+
+type Notification interface {
+	Send() error
+}
+
+type MessageType string
+
+const (
+	RepositoryHasBeenCreatedMessageType          MessageType = "InnerSource.RepositoryHasBeenCreated"
+	OrganizationInvitationMessageType            MessageType = "InnerSource.OrganizationInvitation"
+	OrganizationInvitationExpireMessageType      MessageType = "InnerSource.OrganizationInvitationExpire"
+	RepositoryPublicApprovalMessageType          MessageType = "InnerSource.RepositoryPublicApproval"
+	RepositoryPublicApprovalRemainderMessageType MessageType = "InnerSource.RepositoryPublicApprovalRemainder"
+	RepositoryPublicApprovalProvidedMessageType  MessageType = "InnerSource.RepositoryPublicApprovalProvided"
+	ActivityAddedRequestForHelpMessageType       MessageType = "InnerSource.ActivityAddedRrequestForHelp"
+)
+
+type Contract struct {
+	RequestId   string
+	MessageType MessageType
+	MessageBody interface{}
+}
+
+type RepositoryHasBeenCreatedMessageBody struct {
+	Recipients       []string
+	GitHubAppLink    string
+	OrganizationName string
+	RepoLink         string
+	RepoName         string
+}
+
+func (messageBody RepositoryHasBeenCreatedMessageBody) Send() error {
+	contract := Contract{
+		RequestId:   uuid.New().String(),
+		MessageType: RepositoryHasBeenCreatedMessageType,
+		MessageBody: messageBody,
+	}
+
+	err := SendNotification(contract)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func SendNotification(c Contract) error {
+	accessToken, err := GetToken()
+	if err != nil {
+		return err
+	}
+
+	client := &http.Client{
+		Timeout: time.Second * 10,
+	}
+
+	postBody, _ := json.Marshal(c)
+
+	reqBody := bytes.NewBuffer(postBody)
+
+	req, err := http.NewRequest("POST", os.Getenv("NOTIFICATION_ENDPOINT"), reqBody)
+	if err != nil {
+		return err
+	}
+
+	req.Header.Add("Authorization", "Bearer "+accessToken)
+	req.Header.Add("Content-Type", "application/json")
+	response, err := client.Do(req)
+	if err != nil {
+		return err
+	}
+	defer response.Body.Close()
+
+	return nil
 }
 
 func GetToken() (string, error) {
