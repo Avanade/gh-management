@@ -18,12 +18,7 @@ type Response struct {
 	AccessToken  string `json:"access_token"`
 }
 
-type Header struct {
-	key   string
-	value string
-}
-
-func GetToken() (*Response, error) {
+func GetToken() (string, error) {
 	urlPath := fmt.Sprintf("https://login.microsoftonline.com/%s/oauth2/v2.0/token", os.Getenv("NOTIFICATION_TENANT_ID"))
 	client := &http.Client{
 		Timeout: time.Second * 10,
@@ -38,22 +33,22 @@ func GetToken() (*Response, error) {
 
 	req, err := http.NewRequest("POST", urlPath, strings.NewReader(encodedData))
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
 	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 	req.Header.Add("Content-Length", strconv.Itoa(len(data.Encode())))
 	res, err := client.Do(req)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 	defer res.Body.Close()
 
 	var response Response
 	err = json.NewDecoder(res.Body).Decode(&response)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
-	return &response, nil
+	return response.AccessToken, nil
 }
