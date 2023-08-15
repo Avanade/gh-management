@@ -31,6 +31,7 @@
                 "GH_CLIENT_ID":"",
                 "GH_CLIENT_SECRET":"",
                 "GH_TOKEN":"",
+                "GH_APP_LINK":"",
                 "GHMGMTDB_CONNECTION_STRING":"",
                 "EMAIL_ENDPOINT":"",
                 
