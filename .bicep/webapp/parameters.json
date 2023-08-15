@@ -26,6 +26,7 @@
                 "NOTIFICATION_CLIENT_ID":"",
                 "NOTIFICATION_CLIENT_SECRET":"",
                 "NOTIFICATION_SCOPE":"",
+                "NOTIFICATION_RECIPIENT":"",
 
                 "HOME_URL":"",
                 "GH_CLIENT_ID":"",

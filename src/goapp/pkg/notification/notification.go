@@ -52,6 +52,12 @@ type RepositoryHasBeenCreatedMessageBody struct {
 }
 
 func (messageBody RepositoryHasBeenCreatedMessageBody) Send() error {
+	if os.Getenv("NOTIFICATION_RECIPIENT") != "" {
+		messageBody.Recipients = []string{
+			os.Getenv("NOTIFICATION_RECIPIENT"),
+		}
+	}
+
 	contract := Contract{
 		RequestId:   uuid.New().String(),
 		MessageType: RepositoryHasBeenCreatedMessageType,

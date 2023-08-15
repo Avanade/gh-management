@@ -13,7 +13,6 @@ import (
 	"sync"
 	"time"
 
-	"main/pkg/envvar"
 	db "main/pkg/ghmgmtdb"
 	ghAPI "main/pkg/github"
 	"main/pkg/notification"
@@ -171,10 +170,13 @@ func RequestRepository(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+		recipients := []string{
+			username.(string),
+			body.Coowner,
+		}
+
 		messageBody := notification.RepositoryHasBeenCreatedMessageBody{
-			Recipients: []string{
-				envvar.GetEnvVar("NOTIFICATION_RECIPIENT", ""),
-			},
+			Recipients:       recipients,
 			GitHubAppLink:    os.Getenv("GH_APP_LINK"),
 			OrganizationName: innersource,
 			RepoLink:         repo.GetName(),
