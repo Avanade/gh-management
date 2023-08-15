@@ -175,7 +175,7 @@ func RequestRepository(w http.ResponseWriter, r *http.Request) {
 			Recipients: []string{
 				envvar.GetEnvVar("NOTIFICATION_RECIPIENT", ""),
 			},
-			GitHubAppLink:    "",
+			GitHubAppLink:    os.Getenv("GH_APP_LINK"),
 			OrganizationName: innersource,
 			RepoLink:         repo.GetName(),
 			RepoName:         repo.GetHTMLURL(),
