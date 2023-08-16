@@ -39,7 +39,7 @@ BEGIN
 			@UserPrincipalName,
 			GETDATE(),
 			@UserPrincipalName,
-			GETDATE()
+			DATEADD(day, -1, GETDATE())
 			)
 	END
 END
