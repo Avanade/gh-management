@@ -149,7 +149,7 @@
               <span x-text="results.Name"></span>
             </td>
             <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-              <div x-html="displayDescription(results.Description)"> </div>
+              <div x-html="displayDescription(results.Source, results.Description)"> </div>
             </td>
           </tr>
         </template>
@@ -251,7 +251,6 @@ class="cursor-pointer focus:outline-none"> */}}
             .then(r => {
               r.json().then(body => {
                 this.SearchBy = body
-
                 if (this.SearchBy == null) {
                   this.SearchBySources = ['']
                   this.showEntryBtn = false
@@ -262,13 +261,6 @@ class="cursor-pointer focus:outline-none"> */}}
                   console.log('`' + this.form.searchList + '`', "is not found")
                   console.log('SearchBy is ', this.SearchBy)
                   return
-                }
-
-                {
-                  {
-                    /* history.replaceState(null, null, '/search?search=' + this.form.searchList);
-                                            location.replace = '/search?search=' + this.form.searchList */
-                  }
                 }
 
                 this.SearchBySources = ['All']
@@ -296,18 +288,40 @@ class="cursor-pointer focus:outline-none"> */}}
           console.log("false selected source")
         }
       },
-      displayDescription(description){
-        descriptionList = description.split('|')
+      displayDescription(source, description){
+        switch (source) {
+          case "Users":
+            return this.displayUserDescription(description)
+          break;
+          case "Repositories":
+            return this.displayRepositoryDescription(description)
+          break;
+          case "Communities":
+            return this.displayCommunityDescription(description)
+          break;
+        }
+      },
+      displayRepositoryDescription(description){
+        console.log(description)
+        const descriptionList = description.split('|')
         topics = descriptionList.length > 1 ? descriptionList[1].split(',') : []
         return `
           <p class="mb-1">${descriptionList[0]}</p>
           <template x-if="topics.length != 1">
             <template x-for="topic in topics">
-              <span class="text-xs mr-1 px-2 py-1 bg-sky-100 rounded-lg text-sky-800 items-center" x-text="topic">
-              </span>
+              <a x-bind:href="'/search?search=' + topic">
+                <span class="text-xs mr-1 px-2 py-1 bg-sky-100 rounded-lg text-sky-800 items-center" x-text="topic"></span>
+              </a>
             </template>
           </template>
         `
+      },
+      displayUserDescription(description){
+        userInfos = description.split(',');
+        return userInfos.map(v => `<p class="mb-1">${v}</p>`).toString().replaceAll(',', '')
+      },
+      displayCommunityDescription(description){
+        return `<p class="mb-1">${description}</p>`
       },
       isShowEntriesBtn() {
         if (this.SearchBy = '') {
