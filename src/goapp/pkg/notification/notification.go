@@ -187,6 +187,9 @@ func sendNotification(c Contract) error {
 
 	req.Header.Add("Authorization", "Bearer "+token.AccessToken)
 	req.Header.Add("Content-Type", "application/json")
+
+	log.Printf("REQUEST ID : %s | MESSAGE TYPE : %s", c.RequestId, c.MessageType)
+
 	response, err := client.Do(req)
 	if err != nil {
 		return err

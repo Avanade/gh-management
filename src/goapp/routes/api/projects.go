@@ -179,8 +179,8 @@ func RequestRepository(w http.ResponseWriter, r *http.Request) {
 			Recipients:       recipients,
 			GitHubAppLink:    os.Getenv("GH_APP_LINK"),
 			OrganizationName: innersource,
-			RepoLink:         repo.GetName(),
-			RepoName:         repo.GetHTMLURL(),
+			RepoLink:         repo.GetHTMLURL(),
+			RepoName:         repo.GetName(),
 		}
 		err = messageBody.Send()
 		if err != nil {
