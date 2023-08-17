@@ -15,6 +15,7 @@ import (
 
 	db "main/pkg/ghmgmtdb"
 	ghAPI "main/pkg/github"
+	"main/pkg/notification"
 	"main/pkg/session"
 
 	"github.com/google/go-github/v50/github"
@@ -144,8 +145,8 @@ func RequestRepository(w http.ResponseWriter, r *http.Request) {
 		body.TFSProjectReference = repo.GetHTMLURL()
 		body.Visibility = 1
 
+		innersource := os.Getenv("GH_ORG_INNERSOURCE")
 		if isEnterpriseOrg {
-			innersource := os.Getenv("GH_ORG_INNERSOURCE")
 			err := ghAPI.SetProjectVisibility(repo.GetName(), "internal", innersource)
 			if err != nil {
 				return
@@ -167,6 +168,23 @@ func RequestRepository(w http.ResponseWriter, r *http.Request) {
 			log.Println(err.Error())
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
+		}
+
+		recipients := []string{
+			username.(string),
+			body.Coowner,
+		}
+
+		messageBody := notification.RepositoryHasBeenCreatedMessageBody{
+			Recipients:       recipients,
+			GitHubAppLink:    os.Getenv("GH_APP_LINK"),
+			OrganizationName: innersource,
+			RepoLink:         repo.GetHTMLURL(),
+			RepoName:         repo.GetName(),
+		}
+		err = messageBody.Send()
+		if err != nil {
+			log.Println(err.Error())
 		}
 
 		w.WriteHeader(http.StatusOK)

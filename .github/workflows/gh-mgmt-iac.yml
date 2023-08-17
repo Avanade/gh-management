@@ -128,6 +128,7 @@ jobs:
               echo "NOTIFICATION_CLIENT_ID=${{secrets.NOTIFICATION_CLIENT_ID}}" >> $GITHUB_ENV
               echo "NOTIFICATION_CLIENT_SECRET=${{secrets.NOTIFICATION_CLIENT_SECRET}}" >> $GITHUB_ENV
               echo "NOTIFICATION_SCOPE=${{secrets.NOTIFICATION_SCOPE}}" >> $GITHUB_ENV
+              echo "NOTIFICATION_ENDPOINT=${{secrets.NOTIFICATION_ENDPOINT}}" >> $GITHUB_ENV
             ;;
           "prod")
               echo "HOME_URL=${{ secrets.CUSTOM_DOMAIN_PROD}}" >> $GITHUB_ENV
@@ -138,6 +139,7 @@ jobs:
               echo "NOTIFICATION_CLIENT_ID=${{secrets.NOTIFICATION_CLIENT_ID_PROD}}" >> $GITHUB_ENV
               echo "NOTIFICATION_CLIENT_SECRET=${{secrets.NOTIFICATION_CLIENT_SECRET_PROD}}" >> $GITHUB_ENV
               echo "NOTIFICATION_SCOPE=${{secrets.NOTIFICATION_SCOPE_PROD}}" >> $GITHUB_ENV
+              echo "NOTIFICATION_ENDPOINT=${{secrets.NOTIFICATION_ENDPOINT_PROD}}" >> $GITHUB_ENV
             ;;
         esac
 
@@ -230,6 +232,7 @@ jobs:
         parameters.appServiceSettings.value.NOTIFICATION_CLIENT_ID : ${{ env.NOTIFICATION_CLIENT_ID }}
         parameters.appServiceSettings.value.NOTIFICATION_CLIENT_SECRET : ${{ env.NOTIFICATION_CLIENT_SECRET }}
         parameters.appServiceSettings.value.NOTIFICATION_SCOPE : ${{ env.NOTIFICATION_SCOPE }}
+        parameters.appServiceSettings.value.NOTIFICATION_ENDPOINT : ${{ env.NOTIFICATION_ENDPOINT }}
         parameters.appServiceSettings.value.HOME_URL : ${{env.HOME_URL}}
         parameters.appServiceSettings.value.EMAIL_ENDPOINT : ${{ secrets.EMAIL_ENDPOINT }}
         parameters.appServiceSettings.value.GH_CLIENT_ID : ${{ env.GH_CLIENT_ID }}

@@ -11,6 +11,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 var (
@@ -43,6 +45,31 @@ type Contract struct {
 	RequestId   string
 	MessageType MessageType
 	MessageBody interface{}
+}
+
+type RepositoryHasBeenCreatedMessageBody struct {
+	Recipients       []string
+	GitHubAppLink    string
+	OrganizationName string
+	RepoLink         string
+	RepoName         string
+}
+
+func (messageBody RepositoryHasBeenCreatedMessageBody) Send() error {
+	messageBody.Recipients = setRecipients(messageBody.Recipients)
+
+	contract := Contract{
+		RequestId:   uuid.New().String(),
+		MessageType: RepositoryHasBeenCreatedMessageType,
+		MessageBody: messageBody,
+	}
+
+	err := sendNotification(contract)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func requestNewToken() (*Response, error) {
@@ -105,7 +132,16 @@ func setToken() error {
 	return nil
 }
 
-func SendNotification(c Contract) error {
+func setRecipients(recipients []string) []string {
+	if os.Getenv("NOTIFICATION_RECIPIENT") != "" {
+		return []string{
+			os.Getenv("NOTIFICATION_RECIPIENT"),
+		}
+	}
+	return recipients
+}
+
+func sendNotification(c Contract) error {
 	err := setToken()
 	if err != nil {
 		return err
@@ -126,6 +162,9 @@ func SendNotification(c Contract) error {
 
 	req.Header.Add("Authorization", "Bearer "+token.AccessToken)
 	req.Header.Add("Content-Type", "application/json")
+
+	log.Printf("REQUEST ID : %s | MESSAGE TYPE : %s", c.RequestId, c.MessageType)
+
 	response, err := client.Do(req)
 	if err != nil {
 		return err
