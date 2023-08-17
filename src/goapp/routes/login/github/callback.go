@@ -72,12 +72,6 @@ func GithubCallbackHandler(w http.ResponseWriter, r *http.Request) {
 	userPrincipalName := fmt.Sprintf("%s", azProfile["preferred_username"])
 	ghId := strconv.FormatFloat(p["id"].(float64), 'f', 0, 64)
 	ghUser := fmt.Sprintf("%s", p["login"])
-	id, err := strconv.ParseInt(ghId, 10, 64)
-	if err != nil {
-		log.Println(err.Error())
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
 
 	result, err := db.UpdateUserGithub(userPrincipalName, ghId, ghUser, 0)
 	if err != nil {
@@ -96,7 +90,7 @@ func GithubCallbackHandler(w http.ResponseWriter, r *http.Request) {
 	lastGithubLogin := result["LastGithubLogin"].(time.Time)
 
 	if !DateEqual(lastGithubLogin) && result["IsValid"].(bool) {
-		CheckMembership(userPrincipalName, ghUser, &id)
+		CheckMembership(userPrincipalName, ghUser)
 	}
 
 	err = session.Save(r, w)
@@ -147,6 +141,8 @@ func GithubForceSaveHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	session.Values["ghIsValid"] = result["IsValid"].(bool)
 
+	CheckMembership(userPrincipalName, ghUser)
+
 	err = session.Save(r, w)
 	if err != nil {
 		log.Println(err.Error())
@@ -157,7 +153,7 @@ func GithubForceSaveHandler(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
-func CheckMembership(userPrincipalName, ghusername string, id *int64) {
+func CheckMembership(userPrincipalName, ghusername string) {
 	token := os.Getenv("GH_TOKEN")
 	inner, outer, _ := ghAPI.OrganizationsIsMember(token, ghusername)
 	if !inner {
