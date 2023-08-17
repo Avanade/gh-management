@@ -177,7 +177,7 @@ func NotificationAcceptOrgInvitation(userEmail, ghUsername string, isInnersource
 			Recipients: []string{
 				userEmail,
 			},
-			InvitationLink:   innersourceInvitationLink,
+			InvitationLink:   fmt.Sprintf("https://github.com/orgs/%s/invitation", innersourceInvitationLink),
 			OrganizationLink: fmt.Sprintf("https://github.com/%s", innersourceName),
 			OrganizationName: innersourceName,
 		}
@@ -193,7 +193,7 @@ func NotificationAcceptOrgInvitation(userEmail, ghUsername string, isInnersource
 			Recipients: []string{
 				userEmail,
 			},
-			InvitationLink:   opensourceInvitationLink,
+			InvitationLink:   fmt.Sprintf("https://github.com/orgs/%s/invitation", opensourceInvitationLink),
 			OrganizationLink: fmt.Sprintf("https://github.com/%s", opensourceName),
 			OrganizationName: opensourceName,
 		}
