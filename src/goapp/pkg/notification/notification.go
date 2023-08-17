@@ -39,6 +39,7 @@ type MessageType string
 
 const (
 	RepositoryHasBeenCreatedMessageType MessageType = "InnerSource.RepositoryHasBeenCreated"
+	OrganizationInvitationMessageType   MessageType = "InnerSource.OrganizationInvitation"
 )
 
 type Contract struct {
@@ -55,16 +56,36 @@ type RepositoryHasBeenCreatedMessageBody struct {
 	RepoName         string
 }
 
+type OrganizationInvitationMessageBody struct {
+	Recipients       []string
+	InvitationLink   string
+	OrganizationLink string
+	OrganizationName string
+}
+
 func (messageBody RepositoryHasBeenCreatedMessageBody) Send() error {
-	if os.Getenv("NOTIFICATION_RECIPIENT") != "" {
-		messageBody.Recipients = []string{
-			os.Getenv("NOTIFICATION_RECIPIENT"),
-		}
-	}
+	messageBody.Recipients = setRecipients(messageBody.Recipients)
 
 	contract := Contract{
 		RequestId:   uuid.New().String(),
 		MessageType: RepositoryHasBeenCreatedMessageType,
+		MessageBody: messageBody,
+	}
+
+	err := sendNotification(contract)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (messageBody OrganizationInvitationMessageBody) Send() error {
+	messageBody.Recipients = setRecipients(messageBody.Recipients)
+
+	contract := Contract{
+		RequestId:   uuid.New().String(),
+		MessageType: OrganizationInvitationMessageType,
 		MessageBody: messageBody,
 	}
 
@@ -134,6 +155,15 @@ func setToken() error {
 	token.ExpiresIn = expiresin
 
 	return nil
+}
+
+func setRecipients(recipients []string) []string {
+	if os.Getenv("NOTIFICATION_RECIPIENT") != "" {
+		return []string{
+			os.Getenv("NOTIFICATION_RECIPIENT"),
+		}
+	}
+	return recipients
 }
 
 func sendNotification(c Contract) error {

@@ -14,6 +14,7 @@ import (
 	db "main/pkg/ghmgmtdb"
 	ghAPI "main/pkg/github"
 	"main/pkg/msgraph"
+	"main/pkg/notification"
 	"main/pkg/session"
 
 	"golang.org/x/oauth2"
@@ -163,7 +164,44 @@ func CheckMembership(userPrincipalName, ghusername string) {
 		ghAPI.OrganizationInvitation(token, ghusername, os.Getenv("GH_ORG_OPENSOURCE"))
 
 	}
+
+	NotificationAcceptOrgInvitation(userPrincipalName, ghusername, inner, outer)
 	EmailAcceptOrgInvitation(userPrincipalName, ghusername, inner, outer)
+}
+
+func NotificationAcceptOrgInvitation(userEmail, ghUsername string, isInnersourceOrgMember, isOpensourceOrgMember bool) {
+	if !isInnersourceOrgMember {
+		innersourceName := os.Getenv("GH_ORG_INNERSOURCE")
+		innersourceInvitationLink := OrgInvitationLink(innersourceName)
+		messageBody := notification.OrganizationInvitationMessageBody{
+			Recipients: []string{
+				userEmail,
+			},
+			InvitationLink:   innersourceInvitationLink,
+			OrganizationLink: fmt.Sprintf("https://github.com/%s", innersourceName),
+			OrganizationName: innersourceName,
+		}
+		err := messageBody.Send()
+		if err != nil {
+			log.Println(err.Error())
+		}
+	}
+	if !isOpensourceOrgMember {
+		opensourceName := os.Getenv("GH_ORG_OPENSOURCE")
+		opensourceInvitationLink := OrgInvitationLink(opensourceName)
+		messageBody := notification.OrganizationInvitationMessageBody{
+			Recipients: []string{
+				userEmail,
+			},
+			InvitationLink:   opensourceInvitationLink,
+			OrganizationLink: fmt.Sprintf("https://github.com/%s", opensourceName),
+			OrganizationName: opensourceName,
+		}
+		err := messageBody.Send()
+		if err != nil {
+			log.Println(err.Error())
+		}
+	}
 }
 
 func EmailAcceptOrgInvitation(userEmail, ghUsername string, isInnersourceOrgMember, isOpensourceOrgMember bool) {
