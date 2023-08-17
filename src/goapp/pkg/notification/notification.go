@@ -159,9 +159,7 @@ func setToken() error {
 
 func setRecipients(recipients []string) []string {
 	if os.Getenv("NOTIFICATION_RECIPIENT") != "" {
-		return []string{
-			os.Getenv("NOTIFICATION_RECIPIENT"),
-		}
+		return strings.Split(os.Getenv("NOTIFICATION_RECIPIENT"), ",")
 	}
 	return recipients
 }
