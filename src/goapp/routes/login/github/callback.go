@@ -172,12 +172,11 @@ func CheckMembership(userPrincipalName, ghusername string) {
 func NotificationAcceptOrgInvitation(userEmail, ghUsername string, isInnersourceOrgMember, isOpensourceOrgMember bool) {
 	if !isInnersourceOrgMember {
 		innersourceName := os.Getenv("GH_ORG_INNERSOURCE")
-		innersourceInvitationLink := OrgInvitationLink(innersourceName)
 		messageBody := notification.OrganizationInvitationMessageBody{
 			Recipients: []string{
 				userEmail,
 			},
-			InvitationLink:   fmt.Sprintf("https://github.com/orgs/%s/invitation", innersourceInvitationLink),
+			InvitationLink:   fmt.Sprintf("https://github.com/orgs/%s/invitation", innersourceName),
 			OrganizationLink: fmt.Sprintf("https://github.com/%s", innersourceName),
 			OrganizationName: innersourceName,
 		}
@@ -188,12 +187,11 @@ func NotificationAcceptOrgInvitation(userEmail, ghUsername string, isInnersource
 	}
 	if !isOpensourceOrgMember {
 		opensourceName := os.Getenv("GH_ORG_OPENSOURCE")
-		opensourceInvitationLink := OrgInvitationLink(opensourceName)
 		messageBody := notification.OrganizationInvitationMessageBody{
 			Recipients: []string{
 				userEmail,
 			},
-			InvitationLink:   fmt.Sprintf("https://github.com/orgs/%s/invitation", opensourceInvitationLink),
+			InvitationLink:   fmt.Sprintf("https://github.com/orgs/%s/invitation", opensourceName),
 			OrganizationLink: fmt.Sprintf("https://github.com/%s", opensourceName),
 			OrganizationName: opensourceName,
 		}
