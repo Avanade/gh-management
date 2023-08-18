@@ -10,6 +10,7 @@ import (
 
 	"main/pkg/email"
 	db "main/pkg/ghmgmtdb"
+	"main/pkg/notification"
 	"main/pkg/session"
 
 	"github.com/gorilla/mux"
@@ -119,6 +120,18 @@ func CreateActivity(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if body.Help.Id != 0 {
+		messageBody := notification.ActivityAddedRequestForHelpMessageBody{
+			Recipients: []string{
+				os.Getenv("EMAIL_SUPPORT"),
+			},
+			ActivityLink: fmt.Sprintf("https://ava-gh-mgmt-test.azurewebsites.net/activities/view/%d", communityActivityId),
+			UserName:     username,
+		}
+		err = messageBody.Send()
+		if err != nil {
+			log.Println(err.Error())
+		}
+
 		errHelp := processHelp(communityActivityId, username, body.Help)
 		if errHelp != nil {
 			log.Println(err.Error())
