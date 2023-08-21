@@ -1161,6 +1161,19 @@ func ApprovalSystemRequest(data db.ProjectApproval) error {
 				return err
 			}
 
+			messageBody := notification.RepositoryPublicApprovalMessageBody{
+				Recipients:   []string{},
+				ApprovalLink: fmt.Sprintf("%s/response/%s/%s/%s/1", os.Getenv("APPROVAL_SYSTEM_APP_URL"), postParams.ApplicationId, postParams.ApplicationModuleId, res.ItemId),
+				ApprovalType: data.ApprovalType,
+				RepoLink:     fmt.Sprintf("https://github.com/" + os.Getenv("GH_ORG_INNERSOURCE") + "/" + data.ProjectName),
+				RepoName:     data.ProjectName,
+				UserName:     data.RequesterName,
+			}
+			err = messageBody.Send()
+			if err != nil {
+				log.Println(err.Error())
+			}
+
 			db.ProjectsApprovalUpdateGUID(data.Id, res.ItemId)
 		}
 	}

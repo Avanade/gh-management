@@ -39,6 +39,7 @@ type MessageType string
 
 const (
 	RepositoryHasBeenCreatedMessageType MessageType = "InnerSource.RepositoryHasBeenCreated"
+	RepositoryPublicApprovalMessageType MessageType = "InnerSource.RepositoryPublicApproval"
 )
 
 type Contract struct {
@@ -55,12 +56,38 @@ type RepositoryHasBeenCreatedMessageBody struct {
 	RepoName         string
 }
 
+type RepositoryPublicApprovalMessageBody struct {
+	Recipients   []string
+	ApprovalLink string
+	ApprovalType string
+	RepoLink     string
+	RepoName     string
+	UserName     string
+}
+
 func (messageBody RepositoryHasBeenCreatedMessageBody) Send() error {
 	messageBody.Recipients = setRecipients(messageBody.Recipients)
 
 	contract := Contract{
 		RequestId:   uuid.New().String(),
 		MessageType: RepositoryHasBeenCreatedMessageType,
+		MessageBody: messageBody,
+	}
+
+	err := sendNotification(contract)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (messageBody RepositoryPublicApprovalMessageBody) Send() error {
+	messageBody.Recipients = setRecipients(messageBody.Recipients)
+
+	contract := Contract{
+		RequestId:   uuid.New().String(),
+		MessageType: RepositoryPublicApprovalMessageType,
 		MessageBody: messageBody,
 	}
 
