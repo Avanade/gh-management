@@ -39,8 +39,10 @@ type MessageType string
 
 const (
 	RepositoryHasBeenCreatedMessageType         MessageType = "InnerSource.RepositoryHasBeenCreated"
+	RepositoryPublicApprovalMessageType         MessageType = "InnerSource.RepositoryPublicApproval"
 	OrganizationInvitationMessageType           MessageType = "InnerSource.OrganizationInvitation"
 	RepositoryPublicApprovalProvidedMessageType MessageType = "InnerSource.RepositoryPublicApprovalProvided"
+	ActivityAddedRequestForHelpMessageType      MessageType = "InnerSource.ActivityAddedRrequestForHelp"
 )
 
 type Contract struct {
@@ -69,6 +71,21 @@ type RepositoryPublicApprovalProvidedMessageBody struct {
 	CommunityPortalLink string
 	RepoLink            string
 	RepoName            string
+}
+
+type RepositoryPublicApprovalMessageBody struct {
+	Recipients   []string
+	ApprovalLink string
+	ApprovalType string
+	RepoLink     string
+	RepoName     string
+	UserName     string
+}
+
+type ActivityAddedRequestForHelpMessageBody struct {
+	Recipients   []string
+	ActivityLink string
+	UserName     string
 }
 
 func (messageBody RepositoryHasBeenCreatedMessageBody) Send() error {
@@ -111,6 +128,40 @@ func (messageBody RepositoryPublicApprovalProvidedMessageBody) Send() error {
 	contract := Contract{
 		RequestId:   uuid.New().String(),
 		MessageType: RepositoryPublicApprovalProvidedMessageType,
+		MessageBody: messageBody,
+	}
+
+	err := sendNotification(contract)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (messageBody RepositoryPublicApprovalMessageBody) Send() error {
+	messageBody.Recipients = setRecipients(messageBody.Recipients)
+
+	contract := Contract{
+		RequestId:   uuid.New().String(),
+		MessageType: RepositoryPublicApprovalMessageType,
+		MessageBody: messageBody,
+	}
+
+	err := sendNotification(contract)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (messageBody ActivityAddedRequestForHelpMessageBody) Send() error {
+	messageBody.Recipients = setRecipients(messageBody.Recipients)
+
+	contract := Contract{
+		RequestId:   uuid.New().String(),
+		MessageType: ActivityAddedRequestForHelpMessageType,
 		MessageBody: messageBody,
 	}
 
