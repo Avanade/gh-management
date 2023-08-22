@@ -39,6 +39,7 @@ type MessageType string
 
 const (
 	RepositoryHasBeenCreatedMessageType    MessageType = "InnerSource.RepositoryHasBeenCreated"
+	RepositoryPublicApprovalMessageType    MessageType = "InnerSource.RepositoryPublicApproval"
 	OrganizationInvitationMessageType      MessageType = "InnerSource.OrganizationInvitation"
 	ActivityAddedRequestForHelpMessageType MessageType = "InnerSource.ActivityAddedRrequestForHelp"
 )
@@ -62,6 +63,15 @@ type OrganizationInvitationMessageBody struct {
 	InvitationLink   string
 	OrganizationLink string
 	OrganizationName string
+}
+
+type RepositoryPublicApprovalMessageBody struct {
+	Recipients   []string
+	ApprovalLink string
+	ApprovalType string
+	RepoLink     string
+	RepoName     string
+	UserName     string
 }
 
 type ActivityAddedRequestForHelpMessageBody struct {
@@ -93,6 +103,23 @@ func (messageBody OrganizationInvitationMessageBody) Send() error {
 	contract := Contract{
 		RequestId:   uuid.New().String(),
 		MessageType: OrganizationInvitationMessageType,
+		MessageBody: messageBody,
+	}
+
+	err := sendNotification(contract)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (messageBody RepositoryPublicApprovalMessageBody) Send() error {
+	messageBody.Recipients = setRecipients(messageBody.Recipients)
+
+	contract := Contract{
+		RequestId:   uuid.New().String(),
+		MessageType: RepositoryPublicApprovalMessageType,
 		MessageBody: messageBody,
 	}
 
