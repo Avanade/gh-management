@@ -49,6 +49,7 @@ type ProjectApproval struct {
 	RejectUrl                  string
 	ApproveText                string
 	RejectText                 string
+	ApprovalDate               time.Time
 }
 
 type Project struct {
@@ -379,6 +380,11 @@ func GetProjectApprovalsByProjectId(id int64) (projectApprovals []ProjectApprova
 			ApprovalDescription:       v["ApprovalDescription"].(string),
 			RequestStatus:             v["RequestStatus"].(string),
 		}
+		if v["ApprovalDate"] != nil {
+			data.ApprovalDate = v["ApprovalDate"].(time.Time)
+		}
+
+		fmt.Println(data.ApprovalDate.IsZero())
 		projectApprovals = append(projectApprovals, data)
 	}
 

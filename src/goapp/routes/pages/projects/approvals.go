@@ -336,7 +336,20 @@ func CheckAllRequests(id int64, host string) {
 
 		repoResp, _ := ghAPI.GetRepository(repo, newOwner)
 		db.UpdateTFSProjectReferenceById(id, repoResp.GetHTMLURL())
+	}
 
+	// Check if all requests are responded by approvers.
+	allResponded := true
+
+	for _, a := range projectApprovals {
+		if a.ApprovalDate.IsZero() {
+			allResponded = false
+			break
+		}
+	}
+
+	// Send notification if all approvers responded to the approval request
+	if allResponded {
 		repoOwners, err := db.GetRepoOwnersRecordByRepoId(id)
 		if err != nil {
 			log.Println(err.Error())
@@ -349,11 +362,13 @@ func CheckAllRequests(id int64, host string) {
 			recipients = append(recipients, repoOwners[i].UserPrincipalName)
 		}
 
+		project := db.GetProjectById(id)
+
 		messageBody := notification.RepositoryPublicApprovalProvidedMessageBody{
 			Recipients:          recipients,
 			CommunityPortalLink: fmt.Sprint(envvar.GetEnvVar("SCHEME", "https"), "://", host, "/repositories"),
-			RepoLink:            repoResp.GetHTMLURL(),
-			RepoName:            repoResp.GetName(),
+			RepoLink:            project[0]["Name"].(string),
+			RepoName:            project[0]["TFSProjectReference"].(string),
 		}
 		err = messageBody.Send()
 		if err != nil {
