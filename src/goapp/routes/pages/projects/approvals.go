@@ -367,8 +367,8 @@ func CheckAllRequests(id int64, host string) {
 		messageBody := notification.RepositoryPublicApprovalProvidedMessageBody{
 			Recipients:          recipients,
 			CommunityPortalLink: fmt.Sprint(envvar.GetEnvVar("SCHEME", "https"), "://", host, "/repositories"),
-			RepoLink:            project[0]["Name"].(string),
-			RepoName:            project[0]["TFSProjectReference"].(string),
+			RepoLink:            project[0]["TFSProjectReference"].(string),
+			RepoName:            project[0]["Name"].(string),
 		}
 		err = messageBody.Send()
 		if err != nil {
