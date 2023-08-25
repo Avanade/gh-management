@@ -125,7 +125,7 @@ func CreateActivity(w http.ResponseWriter, r *http.Request) {
 				os.Getenv("EMAIL_SUPPORT"),
 			},
 			ActivityLink: fmt.Sprintf("https://ava-gh-mgmt-test.azurewebsites.net/activities/view/%d", communityActivityId),
-			UserName:     username,
+			UserName:     profile["name"].(string),
 		}
 		err = messageBody.Send()
 		if err != nil {
