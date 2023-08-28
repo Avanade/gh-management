@@ -38,10 +38,11 @@ type MessageBody interface {
 type MessageType string
 
 const (
-	RepositoryHasBeenCreatedMessageType    MessageType = "InnerSource.RepositoryHasBeenCreated"
-	RepositoryPublicApprovalMessageType    MessageType = "InnerSource.RepositoryPublicApproval"
-	OrganizationInvitationMessageType      MessageType = "InnerSource.OrganizationInvitation"
-	ActivityAddedRequestForHelpMessageType MessageType = "InnerSource.ActivityAddedRrequestForHelp"
+	RepositoryHasBeenCreatedMessageType         MessageType = "InnerSource.RepositoryHasBeenCreated"
+	RepositoryPublicApprovalMessageType         MessageType = "InnerSource.RepositoryPublicApproval"
+	OrganizationInvitationMessageType           MessageType = "InnerSource.OrganizationInvitation"
+	RepositoryPublicApprovalProvidedMessageType MessageType = "InnerSource.RepositoryPublicApprovalProvided"
+	ActivityAddedRequestForHelpMessageType      MessageType = "InnerSource.ActivityAddedRrequestForHelp"
 )
 
 type Contract struct {
@@ -63,6 +64,13 @@ type OrganizationInvitationMessageBody struct {
 	InvitationLink   string
 	OrganizationLink string
 	OrganizationName string
+}
+
+type RepositoryPublicApprovalProvidedMessageBody struct {
+	Recipients          []string
+	CommunityPortalLink string
+	RepoLink            string
+	RepoName            string
 }
 
 type RepositoryPublicApprovalMessageBody struct {
@@ -103,6 +111,23 @@ func (messageBody OrganizationInvitationMessageBody) Send() error {
 	contract := Contract{
 		RequestId:   uuid.New().String(),
 		MessageType: OrganizationInvitationMessageType,
+		MessageBody: messageBody,
+	}
+
+	err := sendNotification(contract)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (messageBody RepositoryPublicApprovalProvidedMessageBody) Send() error {
+	messageBody.Recipients = setRecipients(messageBody.Recipients)
+
+	contract := Contract{
+		RequestId:   uuid.New().String(),
+		MessageType: RepositoryPublicApprovalProvidedMessageType,
 		MessageBody: messageBody,
 	}
 
@@ -237,7 +262,8 @@ func sendNotification(c Contract) error {
 	req.Header.Add("Authorization", "Bearer "+token.AccessToken)
 	req.Header.Add("Content-Type", "application/json")
 
-	log.Printf("REQUEST ID : %s | MESSAGE TYPE : %s", c.RequestId, c.MessageType)
+	contract, _ := json.Marshal(c)
+	fmt.Println(string(contract))
 
 	response, err := client.Do(req)
 	if err != nil {

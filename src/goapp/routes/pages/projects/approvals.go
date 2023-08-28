@@ -10,8 +10,10 @@ import (
 	"time"
 
 	"main/pkg/email"
+	"main/pkg/envvar"
 	db "main/pkg/ghmgmtdb"
 	ghAPI "main/pkg/github"
+	"main/pkg/notification"
 )
 
 type ApprovalReAssignRequestBody struct {
@@ -302,12 +304,12 @@ func ProcessApprovalProjects(r *http.Request, module string) error {
 	if module == "projects" {
 		projectApproval := db.GetProjectApprovalByGUID(req.ItemId)
 
-		go CheckAllRequests(projectApproval.ProjectId)
+		go CheckAllRequests(projectApproval.ProjectId, r.Host)
 	}
 	return nil
 }
 
-func CheckAllRequests(id int64) {
+func CheckAllRequests(id int64, host string) {
 	allApproved := true
 
 	// Check if all requests are approved
@@ -334,6 +336,44 @@ func CheckAllRequests(id int64) {
 
 		repoResp, _ := ghAPI.GetRepository(repo, newOwner)
 		db.UpdateTFSProjectReferenceById(id, repoResp.GetHTMLURL())
+	}
+
+	// Check if all requests are responded by approvers.
+	allResponded := true
+
+	for _, a := range projectApprovals {
+		if a.ApprovalDate.IsZero() {
+			allResponded = false
+			break
+		}
+	}
+
+	// Send notification if all approvers responded to the approval request
+	if allResponded {
+		repoOwners, err := db.GetRepoOwnersRecordByRepoId(id)
+		if err != nil {
+			log.Println(err.Error())
+			return
+		}
+
+		var recipients []string
+
+		for i, _ := range repoOwners {
+			recipients = append(recipients, repoOwners[i].UserPrincipalName)
+		}
+
+		project := db.GetProjectById(id)
+
+		messageBody := notification.RepositoryPublicApprovalProvidedMessageBody{
+			Recipients:          recipients,
+			CommunityPortalLink: fmt.Sprint(envvar.GetEnvVar("SCHEME", "https"), "://", host, "/repositories"),
+			RepoLink:            project[0]["TFSProjectReference"].(string),
+			RepoName:            project[0]["Name"].(string),
+		}
+		err = messageBody.Send()
+		if err != nil {
+			log.Println(err.Error())
+		}
 	}
 }
 
