@@ -11,6 +11,7 @@ import (
 	db "main/pkg/ghmgmtdb"
 	ghAPI "main/pkg/github"
 	"main/pkg/msgraph"
+	"main/pkg/notification"
 )
 
 func CheckAvaInnerSource(w http.ResponseWriter, r *http.Request) {
@@ -209,6 +210,42 @@ func RepoOwnerScan(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	fmt.Println("REPOOWNERSSCAN SUCCESSFUL")
+}
+
+func ExpiringInvitation(w http.ResponseWriter, r *http.Request) {
+	token := os.Getenv("GH_TOKEN")
+	innersourceName := os.Getenv("GH_ORG_INNERSOURCE")
+	opensourceName := os.Getenv("GH_ORG_OPENSOURCE")
+
+	sendNotification(token, innersourceName)
+	sendNotification(token, opensourceName)
+}
+
+// Send notifications to those who has pending org invitation that is about to expire tom.
+func sendNotification(token, org string) {
+	invitations := ghAPI.ListPendingOrgInvitations(token, org)
+	for _, v := range invitations {
+		expiresIn, _ := time.ParseDuration("25h")
+
+		if v.CreatedAt.Add(expiresIn).After(time.Now()) {
+			user, err := db.GetUserByGitHubId(fmt.Sprint(v.GetID()))
+			if err != nil {
+				log.Println(err.Error())
+			}
+			messageBody := notification.OrganizationInvitationExpireMessageBody{
+				Recipients: []string{
+					user[0]["UserPrincipalName"].(string),
+				},
+				InvitationLink:   fmt.Sprintf("https://github.com/orgs/%s/invitation", org),
+				OrganizationLink: fmt.Sprintf("https://github.com/%s", org),
+				OrganizationName: org,
+			}
+			err = messageBody.Send()
+			if err != nil {
+				log.Println(err.Error())
+			}
+		}
+	}
 }
 
 // Repo Collaborators Scan
