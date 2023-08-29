@@ -225,10 +225,10 @@ func ExpiringInvitation(w http.ResponseWriter, r *http.Request) {
 func sendNotification(token, org string) {
 	invitations := ghAPI.ListPendingOrgInvitations(token, org)
 	for _, v := range invitations {
-		expiresIn, _ := time.ParseDuration("25h")
+		expiresIn, _ := time.ParseDuration("144h")
 
-		if v.CreatedAt.Add(expiresIn).After(time.Now()) {
-			user, err := db.GetUserByGitHubId(fmt.Sprint(v.GetID()))
+		if v.CreatedAt.Add(expiresIn).Before(time.Now()) {
+			user, err := db.GetUserByGitHubUsername(fmt.Sprint(v.GetLogin()))
 			if err != nil {
 				log.Println(err.Error())
 			}
