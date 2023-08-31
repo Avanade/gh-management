@@ -384,11 +384,26 @@ func GetProjectApprovalsByProjectId(id int64) (projectApprovals []ProjectApprova
 			data.ApprovalDate = v["ApprovalDate"].(time.Time)
 		}
 
-		fmt.Println(data.ApprovalDate.IsZero())
 		projectApprovals = append(projectApprovals, data)
 	}
 
 	return
+}
+
+func GetProjectApprovalsByStatusId(approvalStatusId int64) ([]map[string]interface{}, error) {
+	db := ConnectDb()
+	defer db.Close()
+
+	param := map[string]interface{}{
+		"ApprovalStatusId": approvalStatusId,
+	}
+
+	result, err := db.ExecuteStoredProcedureWithResult("PR_ProjectApprovals_Select_By_StatusId", param)
+	if err != nil {
+		return nil, err
+	}
+
+	return result, nil
 }
 
 func GetProjectApprovalByGUID(id string) (projectApproval ProjectApproval) {

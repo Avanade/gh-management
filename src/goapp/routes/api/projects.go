@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"math"
 	"net/http"
 	"os"
 	"regexp"
@@ -880,6 +881,42 @@ func RepoOwnersCleanup(w http.ResponseWriter, r *http.Request) {
 	wg.Wait()
 	w.WriteHeader(http.StatusOK)
 	fmt.Println("REPO OWNERS CLEANUP SUCCESSFUL")
+}
+
+func RecurringApproval(w http.ResponseWriter, r *http.Request) {
+	const IN_REVIEW = 2
+
+	projectApprovals, err := db.GetProjectApprovalsByStatusId(IN_REVIEW)
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	for _, projectApproval := range projectApprovals {
+		created := projectApproval["Created"].(time.Time)
+
+		daysSinceCreation := time.Since(created).Hours() / 24
+
+		daysSinceCreationFloor := math.Floor(daysSinceCreation)
+
+		if int(daysSinceCreationFloor)%7 == 0 && daysSinceCreationFloor != 0 {
+			messageBody := notification.RepositoryPublicApprovalRemainderMessageBody{
+				Recipients: []string{
+					projectApproval["ApproverUserPrincipalName"].(string),
+				},
+				ApprovalLink: fmt.Sprintf("%s/response/%s/%s/%s/1", os.Getenv("APPROVAL_SYSTEM_APP_URL"), os.Getenv("APPROVAL_SYSTEM_APP_ID"), os.Getenv("APPROVAL_SYSTEM_APP_MODULE_PROJECTS"), projectApproval["ItemId"].(string)),
+				ApprovalType: projectApproval["ApprovalType"].(string),
+				RepoLink:     projectApproval["RepoLink"].(string),
+				RepoName:     projectApproval["RepoName"].(string),
+				UserName:     projectApproval["Requester"].(string),
+			}
+			err = messageBody.Send()
+			if err != nil {
+				log.Println(err.Error())
+			}
+		}
+	}
 }
 
 func GetRepoCollaborators(org string, repo string, role string, affiliations string) []*github.User {
