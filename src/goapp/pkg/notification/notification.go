@@ -38,12 +38,13 @@ type MessageBody interface {
 type MessageType string
 
 const (
-	RepositoryHasBeenCreatedMessageType         MessageType = "InnerSource.RepositoryHasBeenCreated"
-	RepositoryPublicApprovalMessageType         MessageType = "InnerSource.RepositoryPublicApproval"
-	OrganizationInvitationMessageType           MessageType = "InnerSource.OrganizationInvitation"
+	RepositoryHasBeenCreatedMessageType          MessageType = "InnerSource.RepositoryHasBeenCreated"
+	RepositoryPublicApprovalMessageType          MessageType = "InnerSource.RepositoryPublicApproval"
+	RepositoryPublicApprovalRemainderMessageType MessageType = "InnerSource.RepositoryPublicApprovalRemainder"
+	OrganizationInvitationMessageType            MessageType = "InnerSource.OrganizationInvitation"
 	OrganizationInvitationExpireMessageType     MessageType = "InnerSource.OrganizationInvitationExpire"
-	RepositoryPublicApprovalProvidedMessageType MessageType = "InnerSource.RepositoryPublicApprovalProvided"
-	ActivityAddedRequestForHelpMessageType      MessageType = "InnerSource.ActivityAddedRrequestForHelp"
+	RepositoryPublicApprovalProvidedMessageType  MessageType = "InnerSource.RepositoryPublicApprovalProvided"
+	ActivityAddedRequestForHelpMessageType       MessageType = "InnerSource.ActivityAddedRrequestForHelp"
 )
 
 type Contract struct {
@@ -82,6 +83,15 @@ type RepositoryPublicApprovalProvidedMessageBody struct {
 }
 
 type RepositoryPublicApprovalMessageBody struct {
+	Recipients   []string
+	ApprovalLink string
+	ApprovalType string
+	RepoLink     string
+	RepoName     string
+	UserName     string
+}
+
+type RepositoryPublicApprovalRemainderMessageBody struct {
 	Recipients   []string
 	ApprovalLink string
 	ApprovalType string
@@ -181,6 +191,23 @@ func (messageBody RepositoryPublicApprovalMessageBody) Send() error {
 	return nil
 }
 
+func (messageBody RepositoryPublicApprovalRemainderMessageBody) Send() error {
+	messageBody.Recipients = setRecipients(messageBody.Recipients)
+
+	contract := Contract{
+		RequestId:   uuid.New().String(),
+		MessageType: RepositoryPublicApprovalRemainderMessageType,
+		MessageBody: messageBody,
+	}
+
+	err := sendNotification(contract)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (messageBody ActivityAddedRequestForHelpMessageBody) Send() error {
 	messageBody.Recipients = setRecipients(messageBody.Recipients)
 
@@ -266,6 +293,10 @@ func setRecipients(recipients []string) []string {
 }
 
 func sendNotification(c Contract) error {
+	if c.MessageType != RepositoryPublicApprovalRemainderMessageType {
+		return nil
+	}
+
 	err := setToken()
 	if err != nil {
 		return err
