@@ -42,7 +42,7 @@ const (
 	RepositoryPublicApprovalMessageType          MessageType = "InnerSource.RepositoryPublicApproval"
 	RepositoryPublicApprovalRemainderMessageType MessageType = "InnerSource.RepositoryPublicApprovalRemainder"
 	OrganizationInvitationMessageType            MessageType = "InnerSource.OrganizationInvitation"
-	OrganizationInvitationExpireMessageType     MessageType = "InnerSource.OrganizationInvitationExpire"
+	OrganizationInvitationExpireMessageType      MessageType = "InnerSource.OrganizationInvitationExpire"
 	RepositoryPublicApprovalProvidedMessageType  MessageType = "InnerSource.RepositoryPublicApprovalProvided"
 	ActivityAddedRequestForHelpMessageType       MessageType = "InnerSource.ActivityAddedRrequestForHelp"
 )
@@ -293,10 +293,6 @@ func setRecipients(recipients []string) []string {
 }
 
 func sendNotification(c Contract) error {
-	if c.MessageType != RepositoryPublicApprovalRemainderMessageType {
-		return nil
-	}
-
 	err := setToken()
 	if err != nil {
 		return err
