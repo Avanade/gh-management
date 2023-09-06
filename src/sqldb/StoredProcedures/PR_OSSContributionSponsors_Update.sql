@@ -1,4 +1,4 @@
-CREATE PROCEDURE PR_ExternalLinks_Update
+CREATE PROCEDURE PR_OSSContributionSponsors_Update
 (
 			@Id int,
 			@Name VARCHAR(50),
