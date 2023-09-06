@@ -15,6 +15,7 @@
     [Modified] DATETIME NOT NULL DEFAULT getdate(), 
     [ModifiedBy] VARCHAR(100) NULL,
     [OSSsponsor] [varchar](50) NULL,
+    [OSSContributionSponsorId] INT NULL,
 	[Avanadeofferingsassets] [varchar](50) NULL,
 	[Willbecommercialversion] [varchar](50) NULL,
 	[OSSContributionInformation] [varchar](1000) NULL,
@@ -29,4 +30,5 @@
     [ECATTID] INT NULL
     CONSTRAINT FK_ApprovalStatus_Projects FOREIGN KEY (ApprovalStatusId) REFERENCES ApprovalStatus(Id),
     CONSTRAINT FK_Projects_Visibility FOREIGN KEY (VisibilityId) REFERENCES Visibility(Id)
+    CONSTRAINT FK_Projects_OSSContributionSponsors FOREIGN KEY (OSSContributionSponsorId) REFERENCES OSSContributionSponsors(Id)
 )
