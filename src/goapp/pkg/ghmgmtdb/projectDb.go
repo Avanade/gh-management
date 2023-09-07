@@ -49,6 +49,7 @@ type ProjectApproval struct {
 	RejectUrl                  string
 	ApproveText                string
 	RejectText                 string
+	ApprovalDate               time.Time
 }
 
 type Project struct {
@@ -379,10 +380,30 @@ func GetProjectApprovalsByProjectId(id int64) (projectApprovals []ProjectApprova
 			ApprovalDescription:       v["ApprovalDescription"].(string),
 			RequestStatus:             v["RequestStatus"].(string),
 		}
+		if v["ApprovalDate"] != nil {
+			data.ApprovalDate = v["ApprovalDate"].(time.Time)
+		}
+
 		projectApprovals = append(projectApprovals, data)
 	}
 
 	return
+}
+
+func GetProjectApprovalsByStatusId(approvalStatusId int64) ([]map[string]interface{}, error) {
+	db := ConnectDb()
+	defer db.Close()
+
+	param := map[string]interface{}{
+		"ApprovalStatusId": approvalStatusId,
+	}
+
+	result, err := db.ExecuteStoredProcedureWithResult("PR_ProjectApprovals_Select_By_StatusId", param)
+	if err != nil {
+		return nil, err
+	}
+
+	return result, nil
 }
 
 func GetProjectApprovalByGUID(id string) (projectApproval ProjectApproval) {

@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"math"
 	"net/http"
 	"os"
 	"regexp"
@@ -15,6 +16,7 @@ import (
 
 	db "main/pkg/ghmgmtdb"
 	ghAPI "main/pkg/github"
+	"main/pkg/notification"
 	"main/pkg/session"
 
 	"github.com/google/go-github/v50/github"
@@ -144,8 +146,8 @@ func RequestRepository(w http.ResponseWriter, r *http.Request) {
 		body.TFSProjectReference = repo.GetHTMLURL()
 		body.Visibility = 1
 
+		innersource := os.Getenv("GH_ORG_INNERSOURCE")
 		if isEnterpriseOrg {
-			innersource := os.Getenv("GH_ORG_INNERSOURCE")
 			err := ghAPI.SetProjectVisibility(repo.GetName(), "internal", innersource)
 			if err != nil {
 				return
@@ -167,6 +169,23 @@ func RequestRepository(w http.ResponseWriter, r *http.Request) {
 			log.Println(err.Error())
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
+		}
+
+		recipients := []string{
+			username.(string),
+			body.Coowner,
+		}
+
+		messageBody := notification.RepositoryHasBeenCreatedMessageBody{
+			Recipients:       recipients,
+			GitHubAppLink:    os.Getenv("GH_APP_LINK"),
+			OrganizationName: innersource,
+			RepoLink:         repo.GetHTMLURL(),
+			RepoName:         repo.GetName(),
+		}
+		err = messageBody.Send()
+		if err != nil {
+			log.Println(err.Error())
 		}
 
 		w.WriteHeader(http.StatusOK)
@@ -864,6 +883,42 @@ func RepoOwnersCleanup(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("REPO OWNERS CLEANUP SUCCESSFUL")
 }
 
+func RecurringApproval(w http.ResponseWriter, r *http.Request) {
+	const IN_REVIEW = 2
+
+	projectApprovals, err := db.GetProjectApprovalsByStatusId(IN_REVIEW)
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	for _, projectApproval := range projectApprovals {
+		created := projectApproval["Created"].(time.Time)
+
+		daysSinceCreation := time.Since(created).Hours() / 24
+
+		daysSinceCreationFloor := math.Floor(daysSinceCreation)
+
+		if int(daysSinceCreationFloor)%7 == 0 && daysSinceCreationFloor != 0 {
+			messageBody := notification.RepositoryPublicApprovalRemainderMessageBody{
+				Recipients: []string{
+					projectApproval["ApproverUserPrincipalName"].(string),
+				},
+				ApprovalLink: fmt.Sprintf("%s/response/%s/%s/%s/1", os.Getenv("APPROVAL_SYSTEM_APP_URL"), os.Getenv("APPROVAL_SYSTEM_APP_ID"), os.Getenv("APPROVAL_SYSTEM_APP_MODULE_PROJECTS"), projectApproval["ItemId"].(string)),
+				ApprovalType: projectApproval["ApprovalType"].(string),
+				RepoLink:     projectApproval["RepoLink"].(string),
+				RepoName:     projectApproval["RepoName"].(string),
+				UserName:     projectApproval["Requester"].(string),
+			}
+			err = messageBody.Send()
+			if err != nil {
+				log.Println(err.Error())
+			}
+		}
+	}
+}
+
 func GetRepoCollaborators(org string, repo string, role string, affiliations string) []*github.User {
 
 	token := os.Getenv("GH_TOKEN")
@@ -1141,6 +1196,19 @@ func ApprovalSystemRequest(data db.ProjectApproval) error {
 			err := json.NewDecoder(r.Body).Decode(&res)
 			if err != nil {
 				return err
+			}
+
+			messageBody := notification.RepositoryPublicApprovalMessageBody{
+				Recipients:   []string{},
+				ApprovalLink: fmt.Sprintf("%s/response/%s/%s/%s/1", os.Getenv("APPROVAL_SYSTEM_APP_URL"), postParams.ApplicationId, postParams.ApplicationModuleId, res.ItemId),
+				ApprovalType: data.ApprovalType,
+				RepoLink:     fmt.Sprintf("https://github.com/" + os.Getenv("GH_ORG_INNERSOURCE") + "/" + data.ProjectName),
+				RepoName:     data.ProjectName,
+				UserName:     data.RequesterName,
+			}
+			err = messageBody.Send()
+			if err != nil {
+				log.Println(err.Error())
 			}
 
 			db.ProjectsApprovalUpdateGUID(data.Id, res.ItemId)

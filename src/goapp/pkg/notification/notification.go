@@ -11,6 +11,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 var (
@@ -36,13 +38,191 @@ type MessageBody interface {
 type MessageType string
 
 const (
-	RepositoryHasBeenCreatedMessageType MessageType = "InnerSource.RepositoryHasBeenCreated"
+	RepositoryHasBeenCreatedMessageType          MessageType = "InnerSource.RepositoryHasBeenCreated"
+	RepositoryPublicApprovalMessageType          MessageType = "InnerSource.RepositoryPublicApproval"
+	RepositoryPublicApprovalRemainderMessageType MessageType = "InnerSource.RepositoryPublicApprovalRemainder"
+	OrganizationInvitationMessageType            MessageType = "InnerSource.OrganizationInvitation"
+	OrganizationInvitationExpireMessageType      MessageType = "InnerSource.OrganizationInvitationExpire"
+	RepositoryPublicApprovalProvidedMessageType  MessageType = "InnerSource.RepositoryPublicApprovalProvided"
+	ActivityAddedRequestForHelpMessageType       MessageType = "InnerSource.ActivityAddedRrequestForHelp"
 )
 
 type Contract struct {
 	RequestId   string
 	MessageType MessageType
 	MessageBody interface{}
+}
+
+type RepositoryHasBeenCreatedMessageBody struct {
+	Recipients       []string
+	GitHubAppLink    string
+	OrganizationName string
+	RepoLink         string
+	RepoName         string
+}
+
+type OrganizationInvitationMessageBody struct {
+	Recipients       []string
+	InvitationLink   string
+	OrganizationLink string
+	OrganizationName string
+}
+
+type OrganizationInvitationExpireMessageBody struct {
+	Recipients       []string
+	InvitationLink   string
+	OrganizationLink string
+	OrganizationName string
+}
+
+type RepositoryPublicApprovalProvidedMessageBody struct {
+	Recipients          []string
+	CommunityPortalLink string
+	RepoLink            string
+	RepoName            string
+}
+
+type RepositoryPublicApprovalMessageBody struct {
+	Recipients   []string
+	ApprovalLink string
+	ApprovalType string
+	RepoLink     string
+	RepoName     string
+	UserName     string
+}
+
+type RepositoryPublicApprovalRemainderMessageBody struct {
+	Recipients   []string
+	ApprovalLink string
+	ApprovalType string
+	RepoLink     string
+	RepoName     string
+	UserName     string
+}
+
+type ActivityAddedRequestForHelpMessageBody struct {
+	Recipients   []string
+	ActivityLink string
+	UserName     string
+}
+
+func (messageBody RepositoryHasBeenCreatedMessageBody) Send() error {
+	messageBody.Recipients = setRecipients(messageBody.Recipients)
+
+	contract := Contract{
+		RequestId:   uuid.New().String(),
+		MessageType: RepositoryHasBeenCreatedMessageType,
+		MessageBody: messageBody,
+	}
+
+	err := sendNotification(contract)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (messageBody OrganizationInvitationMessageBody) Send() error {
+	messageBody.Recipients = setRecipients(messageBody.Recipients)
+
+	contract := Contract{
+		RequestId:   uuid.New().String(),
+		MessageType: OrganizationInvitationMessageType,
+		MessageBody: messageBody,
+	}
+
+	err := sendNotification(contract)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (messageBody OrganizationInvitationExpireMessageBody) Send() error {
+	messageBody.Recipients = setRecipients(messageBody.Recipients)
+
+	contract := Contract{
+		RequestId:   uuid.New().String(),
+		MessageType: OrganizationInvitationExpireMessageType,
+		MessageBody: messageBody,
+	}
+
+	err := sendNotification(contract)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (messageBody RepositoryPublicApprovalProvidedMessageBody) Send() error {
+	messageBody.Recipients = setRecipients(messageBody.Recipients)
+
+	contract := Contract{
+		RequestId:   uuid.New().String(),
+		MessageType: RepositoryPublicApprovalProvidedMessageType,
+		MessageBody: messageBody,
+	}
+
+	err := sendNotification(contract)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (messageBody RepositoryPublicApprovalMessageBody) Send() error {
+	messageBody.Recipients = setRecipients(messageBody.Recipients)
+
+	contract := Contract{
+		RequestId:   uuid.New().String(),
+		MessageType: RepositoryPublicApprovalMessageType,
+		MessageBody: messageBody,
+	}
+
+	err := sendNotification(contract)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (messageBody RepositoryPublicApprovalRemainderMessageBody) Send() error {
+	messageBody.Recipients = setRecipients(messageBody.Recipients)
+
+	contract := Contract{
+		RequestId:   uuid.New().String(),
+		MessageType: RepositoryPublicApprovalRemainderMessageType,
+		MessageBody: messageBody,
+	}
+
+	err := sendNotification(contract)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (messageBody ActivityAddedRequestForHelpMessageBody) Send() error {
+	messageBody.Recipients = setRecipients(messageBody.Recipients)
+
+	contract := Contract{
+		RequestId:   uuid.New().String(),
+		MessageType: ActivityAddedRequestForHelpMessageType,
+		MessageBody: messageBody,
+	}
+
+	err := sendNotification(contract)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func requestNewToken() (*Response, error) {
@@ -105,7 +285,14 @@ func setToken() error {
 	return nil
 }
 
-func SendNotification(c Contract) error {
+func setRecipients(recipients []string) []string {
+	if os.Getenv("NOTIFICATION_RECIPIENT") != "" {
+		return strings.Split(os.Getenv("NOTIFICATION_RECIPIENT"), ",")
+	}
+	return recipients
+}
+
+func sendNotification(c Contract) error {
 	err := setToken()
 	if err != nil {
 		return err
@@ -126,6 +313,7 @@ func SendNotification(c Contract) error {
 
 	req.Header.Add("Authorization", "Bearer "+token.AccessToken)
 	req.Header.Add("Content-Type", "application/json")
+
 	response, err := client.Do(req)
 	if err != nil {
 		return err

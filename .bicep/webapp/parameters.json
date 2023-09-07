@@ -26,11 +26,14 @@
                 "NOTIFICATION_CLIENT_ID":"",
                 "NOTIFICATION_CLIENT_SECRET":"",
                 "NOTIFICATION_SCOPE":"",
+                "NOTIFICATION_ENDPOINT":"",
+                "NOTIFICATION_RECIPIENT":"",
 
                 "HOME_URL":"",
                 "GH_CLIENT_ID":"",
                 "GH_CLIENT_SECRET":"",
                 "GH_TOKEN":"",
+                "GH_APP_LINK":"",
                 "GHMGMTDB_CONNECTION_STRING":"",
                 "EMAIL_ENDPOINT":"",
                 

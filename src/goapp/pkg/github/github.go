@@ -227,6 +227,29 @@ func OrganizationInvitation(token string, username string, org string) *github.I
 	return invite
 }
 
+func ListPendingOrgInvitations(token, org string) []*github.Invitation {
+	client := CreateClient(token)
+	options := &github.ListOptions{PerPage: 30}
+
+	var allPendingInvitations []*github.Invitation
+
+	for {
+		pendingInvitations, resp, err := client.Organizations.ListPendingOrgInvitations(context.Background(), org, options)
+		if err != nil {
+			log.Printf("ERROR : %s", err.Error())
+			return nil
+		}
+
+		allPendingInvitations = append(allPendingInvitations, pendingInvitations...)
+		if resp.NextPage == 0 {
+			break
+		}
+		options.Page = resp.NextPage
+	}
+
+	return allPendingInvitations
+}
+
 func ListOutsideCollaborators(token string, org string) []*github.User {
 	client := CreateClient(token)
 
