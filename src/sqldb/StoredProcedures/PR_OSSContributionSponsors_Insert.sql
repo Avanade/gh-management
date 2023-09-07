@@ -12,6 +12,6 @@ INSERT INTO
 VALUES
     ( 
         @Name,
-        IsArchived
+        @IsArchived
     )
 END
