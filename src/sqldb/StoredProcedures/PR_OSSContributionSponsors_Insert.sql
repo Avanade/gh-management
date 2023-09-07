@@ -1,14 +1,17 @@
 CREATE PROCEDURE PR_OSSContributionSponsors_Insert
-	@Name VARCHAR(50)
+	@Name VARCHAR(50),
+    @IsArchived BIT = 0
 AS
 BEGIN
 
 INSERT INTO
     [dbo].[OSSContributionSponsors] ( 
-        [Name]
+        [Name],
+        [IsArchived]
     )
 VALUES
     ( 
-        @Name
+        @Name,
+        IsArchived
     )
 END

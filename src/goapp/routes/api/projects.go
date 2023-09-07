@@ -83,7 +83,7 @@ type ProjectApprovalSystemPostDto struct {
 type RequestMakePublicDto struct {
 	Id                         string `json:"id"`
 	Newcontribution            string `json:"newcontribution"`
-	OSSsponsor                 string `json:"osssponsor"`
+	OSSsponsor                 int    `json:"osssponsor"`
 	Offeringsassets            string `json:"avanadeofferingsassets"`
 	Willbecommercialversion    string `json:"willbecommercialversion"`
 	OSSContributionInformation string `json:"osscontributionInformation"`

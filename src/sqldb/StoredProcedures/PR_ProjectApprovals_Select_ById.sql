@@ -18,7 +18,7 @@ SELECT
 	p.[ConfirmEnabledSecurity],
 	p.[ConfirmNotClientProject],
 	p.[newcontribution], 
-	p.[OSSsponsor], 
+	C.Name AS OSSsponsor, 
 	p.[Avanadeofferingsassets],
 	p.[Willbecommercialversion], 
 	p.[OSSContributionInformation]
@@ -29,6 +29,7 @@ FROM
 	INNER JOIN Projects P ON PA.ProjectId = P.Id
 	INNER JOIN Users U1 ON PA.CreatedBy = U1.UserPrincipalName
 	INNER JOIN ApprovalStatus S ON S.Id = PA.ApprovalStatusId
+	INNER JOIN OSSContributionSponsors C ON P.OSSContributionSponsorId = C.Id
 WHERE  
     P.[Id] = @Id
 END

@@ -15,7 +15,7 @@ type Repository struct {
 type ProjectRequest struct {
 	Id                         string
 	Newcontribution            string
-	OSSsponsor                 string
+	OSSsponsor                 int
 	Offeringsassets            string
 	Willbecommercialversion    string
 	OSSContributionInformation string
