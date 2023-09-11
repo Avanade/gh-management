@@ -616,3 +616,25 @@ func GetGitHubRepositories() ([]map[string]interface{}, error) {
 
 	return result, nil
 }
+
+func SelectReposWithMakePublicRequest() ([]map[string]interface{}, error) {
+	db := ConnectDb()
+	defer db.Close()
+
+	sponsors, err := db.ExecuteStoredProcedureWithResult("PR_Projects_Select_AllWithMakePublicRequest", nil)
+	if err != nil {
+		return nil, err
+	}
+	return sponsors, nil
+}
+
+func UpdateOssContributionSponsorId(params map[string]interface{}) ([]map[string]interface{}, error) {
+	db := ConnectDb()
+	defer db.Close()
+
+	_, err := db.ExecuteStoredProcedure("PR_Projects_Update_OssSponsorIdById", params)
+	if err != nil {
+		return nil, err
+	}
+	return nil, nil
+}

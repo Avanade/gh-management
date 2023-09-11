@@ -15,22 +15,22 @@ func SelectSponsorsByIsArchived(params map[string]interface{}) ([]map[string]int
 	db := ConnectDb()
 	defer db.Close()
 
-	externalLinks, err := db.ExecuteStoredProcedureWithResult("PR_OSSContributionSponsors_SelectByIsArchived", params)
+	sponsors, err := db.ExecuteStoredProcedureWithResult("PR_OSSContributionSponsors_SelectByIsArchived", params)
 	if err != nil {
 		return nil, err
 	}
-	return externalLinks, nil
+	return sponsors, nil
 }
 
 func InsertSponsor(params map[string]interface{}) ([]map[string]interface{}, error) {
 	db := ConnectDb()
 	defer db.Close()
 
-	externalLinks, err := db.ExecuteStoredProcedureWithResult("PR_OSSContributionSponsors_Insert", params)
+	sponsors, err := db.ExecuteStoredProcedureWithResult("PR_OSSContributionSponsors_Insert", params)
 	if err != nil {
 		return nil, err
 	}
-	return externalLinks, nil
+	return sponsors, nil
 
 }
 
@@ -38,10 +38,20 @@ func UpdateSponsor(params map[string]interface{}) ([]map[string]interface{}, err
 	db := ConnectDb()
 	defer db.Close()
 
-	externalLinks, err := db.ExecuteStoredProcedureWithResult("PR_OSSContributionSponsors_Update", params)
+	sponsors, err := db.ExecuteStoredProcedureWithResult("PR_OSSContributionSponsors_Update", params)
 	if err != nil {
 		return nil, err
 	}
-	return externalLinks, nil
+	return sponsors, nil
+}
 
+func SelectSponsorByName(params map[string]interface{}) ([]map[string]interface{}, error) {
+	db := ConnectDb()
+	defer db.Close()
+
+	sponsors, err := db.ExecuteStoredProcedureWithResult("PR_OSSContributionSponsors_SelectByName", params)
+	if err != nil {
+		return nil, err
+	}
+	return sponsors, nil
 }
