@@ -7,7 +7,7 @@ AS
 BEGIN
 
 UPDATE
-    [dbo].[Project]
+    [dbo].[Projects]
 SET
     [OSSContributionSponsorId] = @OSSContributionSponsorId
 WHERE

@@ -154,7 +154,7 @@ func MigrateToOssSponsorsTable(w http.ResponseWriter, r *http.Request) {
 	for _, repo := range repos {
 
 		params := map[string]interface{}{
-			"Name": repo["ApprovalStatusId"].(string),
+			"Name": repo["OSSsponsor"].(string),
 		}
 
 		sponsors, err := db.SelectSponsorByName(params)
@@ -164,8 +164,8 @@ func MigrateToOssSponsorsTable(w http.ResponseWriter, r *http.Request) {
 
 		for _, sponsor := range sponsors {
 			params2 := map[string]interface{}{
-				"Id":                       repo["ApprovalStatusId"].(int),
-				"OSSContributionSponsorId": sponsor["Id"].(int),
+				"Id":                       repo["Id"],
+				"OSSContributionSponsorId": sponsor["Id"],
 			}
 
 			_, err := db.UpdateOssContributionSponsorId(params2)
