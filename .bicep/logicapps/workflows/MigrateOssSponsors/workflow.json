@@ -2,7 +2,7 @@
     "definition": {
       "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
       "actions": {
-        "HTTP_ORG_CLEANUP": {
+        "HTTP_MIGRATE_OSSSPONSORS": {
           "type": "Http",
           "inputs": {
             "uri": "@concat(parameters('GHMgmDomain'), '/api/migrateOssSponsors')",
