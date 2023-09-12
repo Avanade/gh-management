@@ -11,6 +11,6 @@ UPDATE
 SET
     [OSSContributionSponsorId] = @OSSContributionSponsorId
 WHERE
-    [Id] = @Id
+    [Id] = @Id AND [RepositorySource] = 'GitHub' AND [OSSContributionSponsorId] IS NULL
 
 END
