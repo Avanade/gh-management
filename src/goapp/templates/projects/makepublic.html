@@ -37,10 +37,10 @@
                 <div class="basis-1/2 md:base-full  md:flex-row mx-3 self-center">
                     <div class="ml-3" x-data="combobox({
                             ajax: getSponsorOptions,
-                            id : 'id',
-                            text : 'text',
+                            id : 'Id',
+                            text : 'Name',
                           
-                            isInsertable : true,
+                            isInsertable : false,
                             isDisplayItem : false
                         })" x-modelable="selected" x-model="form.sponsorOptions">
                         <div x-html="template"></div>
@@ -101,8 +101,8 @@
         </fieldset>
         <div class="flex mt-7 justify-end">
             <div align="right">
-                <button type="submit" class="bg-orange-500  inline-flex justify-center py-2 px-4 rounded-md text-white"
-                    :class="!isValid ? 'bg-orange-100' : ''" x-bind:disabled="!isValid" @click="submit()">
+                <button type="submit" class="inline-flex justify-center py-2 px-4 rounded-md text-white"
+                    x-bind:class="!isValid ? 'bg-orange-100' : 'bg-orange-500'" x-bind:disabled="!isValid" @click="submit()">
                     <span>Submit</span>
                 </button>
             </div>
@@ -139,7 +139,7 @@
             },
             get isValid() {
                 if (this.form.sponsorOptions.length > 0) {
-                    this.form.osssponsor = this.form.sponsorOptions[0]["text"].toString()
+                    this.form.osssponsor = this.form.sponsorOptions[0]["id"]
                 }
                 if (
                     !!this.form.newcontribution &&
@@ -157,36 +157,10 @@
         }
     }
     async function getSponsorOptions() {
-        const data = [{
-                id: "1",
-                text: "Solution Area - Applications and Infrastructure"
-            },
-            {
-                id: "2",
-                text: "Solution Area - Business Applications"
-            },
-            {
-                id: "3",
-                text: "Solution Area - Data & AI"
-            },
-            {
-                id: "4",
-                text: "Solution Area - Modern Workplace"
-            },
-            {
-                id: "5",
-                text: "Business Group - Advisory"
-            },
-            {
-                id: "6",
-                text: "ITS"
-            },
-            {
-                id: "7",
-                text: "Office of the CTO"
-            },
-        ]
-
+        let uri = '/api/osscontributionsponsors/enabled'
+        let encoded = encodeURI(uri);
+        const res = await fetch(encoded)
+        const data = await res.json()
         return data
     }
 </script>
