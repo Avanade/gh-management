@@ -193,4 +193,6 @@ func setApiRoutes(mux *mux.Router) {
 	muxApi.Handle("/RepoOwnerScan", loadGuidAuthApi(rtApi.RepoOwnerScan)).Methods("GET")
 	muxApi.Handle("/RepoOwnersCleanup", loadGuidAuthApi(rtApi.RepoOwnersCleanup)).Methods("GET")
 	muxApi.Handle("/recurringapproval", loadGuidAuthApi(rtApi.RecurringApproval)).Methods("GET")
+	// muxApi.Handle("/utility/fillout/approvers", loadGuidAuthApi(rtApi.FilloutApprovers)).Methods("GET")
+	muxApi.HandleFunc("/utility/fillout/approvers", rtApi.FillOutApprovers)
 }

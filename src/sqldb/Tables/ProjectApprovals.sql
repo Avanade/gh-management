@@ -10,6 +10,7 @@
     [ApprovalDate] DATETIME NULL, 
     [ApprovalSystemGUID] UNIQUEIDENTIFIER NULL,
     [ApprovalSystemDateSent] DATETIME NULL,
+    [RespondedBy] VARCHAR(100),
     [Created] DATETIME NOT NULL DEFAULT getdate(), 
     [CreatedBy] VARCHAR(100) NULL, 
     [Modified] DATETIME NOT NULL DEFAULT getdate(), 

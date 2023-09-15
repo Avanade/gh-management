@@ -3,6 +3,7 @@ package ghmgmt
 import (
 	"fmt"
 	"strconv"
+	"time"
 )
 
 type ApprovalType struct {
@@ -11,9 +12,9 @@ type ApprovalType struct {
 	ApproverUserPrincipalName string
 	IsActive                  bool
 	IsArchived                bool
-	Created                   string
+	Created                   time.Time
 	CreatedBy                 string
-	Modified                  string
+	Modified                  time.Time
 	ModifiedBy                string
 }
 
@@ -28,7 +29,7 @@ func GetAllActiveApprovers() interface{} {
 	return result
 }
 
-func SelectApprovalTypes() (interface{}, error) {
+func SelectApprovalTypes() ([]map[string]interface{}, error) {
 	db := ConnectDb()
 	defer db.Close()
 
@@ -72,7 +73,7 @@ func SelectTotalApprovalTypes() int {
 	return total
 }
 
-func SelectApprovalTypeById(id int) (interface{}, error) {
+func SelectApprovalTypeById(id int) (*ApprovalType, error) {
 	db := ConnectDb()
 	defer db.Close()
 
@@ -85,7 +86,31 @@ func SelectApprovalTypeById(id int) (interface{}, error) {
 		return nil, err
 	}
 
-	return &result[0], nil
+	approvalType := ApprovalType{
+		Id:                        int(result[0]["Id"].(int64)),
+		Name:                      result[0]["Name"].(string),
+		ApproverUserPrincipalName: result[0]["ApproverUserPrincipalName"].(string),
+		IsActive:                  result[0]["IsActive"].(bool),
+		IsArchived:                result[0]["IsArchived"].(bool),
+	}
+
+	if result[0]["Created"] != nil {
+		approvalType.Created = result[0]["Created"].(time.Time)
+	}
+
+	if result[0]["CreatedBy"] != nil {
+		approvalType.CreatedBy = result[0]["CreatedBy"].(string)
+	}
+
+	if result[0]["Modified"] != nil {
+		approvalType.Modified = result[0]["Modified"].(time.Time)
+	}
+
+	if result[0]["ModifiedBy"] != nil {
+		approvalType.ModifiedBy = result[0]["ModifiedBy"].(string)
+	}
+
+	return &approvalType, nil
 }
 
 func InsertApprovalType(approvalType ApprovalType) (int, error) {

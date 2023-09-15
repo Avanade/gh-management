@@ -26,7 +26,10 @@
                             searchTag: 'Start typing to query list of users',
                             searchPlaceholder: 'Input name or email',
                             id : 'mail',
-                            text : 'mail'
+                            text : 'mail',
+                            isMultiple : true,
+                            isDisplayItem : true
+
                         })" x-modelable="selected" x-model="form.approver">
                         <div x-html="template"></div>
                     </div>
@@ -117,12 +120,16 @@
                 const res = await fetch(`/api/approval/type/${this.id}`)
                 const data = await res.json()
 
-                this.form.name = data.Name;
-                this.form.approver = [{
-                    'id': data.ApproverUserPrincipalName,
-                    'text': data.ApproverUserPrincipalName
-                }]
-                this.form.status = data.IsActive.toString();
+                this.form.name = data.name;
+
+                this.form.approver = data.approvers.map((v) => {
+                    return {
+                        'id': v.approverEmail,
+                        'text': v.approverEmail    
+                    }
+                })
+
+                this.form.status = data.isActive.toString();
 
                 modal.visible = false;
             },
@@ -147,8 +154,13 @@
 
                 const data = {
                     name: this.form.name,
-                    approver_user_principal_name: this.form.approver[0].id,
-                    is_active: this.form.status == 'true'
+                    approverUserPrincipalName: this.form.approver[0].id,
+                    approvers: this.form.approver.map(v => {
+                        return {
+                            approverEmail: v.id
+                        }
+                    }),
+                    isActive: this.form.status == 'true'
                 }
 
                 switch (this.action.toLowerCase()) {
@@ -164,7 +176,7 @@
                             "Approval type has been saved.", "Go to list of approval types", "/admin/approvaltypes")
                         break;
                     case 'delete':
-                        data.is_archived = true
+                        data.isArchived = true
                         Alpine.store('master').modal.show()
                         Alpine.store('master').putData(`/api/approval/type/${this.id}/archived`, data,
                             "Approval type has been moved archive.", "Go to list of approval types",
