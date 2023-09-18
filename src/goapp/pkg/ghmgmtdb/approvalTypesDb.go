@@ -41,7 +41,7 @@ func SelectApprovalTypes() ([]map[string]interface{}, error) {
 	return result, nil
 }
 
-func SelectApprovalTypesByFilter(offset, filter int, orderby, ordertype, search string) (interface{}, error) {
+func SelectApprovalTypesByFilter(offset, filter int, orderby, ordertype, search string) ([]map[string]interface{}, error) {
 	db := ConnectDb()
 	defer db.Close()
 
