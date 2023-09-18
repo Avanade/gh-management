@@ -1,8 +1,8 @@
 CREATE PROCEDURE [dbo].[PR_Approvers_Select_ByApprovalTypeId] 
 (
-	@Id INT
+	@ApprovalTypeId INT
 )
 AS
 BEGIN
-	SELECT * FROM [dbo].[Approvers] WHERE Id = @Id
+	SELECT * FROM [dbo].[Approvers] WHERE ApprovalTypeId = @ApprovalTypeId
 END

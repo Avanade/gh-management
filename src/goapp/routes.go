@@ -195,4 +195,5 @@ func setApiRoutes(mux *mux.Router) {
 	muxApi.Handle("/recurringapproval", loadGuidAuthApi(rtApi.RecurringApproval)).Methods("GET")
 	// muxApi.Handle("/utility/fillout/approvers", loadGuidAuthApi(rtApi.FilloutApprovers)).Methods("GET")
 	muxApi.HandleFunc("/utility/fillout/approvers", rtApi.FillOutApprovers)
+	muxApi.HandleFunc("/utility/fillout/approvalrequest/approvers", rtApi.FillOutApprovalRequestApprovers)
 }

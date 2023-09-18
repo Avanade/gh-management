@@ -359,6 +359,18 @@ func GetFailedProjectApprovalRequests() (projectApprovals []ProjectApproval) {
 	return
 }
 
+func GetProjectApprovals() ([]map[string]interface{}, error) {
+	db := ConnectDb()
+	defer db.Close()
+
+	result, err := db.ExecuteStoredProcedureWithResult("PR_ProjectApprovals_Select", nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return result, nil
+}
+
 func GetProjectApprovalsByProjectId(id int64) (projectApprovals []ProjectApproval) {
 	db := ConnectDb()
 	defer db.Close()
@@ -430,6 +442,23 @@ func GetProjectApprovalByGUID(id string) (projectApproval ProjectApproval) {
 	}
 
 	return
+}
+
+func UpdateProjectApprovalById(id int, respondedBy string) error {
+	db := ConnectDb()
+	defer db.Close()
+
+	param := map[string]interface{}{
+		"Id":          id,
+		"RespondedBy": respondedBy,
+	}
+
+	_, err := db.ExecuteStoredProcedure("PR_ProjectApprovals_UpdateRespondedBy_ById", param)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func ProjectsApprovalUpdateGUID(id int64, ApprovalSystemGUID string) {

@@ -7,7 +7,7 @@ AS
 BEGIN   
     INSERT INTO [dbo].[Approvers]
         (
-            [ApprovalTypeId] ,
+            [ApprovalTypeId],
             [ApproverEmail]
         )
     VALUES

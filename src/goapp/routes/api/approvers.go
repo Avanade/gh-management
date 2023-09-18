@@ -26,3 +26,34 @@ func FillOutApprovers(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 }
+
+func FillOutApprovalRequestApprovers(w http.ResponseWriter, r *http.Request) {
+	projectApprovals, err := db.GetProjectApprovals()
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	for _, projectApproval := range projectApprovals {
+		id := int(projectApproval["Id"].(int64))
+		err = db.InsertApprovalRequestApprover(db.ApprovalRequestApprover{
+			ApprovalRequestId: id,
+			ApproverEmail:     projectApproval["ApproverUserPrincipalName"].(string),
+		})
+		if err != nil {
+			log.Println(err.Error())
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		if projectApproval["ApprovalDate"] != nil {
+			err = db.UpdateProjectApprovalById(id, projectApproval["ApproverUserPrincipalName"].(string))
+			if err != nil {
+				log.Println(err.Error())
+				http.Error(w, err.Error(), http.StatusBadRequest)
+				return
+			}
+		}
+	}
+}
