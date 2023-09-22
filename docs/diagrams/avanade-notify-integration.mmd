@@ -1,0 +1,18 @@
+sequenceDiagram
+    App->>+Azure AD: Check all users in the DB against AzureAD
+    Azure AD-->>-App: Return a list of users, active and inactive
+    App->>+GitHub API (for the enterprise org): Query list of users in the organization
+    GitHub API (for the enterprise org)-->>-App: Return a list of users
+    App->>+GitHub API (for the enterprise org): Remove all users that were not in the database at all
+    App->>+GitHub API (for the enterprise org): Remove all external collaborators in the enterprise org
+    App->>+GitHub API (for the enterprise org): Remove all users that were in the enterprise org, but are no longer active employees
+    App->>+GitHub API (for the public /avanade org): Query list of users in the organization
+    GitHub API (for the public /avanade org)-->>-App: Return a list of users
+    App->>+GitHub API (for the public /avanade org): Remove all users that were not in the database at all
+    App->>+GitHub API (for the public /avanade org): Convert users that were members, but are no longer active employees, to external collaborators
+    App->>+App: Check that all repositories have at least two co-owner
+    participant Avanade Notify as DEMS InnerSource Publisher
+    App->>+Avanade Notify: Let owners know if any members have been converted to external collaborators
+    App->>+Avanade Notify: Let OSPO know if any members have been converted to external collaborators
+    App->>+Avanade Notify: Let owners know if they need to add a new co-owner
+    App->>+Avanade Notify: Let OSPO know if a repository needs to add a new co-owner
