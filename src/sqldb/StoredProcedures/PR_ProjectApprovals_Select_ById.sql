@@ -8,6 +8,7 @@ BEGIN
 SELECT
 	PA.Id, PA.ProjectId, P.[Name] [ProjectName],
 	P.[Description] [ProjectDescription],
+	(SELECT STRING_AGG(ApproverEmail, ', ') FROM ApprovalRequestApprovers WHERE ApprovalRequestId = PA.Id GROUP BY ApprovalRequestId) Approvers,
 	U1.Name [RequesterName], U1.GivenName [RequesterGivenName], U1.SurName [RequesterSurName], U1.UserPrincipalName [RequesterUserPrincipalName],
 	PA.ApprovalTypeId, T.[Name] ApprovalType,
 	PA.ApproverUserPrincipalName,

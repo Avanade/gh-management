@@ -72,12 +72,13 @@ type ProjectRequest struct {
 }
 
 type ProjectApprovalSystemPostDto struct {
-	ApplicationId       string
-	ApplicationModuleId string
-	Email               string
-	Subject             string
-	Body                string
-	RequesterEmail      string
+	ApplicationId       string   `json:"applicationId"`
+	ApplicationModuleId string   `json:"applicationModuleId"`
+	Email               string   `json:"email"` // OBSOLETE
+	Emails              []string `json:"emails"`
+	Subject             string   `json:"subject"`
+	Body                string   `json:"body"`
+	RequesterEmail      string   `json:"requesterEmail"`
 }
 
 type RequestMakePublicDto struct {
@@ -631,7 +632,7 @@ func RequestMakePublic(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	go RequestApproval(id, username.(string))
+	go RequestApprovalObsolete(id, username.(string))
 }
 
 func IndexOrgRepos(w http.ResponseWriter, r *http.Request) {
@@ -1101,13 +1102,32 @@ func IndexRepo(repo ghAPI.Repo) {
 	}
 }
 
-func RequestApproval(id int64, email string) {
+func RequestApproval(projectId int64, email string) {
+	projectApprovals, err := db.RequestProjectApprovals(projectId, email)
+	if err != nil {
+		log.Println(err.Error())
+		return
+	}
+
+	for _, v := range projectApprovals {
+		if v.RequestStatus == "New" {
+			err := ApprovalSystemRequest(v)
+			if err != nil {
+				log.Println("ID:" + strconv.FormatInt(int64(v.Id), 10) + " " + err.Error())
+				return
+			}
+		}
+	}
+}
+
+// Obsolete
+func RequestApprovalObsolete(id int64, email string) {
 
 	projectApprovals := db.PopulateProjectsApproval(id, email)
 
 	for _, v := range projectApprovals {
 		if v.RequestStatus == "New" {
-			err := ApprovalSystemRequest(v)
+			err := ApprovalSystemRequestObsolete(v)
 			if err != nil {
 				log.Println("ID:" + strconv.FormatInt(v.Id, 10) + " " + err.Error())
 				return
@@ -1116,7 +1136,107 @@ func RequestApproval(id int64, email string) {
 	}
 }
 
-func ApprovalSystemRequest(data db.ProjectApproval) error {
+func ApprovalSystemRequest(data db.ProjectApprovalApprovers) error {
+	url := os.Getenv("APPROVAL_SYSTEM_APP_URL")
+	if url != "" {
+		url = url + "/request"
+		ch := make(chan *http.Response)
+		// var res *http.Response
+
+		bodyTemplate := `<p>Hi,</p>
+		<p>|RequesterName| is requesting for a new project and is now pending for |ApprovalType| review.</p>
+		<p>Below are the details:</p>
+		<table>
+			<tr>
+				<td style="font-weight: bold;">Project Name<td>
+				<td style="font-size:larger">|ProjectName|<td>
+			</tr>
+			<tr>
+				<td style="font-weight: bold;">Requested by<td>
+				<td style="font-size:larger">|Requester|<td>
+			</tr>
+			<tr>
+				<td style="font-weight: bold;">Description<td>
+				<td style="font-size:larger">|ProjectDescription|<td>
+			</tr>
+		</table>
+		<table>
+			<tr>
+				<td style="font-weight: bold;">Is this a new contribution with no prior code development? (i.e., no existing Avanade IP, no third-party/OSS code, etc.)<td>
+				<td style="font-size:larger">|Newcontribution|<td>
+			</tr>
+			<tr>
+				<td style="font-weight: bold;">Who is sponsoring thapprovalsyscois OSS contribution?<td>
+				<td style="font-size:larger">|OSSsponsor|<td>
+			</tr>
+			<tr>
+				<td style="font-weight: bold;">Will Avanade use this contribution in client accounts and/or as part of an Avanade offerings/assets?<td>
+				<td style="font-size:larger">|Avanadeofferingsassets|<td>
+			</tr>
+			<tr>
+				<td style="font-weight: bold;">Will there be a commercial version of this contribution<td>
+				<td style="font-size:larger">|Willbecommercialversion|<td>
+			</tr>
+				<tr>
+				<td style="font-weight: bold;">Additional OSS Contribution Information (e.g. planned maintenance/support, etc.)?<td>
+				<td style="font-size:larger">|OSSContributionInformation|<td>
+			</tr>
+		</table>
+		<p>For more information, send an email to <a href="mailto:|RequesterUserPrincipalName|">|RequesterUserPrincipalName|</a></p>`
+
+		replacer := strings.NewReplacer(
+			"|RequesterName|", data.RequesterName,
+			"|ApprovalType|", data.ApprovalType,
+			"|ProjectName|", data.ProjectName,
+			"|Requester|", data.RequesterName,
+			"|ProjectDescription|", data.ProjectDescription,
+			"|RequesterUserPrincipalName|", data.RequesterUserPrincipalName,
+			"|Newcontribution|", data.NewContribution,
+			"|OSSsponsor|", data.OSSsponsor,
+			"|Avanadeofferingsassets|", data.AvanadeOfferingsAssets,
+			"|Willbecommercialversion|", data.WillBeCommercialVersion,
+			"|OSSContributionInformation|", data.OSSContributionInformation,
+		)
+		body := replacer.Replace(bodyTemplate)
+		postParams := ProjectApprovalSystemPostDto{
+			ApplicationId:       os.Getenv("APPROVAL_SYSTEM_APP_ID"),
+			ApplicationModuleId: os.Getenv("APPROVAL_SYSTEM_APP_MODULE_PROJECTS"),
+			Subject:             fmt.Sprintf("[GH-Management] New Project For Review - %v", data.ProjectName),
+			Body:                body,
+			Emails:              data.Approvers,
+			RequesterEmail:      data.RequesterUserPrincipalName,
+		}
+
+		go getHttpPostResponseStatus(url, postParams, ch)
+		r := <-ch
+		if r != nil {
+			var res ProjectApprovalSystemPostResponseDto
+			err := json.NewDecoder(r.Body).Decode(&res)
+			if err != nil {
+				return err
+			}
+
+			messageBody := notification.RepositoryPublicApprovalMessageBody{
+				Recipients:   []string{},
+				ApprovalLink: fmt.Sprintf("%s/response/%s/%s/%s/1", os.Getenv("APPROVAL_SYSTEM_APP_URL"), postParams.ApplicationId, postParams.ApplicationModuleId, res.ItemId),
+				ApprovalType: data.ApprovalType,
+				RepoLink:     fmt.Sprintf("https://github.com/" + os.Getenv("GH_ORG_INNERSOURCE") + "/" + data.ProjectName),
+				RepoName:     data.ProjectName,
+				UserName:     data.RequesterName,
+			}
+			err = messageBody.Send()
+			if err != nil {
+				log.Println(err.Error())
+			}
+
+			db.ProjectsApprovalUpdateGUID(data.Id, res.ItemId)
+		}
+	}
+	return nil
+}
+
+// Obsolete
+func ApprovalSystemRequestObsolete(data db.ProjectApproval) error {
 
 	url := os.Getenv("APPROVAL_SYSTEM_APP_URL")
 	if url != "" {
@@ -1172,7 +1292,6 @@ func ApprovalSystemRequest(data db.ProjectApproval) error {
 			"|Requester|", data.RequesterName,
 			"|ProjectDescription|", data.ProjectDescription,
 			"|RequesterUserPrincipalName|", data.RequesterUserPrincipalName,
-
 			"|Newcontribution|", data.Newcontribution,
 			"|OSSsponsor|", data.OSSsponsor,
 			"|Avanadeofferingsassets|", data.Offeringsassets,
@@ -1234,7 +1353,7 @@ func ReprocessRequestApproval() {
 	projectApprovals := db.GetFailedProjectApprovalRequests()
 
 	for _, v := range projectApprovals {
-		go ApprovalSystemRequest(v)
+		go ApprovalSystemRequestObsolete(v)
 	}
 }
 

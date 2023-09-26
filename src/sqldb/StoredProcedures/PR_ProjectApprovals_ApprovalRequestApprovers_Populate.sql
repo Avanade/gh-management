@@ -43,4 +43,8 @@ BEGIN
         Approvers AS A ON T.Id = A.ApprovalTypeId
     WHERE
         PA.ProjectId = @ProjectId
+
+    UPDATE Projects SET ApprovalStatusId = 2, Modified = GETDATE() WHERE Id = @ProjectId
+
+    EXEC PR_ProjectApprovals_Select_ById @ProjectId
 END
