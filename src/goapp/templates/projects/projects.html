@@ -411,10 +411,17 @@
                             </p>
                           </div>
                         </div>
-                        <div class="mt-2 sm:flex text-sm text-gray-500 sm:mt-0">
-                          <p x-show="item.ApprovalRemarks" x-data="{ remarks: 'Remarks: ' + item.ApprovalRemarks }"
-                            x-text="remarks"></p>
+                        <div class="mt-2 sm:flex ">
+                          <div class="sm:flex w-1/2 mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
+                            <p x-show="item.ApprovalRemarks" x-data="{ remarks: 'Remarks: ' + item.ApprovalRemarks }"
+                            x-text="remarks"></p>                            
+                          </div>
+                          <div class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
+                            <p x-show="item.RespondedBy" x-data="{ respondedBy: 'Responded by: ' + item.RespondedBy }"
+                            x-text="respondedBy"></p>
+                          </div>
                         </div>
+
                       </div>
                     </li>
                   </template>

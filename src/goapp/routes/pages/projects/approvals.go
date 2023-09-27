@@ -32,6 +32,7 @@ type ApprovalStatusRequestBody struct {
 	IsApproved   bool   `json:"isApproved"`
 	Remarks      string `json:"Remarks"`
 	ResponseDate string `json:"responseDate"`
+	RespondedBy  string `json:"respondedBy"`
 }
 
 func UpdateApprovalStatusProjects(w http.ResponseWriter, r *http.Request) {
@@ -282,7 +283,7 @@ func ProcessApprovalProjects(r *http.Request, module string) error {
 		approvalStatusId = REJECTED
 	}
 
-	params := make(map[string]interface{})
+	params := make(map[string]interface{}) // OBSOLETE
 	params["ApprovalSystemGUID"] = req.ItemId
 	params["ApprovalStatusId"] = approvalStatusId
 	params["ApprovalRemarks"] = req.Remarks
@@ -296,7 +297,7 @@ func ProcessApprovalProjects(r *http.Request, module string) error {
 		spName = "PR_CommunityApproval_Update_ApproverResponse"
 	}
 
-	_, err = db.UpdateApprovalApproverResponse(spName, req.ItemId, req.Remarks, req.ResponseDate, approvalStatusId)
+	_, err = db.UpdateApprovalApproverResponse(spName, req.ItemId, req.Remarks, req.ResponseDate, req.RespondedBy, approvalStatusId)
 	if err != nil {
 		return err
 	}

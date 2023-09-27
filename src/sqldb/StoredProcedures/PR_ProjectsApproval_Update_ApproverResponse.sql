@@ -3,7 +3,8 @@ CREATE PROCEDURE [dbo].[PR_ProjectsApproval_Update_ApproverResponse]
   @ApprovalSystemGUID UNIQUEIDENTIFIER,
   @ApprovalStatusId INT,
   @ApprovalRemarks VARCHAR(255),
-  @ApprovalDate DATETIME
+  @ApprovalDate DATETIME,
+  @RespondedBy VARCHAR(100) = NULL -- OBSOLETE REMOVE EQUALS NULL
 )
 AS
 BEGIN
@@ -15,7 +16,8 @@ UPDATE
     [ApprovalRemarks] = @ApprovalRemarks,
     [ModifiedBy] = [ApproverUserPrincipalName],
     [Modified] = GETDATE(),
-    [ApprovalDate] = convert(DATETIME, @ApprovalDate)
+    [ApprovalDate] = convert(DATETIME, @ApprovalDate),
+    [RespondedBy] = @RespondedBy
   WHERE
     [ApprovalSystemGUID] = @ApprovalSystemGUID
 END

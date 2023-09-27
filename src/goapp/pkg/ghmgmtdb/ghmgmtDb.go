@@ -34,7 +34,7 @@ func SearchCommunitiesProjectsUsers(searchText, offSet, rowCount, username strin
 	return result, err
 }
 
-func UpdateApprovalApproverResponse(storedProcedure, itemId, remarks, responseDate string, approvalStatusId int) (bool, error) {
+func UpdateApprovalApproverResponse(storedProcedure, itemId, remarks, responseDate, respondedBy string, approvalStatusId int) (bool, error) {
 	db := ConnectDb()
 	defer db.Close()
 
@@ -43,6 +43,7 @@ func UpdateApprovalApproverResponse(storedProcedure, itemId, remarks, responseDa
 		"ApprovalStatusId":   approvalStatusId,
 		"ApprovalRemarks":    remarks,
 		"ApprovalDate":       responseDate,
+		"RespondedBy":        respondedBy,
 	}
 
 	_, err := db.ExecuteStoredProcedure(storedProcedure, params)

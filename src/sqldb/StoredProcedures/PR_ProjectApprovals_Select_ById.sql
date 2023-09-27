@@ -12,6 +12,7 @@ SELECT
 	U1.Name [RequesterName], U1.GivenName [RequesterGivenName], U1.SurName [RequesterSurName], U1.UserPrincipalName [RequesterUserPrincipalName],
 	PA.ApprovalTypeId, T.[Name] ApprovalType,
 	PA.ApproverUserPrincipalName,
+	PA.RespondedBy,
 	PA.ApprovalDescription,
 	S.Name [RequestStatus],
 	PA.[ApprovalDate], PA.[ApprovalRemarks],
