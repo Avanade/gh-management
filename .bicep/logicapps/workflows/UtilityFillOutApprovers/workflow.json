@@ -1,0 +1,32 @@
+{
+    "definition": {
+        "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+        "actions": {
+            "HTTP_FillOut_Approvers": {
+                "inputs": {
+                    "authentication": {
+                        "identity": "@concat('/subscriptions/59d64684-e7c9-4397-8982-6b775a473b74/resourcegroups/OpenTech_GitHub_Mgmt/providers/Microsoft.ManagedIdentity/userAssignedIdentities/', parameters('ManagedIdentityName'))",
+                        "type": "ManagedServiceIdentity"
+                    },
+                    "method": "GET",
+                    "uri": "@concat(parameters('GHMgmDomain'), '/utility/fillout/approvers')"
+                },
+                "runAfter": {},
+                "type": "Http"
+            }
+        },
+        "contentVersion": "1.0.0.0",
+        "outputs": {},
+        "triggers": {
+            "Recurrence": {
+                "recurrence": {
+                    "frequency": "Day",
+                    "interval": 1,
+                    "schedule": {}
+                },
+                "type": "Recurrence"
+            }
+        }
+    },
+    "kind": "Stateful"
+}
