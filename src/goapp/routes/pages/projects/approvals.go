@@ -359,7 +359,7 @@ func CheckAllRequests(id int64, host string) {
 
 		var recipients []string
 
-		for i, _ := range repoOwners {
+		for i := range repoOwners {
 			recipients = append(recipients, repoOwners[i].UserPrincipalName)
 		}
 

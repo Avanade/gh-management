@@ -28,7 +28,7 @@ type ProjectApprovalApprovers struct {
 	ConfirmNotClientProject    bool
 	NewContribution            string
 	OSSsponsor                 string
-	AvanadeOfferingsAssets     string
+	OfferingsAssets            string
 	WillBeCommercialVersion    string
 	OSSContributionInformation string
 }
@@ -128,7 +128,7 @@ func PopulateApprovalRequestApproversProjectApprovalsByProject(projectId int64, 
 		}
 
 		if v["Avanadeofferingsassets"] != nil {
-			projectApprovalApprover.AvanadeOfferingsAssets = v["Avanadeofferingsassets"].(string)
+			projectApprovalApprover.OfferingsAssets = v["Avanadeofferingsassets"].(string)
 		}
 
 		if v["OSSsponsor"] != nil {
@@ -185,6 +185,10 @@ func ReprocessFailedProjectApprovals() ([]ProjectApprovalApprovers, error) {
 			ApprovalDescription:        v.ApprovalDescription,
 			RequestStatus:              v.RequestStatus,
 			ApprovalDate:               v.ApprovalDate,
+			OSSsponsor:                 v.OSSsponsor,
+			OfferingsAssets:            v.Offeringsassets,
+			WillBeCommercialVersion:    v.Willbecommercialversion,
+			OSSContributionInformation: v.OSSContributionInformation,
 		}
 
 		approvalRequestApprovers, err := GetApprovalRequestApproversByApprovalRequestId(int(v.Id))

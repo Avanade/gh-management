@@ -1193,7 +1193,7 @@ func ApprovalSystemRequest(data db.ProjectApprovalApprovers) error {
 			"|RequesterUserPrincipalName|", data.RequesterUserPrincipalName,
 			"|Newcontribution|", data.NewContribution,
 			"|OSSsponsor|", data.OSSsponsor,
-			"|Avanadeofferingsassets|", data.AvanadeOfferingsAssets,
+			"|Avanadeofferingsassets|", data.OfferingsAssets,
 			"|Willbecommercialversion|", data.WillBeCommercialVersion,
 			"|OSSContributionInformation|", data.OSSContributionInformation,
 		)
@@ -1363,7 +1363,7 @@ func ReprocessRequestApproval() {
 
 // Obsolete
 func ReprocessRequestApprovalObsolete() {
-	projectApprovals := db.GetFailedProjectApprovalRequests()
+	projectApprovals := db.GetFailedProjectApprovalRequestsObsolete()
 
 	for _, v := range projectApprovals {
 		go ApprovalSystemRequestObsolete(v)
