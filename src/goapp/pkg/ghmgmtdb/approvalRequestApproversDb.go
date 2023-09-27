@@ -164,3 +164,39 @@ func RequestProjectApprovals(projectId int64, requestedBy string) ([]ProjectAppr
 
 	return projectApprovalApprovers, nil
 }
+
+func ReprocessFailedProjectApprovals() ([]ProjectApprovalApprovers, error) {
+	projectApprovals := GetFailedProjectApprovalRequests()
+
+	var projectApprovalApprovers []ProjectApprovalApprovers
+
+	for _, v := range projectApprovals {
+		projectApprovalApprover := ProjectApprovalApprovers{
+			Id:                         v.Id,
+			ProjectId:                  v.ProjectId,
+			ProjectName:                v.ProjectName,
+			ProjectDescription:         v.ProjectDescription,
+			RequesterName:              v.RequesterName,
+			RequesterGivenName:         v.RequesterGivenName,
+			RequesterSurName:           v.RequesterSurName,
+			RequesterUserPrincipalName: v.RequesterUserPrincipalName,
+			ApprovalTypeId:             int(v.ApprovalTypeId),
+			ApprovalType:               v.ApprovalType,
+			ApprovalDescription:        v.ApprovalDescription,
+			RequestStatus:              v.RequestStatus,
+			ApprovalDate:               v.ApprovalDate,
+		}
+
+		approvalRequestApprovers, err := GetApprovalRequestApproversByApprovalRequestId(int(v.Id))
+		if err != nil {
+			return nil, err
+		}
+		for _, approvalRequestApprover := range approvalRequestApprovers {
+			projectApprovalApprover.Approvers = append(projectApprovalApprover.Approvers, approvalRequestApprover.ApproverEmail)
+		}
+
+		projectApprovalApprovers = append(projectApprovalApprovers, projectApprovalApprover)
+	}
+
+	return projectApprovalApprovers, nil
+}

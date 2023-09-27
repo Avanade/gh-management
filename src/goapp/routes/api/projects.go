@@ -632,7 +632,7 @@ func RequestMakePublic(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	go RequestApprovalObsolete(id, username.(string))
+	go RequestApproval(id, username.(string))
 }
 
 func IndexOrgRepos(w http.ResponseWriter, r *http.Request) {
@@ -1350,6 +1350,19 @@ func getHttpPostResponseStatus(url string, data interface{}, ch chan *http.Respo
 }
 
 func ReprocessRequestApproval() {
+	projectApprovals, err := db.ReprocessFailedProjectApprovals()
+	if err != nil {
+		log.Println(err.Error())
+		return
+	}
+
+	for _, v := range projectApprovals {
+		go ApprovalSystemRequest(v)
+	}
+}
+
+// Obsolete
+func ReprocessRequestApprovalObsolete() {
 	projectApprovals := db.GetFailedProjectApprovalRequests()
 
 	for _, v := range projectApprovals {
