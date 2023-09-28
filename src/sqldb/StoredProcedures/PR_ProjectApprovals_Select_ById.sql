@@ -22,7 +22,8 @@ SELECT
 	p.[OSSsponsor], 
 	p.[Avanadeofferingsassets],
 	p.[Willbecommercialversion], 
-	p.[OSSContributionInformation]
+	p.[OSSContributionInformation],
+	PA.RespondedBy
     
 FROM 
     ProjectApprovals PA
