@@ -15,6 +15,10 @@ func FillOutApprovers(w http.ResponseWriter, r *http.Request) {
 	}
 
 	for _, approver := range result {
+		if approver["ApproverUserPrincipalName"] == nil {
+			continue
+		}
+
 		err = db.InsertApprover(db.Approver{
 			ApprovalTypeId: int(approver["Id"].(int64)),
 			ApproverEmail:  approver["ApproverUserPrincipalName"].(string),
@@ -34,6 +38,9 @@ func FillOutApprovalRequestApprovers(w http.ResponseWriter, r *http.Request) {
 	}
 
 	for _, projectApproval := range projectApprovals {
+		if projectApproval["ApproverUserPrincipalName"] == nil {
+			continue
+		}
 		id := int(projectApproval["Id"].(int64))
 		err = db.InsertApprovalRequestApprover(db.ApprovalRequestApprover{
 			ApprovalRequestId: id,
