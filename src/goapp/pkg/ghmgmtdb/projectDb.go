@@ -638,3 +638,14 @@ func UpdateOssContributionSponsorId(params map[string]interface{}) ([]map[string
 	}
 	return nil, nil
 }
+
+func LegacySearch(params map[string]interface{}) ([]map[string]interface{}, error) {
+	db := ConnectDb()
+	defer db.Close()
+
+	result, err := db.ExecuteStoredProcedureWithResult("PR_Projects_LegacySearch", params)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
+}
