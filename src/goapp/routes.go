@@ -160,7 +160,6 @@ func setApiRoutes(mux *mux.Router) {
 	muxApi.Handle("/search/users/{search}", loadAzAuthPage(rtApi.SearchUserFromActiveDirectory))
 	muxApi.Handle("/allrepositories", loadAzAuthPage(rtApi.GetAllRepositories))
 	muxApi.Handle("/getActiveApprovalTypes", loadAzGHAuthPage(rtApi.GetActiveApprovalTypes))
-	muxApi.HandleFunc("/searchresult/{searchText}", rtApi.LegacySearchHandler)
 
 	//APPROVAL TYPES API
 	muxApi.Handle("/approval/type", loadAzAuthPage(rtApi.CreateApprovalType)).Methods("POST")
@@ -205,4 +204,5 @@ func setApiRoutes(mux *mux.Router) {
 	muxApi.Handle("/RepoOwnersCleanup", loadGuidAuthApi(rtApi.RepoOwnersCleanup)).Methods("GET")
 	muxApi.Handle("/recurringapproval", loadGuidAuthApi(rtApi.RecurringApproval)).Methods("GET")
 	muxApi.Handle("/migrateOssSponsors", loadGuidAuthApi(rtApi.MigrateToOssSponsorsTable)).Methods("GET")
+	muxApi.Handle("/searchresult/{searchText}", loadGuidAuthApi(rtApi.LegacySearchHandler))
 }
