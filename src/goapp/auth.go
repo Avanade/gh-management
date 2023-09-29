@@ -71,7 +71,8 @@ func checkFailedApprovalRequests() {
 	freqInt, _ := strconv.ParseInt(freq, 0, 64)
 	if freq > "0" {
 		for range time.NewTicker(time.Duration(freqInt) * time.Minute).C {
-			go rtApi.ReprocessRequestApprovalObsolete() // OBSOLETE
+			go rtApi.ReprocessRequestApproval()
+			// go rtApi.ReprocessRequestApprovalObsolete() // OBSOLETE
 			go rtApi.ReprocessRequestCommunityApproval()
 		}
 	}
