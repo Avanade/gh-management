@@ -16,7 +16,7 @@ AS
 UNION
 
 	SELECT
-		[GitHubId] AS 'Code',
+		CAST(GitHubId as varchar(50)) AS 'Code',
 		[Name] AS 'Title',
 		[Description],
 		'Asset' [Type]
