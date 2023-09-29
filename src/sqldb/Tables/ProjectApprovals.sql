@@ -3,7 +3,7 @@
 	[Id] INT NOT NULL PRIMARY KEY IDENTITY, 
     [ProjectId] INT NOT NULL, 
     [ApprovalTypeId] INT NOT NULL, 
-    [ApproverUserPrincipalName] VARCHAR(100) NOT NULL, 
+    [ApproverUserPrincipalName] VARCHAR(100), 
     [ApprovalStatusId] INT NOT NULL, 
     [ApprovalDescription] VARCHAR(500) NULL,
     [ApprovalRemarks] VARCHAR(255) NULL,
