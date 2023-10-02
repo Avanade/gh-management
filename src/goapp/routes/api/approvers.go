@@ -50,7 +50,7 @@ func FillOutApprovalRequestApprovers(w http.ResponseWriter, r *http.Request) {
 			log.Println(err.Error())
 		}
 
-		if projectApproval["ApprovalDate"] != nil {
+		if projectApproval["ApprovalDate"] != nil && projectApproval["ApproverUserPrincipalName"] != nil {
 			err = db.UpdateProjectApprovalById(id, projectApproval["ApproverUserPrincipalName"].(string))
 			if err != nil {
 				log.Println(err.Error())
