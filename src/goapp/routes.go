@@ -203,6 +203,9 @@ func setApiRoutes(mux *mux.Router) {
 	muxApi.Handle("/RepoOwnerScan", loadGuidAuthApi(rtApi.RepoOwnerScan)).Methods("GET")
 	muxApi.Handle("/RepoOwnersCleanup", loadGuidAuthApi(rtApi.RepoOwnersCleanup)).Methods("GET")
 	muxApi.Handle("/recurringapproval", loadGuidAuthApi(rtApi.RecurringApproval)).Methods("GET")
+
+	muxApi.Handle("/utility/fillout/approvers", loadGuidAuthApi(rtApi.FillOutApprovers)).Methods("GET")
+	muxApi.Handle("/utility/fillout/approvalrequest/approvers", loadGuidAuthApi(rtApi.FillOutApprovalRequestApprovers)).Methods("GET")
 	muxApi.Handle("/migrateOssSponsors", loadGuidAuthApi(rtApi.MigrateToOssSponsorsTable)).Methods("GET")
 	muxApi.Handle("/searchresult/{searchText}", loadGuidAuthApi(rtApi.LegacySearchHandler))
 }

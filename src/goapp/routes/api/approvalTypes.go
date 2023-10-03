@@ -14,15 +14,21 @@ import (
 )
 
 type ApprovalTypeDto struct {
-	Id                        int    `json:"id"`
-	Name                      string `json:"name"`
-	ApproverUserPrincipalName string `json:"approver_user_principal_name"`
-	IsActive                  bool   `json:"is_active"`
-	IsArchived                bool   `json:"is_archived"`
+	Id                        int           `json:"id"`
+	Name                      string        `json:"name"`
+	ApproverUserPrincipalName string        `json:"approverUserPrincipalName"`
+	Approvers                 []ApproverDto `json:"approvers"`
+	IsActive                  bool          `json:"isActive"`
+	IsArchived                bool          `json:"isArchived"`
+}
+
+type ApproverDto struct {
+	ApprovalTypeId int    `json:"approvalTypeId"`
+	ApproverEmail  string `json:"approverEmail"`
 }
 
 func GetApprovalTypes(w http.ResponseWriter, r *http.Request) {
-	var data interface{}
+	var data []map[string]interface{}
 	var total int
 
 	params := r.URL.Query()
@@ -33,7 +39,13 @@ func GetApprovalTypes(w http.ResponseWriter, r *http.Request) {
 		search := params["search"][0]
 		orderby := params["orderby"][0]
 		ordertype := params["ordertype"][0]
-		data, _ = db.SelectApprovalTypesByFilter(offset, filter, orderby, ordertype, search)
+		result, err := db.SelectApprovalTypesByFilter(offset, filter, orderby, ordertype, search)
+		if err != nil {
+			log.Println(err.Error())
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		data = result
 	} else {
 		result, err := db.SelectApprovalTypes()
 		if err != nil {
@@ -44,15 +56,38 @@ func GetApprovalTypes(w http.ResponseWriter, r *http.Request) {
 		data = result
 	}
 
+	//MOVE APPROVAL TYPES FROM DATABASE RESULT TO API DTO
+	var approvalTypesDto []ApprovalTypeDto
+	for _, v := range data {
+		approvalTypeDto := ApprovalTypeDto{
+			Id:                        int(v["Id"].(int64)),
+			Name:                      v["Name"].(string),
+			ApproverUserPrincipalName: v["ApproverUserPrincipalName"].(string),
+			IsActive:                  v["IsActive"].(bool),
+			IsArchived:                v["IsArchived"].(bool),
+		}
+
+		approversResult, err := GetApproversByApprovalTypeId(approvalTypeDto.Id)
+		if err != nil {
+			log.Println(err.Error())
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		approvalTypeDto.Approvers = *approversResult
+
+		approvalTypesDto = append(approvalTypesDto, approvalTypeDto)
+	}
+
 	total = db.SelectTotalApprovalTypes()
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(struct {
-		Data  interface{} `json:"data"`
-		Total int         `json:"total"`
+		Data  []ApprovalTypeDto `json:"data"`
+		Total int               `json:"total"`
 	}{
-		Data:  data,
+		Data:  approvalTypesDto,
 		Total: total,
 	})
 }
@@ -60,15 +95,33 @@ func GetApprovalTypes(w http.ResponseWriter, r *http.Request) {
 func GetApprovalTypeById(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id, _ := strconv.Atoi(vars["id"])
+
 	result, err := db.SelectApprovalTypeById(id)
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
+
+	approversDto, err := GetApproversByApprovalTypeId(result.Id)
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	approvalTypeDto := ApprovalTypeDto{
+		Id:                        result.Id,
+		Name:                      result.Name,
+		ApproverUserPrincipalName: result.ApproverUserPrincipalName,
+		Approvers:                 *approversDto,
+		IsActive:                  result.IsActive,
+		IsArchived:                result.IsArchived,
+	}
+
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(result)
+	json.NewEncoder(w).Encode(approvalTypeDto)
 }
 
 func CreateApprovalType(w http.ResponseWriter, r *http.Request) {
@@ -90,6 +143,19 @@ func CreateApprovalType(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
+
+	for _, v := range approvalTypeDto.Approvers {
+		err := db.InsertApprover(db.Approver{
+			ApprovalTypeId: id,
+			ApproverEmail:  v.ApproverEmail,
+		})
+		if err != nil {
+			log.Println(err.Error())
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+	}
+
 	approvalTypeDto.Id = id
 	json.NewEncoder(w).Encode(approvalTypeDto)
 }
@@ -123,6 +189,26 @@ func EditApprovalTypeById(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
+
+	err = db.DeleteApproverByApprovalTypeId(id)
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	for _, v := range approvalTypeDto.Approvers {
+		err := db.InsertApprover(db.Approver{
+			ApprovalTypeId: id,
+			ApproverEmail:  v.ApproverEmail,
+		})
+		if err != nil {
+			log.Println(err.Error())
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+	}
+
 	approvalTypeDto.Id = approvalTypeId
 	json.NewEncoder(w).Encode(approvalTypeDto)
 }
@@ -169,4 +255,24 @@ func GetActiveApprovalTypes(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(data)
+}
+
+func GetApproversByApprovalTypeId(approvalTypeId int) (*[]ApproverDto, error) {
+	resultApprovers, err := db.GetApproversByApprovalTypeId(approvalTypeId)
+	if err != nil {
+		return nil, err
+	}
+
+	var approversDto []ApproverDto
+
+	for _, v := range resultApprovers {
+		approverDto := ApproverDto{
+			ApprovalTypeId: v.ApprovalTypeId,
+			ApproverEmail:  v.ApproverEmail,
+		}
+
+		approversDto = append(approversDto, approverDto)
+	}
+
+	return &approversDto, nil
 }
