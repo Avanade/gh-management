@@ -3,7 +3,7 @@
 		@Id INT,
 		@ModifiedBy VARCHAR(100),
 		@Newcontribution VARCHAR(50),
-		@OSSsponsor VARCHAR(50),
+		@OSSsponsor INT,
 		@Avanadeofferingsassets VARCHAR(50),
 		@Willbecommercialversion VARCHAR(50),
 		@OSSContributionInformation VARCHAR(1000)
@@ -19,7 +19,7 @@ UPDATE
 		[dbo].[Projects]
    SET 
 		[Newcontribution] = @Newcontribution,
-		[OSSsponsor] = @OSSsponsor,
+		[OSSContributionSponsorId] = @OSSsponsor,
 		[Avanadeofferingsassets] = @Avanadeofferingsassets,
 		[Willbecommercialversion] = @Willbecommercialversion,
 		[OSSContributionInformation] = @OSSContributionInformation,

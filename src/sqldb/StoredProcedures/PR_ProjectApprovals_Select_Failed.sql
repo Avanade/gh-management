@@ -15,7 +15,7 @@ SELECT
 	p.[ConfirmAvaIP],
 	p.[ConfirmEnabledSecurity],
 	p.[newcontribution], 
-	p.[OSSsponsor], 
+	C.Name AS OSSsponsor,
 	p.[Avanadeofferingsassets],
 	p.[Willbecommercialversion], 
 	p.[OSSContributionInformation]
@@ -25,8 +25,9 @@ FROM
 	INNER JOIN ApprovalTypes T ON PA.ApprovalTypeId = T.Id
 	INNER JOIN Projects P ON PA.ProjectId = P.Id
 	INNER JOIN Users U1 ON P.CreatedBy = U1.UserPrincipalName
-	INNER JOIN Users U2 ON P.CoOwner = U2.UserPrincipalName
+	LEFT JOIN Users U2 ON P.CoOwner = U2.UserPrincipalName
 	INNER JOIN ApprovalStatus S ON S.Id = PA.ApprovalStatusId
+	INNER JOIN OSSContributionSponsors C ON P.OSSContributionSponsorId = C.Id
 WHERE  
 	ApprovalSystemGUID IS NULL
 	AND DATEDIFF(MI, PA.Created, GETDATE()) >=5

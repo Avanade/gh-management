@@ -19,6 +19,7 @@ on:
 
 env:
   PROJECT_NAME: ava-gh-mgmt
+  APPROVAL_SYSTEM_NAME: ava-approval-system
   ACTIVE_ENV: ${{github.event.inputs.selected_environment}}
 
 jobs:
@@ -32,11 +33,13 @@ jobs:
           case ${{ github.event.inputs.selected_environment }} in
             "prod")
                 echo "GH_DOMAIN=${{secrets.CUSTOM_DOMAIN_PROD}}" >> $GITHUB_ENV
+                echo "APPROVAL_SYSTEM_DOMAIN=${{secrets.CUSTOM_APPROVAL_SYSTEM_DOMAIN_PROD}}" >> $GITHUB_ENV
                 echo "ACTIVE_ENV=prod" >> $GITHUB_ENV
                 echo "LA_MANAGE_IDENTITY_NAME=${{secrets.LOGIC_APP_MANAGE_IDENTITY_PROD}}" >> $GITHUB_ENV
               ;;
             "test" | "uat")
                 echo "GH_DOMAIN=https://${{ env.PROJECT_NAME }}-${{env.ACTIVE_ENV}}.azurewebsites.net" >> $GITHUB_ENV
+                echo "APPROVAL_SYSTEM_DOMAIN=https://${{ env.APPROVAL_SYSTEM_NAME }}-${{env.ACTIVE_ENV}}.azurewebsites.net" >> $GITHUB_ENV
                 echo "ACTIVE_ENV=${{env.ACTIVE_ENV}}" >> $GITHUB_ENV
                 echo "LA_MANAGE_IDENTITY_NAME=${{secrets.LOGIC_APP_MANAGE_IDENTITY}}" >> $GITHUB_ENV
               ;;
@@ -66,6 +69,7 @@ jobs:
         env:
           GHMgmDomain.value: ${{ env.GH_DOMAIN }}
           ManagedIdentityName.value: ${{ env.LA_MANAGE_IDENTITY_NAME }}
+          ApprovalSystemDomain.value: ${{ env.APPROVAL_SYSTEM_DOMAIN }}
           
       - name: Upload Logic App Workflows
         uses: azure/CLI@v1

@@ -400,7 +400,7 @@
                         <div class="mt-2 sm:flex ">
                           <div class="sm:flex w-1/2">
                             <p class="flex items-center text-sm text-gray-500"
-                              x-data="{ approver: 'Approver: ' + item.ApproverUserPrincipalName}" x-text="approver">
+                              x-data="{ approver: 'Approver: ' + item.Approvers}" x-text="approver">
                             </p>
                           </div>
                           <div class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
@@ -411,10 +411,17 @@
                             </p>
                           </div>
                         </div>
-                        <div class="mt-2 sm:flex text-sm text-gray-500 sm:mt-0">
-                          <p x-show="item.ApprovalRemarks" x-data="{ remarks: 'Remarks: ' + item.ApprovalRemarks }"
-                            x-text="remarks"></p>
+                        <div class="mt-2 sm:flex ">
+                          <div class="sm:flex w-1/2 mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
+                            <p x-show="item.ApprovalRemarks" x-data="{ remarks: 'Remarks: ' + item.ApprovalRemarks }"
+                            x-text="remarks"></p>                            
+                          </div>
+                          <div class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
+                            <p x-show="item.RespondedBy" x-data="{ respondedBy: 'Responded by: ' + item.RespondedBy }"
+                            x-text="respondedBy"></p>
+                          </div>
                         </div>
+
                       </div>
                     </li>
                   </template>
@@ -1013,6 +1020,7 @@
           fetch('/api/repositories/list')
             .then(r => {
               r.json().then(body => {
+                console.log(body)
                 this.userRepositoriesList = body
                 this.showSpinner = false
               });
@@ -1043,6 +1051,7 @@
           fetch('/api/repositories/' + id)
             .then(r => {
               r.json().then(body => {
+                console.log(body)
                 this.userRepositoriesList[i]["approvalStatus"] = body
                 this.userRepositoriesList[i]["statusLoaded"] = true
 
