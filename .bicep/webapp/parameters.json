@@ -28,6 +28,7 @@
                 "NOTIFICATION_SCOPE":"",
                 "NOTIFICATION_ENDPOINT":"",
                 "NOTIFICATION_RECIPIENT":"",
+                "NOTIFICATION_ENABLED": "",
 
                 "HOME_URL":"",
                 "GH_CLIENT_ID":"",

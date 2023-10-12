@@ -293,6 +293,11 @@ func setRecipients(recipients []string) []string {
 }
 
 func sendNotification(c Contract) error {
+	if os.Getenv("NOTIFICATION_ENABLED") != "true" {
+		log.Println("Teams notification not sent because it is not enabled.")
+		return nil
+	}
+
 	err := setToken()
 	if err != nil {
 		return err
