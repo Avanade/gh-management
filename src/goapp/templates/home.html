@@ -234,6 +234,12 @@
 </section>
 <script>
   function dashboardData() {
+    let hash = decodeURI(window.location.hash)
+    searchTerm = hash.slice(1)
+    if (searchTerm) {
+      window.location.href=`/search?search=${searchTerm}`
+    }
+    
     return {
       search: '',
       searchCommunity: '',
