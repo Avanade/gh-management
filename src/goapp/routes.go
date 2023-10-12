@@ -211,5 +211,6 @@ func setApiRoutes(mux *mux.Router) {
 	// LEGACY APIS
 	muxApi.Handle("/searchresult/{searchText}", loadGuidAuthApi(rtApi.LegacySearchHandler))
 	mux.HandleFunc("/Home/Asset/{assetCode}", rtApi.RedirectAsset)
+	mux.HandleFunc("/Home/AssetRequestCreation/", rtApi.RedirectAssetRequest)
 
 }

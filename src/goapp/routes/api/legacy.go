@@ -92,3 +92,7 @@ func RedirectAsset(w http.ResponseWriter, r *http.Request) {
 
 	}
 }
+
+func RedirectAssetRequest(w http.ResponseWriter, r *http.Request) {
+	http.Redirect(w, r, "/repositories/new", http.StatusPermanentRedirect)
+}
