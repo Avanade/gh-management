@@ -235,8 +235,8 @@
 <script>
   function dashboardData() {
     let hash = decodeURI(window.location.hash)
-    searchTerm = hash.slice(1)
-    if (searchTerm) {
+    if (hash) {
+      let searchTerm = hash.slice(1)
       window.location.href=`/search?search=${searchTerm}`
     }
     
