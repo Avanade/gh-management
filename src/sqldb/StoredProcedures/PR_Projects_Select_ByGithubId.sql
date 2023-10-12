@@ -21,7 +21,8 @@ SELECT [Id],
        [Created],
        [CreatedBy],
        [Modified],
-       [ModifiedBy]
+       [ModifiedBy],
+       [TFSProjectReference]
   FROM 
        [dbo].[Projects]
   WHERE
