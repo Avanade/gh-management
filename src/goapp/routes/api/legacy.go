@@ -84,7 +84,7 @@ func RedirectAsset(w http.ResponseWriter, r *http.Request) {
 		}
 		result = db.GetProjectByGithubId(int64(githubId))
 		if len(result) > 0 {
-			url := result[0]["TFSPRojectReference"].(string)
+			url := result[0]["TFSProjectReference"].(string)
 			http.Redirect(w, r, url, http.StatusTemporaryRedirect)
 			return
 		}
