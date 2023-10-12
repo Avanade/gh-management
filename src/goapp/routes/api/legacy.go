@@ -78,16 +78,17 @@ func RedirectAsset(w http.ResponseWriter, r *http.Request) {
 	} else {
 		githubId, err := strconv.Atoi(assetCode)
 		if err != nil {
-			log.Println(err.Error())
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
+			http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
+		} else {
+			result = db.GetProjectByGithubId(int64(githubId))
+			if len(result) > 0 {
+				url := result[0]["TFSProjectReference"].(string)
+				http.Redirect(w, r, url, http.StatusTemporaryRedirect)
+				return
+			} else {
+				http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
+			}
 		}
-		result = db.GetProjectByGithubId(int64(githubId))
-		if len(result) > 0 {
-			url := result[0]["TFSProjectReference"].(string)
-			http.Redirect(w, r, url, http.StatusTemporaryRedirect)
-			return
-		}
+
 	}
-	http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
 }
