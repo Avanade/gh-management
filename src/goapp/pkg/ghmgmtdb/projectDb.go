@@ -559,6 +559,19 @@ func GetProjectByGithubId(githubId int64) []map[string]interface{} {
 	return result
 }
 
+func GetProjectByAssetCode(assetCode string) []map[string]interface{} {
+	db := ConnectDb()
+	defer db.Close()
+
+	param := map[string]interface{}{
+		"AssetCode": assetCode,
+	}
+
+	result, _ := db.ExecuteStoredProcedureWithResult("PR_Projects_Select_ByAssetCode", param)
+
+	return result
+}
+
 func ReposSelectByOffsetAndFilter(offset int, search string) []map[string]interface{} {
 	db := ConnectDb()
 	defer db.Close()

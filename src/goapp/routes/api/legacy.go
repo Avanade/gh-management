@@ -4,6 +4,7 @@ import (
 	"encoding/xml"
 	"log"
 	"net/http"
+	"strconv"
 
 	db "main/pkg/ghmgmtdb"
 
@@ -64,4 +65,30 @@ func LegacySearchHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/xml")
 	// Write
 	w.Write(response)
+}
+
+func RedirectAsset(w http.ResponseWriter, r *http.Request) {
+	req := mux.Vars(r)
+	assetCode := req["assetCode"]
+
+	result := db.GetProjectByAssetCode(assetCode)
+	if len(result) > 0 {
+		url := result[0]["TFSProjectReference"].(string)
+		http.Redirect(w, r, url, http.StatusTemporaryRedirect)
+	} else {
+		githubId, err := strconv.Atoi(assetCode)
+		if err != nil {
+			http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
+		} else {
+			result = db.GetProjectByGithubId(int64(githubId))
+			if len(result) > 0 {
+				url := result[0]["TFSProjectReference"].(string)
+				http.Redirect(w, r, url, http.StatusTemporaryRedirect)
+				return
+			} else {
+				http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
+			}
+		}
+
+	}
 }

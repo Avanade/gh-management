@@ -1,6 +1,6 @@
-CREATE PROCEDURE [dbo].[PR_Projects_Select_ByGithubId]
+CREATE PROCEDURE [dbo].[PR_Projects_Select_ByAssetCode]
 (
-	@GithubId INT
+	@AssetCode VARCHAR(50)
 )
 AS
 BEGIN
@@ -26,5 +26,5 @@ SELECT [Id],
   FROM 
        [dbo].[Projects]
   WHERE
-      [GithubId] = @GithubId
+      [AssetCode] = @AssetCode
 END
