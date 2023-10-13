@@ -36,10 +36,9 @@ require (
 	github.com/lestrrat-go/jwx v1.2.26
 	github.com/pquerna/cachecontrol v0.1.0 // indirect
 	github.com/thedatashed/xlsxreader v1.2.5
-	golang.org/x/crypto v0.9.0 // indirect
-	golang.org/x/net v0.10.0 // indirect
+	golang.org/x/crypto v0.14.0 // indirect
+	golang.org/x/net v0.17.0 // indirect
 	golang.org/x/oauth2 v0.0.0-20220411215720-9780585627b5
-	golang.org/x/text v0.13.0
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/protobuf v1.25.0 // indirect
 	gopkg.in/square/go-jose.v2 v2.6.0 // indirect
