@@ -213,5 +213,6 @@ func setApiRoutes(mux *mux.Router) {
 	mux.HandleFunc("/Home/Asset/{assetCode}", rtApi.RedirectAsset)
 	mux.HandleFunc("/Home/AssetRequestCreation", rtApi.RedirectAssetRequest)
 	mux.HandleFunc("/Home/AssetRequestCreation/", rtApi.RedirectAssetRequest)
+	mux.Handle("/Home/Tool/{assetCode}", loadAzAuthPage(rtPages.ToolHandler))
 
 }
