@@ -1474,7 +1474,7 @@ func DownloadProjectApprovalsByUsername(w http.ResponseWriter, r *http.Request) 
 		data = append(data, row)
 	}
 
-	w.Header().Set("Content-Disposition", "attachment; filename=export.csv")
+	w.Header().Set("Content-Disposition", "attachment; filename=project_approval_requests.csv")
 	w.Header().Set("Content-Type", "text/csv")
 	w.Header().Set("Transfer-Encoding", "chunked")
 
