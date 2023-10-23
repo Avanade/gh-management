@@ -432,14 +432,13 @@ func GetProjectApprovalsByProjectId(id int64) (projectApprovals []ProjectApprova
 
 	for _, v := range result {
 		data := ProjectApproval{
-			Id:                        v["Id"].(int64),
-			ProjectId:                 v["ProjectId"].(int64),
-			ProjectName:               v["ProjectName"].(string),
-			ApprovalTypeId:            v["ApprovalTypeId"].(int64),
-			ApprovalType:              v["ApprovalType"].(string),
-			ApproverUserPrincipalName: v["ApproverUserPrincipalName"].(string),
-			ApprovalDescription:       v["ApprovalDescription"].(string),
-			RequestStatus:             v["RequestStatus"].(string),
+			Id:                  v["Id"].(int64),
+			ProjectId:           v["ProjectId"].(int64),
+			ProjectName:         v["ProjectName"].(string),
+			ApprovalTypeId:      v["ApprovalTypeId"].(int64),
+			ApprovalType:        v["ApprovalType"].(string),
+			ApprovalDescription: v["ApprovalDescription"].(string),
+			RequestStatus:       v["RequestStatus"].(string),
 		}
 		if v["ApprovalDate"] != nil {
 			data.ApprovalDate = v["ApprovalDate"].(time.Time)
