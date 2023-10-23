@@ -2,12 +2,14 @@ package routes
 
 import (
 	"bytes"
+	"encoding/csv"
 	"encoding/json"
 	"fmt"
 	"log"
 	"math"
 	"net/http"
 	"os"
+	"reflect"
 	"regexp"
 	"strconv"
 	"strings"
@@ -1428,6 +1430,64 @@ func GetPopularTopics(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.Write(jsonResp)
+}
+
+func DownloadProjectApprovalsByUsername(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+
+	username := vars["username"]
+
+	projectApprovals, err := db.GetProjectApprovalsByUsername(username)
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	var data [][]string
+
+	t := reflect.TypeOf(db.ApprovalRequest{})
+
+	columns := make([]string, t.NumField())
+	for i := range columns {
+		columns[i] = t.Field(i).Name
+	}
+
+	data = append(data, columns)
+
+	for _, projectApproval := range projectApprovals {
+		v := reflect.ValueOf(projectApproval)
+
+		row := make([]string, v.NumField())
+
+		for i := 0; i < v.NumField(); i++ {
+			vi := v.Field(i).Interface()
+			if vi == "<nil>" {
+				row[i] = ""
+				continue
+			}
+			row[i] = fmt.Sprintf("%v", v.Field(i).Interface())
+		}
+
+		fmt.Println(row)
+
+		data = append(data, row)
+	}
+
+	w.Header().Set("Content-Disposition", "attachment; filename=project_approval_requests.csv")
+	w.Header().Set("Content-Type", "text/csv")
+	w.Header().Set("Transfer-Encoding", "chunked")
+
+	writer := csv.NewWriter(w)
+	defer writer.Flush()
+
+	for _, value := range data {
+		if err := writer.Write(value); err != nil {
+			log.Println(err.Error())
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+	}
 }
 
 func HttpResponseError(w http.ResponseWriter, code int, errorMessage string) {

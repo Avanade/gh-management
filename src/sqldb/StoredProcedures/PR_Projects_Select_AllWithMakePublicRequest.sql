@@ -10,5 +10,5 @@ SELECT *
   FROM 
        [dbo].[Projects]
   WHERE
-      [ApprovalStatusId] != 1 AND [RepositorySource] = 'GitHub' AND [OSSContributionSponsorId] IS NULL
+      [ApprovalStatusId] != 1 AND [RepositorySource] = 'GitHub' AND [OSSContributionSponsorId] IS NULL AND [OSSsponsor] IS NOT NULL
 END
