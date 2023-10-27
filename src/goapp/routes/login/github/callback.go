@@ -17,6 +17,7 @@ import (
 	"main/pkg/notification"
 	"main/pkg/session"
 
+	"github.com/gorilla/sessions"
 	"golang.org/x/oauth2"
 )
 
@@ -94,6 +95,14 @@ func GithubCallbackHandler(w http.ResponseWriter, r *http.Request) {
 		CheckMembership(userPrincipalName, ghUser)
 	}
 
+	session.Options = &sessions.Options{
+		Path:     "/",
+		Domain:   "",
+		MaxAge:   2592000,
+		Secure:   true,
+		HttpOnly: false,
+		SameSite: http.SameSiteNoneMode,
+	}
 	err = session.Save(r, w)
 	if err != nil {
 		log.Panicln(err.Error())
@@ -144,6 +153,14 @@ func GithubForceSaveHandler(w http.ResponseWriter, r *http.Request) {
 
 	CheckMembership(userPrincipalName, ghUser)
 
+	session.Options = &sessions.Options{
+		Path:     "/",
+		Domain:   "",
+		MaxAge:   2592000,
+		Secure:   true,
+		HttpOnly: false,
+		SameSite: http.SameSiteNoneMode,
+	}
 	err = session.Save(r, w)
 	if err != nil {
 		log.Println(err.Error())

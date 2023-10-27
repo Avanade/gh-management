@@ -8,6 +8,7 @@ import (
 	"os"
 
 	"github.com/coreos/go-oidc"
+	"github.com/gorilla/sessions"
 
 	auth "main/pkg/authentication"
 	db "main/pkg/ghmgmtdb"
@@ -87,6 +88,14 @@ func CallbackHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	session.Values["userHasPhoto"] = hasPhoto
 	session.Values["userPhoto"] = userPhoto
+	session.Options = &sessions.Options{
+		Path:     "/",
+		Domain:   "",
+		MaxAge:   2592000,
+		Secure:   true,
+		HttpOnly: false,
+		SameSite: http.SameSiteNoneMode,
+	}
 	err = session.Save(r, w)
 	if err != nil {
 		log.Println(err.Error())
