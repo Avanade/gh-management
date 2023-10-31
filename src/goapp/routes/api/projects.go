@@ -754,7 +754,13 @@ func AddCollaborator(w http.ResponseWriter, r *http.Request) {
 		repoUrlSub := strings.Split(repoUrl, "/")
 
 		isInnersource := strings.EqualFold(repoUrlSub[1], os.Getenv("GH_ORG_INNERSOURCE"))
-		isMember, _, _ := ghAPI.OrganizationsIsMember(os.Getenv("GH_TOKEN"), ghUser)
+
+		isMember, err := ghAPI.IsOrganizationMember(os.Getenv("GH_TOKEN"), os.Getenv("GH_ORG_INNERSOURCE"), ghUser)
+		if err != nil {
+			log.Println(err.Error())
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
 
 		if (isInnersource && isMember) || (!isInnersource) {
 			_, err := ghAPI.AddCollaborator(repoUrlSub[1], repo.Name, ghUser, permission)
@@ -1385,10 +1391,15 @@ func IsRepoNameValid(value string) bool {
 
 func AddCollaboratorToRequestedRepo(user string, repo string, repoId int64) error {
 	innersource := os.Getenv("GH_ORG_INNERSOURCE")
-	gHUser := db.Users_Get_GHUser(user)
-	isInnersourceMember, _, _ := ghAPI.OrganizationsIsMember(os.Getenv("GH_TOKEN"), gHUser)
+	ghUser := db.Users_Get_GHUser(user)
+
+	isInnersourceMember, err := ghAPI.IsOrganizationMember(os.Getenv("GH_TOKEN"), os.Getenv("GH_ORG_INNERSOURCE"), ghUser)
+	if err != nil {
+		return err
+	}
+
 	if isInnersourceMember {
-		_, err := ghAPI.AddCollaborator(innersource, repo, gHUser, "admin")
+		_, err := ghAPI.AddCollaborator(innersource, repo, ghUser, "admin")
 		if err != nil {
 			return err
 		}
