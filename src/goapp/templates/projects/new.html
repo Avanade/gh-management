@@ -6,13 +6,14 @@
     {{.isInnersourceMember}},
     {{.isOpensourceMember}},
     '{{.innersourceOrg}}',
-    '{{.opensourceOrg}}'
+    '{{.opensourceOrg}}',
+    {{.isInvalidToken}}
 )">
     <div x-html="template"></div>
 </div>
 <div x-data="data({{.isInnersourceMember}},{{.isOpensourceMember}})">
     <form onsubmit="event.preventDefault()" autocomplete="off">
-        <fieldset x-bind:disabled="isNotMember">
+        <fieldset x-bind:disabled="isFieldsetDisabled">
             <h3 class="text-lg font-medium leading-6 text-gray-900">Repository information</h3>
             <p class="mt-1 text-sm text-gray-500">
                 All repositories start on Avanade’s innersource on GitHub. Once you have identified a business sponsor,
@@ -252,7 +253,7 @@
                 modal.visible = false
             },
             submit() {
-                if (this.isNotMember()) return;
+                if (this.isFieldsetDisabled()) return;
 
                 Alpine.store('master').modal.reset()
                 Alpine.store('master').modal.show()
@@ -264,8 +265,8 @@
                 return userPrincipalName.includes(this.form.coowner) || githubUser.includes(this.form.coowner) ?
                     true : false
             },
-            isNotMember() {
-                return !this.isInnersourceMember || !this.isOpensourceOrgMember
+            isFieldsetDisabled() {
+                return !this.isInnersourceMember || !this.isOpensourceOrgMember || this.isInvalidToken
             },
             get isValid() {
                 if (
@@ -318,14 +319,17 @@
         isInnersourceMember,
         isOpensourceOrgMember,
         innersourceOrg,
-        openSourceOrg
+        openSourceOrg,
+        isInvalidToken
     ) => {
         return {
+            isInvalidToken: false,
             isInnersourceMember: false,
             isOpensourceOrgMember: false,
             innersourceOrg: "",
             openSourceOrg: "",
             init() {
+                this.isInvalidToken = isInvalidToken;
                 this.isInnersourceMember = isInnersourceMember;
                 this.isOpensourceOrgMember = isOpensourceOrgMember;
                 this.innersourceOrg = innersourceOrg;
@@ -337,6 +341,10 @@
             displayMessage() {
                 const innersourceOrgLink = this.getOrgInvitationLink(this.innersourceOrg)
                 const opensourceOrgLink = this.getOrgInvitationLink(this.openSourceOrg)
+
+                if (this.isInvalidToken) {
+                    return `We currently can't check your membership on ${innersourceOrgLink} and ${opensourceOrgLink}. Please try again later.`
+                }
 
                 if (!this.isInnersourceMember && !this.isOpensourceOrgMember) {
                     return `You have a pending invitation to ${innersourceOrgLink} and ${opensourceOrgLink}. You need to join these organizations before you can request for a repository.`
