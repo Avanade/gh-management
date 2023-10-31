@@ -29,6 +29,11 @@ func GithubCallbackHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	// Check session and state
 	state, err := session.GetState(w, r)
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 
 	session, err := session.Store.Get(r, "gh-auth-session")
 	if err != nil {
@@ -156,54 +161,46 @@ func GithubForceSaveHandler(w http.ResponseWriter, r *http.Request) {
 
 func CheckMembership(userPrincipalName, ghusername string) {
 	token := os.Getenv("GH_TOKEN")
-	inner, outer, err := ghAPI.OrganizationsIsMember(token, ghusername)
+
+	innerSourceOrgName := os.Getenv("GH_ORG_INNERSOURCE")
+	openSourceOrgName := os.Getenv("GH_ORG_OPENSOURCE")
+
+	isInnerSourceMember, err := ghAPI.IsOrganizationMember(token, innerSourceOrgName, ghusername)
 	if err != nil {
+		isInnerSourceMember = true
 		log.Println(err.Error())
-		return
+	} else {
+		if !isInnerSourceMember {
+			ghAPI.OrganizationInvitation(token, ghusername, innerSourceOrgName)
+			NotificationAccepOrgInvitation(userPrincipalName, innerSourceOrgName)
+		}
 	}
 
-	if !inner {
-		ghAPI.OrganizationInvitation(token, ghusername, os.Getenv("GH_ORG_INNERSOURCE"))
+	isOpenSourceMember, err := ghAPI.IsOrganizationMember(token, openSourceOrgName, ghusername)
+	if err != nil {
+		isOpenSourceMember = true
+		log.Println(err.Error())
+	} else {
+		if !isOpenSourceMember {
+			ghAPI.OrganizationInvitation(token, ghusername, openSourceOrgName)
+			NotificationAccepOrgInvitation(userPrincipalName, openSourceOrgName)
+		}
 	}
-	if !outer {
-		ghAPI.OrganizationInvitation(token, ghusername, os.Getenv("GH_ORG_OPENSOURCE"))
-
-	}
-
-	NotificationAcceptOrgInvitation(userPrincipalName, ghusername, inner, outer)
-	EmailAcceptOrgInvitation(userPrincipalName, ghusername, inner, outer)
+	EmailAcceptOrgInvitation(userPrincipalName, ghusername, isInnerSourceMember, isOpenSourceMember)
 }
 
-func NotificationAcceptOrgInvitation(userEmail, ghUsername string, isInnersourceOrgMember, isOpensourceOrgMember bool) {
-	if !isInnersourceOrgMember {
-		innersourceName := os.Getenv("GH_ORG_INNERSOURCE")
-		messageBody := notification.OrganizationInvitationMessageBody{
-			Recipients: []string{
-				userEmail,
-			},
-			InvitationLink:   fmt.Sprintf("https://github.com/orgs/%s/invitation", innersourceName),
-			OrganizationLink: fmt.Sprintf("https://github.com/%s", innersourceName),
-			OrganizationName: innersourceName,
-		}
-		err := messageBody.Send()
-		if err != nil {
-			log.Println(err.Error())
-		}
+func NotificationAccepOrgInvitation(userEmail, org string) {
+	messageBody := notification.OrganizationInvitationMessageBody{
+		Recipients: []string{
+			userEmail,
+		},
+		InvitationLink:   fmt.Sprintf("https://github.com/orgs/%s/invitation", org),
+		OrganizationLink: fmt.Sprintf("https://github.com/%s", org),
+		OrganizationName: org,
 	}
-	if !isOpensourceOrgMember {
-		opensourceName := os.Getenv("GH_ORG_OPENSOURCE")
-		messageBody := notification.OrganizationInvitationMessageBody{
-			Recipients: []string{
-				userEmail,
-			},
-			InvitationLink:   fmt.Sprintf("https://github.com/orgs/%s/invitation", opensourceName),
-			OrganizationLink: fmt.Sprintf("https://github.com/%s", opensourceName),
-			OrganizationName: opensourceName,
-		}
-		err := messageBody.Send()
-		if err != nil {
-			log.Println(err.Error())
-		}
+	err := messageBody.Send()
+	if err != nil {
+		log.Println(err.Error())
 	}
 }
 
