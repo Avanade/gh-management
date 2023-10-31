@@ -156,7 +156,12 @@ func GithubForceSaveHandler(w http.ResponseWriter, r *http.Request) {
 
 func CheckMembership(userPrincipalName, ghusername string) {
 	token := os.Getenv("GH_TOKEN")
-	inner, outer, _ := ghAPI.OrganizationsIsMember(token, ghusername)
+	inner, outer, err := ghAPI.OrganizationsIsMember(token, ghusername)
+	if err != nil {
+		log.Println(err.Error())
+		return
+	}
+
 	if !inner {
 		ghAPI.OrganizationInvitation(token, ghusername, os.Getenv("GH_ORG_INNERSOURCE"))
 	}

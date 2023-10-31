@@ -46,7 +46,7 @@ func NewProject(w http.ResponseWriter, r *http.Request) {
 	iprofile := sessionaz.Values["profile"]
 	profile := iprofile.(map[string]interface{})
 	username := profile["preferred_username"]
-	isInnersourceMember, isOpensourceMember, _ := ghAPI.OrganizationsIsMember(os.Getenv("GH_TOKEN"), sessiongh.Username)
+	isInnersourceMember, isOpensourceMember, err := ghAPI.OrganizationsIsMember(os.Getenv("GH_TOKEN"), sessiongh.Username)
 
 	users := db.GetUsersWithGithub()
 	data := map[string]interface{}{
@@ -58,5 +58,10 @@ func NewProject(w http.ResponseWriter, r *http.Request) {
 		"innersourceOrg":      os.Getenv("GH_ORG_INNERSOURCE"),
 		"opensourceOrg":       os.Getenv("GH_ORG_OPENSOURCE"),
 	}
+
+	if err != nil {
+		data["isInvalidToken"] = true
+	}
+
 	template.UseTemplate(&w, r, "projects/new", data)
 }
