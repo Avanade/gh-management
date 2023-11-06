@@ -21,6 +21,16 @@ func LoginRedirectHandler(w http.ResponseWriter, r *http.Request) {
 	tmpl.Execute(w, data)
 }
 
+func GHAuthenticatedHandler(w http.ResponseWriter, r *http.Request) {
+	tmpl := template.Must(template.ParseFiles("templates/ghauthenticated.html"))
+	tmpl.Execute(w, nil)
+}
+
+func GHAuthenticatingHandler(w http.ResponseWriter, r *http.Request) {
+	tmpl := template.Must(template.ParseFiles("templates/ghauthenticating.html"))
+	tmpl.Execute(w, nil)
+}
+
 func GitRedirectHandler(w http.ResponseWriter, r *http.Request) {
 	q := r.URL.Query()
 	redirect := "/"

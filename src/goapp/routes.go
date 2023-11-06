@@ -65,6 +65,8 @@ func setPageRoutes(mux *mux.Router) {
 	mux.HandleFunc("/login/github/callback", rtGithub.GithubCallbackHandler)
 	mux.HandleFunc("/login/github/force", rtGithub.GithubForceSaveHandler)
 	mux.HandleFunc("/logout/github", rtGithub.GitHubLogoutHandler)
+	mux.HandleFunc("/authenticating/github", rtPages.GHAuthenticatingHandler)
+	mux.HandleFunc("/authenticated/github", rtPages.GHAuthenticatedHandler)
 }
 
 func setAdminPageRoutes(mux *mux.Router) {

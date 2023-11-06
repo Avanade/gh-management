@@ -109,7 +109,7 @@ func GithubCallbackHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 
-	http.Redirect(w, r, "/", http.StatusSeeOther)
+	http.Redirect(w, r, "/authenticated/github", http.StatusSeeOther)
 }
 
 func GithubForceSaveHandler(w http.ResponseWriter, r *http.Request) {
