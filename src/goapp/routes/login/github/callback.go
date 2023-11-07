@@ -14,6 +14,7 @@ import (
 	db "main/pkg/ghmgmtdb"
 	ghAPI "main/pkg/github"
 	"main/pkg/msgraph"
+	"main/pkg/notification"
 	"main/pkg/session"
 
 	"golang.org/x/oauth2"
@@ -28,6 +29,11 @@ func GithubCallbackHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	// Check session and state
 	state, err := session.GetState(w, r)
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 
 	session, err := session.Store.Get(r, "gh-auth-session")
 	if err != nil {
@@ -72,12 +78,6 @@ func GithubCallbackHandler(w http.ResponseWriter, r *http.Request) {
 	userPrincipalName := fmt.Sprintf("%s", azProfile["preferred_username"])
 	ghId := strconv.FormatFloat(p["id"].(float64), 'f', 0, 64)
 	ghUser := fmt.Sprintf("%s", p["login"])
-	id, err := strconv.ParseInt(ghId, 10, 64)
-	if err != nil {
-		log.Println(err.Error())
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
 
 	result, err := db.UpdateUserGithub(userPrincipalName, ghId, ghUser, 0)
 	if err != nil {
@@ -93,7 +93,11 @@ func GithubCallbackHandler(w http.ResponseWriter, r *http.Request) {
 	session.Values["ghIsDirect"] = isDirect
 	session.Values["ghIsEnterpriseMember"] = isEnterpriseMember
 
-	CheckMembership(userPrincipalName, ghUser, &id)
+	lastGithubLogin := result["LastGithubLogin"].(time.Time)
+
+	if !DateEqual(lastGithubLogin) && result["IsValid"].(bool) {
+		CheckMembership(userPrincipalName, ghUser)
+	}
 
 	err = session.Save(r, w)
 	if err != nil {
@@ -143,6 +147,8 @@ func GithubForceSaveHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	session.Values["ghIsValid"] = result["IsValid"].(bool)
 
+	CheckMembership(userPrincipalName, ghUser)
+
 	err = session.Save(r, w)
 	if err != nil {
 		log.Println(err.Error())
@@ -153,17 +159,49 @@ func GithubForceSaveHandler(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
-func CheckMembership(userPrincipalName, ghusername string, id *int64) {
+func CheckMembership(userPrincipalName, ghusername string) {
 	token := os.Getenv("GH_TOKEN")
-	inner, outer, _ := ghAPI.OrganizationsIsMember(token, ghusername)
-	if !inner {
-		ghAPI.OrganizationInvitation(token, ghusername, os.Getenv("GH_ORG_INNERSOURCE"))
-	}
-	if !outer {
-		ghAPI.OrganizationInvitation(token, ghusername, os.Getenv("GH_ORG_OPENSOURCE"))
 
+	innerSourceOrgName := os.Getenv("GH_ORG_INNERSOURCE")
+	openSourceOrgName := os.Getenv("GH_ORG_OPENSOURCE")
+
+	isInnerSourceMember, err := ghAPI.IsOrganizationMember(token, innerSourceOrgName, ghusername)
+	if err != nil {
+		isInnerSourceMember = true
+		log.Println(err.Error())
+	} else {
+		if !isInnerSourceMember {
+			ghAPI.OrganizationInvitation(token, ghusername, innerSourceOrgName)
+			NotificationAccepOrgInvitation(userPrincipalName, innerSourceOrgName)
+		}
 	}
-	EmailAcceptOrgInvitation(userPrincipalName, ghusername, inner, outer)
+
+	isOpenSourceMember, err := ghAPI.IsOrganizationMember(token, openSourceOrgName, ghusername)
+	if err != nil {
+		isOpenSourceMember = true
+		log.Println(err.Error())
+	} else {
+		if !isOpenSourceMember {
+			ghAPI.OrganizationInvitation(token, ghusername, openSourceOrgName)
+			NotificationAccepOrgInvitation(userPrincipalName, openSourceOrgName)
+		}
+	}
+	EmailAcceptOrgInvitation(userPrincipalName, ghusername, isInnerSourceMember, isOpenSourceMember)
+}
+
+func NotificationAccepOrgInvitation(userEmail, org string) {
+	messageBody := notification.OrganizationInvitationMessageBody{
+		Recipients: []string{
+			userEmail,
+		},
+		InvitationLink:   fmt.Sprintf("https://github.com/orgs/%s/invitation", org),
+		OrganizationLink: fmt.Sprintf("https://github.com/%s", org),
+		OrganizationName: org,
+	}
+	err := messageBody.Send()
+	if err != nil {
+		log.Println(err.Error())
+	}
 }
 
 func EmailAcceptOrgInvitation(userEmail, ghUsername string, isInnersourceOrgMember, isOpensourceOrgMember bool) {
@@ -197,4 +235,10 @@ func EmailAcceptOrgInvitation(userEmail, ghUsername string, isInnersourceOrgMemb
 func OrgInvitationLink(org string) string {
 	url := fmt.Sprintf("https://github.com/orgs/%s/invitation", org)
 	return fmt.Sprintf("<a href='%s'>%s</a>", url, org)
+}
+
+func DateEqual(date time.Time) bool {
+	y1, m1, d1 := time.Now().Date()
+	y2, m2, d2 := date.Date()
+	return y1 == y2 && m1 == m2 && d1 == d2
 }

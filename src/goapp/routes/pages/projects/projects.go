@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"log"
 	"net/http"
 	"os"
 
@@ -46,17 +47,35 @@ func NewProject(w http.ResponseWriter, r *http.Request) {
 	iprofile := sessionaz.Values["profile"]
 	profile := iprofile.(map[string]interface{})
 	username := profile["preferred_username"]
-	isInnersourceMember, isOpensourceMember, _ := ghAPI.OrganizationsIsMember(os.Getenv("GH_TOKEN"), sessiongh.Username)
+
+	token := os.Getenv("GH_TOKEN")
+	innerSourceOrgName := os.Getenv("GH_ORG_INNERSOURCE")
+	openSourceOrgName := os.Getenv("GH_ORG_OPENSOURCE")
+	isInvalidToken := false
+
+	isInnerSourceMember, errInnerSource := ghAPI.IsOrganizationMember(token, innerSourceOrgName, sessiongh.Username)
+	if errInnerSource != nil {
+		log.Println(errInnerSource.Error())
+		isInvalidToken = true
+	}
+
+	isOpenSourceMember, errOpenSource := ghAPI.IsOrganizationMember(token, openSourceOrgName, sessiongh.Username)
+	if errOpenSource != nil {
+		log.Println(errOpenSource.Error())
+		isInvalidToken = true
+	}
 
 	users := db.GetUsersWithGithub()
 	data := map[string]interface{}{
 		"Id":                  id,
 		"users":               users,
 		"email":               username,
-		"isInnersourceMember": isInnersourceMember,
-		"isOpensourceMember":  isOpensourceMember,
-		"innersourceOrg":      os.Getenv("GH_ORG_INNERSOURCE"),
-		"opensourceOrg":       os.Getenv("GH_ORG_OPENSOURCE"),
+		"isInnersourceMember": isInnerSourceMember,
+		"isOpensourceMember":  isOpenSourceMember,
+		"innersourceOrg":      innerSourceOrgName,
+		"opensourceOrg":       openSourceOrgName,
+		"isInvalidToken":      isInvalidToken,
 	}
+
 	template.UseTemplate(&w, r, "projects/new", data)
 }

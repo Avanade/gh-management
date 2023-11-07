@@ -23,6 +23,7 @@ type Repo struct {
 	IsArchived          bool             `json:"archived"`
 	Visibility          string           `json:"visibility"`
 	TFSProjectReference string
+	Topics              []string
 }
 
 func CreateClient(token string) *github.Client {
@@ -53,14 +54,14 @@ func CreatePrivateGitHubRepository(name, description, requestor string) (*github
 	return repo, nil
 }
 
-func IsOrgAllowInternalRepo() (bool, error) {
+func IsEnterpriseOrg() (bool, error) {
 	client := CreateClient(os.Getenv("GH_TOKEN"))
 	orgName := os.Getenv("GH_ORG_INNERSOURCE")
 	org, _, err := client.Organizations.Get(context.Background(), orgName)
 	if err != nil {
 		return false, err
 	}
-	return *org.MembersCanCreateInternalRepos, err
+	return *org.Plan.Name == "enterprise", err
 }
 
 func AddCollaborator(owner string, repo string, user string, permission string) (*github.Response, error) {
@@ -160,6 +161,7 @@ func GetRepositoriesFromOrganization(org string) ([]Repo, error) {
 			IsArchived:          repo.GetArchived(),
 			Visibility:          repo.GetVisibility(),
 			TFSProjectReference: repo.GetHTMLURL(),
+			Topics:              repo.Topics,
 		}
 		repoList = append(repoList, r)
 	}
@@ -201,14 +203,10 @@ func TransferRepository(repo string, owner string, newOwner string) (*github.Rep
 	return resp, nil
 }
 
-func OrganizationsIsMember(token string, GHUser string) (bool, bool, error) {
+func IsOrganizationMember(token, org, ghUser string) (bool, error) {
 	client := CreateClient(token)
-	OrgInnerSource := os.Getenv("GH_ORG_INNERSOURCE")
-	OrgInnerSourceIsMember, _, err := client.Organizations.IsMember(context.Background(), OrgInnerSource, GHUser)
-
-	OrgOuterSource := os.Getenv("GH_ORG_OPENSOURCE")
-	OrgOuterSourceIsMember, _, err := client.Organizations.IsMember(context.Background(), OrgOuterSource, GHUser)
-	return OrgInnerSourceIsMember, OrgOuterSourceIsMember, err
+	isOrgMember, _, err := client.Organizations.IsMember(context.Background(), org, ghUser)
+	return isOrgMember, err
 }
 
 func OrganizationInvitation(token string, username string, org string) *github.Invitation {
@@ -218,11 +216,34 @@ func OrganizationInvitation(token string, username string, org string) *github.I
 	teamid := []int64{}
 	user, _, _ := client.Users.Get(context.Background(), username)
 	intid2 := user.ID
-	options := *&github.CreateOrgInvitationOptions{InviteeID: intid2, Email: &Email, Role: &Role, TeamID: teamid}
+	options := &github.CreateOrgInvitationOptions{InviteeID: intid2, Email: &Email, Role: &Role, TeamID: teamid}
 
-	invite, _, _ := client.Organizations.CreateOrgInvitation(context.Background(), org, &options)
+	invite, _, _ := client.Organizations.CreateOrgInvitation(context.Background(), org, options)
 
 	return invite
+}
+
+func ListPendingOrgInvitations(token, org string) []*github.Invitation {
+	client := CreateClient(token)
+	options := &github.ListOptions{PerPage: 30}
+
+	var allPendingInvitations []*github.Invitation
+
+	for {
+		pendingInvitations, resp, err := client.Organizations.ListPendingOrgInvitations(context.Background(), org, options)
+		if err != nil {
+			log.Printf("ERROR : %s", err.Error())
+			return nil
+		}
+
+		allPendingInvitations = append(allPendingInvitations, pendingInvitations...)
+		if resp.NextPage == 0 {
+			break
+		}
+		options.Page = resp.NextPage
+	}
+
+	return allPendingInvitations
 }
 
 func ListOutsideCollaborators(token string, org string) []*github.User {

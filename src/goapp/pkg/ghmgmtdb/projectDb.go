@@ -15,7 +15,7 @@ type Repository struct {
 type ProjectRequest struct {
 	Id                         string
 	Newcontribution            string
-	OSSsponsor                 string
+	OSSsponsor                 int
 	Offeringsassets            string
 	Willbecommercialversion    string
 	OSSContributionInformation string
@@ -49,6 +49,7 @@ type ProjectApproval struct {
 	RejectUrl                  string
 	ApproveText                string
 	RejectText                 string
+	ApprovalDate               time.Time
 }
 
 type Project struct {
@@ -62,6 +63,23 @@ type Project struct {
 	ConfirmNotClientProject bool
 	TFSProjectReference     string
 	Visibility              int
+}
+
+type ApprovalRequest struct {
+	ApprovalSystemGUID         string
+	ProjectName                string
+	RequestedBy                string
+	Description                string
+	NewContribution            string
+	OSSContributorSponsor      string
+	IsAvanadeOfferingAssets    string
+	WillBeCommercialVersion    string
+	OSSContributionInformation string
+	Remarks                    string
+	Status                     string
+	RespondedBy                string
+	ApprovalDate               string
+	ApprovalSystemDateSent     string
 }
 
 func ProjectApprovalsSelectById(params map[string]interface{}) ([]map[string]interface{}, error) {
@@ -185,6 +203,23 @@ func PRProjectsUpdate(project Project, user string) (id int64) {
 	return
 }
 
+func UpdateProjectEcattIdById(id, ecattId int, user string) error {
+	db := ConnectDb()
+	defer db.Close()
+
+	param := map[string]interface{}{
+		"Id":         id,
+		"ECATTID":    ecattId,
+		"ModifiedBy": user,
+	}
+
+	_, err := db.ExecuteStoredProcedure("PR_Projects_Update_ECATTID_ById", param)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func PRProjectsUpdateLegalQuestions(projectRequest ProjectRequest, user string) {
 
 	db := ConnectDb()
@@ -205,7 +240,7 @@ func PRProjectsUpdateLegalQuestions(projectRequest ProjectRequest, user string) 
 	}
 }
 
-func Projects_ByRepositorySource(repositorySource string) ([]map[string]interface{}, error) {
+func ProjectsByRepositorySource(repositorySource string) ([]map[string]interface{}, error) {
 	db := ConnectDb()
 	defer db.Close()
 
@@ -220,7 +255,7 @@ func Projects_ByRepositorySource(repositorySource string) ([]map[string]interfac
 	return result, nil
 }
 
-func Projects_IsExisting(name string) bool {
+func ProjectsIsExisting(name string) bool {
 
 	db := ConnectDb()
 	defer db.Close()
@@ -244,7 +279,7 @@ func Projects_IsExisting(name string) bool {
 	}
 }
 
-func Projects_IsExisting_By_GithubId(githubId int64) bool {
+func ProjectsIsExistingByGithubId(githubId int64) bool {
 
 	db := ConnectDb()
 	defer db.Close()
@@ -314,6 +349,38 @@ func GetFailedProjectApprovalRequests() (projectApprovals []ProjectApproval) {
 			Id:                         v["Id"].(int64),
 			ProjectId:                  v["ProjectId"].(int64),
 			ProjectName:                v["ProjectName"].(string),
+			ProjectDescription:         v["ProjectDescription"].(string),
+			RequesterGivenName:         v["RequesterGivenName"].(string),
+			RequesterSurName:           v["RequesterSurName"].(string),
+			RequesterName:              v["RequesterName"].(string),
+			RequesterUserPrincipalName: v["RequesterUserPrincipalName"].(string),
+			ApprovalTypeId:             v["ApprovalTypeId"].(int64),
+			ApprovalType:               v["ApprovalType"].(string),
+			ApprovalDescription:        v["ApprovalDescription"].(string),
+			Newcontribution:            v["newcontribution"].(string),
+			OSSsponsor:                 v["OSSsponsor"].(string),
+			Offeringsassets:            v["Avanadeofferingsassets"].(string),
+			Willbecommercialversion:    v["Willbecommercialversion"].(string),
+			OSSContributionInformation: v["OSSContributionInformation"].(string),
+			RequestStatus:              v["RequestStatus"].(string),
+		}
+		projectApprovals = append(projectApprovals, data)
+	}
+
+	return
+}
+
+func GetFailedProjectApprovalRequestsObsolete() (projectApprovals []ProjectApproval) {
+	db := ConnectDb()
+	defer db.Close()
+
+	result, _ := db.ExecuteStoredProcedureWithResult("PR_ProjectApprovals_Select_Failed", nil)
+
+	for _, v := range result {
+		data := ProjectApproval{
+			Id:                         v["Id"].(int64),
+			ProjectId:                  v["ProjectId"].(int64),
+			ProjectName:                v["ProjectName"].(string),
 			ProjectCoowner:             v["ProjectCoowner"].(string),
 			ProjectDescription:         v["ProjectDescription"].(string),
 			RequesterGivenName:         v["RequesterGivenName"].(string),
@@ -341,6 +408,18 @@ func GetFailedProjectApprovalRequests() (projectApprovals []ProjectApproval) {
 	return
 }
 
+func GetProjectApprovals() ([]map[string]interface{}, error) {
+	db := ConnectDb()
+	defer db.Close()
+
+	result, err := db.ExecuteStoredProcedureWithResult("PR_ProjectApprovals_Select", nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return result, nil
+}
+
 func GetProjectApprovalsByProjectId(id int64) (projectApprovals []ProjectApproval) {
 	db := ConnectDb()
 	defer db.Close()
@@ -353,19 +432,38 @@ func GetProjectApprovalsByProjectId(id int64) (projectApprovals []ProjectApprova
 
 	for _, v := range result {
 		data := ProjectApproval{
-			Id:                        v["Id"].(int64),
-			ProjectId:                 v["ProjectId"].(int64),
-			ProjectName:               v["ProjectName"].(string),
-			ApprovalTypeId:            v["ApprovalTypeId"].(int64),
-			ApprovalType:              v["ApprovalType"].(string),
-			ApproverUserPrincipalName: v["ApproverUserPrincipalName"].(string),
-			ApprovalDescription:       v["ApprovalDescription"].(string),
-			RequestStatus:             v["RequestStatus"].(string),
+			Id:                  v["Id"].(int64),
+			ProjectId:           v["ProjectId"].(int64),
+			ProjectName:         v["ProjectName"].(string),
+			ApprovalTypeId:      v["ApprovalTypeId"].(int64),
+			ApprovalType:        v["ApprovalType"].(string),
+			ApprovalDescription: v["ApprovalDescription"].(string),
+			RequestStatus:       v["RequestStatus"].(string),
 		}
+		if v["ApprovalDate"] != nil {
+			data.ApprovalDate = v["ApprovalDate"].(time.Time)
+		}
+
 		projectApprovals = append(projectApprovals, data)
 	}
 
 	return
+}
+
+func GetProjectApprovalsByStatusId(approvalStatusId int64) ([]map[string]interface{}, error) {
+	db := ConnectDb()
+	defer db.Close()
+
+	param := map[string]interface{}{
+		"ApprovalStatusId": approvalStatusId,
+	}
+
+	result, err := db.ExecuteStoredProcedureWithResult("PR_ProjectApprovals_Select_By_StatusId", param)
+	if err != nil {
+		return nil, err
+	}
+
+	return result, nil
 }
 
 func GetProjectApprovalByGUID(id string) (projectApproval ProjectApproval) {
@@ -380,18 +478,34 @@ func GetProjectApprovalByGUID(id string) (projectApproval ProjectApproval) {
 
 	for _, v := range result {
 		projectApproval = ProjectApproval{
-			Id:                        v["Id"].(int64),
-			ProjectId:                 v["ProjectId"].(int64),
-			ProjectName:               v["ProjectName"].(string),
-			ApprovalTypeId:            v["ApprovalTypeId"].(int64),
-			ApprovalType:              v["ApprovalType"].(string),
-			ApproverUserPrincipalName: v["ApproverUserPrincipalName"].(string),
-			ApprovalDescription:       v["ApprovalDescription"].(string),
-			RequestStatus:             v["RequestStatus"].(string),
+			Id:                  v["Id"].(int64),
+			ProjectId:           v["ProjectId"].(int64),
+			ProjectName:         v["ProjectName"].(string),
+			ApprovalTypeId:      v["ApprovalTypeId"].(int64),
+			ApprovalType:        v["ApprovalType"].(string),
+			ApprovalDescription: v["ApprovalDescription"].(string),
+			RequestStatus:       v["RequestStatus"].(string),
 		}
 	}
 
 	return
+}
+
+func UpdateProjectApprovalById(id int, respondedBy string) error {
+	db := ConnectDb()
+	defer db.Close()
+
+	param := map[string]interface{}{
+		"Id":          id,
+		"RespondedBy": respondedBy,
+	}
+
+	_, err := db.ExecuteStoredProcedure("PR_ProjectApprovals_UpdateRespondedBy_ById", param)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func ProjectsApprovalUpdateGUID(id int64, ApprovalSystemGUID string) {
@@ -460,7 +574,20 @@ func GetProjectByGithubId(githubId int64) []map[string]interface{} {
 	return result
 }
 
-func Repos_Select_ByOffsetAndFilter(offset int, search string) []map[string]interface{} {
+func GetProjectByAssetCode(assetCode string) []map[string]interface{} {
+	db := ConnectDb()
+	defer db.Close()
+
+	param := map[string]interface{}{
+		"AssetCode": assetCode,
+	}
+
+	result, _ := db.ExecuteStoredProcedureWithResult("PR_Projects_Select_ByAssetCode", param)
+
+	return result
+}
+
+func ReposSelectByOffsetAndFilter(offset int, search string) []map[string]interface{} {
 	db := ConnectDb()
 	defer db.Close()
 
@@ -473,7 +600,7 @@ func Repos_Select_ByOffsetAndFilter(offset int, search string) []map[string]inte
 	return result
 }
 
-func Repos_TotalCount_BySearchTerm(search string) int {
+func ReposTotalCountBySearchTerm(search string) int {
 	db := ConnectDb()
 	defer db.Close()
 
@@ -577,4 +704,76 @@ func GetGitHubRepositories() ([]map[string]interface{}, error) {
 	}
 
 	return result, nil
+}
+
+func SelectReposWithMakePublicRequest() ([]map[string]interface{}, error) {
+	db := ConnectDb()
+	defer db.Close()
+
+	sponsors, err := db.ExecuteStoredProcedureWithResult("PR_Projects_Select_AllWithMakePublicRequest", nil)
+	if err != nil {
+		return nil, err
+	}
+	return sponsors, nil
+}
+
+func UpdateOssContributionSponsorId(params map[string]interface{}) ([]map[string]interface{}, error) {
+	db := ConnectDb()
+	defer db.Close()
+
+	_, err := db.ExecuteStoredProcedure("PR_Projects_Update_OssSponsorIdById", params)
+	if err != nil {
+		return nil, err
+	}
+	return nil, nil
+}
+
+func LegacySearch(params map[string]interface{}) ([]map[string]interface{}, error) {
+	db := ConnectDb()
+	defer db.Close()
+
+	result, err := db.ExecuteStoredProcedureWithResult("PR_Projects_LegacySearch", params)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
+func GetProjectApprovalsByUsername(username string) ([]ApprovalRequest, error) {
+	db := ConnectDb()
+	defer db.Close()
+
+	params := map[string]interface{}{
+		"ApproverEmail": username,
+	}
+
+	result, err := db.ExecuteStoredProcedureWithResult("PR_ApprovalRequests_Select_ByApproverEmail", params)
+	if err != nil {
+		return nil, err
+	}
+
+	var approvalRequests []ApprovalRequest
+
+	for _, v := range result {
+		approvalRequest := ApprovalRequest{
+			ApprovalSystemGUID:         fmt.Sprintf("%v", v["ApprovalSystemGUID"]),
+			ProjectName:                fmt.Sprintf("%v", v["ProjectName"]),
+			RequestedBy:                fmt.Sprintf("%v", v["RequestedBy"]),
+			Description:                fmt.Sprintf("%v", v["Description"]),
+			NewContribution:            fmt.Sprintf("%v", v["NewContribution"]),
+			OSSContributorSponsor:      fmt.Sprintf("%v", v["OSSContributionSponsor"]),
+			IsAvanadeOfferingAssets:    fmt.Sprintf("%v", v["IsAvanadeOfferingAssets"]),
+			WillBeCommercialVersion:    fmt.Sprintf("%v", v["WillBeCommercialVersion"]),
+			OSSContributionInformation: fmt.Sprintf("%v", v["OSSContributionInformation"]),
+			Remarks:                    fmt.Sprintf("%v", v["Remarks"]),
+			Status:                     fmt.Sprintf("%v", v["Status"]),
+			RespondedBy:                fmt.Sprintf("%v", v["RespondedBy"]),
+			ApprovalDate:               fmt.Sprintf("%v", v["ApprovalDate"]),
+			ApprovalSystemDateSent:     fmt.Sprintf("%v", v["ApprovalSystemDateSent"]),
+		}
+
+		approvalRequests = append(approvalRequests, approvalRequest)
+	}
+
+	return approvalRequests, err
 }

@@ -11,6 +11,9 @@ BEGIN
 	-- interfering with SELECT statements.
 	SET NOCOUNT ON;
 
+    DECLARE @LastGithubLogin DATETIME
+	SET @LastGithubLogin = (SELECT LastGithubLogin FROM [dbo].[Users] WHERE UserPrincipalName=@UserPrincipalName)
+
     IF EXISTS (
         SELECT UserPrincipalName
         FROM Users
@@ -25,11 +28,33 @@ BEGIN
                     [GitHubId] = @GitHubId,
                     [GitHubUser] = @GitHubUser,
                     [Modified] = GETDATE(),
-                    [ModifiedBy] = @UserPrincipalName
+                    [ModifiedBy] = @UserPrincipalName,
+                    [LastGithubLogin] = GETDATE()
             WHERE  
                     [UserPrincipalName] = @UserPrincipalName
 
-            SELECT CONVERT(BIT, 1) [IsValid], @GitHubId [GitHubId], @GitHubUser [GitHubUser]
+            SELECT CONVERT(BIT, 1) [IsValid], @GitHubId [GitHubId], @GitHubUser [GitHubUser], @LastGithubLogin [LastGithubLogin]
+            RETURN 1
+        END
+    ELSE IF EXISTS(
+        SELECT UserPrincipalName
+        FROM Users
+        WHERE
+        UserPrincipalName = @UserPrincipalName
+        AND GitHubId = @GitHubId AND GitHubUser != GitHubUser
+    )
+        BEGIN
+            UPDATE 
+                    [dbo].[Users]
+            SET
+                    [GitHubUser] = @GitHubUser,
+                    [Modified] = GETDATE(),
+                    [ModifiedBy] = @UserPrincipalName,
+                    [LastGithubLogin] = GETDATE()
+            WHERE  
+                    [UserPrincipalName] = @UserPrincipalName
+
+            SELECT CONVERT(BIT, 1) [IsValid], @GitHubId [GitHubId], @GitHubUser [GitHubUser], @LastGithubLogin [LastGithubLogin]
             RETURN 1
         END
     ELSE
@@ -41,12 +66,19 @@ BEGIN
                 AND GitHubId = @GitHubId
             )
             BEGIN
-                SELECT CONVERT(BIT, 1) [IsValid], @GitHubId [GitHubId], @GitHubUser [GitHubUser]
+                UPDATE 
+                    [dbo].[Users]
+                SET
+                    [LastGithubLogin] = GETDATE()
+                WHERE  
+                    [UserPrincipalName] = @UserPrincipalName
+
+                SELECT CONVERT(BIT, 1) [IsValid], @GitHubId [GitHubId], @GitHubUser [GitHubUser], @LastGithubLogin [LastGithubLogin]
                 RETURN 1
             END
             ELSE
             BEGIN
-                SELECT CONVERT(BIT, 0) [IsValid], GitHubId, GitHubUser
+                SELECT CONVERT(BIT, 0) [IsValid], GitHubId, GitHubUser, @LastGithubLogin [LastGithubLogin]
                 FROM Users WHERE UserPrincipalName = @UserPrincipalName
                 RETURN 0
             END

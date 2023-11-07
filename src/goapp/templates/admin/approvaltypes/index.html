@@ -24,24 +24,21 @@
                     columns : [
                         { 
                             name : 'Name', 
-                            value : 'Name',
+                            value : 'name',
                             sort : {
-                                orderby : 'Name',
+                                orderby : 'name',
                                 ordertype : 'ASC'
                             }
                         },
                         { 
-                            name : 'Approver', 
-                            value : 'ApproverUserPrincipalName',
-                            sort : {
-                                orderby : 'ApproverUserPrincipalName',
-                                ordertype : 'ASC'
-                            }
+                            name : 'Approver/s',
+                            value : 'approvers', 
+                            render : value => renderApprovers(value)
                         },
-                        { name : 'IsActive', value : 'IsActive' },
+                        { name : 'IsActive', value : 'isActive' },
                         { 
                             name : 'Action', 
-                            value : 'Id', 
+                            value : 'id', 
                             render : value => renderAction(value)
                         }
                     ]
@@ -74,6 +71,13 @@
                         </a>
                     </div>`
     }
+    
+    function renderApprovers(approvers) {
+        return approvers.map(v => {
+            return `<p>${v.approverEmail}</p>`
+        }).join('')
+    }
+
     async function getApprovalTypes(e) {
         const offset = e.filter * e.page;
         const search = encodeURIComponent(e.search)

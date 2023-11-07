@@ -2,11 +2,14 @@ package routes
 
 import (
 	"bytes"
+	"encoding/csv"
 	"encoding/json"
 	"fmt"
 	"log"
+	"math"
 	"net/http"
 	"os"
+	"reflect"
 	"regexp"
 	"strconv"
 	"strings"
@@ -15,6 +18,7 @@ import (
 
 	db "main/pkg/ghmgmtdb"
 	ghAPI "main/pkg/github"
+	"main/pkg/notification"
 	"main/pkg/session"
 
 	"github.com/google/go-github/v50/github"
@@ -27,22 +31,24 @@ type RepositoryListDto struct {
 }
 
 type RepoDto struct {
-	Id                     int    `json:"Id"`
-	Name                   string `json:"Name"`
-	Description            string `json:"Description"`
-	IsArchived             bool   `json:"IsArchived"`
-	Created                string `json:"Created"`
-	RepositorySource       string `json:"RepositorySource"`
-	TFSProjectReference    string `json:"TFSProjectReference"`
-	Visibility             string `json:"Visibility"`
-	ApprovalStatus         bool   `json:"ApprovalStatus"`
-	ApprovalStatusId       int    `json:"ApprovalStatusId"`
-	CoOwner                string `json:"CoOwner"`
-	ConfirmAvaIP           bool   `json:"ConfirmAvaIP"`
-	ConfirmEnabledSecurity bool   `json:"ConfirmEnabledSecurity"`
-	CreatedBy              string `json:"CreatedBy"`
-	Modified               string `json:"Modified"`
-	ModifiedBy             string `json:"ModifiedBy"`
+	Id                     int      `json:"Id"`
+	Name                   string   `json:"Name"`
+	Description            string   `json:"Description"`
+	IsArchived             bool     `json:"IsArchived"`
+	Created                string   `json:"Created"`
+	RepositorySource       string   `json:"RepositorySource"`
+	TFSProjectReference    string   `json:"TFSProjectReference"`
+	Visibility             string   `json:"Visibility"`
+	ApprovalStatus         bool     `json:"ApprovalStatus"`
+	ApprovalStatusId       int      `json:"ApprovalStatusId"`
+	CoOwner                string   `json:"CoOwner"`
+	ConfirmAvaIP           bool     `json:"ConfirmAvaIP"`
+	ConfirmEnabledSecurity bool     `json:"ConfirmEnabledSecurity"`
+	ECATTID                int      `json:"ECATTID"`
+	CreatedBy              string   `json:"CreatedBy"`
+	Modified               string   `json:"Modified"`
+	ModifiedBy             string   `json:"ModifiedBy"`
+	Topics                 []string `json:"RepoTopics"`
 }
 
 type CollaboratorDto struct {
@@ -68,18 +74,19 @@ type ProjectRequest struct {
 }
 
 type ProjectApprovalSystemPostDto struct {
-	ApplicationId       string
-	ApplicationModuleId string
-	Email               string
-	Subject             string
-	Body                string
-	RequesterEmail      string
+	ApplicationId       string   `json:"applicationId"`
+	ApplicationModuleId string   `json:"applicationModuleId"`
+	Email               string   `json:"email"` // OBSOLETE
+	Emails              []string `json:"emails"`
+	Subject             string   `json:"subject"`
+	Body                string   `json:"body"`
+	RequesterEmail      string   `json:"requesterEmail"`
 }
 
 type RequestMakePublicDto struct {
 	Id                         string `json:"id"`
 	Newcontribution            string `json:"newcontribution"`
-	OSSsponsor                 string `json:"osssponsor"`
+	OSSsponsor                 int    `json:"osssponsor"`
 	Offeringsassets            string `json:"avanadeofferingsassets"`
 	Willbecommercialversion    string `json:"willbecommercialversion"`
 	OSSContributionInformation string `json:"osscontributionInformation"`
@@ -112,7 +119,7 @@ func RequestRepository(w http.ResponseWriter, r *http.Request) {
 	var existsDb bool
 	var existsGH bool
 	dashedProjName := strings.ReplaceAll(body.Name, " ", "-")
-	go func() { checkDB <- db.Projects_IsExisting(body.Name) }()
+	go func() { checkDB <- db.ProjectsIsExisting(body.Name) }()
 	go func() { b, _ := ghAPI.IsRepoExisting(dashedProjName); checkGH <- b }()
 
 	existsDb = <-checkDB
@@ -126,7 +133,7 @@ func RequestRepository(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	} else {
-		isOrgAllowInternalRepo, err := ghAPI.IsOrgAllowInternalRepo()
+		isEnterpriseOrg, err := ghAPI.IsEnterpriseOrg()
 		if err != nil {
 			HttpResponseError(w, http.StatusBadRequest, "There is a problem checking if the organization is enterprise or not.")
 			return
@@ -142,8 +149,8 @@ func RequestRepository(w http.ResponseWriter, r *http.Request) {
 		body.TFSProjectReference = repo.GetHTMLURL()
 		body.Visibility = 1
 
-		if isOrgAllowInternalRepo {
-			innersource := os.Getenv("GH_ORG_INNERSOURCE")
+		innersource := os.Getenv("GH_ORG_INNERSOURCE")
+		if isEnterpriseOrg {
 			err := ghAPI.SetProjectVisibility(repo.GetName(), "internal", innersource)
 			if err != nil {
 				return
@@ -167,6 +174,23 @@ func RequestRepository(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+		recipients := []string{
+			username.(string),
+			body.Coowner,
+		}
+
+		messageBody := notification.RepositoryHasBeenCreatedMessageBody{
+			Recipients:       recipients,
+			GitHubAppLink:    os.Getenv("GH_APP_LINK"),
+			OrganizationName: innersource,
+			RepoLink:         repo.GetHTMLURL(),
+			RepoName:         repo.GetName(),
+		}
+		err = messageBody.Send()
+		if err != nil {
+			log.Println(err.Error())
+		}
+
 		w.WriteHeader(http.StatusOK)
 	}
 }
@@ -188,6 +212,34 @@ func UpdateRepositoryById(w http.ResponseWriter, r *http.Request) {
 	}
 
 	db.PRProjectsUpdate(body, username.(string))
+
+	w.WriteHeader(http.StatusOK)
+}
+
+func UpdateRepositoryEcattIdById(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+
+	sessionaz, _ := session.Store.Get(r, "auth-session")
+	iprofile := sessionaz.Values["profile"]
+	profile := iprofile.(map[string]interface{})
+	username := profile["preferred_username"]
+
+	id, err := strconv.Atoi(vars["id"])
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	var body RepoDto
+	err = json.NewDecoder(r.Body).Decode(&body)
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	db.UpdateProjectEcattIdById(id, body.ECATTID, username.(string))
 
 	w.WriteHeader(http.StatusOK)
 }
@@ -222,6 +274,12 @@ func GetUserProjects(w http.ResponseWriter, r *http.Request) {
 		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
+	}
+
+	for i := 0; i < len(list); i++ {
+		if projects[i]["Topics"] != nil {
+			list[i].Topics = strings.Split(projects[i]["Topics"].(string), ",")
+		}
 	}
 
 	w.WriteHeader(http.StatusOK)
@@ -451,7 +509,7 @@ func GetAllRepositories(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Get repository list
-	data := db.Repos_Select_ByOffsetAndFilter(offset, search)
+	data := db.ReposSelectByOffsetAndFilter(offset, search)
 	s, _ := json.Marshal(data)
 	var list []RepoDto
 	err = json.Unmarshal(s, &list)
@@ -460,9 +518,16 @@ func GetAllRepositories(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+
+	for i := 0; i < len(list); i++ {
+		if data[i]["Topics"] != nil {
+			list[i].Topics = strings.Split(data[i]["Topics"].(string), ",")
+		}
+	}
+
 	result := RepositoryListDto{
 		Data:  list,
-		Total: db.Repos_TotalCount_BySearchTerm(search),
+		Total: db.ReposTotalCountBySearchTerm(search),
 	}
 
 	w.WriteHeader(http.StatusOK)
@@ -611,7 +676,7 @@ func IndexOrgRepos(w http.ResponseWriter, r *http.Request) {
 }
 
 func ClearOrgRepos(w http.ResponseWriter, r *http.Request) {
-	projects, err := db.Projects_ByRepositorySource("GitHub")
+	projects, err := db.ProjectsByRepositorySource("GitHub")
 	if err != nil {
 		fmt.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -689,7 +754,13 @@ func AddCollaborator(w http.ResponseWriter, r *http.Request) {
 		repoUrlSub := strings.Split(repoUrl, "/")
 
 		isInnersource := strings.EqualFold(repoUrlSub[1], os.Getenv("GH_ORG_INNERSOURCE"))
-		isMember, _, _ := ghAPI.OrganizationsIsMember(os.Getenv("GH_TOKEN"), ghUser)
+
+		isMember, err := ghAPI.IsOrganizationMember(os.Getenv("GH_TOKEN"), os.Getenv("GH_ORG_INNERSOURCE"), ghUser)
+		if err != nil {
+			log.Println(err.Error())
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
 
 		if (isInnersource && isMember) || (!isInnersource) {
 			_, err := ghAPI.AddCollaborator(repoUrlSub[1], repo.Name, ghUser, permission)
@@ -821,6 +892,42 @@ func RepoOwnersCleanup(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("REPO OWNERS CLEANUP SUCCESSFUL")
 }
 
+func RecurringApproval(w http.ResponseWriter, r *http.Request) {
+	const IN_REVIEW = 2
+
+	projectApprovals, err := db.GetProjectApprovalsByStatusId(IN_REVIEW)
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	for _, projectApproval := range projectApprovals {
+		created := projectApproval["Created"].(time.Time)
+
+		daysSinceCreation := time.Since(created).Hours() / 24
+
+		daysSinceCreationFloor := math.Floor(daysSinceCreation)
+
+		if int(daysSinceCreationFloor)%7 == 0 && daysSinceCreationFloor != 0 {
+			messageBody := notification.RepositoryPublicApprovalRemainderMessageBody{
+				Recipients: []string{
+					projectApproval["ApproverUserPrincipalName"].(string),
+				},
+				ApprovalLink: fmt.Sprintf("%s/response/%s/%s/%s/1", os.Getenv("APPROVAL_SYSTEM_APP_URL"), os.Getenv("APPROVAL_SYSTEM_APP_ID"), os.Getenv("APPROVAL_SYSTEM_APP_MODULE_PROJECTS"), projectApproval["ItemId"].(string)),
+				ApprovalType: projectApproval["ApprovalType"].(string),
+				RepoLink:     projectApproval["RepoLink"].(string),
+				RepoName:     projectApproval["RepoName"].(string),
+				UserName:     projectApproval["Requester"].(string),
+			}
+			err = messageBody.Send()
+			if err != nil {
+				log.Println(err.Error())
+			}
+		}
+	}
+}
+
 func GetRepoCollaborators(org string, repo string, role string, affiliations string) []*github.User {
 
 	token := os.Getenv("GH_TOKEN")
@@ -917,11 +1024,13 @@ func IndexRepo(repo ghAPI.Repo) {
 		"Created":             repo.Created.Format("2006-01-02 15:04:05"),
 	}
 
-	isExisting := db.Projects_IsExisting_By_GithubId(repo.GithubId)
+	isExisting := db.ProjectsIsExistingByGithubId(repo.GithubId)
+	var projectId int
 
 	if isExisting {
 		project := db.GetProjectByGithubId(repo.GithubId)
 		param["Id"] = project[0]["Id"]
+		projectId = int(project[0]["Id"].(int64))
 
 		err := db.ProjectUpdateByImport(param)
 		if err != nil {
@@ -960,6 +1069,7 @@ func IndexRepo(repo ghAPI.Repo) {
 
 		project := db.GetProjectByGithubId(repo.GithubId)
 		param["Id"] = project[0]["Id"]
+		projectId = int(project[0]["Id"].(int64))
 
 		// Get direct admin collaborators
 		repoUrl := strings.Replace(repo.TFSProjectReference, "https://", "", -1)
@@ -984,15 +1094,48 @@ func IndexRepo(repo ghAPI.Repo) {
 			}
 		}
 	}
+	if len(repo.Topics) > 0 {
+		err := db.DeleteProjectTopics(projectId)
+		if err != nil {
+			log.Println(err.Error())
+			return
+		}
+		for i := 0; i < len(repo.Topics); i++ {
+			err := db.InsertProjectTopics(projectId, repo.Topics[i])
+			if err != nil {
+				log.Println(err.Error())
+				return
+			}
+		}
+	}
 }
 
-func RequestApproval(id int64, email string) {
+func RequestApproval(projectId int64, email string) {
+	projectApprovals, err := db.RequestProjectApprovals(projectId, email)
+	if err != nil {
+		log.Println(err.Error())
+		return
+	}
+
+	for _, v := range projectApprovals {
+		if v.RequestStatus == "New" {
+			err := ApprovalSystemRequest(v)
+			if err != nil {
+				log.Println("ID:" + strconv.FormatInt(int64(v.Id), 10) + " " + err.Error())
+				return
+			}
+		}
+	}
+}
+
+// Obsolete
+func RequestApprovalObsolete(id int64, email string) {
 
 	projectApprovals := db.PopulateProjectsApproval(id, email)
 
 	for _, v := range projectApprovals {
 		if v.RequestStatus == "New" {
-			err := ApprovalSystemRequest(v)
+			err := ApprovalSystemRequestObsolete(v)
 			if err != nil {
 				log.Println("ID:" + strconv.FormatInt(v.Id, 10) + " " + err.Error())
 				return
@@ -1001,7 +1144,107 @@ func RequestApproval(id int64, email string) {
 	}
 }
 
-func ApprovalSystemRequest(data db.ProjectApproval) error {
+func ApprovalSystemRequest(data db.ProjectApprovalApprovers) error {
+	url := os.Getenv("APPROVAL_SYSTEM_APP_URL")
+	if url != "" {
+		url = url + "/request"
+		ch := make(chan *http.Response)
+		// var res *http.Response
+
+		bodyTemplate := `<p>Hi,</p>
+		<p>|RequesterName| is requesting for a new project and is now pending for |ApprovalType| review.</p>
+		<p>Below are the details:</p>
+		<table>
+			<tr>
+				<td style="font-weight: bold;">Project Name<td>
+				<td style="font-size:larger">|ProjectName|<td>
+			</tr>
+			<tr>
+				<td style="font-weight: bold;">Requested by<td>
+				<td style="font-size:larger">|Requester|<td>
+			</tr>
+			<tr>
+				<td style="font-weight: bold;">Description<td>
+				<td style="font-size:larger">|ProjectDescription|<td>
+			</tr>
+		</table>
+		<table>
+			<tr>
+				<td style="font-weight: bold;">Is this a new contribution with no prior code development? (i.e., no existing Avanade IP, no third-party/OSS code, etc.)<td>
+				<td style="font-size:larger">|Newcontribution|<td>
+			</tr>
+			<tr>
+				<td style="font-weight: bold;">Who is sponsoring thapprovalsyscois OSS contribution?<td>
+				<td style="font-size:larger">|OSSsponsor|<td>
+			</tr>
+			<tr>
+				<td style="font-weight: bold;">Will Avanade use this contribution in client accounts and/or as part of an Avanade offerings/assets?<td>
+				<td style="font-size:larger">|Avanadeofferingsassets|<td>
+			</tr>
+			<tr>
+				<td style="font-weight: bold;">Will there be a commercial version of this contribution<td>
+				<td style="font-size:larger">|Willbecommercialversion|<td>
+			</tr>
+				<tr>
+				<td style="font-weight: bold;">Additional OSS Contribution Information (e.g. planned maintenance/support, etc.)?<td>
+				<td style="font-size:larger">|OSSContributionInformation|<td>
+			</tr>
+		</table>
+		<p>For more information, send an email to <a href="mailto:|RequesterUserPrincipalName|">|RequesterUserPrincipalName|</a></p>`
+
+		replacer := strings.NewReplacer(
+			"|RequesterName|", data.RequesterName,
+			"|ApprovalType|", data.ApprovalType,
+			"|ProjectName|", data.ProjectName,
+			"|Requester|", data.RequesterName,
+			"|ProjectDescription|", data.ProjectDescription,
+			"|RequesterUserPrincipalName|", data.RequesterUserPrincipalName,
+			"|Newcontribution|", data.NewContribution,
+			"|OSSsponsor|", data.OSSsponsor,
+			"|Avanadeofferingsassets|", data.OfferingsAssets,
+			"|Willbecommercialversion|", data.WillBeCommercialVersion,
+			"|OSSContributionInformation|", data.OSSContributionInformation,
+		)
+		body := replacer.Replace(bodyTemplate)
+		postParams := ProjectApprovalSystemPostDto{
+			ApplicationId:       os.Getenv("APPROVAL_SYSTEM_APP_ID"),
+			ApplicationModuleId: os.Getenv("APPROVAL_SYSTEM_APP_MODULE_PROJECTS"),
+			Subject:             fmt.Sprintf("[GH-Management] New Project For Review - %v", data.ProjectName),
+			Body:                body,
+			Emails:              data.Approvers,
+			RequesterEmail:      data.RequesterUserPrincipalName,
+		}
+
+		go getHttpPostResponseStatus(url, postParams, ch)
+		r := <-ch
+		if r != nil {
+			var res ProjectApprovalSystemPostResponseDto
+			err := json.NewDecoder(r.Body).Decode(&res)
+			if err != nil {
+				return err
+			}
+
+			messageBody := notification.RepositoryPublicApprovalMessageBody{
+				Recipients:   []string{},
+				ApprovalLink: fmt.Sprintf("%s/response/%s/%s/%s/1", os.Getenv("APPROVAL_SYSTEM_APP_URL"), postParams.ApplicationId, postParams.ApplicationModuleId, res.ItemId),
+				ApprovalType: data.ApprovalType,
+				RepoLink:     fmt.Sprintf("https://github.com/" + os.Getenv("GH_ORG_INNERSOURCE") + "/" + data.ProjectName),
+				RepoName:     data.ProjectName,
+				UserName:     data.RequesterName,
+			}
+			err = messageBody.Send()
+			if err != nil {
+				log.Println(err.Error())
+			}
+
+			db.ProjectsApprovalUpdateGUID(data.Id, res.ItemId)
+		}
+	}
+	return nil
+}
+
+// Obsolete
+func ApprovalSystemRequestObsolete(data db.ProjectApproval) error {
 
 	url := os.Getenv("APPROVAL_SYSTEM_APP_URL")
 	if url != "" {
@@ -1057,7 +1300,6 @@ func ApprovalSystemRequest(data db.ProjectApproval) error {
 			"|Requester|", data.RequesterName,
 			"|ProjectDescription|", data.ProjectDescription,
 			"|RequesterUserPrincipalName|", data.RequesterUserPrincipalName,
-
 			"|Newcontribution|", data.Newcontribution,
 			"|OSSsponsor|", data.OSSsponsor,
 			"|Avanadeofferingsassets|", data.Offeringsassets,
@@ -1083,6 +1325,19 @@ func ApprovalSystemRequest(data db.ProjectApproval) error {
 				return err
 			}
 
+			messageBody := notification.RepositoryPublicApprovalMessageBody{
+				Recipients:   []string{},
+				ApprovalLink: fmt.Sprintf("%s/response/%s/%s/%s/1", os.Getenv("APPROVAL_SYSTEM_APP_URL"), postParams.ApplicationId, postParams.ApplicationModuleId, res.ItemId),
+				ApprovalType: data.ApprovalType,
+				RepoLink:     fmt.Sprintf("https://github.com/" + os.Getenv("GH_ORG_INNERSOURCE") + "/" + data.ProjectName),
+				RepoName:     data.ProjectName,
+				UserName:     data.RequesterName,
+			}
+			err = messageBody.Send()
+			if err != nil {
+				log.Println(err.Error())
+			}
+
 			db.ProjectsApprovalUpdateGUID(data.Id, res.ItemId)
 		}
 	}
@@ -1103,10 +1358,23 @@ func getHttpPostResponseStatus(url string, data interface{}, ch chan *http.Respo
 }
 
 func ReprocessRequestApproval() {
-	projectApprovals := db.GetFailedProjectApprovalRequests()
+	projectApprovals, err := db.ReprocessFailedProjectApprovals()
+	if err != nil {
+		log.Println(err.Error())
+		return
+	}
 
 	for _, v := range projectApprovals {
 		go ApprovalSystemRequest(v)
+	}
+}
+
+// Obsolete
+func ReprocessRequestApprovalObsolete() {
+	projectApprovals := db.GetFailedProjectApprovalRequestsObsolete()
+
+	for _, v := range projectApprovals {
+		go ApprovalSystemRequestObsolete(v)
 	}
 }
 
@@ -1123,10 +1391,15 @@ func IsRepoNameValid(value string) bool {
 
 func AddCollaboratorToRequestedRepo(user string, repo string, repoId int64) error {
 	innersource := os.Getenv("GH_ORG_INNERSOURCE")
-	gHUser := db.Users_Get_GHUser(user)
-	isInnersourceMember, _, _ := ghAPI.OrganizationsIsMember(os.Getenv("GH_TOKEN"), gHUser)
+	ghUser := db.Users_Get_GHUser(user)
+
+	isInnersourceMember, err := ghAPI.IsOrganizationMember(os.Getenv("GH_TOKEN"), os.Getenv("GH_ORG_INNERSOURCE"), ghUser)
+	if err != nil {
+		return err
+	}
+
 	if isInnersourceMember {
-		_, err := ghAPI.AddCollaborator(innersource, repo, gHUser, "admin")
+		_, err := ghAPI.AddCollaborator(innersource, repo, ghUser, "admin")
 		if err != nil {
 			return err
 		}
@@ -1136,6 +1409,96 @@ func AddCollaboratorToRequestedRepo(user string, repo string, repoId int64) erro
 		}
 	}
 	return nil
+}
+
+func GetPopularTopics(w http.ResponseWriter, r *http.Request) {
+	params := r.URL.Query()
+	offset, err := strconv.Atoi(params["offset"][0])
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	rowCount, err := strconv.Atoi(params["rowCount"][0])
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	result, err := db.GetPopularTopics(offset, rowCount)
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Header().Set("Content-Type", "application/json")
+	jsonResp, err := json.Marshal(result)
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.Write(jsonResp)
+}
+
+func DownloadProjectApprovalsByUsername(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+
+	username := vars["username"]
+
+	projectApprovals, err := db.GetProjectApprovalsByUsername(username)
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	var data [][]string
+
+	t := reflect.TypeOf(db.ApprovalRequest{})
+
+	columns := make([]string, t.NumField())
+	for i := range columns {
+		columns[i] = t.Field(i).Name
+	}
+
+	data = append(data, columns)
+
+	for _, projectApproval := range projectApprovals {
+		v := reflect.ValueOf(projectApproval)
+
+		row := make([]string, v.NumField())
+
+		for i := 0; i < v.NumField(); i++ {
+			vi := v.Field(i).Interface()
+			if vi == "<nil>" {
+				row[i] = ""
+				continue
+			}
+			row[i] = fmt.Sprintf("%v", v.Field(i).Interface())
+		}
+
+		fmt.Println(row)
+
+		data = append(data, row)
+	}
+
+	w.Header().Set("Content-Disposition", "attachment; filename=project_approval_requests.csv")
+	w.Header().Set("Content-Type", "text/csv")
+	w.Header().Set("Transfer-Encoding", "chunked")
+
+	writer := csv.NewWriter(w)
+	defer writer.Flush()
+
+	for _, value := range data {
+		if err := writer.Write(value); err != nil {
+			log.Println(err.Error())
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+	}
 }
 
 func HttpResponseError(w http.ResponseWriter, code int, errorMessage string) {
