@@ -21,8 +21,18 @@ func LoginRedirectHandler(w http.ResponseWriter, r *http.Request) {
 	tmpl.Execute(w, data)
 }
 
+func AuthenticatedHandler(w http.ResponseWriter, r *http.Request) {
+	tmpl := template.Must(template.ParseFiles("templates/authenticated.html"))
+	tmpl.Execute(w, nil)
+}
+
+func AuthenticatingHandler(w http.ResponseWriter, r *http.Request) {
+	tmpl := template.Must(template.ParseFiles("templates/authenticating.html"))
+	tmpl.Execute(w, nil)
+}
+
 func GHAuthenticatedHandler(w http.ResponseWriter, r *http.Request) {
-	tmpl := template.Must(template.ParseFiles("templates/ghauthenticated.html"))
+	tmpl := template.Must(template.ParseFiles("templates/authenticated.html"))
 	tmpl.Execute(w, nil)
 }
 

@@ -113,5 +113,5 @@ func CallbackHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Redirect to index
-	http.Redirect(w, r, "/", http.StatusSeeOther)
+	http.Redirect(w, r, "/authenticated/azure", http.StatusSeeOther)
 }

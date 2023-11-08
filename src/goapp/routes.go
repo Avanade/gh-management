@@ -60,6 +60,8 @@ func setPageRoutes(mux *mux.Router) {
 	mux.HandleFunc("/login/azure", rtAzure.LoginHandler)
 	mux.HandleFunc("/login/azure/callback", rtAzure.CallbackHandler)
 	mux.HandleFunc("/logout/azure", rtAzure.LogoutHandler)
+	mux.HandleFunc("/authenticating/azure", rtPages.AuthenticatingHandler)
+	mux.HandleFunc("/authenticated/azure", rtPages.AuthenticatedHandler)
 	// GITHUB
 	mux.HandleFunc("/login/github", rtGithub.GithubLoginHandler)
 	mux.HandleFunc("/login/github/callback", rtGithub.GithubCallbackHandler)
