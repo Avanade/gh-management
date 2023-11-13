@@ -21,23 +21,23 @@ func LoginRedirectHandler(w http.ResponseWriter, r *http.Request) {
 	tmpl.Execute(w, data)
 }
 
-func AuthenticatedHandler(w http.ResponseWriter, r *http.Request) {
-	tmpl := template.Must(template.ParseFiles("templates/authenticated.html"))
+func AuthenticationSuccessfulHandler(w http.ResponseWriter, r *http.Request) {
+	tmpl := template.Must(template.ParseFiles("templates/authenticationsuccessful.html"))
 	tmpl.Execute(w, nil)
 }
 
-func AuthenticatingHandler(w http.ResponseWriter, r *http.Request) {
-	tmpl := template.Must(template.ParseFiles("templates/authenticating.html"))
+func AuthenticationInProgressHandler(w http.ResponseWriter, r *http.Request) {
+	tmpl := template.Must(template.ParseFiles("templates/authenticationinprogress.html"))
 	tmpl.Execute(w, nil)
 }
 
-func GHAuthenticatedHandler(w http.ResponseWriter, r *http.Request) {
-	tmpl := template.Must(template.ParseFiles("templates/authenticated.html"))
+func AuthenticationFailedHandler(w http.ResponseWriter, r *http.Request) {
+	tmpl := template.Must(template.ParseFiles("templates/authenticationfailed.html"))
 	tmpl.Execute(w, nil)
 }
 
-func GHAuthenticatingHandler(w http.ResponseWriter, r *http.Request) {
-	tmpl := template.Must(template.ParseFiles("templates/ghauthenticating.html"))
+func GHAuthenticationInProgressHandler(w http.ResponseWriter, r *http.Request) {
+	tmpl := template.Must(template.ParseFiles("templates/ghauthenticationinprogress.html"))
 	tmpl.Execute(w, nil)
 }
 

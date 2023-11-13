@@ -11,23 +11,38 @@
               <h1 class="text-4xl font-semibold text-gray-900 tracking-tight sm:text-4xl">Authenticate GitHub Account</h1>
               <p class="mt-1 text-base text-gray-500">Please enable popups in your browser settings to complete the authentication process.</p>
             </div>
-            <div class="mt-10 flex space-x-3 sm:border-l sm:border-transparent sm:pl-6">
+            <div id="goBackHomeAction" class="mt-10 space-x-3 sm:border-l sm:border-transparent sm:pl-6" hidden>
+              <span class="text-red-500">Authentication was not successful</span>
               <a href="/"
-                class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-[#FE4800] hover:bg-[#FF5800] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                Go back home </a>
+                class="items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-[#FE4800] hover:bg-[#FF5800] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                Go back home</a>
             </div>
           </div>
         </main>
       </div>
     </div>
     <script type="text/javascript" defer>
-      window.open("/login/github", "_blank");
+      const openedWindow = window.open("/login/github", "_blank");
       window.addEventListener("message", receiveMessage, false);
-    
+      var timer = setInterval(function() {
+          if(openedWindow == null) {
+            clearInterval(timer);
+            return
+          }
+          if(openedWindow.closed) {
+              clearInterval(timer);
+              document.getElementById("goBackHomeAction").removeAttribute("hidden");
+          }
+      }, 1000);
       function receiveMessage(event) {
         if (event.origin !== window.location.origin) {
             console.warn(`Message received by ${event.origin}; IGNORED.`);
             return;
+        }
+        clearInterval(timer);
+        if (event.data == 'failed') {
+          document.getElementById("goBackHomeAction").removeAttribute("hidden");
+          return;
         }
         window.location.href = '/'
       }

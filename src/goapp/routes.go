@@ -60,15 +60,17 @@ func setPageRoutes(mux *mux.Router) {
 	mux.HandleFunc("/login/azure", rtAzure.LoginHandler)
 	mux.HandleFunc("/login/azure/callback", rtAzure.CallbackHandler)
 	mux.HandleFunc("/logout/azure", rtAzure.LogoutHandler)
-	mux.HandleFunc("/authenticating/azure", rtPages.AuthenticatingHandler)
-	mux.HandleFunc("/authenticated/azure", rtPages.AuthenticatedHandler)
+	mux.HandleFunc("/authentication/azure/inprogress", rtPages.AuthenticationInProgressHandler)
+	mux.HandleFunc("/authentication/azure/successful", rtPages.AuthenticationSuccessfulHandler)
+	mux.HandleFunc("/authentication/azure/failed", rtPages.AuthenticationFailedHandler)
 	// GITHUB
 	mux.HandleFunc("/login/github", rtGithub.GithubLoginHandler)
 	mux.HandleFunc("/login/github/callback", rtGithub.GithubCallbackHandler)
 	mux.HandleFunc("/login/github/force", rtGithub.GithubForceSaveHandler)
 	mux.HandleFunc("/logout/github", rtGithub.GitHubLogoutHandler)
-	mux.HandleFunc("/authenticating/github", rtPages.GHAuthenticatingHandler)
-	mux.HandleFunc("/authenticated/github", rtPages.GHAuthenticatedHandler)
+	mux.HandleFunc("/authentication/github/inprogress", rtPages.GHAuthenticationInProgressHandler)
+	mux.HandleFunc("/authentication/github/successful", rtPages.AuthenticationSuccessfulHandler)
+	mux.HandleFunc("/authentication/github/failed", rtPages.AuthenticationFailedHandler)
 }
 
 func setAdminPageRoutes(mux *mux.Router) {
