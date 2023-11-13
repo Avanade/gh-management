@@ -21,6 +21,26 @@ func LoginRedirectHandler(w http.ResponseWriter, r *http.Request) {
 	tmpl.Execute(w, data)
 }
 
+func AuthenticationSuccessfulHandler(w http.ResponseWriter, r *http.Request) {
+	tmpl := template.Must(template.ParseFiles("templates/authenticationsuccessful.html"))
+	tmpl.Execute(w, nil)
+}
+
+func AuthenticationInProgressHandler(w http.ResponseWriter, r *http.Request) {
+	tmpl := template.Must(template.ParseFiles("templates/authenticationinprogress.html"))
+	tmpl.Execute(w, nil)
+}
+
+func AuthenticationFailedHandler(w http.ResponseWriter, r *http.Request) {
+	tmpl := template.Must(template.ParseFiles("templates/authenticationfailed.html"))
+	tmpl.Execute(w, nil)
+}
+
+func GHAuthenticationInProgressHandler(w http.ResponseWriter, r *http.Request) {
+	tmpl := template.Must(template.ParseFiles("templates/ghauthenticationinprogress.html"))
+	tmpl.Execute(w, nil)
+}
+
 func GitRedirectHandler(w http.ResponseWriter, r *http.Request) {
 	q := r.URL.Query()
 	redirect := "/"

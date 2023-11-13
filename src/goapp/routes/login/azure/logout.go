@@ -9,6 +9,8 @@ import (
 
 	"main/pkg/envvar"
 	"main/pkg/session"
+
+	"github.com/gorilla/sessions"
 )
 
 func LogoutHandler(w http.ResponseWriter, r *http.Request) {
@@ -19,7 +21,14 @@ func LogoutHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	azSession.Options.MaxAge = -1
+	azSession.Options = &sessions.Options{
+		Path:     "/",
+		Domain:   "",
+		MaxAge:   -1,
+		Secure:   true,
+		HttpOnly: false,
+		SameSite: http.SameSiteNoneMode,
+	}
 	err = azSession.Save(r, w)
 	if err != nil {
 		log.Println(err.Error())
