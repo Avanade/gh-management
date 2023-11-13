@@ -8,8 +8,6 @@ import (
 
 	auth "main/pkg/authentication"
 	"main/pkg/session"
-
-	"github.com/gorilla/sessions"
 )
 
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
@@ -32,15 +30,6 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	session.Values["state"] = state
-	session.Options = &sessions.Options{
-		Path:     "/",
-		Domain:   "",
-		MaxAge:   2592000,
-		Secure:   true,
-		HttpOnly: false,
-		SameSite: http.SameSiteNoneMode,
-	}
-
 	err = session.Save(r, w)
 	if err != nil {
 		log.Println(err.Error())
