@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"strings"
 
 	"main/pkg/email"
 	db "main/pkg/ghmgmtdb"
@@ -120,10 +121,15 @@ func CreateActivity(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if body.Help.Id != 0 {
+		if os.Getenv("NOTIFICATION_EMAIL_SUPPORT") == "" {
+			log.Println("Activity does not send successfully because the notification support email environment is not set.")
+			return
+		}
+
+		recipients := strings.Split(os.Getenv("NOTIFICATION_EMAIL_SUPPORT"), ",")
+
 		messageBody := notification.ActivityAddedRequestForHelpMessageBody{
-			Recipients: []string{
-				os.Getenv("EMAIL_SUPPORT"),
-			},
+			Recipients:   recipients,
 			ActivityLink: fmt.Sprintf("https://ava-gh-mgmt-test.azurewebsites.net/activities/view/%d", communityActivityId),
 			UserName:     profile["name"].(string),
 		}
