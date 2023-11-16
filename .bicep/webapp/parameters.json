@@ -29,6 +29,7 @@
                 "NOTIFICATION_ENDPOINT":"",
                 "NOTIFICATION_RECIPIENT":"",
                 "NOTIFICATION_ENABLED": "",
+                "NOTIFICATION_EMAIL_SUPPORT": "",
 
                 "HOME_URL":"",
                 "GH_CLIENT_ID":"",
