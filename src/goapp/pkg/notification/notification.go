@@ -325,5 +325,7 @@ func sendNotification(c Contract) error {
 	}
 	defer response.Body.Close()
 
+	contract, _ := json.Marshal(c)
+	fmt.Println(string(contract))
 	return nil
 }
