@@ -319,13 +319,16 @@ func sendNotification(c Contract) error {
 	req.Header.Add("Authorization", "Bearer "+token.AccessToken)
 	req.Header.Add("Content-Type", "application/json")
 
+	contractBefore, _ := json.Marshal(c)
+	fmt.Println("BEFORE DEFER", string(contractBefore))
+
 	response, err := client.Do(req)
 	if err != nil {
 		return err
 	}
 	defer response.Body.Close()
 
-	contract, _ := json.Marshal(c)
-	fmt.Println(string(contract))
+	contractAfter, _ := json.Marshal(c)
+	fmt.Println("AFTER DEFER", string(contractAfter))
 	return nil
 }
