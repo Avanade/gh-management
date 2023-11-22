@@ -44,7 +44,7 @@ const (
 	OrganizationInvitationMessageType            MessageType = "InnerSource.OrganizationInvitation"
 	OrganizationInvitationExpireMessageType      MessageType = "InnerSource.OrganizationInvitationExpire"
 	RepositoryPublicApprovalProvidedMessageType  MessageType = "InnerSource.RepositoryPublicApprovalProvided"
-	ActivityAddedRequestForHelpMessageType       MessageType = "InnerSource.ActivityAddedRrequestForHelp"
+	ActivityAddedRequestForHelpMessageType       MessageType = "InnerSource.ActivityAddedRequestForHelp"
 )
 
 type Contract struct {
