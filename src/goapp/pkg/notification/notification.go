@@ -44,7 +44,7 @@ const (
 	OrganizationInvitationMessageType            MessageType = "InnerSource.OrganizationInvitation"
 	OrganizationInvitationExpireMessageType      MessageType = "InnerSource.OrganizationInvitationExpire"
 	RepositoryPublicApprovalProvidedMessageType  MessageType = "InnerSource.RepositoryPublicApprovalProvided"
-	ActivityAddedRequestForHelpMessageType       MessageType = "InnerSource.ActivityAddedRrequestForHelp"
+	ActivityAddedRequestForHelpMessageType       MessageType = "InnerSource.ActivityAddedRequestForHelp"
 )
 
 type Contract struct {
@@ -319,11 +319,16 @@ func sendNotification(c Contract) error {
 	req.Header.Add("Authorization", "Bearer "+token.AccessToken)
 	req.Header.Add("Content-Type", "application/json")
 
+	contractBefore, _ := json.Marshal(c)
+	fmt.Println("BEFORE DEFER", string(contractBefore))
+
 	response, err := client.Do(req)
 	if err != nil {
 		return err
 	}
 	defer response.Body.Close()
 
+	contractAfter, _ := json.Marshal(c)
+	fmt.Println("AFTER DEFER", string(contractAfter))
 	return nil
 }
