@@ -50,7 +50,7 @@ func SendEmail(msg EmailMessage) error {
 			CcRecipients: []msgraph.Recipient{
 				{
 					EmailAddress: msgraph.EmailAddress{
-						Address: os.Getenv("EMAIL_CC"),
+						Address: os.Getenv("EMAIL_DEFAULT_CC_RECIPIENT"),
 					},
 				},
 			},
@@ -58,7 +58,7 @@ func SendEmail(msg EmailMessage) error {
 		SaveToSentItems: "true",
 	}
 
-	userId := os.Getenv("EMAIL_USER_PRINCIPAL_NAME")
+	userId := os.Getenv("EMAIL_USER_ID")
 
 	err := msgraph.SendEmail(userId, sendMailRequest)
 	if err != nil {

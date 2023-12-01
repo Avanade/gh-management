@@ -4,7 +4,13 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
+	"net/url"
+	"os"
+	"strconv"
+	"strings"
+	"time"
 )
 
 type EmailAddress struct {
@@ -32,8 +38,49 @@ type SendMailRequest struct {
 	SaveToSentItems string       `json:"saveToSentItems"`
 }
 
+func GetEmailToken() (string, error) {
+
+	urlPath := fmt.Sprintf("https://login.microsoftonline.com/%s/oauth2/v2.0/token", os.Getenv("EMAIL_TENANT_ID"))
+	client := &http.Client{
+		Timeout: time.Second * 10,
+	}
+
+	data := url.Values{}
+	data.Set("client_id", os.Getenv("EMAIL_CLIENT_ID"))
+	data.Set("scope", "https://graph.microsoft.com/.default")
+	data.Set("client_secret", os.Getenv("EMAIL_CLIENT_SECRET"))
+	data.Set("grant_type", "client_credentials")
+	encodedData := data.Encode()
+
+	req, err := http.NewRequest("POST", urlPath, strings.NewReader(encodedData))
+	if err != nil {
+		return "", err
+	}
+
+	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+	req.Header.Add("Content-Length", strconv.Itoa(len(data.Encode())))
+	response, err := client.Do(req)
+	if err != nil {
+		return "", err
+	}
+	defer response.Body.Close()
+
+	var tokenResponse TokenResponse
+	err = json.NewDecoder(response.Body).Decode(&tokenResponse)
+	if err != nil {
+		return "", err
+	}
+
+	return tokenResponse.AccessToken, nil
+}
+
 func SendEmail(userId string, request SendMailRequest) error {
-	accessToken, err := GetToken()
+	if os.Getenv("EMAIL_ENABLED") != "true" {
+		log.Println("Email not sent because it is not enabled.")
+		return nil
+	}
+
+	accessToken, err := GetEmailToken()
 	if err != nil {
 		return err
 	}
