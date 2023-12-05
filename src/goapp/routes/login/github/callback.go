@@ -248,10 +248,17 @@ func EmailAcceptOrgInvitation(userEmail, ghUsername string, isInnersourceOrgMemb
 
 	body = body + "<br>OSPO"
 
-	m := email.EmailMessage{
+	m := email.Message{
 		Subject: "Github Organizations Invitation",
-		Body:    body,
-		To:      userEmail,
+		Body: email.Body{
+			Content: body,
+			Type:    email.HtmlMessageType,
+		},
+		ToRecipients: []email.Recipient{
+			{
+				Email: userEmail,
+			},
+		},
 	}
 
 	email.SendEmail(m)

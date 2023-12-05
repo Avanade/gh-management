@@ -27,7 +27,7 @@ func ScheduleJob(ctx context.Context, o time.Duration, f func()) {
 	if firstRun.Before(n) {
 		firstRun = firstRun.Add(dayPeriod)
 	}
-	firstRunChannel := time.After(firstRun.Sub(time.Now()))
+	firstRunChannel := time.After(time.Until(firstRun))
 	t := &time.Ticker{C: nil}
 
 	for {
@@ -82,10 +82,17 @@ func DailySummaryReport() {
 	}
 
 	body := buf.String()
-	m := email.EmailMessage{
+	m := email.Message{
 		Subject: "Requested Repositories",
-		Body:    body,
-		To:      recipient,
+		Body: email.Body{
+			Content: body,
+			Type:    email.HtmlMessageType,
+		},
+		ToRecipients: []email.Recipient{
+			{
+				Email: recipient,
+			},
+		},
 	}
 
 	email.SendEmail(m)

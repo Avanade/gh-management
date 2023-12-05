@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"net/url"
@@ -108,6 +109,9 @@ func SendEmail(userId string, request SendMailRequest) error {
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusAccepted {
+		// Print the response body for additional details
+		responseBody, _ := io.ReadAll(resp.Body)
+		fmt.Println("Response Body:", string(responseBody))
 		return fmt.Errorf("unexpected response status: %v", resp.Status)
 	}
 

@@ -251,10 +251,17 @@ func SendReassignEmail(data db.ProjectApproval) error {
 	)
 
 	body := replacer.Replace(bodyTemplate)
-	m := email.EmailMessage{
+	m := email.Message{
 		Subject: fmt.Sprintf("[GH-Management] New Project For Review - %v", data.ProjectName),
-		Body:    body,
-		To:      data.ApproverUserPrincipalName,
+		Body: email.Body{
+			Content: body,
+			Type:    email.HtmlMessageType,
+		},
+		ToRecipients: []email.Recipient{
+			{
+				Email: data.ApproverUserPrincipalName,
+			},
+		},
 	}
 
 	err := email.SendEmail(m)
@@ -440,10 +447,17 @@ func SendReassignEmailCommunity(data db.CommunityApproval) error {
 		"|RejectText|", data.RejectText,
 	)
 	body := replacer.Replace(bodyTemplate)
-	m := email.EmailMessage{
+	m := email.Message{
 		Subject: fmt.Sprintf("[GH-Management] New Community For Approval - %v", data.CommunityName),
-		Body:    body,
-		To:      data.ApproverUserPrincipalName,
+		Body: email.Body{
+			Content: body,
+			Type:    email.HtmlMessageType,
+		},
+		ToRecipients: []email.Recipient{
+			{
+				Email: data.ApproverUserPrincipalName,
+			},
+		},
 	}
 
 	err := email.SendEmail(m)
