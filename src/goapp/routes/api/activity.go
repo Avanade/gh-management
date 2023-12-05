@@ -230,7 +230,7 @@ func processHelp(activityId int, activityLink, requestorName string, h HelpDto) 
 
 	// SEND EMAIL
 	m := email.Message{
-		Subject: fmt.Sprintf("%s : COMMUNITY PORTAL", h.Name),
+		Subject: fmt.Sprintf("%s : Community Portal", h.Name),
 		Body: email.Body{
 			Content: body,
 			Type:    email.HtmlMessageType,
