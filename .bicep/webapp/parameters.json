@@ -31,13 +31,21 @@
                 "NOTIFICATION_ENABLED": "",
                 "NOTIFICATION_EMAIL_SUPPORT": "",
 
+                "EMAIL_SUMMARY_REPORT":"",
+                "EMAIL_SUPPORT":"",
+                "EMAIL_ENABLED" : "",
+
+                "EMAIL_TENANT_ID" : "",
+                "EMAIL_CLIENT_ID" : "",
+                "EMAIL_CLIENT_SECRET" : "",
+                "EMAIL_USER_ID" : "",
+                
                 "HOME_URL":"",
                 "GH_CLIENT_ID":"",
                 "GH_CLIENT_SECRET":"",
                 "GH_TOKEN":"",
                 "GH_APP_LINK":"",
                 "GHMGMTDB_CONNECTION_STRING":"",
-                "EMAIL_ENDPOINT":"",
                 
                 "GH_ORG_INNERSOURCE":"",
                 "GH_ORG_OPENSOURCE":"",
@@ -50,9 +58,8 @@
                 "APPROVAL_SYSTEM_APP_MODULE_COMMUNITY":"",
                 "GH_AZURE_AD_GROUP":"",
                 "GH_AZURE_AD_ADMIN_GROUP":"",
-                "EMAIL_SUPPORT":"",
+                
                 "SUMMARY_REPORT_TRIGGER":"",
-                "EMAIL_SUMMARY_REPORT":"",
                 "CONTENT_SECURITY_POLICY":""
             }
         }
