@@ -143,7 +143,7 @@ func CreateActivity(w http.ResponseWriter, r *http.Request) {
 			log.Println(err.Error())
 		}
 
-		errHelp := processHelp(communityActivityId, activityLink, profile["name"].(string), body.Help)
+		errHelp := processHelp(communityActivityId, activityLink, username, profile["name"].(string), body.Help)
 		if errHelp != nil {
 			log.Println(err.Error())
 			http.Error(w, errHelp.Error(), http.StatusBadRequest)
@@ -219,7 +219,7 @@ func insertCommunityActivitiesContributionArea(ca ItemDto, caca db.CommunityActi
 	return nil
 }
 
-func processHelp(activityId int, activityLink, requestorName string, h HelpDto) error {
+func processHelp(activityId int, activityLink, requestorEmail string, requestorName string, h HelpDto) error {
 	// INSERT
 	_, err := db.CommunityActivitiesHelpTypes_Insert(activityId, h.Id, h.Details)
 	if err != nil {
@@ -240,9 +240,14 @@ func processHelp(activityId int, activityLink, requestorName string, h HelpDto) 
 				Email: os.Getenv("EMAIL_SUPPORT"),
 			},
 		},
+		CcRecipients: []email.Recipient{
+			{
+				Email: requestorEmail,
+			},
+		},
 	}
 
-	errEmail := email.SendEmail(m)
+	errEmail := email.SendEmail(m, false)
 	if errEmail != nil {
 		return errEmail
 	}

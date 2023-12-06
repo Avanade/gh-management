@@ -274,7 +274,7 @@ func EmailAdmin(admin string, adminemail string, reponame string, outisideCollab
 		},
 	}
 
-	email.SendEmail(m)
+	email.SendEmail(m, true)
 	fmt.Printf(" GitHub Repo Collaborators Scan on %s was sent.", e)
 }
 
@@ -301,7 +301,7 @@ func EmailAdminDeletedProjects(to string, repos []string) {
 		},
 	}
 
-	email.SendEmail(m)
+	email.SendEmail(m, false)
 }
 
 // List of users converted into outside collaborators to Repo Owner
@@ -333,7 +333,7 @@ func EmailAdminConvertToColaborator(to string, outisideCollab []string) {
 		},
 	}
 
-	email.SendEmail(m)
+	email.SendEmail(m, false)
 	fmt.Printf("GitHub User was converted into an outside  on %s was sent.", e)
 }
 
@@ -370,7 +370,7 @@ func EmailRepoAdminConvertToColaborator(to string, repoName string, outisideColl
 		},
 	}
 
-	email.SendEmail(m)
+	email.SendEmail(m, true)
 	fmt.Printf("GitHub User was converted into an outside  on %s was sent.", e)
 }
 
@@ -407,7 +407,7 @@ func EmailOspoOwnerDeficient(to string, org string, repoName []string) {
 		},
 	}
 
-	email.SendEmail(m)
+	email.SendEmail(m, false)
 	fmt.Printf(" less than 2 owner    %s was sent.", e)
 }
 
@@ -433,5 +433,5 @@ func EmailcoownerDeficient(to string, Org string, reponame string) {
 		},
 	}
 
-	email.SendEmail(m)
+	email.SendEmail(m, true)
 }

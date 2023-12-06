@@ -21,11 +21,10 @@ type EmailMessage struct {
 }
 
 type Message struct {
-	Subject       string
-	Body          Body
-	ToRecipients  []Recipient
-	CcRecipients  []Recipient
-	BccRecipients *[]Recipient
+	Subject      string
+	Body         Body
+	ToRecipients []Recipient
+	CcRecipients []Recipient
 }
 
 type Body struct {
@@ -37,7 +36,7 @@ type Recipient struct {
 	Email string
 }
 
-func SendEmail(message Message) error {
+func SendEmail(message Message, hasDefaultCc bool) error {
 	sendMailRequest := msgraph.SendMailRequest{
 		Message: msgraph.EmailMessage{
 			Subject: message.Subject,
@@ -57,21 +56,33 @@ func SendEmail(message Message) error {
 		})
 	}
 
+	var ccRecipients []msgraph.Recipient
+
 	// DEFAULT CC RECIPIENT
-	sendMailRequest.Message.CcRecipients = append(sendMailRequest.Message.CcRecipients, msgraph.Recipient{
-		EmailAddress: msgraph.EmailAddress{
-			Address: os.Getenv("EMAIL_DEFAULT_CC_RECIPIENT"),
-		},
-	})
+	if hasDefaultCc {
+		if os.Getenv("EMAIL_SUPPORT") != "" {
+			ccRecipients = append(ccRecipients, msgraph.Recipient{
+				EmailAddress: msgraph.EmailAddress{
+					Address: os.Getenv("EMAIL_SUPPORT"),
+				},
+			})
+		}
+	}
 
 	if len(message.CcRecipients) > 0 {
 		for _, recipient := range message.CcRecipients {
-			sendMailRequest.Message.CcRecipients = append(sendMailRequest.Message.CcRecipients, msgraph.Recipient{
+			ccRecipients = append(ccRecipients, msgraph.Recipient{
 				EmailAddress: msgraph.EmailAddress{
 					Address: recipient.Email,
 				},
 			})
 		}
+	}
+
+	if ccRecipients != nil {
+		sendMailRequest.Message.CcRecipients = ccRecipients
+	} else {
+		sendMailRequest.Message.CcRecipients = []msgraph.Recipient{}
 	}
 
 	userId := os.Getenv("EMAIL_USER_ID")

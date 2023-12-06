@@ -261,7 +261,7 @@ func EmailAcceptOrgInvitation(userEmail, ghUsername string, isInnersourceOrgMemb
 		},
 	}
 
-	email.SendEmail(m)
+	email.SendEmail(m, true)
 	fmt.Printf("GitHub Organization Invitation on %s was sent.", time.Now())
 }
 

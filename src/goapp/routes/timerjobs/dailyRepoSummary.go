@@ -95,6 +95,6 @@ func DailySummaryReport() {
 		},
 	}
 
-	email.SendEmail(m)
+	email.SendEmail(m, true)
 	fmt.Printf("Summary of requested repositories on %s was sent.", e)
 }

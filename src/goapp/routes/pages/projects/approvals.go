@@ -264,7 +264,7 @@ func SendReassignEmail(data db.ProjectApproval) error {
 		},
 	}
 
-	err := email.SendEmail(m)
+	err := email.SendEmail(m, true)
 
 	if err != nil {
 		return err
@@ -460,7 +460,7 @@ func SendReassignEmailCommunity(data db.CommunityApproval) error {
 		},
 	}
 
-	err := email.SendEmail(m)
+	err := email.SendEmail(m, true)
 
 	if err != nil {
 		return err
