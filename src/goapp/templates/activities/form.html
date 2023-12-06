@@ -5,7 +5,7 @@
         action : '{{ .Action }}',
         id : '{{ .Id }}'
     })" class="space-y-8 divide-y divide-gray-200"
-    @keydown="(e) => { if(e.keyCode == 13) {e.preventDefault(); return} ; }">
+        onsubmit="event.preventDefault()">
     <fieldset x-bind:disabled="action.toLowerCase() == 'view'">
         <div class="space-y-8 divide-y divide-gray-200 sm:space-y-5">
             <div>
