@@ -34,7 +34,6 @@
                 "EMAIL_SUMMARY_REPORT":"",
                 "EMAIL_SUPPORT":"",
                 "EMAIL_ENABLED" : "",
-                "EMAIL_DEFAULT_CC_RECIPIENT" : "",
 
                 "EMAIL_TENANT_ID" : "",
                 "EMAIL_CLIENT_ID" : "",
