@@ -121,8 +121,8 @@ resource ghmgmtAppServiceTags 'Microsoft.Resources/tags@2022-09-01' = {
   }
 }
 
-var appInsightName = toLower('${projectName}-appinsights')
-var logAnalyticsName = toLower('${projectName}-loganalytics')
+var appInsightName = toLower('${projectName}-${activeEnv}-appinsights')
+var logAnalyticsName = toLower('${projectName}-${activeEnv}-loganalytics')
 
 resource appInsights 'Microsoft.Insights/components@2020-02-02' = {
   name: appInsightName
