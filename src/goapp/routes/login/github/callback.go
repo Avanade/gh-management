@@ -17,6 +17,7 @@ import (
 	"main/pkg/notification"
 	"main/pkg/session"
 
+	"github.com/gorilla/sessions"
 	"golang.org/x/oauth2"
 )
 
@@ -24,27 +25,31 @@ func GithubCallbackHandler(w http.ResponseWriter, r *http.Request) {
 	sessionaz, err := session.Store.Get(r, "auth-session")
 	if err != nil {
 		log.Println(err.Error())
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		// http.Error(w, err.Error(), http.StatusInternalServerError)
+		http.Redirect(w, r, "/authentication/github/failed", http.StatusSeeOther)
 		return
 	}
 	// Check session and state
 	state, err := session.GetState(w, r)
 	if err != nil {
 		log.Println(err.Error())
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		// http.Error(w, err.Error(), http.StatusInternalServerError)
+		http.Redirect(w, r, "/authentication/github/failed", http.StatusSeeOther)
 		return
 	}
 
 	session, err := session.Store.Get(r, "gh-auth-session")
 	if err != nil {
 		log.Println(err.Error())
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		// http.Error(w, err.Error(), http.StatusInternalServerError)
+		http.Redirect(w, r, "/authentication/github/failed", http.StatusSeeOther)
 		return
 	}
 
 	if r.URL.Query().Get("state") != state {
 		log.Println("Invalid state paramerer")
-		http.Error(w, "Invalid state parameter", http.StatusBadRequest)
+		// http.Error(w, "Invalid state parameter", http.StatusBadRequest)
+		http.Redirect(w, r, "/authentication/github/failed", http.StatusSeeOther)
 		return
 	}
 
@@ -56,7 +61,8 @@ func GithubCallbackHandler(w http.ResponseWriter, r *http.Request) {
 	ghAccessToken, err := ghauth.Exchange(oauth2.NoContext, code)
 	if err != nil {
 		log.Println(err.Error())
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		// http.Error(w, err.Error(), http.StatusInternalServerError)
+		http.Redirect(w, r, "/authentication/github/failed", http.StatusSeeOther)
 		return
 	}
 	ghProfile := auth.GetGitHubUserProfile(ghAccessToken.AccessToken)
@@ -70,7 +76,8 @@ func GithubCallbackHandler(w http.ResponseWriter, r *http.Request) {
 	err = json.Unmarshal([]byte(ghProfile), &p)
 	if err != nil {
 		log.Println(err.Error())
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		// http.Error(w, err.Error(), http.StatusInternalServerError)
+		http.Redirect(w, r, "/authentication/github/failed", http.StatusSeeOther)
 		return
 	}
 	// Save and Validate github account
@@ -82,7 +89,8 @@ func GithubCallbackHandler(w http.ResponseWriter, r *http.Request) {
 	result, err := db.UpdateUserGithub(userPrincipalName, ghId, ghUser, 0)
 	if err != nil {
 		log.Println(err.Error())
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		// http.Error(w, err.Error(), http.StatusInternalServerError)
+		http.Redirect(w, r, "/authentication/github/failed", http.StatusSeeOther)
 		return
 	}
 	session.Values["ghIsValid"] = result["IsValid"].(bool)
@@ -99,13 +107,23 @@ func GithubCallbackHandler(w http.ResponseWriter, r *http.Request) {
 		CheckMembership(userPrincipalName, ghUser)
 	}
 
+	session.Options = &sessions.Options{
+		Path:     "/",
+		Domain:   "",
+		MaxAge:   2592000,
+		Secure:   true,
+		HttpOnly: false,
+		SameSite: http.SameSiteNoneMode,
+	}
 	err = session.Save(r, w)
 	if err != nil {
 		log.Panicln(err.Error())
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		// http.Error(w, err.Error(), http.StatusInternalServerError)
+		http.Redirect(w, r, "/authentication/github/failed", http.StatusSeeOther)
+		return
 	}
 
-	http.Redirect(w, r, "/", http.StatusSeeOther)
+	http.Redirect(w, r, "/authentication/github/successful", http.StatusSeeOther)
 }
 
 func GithubForceSaveHandler(w http.ResponseWriter, r *http.Request) {
@@ -149,6 +167,14 @@ func GithubForceSaveHandler(w http.ResponseWriter, r *http.Request) {
 
 	CheckMembership(userPrincipalName, ghUser)
 
+	session.Options = &sessions.Options{
+		Path:     "/",
+		Domain:   "",
+		MaxAge:   2592000,
+		Secure:   true,
+		HttpOnly: false,
+		SameSite: http.SameSiteNoneMode,
+	}
 	err = session.Save(r, w)
 	if err != nil {
 		log.Println(err.Error())
@@ -222,13 +248,20 @@ func EmailAcceptOrgInvitation(userEmail, ghUsername string, isInnersourceOrgMemb
 
 	body = body + "<br>OSPO"
 
-	m := email.EmailMessage{
+	m := email.Message{
 		Subject: "Github Organizations Invitation",
-		Body:    body,
-		To:      userEmail,
+		Body: email.Body{
+			Content: body,
+			Type:    email.HtmlMessageType,
+		},
+		ToRecipients: []email.Recipient{
+			{
+				Email: userEmail,
+			},
+		},
 	}
 
-	email.SendEmail(m)
+	email.SendEmail(m, true)
 	fmt.Printf("GitHub Organization Invitation on %s was sent.", time.Now())
 }
 

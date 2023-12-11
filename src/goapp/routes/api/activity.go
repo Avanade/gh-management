@@ -7,9 +7,11 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"strings"
 
 	"main/pkg/appinsights_wrapper"
 	"main/pkg/email"
+	"main/pkg/envvar"
 	db "main/pkg/ghmgmtdb"
 	"main/pkg/notification"
 	"main/pkg/session"
@@ -129,11 +131,20 @@ func CreateActivity(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if body.Help.Id != 0 {
+		if os.Getenv("NOTIFICATION_EMAIL_SUPPORT") == "" {
+			log.Println("Activity does not send successfully because the notification support email environment is not set.")
+			return
+		}
+
+		recipients := strings.Split(os.Getenv("NOTIFICATION_EMAIL_SUPPORT"), ",")
+
+		scheme := envvar.GetEnvVar("SCHEME", "https")
+
+		activityLink := fmt.Sprint(scheme, "://", r.Host, "/activities/view/", communityActivityId)
+
 		messageBody := notification.ActivityAddedRequestForHelpMessageBody{
-			Recipients: []string{
-				os.Getenv("EMAIL_SUPPORT"),
-			},
-			ActivityLink: fmt.Sprintf("https://ava-gh-mgmt-test.azurewebsites.net/activities/view/%d", communityActivityId),
+			Recipients:   recipients,
+			ActivityLink: activityLink,
 			UserName:     profile["name"].(string),
 		}
 		err = messageBody.Send()
@@ -141,7 +152,7 @@ func CreateActivity(w http.ResponseWriter, r *http.Request) {
 			log.Println(err.Error())
 		}
 
-		errHelp := processHelp(communityActivityId, username, body.Help)
+		errHelp := processHelp(communityActivityId, activityLink, username, profile["name"].(string), body.Help)
 		if errHelp != nil {
 			log.Println(err.Error())
 			http.Error(w, errHelp.Error(), http.StatusBadRequest)
@@ -217,20 +228,35 @@ func insertCommunityActivitiesContributionArea(ca ItemDto, caca db.CommunityActi
 	return nil
 }
 
-func processHelp(activityId int, username string, h HelpDto) error {
+func processHelp(activityId int, activityLink, requestorEmail string, requestorName string, h HelpDto) error {
 	// INSERT
 	_, err := db.CommunityActivitiesHelpTypes_Insert(activityId, h.Id, h.Details)
 	if err != nil {
 		return err
 	}
+
+	body := fmt.Sprintf("<p>%s added an <a href=\"%s\">activity</a> and is requesting for help below are the details of the request.</p><p>DETAILS: %s</p>", requestorName, activityLink, h.Details)
+
 	// SEND EMAIL
-	emailData := email.EmailMessage{
-		To:      os.Getenv("EMAIL_SUPPORT"),
-		Subject: h.Name,
-		Body:    fmt.Sprintf("<p><b>FROM</b> : %s</p> \n<p><b>TYPE</b> : %s</p> \n<p><b>DETAILS</b> : %s</p>", username, h.Name, h.Details),
+	m := email.Message{
+		Subject: fmt.Sprintf("%s : Community Portal", h.Name),
+		Body: email.Body{
+			Content: body,
+			Type:    email.HtmlMessageType,
+		},
+		ToRecipients: []email.Recipient{
+			{
+				Email: os.Getenv("EMAIL_SUPPORT"),
+			},
+		},
+		CcRecipients: []email.Recipient{
+			{
+				Email: requestorEmail,
+			},
+		},
 	}
 
-	_, errEmail := email.SendEmail(emailData)
+	errEmail := email.SendEmail(m, false)
 	if errEmail != nil {
 		return errEmail
 	}

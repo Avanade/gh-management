@@ -261,13 +261,20 @@ func EmailAdmin(admin string, adminemail string, reponame string, outisideCollab
 	collabList = collabList + " </table  > <p>"
 	body := fmt.Sprintf("<p>Hello %s ,  </p>  \n<p>This is to inform you that your Github repository <b> %s </b> has %d outside collaborator/s. </p> %s  This email was sent to the admins of the repository.  </p> \n <p>OSPO</p>", admin, link, len(outisideCollab), collabList)
 
-	m := email.EmailMessage{
+	m := email.Message{
 		Subject: "GitHub Repo Collaborators Scan",
-		Body:    body,
-		To:      adminemail,
+		Body: email.Body{
+			Content: body,
+			Type:    email.HtmlMessageType,
+		},
+		ToRecipients: []email.Recipient{
+			{
+				Email: adminemail,
+			},
+		},
 	}
 
-	email.SendEmail(m)
+	email.SendEmail(m, true)
 	fmt.Printf(" GitHub Repo Collaborators Scan on %s was sent.", e)
 }
 
@@ -281,13 +288,20 @@ func EmailAdminDeletedProjects(to string, repos []string) {
 
 	body := fmt.Sprintf("The following repositories were removed from the database as they no longer exist on %s and %s GitHub organizations: %s", os.Getenv("GH_ORG_INNERSOURCE"), os.Getenv("GH_ORG_OPENSOURCE"), repoList)
 
-	m := email.EmailMessage{
+	m := email.Message{
 		Subject: "List of Deleted Repo",
-		Body:    body,
-		To:      to,
+		Body: email.Body{
+			Content: body,
+			Type:    email.HtmlMessageType,
+		},
+		ToRecipients: []email.Recipient{
+			{
+				Email: to,
+			},
+		},
 	}
 
-	email.SendEmail(m)
+	email.SendEmail(m, false)
 }
 
 // List of users converted into outside collaborators to Repo Owner
@@ -306,13 +320,20 @@ func EmailAdminConvertToColaborator(to string, outisideCollab []string) {
 		body = fmt.Sprintf("<p>Hello %s ,  </p>  \n<p>This is to inform you that %d GitHub user on %s was converted to an outside collaborator. </p> %s  ", to, len(outisideCollab), os.Getenv("GH_ORG_OPENSOURCE"), collabList)
 	}
 
-	m := email.EmailMessage{
+	m := email.Message{
 		Subject: "GitHub Organization Scan",
-		Body:    body,
-		To:      to,
+		Body: email.Body{
+			Content: body,
+			Type:    email.HtmlMessageType,
+		},
+		ToRecipients: []email.Recipient{
+			{
+				Email: to,
+			},
+		},
 	}
 
-	email.SendEmail(m)
+	email.SendEmail(m, false)
 	fmt.Printf("GitHub User was converted into an outside  on %s was sent.", e)
 }
 
@@ -336,13 +357,20 @@ func EmailRepoAdminConvertToColaborator(to string, repoName string, outisideColl
 		body = fmt.Sprintf("<p>Hello %s ,  </p>  \n<p>This is to inform you that <b> %d </b> GitHub users on your GitHub repo %s were converted to outside collaborators. </p> %s This email was sent to the admins of the repository. </p> \n <p>OSPO</p>", to, len(outisideCollab), link, collabList)
 	}
 
-	m := email.EmailMessage{
+	m := email.Message{
 		Subject: "GitHub Organization Scan",
-		Body:    body,
-		To:      to,
+		Body: email.Body{
+			Content: body,
+			Type:    email.HtmlMessageType,
+		},
+		ToRecipients: []email.Recipient{
+			{
+				Email: to,
+			},
+		},
 	}
 
-	email.SendEmail(m)
+	email.SendEmail(m, true)
 	fmt.Printf("GitHub User was converted into an outside  on %s was sent.", e)
 }
 
@@ -366,13 +394,20 @@ func EmailOspoOwnerDeficient(to string, org string, repoName []string) {
 	} else {
 		body = fmt.Sprintf("<p>Hello %s ,  </p>  \n<p>This is to inform you that <b> %d </b> repositories on %s need to add a co-owner.</p> %s   </p>  ", to, len(repoName), org, repoNameList)
 	}
-	m := email.EmailMessage{
+	m := email.Message{
 		Subject: "Repository Owners Scan",
-		Body:    body,
-		To:      to,
+		Body: email.Body{
+			Content: body,
+			Type:    email.HtmlMessageType,
+		},
+		ToRecipients: []email.Recipient{
+			{
+				Email: to,
+			},
+		},
 	}
 
-	email.SendEmail(m)
+	email.SendEmail(m, false)
 	fmt.Printf(" less than 2 owner    %s was sent.", e)
 }
 
@@ -385,11 +420,18 @@ func EmailcoownerDeficient(to string, Org string, reponame string) {
 
 	body = fmt.Sprintf("<p>Hello %s ,  </p>  \n<p>This is to inform you that you are the only admin on %s  GitHub repository. We recommend at least 2 admins on each repository. Click %s to add a co-owner.</p> \n <p>OSPO</p>", to, reponame, link)
 
-	m := email.EmailMessage{
+	m := email.Message{
 		Subject: "Repository Owners Scan",
-		Body:    body,
-		To:      to,
+		Body: email.Body{
+			Content: body,
+			Type:    email.HtmlMessageType,
+		},
+		ToRecipients: []email.Recipient{
+			{
+				Email: to,
+			},
+		},
 	}
 
-	email.SendEmail(m)
+	email.SendEmail(m, true)
 }

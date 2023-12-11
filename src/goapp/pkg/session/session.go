@@ -104,6 +104,15 @@ func IsAuthenticated(w http.ResponseWriter, r *http.Request, next http.HandlerFu
 				session.Values["refresh_token"] = newToken.RefreshToken
 				session.Values["expiry"] = newToken.Expiry.UTC().Format("2006-01-02 15:04:05")
 				session.Values["access_token"] = newToken.AccessToken
+
+				session.Options = &sessions.Options{
+					Path:     "/",
+					Domain:   "",
+					MaxAge:   2592000,
+					Secure:   true,
+					HttpOnly: false,
+					SameSite: http.SameSiteNoneMode,
+				}
 				err = session.Save(r, w)
 
 				if err != nil {
@@ -206,7 +215,14 @@ func RemoveGitHubAccount(w http.ResponseWriter, r *http.Request) error {
 		return err
 	}
 
-	session.Options.MaxAge = -1
+	session.Options = &sessions.Options{
+		Path:     "/",
+		Domain:   "",
+		MaxAge:   -1,
+		Secure:   true,
+		HttpOnly: false,
+		SameSite: http.SameSiteNoneMode,
+	}
 	err = session.Save(r, w)
 
 	if err != nil {
