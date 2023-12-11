@@ -65,6 +65,13 @@ resource ghmgmtAppService 'Microsoft.Web/sites@2022-03-01' = {
     }
   }
 }
+resource appServiceLogging 'Microsoft.Web/sites/config@2020-06-01' = {
+  parent: ghmgmtAppService
+  name: 'appsettings'
+  properties: {
+    APPINSIGHTS_INSTRUMENTATIONKEY: appInsights.properties.InstrumentationKey
+  }
+}
 
 var possibleOutboundIpAddressesList = split(ghmgmtAppService.properties.possibleOutboundIpAddresses, ',')
 
@@ -112,6 +119,43 @@ resource ghmgmtAppServiceTags 'Microsoft.Resources/tags@2022-09-01' = {
     tags: {
       project: 'gh-management'
       env: activeEnv
+    }
+  }
+}
+
+var appInsightName = toLower('${projectName}-appinsights')
+var logAnalyticsName = toLower('${projectName}-loganalytics')
+
+resource appInsights 'Microsoft.Insights/components@2020-02-02' = {
+  name: appInsightName
+  location: location
+  kind: 'string'
+  tags: {
+    displayName: 'AppInsight'
+    ProjectName: projectName
+  }
+  properties: {
+    Application_Type: 'web'
+    WorkspaceResourceId: logAnalyticsWorkspace.id
+  }
+}
+
+resource logAnalyticsWorkspace 'Microsoft.OperationalInsights/workspaces@2020-08-01' = {
+  name: logAnalyticsName
+  location: location
+  tags: {
+    displayName: 'Log Analytics'
+    ProjectName: projectName
+  }
+  properties: {
+    sku: {
+      name: 'PerGB2018'
+    }
+    retentionInDays: 120
+    features: {
+      searchVersion: 1
+      legacy: 0
+      enableLogAccessUsingOnlyResourcePermissions: true
     }
   }
 }

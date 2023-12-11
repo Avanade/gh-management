@@ -9,6 +9,7 @@ import (
 	"strconv"
 	"time"
 
+	"main/pkg/appinsights_wrapper"
 	ev "main/pkg/envvar"
 	"main/pkg/session"
 	rtPages "main/routes/pages"
@@ -46,6 +47,9 @@ func main() {
 
 	// Setup logging format
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
+
+	// Initialize azure application insights
+	appinsights_wrapper.Init(os.Getenv("APPINSIGHTS_INSTRUMENTATIONKEY"))
 
 	// SETUP ROUTES
 	mux := mux.NewRouter()
