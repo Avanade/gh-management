@@ -51,25 +51,23 @@ resource ghmgmtAppServicePlan 'Microsoft.Web/serverfarms@2020-06-01' = {
 
 var appServiceName = '${projectName}-${activeEnv}'
 
+var appSettings = [for item in items(appServiceSettings): {
+  name: item.key
+  value: item.value
+}]
+
 resource ghmgmtAppService 'Microsoft.Web/sites@2022-03-01' = {
   name: appServiceName
   location: location
   properties: {
     serverFarmId: ghmgmtAppServicePlan.id
     siteConfig: {
-      appSettings: [for item in items(appServiceSettings): {
-        name: item.key
-        value: item.value
-      }]
+      appSettings: union([{
+        name: 'APPINSIGHTS_INSTRUMENTATIONKEY'
+        value: appInsights.properties.InstrumentationKey
+      }], appSettings)
       linuxFxVersion: 'DOCKER|${containerServer}/${imageName}'
     }
-  }
-}
-resource appServiceLogging 'Microsoft.Web/sites/config@2020-06-01' = {
-  parent: ghmgmtAppService
-  name: 'appsettings'
-  properties: {
-    APPINSIGHTS_INSTRUMENTATIONKEY: appInsights.properties.InstrumentationKey
   }
 }
 
