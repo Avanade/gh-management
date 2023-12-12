@@ -10,11 +10,11 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func ListContributionAreas(w http.ResponseWriter, r *http.Request) {
+func ContributionAreasHandler(w http.ResponseWriter, r *http.Request) {
 	template.UseTemplate(&w, r, "admin/contributionareas/index", nil)
 }
 
-func ContributionAreasForm(w http.ResponseWriter, r *http.Request) {
+func ContributionAreasFormHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id, _ := strconv.Atoi(vars["id"])
 

@@ -22,7 +22,7 @@ type CommunityApprovers struct {
 	ModifiedBy                string `json:"modifiedBy"`
 }
 
-func CommunityApproverHandler(w http.ResponseWriter, r *http.Request) {
+func CommunityApproversHandler(w http.ResponseWriter, r *http.Request) {
 
 	template.UseTemplate(&w, r, "/community/communityapprovers", nil)
 }

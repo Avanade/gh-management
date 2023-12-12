@@ -23,39 +23,34 @@ func setPageRoutes(mux *mux.Router) {
 	mux.Handle("/error/ghlogin", loadAzAuthPage(rtPages.GHLoginRequire))
 
 	// SEARCH
-	mux.Handle("/search/{offSet}/{rowCount}", loadAzGHAuthPage(rtSearch.GetSearchResults))
 	mux.Handle("/search", loadAzGHAuthPage(rtSearch.SearchHandler))
 
 	// ACTIVITIES PAGE
 	mux.Handle("/activities", loadAzGHAuthPage(rtActivities.ActivitiesHandler))
-	mux.Handle("/activities/{action:add}", loadAzGHAuthPage(rtActivities.ActivitiesNewHandler))
-	mux.Handle("/activities/{action:edit|view}/{id}", loadAzGHAuthPage(rtActivities.ActivitiesNewHandler))
+	mux.Handle("/activities/{action:new}", loadAzGHAuthPage(rtActivities.ActivitiesFormHandler))
+	mux.Handle("/activities/{action:edit|view}/{id}", loadAzGHAuthPage(rtActivities.ActivitiesFormHandler))
 
 	// REPOSITORIES PAGE
-	mux.Handle("/repositories", loadAzGHAuthPage(rtProjects.Projects))
-	mux.Handle("/repositories/new", loadAzGHAuthPage(rtProjects.NewProject))
-	mux.Handle("/repositories/{id}", loadAzGHAuthPage(rtProjects.ProjectById))
-	mux.Handle("/repositories/makepublic/{id}", loadAzGHAuthPage(rtProjects.MakePublic))
+	mux.Handle("/repositories", loadAzGHAuthPage(rtProjects.ProjectsHandler))
+	mux.Handle("/repositories/new", loadAzGHAuthPage(rtProjects.NewProjectHandler))
+	mux.Handle("/repositories/makepublic/{id}", loadAzGHAuthPage(rtProjects.MakePublicHandler))
 
 	// GUIDANCE PAGE
 	mux.Handle("/guidance", loadAzGHAuthPage(rtGuidance.GuidanceHandler))
 	mux.Handle("/guidance/new", loadAzGHAuthPage(rtGuidance.CategoriesHandler))
 	mux.Handle("/guidance/{id}", loadAzGHAuthPage(rtGuidance.CategoryUpdateHandler))
-	mux.Handle("/guidance/Article/{id}", loadAzGHAuthPage(rtGuidance.ArticleHandler))
+	mux.Handle("/guidance/article/{id}", loadAzGHAuthPage(rtGuidance.ArticleHandler))
 
 	// COMMUNITY PAGE
-	mux.Handle("/community/new", loadAzGHAuthPage(rtCommunity.CommunityHandler))
-	mux.Handle("/community/my", loadAzGHAuthPage(rtCommunity.GetMyCommunitylist))
-	mux.Handle("/community/imanage", loadAzGHAuthPage(rtCommunity.GetCommunityIManagelist))
-	mux.Handle("/community/{id}", loadAzGHAuthPage(rtCommunity.CommunityHandler))
-	mux.Handle("/community/getcommunity/{id}", loadAzGHAuthPage(rtCommunity.GetUserCommunity))
-	mux.Handle("/communities/list", loadAzGHAuthPage(rtCommunity.CommunitylistHandler))
-	mux.Handle("/community", loadAzGHAuthPage(rtCommunity.GetUserCommunitylist))
-	mux.Handle("/community/{id}/onboarding", loadAzGHAuthPage(rtCommunity.CommunityOnBoarding))
+	mux.Handle("/communities/new", loadAzGHAuthPage(rtCommunity.CommunityFormHandler))
+	mux.Handle("/communities/{id}", loadAzGHAuthPage(rtCommunity.CommunityFormHandler))
+	mux.Handle("/communities/list", loadAzGHAuthPage(rtCommunity.CommunityListHandler))
+	mux.Handle("/communities/{id}/onboarding", loadAzGHAuthPage(rtCommunity.CommunityOnBoarding))
 
 	// AUTHENTICATION
-	mux.HandleFunc("/loginredirect", rtPages.LoginRedirectHandler).Methods("GET")
-	mux.HandleFunc("/gitredirect", rtPages.GitRedirectHandler).Methods("GET")
+	mux.HandleFunc("/loginredirect", rtPages.LoginRedirectHandler)
+	mux.HandleFunc("/gitredirect", rtPages.GitRedirectHandler)
+
 	// AZURE
 	mux.HandleFunc("/login/azure", rtAzure.LoginHandler)
 	mux.HandleFunc("/login/azure/callback", rtAzure.CallbackHandler)
@@ -63,6 +58,7 @@ func setPageRoutes(mux *mux.Router) {
 	mux.HandleFunc("/authentication/azure/inprogress", rtPages.AuthenticationInProgressHandler)
 	mux.HandleFunc("/authentication/azure/successful", rtPages.AuthenticationSuccessfulHandler)
 	mux.HandleFunc("/authentication/azure/failed", rtPages.AuthenticationFailedHandler)
+
 	// GITHUB
 	mux.HandleFunc("/login/github", rtGithub.GithubLoginHandler)
 	mux.HandleFunc("/login/github/callback", rtGithub.GithubCallbackHandler)
@@ -77,29 +73,29 @@ func setAdminPageRoutes(mux *mux.Router) {
 	// ADMIN
 	muxAdmin := mux.PathPrefix("/admin").Subrouter()
 
-	muxAdmin.Handle("", loadAdminPage(rtAdmin.AdminIndex))
-	muxAdmin.Handle("/members", loadAdminPage(rtAdmin.ListCommunityMembers))
+	muxAdmin.Handle("", loadAdminPage(rtAdmin.AdminIndexHandler))
+	muxAdmin.Handle("/members", loadAdminPage(rtAdmin.CommunityMembersHandler))
 	muxAdmin.Handle("/guidance", loadAdminPage(rtGuidance.GuidanceHandler))
-	muxAdmin.Handle("/approvaltypes", loadAdminPage(rtAdmin.ListApprovalTypes))
-	muxAdmin.Handle("/communityapprovers", loadAdminPage(rtCommunity.CommunityApproverHandler))
+	muxAdmin.Handle("/communityapprovers", loadAdminPage(rtCommunity.CommunityApproversHandler))
 
 	// APPROVAL TYPES ADMIN
-	muxAdmin.Handle("/approvaltype/{action:add}", loadAdminPage(rtAdmin.ApprovalTypeForm))
-	muxAdmin.Handle("/approvaltype/{action:view|edit|delete}/{id}", loadAdminPage(rtAdmin.ApprovalTypeForm))
+	muxAdmin.Handle("/approvaltypes", loadAdminPage(rtAdmin.ApprovalTypesHandler))
+	muxAdmin.Handle("/approvaltypes/{action:add}", loadAdminPage(rtAdmin.ApprovalTypeFormHandler))
+	muxAdmin.Handle("/approvaltypes/{action:view|edit|delete}/{id}", loadAdminPage(rtAdmin.ApprovalTypeFormHandler))
 
 	// CONTRIBUTION AREAS ADMIN
-	muxAdmin.Handle("/contributionarea", loadAdminPage(rtAdmin.ListContributionAreas))
-	muxAdmin.Handle("/contributionarea/{action:add}", loadAdminPage(rtAdmin.ContributionAreasForm))
-	muxAdmin.Handle("/contributionarea/{action:view|edit}/{id}", loadAdminPage(rtAdmin.ContributionAreasForm))
+	muxAdmin.Handle("/contributionareas", loadAdminPage(rtAdmin.ContributionAreasHandler))
+	muxAdmin.Handle("/contributionareas/{action:add}", loadAdminPage(rtAdmin.ContributionAreasFormHandler))
+	muxAdmin.Handle("/contributionareas/{action:view|edit}/{id}", loadAdminPage(rtAdmin.ContributionAreasFormHandler))
 
 	// EXTERNAL LINKS ADMIN
 	muxAdmin.Handle("/externallinks", loadAdminPage(rtAdmin.ExternalLinksHandler))
-	muxAdmin.Handle("/externallinks/{action:add}/", loadAdminPage(rtAdmin.ExternalLinksForm))
-	muxAdmin.Handle("/externallinks/{action:view|edit}/{id}", loadAdminPage(rtAdmin.ExternalLinksForm))
+	muxAdmin.Handle("/externallinks/{action:add}/", loadAdminPage(rtAdmin.ExternalLinksFormHandler))
+	muxAdmin.Handle("/externallinks/{action:view|edit}/{id}", loadAdminPage(rtAdmin.ExternalLinksFormHandler))
 
 	// OSS CONTRIBUTION SPONSORS ADMIN
 	muxAdmin.Handle("/osscontributionsponsors", loadAdminPage(rtAdmin.OssContributionSponsorsHandler))
-	muxAdmin.Handle("/osscontributionsponsors/form", loadAdminPage(rtAdmin.OssContributionSponsorsForm))
+	muxAdmin.Handle("/osscontributionsponsors/form", loadAdminPage(rtAdmin.OssContributionSponsorsFormHandler))
 }
 
 func setApiRoutes(mux *mux.Router) {
@@ -223,4 +219,9 @@ func setApiRoutes(mux *mux.Router) {
 	mux.HandleFunc("/Home/AssetRequestCreation/", rtApi.RedirectAssetRequest)
 	mux.Handle("/Home/Tool/{assetCode}", loadAzAuthPage(rtPages.ToolHandler))
 
+	mux.Handle("/search/{offSet}/{rowCount}", loadAzGHAuthPage(rtSearch.GetSearchResults))
+	mux.Handle("/communities/my", loadAzGHAuthPage(rtCommunity.GetMyCommunitylist))
+	mux.Handle("/communities/imanage", loadAzGHAuthPage(rtCommunity.GetCommunityIManagelist))
+	mux.Handle("/community/getcommunity/{id}", loadAzGHAuthPage(rtCommunity.GetUserCommunity))
+	mux.Handle("/community", loadAzGHAuthPage(rtCommunity.GetUserCommunitylist))
 }

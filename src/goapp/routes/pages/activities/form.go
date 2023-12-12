@@ -10,7 +10,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func ActivitiesNewHandler(w http.ResponseWriter, r *http.Request) {
+func ActivitiesFormHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id, _ := strconv.Atoi(vars["id"])
 
@@ -20,6 +20,6 @@ func ActivitiesNewHandler(w http.ResponseWriter, r *http.Request) {
 		Action string
 	}{
 		Id:     id,
-		Action: strings.Title(action),
+		Action: strings.ToTitle(action),
 	})
 }

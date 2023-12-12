@@ -90,7 +90,7 @@
                             <div x-html="template"></div>
                         </div>
                     </div>
-                    <template x-if="action.toLowerCase() == 'add'">
+                    <template x-if="action.toLowerCase() == 'new'">
                         <div class="sm:col-span-6 pt-2 sm:pt-2 border-t-2 border-gray-100">
                             <div role="group" aria-labelledby="label-notifications">
                                 <div class="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-baseline">
@@ -186,7 +186,7 @@
                 this.action = action,
                     this.id = id
 
-                if (this.action.toLowerCase() == 'add') return;
+                if (this.action.toLowerCase() == 'new') return;
 
                 var modal = Alpine.store('master').modal
                 modal.update('loading', 'Loading', 'Please wait for a moment.', '', '')

@@ -26,7 +26,7 @@
       </nav>
     </div>
     <div class="flex">
-      <a href="/community/new">
+      <a href="/communities/new">
         <button class="bg-[#FF5800] hover:bg-[#FF4300] text-white font-bold py-2 px-4 rounded" x-show="hasApprovers">
           Request a Community
         </button>
@@ -61,7 +61,7 @@
       </div>
       <div class="flex items-center justify-center">
         <p class="text-sm font-medim text-gray-600 truncate">
-          <a href="/community/new" class="text-indigo-600"> Make a request </a> to add your community here.
+          <a href="/communities/new" class="text-indigo-600"> Make a request </a> to add your community here.
         </p>
       </div>
     </div>
@@ -94,7 +94,7 @@
               @click="Community.showStatus = !Community.showStatus;getCommunityApprovalStatus(Community.Id, index)">
 
               <div class="flex items-center justify-between">
-                <a @click.stop="window.location=`/community/${Community.Id}`">
+                <a @click.stop="window.location=`/communities/${Community.Id}`">
                   <p class="text-xl font-medium text-indigo-600 truncate" x-text=" Community.Name"
                     title="Community name"> </p>
                 </a>
@@ -244,7 +244,7 @@
       getMyCommunity() {
         this.showSpinner = true
         this.Communitylist = []
-        fetch('/community/my')
+        fetch('/communities/my')
           .then(r => {
             r.json().then(body => {
               this.Communitylist = body
@@ -260,7 +260,7 @@
       getCommunitiesIManage() {
         this.showSpinner = true
         this.Communitylist = []
-        fetch('/community/imanage')
+        fetch('/communities/imanage')
           .then(r => {
             r.json().then(body => {
               this.Communitylist = body

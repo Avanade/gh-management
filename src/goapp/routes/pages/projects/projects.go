@@ -13,7 +13,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func Projects(w http.ResponseWriter, r *http.Request) {
+func ProjectsHandler(w http.ResponseWriter, r *http.Request) {
 	isAdmin, _ := session.IsUserAdmin(w, r)
 
 	data := map[string]interface{}{
@@ -22,23 +22,11 @@ func Projects(w http.ResponseWriter, r *http.Request) {
 	template.UseTemplate(&w, r, "projects/projects", data)
 }
 
-func MakePublic(w http.ResponseWriter, r *http.Request) {
+func MakePublicHandler(w http.ResponseWriter, r *http.Request) {
 	template.UseTemplate(&w, r, "projects/makepublic", nil)
 }
 
-func ProjectById(w http.ResponseWriter, r *http.Request) {
-	req := mux.Vars(r)
-	id := req["id"]
-
-	users := db.GetUsersWithGithub()
-	data := map[string]interface{}{
-		"Id":    id,
-		"users": users,
-	}
-	template.UseTemplate(&w, r, "projects/new", data)
-}
-
-func NewProject(w http.ResponseWriter, r *http.Request) {
+func NewProjectHandler(w http.ResponseWriter, r *http.Request) {
 	req := mux.Vars(r)
 	id := req["id"]
 

@@ -9,7 +9,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func CommunityHandler(w http.ResponseWriter, r *http.Request) {
+func CommunityFormHandler(w http.ResponseWriter, r *http.Request) {
 	req := mux.Vars(r)
 	id := req["id"]
 

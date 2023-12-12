@@ -10,11 +10,11 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func ListApprovalTypes(w http.ResponseWriter, r *http.Request) {
+func ApprovalTypesHandler(w http.ResponseWriter, r *http.Request) {
 	template.UseTemplate(&w, r, "admin/approvaltypes/index", nil)
 }
 
-func ApprovalTypeForm(w http.ResponseWriter, r *http.Request) {
+func ApprovalTypeFormHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id, _ := strconv.Atoi(vars["id"])
 

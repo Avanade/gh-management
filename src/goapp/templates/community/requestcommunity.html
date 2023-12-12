@@ -368,7 +368,7 @@
                     Alpine.store('master').modal.reset()
                     Alpine.store('master').modal.show()
                     Alpine.store('master').uploadFile(url, formData, successMessage,
-                        "Close", `/community/${this.form.id}`)
+                        "Close", `/communities/${this.form.id}`)
                 }
 
                 let title = "Confirmation"
@@ -617,7 +617,7 @@
             },
 
             onBoarding() {
-                window.location.href = `/community/${this.form.id}/onboarding`
+                window.location.href = `/communities/${this.form.id}/onboarding`
             },
 
             get isValid() {
