@@ -53,7 +53,7 @@ func GetActivities(w http.ResponseWriter, r *http.Request) {
 	client := appinsights_wrapper.NewClient()
 	client.StartOperation("GET ACTIVITIES")
 
-	client.TrackEvent("START GET ACTIVITIES")
+	client.LogEvent("START GET ACTIVITIES")
 
 	sessionaz, _ := session.Store.Get(r, "auth-session")
 	iprofile := sessionaz.Values["profile"]
@@ -85,7 +85,7 @@ func GetActivities(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(result)
 
-	client.TrackEvent("END GET ACTIVITIES")
+	client.LogEvent("END GET ACTIVITIES")
 	client.EndOperation()
 }
 
