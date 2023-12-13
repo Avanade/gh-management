@@ -11,7 +11,7 @@ import (
 )
 
 var (
-	tc *appinsights.TelemetryConfiguration
+	TelemetryConfiguration *appinsights.TelemetryConfiguration
 )
 
 type TelemetryClient struct {
@@ -19,7 +19,7 @@ type TelemetryClient struct {
 }
 
 func Init(instrumentationKey string) {
-	tc = appinsights.NewTelemetryConfiguration(instrumentationKey)
+	TelemetryConfiguration = appinsights.NewTelemetryConfiguration(instrumentationKey)
 
 	/*turn on diagnostics to help troubleshoot problems with telemetry submission. */
 	appinsights.NewDiagnosticsMessageListener(func(msg string) error {
@@ -29,18 +29,30 @@ func Init(instrumentationKey string) {
 }
 
 func NewClient() *TelemetryClient {
-	return &TelemetryClient{
-		TelemetryClient: appinsights.NewTelemetryClientFromConfig(tc),
+	telemetryClient := &TelemetryClient{
+		TelemetryClient: appinsights.NewTelemetryClientFromConfig(TelemetryConfiguration),
 	}
-}
 
-func (tc *TelemetryClient) StartOperation(name string) {
-	tc.Context().Tags.Operation().SetId(newUUID().String())
-	tc.Context().Tags.Operation().SetName(name)
-	fmt.Printf("\nSTART OPERATION | ID:%s\n", tc.Context().Tags.Operation().GetId())
+	pc, _, _, ok := runtime.Caller(1)
+	funcName := "???"
+	if ok {
+		funcName = runtime.FuncForPC(pc).Name()
+	}
+	telemetryClient.Context().Tags.Operation().SetId(newUUID().String())
+	telemetryClient.Context().Tags.Operation().SetName(funcName)
+	fmt.Printf("\nSTART OPERATION | ID:%s\n", telemetryClient.Context().Tags.Operation().GetId())
+	telemetryClient.TrackEvent(fmt.Sprintf("START %s", funcName))
+
+	return telemetryClient
 }
 
 func (tc *TelemetryClient) EndOperation() {
+	pc, _, _, ok := runtime.Caller(1)
+	funcName := "???"
+	if ok {
+		funcName = runtime.FuncForPC(pc).Name()
+	}
+	tc.TrackEvent(fmt.Sprintf("END %s", funcName))
 	fmt.Printf("\nEND OPERATION | ID:%s\n", tc.Context().Tags.Operation().GetId())
 	for k := range tc.Context().Tags.Operation() {
 		delete(tc.Context().Tags.Operation(), k)
