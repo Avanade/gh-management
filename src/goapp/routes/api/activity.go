@@ -51,9 +51,7 @@ type ItemDto struct {
 
 func GetActivities(w http.ResponseWriter, r *http.Request) {
 	client := appinsights_wrapper.NewClient()
-	client.StartOperation("GET ACTIVITIES")
-
-	client.LogEvent("START GET ACTIVITIES")
+	defer client.EndOperation()
 
 	sessionaz, _ := session.Store.Get(r, "auth-session")
 	iprofile := sessionaz.Values["profile"]
@@ -84,9 +82,6 @@ func GetActivities(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(result)
-
-	client.LogEvent("END GET ACTIVITIES")
-	client.EndOperation()
 }
 
 func CreateActivity(w http.ResponseWriter, r *http.Request) {
