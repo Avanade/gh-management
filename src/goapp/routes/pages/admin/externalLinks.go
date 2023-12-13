@@ -23,6 +23,6 @@ func ExternalLinksFormHandler(w http.ResponseWriter, r *http.Request) {
 		Action string
 	}{
 		Id:     id,
-		Action: strings.Title(action),
+		Action: strings.ToTitle(action),
 	})
 }

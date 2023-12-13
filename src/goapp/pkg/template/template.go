@@ -92,6 +92,6 @@ func GetUrlPath(path string) string {
 	if p[1] == "" {
 		return "Dashboard"
 	} else {
-		return strings.Title(p[1])
+		return strings.ToTitle(p[1])
 	}
 }
