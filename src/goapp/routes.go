@@ -26,9 +26,9 @@ func setPageRoutes(mux *mux.Router) {
 	mux.Handle("/search", loadAzGHAuthPage(rtSearch.SearchHandler))
 
 	// ACTIVITIES PAGE
-	mux.Handle("/activities", loadAzGHAuthPage(rtActivities.ActivitiesHandler))
-	mux.Handle("/activities/{action:new}", loadAzGHAuthPage(rtActivities.ActivitiesFormHandler))
-	mux.Handle("/activities/{action:edit|view}/{id}", loadAzGHAuthPage(rtActivities.ActivitiesFormHandler))
+	mux.Handle("/activities", loadAzGHAuthPage(rtActivities.IndexHandler))
+	mux.Handle("/activities/{action:new}", loadAzGHAuthPage(rtActivities.FormHandler))
+	mux.Handle("/activities/{action:edit|view}/{id}", loadAzGHAuthPage(rtActivities.FormHandler))
 
 	// REPOSITORIES PAGE
 	mux.Handle("/repositories", loadAzGHAuthPage(rtProjects.ProjectsHandler))
