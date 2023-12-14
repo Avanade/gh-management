@@ -32,7 +32,7 @@ func setPageRoutes(mux *mux.Router) {
 
 	// REPOSITORIES PAGE
 	mux.Handle("/repositories", loadAzGHAuthPage(rtProjects.IndexHandler))
-	mux.Handle("/repositories/new", loadAzGHAuthPage(rtProjects.NewProjectHandler))
+	mux.Handle("/repositories/new", loadAzGHAuthPage(rtProjects.FormHandler))
 	mux.Handle("/repositories/makepublic/{id}", loadAzGHAuthPage(rtProjects.MakePublicHandler))
 
 	// GUIDANCE PAGE

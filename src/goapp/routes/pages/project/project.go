@@ -19,14 +19,14 @@ func IndexHandler(w http.ResponseWriter, r *http.Request) {
 	data := map[string]interface{}{
 		"isAdmin": isAdmin,
 	}
-	template.UseTemplate(&w, r, "projects/projects", data)
+	template.UseTemplate(&w, r, "projects/index", data)
 }
 
 func MakePublicHandler(w http.ResponseWriter, r *http.Request) {
 	template.UseTemplate(&w, r, "projects/makepublic", nil)
 }
 
-func NewProjectHandler(w http.ResponseWriter, r *http.Request) {
+func FormHandler(w http.ResponseWriter, r *http.Request) {
 	req := mux.Vars(r)
 	id := req["id"]
 
@@ -65,5 +65,5 @@ func NewProjectHandler(w http.ResponseWriter, r *http.Request) {
 		"isInvalidToken":      isInvalidToken,
 	}
 
-	template.UseTemplate(&w, r, "projects/new", data)
+	template.UseTemplate(&w, r, "projects/form", data)
 }
