@@ -36,7 +36,7 @@ func setPageRoutes(mux *mux.Router) {
 	mux.Handle("/repositories/makepublic/{id}", loadAzGHAuthPage(rtProjects.MakePublicHandler))
 
 	// GUIDANCE PAGE
-	mux.Handle("/guidance", loadAzGHAuthPage(rtGuidance.GuidanceHandler))
+	mux.Handle("/guidance", loadAzGHAuthPage(rtGuidance.IndexHandler))
 	mux.Handle("/guidance/categories/{id}", loadAzGHAuthPage(rtGuidance.EditCategoryHandler))
 	mux.Handle("/guidance/articles/new", loadAzGHAuthPage(rtGuidance.NewArticleHandler))
 	mux.Handle("/guidance/articles/{id}", loadAzGHAuthPage(rtGuidance.EditArticleHandler))
@@ -75,7 +75,7 @@ func setAdminPageRoutes(mux *mux.Router) {
 
 	muxAdmin.Handle("", loadAdminPage(rtAdmin.AdminIndexHandler))
 	muxAdmin.Handle("/members", loadAdminPage(rtAdmin.CommunityMembersHandler))
-	muxAdmin.Handle("/guidance", loadAdminPage(rtGuidance.GuidanceHandler))
+	muxAdmin.Handle("/guidance", loadAdminPage(rtGuidance.IndexHandler))
 	muxAdmin.Handle("/communityapprovers", loadAdminPage(rtCommunity.CommunityApproversHandler))
 
 	// APPROVAL TYPES ADMIN
