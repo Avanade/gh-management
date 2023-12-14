@@ -13,7 +13,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func ProjectsHandler(w http.ResponseWriter, r *http.Request) {
+func IndexHandler(w http.ResponseWriter, r *http.Request) {
 	isAdmin, _ := session.IsUserAdmin(w, r)
 
 	data := map[string]interface{}{

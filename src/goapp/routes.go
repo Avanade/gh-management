@@ -11,7 +11,7 @@ import (
 	rtAdmin "main/routes/pages/admin"
 	rtCommunity "main/routes/pages/community"
 	rtGuidance "main/routes/pages/guidance"
-	rtProjects "main/routes/pages/projects"
+	rtProjects "main/routes/pages/project"
 	rtSearch "main/routes/pages/search"
 
 	"github.com/gorilla/mux"
@@ -31,7 +31,7 @@ func setPageRoutes(mux *mux.Router) {
 	mux.Handle("/activities/{action:edit|view}/{id}", loadAzGHAuthPage(rtActivities.FormHandler))
 
 	// REPOSITORIES PAGE
-	mux.Handle("/repositories", loadAzGHAuthPage(rtProjects.ProjectsHandler))
+	mux.Handle("/repositories", loadAzGHAuthPage(rtProjects.IndexHandler))
 	mux.Handle("/repositories/new", loadAzGHAuthPage(rtProjects.NewProjectHandler))
 	mux.Handle("/repositories/makepublic/{id}", loadAzGHAuthPage(rtProjects.MakePublicHandler))
 
