@@ -4,12 +4,13 @@ import (
 	"log"
 	"net/http"
 	"strconv"
-	"strings"
 
 	"main/pkg/session"
 	"main/pkg/template"
 
 	"github.com/gorilla/mux"
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 )
 
 func IndexHandler(w http.ResponseWriter, r *http.Request) {
@@ -27,11 +28,14 @@ func FormHandler(w http.ResponseWriter, r *http.Request) {
 	id, _ := strconv.Atoi(vars["id"])
 
 	action := vars["action"]
+
+	caser := cases.Title(language.Und, cases.NoLower)
+
 	template.UseTemplate(&w, r, "activities/form", struct {
 		Id     int
 		Action string
 	}{
 		Id:     id,
-		Action: strings.ToTitle(action),
+		Action: caser.String(action),
 	})
 }

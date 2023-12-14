@@ -3,11 +3,12 @@ package routes
 import (
 	"net/http"
 	"strconv"
-	"strings"
 
 	"main/pkg/template"
 
 	"github.com/gorilla/mux"
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 )
 
 func ExternalLinksHandler(w http.ResponseWriter, r *http.Request) {
@@ -18,11 +19,12 @@ func ExternalLinksFormHandler(w http.ResponseWriter, r *http.Request) {
 	id, _ := strconv.Atoi(vars["id"])
 
 	action := vars["action"]
+	caser := cases.Title(language.Und, cases.NoLower)
 	template.UseTemplate(&w, r, "admin/externallinks/form", struct {
 		Id     int
 		Action string
 	}{
 		Id:     id,
-		Action: strings.ToTitle(action),
+		Action: caser.String(action),
 	})
 }

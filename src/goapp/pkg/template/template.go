@@ -7,6 +7,9 @@ import (
 	"net/http"
 	"os"
 	"strings"
+
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 )
 
 type PageData struct {
@@ -92,6 +95,7 @@ func GetUrlPath(path string) string {
 	if p[1] == "" {
 		return "Dashboard"
 	} else {
-		return strings.ToTitle(p[1])
+		caser := cases.Title(language.Und, cases.NoLower)
+		return caser.String(p[1])
 	}
 }
