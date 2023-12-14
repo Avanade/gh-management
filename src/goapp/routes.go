@@ -42,10 +42,10 @@ func setPageRoutes(mux *mux.Router) {
 	mux.Handle("/guidance/articles/{id}", loadAzGHAuthPage(rtGuidance.EditArticleHandler))
 
 	// COMMUNITY PAGE
-	mux.Handle("/communities", loadAzGHAuthPage(rtCommunity.CommunitiesHandler))
-	mux.Handle("/communities/new", loadAzGHAuthPage(rtCommunity.CommunityFormHandler))
-	mux.Handle("/communities/{id}", loadAzGHAuthPage(rtCommunity.CommunityFormHandler))
-	mux.Handle("/communities/{id}/onboarding", loadAzGHAuthPage(rtCommunity.CommunityOnBoarding))
+	mux.Handle("/communities", loadAzGHAuthPage(rtCommunity.IndexHandler))
+	mux.Handle("/communities/new", loadAzGHAuthPage(rtCommunity.FormHandler))
+	mux.Handle("/communities/{id}", loadAzGHAuthPage(rtCommunity.FormHandler))
+	mux.Handle("/communities/{id}/onboarding", loadAzGHAuthPage(rtCommunity.OnBoardingHandler))
 
 	// AUTHENTICATION
 	mux.HandleFunc("/loginredirect", rtPages.LoginRedirectHandler)
@@ -187,10 +187,10 @@ func setApiRoutes(mux *mux.Router) {
 	muxApi.HandleFunc("/approvals/community/callback", rtApi.UpdateApprovalStatusCommunity).Methods("POST")
 
 	// COMMUNITY APPROVERS API
-	muxApi.HandleFunc("/communityapprovers/update", rtCommunity.CommunityApproversListUpdate)
-	muxApi.HandleFunc("/communityapprovers/GetCommunityApproversList", rtCommunity.GetCommunityApproversList)
-	muxApi.HandleFunc("/communityapprovers/GetAllActiveCommunityApprovers", rtCommunity.GetAllActiveCommunityApprovers)
-	muxApi.HandleFunc("/communityapprovers/GetCommunityApproversList/{id}", rtCommunity.GetCommunityApproversById)
+	muxApi.HandleFunc("/communityapprovers/update", rtApi.CommunityApproversListUpdate)
+	muxApi.HandleFunc("/communityapprovers/GetCommunityApproversList", rtApi.GetCommunityApproversList)
+	muxApi.HandleFunc("/communityapprovers/GetAllActiveCommunityApprovers", rtApi.GetAllActiveCommunityApprovers)
+	muxApi.HandleFunc("/communityapprovers/GetCommunityApproversList/{id}", rtApi.GetCommunityApproversById)
 
 	// OSS CONTRIBUTION SPONSORS API
 	muxApi.Handle("/osscontributionsponsors/all", loadAdminPage((rtApi.GetAllOssContributionSponsors)))
@@ -220,8 +220,8 @@ func setApiRoutes(mux *mux.Router) {
 	mux.Handle("/Home/Tool/{assetCode}", loadAzAuthPage(rtPages.ToolHandler))
 
 	mux.Handle("/search/{offSet}/{rowCount}", loadAzGHAuthPage(rtSearch.GetSearchResults))
-	mux.Handle("/communities/my", loadAzGHAuthPage(rtCommunity.GetMyCommunitylist))
-	mux.Handle("/communities/imanage", loadAzGHAuthPage(rtCommunity.GetCommunityIManagelist))
-	mux.Handle("/community/getcommunity/{id}", loadAzGHAuthPage(rtCommunity.GetUserCommunity))
-	mux.Handle("/community", loadAzGHAuthPage(rtCommunity.GetUserCommunitylist))
+	mux.Handle("/communities/my", loadAzGHAuthPage(rtApi.GetMyCommunitylist))
+	mux.Handle("/communities/imanage", loadAzGHAuthPage(rtApi.GetCommunityIManagelist))
+	mux.Handle("/community/getcommunity/{id}", loadAzGHAuthPage(rtApi.GetUserCommunity))
+	mux.Handle("/community", loadAzGHAuthPage(rtApi.GetUserCommunitylist))
 }
