@@ -12,7 +12,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func CommunityListHandler(w http.ResponseWriter, r *http.Request) {
+func CommunitiesHandler(w http.ResponseWriter, r *http.Request) {
 	template.UseTemplate(&w, r, "community/communitylist", nil)
 }
 

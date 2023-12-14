@@ -322,7 +322,7 @@
                             if (!body || body.length < 1) {
                                 if (this.mode !== 'view') {
 
-                                    window.location.href = '/communities/list';
+                                    window.location.href = '/communities';
                                 } else {
                                     this.hasApprovers = false;
                                     this.onLoad();
@@ -422,7 +422,7 @@
                             r.json().then(body => {
                                 if (body[0]['ApprovalStatusId'] !== 5 && body[0]['CreatedBy'] !==
                                     '{{.Email}}') {
-                                    window.location.href = '/communities/list';
+                                    window.location.href = '/communities';
                                 } else {
                                     this.communityCreatedBy = body[0]['CreatedBy']
                                     this.form.id = body[0]["Id"]
@@ -551,7 +551,7 @@
                 if (this.form.id) {
                     this.onLoad()
                 } else {
-                    window.location.href = '/communities/list'
+                    window.location.href = '/communities'
                 }
             },
 
@@ -608,7 +608,7 @@
 
                 }
                 Alpine.store('master').postData('/api/community', postData, "Your community has been created.",
-                    "Go to communities list", "/communities/list")
+                    "Go to communities list", "/communities")
 
             },
             datapush() {

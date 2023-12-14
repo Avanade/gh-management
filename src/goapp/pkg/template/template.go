@@ -63,7 +63,7 @@ func UseTemplate(w *http.ResponseWriter, r *http.Request, page string, pageData 
 	var menu []Menu
 	menu = append(menu, Menu{Name: "Dashboard", Url: "/", IconPath: "/public/icons/dashboard.svg", External: false})
 	menu = append(menu, Menu{Name: "Repositories", Url: "/repositories", IconPath: "/public/icons/projects.svg", External: false})
-	menu = append(menu, Menu{Name: "Communities", Url: "/communities/list", IconPath: "/public/icons/communities.svg", External: false})
+	menu = append(menu, Menu{Name: "Communities", Url: "/communities", IconPath: "/public/icons/communities.svg", External: false})
 	menu = append(menu, Menu{Name: "Activities", Url: "/activities", IconPath: "/public/icons/activity.svg", External: false})
 	menu = append(menu, Menu{Name: "Guidance", Url: "/guidance", IconPath: "/public/icons/guidance.svg", External: false})
 	menu = append(menu, Menu{Name: "Approvals", Url: approvalSystemUrl, IconPath: "/public/icons/approvals.svg", External: true})

@@ -7,7 +7,7 @@ import (
 	rtAzure "main/routes/login/azure"
 	rtGithub "main/routes/login/github"
 	rtPages "main/routes/pages"
-	rtActivities "main/routes/pages/activities"
+	rtActivities "main/routes/pages/activity"
 	rtAdmin "main/routes/pages/admin"
 	rtCommunity "main/routes/pages/community"
 	rtGuidance "main/routes/pages/guidance"
@@ -37,14 +37,14 @@ func setPageRoutes(mux *mux.Router) {
 
 	// GUIDANCE PAGE
 	mux.Handle("/guidance", loadAzGHAuthPage(rtGuidance.GuidanceHandler))
-	mux.Handle("/guidance/new", loadAzGHAuthPage(rtGuidance.CategoriesHandler))
-	mux.Handle("/guidance/{id}", loadAzGHAuthPage(rtGuidance.CategoryUpdateHandler))
-	mux.Handle("/guidance/article/{id}", loadAzGHAuthPage(rtGuidance.ArticleHandler))
+	mux.Handle("/guidance/categories/{id}", loadAzGHAuthPage(rtGuidance.EditCategoryHandler))
+	mux.Handle("/guidance/articles/new", loadAzGHAuthPage(rtGuidance.NewArticleHandler))
+	mux.Handle("/guidance/articles/{id}", loadAzGHAuthPage(rtGuidance.EditArticleHandler))
 
 	// COMMUNITY PAGE
+	mux.Handle("/communities", loadAzGHAuthPage(rtCommunity.CommunitiesHandler))
 	mux.Handle("/communities/new", loadAzGHAuthPage(rtCommunity.CommunityFormHandler))
 	mux.Handle("/communities/{id}", loadAzGHAuthPage(rtCommunity.CommunityFormHandler))
-	mux.Handle("/communities/list", loadAzGHAuthPage(rtCommunity.CommunityListHandler))
 	mux.Handle("/communities/{id}/onboarding", loadAzGHAuthPage(rtCommunity.CommunityOnBoarding))
 
 	// AUTHENTICATION
