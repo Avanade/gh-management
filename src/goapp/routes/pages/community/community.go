@@ -40,8 +40,3 @@ func OnBoardingHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	template.UseTemplate(&w, r, "community/onboarding", data)
 }
-
-// NOT YET FINAL
-func CommunityApproversHandler(w http.ResponseWriter, r *http.Request) {
-	template.UseTemplate(&w, r, "/community/communityapprovers", nil)
-}

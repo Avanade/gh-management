@@ -74,9 +74,12 @@ func setAdminPageRoutes(mux *mux.Router) {
 	muxAdmin := mux.PathPrefix("/admin").Subrouter()
 
 	muxAdmin.Handle("", loadAdminPage(rtAdmin.AdminIndexHandler))
+
+	// COMMUNITY MEMBERS
 	muxAdmin.Handle("/members", loadAdminPage(rtAdmin.CommunityMembersHandler))
-	muxAdmin.Handle("/guidance", loadAdminPage(rtGuidance.IndexHandler))
-	muxAdmin.Handle("/communityapprovers", loadAdminPage(rtCommunity.CommunityApproversHandler))
+
+	// COMMUNITY APPROVERS
+	muxAdmin.Handle("/communityapprovers", loadAdminPage(rtAdmin.CommunityApproversHandler))
 
 	// APPROVAL TYPES ADMIN
 	muxAdmin.Handle("/approvaltypes", loadAdminPage(rtAdmin.ApprovalTypesHandler))
