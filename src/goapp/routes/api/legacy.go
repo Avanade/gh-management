@@ -9,7 +9,6 @@ import (
 	db "main/pkg/ghmgmtdb"
 
 	"github.com/gorilla/mux"
-	"github.com/microsoft/ApplicationInsights-Go/appinsights/contracts"
 )
 
 type SearchResultItem struct {
@@ -38,7 +37,7 @@ func LegacySearchHandler(w http.ResponseWriter, r *http.Request) {
 
 	result, err := db.LegacySearch(param)
 	if err != nil {
-		logger.LogTrace(err.Error(), contracts.Error)
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}

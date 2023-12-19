@@ -9,7 +9,6 @@ import (
 	"main/pkg/session"
 
 	"github.com/gorilla/mux"
-	"github.com/microsoft/ApplicationInsights-Go/appinsights/contracts"
 )
 
 type ExternalLinksDto struct {
@@ -32,7 +31,7 @@ func GetExternalLinks(w http.ResponseWriter, r *http.Request) {
 
 	externalLinks, err := db.ExternalLinksExecuteSelect()
 	if err != nil {
-		logger.LogTrace(err.Error(), contracts.Error)
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -41,7 +40,7 @@ func GetExternalLinks(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	jsonResp, err := json.Marshal(externalLinks)
 	if err != nil {
-		logger.LogTrace(err.Error(), contracts.Error)
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -59,7 +58,7 @@ func GetExternalLinksAllEnabled(w http.ResponseWriter, r *http.Request) {
 
 	externalLinks, err := db.ExternalLinksExecuteAllEnabled(param)
 	if err != nil {
-		logger.LogTrace(err.Error(), contracts.Error)
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -68,7 +67,7 @@ func GetExternalLinksAllEnabled(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	jsonResp, err := json.Marshal(externalLinks)
 	if err != nil {
-		logger.LogTrace(err.Error(), contracts.Error)
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -89,7 +88,7 @@ func GetExternalLinksById(w http.ResponseWriter, r *http.Request) {
 
 	externalLinks, err := db.ExternalLinksExecuteById(param)
 	if err != nil {
-		logger.LogTrace(err.Error(), contracts.Error)
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -98,7 +97,7 @@ func GetExternalLinksById(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	jsonResp, err := json.Marshal(externalLinks)
 	if err != nil {
-		logger.LogTrace(err.Error(), contracts.Error)
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -117,7 +116,7 @@ func CreateExternalLinks(w http.ResponseWriter, r *http.Request) {
 
 	err := json.NewDecoder(r.Body).Decode(&data)
 	if err != nil {
-		logger.LogTrace(err.Error(), contracts.Error)
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -132,7 +131,7 @@ func CreateExternalLinks(w http.ResponseWriter, r *http.Request) {
 
 	_, err = db.ExternalLinksExecuteCreate(params)
 	if err != nil {
-		logger.LogTrace(err.Error(), contracts.Error)
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -150,7 +149,7 @@ func UpdateExternalLinks(w http.ResponseWriter, r *http.Request) {
 
 	err := json.NewDecoder(r.Body).Decode(&body)
 	if err != nil {
-		logger.LogTrace(err.Error(), contracts.Error)
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -166,7 +165,7 @@ func UpdateExternalLinks(w http.ResponseWriter, r *http.Request) {
 
 	_, err = db.ExternalLinksExecuteUpdate(params)
 	if err != nil {
-		logger.LogTrace(err.Error(), contracts.Error)
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -184,7 +183,7 @@ func ExternalLinksDelete(w http.ResponseWriter, r *http.Request) {
 	}
 	_, err := db.ExternalLinksExecuteDelete(param)
 	if err != nil {
-		logger.LogTrace(err.Error(), contracts.Error)
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}

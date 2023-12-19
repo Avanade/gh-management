@@ -11,7 +11,6 @@ import (
 	"main/pkg/session"
 
 	"github.com/gorilla/mux"
-	"github.com/microsoft/ApplicationInsights-Go/appinsights/contracts"
 )
 
 type CategoryDto struct {
@@ -48,7 +47,7 @@ func CategoryAPIHandler(w http.ResponseWriter, r *http.Request) {
 	var body CategoryDto
 	err := json.NewDecoder(r.Body).Decode(&body)
 	if err != nil {
-		logger.LogTrace(err.Error(), contracts.Error)
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -63,14 +62,14 @@ func CategoryAPIHandler(w http.ResponseWriter, r *http.Request) {
 
 	result, err := db.CategoryInsert(param)
 	if err != nil {
-		logger.LogTrace(err.Error(), contracts.Error)
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	id, err := strconv.Atoi(fmt.Sprint(result[0]["Id"]))
 	if err != nil {
-		logger.LogTrace(err.Error(), contracts.Error)
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -90,7 +89,7 @@ func CategoryAPIHandler(w http.ResponseWriter, r *http.Request) {
 
 		_, err := db.CategoryArticlesInsert(categoryArticles)
 		if err != nil {
-			logger.LogTrace(err.Error(), contracts.Error)
+			logger.LogException(err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
@@ -104,7 +103,7 @@ func CategoryListAPIHandler(w http.ResponseWriter, r *http.Request) {
 	// Get project list
 	communities, err := db.CategorySelect()
 	if err != nil {
-		logger.LogTrace(err.Error(), contracts.Error)
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -113,7 +112,7 @@ func CategoryListAPIHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	jsonResp, err := json.Marshal(communities)
 	if err != nil {
-		logger.LogTrace(err.Error(), contracts.Error)
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -133,7 +132,7 @@ func GetCategoryArticlesById(w http.ResponseWriter, r *http.Request) {
 	params["Id"] = id
 	categoryArticles, err := db.CategoryArticlesselectById(params)
 	if err != nil {
-		logger.LogTrace(err.Error(), contracts.Error)
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -142,7 +141,7 @@ func GetCategoryArticlesById(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	jsonResp, err := json.Marshal(categoryArticles)
 	if err != nil {
-		logger.LogTrace(err.Error(), contracts.Error)
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -162,7 +161,7 @@ func GetCategoryArticlesByArticlesID(w http.ResponseWriter, r *http.Request) {
 
 	categoryArticles, err := db.CategoryArticlesSelectByArticlesID(params)
 	if err != nil {
-		logger.LogTrace(err.Error(), contracts.Error)
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -171,7 +170,7 @@ func GetCategoryArticlesByArticlesID(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	jsonResp, err := json.Marshal(categoryArticles)
 	if err != nil {
-		logger.LogTrace(err.Error(), contracts.Error)
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -190,7 +189,7 @@ func GetCategoryByID(w http.ResponseWriter, r *http.Request) {
 	params["Id"] = id
 	category, err := db.CategorySelectById(params)
 	if err != nil {
-		logger.LogTrace(err.Error(), contracts.Error)
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -199,7 +198,7 @@ func GetCategoryByID(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	jsonResp, err := json.Marshal(category)
 	if err != nil {
-		logger.LogTrace(err.Error(), contracts.Error)
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -218,7 +217,7 @@ func CategoryArticlesUpdate(w http.ResponseWriter, r *http.Request) {
 
 	err := json.NewDecoder(r.Body).Decode(&body)
 	if err != nil {
-		logger.LogTrace(err.Error(), contracts.Error)
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -233,7 +232,7 @@ func CategoryArticlesUpdate(w http.ResponseWriter, r *http.Request) {
 
 	result, err := db.CategoryInsert(params)
 	if err != nil {
-		logger.LogTrace(err.Error(), contracts.Error)
+		logger.LogException(err)
 	}
 
 	id, _ := strconv.Atoi(fmt.Sprint(result[0]["Id"]))
@@ -249,7 +248,7 @@ func CategoryArticlesUpdate(w http.ResponseWriter, r *http.Request) {
 
 	err = db.CategoryArticlesUpdate(param)
 	if err != nil {
-		logger.LogTrace(err.Error(), contracts.Error)
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -268,7 +267,7 @@ func CategoryUpdate(w http.ResponseWriter, r *http.Request) {
 
 	err := json.NewDecoder(r.Body).Decode(&body)
 	if err != nil {
-		logger.LogTrace(err.Error(), contracts.Error)
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -282,7 +281,7 @@ func CategoryUpdate(w http.ResponseWriter, r *http.Request) {
 
 	_, err = db.CategoryInsert(params)
 	if err != nil {
-		logger.LogTrace(err.Error(), contracts.Error)
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}

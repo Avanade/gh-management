@@ -36,7 +36,7 @@ func CheckAvaOpenSource(w http.ResponseWriter, r *http.Request) {
 	token := os.Getenv("GH_TOKEN")
 	repos, err := ghAPI.GetRepositoriesFromOrganization(org)
 	if err != nil {
-		logger.LogTrace(err.Error(), contracts.Error)
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -74,7 +74,7 @@ func CheckAvaOpenSource(w http.ResponseWriter, r *http.Request) {
 			for _, admin := range adminmember {
 				email, err := db.UsersGetEmail(admin)
 				if err != nil {
-					logger.LogTrace(err.Error(), contracts.Error)
+					logger.LogException(err)
 					http.Error(w, err.Error(), http.StatusInternalServerError)
 					return
 				}
@@ -100,14 +100,14 @@ func ClearOrgMembers(w http.ResponseWriter, r *http.Request) {
 	for _, list := range users {
 		email, err := db.UsersGetEmail(*list.Login)
 		if err != nil {
-			logger.LogTrace(err.Error(), contracts.Error)
+			logger.LogException(err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 		if len(email) > 0 {
 			activeUser, err := msgraph.ActiveUsers(email)
 			if err != nil {
-				logger.LogTrace(err.Error(), contracts.Error)
+				logger.LogException(err)
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
 			}
@@ -129,7 +129,7 @@ func ClearOrgMembers(w http.ResponseWriter, r *http.Request) {
 	for _, list := range usersOpenOrg {
 		email, err := db.UsersGetEmail(*list.Login)
 		if err != nil {
-			logger.LogTrace(err.Error(), contracts.Error)
+			logger.LogException(err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
@@ -189,7 +189,7 @@ func RepoOwnerScan(w http.ResponseWriter, r *http.Request) {
 		repoOnwerDeficient = nil
 		repos, err := ghAPI.GetRepositoriesFromOrganization(org)
 		if err != nil {
-			logger.LogTrace(err.Error(), contracts.Error)
+			logger.LogException(err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
@@ -203,7 +203,7 @@ func RepoOwnerScan(w http.ResponseWriter, r *http.Request) {
 				for _, owner := range owners {
 					email, err = db.UsersGetEmail(*owner.Login)
 					if err != nil {
-						logger.LogTrace(err.Error(), contracts.Error)
+						logger.LogException(err)
 						http.Error(w, err.Error(), http.StatusInternalServerError)
 						return
 					}
@@ -242,7 +242,7 @@ func sendNotification(token, org string, logger *appinsights_wrapper.TelemetryCl
 		if v.CreatedAt.Add(expiresIn).Before(time.Now()) {
 			user, err := db.GetUserByGitHubUsername(fmt.Sprint(v.GetLogin()))
 			if err != nil {
-				logger.LogTrace(err.Error(), contracts.Error)
+				logger.LogException(err)
 			}
 			messageBody := notification.OrganizationInvitationExpireMessageBody{
 				Recipients: []string{
@@ -254,7 +254,7 @@ func sendNotification(token, org string, logger *appinsights_wrapper.TelemetryCl
 			}
 			err = messageBody.Send()
 			if err != nil {
-				logger.LogTrace(err.Error(), contracts.Error)
+				logger.LogException(err)
 			}
 		}
 	}
@@ -288,7 +288,7 @@ func emailAdmin(admin string, adminemail string, reponame string, outisideCollab
 
 	err := email.SendEmail(m, true)
 	if err != nil {
-		logger.LogTrace(err.Error(), contracts.Error)
+		logger.LogException(err)
 		return
 	}
 	logger.TrackTrace(fmt.Sprintf(" GitHub Repo Collaborators Scan on %s was sent.", e), contracts.Information)

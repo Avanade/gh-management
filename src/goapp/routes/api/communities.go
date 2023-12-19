@@ -85,7 +85,7 @@ func AddCommunity(w http.ResponseWriter, r *http.Request) {
 	var body CommunityDto
 	err := json.NewDecoder(r.Body).Decode(&body)
 	if err != nil {
-		logger.LogTrace(err.Error(), contracts.Error)
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -107,18 +107,18 @@ func AddCommunity(w http.ResponseWriter, r *http.Request) {
 
 	result, err := db.CommunitiesInsert(param)
 	if err != nil {
-		logger.LogTrace(err.Error(), contracts.Error)
+		logger.LogException(err)
 	}
 
 	id, _ := strconv.Atoi(fmt.Sprint(result[0]["Id"]))
 	if err != nil {
-		logger.LogTrace(err.Error(), contracts.Error)
+		logger.LogException(err)
 	}
 
 	for _, s := range body.Sponsors {
 		err = db.InsertUser(s.Mail, s.DisplayName, "", "", "")
 		if err != nil {
-			logger.LogTrace(err.Error(), contracts.Error)
+			logger.LogException(err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
@@ -133,7 +133,7 @@ func AddCommunity(w http.ResponseWriter, r *http.Request) {
 		_, err := db.CommunitySponsorsInsert(sponsorsParam)
 
 		if err != nil {
-			logger.LogTrace(err.Error(), contracts.Error)
+			logger.LogException(err)
 		}
 	}
 
@@ -143,7 +143,7 @@ func AddCommunity(w http.ResponseWriter, r *http.Request) {
 	}
 	_, err = db.RelatedCommunitiesDelete(deleteParam)
 	if err != nil {
-		logger.LogTrace(err.Error(), contracts.Error)
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -156,7 +156,7 @@ func AddCommunity(w http.ResponseWriter, r *http.Request) {
 
 		_, err := db.RelatedCommunitiesInsert(relatedCommunities)
 		if err != nil {
-			logger.LogTrace(err.Error(), contracts.Error)
+			logger.LogException(err)
 		}
 	}
 
@@ -167,7 +167,7 @@ func AddCommunity(w http.ResponseWriter, r *http.Request) {
 		}
 		_, err := db.RelatedCommunitiesInsert(param)
 		if err != nil {
-			logger.LogTrace(err.Error(), contracts.Error)
+			logger.LogException(err)
 		}
 	}
 
@@ -178,7 +178,7 @@ func AddCommunity(w http.ResponseWriter, r *http.Request) {
 		}
 		_, err := db.CommunityTagsInsert(tagsParam)
 		if err != nil {
-			logger.LogTrace(err.Error(), contracts.Error)
+			logger.LogException(err)
 		}
 	}
 	if body.Id == 0 {
@@ -200,7 +200,7 @@ func GetRequestStatusByCommunity(w http.ResponseWriter, r *http.Request) {
 	params["Id"] = id
 	projects, err := db.CommunityApprovalsSelectById(params)
 	if err != nil {
-		logger.LogTrace(err.Error(), contracts.Error)
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -209,7 +209,7 @@ func GetRequestStatusByCommunity(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	jsonResp, err := json.Marshal(projects)
 	if err != nil {
-		logger.LogTrace(err.Error(), contracts.Error)
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -235,7 +235,7 @@ func GetCommunitiesIsexternal(w http.ResponseWriter, r *http.Request) {
 
 	communities, err := db.CommunitiesIsexternal(param)
 	if err != nil {
-		logger.LogTrace(err.Error(), contracts.Error)
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -244,7 +244,7 @@ func GetCommunitiesIsexternal(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	jsonResp, err := json.Marshal(communities)
 	if err != nil {
-		logger.LogTrace(err.Error(), contracts.Error)
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -265,7 +265,7 @@ func ProcessCommunityMembersListExcel(w http.ResponseWriter, r *http.Request) {
 
 	file, handler, err := r.FormFile("fileupload")
 	if err != nil {
-		logger.LogTrace(err.Error(), contracts.Error)
+		logger.LogException(err)
 		fmt.Println("Error Retrieving the File")
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -285,7 +285,7 @@ func ProcessCommunityMembersListExcel(w http.ResponseWriter, r *http.Request) {
 
 	fileBytes, err := io.ReadAll(file)
 	if err != nil {
-		logger.LogTrace(err.Error(), contracts.Error)
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -307,7 +307,7 @@ func ProcessCommunityMembersListExcel(w http.ResponseWriter, r *http.Request) {
 	}{NewMembers: counter}
 	jsonResp, err := json.Marshal(response)
 	if err != nil {
-		logger.LogTrace(err.Error(), contracts.Error)
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -347,7 +347,7 @@ func GetCommunityOnBoardingInfo(w http.ResponseWriter, r *http.Request) {
 
 		jsonResp, err := json.Marshal(data)
 		if err != nil {
-			logger.LogTrace(err.Error(), contracts.Error)
+			logger.LogException(err)
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
@@ -370,7 +370,7 @@ func GetCommunities(w http.ResponseWriter, r *http.Request) {
 
 	jsonResp, err := json.Marshal(result)
 	if err != nil {
-		logger.LogTrace(err.Error(), contracts.Error)
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -390,7 +390,7 @@ func GetCommunityMembers(w http.ResponseWriter, r *http.Request) {
 
 	jsonResp, err := json.Marshal(result)
 	if err != nil {
-		logger.LogTrace(err.Error(), contracts.Error)
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -409,7 +409,7 @@ func CommunitySponsorsAPIHandler(w http.ResponseWriter, r *http.Request) {
 	var body CommunitySponsorsDto
 	err := json.NewDecoder(r.Body).Decode(&body)
 	if err != nil {
-		logger.LogTrace(err.Error(), contracts.Error)
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -425,7 +425,7 @@ func CommunitySponsorsAPIHandler(w http.ResponseWriter, r *http.Request) {
 
 		_, err := db.CommunitySponsorsInsert(param)
 		if err != nil {
-			logger.LogTrace(err.Error(), contracts.Error)
+			logger.LogException(err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
@@ -438,7 +438,7 @@ func CommunitySponsorsAPIHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		_, err := db.CommunitySponsorsUpdate(param)
 		if err != nil {
-			logger.LogTrace(err.Error(), contracts.Error)
+			logger.LogException(err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
@@ -460,7 +460,7 @@ func CommunitySponsorsPerCommunityId(w http.ResponseWriter, r *http.Request) {
 
 	communitySponsors, err := db.CommunitySponsorsSelectByCommunityId(param)
 	if err != nil {
-		logger.LogTrace(err.Error(), contracts.Error)
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -469,7 +469,7 @@ func CommunitySponsorsPerCommunityId(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	jsonResp, err := json.Marshal(communitySponsors)
 	if err != nil {
-		logger.LogTrace(err.Error(), contracts.Error)
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -492,7 +492,7 @@ func CommunityTagPerCommunityId(w http.ResponseWriter, r *http.Request) {
 
 	communityTags, err := db.CommunityTagsSelectByCommunityId(param)
 	if err != nil {
-		logger.LogTrace(err.Error(), contracts.Error)
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -501,7 +501,7 @@ func CommunityTagPerCommunityId(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	jsonResp, err := json.Marshal(communityTags)
 	if err != nil {
-		logger.LogTrace(err.Error(), contracts.Error)
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -517,7 +517,7 @@ func RelatedCommunitiesInsert(w http.ResponseWriter, r *http.Request) {
 
 	err := json.NewDecoder(r.Body).Decode(&body)
 	if err != nil {
-		logger.LogTrace(err.Error(), contracts.Error)
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -530,7 +530,7 @@ func RelatedCommunitiesInsert(w http.ResponseWriter, r *http.Request) {
 
 	approvers, err := db.RelatedCommunitiesInsert(param)
 	if err != nil {
-		logger.LogTrace(err.Error(), contracts.Error)
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -539,7 +539,7 @@ func RelatedCommunitiesInsert(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	jsonResp, err := json.Marshal(approvers)
 	if err != nil {
-		logger.LogTrace(err.Error(), contracts.Error)
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -555,7 +555,7 @@ func RelatedCommunitiesDelete(w http.ResponseWriter, r *http.Request) {
 
 	err := json.NewDecoder(r.Body).Decode(&body)
 	if err != nil {
-		logger.LogTrace(err.Error(), contracts.Error)
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -568,7 +568,7 @@ func RelatedCommunitiesDelete(w http.ResponseWriter, r *http.Request) {
 
 	approvers, err := db.RelatedCommunitiesDelete(param)
 	if err != nil {
-		logger.LogTrace(err.Error(), contracts.Error)
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -577,7 +577,7 @@ func RelatedCommunitiesDelete(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	jsonResp, err := json.Marshal(approvers)
 	if err != nil {
-		logger.LogTrace(err.Error(), contracts.Error)
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -599,7 +599,7 @@ func RelatedCommunitiesSelect(w http.ResponseWriter, r *http.Request) {
 
 	approvers, err := db.RelatedCommunitiesSelect(param)
 	if err != nil {
-		logger.LogTrace(err.Error(), contracts.Error)
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -608,7 +608,7 @@ func RelatedCommunitiesSelect(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	jsonResp, err := json.Marshal(approvers)
 	if err != nil {
-		logger.LogTrace(err.Error(), contracts.Error)
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -718,7 +718,7 @@ func getTeamsChannelMembers(channelId string, id int) {
 	logger.TrackTrace("Community Id: "+fmt.Sprint(id), contracts.Information)
 	teamMembers, err := msgraph.GetTeamsMembers(channelId, "")
 	if err != nil {
-		logger.LogTrace(err.Error(), contracts.Error)
+		logger.LogException(err)
 	}
 
 	if len(teamMembers) > 0 {

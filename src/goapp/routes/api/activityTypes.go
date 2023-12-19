@@ -6,8 +6,6 @@ import (
 
 	"main/pkg/appinsights_wrapper"
 	db "main/pkg/ghmgmtdb"
-
-	"github.com/microsoft/ApplicationInsights-Go/appinsights/contracts"
 )
 
 type ActivityTypeDto struct {
@@ -30,7 +28,7 @@ func CreateActivityType(w http.ResponseWriter, r *http.Request) {
 	json.NewDecoder(r.Body).Decode(&activityType)
 	id, err := db.ActivityTypes_Insert(activityType.Name)
 	if err != nil {
-		logger.LogTrace(err.Error(), contracts.Error)
+		logger.LogException(err)
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}

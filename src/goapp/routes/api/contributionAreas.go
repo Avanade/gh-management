@@ -11,7 +11,6 @@ import (
 	"main/pkg/session"
 
 	"github.com/gorilla/mux"
-	"github.com/microsoft/ApplicationInsights-Go/appinsights/contracts"
 )
 
 type ContributionAreaDto struct {
@@ -42,7 +41,7 @@ func GetContributionAreas(w http.ResponseWriter, r *http.Request) {
 	} else {
 		result, err := db.ContributionAreas_Select()
 		if err != nil {
-			logger.LogTrace(err.Error(), contracts.Error)
+			logger.LogException(err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
@@ -69,7 +68,7 @@ func GetContributionAreaById(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id, err := strconv.Atoi(vars["id"])
 	if err != nil {
-		logger.LogTrace(err.Error(), contracts.Error)
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -87,7 +86,7 @@ func GetContributionAreasByActivityId(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	activityId, err := strconv.Atoi(vars["id"])
 	if err != nil {
-		logger.LogTrace(err.Error(), contracts.Error)
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -112,7 +111,7 @@ func CreateContributionAreas(w http.ResponseWriter, r *http.Request) {
 
 	id, err := db.ContributionAreas_Insert(contributionArea.Name, username)
 	if err != nil {
-		logger.LogTrace(err.Error(), contracts.Error)
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}

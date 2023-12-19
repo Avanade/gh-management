@@ -93,7 +93,7 @@ func CreateActivity(w http.ResponseWriter, r *http.Request) {
 	var body ActivityDto
 	err := json.NewDecoder(r.Body).Decode(&body)
 	if err != nil {
-		logger.LogTrace(err.Error(), contracts.Error)
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -102,7 +102,7 @@ func CreateActivity(w http.ResponseWriter, r *http.Request) {
 	if body.Type.Id == 0 {
 		id, err := db.ActivityTypes_Insert(body.Type.Name)
 		if err != nil {
-			logger.LogTrace(err.Error(), contracts.Error)
+			logger.LogException(err)
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
@@ -120,7 +120,7 @@ func CreateActivity(w http.ResponseWriter, r *http.Request) {
 		CreatedBy:   username,
 	})
 	if err != nil {
-		logger.LogTrace(err.Error(), contracts.Error)
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -144,12 +144,12 @@ func CreateActivity(w http.ResponseWriter, r *http.Request) {
 		}
 		err = messageBody.Send()
 		if err != nil {
-			logger.LogTrace(err.Error(), contracts.Error)
+			logger.LogException(err)
 		}
 
 		errHelp := processHelp(communityActivityId, activityLink, username, profile["name"].(string), body.Help)
 		if errHelp != nil {
-			logger.LogTrace(err.Error(), contracts.Error)
+			logger.LogException(err)
 			http.Error(w, errHelp.Error(), http.StatusBadRequest)
 			return
 		}
@@ -163,7 +163,7 @@ func CreateActivity(w http.ResponseWriter, r *http.Request) {
 		CreatedBy:           username,
 	})
 	if err != nil {
-		logger.LogTrace(err.Error(), contracts.Error)
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -177,7 +177,7 @@ func CreateActivity(w http.ResponseWriter, r *http.Request) {
 			CreatedBy:           username,
 		})
 		if err != nil {
-			logger.LogTrace(err.Error(), contracts.Error)
+			logger.LogException(err)
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}

@@ -70,6 +70,10 @@ func (tc *TelemetryClient) Log(telemetry appinsights.Telemetry) {
 	tc.Context().CommonProperties["line"] = fmt.Sprint(line)
 
 	tc.Track(telemetry)
+
+	for k := range tc.Context().CommonProperties {
+		delete(tc.Context().CommonProperties, k)
+	}
 }
 
 func (tc *TelemetryClient) LogEvent(name string) {

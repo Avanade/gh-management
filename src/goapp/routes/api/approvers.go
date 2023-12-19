@@ -4,8 +4,6 @@ import (
 	"main/pkg/appinsights_wrapper"
 	db "main/pkg/ghmgmtdb"
 	"net/http"
-
-	"github.com/microsoft/ApplicationInsights-Go/appinsights/contracts"
 )
 
 func FillOutApprovers(w http.ResponseWriter, r *http.Request) {
@@ -14,7 +12,7 @@ func FillOutApprovers(w http.ResponseWriter, r *http.Request) {
 
 	result, err := db.SelectApprovalTypes()
 	if err != nil {
-		logger.LogTrace(err.Error(), contracts.Error)
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -29,7 +27,7 @@ func FillOutApprovers(w http.ResponseWriter, r *http.Request) {
 			ApproverEmail:  approver["ApproverUserPrincipalName"].(string),
 		})
 		if err != nil {
-			logger.LogTrace(err.Error(), contracts.Error)
+			logger.LogException(err)
 		}
 	}
 }
@@ -40,7 +38,7 @@ func FillOutApprovalRequestApprovers(w http.ResponseWriter, r *http.Request) {
 
 	projectApprovals, err := db.GetProjectApprovals()
 	if err != nil {
-		logger.LogTrace(err.Error(), contracts.Error)
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -55,13 +53,13 @@ func FillOutApprovalRequestApprovers(w http.ResponseWriter, r *http.Request) {
 			ApproverEmail:     projectApproval["ApproverUserPrincipalName"].(string),
 		})
 		if err != nil {
-			logger.LogTrace(err.Error(), contracts.Error)
+			logger.LogException(err)
 		}
 
 		if projectApproval["ApprovalDate"] != nil && projectApproval["ApproverUserPrincipalName"] != nil {
 			err = db.UpdateProjectApprovalById(id, projectApproval["ApproverUserPrincipalName"].(string))
 			if err != nil {
-				logger.LogTrace(err.Error(), contracts.Error)
+				logger.LogException(err)
 			}
 		}
 	}

@@ -6,8 +6,6 @@ import (
 
 	"main/pkg/appinsights_wrapper"
 	db "main/pkg/ghmgmtdb"
-
-	"github.com/microsoft/ApplicationInsights-Go/appinsights/contracts"
 )
 
 type OssContributionSponsor struct {
@@ -22,7 +20,7 @@ func GetAllOssContributionSponsors(w http.ResponseWriter, r *http.Request) {
 
 	sponsors, err := db.SelectAllSponsors()
 	if err != nil {
-		logger.LogTrace(err.Error(), contracts.Error)
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -31,7 +29,7 @@ func GetAllOssContributionSponsors(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	jsonResp, err := json.Marshal(sponsors)
 	if err != nil {
-		logger.LogTrace(err.Error(), contracts.Error)
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -49,7 +47,7 @@ func GetAllEnabledOssContributionSponsors(w http.ResponseWriter, r *http.Request
 
 	sponsors, err := db.SelectSponsorsByIsArchived(param)
 	if err != nil {
-		logger.LogTrace(err.Error(), contracts.Error)
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -58,7 +56,7 @@ func GetAllEnabledOssContributionSponsors(w http.ResponseWriter, r *http.Request
 	w.Header().Set("Content-Type", "application/json")
 	jsonResp, err := json.Marshal(sponsors)
 	if err != nil {
-		logger.LogTrace(err.Error(), contracts.Error)
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -74,7 +72,7 @@ func AddSponsor(w http.ResponseWriter, r *http.Request) {
 
 	err := json.NewDecoder(r.Body).Decode(&data)
 	if err != nil {
-		logger.LogTrace(err.Error(), contracts.Error)
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -86,7 +84,7 @@ func AddSponsor(w http.ResponseWriter, r *http.Request) {
 
 	_, err = db.InsertSponsor(params)
 	if err != nil {
-		logger.LogTrace(err.Error(), contracts.Error)
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -100,7 +98,7 @@ func UpdateSponsor(w http.ResponseWriter, r *http.Request) {
 
 	err := json.NewDecoder(r.Body).Decode(&data)
 	if err != nil {
-		logger.LogTrace(err.Error(), contracts.Error)
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -113,7 +111,7 @@ func UpdateSponsor(w http.ResponseWriter, r *http.Request) {
 
 	_, err = db.UpdateSponsor(params)
 	if err != nil {
-		logger.LogTrace(err.Error(), contracts.Error)
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -140,7 +138,7 @@ func MigrateToOssSponsorsTable(w http.ResponseWriter, r *http.Request) {
 
 		result, err := db.SelectSponsorByName(param)
 		if err != nil {
-			logger.LogTrace(err.Error(), contracts.Error)
+			logger.LogException(err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
@@ -153,7 +151,7 @@ func MigrateToOssSponsorsTable(w http.ResponseWriter, r *http.Request) {
 
 			_, err = db.InsertSponsor(params)
 			if err != nil {
-				logger.LogTrace(err.Error(), contracts.Error)
+				logger.LogException(err)
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
 			}
@@ -162,7 +160,7 @@ func MigrateToOssSponsorsTable(w http.ResponseWriter, r *http.Request) {
 
 	repos, err := db.SelectReposWithMakePublicRequest()
 	if err != nil {
-		logger.LogTrace(err.Error(), contracts.Error)
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}

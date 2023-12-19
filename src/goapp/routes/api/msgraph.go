@@ -7,7 +7,6 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
-	"github.com/microsoft/ApplicationInsights-Go/appinsights/contracts"
 )
 
 func GetAllUserFromActiveDirectory(w http.ResponseWriter, r *http.Request) {
@@ -16,7 +15,7 @@ func GetAllUserFromActiveDirectory(w http.ResponseWriter, r *http.Request) {
 
 	users, err := msgraph.GetAllUsers()
 	if err != nil {
-		logger.LogTrace(err.Error(), contracts.Error)
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -25,7 +24,7 @@ func GetAllUserFromActiveDirectory(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	jsonResp, err := json.Marshal(users)
 	if err != nil {
-		logger.LogTrace(err.Error(), contracts.Error)
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -42,7 +41,7 @@ func SearchUserFromActiveDirectory(w http.ResponseWriter, r *http.Request) {
 	users, err := msgraph.SearchUsers(search)
 
 	if err != nil {
-		logger.LogTrace(err.Error(), contracts.Error)
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -51,7 +50,7 @@ func SearchUserFromActiveDirectory(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	jsonResp, err := json.Marshal(users)
 	if err != nil {
-		logger.LogTrace(err.Error(), contracts.Error)
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}

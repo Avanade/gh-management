@@ -11,7 +11,6 @@ import (
 	"main/pkg/session"
 
 	"github.com/gorilla/mux"
-	"github.com/microsoft/ApplicationInsights-Go/appinsights/contracts"
 )
 
 type ApprovalTypeDto struct {
@@ -45,7 +44,7 @@ func GetApprovalTypes(w http.ResponseWriter, r *http.Request) {
 		ordertype := params["ordertype"][0]
 		result, err := db.SelectApprovalTypesByFilter(offset, filter, orderby, ordertype, search)
 		if err != nil {
-			logger.LogTrace(err.Error(), contracts.Error)
+			logger.LogException(err)
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
@@ -53,7 +52,7 @@ func GetApprovalTypes(w http.ResponseWriter, r *http.Request) {
 	} else {
 		result, err := db.SelectApprovalTypes()
 		if err != nil {
-			logger.LogTrace(err.Error(), contracts.Error)
+			logger.LogException(err)
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
@@ -73,7 +72,7 @@ func GetApprovalTypes(w http.ResponseWriter, r *http.Request) {
 
 		approversResult, err := getApproversByApprovalTypeId(approvalTypeDto.Id)
 		if err != nil {
-			logger.LogTrace(err.Error(), contracts.Error)
+			logger.LogException(err)
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
@@ -105,14 +104,14 @@ func GetApprovalTypeById(w http.ResponseWriter, r *http.Request) {
 
 	result, err := db.SelectApprovalTypeById(id)
 	if err != nil {
-		logger.LogTrace(err.Error(), contracts.Error)
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
 	approversDto, err := getApproversByApprovalTypeId(result.Id)
 	if err != nil {
-		logger.LogTrace(err.Error(), contracts.Error)
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -149,7 +148,7 @@ func CreateApprovalType(w http.ResponseWriter, r *http.Request) {
 		CreatedBy:                 username,
 	})
 	if err != nil {
-		logger.LogTrace(err.Error(), contracts.Error)
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -160,7 +159,7 @@ func CreateApprovalType(w http.ResponseWriter, r *http.Request) {
 			ApproverEmail:  v.ApproverEmail,
 		})
 		if err != nil {
-			logger.LogTrace(err.Error(), contracts.Error)
+			logger.LogException(err)
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
@@ -186,7 +185,7 @@ func EditApprovalTypeById(w http.ResponseWriter, r *http.Request) {
 
 	id, err := strconv.Atoi(vars["id"])
 	if err != nil {
-		logger.LogTrace(err.Error(), contracts.Error)
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -198,14 +197,14 @@ func EditApprovalTypeById(w http.ResponseWriter, r *http.Request) {
 		CreatedBy:                 username,
 	})
 	if err != nil {
-		logger.LogTrace(err.Error(), contracts.Error)
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
 	err = db.DeleteApproverByApprovalTypeId(id)
 	if err != nil {
-		logger.LogTrace(err.Error(), contracts.Error)
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -216,7 +215,7 @@ func EditApprovalTypeById(w http.ResponseWriter, r *http.Request) {
 			ApproverEmail:  v.ApproverEmail,
 		})
 		if err != nil {
-			logger.LogTrace(err.Error(), contracts.Error)
+			logger.LogException(err)
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
@@ -242,7 +241,7 @@ func SetIsArchivedApprovalTypeById(w http.ResponseWriter, r *http.Request) {
 
 	id, err := strconv.Atoi(vars["id"])
 	if err != nil {
-		logger.LogTrace(err.Error(), contracts.Error)
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -256,7 +255,7 @@ func SetIsArchivedApprovalTypeById(w http.ResponseWriter, r *http.Request) {
 	})
 
 	if err != nil {
-		logger.LogTrace(err.Error(), contracts.Error)
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}

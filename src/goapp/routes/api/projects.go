@@ -108,7 +108,7 @@ func RequestRepository(w http.ResponseWriter, r *http.Request) {
 
 	err := json.NewDecoder(r.Body).Decode(&body)
 	if err != nil {
-		logger.LogTrace(err.Error(), contracts.Error)
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -143,14 +143,14 @@ func RequestRepository(w http.ResponseWriter, r *http.Request) {
 	} else {
 		isEnterpriseOrg, err := ghAPI.IsEnterpriseOrg()
 		if err != nil {
-			logger.LogTrace(err.Error(), contracts.Error)
+			logger.LogException(err)
 			HttpResponseError(w, http.StatusBadRequest, "There is a problem checking if the organization is enterprise or not.", logger)
 			return
 		}
 
 		repo, err := ghAPI.CreatePrivateGitHubRepository(body.Name, body.Description, username.(string))
 		if err != nil {
-			logger.LogTrace(err.Error(), contracts.Error)
+			logger.LogException(err)
 			HttpResponseError(w, http.StatusInternalServerError, "There is a problem creating the GitHub repository.", logger)
 			return
 		}
@@ -162,7 +162,7 @@ func RequestRepository(w http.ResponseWriter, r *http.Request) {
 		if isEnterpriseOrg {
 			err := ghAPI.SetProjectVisibility(repo.GetName(), "internal", innersource)
 			if err != nil {
-				logger.LogTrace(err.Error(), contracts.Error)
+				logger.LogException(err)
 				HttpResponseError(w, http.StatusInternalServerError, err.Error(), logger)
 				return
 			}
@@ -172,15 +172,13 @@ func RequestRepository(w http.ResponseWriter, r *http.Request) {
 		repoId := db.PRProjectsInsert(body, username.(string))
 
 		// Add  requestor and coowner as repo admins
-		err = AddCollaboratorToRequestedRepo(username.(string), body.Name, repoId)
+		err = AddCollaboratorToRequestedRepo(username.(string), body.Name, repoId, logger)
 		if err != nil {
-			logger.LogTrace(err.Error(), contracts.Error)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		err = AddCollaboratorToRequestedRepo(body.Coowner, body.Name, repoId)
+		err = AddCollaboratorToRequestedRepo(body.Coowner, body.Name, repoId, logger)
 		if err != nil {
-			logger.LogTrace(err.Error(), contracts.Error)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
@@ -199,7 +197,7 @@ func RequestRepository(w http.ResponseWriter, r *http.Request) {
 		}
 		err = messageBody.Send()
 		if err != nil {
-			logger.LogTrace(err.Error(), contracts.Error)
+			logger.LogException(err)
 		}
 
 		w.WriteHeader(http.StatusOK)
@@ -239,7 +237,7 @@ func UpdateRepositoryEcattIdById(w http.ResponseWriter, r *http.Request) {
 
 	id, err := strconv.Atoi(vars["id"])
 	if err != nil {
-		logger.LogTrace(err.Error(), contracts.Error)
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -247,14 +245,14 @@ func UpdateRepositoryEcattIdById(w http.ResponseWriter, r *http.Request) {
 	var body RepoDto
 	err = json.NewDecoder(r.Body).Decode(&body)
 	if err != nil {
-		logger.LogTrace(err.Error(), contracts.Error)
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	err = db.UpdateProjectEcattIdById(id, body.ECATTID, username.(string))
 	if err != nil {
-		logger.LogTrace(err.Error(), contracts.Error)
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -278,21 +276,21 @@ func GetUserProjects(w http.ResponseWriter, r *http.Request) {
 
 	projects, err := db.ProjectsSelectByUserPrincipalName(params)
 	if err != nil {
-		logger.LogTrace(err.Error(), contracts.Error)
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	s, err := json.Marshal(projects)
 	if err != nil {
-		logger.LogTrace(err.Error(), contracts.Error)
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	var list []RepoDto
 	err = json.Unmarshal(s, &list)
 	if err != nil {
-		logger.LogTrace(err.Error(), contracts.Error)
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -307,7 +305,7 @@ func GetUserProjects(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	jsonResp, err := json.Marshal(list)
 	if err != nil {
-		logger.LogTrace(err.Error(), contracts.Error)
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -324,7 +322,7 @@ func GetUsersWithGithub(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	jsonResp, err := json.Marshal(users)
 	if err != nil {
-		logger.LogTrace(err.Error(), contracts.Error)
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -344,7 +342,7 @@ func GetRequestStatusByProject(w http.ResponseWriter, r *http.Request) {
 
 	projects, err := db.ProjectApprovalsSelectById(params)
 	if err != nil {
-		logger.LogTrace(err.Error(), contracts.Error)
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -353,7 +351,7 @@ func GetRequestStatusByProject(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	jsonResp, err := json.Marshal(projects)
 	if err != nil {
-		logger.LogTrace(err.Error(), contracts.Error)
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -367,7 +365,7 @@ func GetRepoCollaboratorsByRepoId(w http.ResponseWriter, r *http.Request) {
 	req := mux.Vars(r)
 	id, err := strconv.ParseInt(req["id"], 10, 64)
 	if err != nil {
-		logger.LogTrace(err.Error(), contracts.Error)
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -376,14 +374,14 @@ func GetRepoCollaboratorsByRepoId(w http.ResponseWriter, r *http.Request) {
 	data := db.GetProjectById(id)
 	s, err := json.Marshal(data)
 	if err != nil {
-		logger.LogTrace(err.Error(), contracts.Error)
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	var repoList []RepoDto
 	err = json.Unmarshal(s, &repoList)
 	if err != nil {
-		logger.LogTrace(err.Error(), contracts.Error)
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -432,7 +430,7 @@ func GetRepoCollaboratorsByRepoId(w http.ResponseWriter, r *http.Request) {
 				//Get user name and email address
 				users, err := db.GetUserByGitHubId(strconv.FormatInt(*collaborator.ID, 10))
 				if err != nil {
-					logger.LogTrace(err.Error(), contracts.Error)
+					logger.LogException(err)
 					http.Error(w, err.Error(), http.StatusInternalServerError)
 					return
 				}
@@ -449,7 +447,7 @@ func GetRepoCollaboratorsByRepoId(w http.ResponseWriter, r *http.Request) {
 
 			repoOwner, err := db.GetRepoOwnersRecordByRepoId(int64(repo.Id))
 			if err != nil {
-				logger.LogTrace(err.Error(), contracts.Error)
+				logger.LogException(err)
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
 			}
@@ -457,7 +455,7 @@ func GetRepoCollaboratorsByRepoId(w http.ResponseWriter, r *http.Request) {
 			if len(repoOwner) > 0 {
 				users, err := db.GetUserByUserPrincipal(repoOwner[0].UserPrincipalName)
 				if err != nil {
-					logger.LogTrace(err.Error(), contracts.Error)
+					logger.LogException(err)
 					http.Error(w, err.Error(), http.StatusInternalServerError)
 					return
 				}
@@ -478,7 +476,7 @@ func GetRepoCollaboratorsByRepoId(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	jsonResp, err := json.Marshal(result)
 	if err != nil {
-		logger.LogTrace(err.Error(), contracts.Error)
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -503,14 +501,14 @@ func ArchiveProject(w http.ResponseWriter, r *http.Request) {
 	if archive == "1" {
 		err := ghAPI.ArchiveProject(project, archive == "1", organization)
 		if err != nil {
-			logger.LogTrace(err.Error(), contracts.Error)
+			logger.LogException(err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 	} else {
 		isArchived, err := ghAPI.IsArchived(project, organization)
 		if err != nil {
-			logger.LogTrace(err.Error(), contracts.Error)
+			logger.LogException(err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
@@ -523,13 +521,13 @@ func ArchiveProject(w http.ResponseWriter, r *http.Request) {
 	}
 	id, err := strconv.ParseInt(projectId, 10, 64)
 	if err != nil {
-		logger.LogTrace(err.Error(), contracts.Error)
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	err = db.UpdateProjectIsArchived(id, archive == "1")
 	if err != nil {
-		logger.LogTrace(err.Error(), contracts.Error)
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -544,7 +542,7 @@ func GetAllRepositories(w http.ResponseWriter, r *http.Request) {
 	search := params["search"][0]
 	offset, err := strconv.Atoi(params["offset"][0])
 	if err != nil {
-		logger.LogTrace(err.Error(), contracts.Error)
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -553,14 +551,14 @@ func GetAllRepositories(w http.ResponseWriter, r *http.Request) {
 	data := db.ReposSelectByOffsetAndFilter(offset, search)
 	s, err := json.Marshal(data)
 	if err != nil {
-		logger.LogTrace(err.Error(), contracts.Error)
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	var list []RepoDto
 	err = json.Unmarshal(s, &list)
 	if err != nil {
-		logger.LogTrace(err.Error(), contracts.Error)
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -580,7 +578,7 @@ func GetAllRepositories(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	jsonResp, err := json.Marshal(result)
 	if err != nil {
-		logger.LogTrace(err.Error(), contracts.Error)
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -606,7 +604,7 @@ func SetVisibility(w http.ResponseWriter, r *http.Request) {
 
 	id, err := strconv.ParseInt(projectId, 10, 64)
 	if err != nil {
-		logger.LogTrace(err.Error(), contracts.Error)
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -615,7 +613,7 @@ func SetVisibility(w http.ResponseWriter, r *http.Request) {
 		// Set repo to desired visibility then move to innersource
 		err := ghAPI.SetProjectVisibility(project, desiredState, opensource)
 		if err != nil {
-			logger.LogTrace(err.Error(), contracts.Error)
+			logger.LogException(err)
 			http.Error(w, "Failed to make the repository "+desiredState, http.StatusInternalServerError)
 			return
 		}
@@ -625,13 +623,13 @@ func SetVisibility(w http.ResponseWriter, r *http.Request) {
 		time.Sleep(3 * time.Second)
 		repoResp, err := ghAPI.GetRepository(project, innersource)
 		if err != nil {
-			logger.LogTrace(err.Error(), contracts.Error)
+			logger.LogException(err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 		err = db.UpdateTFSProjectReferenceById(id, repoResp.GetHTMLURL())
 		if err != nil {
-			logger.LogTrace(err.Error(), contracts.Error)
+			logger.LogException(err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
@@ -639,7 +637,7 @@ func SetVisibility(w http.ResponseWriter, r *http.Request) {
 		// Set repo to desired visibility
 		err := ghAPI.SetProjectVisibility(project, desiredState, innersource)
 		if err != nil {
-			logger.LogTrace(err.Error(), contracts.Error)
+			logger.LogException(err)
 			http.Error(w, "Failed to make the repository "+desiredState, http.StatusInternalServerError)
 			return
 		}
@@ -647,7 +645,7 @@ func SetVisibility(w http.ResponseWriter, r *http.Request) {
 
 	err = db.UpdateProjectVisibilityId(id, int64(visibilityId))
 	if err != nil {
-		logger.LogTrace(err.Error(), contracts.Error)
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -669,7 +667,7 @@ func RequestMakePublic(w http.ResponseWriter, r *http.Request) {
 
 	err := json.NewDecoder(r.Body).Decode(&body)
 	if err != nil {
-		logger.LogTrace(err.Error(), contracts.Error)
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -687,7 +685,7 @@ func RequestMakePublic(w http.ResponseWriter, r *http.Request) {
 
 	id, err := strconv.ParseInt(projectRequest.Id, 10, 64)
 	if err != nil {
-		logger.LogTrace(err.Error(), contracts.Error)
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -706,7 +704,7 @@ func IndexOrgRepos(w http.ResponseWriter, r *http.Request) {
 	for _, org := range orgs {
 		reposByOrg, err := ghAPI.GetRepositoriesFromOrganization(org)
 		if err != nil {
-			logger.LogTrace(err.Error(), contracts.Error)
+			logger.LogException(err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
@@ -741,7 +739,7 @@ func ClearOrgRepos(w http.ResponseWriter, r *http.Request) {
 
 	projects, err := db.ProjectsByRepositorySource("GitHub")
 	if err != nil {
-		logger.LogTrace(err.Error(), contracts.Error)
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -796,14 +794,14 @@ func AddCollaborator(w http.ResponseWriter, r *http.Request) {
 	data := db.GetProjectById(id)
 	s, err := json.Marshal(data)
 	if err != nil {
-		logger.LogTrace(err.Error(), contracts.Error)
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	var repoList []RepoDto
 	err = json.Unmarshal(s, &repoList)
 	if err != nil {
-		logger.LogTrace(err.Error(), contracts.Error)
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -824,7 +822,7 @@ func AddCollaborator(w http.ResponseWriter, r *http.Request) {
 
 		isMember, err := ghAPI.IsOrganizationMember(os.Getenv("GH_TOKEN"), os.Getenv("GH_ORG_INNERSOURCE"), ghUser)
 		if err != nil {
-			logger.LogTrace(err.Error(), contracts.Error)
+			logger.LogException(err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
@@ -832,7 +830,7 @@ func AddCollaborator(w http.ResponseWriter, r *http.Request) {
 		if (isInnersource && isMember) || (!isInnersource) {
 			_, err := ghAPI.AddCollaborator(repoUrlSub[1], repo.Name, ghUser, permission)
 			if err != nil {
-				logger.LogTrace(err.Error(), contracts.Error)
+				logger.LogException(err)
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
 			}
@@ -848,7 +846,7 @@ func AddCollaborator(w http.ResponseWriter, r *http.Request) {
 				if len(users) > 0 {
 					rec, err := db.RepoOwnersByUserAndProjectId(id, users[0]["UserPrincipalName"].(string))
 					if err != nil {
-						logger.LogTrace(err.Error(), contracts.Error)
+						logger.LogException(err)
 						http.Error(w, err.Error(), http.StatusInternalServerError)
 						return
 					}
@@ -856,7 +854,7 @@ func AddCollaborator(w http.ResponseWriter, r *http.Request) {
 					if len(rec) > 0 {
 						err := db.DeleteRepoOwnerRecordByUserAndProjectId(id, users[0]["UserPrincipalName"].(string))
 						if err != nil {
-							logger.LogTrace(err.Error(), contracts.Error)
+							logger.LogException(err)
 							http.Error(w, err.Error(), http.StatusInternalServerError)
 							return
 						}
@@ -886,14 +884,14 @@ func RemoveCollaborator(w http.ResponseWriter, r *http.Request) {
 	data := db.GetProjectById(id)
 	s, err := json.Marshal(data)
 	if err != nil {
-		logger.LogTrace(err.Error(), contracts.Error)
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	var repoList []RepoDto
 	err = json.Unmarshal(s, &repoList)
 	if err != nil {
-		logger.LogTrace(err.Error(), contracts.Error)
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -912,7 +910,7 @@ func RemoveCollaborator(w http.ResponseWriter, r *http.Request) {
 
 		_, err := ghAPI.RemoveCollaborator(repoUrlSub[1], repo.Name, ghUser, permission)
 		if err != nil {
-			logger.LogTrace(err.Error(), contracts.Error)
+			logger.LogException(err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
@@ -923,7 +921,7 @@ func RemoveCollaborator(w http.ResponseWriter, r *http.Request) {
 			if len(users) > 0 {
 				err = db.DeleteRepoOwnerRecordByUserAndProjectId(id, users[0]["UserPrincipalName"].(string))
 				if err != nil {
-					logger.LogTrace(err.Error(), contracts.Error)
+					logger.LogException(err)
 					http.Error(w, err.Error(), http.StatusInternalServerError)
 					return
 				}
@@ -944,7 +942,7 @@ func RepoOwnersCleanup(w http.ResponseWriter, r *http.Request) {
 	// Get all repos from database
 	repos, err := db.GetGitHubRepositories()
 	if err != nil {
-		logger.LogTrace(err.Error(), contracts.Error)
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -975,7 +973,7 @@ func RecurringApproval(w http.ResponseWriter, r *http.Request) {
 
 	projectApprovals, err := db.GetProjectApprovalsByStatusId(IN_REVIEW)
 	if err != nil {
-		logger.LogTrace(err.Error(), contracts.Error)
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -1000,7 +998,7 @@ func RecurringApproval(w http.ResponseWriter, r *http.Request) {
 			}
 			err = messageBody.Send()
 			if err != nil {
-				logger.LogTrace(err.Error(), contracts.Error)
+				logger.LogException(err)
 			}
 		}
 	}
@@ -1022,7 +1020,7 @@ func cleanupRepoOwners(repo map[string]interface{}, token string, logger *appins
 		// Get owners of the repo on the database
 		owners, err := db.GetRepoOwnersByProjectIdWithGHUsername(repo["Id"].(int64))
 		if err != nil {
-			logger.LogTrace(err.Error(), contracts.Error)
+			logger.LogException(err)
 			return
 		}
 
@@ -1043,7 +1041,7 @@ func cleanupRepoOwners(repo map[string]interface{}, token string, logger *appins
 	// Get owners of the repo on the database
 	owners, err := db.GetRepoOwnersByProjectIdWithGHUsername(repo["Id"].(int64))
 	if err != nil {
-		logger.LogTrace(err.Error(), contracts.Error)
+		logger.LogException(err)
 		return
 	}
 
@@ -1074,7 +1072,7 @@ func RemoveRepoIfNotExist(projectId int, repoName string, isGithubIdNil bool, lo
 	if !isExist || isGithubIdNil {
 		err := db.DeleteProjectById(projectId)
 		if err != nil {
-			logger.LogTrace(err.Error(), contracts.Error)
+			logger.LogException(err)
 			return false
 		}
 		return true
@@ -1112,7 +1110,7 @@ func indexRepo(repo ghAPI.Repo, logger *appinsights_wrapper.TelemetryClient) {
 
 		err := db.ProjectUpdateByImport(param)
 		if err != nil {
-			logger.LogTrace(err.Error(), contracts.Error)
+			logger.LogException(err)
 			return
 		}
 
@@ -1127,7 +1125,7 @@ func indexRepo(repo ghAPI.Repo, logger *appinsights_wrapper.TelemetryClient) {
 		for _, admin := range collaborators {
 			users, err := db.GetUserByGitHubId(strconv.FormatInt(*admin.ID, 10))
 			if err != nil {
-				logger.LogTrace(err.Error(), contracts.Error)
+				logger.LogException(err)
 				return
 			}
 
@@ -1135,14 +1133,14 @@ func indexRepo(repo ghAPI.Repo, logger *appinsights_wrapper.TelemetryClient) {
 			if len(users) > 0 {
 				if len(users) > 0 {
 					err = db.RepoOwnersInsert(project[0]["Id"].(int64), users[0]["UserPrincipalName"].(string))
-					logger.LogTrace(err.Error(), contracts.Error)
+					logger.LogException(err)
 				}
 			}
 		}
 	} else {
 		err := db.ProjectInsertByImport(param)
 		if err != nil {
-			logger.LogTrace(err.Error(), contracts.Error)
+			logger.LogException(err)
 			return
 		}
 
@@ -1161,7 +1159,7 @@ func indexRepo(repo ghAPI.Repo, logger *appinsights_wrapper.TelemetryClient) {
 		for _, admin := range collaborators {
 			users, err := db.GetUserByGitHubId(strconv.FormatInt(*admin.ID, 10))
 			if err != nil {
-				logger.LogTrace(err.Error(), contracts.Error)
+				logger.LogException(err)
 				return
 			}
 
@@ -1170,7 +1168,7 @@ func indexRepo(repo ghAPI.Repo, logger *appinsights_wrapper.TelemetryClient) {
 				if len(users) > 0 {
 					err = db.RepoOwnersInsert(project[0]["Id"].(int64), users[0]["UserPrincipalName"].(string))
 					if err != nil {
-						logger.LogTrace(err.Error(), contracts.Error)
+						logger.LogException(err)
 						return
 					}
 				}
@@ -1180,13 +1178,13 @@ func indexRepo(repo ghAPI.Repo, logger *appinsights_wrapper.TelemetryClient) {
 	if len(repo.Topics) > 0 {
 		err := db.DeleteProjectTopics(projectId)
 		if err != nil {
-			logger.LogTrace(err.Error(), contracts.Error)
+			logger.LogException(err)
 			return
 		}
 		for i := 0; i < len(repo.Topics); i++ {
 			err := db.InsertProjectTopics(projectId, repo.Topics[i])
 			if err != nil {
-				logger.LogTrace(err.Error(), contracts.Error)
+				logger.LogException(err)
 				return
 			}
 		}
@@ -1196,7 +1194,7 @@ func indexRepo(repo ghAPI.Repo, logger *appinsights_wrapper.TelemetryClient) {
 func RequestApproval(projectId int64, email string, logger *appinsights_wrapper.TelemetryClient) {
 	projectApprovals, err := db.RequestProjectApprovals(projectId, email)
 	if err != nil {
-		logger.LogTrace(err.Error(), contracts.Error)
+		logger.LogException(err)
 		return
 	}
 
@@ -1204,7 +1202,7 @@ func RequestApproval(projectId int64, email string, logger *appinsights_wrapper.
 		if v.RequestStatus == "New" {
 			err := ApprovalSystemRequest(v, logger)
 			if err != nil {
-				logger.LogTrace("ID:"+strconv.FormatInt(int64(v.Id), 10)+" "+err.Error(), contracts.Error)
+				logger.LogException("ID:" + strconv.FormatInt(int64(v.Id), 10) + " " + err.Error())
 				return
 			}
 		}
@@ -1288,6 +1286,7 @@ func ApprovalSystemRequest(data db.ProjectApprovalApprovers, logger *appinsights
 			var res ProjectApprovalSystemPostResponseDto
 			err := json.NewDecoder(r.Body).Decode(&res)
 			if err != nil {
+				logger.LogException(err)
 				return err
 			}
 
@@ -1301,7 +1300,7 @@ func ApprovalSystemRequest(data db.ProjectApprovalApprovers, logger *appinsights
 			}
 			err = messageBody.Send()
 			if err != nil {
-				logger.LogTrace(err.Error(), contracts.Error)
+				logger.LogException(err)
 			}
 
 			db.ProjectsApprovalUpdateGUID(data.Id, res.ItemId)
@@ -1313,7 +1312,7 @@ func ApprovalSystemRequest(data db.ProjectApprovalApprovers, logger *appinsights
 func getHttpPostResponseStatus(url string, data interface{}, ch chan *http.Response, logger *appinsights_wrapper.TelemetryClient) {
 	jsonReq, err := json.Marshal(data)
 	if err != nil {
-		logger.LogTrace(err.Error(), contracts.Error)
+		logger.LogException(err)
 		ch <- nil
 	}
 	res, err := http.Post(url, "application/json; charset=utf-8", bytes.NewBuffer(jsonReq))
@@ -1329,14 +1328,14 @@ func ReprocessRequestApproval() {
 
 	projectApprovals, err := db.ReprocessFailedProjectApprovals()
 	if err != nil {
-		logger.LogTrace(err.Error(), contracts.Error)
+		logger.LogException(err)
 		return
 	}
 
 	for _, v := range projectApprovals {
 		err := ApprovalSystemRequest(v, logger)
 		if err != nil {
-			logger.LogTrace(err.Error(), contracts.Error)
+			logger.LogException(err)
 			return
 		}
 	}
@@ -1353,22 +1352,25 @@ func IsRepoNameValid(value string) bool {
 	return matched[0] == value
 }
 
-func AddCollaboratorToRequestedRepo(user string, repo string, repoId int64) error {
+func AddCollaboratorToRequestedRepo(user string, repo string, repoId int64, logger *appinsights_wrapper.TelemetryClient) error {
 	innersource := os.Getenv("GH_ORG_INNERSOURCE")
 	ghUser := db.Users_Get_GHUser(user)
 
 	isInnersourceMember, err := ghAPI.IsOrganizationMember(os.Getenv("GH_TOKEN"), os.Getenv("GH_ORG_INNERSOURCE"), ghUser)
 	if err != nil {
+		logger.LogException(err)
 		return err
 	}
 
 	if isInnersourceMember {
 		_, err := ghAPI.AddCollaborator(innersource, repo, ghUser, "admin")
 		if err != nil {
+			logger.LogException(err)
 			return err
 		}
 		err = db.RepoOwnersInsert(repoId, user)
 		if err != nil {
+			logger.LogException(err)
 			return err
 		}
 	}
@@ -1382,26 +1384,26 @@ func GetPopularTopics(w http.ResponseWriter, r *http.Request) {
 	params := r.URL.Query()
 	offset, err := strconv.Atoi(params["offset"][0])
 	if err != nil {
-		logger.LogTrace(err.Error(), contracts.Error)
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	rowCount, err := strconv.Atoi(params["rowCount"][0])
 	if err != nil {
-		logger.LogTrace(err.Error(), contracts.Error)
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	result, err := db.GetPopularTopics(offset, rowCount)
 	if err != nil {
-		logger.LogTrace(err.Error(), contracts.Error)
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	jsonResp, err := json.Marshal(result)
 	if err != nil {
-		logger.LogTrace(err.Error(), contracts.Error)
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -1420,7 +1422,7 @@ func DownloadProjectApprovalsByUsername(w http.ResponseWriter, r *http.Request) 
 
 	projectApprovals, err := db.GetProjectApprovalsByUsername(username)
 	if err != nil {
-		logger.LogTrace(err.Error(), contracts.Error)
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -1464,7 +1466,7 @@ func DownloadProjectApprovalsByUsername(w http.ResponseWriter, r *http.Request) 
 
 	for _, value := range data {
 		if err := writer.Write(value); err != nil {
-			logger.LogTrace(err.Error(), contracts.Error)
+			logger.LogException(err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
@@ -1476,7 +1478,7 @@ func HttpResponseError(w http.ResponseWriter, code int, errorMessage string, log
 	w.WriteHeader(code)
 	response, err := json.Marshal(errorMessage)
 	if err != nil {
-		logger.LogTrace(err.Error(), contracts.Error)
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -1508,7 +1510,7 @@ func emailAdminDeletedProjects(to string, repos []string, logger *appinsights_wr
 
 	err := email.SendEmail(m, false)
 	if err != nil {
-		logger.LogTrace(err.Error(), contracts.Error)
+		logger.LogException(err)
 	}
 }
 
