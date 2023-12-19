@@ -3,7 +3,6 @@ package routes
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 	"os"
 	"strconv"
@@ -17,6 +16,7 @@ import (
 	"main/pkg/session"
 
 	"github.com/gorilla/mux"
+	"github.com/microsoft/ApplicationInsights-Go/appinsights/contracts"
 )
 
 type ActivitiesDto struct {
@@ -50,9 +50,6 @@ type ItemDto struct {
 }
 
 func GetActivities(w http.ResponseWriter, r *http.Request) {
-	client := appinsights_wrapper.NewClient()
-	defer client.EndOperation()
-
 	sessionaz, _ := session.Store.Get(r, "auth-session")
 	iprofile := sessionaz.Values["profile"]
 	profile := iprofile.(map[string]interface{})
@@ -85,6 +82,9 @@ func GetActivities(w http.ResponseWriter, r *http.Request) {
 }
 
 func CreateActivity(w http.ResponseWriter, r *http.Request) {
+	logger := appinsights_wrapper.NewClient()
+	defer logger.EndOperation()
+
 	sessionaz, _ := session.Store.Get(r, "auth-session")
 	iprofile := sessionaz.Values["profile"]
 	profile := iprofile.(map[string]interface{})
@@ -93,7 +93,7 @@ func CreateActivity(w http.ResponseWriter, r *http.Request) {
 	var body ActivityDto
 	err := json.NewDecoder(r.Body).Decode(&body)
 	if err != nil {
-		log.Println(err.Error())
+		logger.LogTrace(err.Error(), contracts.Error)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -102,7 +102,7 @@ func CreateActivity(w http.ResponseWriter, r *http.Request) {
 	if body.Type.Id == 0 {
 		id, err := db.ActivityTypes_Insert(body.Type.Name)
 		if err != nil {
-			log.Println(err.Error())
+			logger.LogTrace(err.Error(), contracts.Error)
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
@@ -120,14 +120,14 @@ func CreateActivity(w http.ResponseWriter, r *http.Request) {
 		CreatedBy:   username,
 	})
 	if err != nil {
-		log.Println(err.Error())
+		logger.LogTrace(err.Error(), contracts.Error)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
 	if body.Help.Id != 0 {
 		if os.Getenv("NOTIFICATION_EMAIL_SUPPORT") == "" {
-			log.Println("Activity does not send successfully because the notification support email environment is not set.")
+			logger.LogTrace("Activity does not send successfully because the notification support email environment is not set.", contracts.Error)
 			return
 		}
 
@@ -144,12 +144,12 @@ func CreateActivity(w http.ResponseWriter, r *http.Request) {
 		}
 		err = messageBody.Send()
 		if err != nil {
-			log.Println(err.Error())
+			logger.LogTrace(err.Error(), contracts.Error)
 		}
 
 		errHelp := processHelp(communityActivityId, activityLink, username, profile["name"].(string), body.Help)
 		if errHelp != nil {
-			log.Println(err.Error())
+			logger.LogTrace(err.Error(), contracts.Error)
 			http.Error(w, errHelp.Error(), http.StatusBadRequest)
 			return
 		}
@@ -163,7 +163,7 @@ func CreateActivity(w http.ResponseWriter, r *http.Request) {
 		CreatedBy:           username,
 	})
 	if err != nil {
-		log.Println(err.Error())
+		logger.LogTrace(err.Error(), contracts.Error)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -177,7 +177,7 @@ func CreateActivity(w http.ResponseWriter, r *http.Request) {
 			CreatedBy:           username,
 		})
 		if err != nil {
-			log.Println(err.Error())
+			logger.LogTrace(err.Error(), contracts.Error)
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
@@ -187,11 +187,14 @@ func CreateActivity(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetActivityById(w http.ResponseWriter, r *http.Request) {
+	logger := appinsights_wrapper.NewClient()
+	defer logger.EndOperation()
+
 	vars := mux.Vars(r)
 	id, _ := strconv.Atoi(vars["id"])
 	result, err := db.CommunitiesActivities_Select_ById(id)
 	if err != nil {
-		log.Println(err.Error())
+		logger.LogTrace(err.Error(), contracts.Error)
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}

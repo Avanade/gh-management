@@ -2,13 +2,14 @@ package routes
 
 import (
 	"encoding/xml"
-	"log"
 	"net/http"
 	"strconv"
 
+	"main/pkg/appinsights_wrapper"
 	db "main/pkg/ghmgmtdb"
 
 	"github.com/gorilla/mux"
+	"github.com/microsoft/ApplicationInsights-Go/appinsights/contracts"
 )
 
 type SearchResultItem struct {
@@ -25,6 +26,9 @@ type ArrayOfSearchResultItem struct {
 }
 
 func LegacySearchHandler(w http.ResponseWriter, r *http.Request) {
+	logger := appinsights_wrapper.NewClient()
+	defer logger.EndOperation()
+
 	req := mux.Vars(r)
 	searchText := req["searchText"]
 
@@ -34,7 +38,7 @@ func LegacySearchHandler(w http.ResponseWriter, r *http.Request) {
 
 	result, err := db.LegacySearch(param)
 	if err != nil {
-		log.Println(err.Error())
+		logger.LogTrace(err.Error(), contracts.Error)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}

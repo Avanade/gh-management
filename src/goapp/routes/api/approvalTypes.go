@@ -3,14 +3,15 @@ package routes
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 	"strconv"
 
+	"main/pkg/appinsights_wrapper"
 	db "main/pkg/ghmgmtdb"
 	"main/pkg/session"
 
 	"github.com/gorilla/mux"
+	"github.com/microsoft/ApplicationInsights-Go/appinsights/contracts"
 )
 
 type ApprovalTypeDto struct {
@@ -28,6 +29,9 @@ type ApproverDto struct {
 }
 
 func GetApprovalTypes(w http.ResponseWriter, r *http.Request) {
+	logger := appinsights_wrapper.NewClient()
+	defer logger.EndOperation()
+
 	var data []map[string]interface{}
 	var total int
 
@@ -41,7 +45,7 @@ func GetApprovalTypes(w http.ResponseWriter, r *http.Request) {
 		ordertype := params["ordertype"][0]
 		result, err := db.SelectApprovalTypesByFilter(offset, filter, orderby, ordertype, search)
 		if err != nil {
-			log.Println(err.Error())
+			logger.LogTrace(err.Error(), contracts.Error)
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
@@ -49,7 +53,7 @@ func GetApprovalTypes(w http.ResponseWriter, r *http.Request) {
 	} else {
 		result, err := db.SelectApprovalTypes()
 		if err != nil {
-			log.Println(err.Error())
+			logger.LogTrace(err.Error(), contracts.Error)
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
@@ -67,9 +71,9 @@ func GetApprovalTypes(w http.ResponseWriter, r *http.Request) {
 			IsArchived:                v["IsArchived"].(bool),
 		}
 
-		approversResult, err := GetApproversByApprovalTypeId(approvalTypeDto.Id)
+		approversResult, err := getApproversByApprovalTypeId(approvalTypeDto.Id)
 		if err != nil {
-			log.Println(err.Error())
+			logger.LogTrace(err.Error(), contracts.Error)
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
@@ -93,19 +97,22 @@ func GetApprovalTypes(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetApprovalTypeById(w http.ResponseWriter, r *http.Request) {
+	logger := appinsights_wrapper.NewClient()
+	defer logger.EndOperation()
+
 	vars := mux.Vars(r)
 	id, _ := strconv.Atoi(vars["id"])
 
 	result, err := db.SelectApprovalTypeById(id)
 	if err != nil {
-		log.Println(err.Error())
+		logger.LogTrace(err.Error(), contracts.Error)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	approversDto, err := GetApproversByApprovalTypeId(result.Id)
+	approversDto, err := getApproversByApprovalTypeId(result.Id)
 	if err != nil {
-		log.Println(err.Error())
+		logger.LogTrace(err.Error(), contracts.Error)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -125,6 +132,9 @@ func GetApprovalTypeById(w http.ResponseWriter, r *http.Request) {
 }
 
 func CreateApprovalType(w http.ResponseWriter, r *http.Request) {
+	logger := appinsights_wrapper.NewClient()
+	defer logger.EndOperation()
+
 	sessionaz, _ := session.Store.Get(r, "auth-session")
 	iprofile := sessionaz.Values["profile"]
 	profile := iprofile.(map[string]interface{})
@@ -139,7 +149,7 @@ func CreateApprovalType(w http.ResponseWriter, r *http.Request) {
 		CreatedBy:                 username,
 	})
 	if err != nil {
-		log.Println(err.Error())
+		logger.LogTrace(err.Error(), contracts.Error)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -150,7 +160,7 @@ func CreateApprovalType(w http.ResponseWriter, r *http.Request) {
 			ApproverEmail:  v.ApproverEmail,
 		})
 		if err != nil {
-			log.Println(err.Error())
+			logger.LogTrace(err.Error(), contracts.Error)
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
@@ -161,6 +171,9 @@ func CreateApprovalType(w http.ResponseWriter, r *http.Request) {
 }
 
 func EditApprovalTypeById(w http.ResponseWriter, r *http.Request) {
+	logger := appinsights_wrapper.NewClient()
+	defer logger.EndOperation()
+
 	vars := mux.Vars(r)
 
 	sessionaz, _ := session.Store.Get(r, "auth-session")
@@ -173,7 +186,7 @@ func EditApprovalTypeById(w http.ResponseWriter, r *http.Request) {
 
 	id, err := strconv.Atoi(vars["id"])
 	if err != nil {
-		log.Println(err.Error())
+		logger.LogTrace(err.Error(), contracts.Error)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -185,14 +198,14 @@ func EditApprovalTypeById(w http.ResponseWriter, r *http.Request) {
 		CreatedBy:                 username,
 	})
 	if err != nil {
-		log.Println(err.Error())
+		logger.LogTrace(err.Error(), contracts.Error)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
 	err = db.DeleteApproverByApprovalTypeId(id)
 	if err != nil {
-		log.Println(err.Error())
+		logger.LogTrace(err.Error(), contracts.Error)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -203,7 +216,7 @@ func EditApprovalTypeById(w http.ResponseWriter, r *http.Request) {
 			ApproverEmail:  v.ApproverEmail,
 		})
 		if err != nil {
-			log.Println(err.Error())
+			logger.LogTrace(err.Error(), contracts.Error)
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
@@ -214,6 +227,9 @@ func EditApprovalTypeById(w http.ResponseWriter, r *http.Request) {
 }
 
 func SetIsArchivedApprovalTypeById(w http.ResponseWriter, r *http.Request) {
+	logger := appinsights_wrapper.NewClient()
+	defer logger.EndOperation()
+
 	vars := mux.Vars(r)
 
 	sessionaz, _ := session.Store.Get(r, "auth-session")
@@ -226,7 +242,7 @@ func SetIsArchivedApprovalTypeById(w http.ResponseWriter, r *http.Request) {
 
 	id, err := strconv.Atoi(vars["id"])
 	if err != nil {
-		log.Println(err.Error())
+		logger.LogTrace(err.Error(), contracts.Error)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -240,7 +256,7 @@ func SetIsArchivedApprovalTypeById(w http.ResponseWriter, r *http.Request) {
 	})
 
 	if err != nil {
-		log.Println(err.Error())
+		logger.LogTrace(err.Error(), contracts.Error)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -257,7 +273,7 @@ func GetActiveApprovalTypes(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(data)
 }
 
-func GetApproversByApprovalTypeId(approvalTypeId int) (*[]ApproverDto, error) {
+func getApproversByApprovalTypeId(approvalTypeId int) (*[]ApproverDto, error) {
 	resultApprovers, err := db.GetApproversByApprovalTypeId(approvalTypeId)
 	if err != nil {
 		return nil, err
