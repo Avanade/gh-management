@@ -730,7 +730,7 @@ func IndexOrgRepos(w http.ResponseWriter, r *http.Request) {
 	wg.Wait()
 
 	w.WriteHeader(http.StatusOK)
-	fmt.Println("INDEX ORGANIZATION REPOSITORIES SUCCESSFUL")
+	logger.TrackTrace("Index organization repositories successful", contracts.Information)
 }
 
 func ClearOrgRepos(w http.ResponseWriter, r *http.Request) {
@@ -778,7 +778,7 @@ func ClearOrgRepos(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusOK)
-	logger.TrackTrace("Successfully indexed organization repositories", contracts.Information)
+	logger.TrackTrace("Clear org repos successful", contracts.Information)
 }
 
 func AddCollaborator(w http.ResponseWriter, r *http.Request) {
