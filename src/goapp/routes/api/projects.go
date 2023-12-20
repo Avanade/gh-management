@@ -1133,7 +1133,9 @@ func indexRepo(repo ghAPI.Repo, logger *appinsights_wrapper.TelemetryClient) {
 			if len(users) > 0 {
 				if len(users) > 0 {
 					err = db.RepoOwnersInsert(project[0]["Id"].(int64), users[0]["UserPrincipalName"].(string))
-					logger.LogException(err)
+					if err != nil {
+						logger.LogException(err)
+					}
 				}
 			}
 		}
