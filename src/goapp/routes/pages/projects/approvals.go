@@ -290,12 +290,6 @@ func ProcessApprovalProjects(r *http.Request, module string) error {
 		approvalStatusId = REJECTED
 	}
 
-	params := make(map[string]interface{}) // OBSOLETE
-	params["ApprovalSystemGUID"] = req.ItemId
-	params["ApprovalStatusId"] = approvalStatusId
-	params["ApprovalRemarks"] = req.Remarks
-	params["ApprovalDate"] = req.ResponseDate
-
 	var spName string
 	switch module {
 	case "projects":
