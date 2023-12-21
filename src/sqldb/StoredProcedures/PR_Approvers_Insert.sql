@@ -1,21 +1,24 @@
-CREATE PROCEDURE [dbo].[PR_RepoOwners_Insert] 
+CREATE PROCEDURE  [dbo].[PR_Approvers_Insert]
 (
-    @ProjectId INT,
-	@UserPrincipalName VARCHAR(100)
+    @ApprovalTypeId INT,
+    @ApproverEmail VARCHAR(100)
 )
 AS
-BEGIN
+BEGIN  
+    SET NOCOUNT ON
     IF NOT EXISTS (
-        SELECT * FROM RepoOwners WHERE 
-            ProjectId = @ProjectId AND 
-            UserPrincipalName = @UserPrincipalName
+        SELECT * FROM Approvers WHERE ApprovalTypeId = @ApprovalTypeId AND ApproverEmail = @ApproverEmail
     )
-    BEGIN
-        INSERT INTO [dbo].[RepoOwners]
-            ([ProjectId]
-            ,[UserPrincipalName])
+    BEGIN 
+        INSERT INTO [dbo].[Approvers]
+            (
+                [ApprovalTypeId] ,
+                [ApproverEmail]
+            )
         VALUES
-            (@ProjectId
-            ,@UserPrincipalName)
+            (
+                @ApprovalTypeId,
+                @ApproverEmail
+            )
     END
 END
