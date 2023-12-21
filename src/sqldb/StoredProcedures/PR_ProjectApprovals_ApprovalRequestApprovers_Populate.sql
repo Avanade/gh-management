@@ -1,4 +1,4 @@
-ALTER PROCEDURE [dbo].[PR_ProjectApprovals_ApprovalRequestApprovers_Populate]
+CREATE PROCEDURE [dbo].[PR_ProjectApprovals_ApprovalRequestApprovers_Populate]
 (
     @ProjectId INT,
 	@RequestedBy VARCHAR(100)
