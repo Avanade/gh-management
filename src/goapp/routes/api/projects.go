@@ -78,7 +78,6 @@ type ProjectRequest struct {
 type ProjectApprovalSystemPostDto struct {
 	ApplicationId       string   `json:"applicationId"`
 	ApplicationModuleId string   `json:"applicationModuleId"`
-	Email               string   `json:"email"` // OBSOLETE
 	Emails              []string `json:"emails"`
 	Subject             string   `json:"subject"`
 	Body                string   `json:"body"`
@@ -1201,6 +1200,9 @@ func RequestApproval(projectId int64, email string, logger *appinsights_wrapper.
 	}
 
 	for _, v := range projectApprovals {
+		if len(v.Approvers) == 0 {
+			continue
+		}
 		if v.RequestStatus == "New" {
 			err := ApprovalSystemRequest(v, logger)
 			if err != nil {

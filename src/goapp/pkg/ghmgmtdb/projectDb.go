@@ -370,44 +370,6 @@ func GetFailedProjectApprovalRequests() (projectApprovals []ProjectApproval) {
 	return
 }
 
-func GetFailedProjectApprovalRequestsObsolete() (projectApprovals []ProjectApproval) {
-	db := ConnectDb()
-	defer db.Close()
-
-	result, _ := db.ExecuteStoredProcedureWithResult("PR_ProjectApprovals_Select_Failed", nil)
-
-	for _, v := range result {
-		data := ProjectApproval{
-			Id:                         v["Id"].(int64),
-			ProjectId:                  v["ProjectId"].(int64),
-			ProjectName:                v["ProjectName"].(string),
-			ProjectCoowner:             v["ProjectCoowner"].(string),
-			ProjectDescription:         v["ProjectDescription"].(string),
-			RequesterGivenName:         v["RequesterGivenName"].(string),
-			RequesterSurName:           v["RequesterSurName"].(string),
-			RequesterName:              v["RequesterName"].(string),
-			RequesterUserPrincipalName: v["RequesterUserPrincipalName"].(string),
-			CoownerGivenName:           v["CoownerGivenName"].(string),
-			CoownerSurName:             v["CoownerSurName"].(string),
-			CoownerName:                v["CoownerName"].(string),
-			CoownerUserPrincipalName:   v["CoownerUserPrincipalName"].(string),
-			ApprovalTypeId:             v["ApprovalTypeId"].(int64),
-			ApprovalType:               v["ApprovalType"].(string),
-			ApproverUserPrincipalName:  v["ApproverUserPrincipalName"].(string),
-			ApprovalDescription:        v["ApprovalDescription"].(string),
-			Newcontribution:            v["newcontribution"].(string),
-			OSSsponsor:                 v["OSSsponsor"].(string),
-			Offeringsassets:            v["Avanadeofferingsassets"].(string),
-			Willbecommercialversion:    v["Willbecommercialversion"].(string),
-			OSSContributionInformation: v["OSSContributionInformation"].(string),
-			RequestStatus:              v["RequestStatus"].(string),
-		}
-		projectApprovals = append(projectApprovals, data)
-	}
-
-	return
-}
-
 func GetProjectApprovals() ([]map[string]interface{}, error) {
 	db := ConnectDb()
 	defer db.Close()

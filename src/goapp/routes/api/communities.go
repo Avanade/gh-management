@@ -68,7 +68,7 @@ type CommunityApprovalSystemPostResponseDto struct {
 type CommunityApprovalSystemPost struct {
 	ApplicationId       string
 	ApplicationModuleId string
-	Email               string
+	Emails              []string
 	Subject             string
 	Body                string
 	RequesterEmail      string
@@ -690,7 +690,7 @@ func ApprovalSystemRequestCommunity(data db.CommunityApproval, logger *appinsigh
 		postParams := CommunityApprovalSystemPost{
 			ApplicationId:       os.Getenv("APPROVAL_SYSTEM_APP_ID"),
 			ApplicationModuleId: os.Getenv("APPROVAL_SYSTEM_APP_MODULE_COMMUNITY"),
-			Email:               data.ApproverUserPrincipalName,
+			Emails:              []string{data.ApproverUserPrincipalName},
 			Subject:             fmt.Sprintf("[GH-Management] New Community For Approval - %v", data.CommunityName),
 			Body:                body,
 			RequesterEmail:      data.RequesterUserPrincipalName,

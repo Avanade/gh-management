@@ -1,4 +1,4 @@
-CREATE PROCEDURE [dbo].[PR_ProjectApprovals_ApprovalRequestApprovers_Populate]
+ALTER PROCEDURE [dbo].[PR_ProjectApprovals_ApprovalRequestApprovers_Populate]
 (
     @ProjectId INT,
 	@RequestedBy VARCHAR(100)
@@ -42,7 +42,8 @@ BEGIN
         INNER JOIN 
         Approvers AS A ON T.Id = A.ApprovalTypeId
     WHERE
-        PA.ProjectId = @ProjectId
+        PA.ProjectId = @ProjectId AND
+        PA.ApprovalStatusId = 1
 
     UPDATE Projects SET ApprovalStatusId = 2, Modified = GETDATE() WHERE Id = @ProjectId
 
