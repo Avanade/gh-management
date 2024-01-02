@@ -5,11 +5,17 @@ CREATE PROCEDURE [dbo].[PR_RepoOwners_Insert]
 )
 AS
 BEGIN
-    SET NOCOUNT ON
-	INSERT INTO [dbo].[RepoOwners]
-           ([ProjectId]
-           ,[UserPrincipalName])
-     VALUES
-           (@ProjectId
-           ,@UserPrincipalName)
+    IF NOT EXISTS (
+        SELECT * FROM RepoOwners WHERE 
+            ProjectId = @ProjectId AND 
+            UserPrincipalName = @UserPrincipalName
+    )
+    BEGIN
+        INSERT INTO [dbo].[RepoOwners]
+            ([ProjectId]
+            ,[UserPrincipalName])
+        VALUES
+            (@ProjectId
+            ,@UserPrincipalName)
+    END
 END

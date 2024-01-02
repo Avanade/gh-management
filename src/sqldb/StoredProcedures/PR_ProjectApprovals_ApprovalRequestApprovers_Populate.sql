@@ -42,7 +42,8 @@ BEGIN
         INNER JOIN 
         Approvers AS A ON T.Id = A.ApprovalTypeId
     WHERE
-        PA.ProjectId = @ProjectId
+        PA.ProjectId = @ProjectId AND
+        PA.ApprovalStatusId = 1
 
     UPDATE Projects SET ApprovalStatusId = 2, Modified = GETDATE() WHERE Id = @ProjectId
 
