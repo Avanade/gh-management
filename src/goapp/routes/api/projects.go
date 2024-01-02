@@ -1337,6 +1337,9 @@ func ReprocessRequestApproval() {
 	}
 
 	for _, v := range projectApprovals {
+		if len(v.Approvers) == 0 {
+			continue
+		}
 		err := ApprovalSystemRequest(v, logger)
 		if err != nil {
 			logger.LogException(err)
