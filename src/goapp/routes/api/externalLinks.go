@@ -2,9 +2,9 @@ package routes
 
 import (
 	"encoding/json"
-	"log"
 	"net/http"
 
+	"main/pkg/appinsights_wrapper"
 	db "main/pkg/ghmgmtdb"
 	"main/pkg/session"
 
@@ -26,10 +26,12 @@ type ExternalLinksDto struct {
 }
 
 func GetExternalLinks(w http.ResponseWriter, r *http.Request) {
+	logger := appinsights_wrapper.NewClient()
+	defer logger.EndOperation()
 
 	externalLinks, err := db.ExternalLinksExecuteSelect()
 	if err != nil {
-		log.Println(err.Error())
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -38,7 +40,7 @@ func GetExternalLinks(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	jsonResp, err := json.Marshal(externalLinks)
 	if err != nil {
-		log.Println(err.Error())
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -47,13 +49,16 @@ func GetExternalLinks(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetExternalLinksAllEnabled(w http.ResponseWriter, r *http.Request) {
+	logger := appinsights_wrapper.NewClient()
+	defer logger.EndOperation()
+
 	param := map[string]interface{}{
 		"Enabled": true,
 	}
 
 	externalLinks, err := db.ExternalLinksExecuteAllEnabled(param)
 	if err != nil {
-		log.Println(err.Error())
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -62,7 +67,7 @@ func GetExternalLinksAllEnabled(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	jsonResp, err := json.Marshal(externalLinks)
 	if err != nil {
-		log.Println(err.Error())
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -71,6 +76,9 @@ func GetExternalLinksAllEnabled(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetExternalLinksById(w http.ResponseWriter, r *http.Request) {
+	logger := appinsights_wrapper.NewClient()
+	defer logger.EndOperation()
+
 	req := mux.Vars(r)
 	id := req["id"]
 
@@ -80,7 +88,7 @@ func GetExternalLinksById(w http.ResponseWriter, r *http.Request) {
 
 	externalLinks, err := db.ExternalLinksExecuteById(param)
 	if err != nil {
-		log.Println(err.Error())
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -89,7 +97,7 @@ func GetExternalLinksById(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	jsonResp, err := json.Marshal(externalLinks)
 	if err != nil {
-		log.Println(err.Error())
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -97,6 +105,9 @@ func GetExternalLinksById(w http.ResponseWriter, r *http.Request) {
 }
 
 func CreateExternalLinks(w http.ResponseWriter, r *http.Request) {
+	logger := appinsights_wrapper.NewClient()
+	defer logger.EndOperation()
+
 	sessionaz, _ := session.Store.Get(r, "auth-session")
 	iprofile := sessionaz.Values["profile"]
 	profile := iprofile.(map[string]interface{})
@@ -105,7 +116,7 @@ func CreateExternalLinks(w http.ResponseWriter, r *http.Request) {
 
 	err := json.NewDecoder(r.Body).Decode(&data)
 	if err != nil {
-		log.Println(err.Error())
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -120,13 +131,16 @@ func CreateExternalLinks(w http.ResponseWriter, r *http.Request) {
 
 	_, err = db.ExternalLinksExecuteCreate(params)
 	if err != nil {
-		log.Println(err.Error())
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 }
 
 func UpdateExternalLinks(w http.ResponseWriter, r *http.Request) {
+	logger := appinsights_wrapper.NewClient()
+	defer logger.EndOperation()
+
 	sessionaz, _ := session.Store.Get(r, "auth-session")
 	iprofile := sessionaz.Values["profile"]
 	profile := iprofile.(map[string]interface{})
@@ -135,7 +149,7 @@ func UpdateExternalLinks(w http.ResponseWriter, r *http.Request) {
 
 	err := json.NewDecoder(r.Body).Decode(&body)
 	if err != nil {
-		log.Println(err.Error())
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -151,13 +165,16 @@ func UpdateExternalLinks(w http.ResponseWriter, r *http.Request) {
 
 	_, err = db.ExternalLinksExecuteUpdate(params)
 	if err != nil {
-		log.Println(err.Error())
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 }
 
 func ExternalLinksDelete(w http.ResponseWriter, r *http.Request) {
+	logger := appinsights_wrapper.NewClient()
+	defer logger.EndOperation()
+
 	req := mux.Vars(r)
 	id := req["id"]
 
@@ -166,7 +183,7 @@ func ExternalLinksDelete(w http.ResponseWriter, r *http.Request) {
 	}
 	_, err := db.ExternalLinksExecuteDelete(param)
 	if err != nil {
-		log.Println(err.Error())
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}

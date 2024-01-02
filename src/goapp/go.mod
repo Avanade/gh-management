@@ -14,9 +14,11 @@ require (
 )
 
 require (
+	code.cloudfoundry.org/clock v0.0.0-20180518195852-02e53af36e6c // indirect
 	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.2.0 // indirect
 	github.com/denisenkom/go-mssqldb v0.12.0 // indirect
 	github.com/goccy/go-json v0.10.2 // indirect
+	github.com/gofrs/uuid v3.3.0+incompatible // indirect
 	github.com/golang-sql/civil v0.0.0-20220223132316-b832511892a9 // indirect
 	github.com/golang-sql/sqlexp v0.0.0-20170517235910-f1bb20e5a188 // indirect
 	github.com/google/go-querystring v1.1.0 // indirect
@@ -34,6 +36,7 @@ require (
 	github.com/google/uuid v1.3.0
 	github.com/gorilla/sessions v1.2.1
 	github.com/lestrrat-go/jwx v1.2.26
+	github.com/microsoft/ApplicationInsights-Go v0.4.4
 	github.com/pquerna/cachecontrol v0.1.0 // indirect
 	github.com/thedatashed/xlsxreader v1.2.5
 	golang.org/x/crypto v0.17.0 // indirect
