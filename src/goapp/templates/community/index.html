@@ -228,7 +228,7 @@
         this.showSpinner = true
         this.Communitylist = []
 
-        fetch('/community')
+        fetch('/api/community')
           .then(r => {
             r.json().then(body => {
               this.Communitylist = body
@@ -244,7 +244,7 @@
       getMyCommunity() {
         this.showSpinner = true
         this.Communitylist = []
-        fetch('/communities/my')
+        fetch('/api/communities/my')
           .then(r => {
             r.json().then(body => {
               this.Communitylist = body
@@ -260,7 +260,7 @@
       getCommunitiesIManage() {
         this.showSpinner = true
         this.Communitylist = []
-        fetch('/communities/imanage')
+        fetch('/api/communities/imanage')
           .then(r => {
             r.json().then(body => {
               this.Communitylist = body

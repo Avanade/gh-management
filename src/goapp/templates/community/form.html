@@ -417,7 +417,7 @@
                 spinnercount = 4
                 if (this.form.id) {
                     this.mode = 'view'
-                    fetch('/community/getcommunity/' + '{{.Id}}')
+                    fetch('/api/community/getcommunity/' + '{{.Id}}')
                         .then(r => {
                             r.json().then(body => {
                                 if (body[0]['ApprovalStatusId'] !== 5 && body[0]['CreatedBy'] !==

@@ -67,6 +67,13 @@ func setPageRoutes(mux *mux.Router) {
 	mux.HandleFunc("/authentication/github/inprogress", rtPages.GHAuthenticationInProgressHandler)
 	mux.HandleFunc("/authentication/github/successful", rtPages.AuthenticationSuccessfulHandler)
 	mux.HandleFunc("/authentication/github/failed", rtPages.AuthenticationFailedHandler)
+
+	// LEGACY REDIRECTS
+	mux.HandleFunc("/Home/Asset/{assetCode}", rtApi.RedirectAsset)
+	mux.HandleFunc("/Home/AssetRequestCreation", rtApi.RedirectAssetRequest)
+	mux.HandleFunc("/Home/AssetRequestCreation/", rtApi.RedirectAssetRequest)
+	mux.Handle("/Home/Tool/{assetCode}", loadAzAuthPage(rtPages.ToolHandler))
+	mux.Handle("/search/{offSet}/{rowCount}", loadAzGHAuthPage(rtSearch.GetSearchResults))
 }
 
 func setAdminPageRoutes(mux *mux.Router) {
@@ -105,24 +112,30 @@ func setApiRoutes(mux *mux.Router) {
 	// APIS
 	muxApi := mux.PathPrefix("/api").Subrouter()
 
-	// ACTIVITIES API
+	// ACTIVITY TYPES API
 	muxApi.Handle("/activity/type", loadAzGHAuthPage(rtApi.GetActivityTypes)).Methods("GET")
 	muxApi.Handle("/activity/type", loadAzGHAuthPage(rtApi.CreateActivityType)).Methods("POST")
+
+	// ACTIVITY API
 	muxApi.Handle("/activity", loadAzGHAuthPage(rtApi.CreateActivity)).Methods("POST")
 	muxApi.Handle("/activity", loadAzGHAuthPage(rtApi.GetActivities)).Methods("GET")
 	muxApi.Handle("/activity/{id}", loadAzGHAuthPage(rtApi.GetActivityById)).Methods("GET")
 
 	// COMMUNITIES API
+	muxApi.Handle("/community", loadAzGHAuthPage(rtApi.GetUserCommunitylist)).Methods("GET")
 	muxApi.Handle("/community", loadAzGHAuthPage(rtApi.AddCommunity)).Methods("POST")
+	muxApi.Handle("/community/all", loadAzAuthPage(rtApi.GetCommunities)).Methods("GET")
+	muxApi.Handle("/community/{id}/members", loadAzAuthPage(rtApi.GetCommunityMembers)).Methods("GET")
+	muxApi.Handle("/community/getCommunitiesisexternal/{isexternal}", loadAzGHAuthPage(rtApi.GetCommunitiesIsexternal))
+	muxApi.Handle("/community/members/processfile/{id}", loadAzGHAuthPage(rtApi.ProcessCommunityMembersListExcel)).Methods("POST")
+	muxApi.Handle("/communities/my", loadAzGHAuthPage(rtApi.GetMyCommunitylist))
+	muxApi.Handle("/communities/imanage", loadAzGHAuthPage(rtApi.GetCommunityIManagelist))
+	muxApi.Handle("/community/getcommunity/{id}", loadAzGHAuthPage(rtApi.GetUserCommunity))
 	muxApi.Handle("/communitySponsors", loadAzGHAuthPage(rtApi.CommunitySponsorsAPIHandler))
 	muxApi.Handle("/CommunitySponsorsPerCommunityId/{id}", loadAzGHAuthPage(rtApi.CommunitySponsorsPerCommunityId))
 	muxApi.Handle("/CommunityTagPerCommunityId/{id}", loadAzGHAuthPage(rtApi.CommunityTagPerCommunityId))
 	muxApi.Handle("/community/onboarding/{id}", loadAzGHAuthPage(rtApi.GetCommunityOnBoardingInfo)).Methods("GET", "POST", "DELETE")
-	muxApi.Handle("/community/all", loadAzAuthPage(rtApi.GetCommunities)).Methods("GET")
-	muxApi.Handle("/community/{id}/members", loadAzAuthPage(rtApi.GetCommunityMembers)).Methods("GET")
 	muxApi.Handle("/communitystatus/{id}", loadAzGHAuthPage(rtApi.GetRequestStatusByCommunity))
-	muxApi.Handle("/community/getCommunitiesisexternal/{isexternal}", loadAzGHAuthPage(rtApi.GetCommunitiesIsexternal))
-	muxApi.Handle("/community/members/processfile/{id}", loadAzGHAuthPage(rtApi.ProcessCommunityMembersListExcel)).Methods("POST")
 
 	// RELATED COMMUNITIES API
 	muxApi.Handle("/relatedcommunityAdd", loadAzAuthPage(rtApi.RelatedCommunitiesInsert))
@@ -201,31 +214,25 @@ func setApiRoutes(mux *mux.Router) {
 	muxApi.Handle("/osscontributionsponsors/add", loadAdminPage((rtApi.AddSponsor)))
 	muxApi.Handle("/osscontributionsponsors/update", loadAdminPage((rtApi.UpdateSponsor)))
 
-	// API FOR LOGIC APP
-	muxApi.Handle("/indexorgrepos", loadGuidAuthApi(rtApi.IndexOrgRepos)).Methods("GET")
-	muxApi.Handle("/clearorgrepos", loadGuidAuthApi(rtApi.ClearOrgRepos)).Methods("GET")
-	muxApi.Handle("/checkAvaInnerSource", loadGuidAuthApi(rtApi.CheckAvaInnerSource)).Methods("GET")
-	muxApi.Handle("/checkAvaOpenSource", loadGuidAuthApi(rtApi.CheckAvaOpenSource)).Methods("GET")
-	muxApi.Handle("/clearOrgMembers", loadGuidAuthApi(rtApi.ClearOrgMembers)).Methods("GET")
-	muxApi.Handle("/RepoOwnerScan", loadGuidAuthApi(rtApi.RepoOwnerScan)).Methods("GET")
-	muxApi.Handle("/RepoOwnersCleanup", loadGuidAuthApi(rtApi.RepoOwnersCleanup)).Methods("GET")
-	muxApi.Handle("/recurringapproval", loadGuidAuthApi(rtApi.RecurringApproval)).Methods("GET")
-	muxApi.Handle("/expiringinvitations", loadGuidAuthApi(rtApi.ExpiringInvitation)).Methods("GET")
-
-	muxApi.Handle("/utility/fillout/approvers", loadGuidAuthApi(rtApi.FillOutApprovers)).Methods("GET")
-	muxApi.Handle("/utility/fillout/approvalrequest/approvers", loadGuidAuthApi(rtApi.FillOutApprovalRequestApprovers)).Methods("GET")
-	muxApi.Handle("/migrateOssSponsors", loadGuidAuthApi(rtApi.MigrateToOssSponsorsTable)).Methods("GET")
-
 	// LEGACY APIS
 	muxApi.Handle("/searchresult/{searchText}", loadGuidAuthApi(rtApi.LegacySearchHandler))
-	mux.HandleFunc("/Home/Asset/{assetCode}", rtApi.RedirectAsset)
-	mux.HandleFunc("/Home/AssetRequestCreation", rtApi.RedirectAssetRequest)
-	mux.HandleFunc("/Home/AssetRequestCreation/", rtApi.RedirectAssetRequest)
-	mux.Handle("/Home/Tool/{assetCode}", loadAzAuthPage(rtPages.ToolHandler))
+}
 
-	mux.Handle("/search/{offSet}/{rowCount}", loadAzGHAuthPage(rtSearch.GetSearchResults))
-	mux.Handle("/communities/my", loadAzGHAuthPage(rtApi.GetMyCommunitylist))
-	mux.Handle("/communities/imanage", loadAzGHAuthPage(rtApi.GetCommunityIManagelist))
-	mux.Handle("/community/getcommunity/{id}", loadAzGHAuthPage(rtApi.GetUserCommunity))
-	mux.Handle("/community", loadAzGHAuthPage(rtApi.GetUserCommunitylist))
+func setUtilityRoutes(mux *mux.Router) {
+	// UTILITIES
+	muxUtility := mux.PathPrefix("/utility").Subrouter()
+
+	// API FOR LOGIC APP
+	muxUtility.Handle("/indexorgrepos", loadGuidAuthApi(rtApi.IndexOrgRepos)).Methods("GET")
+	muxUtility.Handle("/clearorgrepos", loadGuidAuthApi(rtApi.ClearOrgRepos)).Methods("GET")
+	muxUtility.Handle("/checkAvaInnerSource", loadGuidAuthApi(rtApi.CheckAvaInnerSource)).Methods("GET")
+	muxUtility.Handle("/checkAvaOpenSource", loadGuidAuthApi(rtApi.CheckAvaOpenSource)).Methods("GET")
+	muxUtility.Handle("/clearOrgMembers", loadGuidAuthApi(rtApi.ClearOrgMembers)).Methods("GET")
+	muxUtility.Handle("/RepoOwnerScan", loadGuidAuthApi(rtApi.RepoOwnerScan)).Methods("GET")
+	muxUtility.Handle("/RepoOwnersCleanup", loadGuidAuthApi(rtApi.RepoOwnersCleanup)).Methods("GET")
+	muxUtility.Handle("/recurringapproval", loadGuidAuthApi(rtApi.RecurringApproval)).Methods("GET")
+	muxUtility.Handle("/expiringinvitations", loadGuidAuthApi(rtApi.ExpiringInvitation)).Methods("GET")
+	muxUtility.Handle("/fillout/approvers", loadGuidAuthApi(rtApi.FillOutApprovers)).Methods("GET")
+	muxUtility.Handle("/fillout/approvalrequest/approvers", loadGuidAuthApi(rtApi.FillOutApprovalRequestApprovers)).Methods("GET")
+	muxUtility.Handle("/migrateOssSponsors", loadGuidAuthApi(rtApi.MigrateToOssSponsorsTable)).Methods("GET")
 }
