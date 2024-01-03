@@ -9,7 +9,7 @@
                         "type": "ManagedServiceIdentity"
                     },
                     "method": "GET",
-                    "uri": "@concat(parameters('GHMgmDomain'), '/api/expiringinvitations')"
+                    "uri": "@concat(parameters('GHMgmDomain'), '/utility/expiring-invitations')"
                 },
                 "runAfter": {},
                 "type": "Http"

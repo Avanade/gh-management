@@ -9,7 +9,7 @@
                         "type": "ManagedServiceIdentity"
                     },
                     "method": "GET",
-                    "uri": "@concat(parameters('GHMgmDomain'), '/api/recurringapproval')"
+                    "uri": "@concat(parameters('GHMgmDomain'), '/utility/recurring-approval')"
                 },
                 "runAfter": {},
                 "type": "Http"
