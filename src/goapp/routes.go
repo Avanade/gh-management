@@ -141,6 +141,15 @@ func setApiRoutes(mux *mux.Router) {
 	muxApi.Handle("/relatedcommunityDelete", loadAzAuthPage(rtApi.RelatedCommunitiesDelete))
 	muxApi.Handle("/relatedcommunity/{id}", loadAzAuthPage(rtApi.RelatedCommunitiesSelect)).Methods("GET")
 
+	muxApi.HandleFunc("/approvals/community/reassign/callback", rtApi.UpdateCommunityApprovalReassignApprover)
+	muxApi.HandleFunc("/approvals/community/callback", rtApi.UpdateApprovalStatusCommunity).Methods("POST")
+
+	// COMMUNITY APPROVERS API
+	muxApi.HandleFunc("/communityapprovers/update", rtApi.CommunityApproversListUpdate)
+	muxApi.HandleFunc("/communityapprovers/GetCommunityApproversList", rtApi.GetCommunityApproversList)
+	muxApi.HandleFunc("/communityapprovers/GetAllActiveCommunityApprovers", rtApi.GetAllActiveCommunityApprovers)
+	muxApi.HandleFunc("/communityapprovers/GetCommunityApproversList/{id}", rtApi.GetCommunityApproversById)
+
 	// CONTRIBUTION AREAS API
 	muxApi.Handle("/contributionarea", loadAzGHAuthPage(rtApi.CreateContributionAreas)).Methods("POST")
 	muxApi.Handle("/contributionarea", loadAzGHAuthPage(rtApi.GetContributionAreas)).Methods("GET")
@@ -197,15 +206,6 @@ func setApiRoutes(mux *mux.Router) {
 	muxApi.HandleFunc("/approvals/project/callback", rtApi.UpdateApprovalStatusProjects).Methods("POST")
 	muxApi.HandleFunc("/approvals/project/reassign/callback", rtApi.UpdateApprovalReassignApprover)
 	muxApi.Handle("/users/{username}/approvals", loadAzAuthPage(rtApi.DownloadProjectApprovalsByUsername))
-
-	muxApi.HandleFunc("/approvals/community/reassign/callback", rtApi.UpdateCommunityApprovalReassignApprover)
-	muxApi.HandleFunc("/approvals/community/callback", rtApi.UpdateApprovalStatusCommunity).Methods("POST")
-
-	// COMMUNITY APPROVERS API
-	muxApi.HandleFunc("/communityapprovers/update", rtApi.CommunityApproversListUpdate)
-	muxApi.HandleFunc("/communityapprovers/GetCommunityApproversList", rtApi.GetCommunityApproversList)
-	muxApi.HandleFunc("/communityapprovers/GetAllActiveCommunityApprovers", rtApi.GetAllActiveCommunityApprovers)
-	muxApi.HandleFunc("/communityapprovers/GetCommunityApproversList/{id}", rtApi.GetCommunityApproversById)
 
 	// OSS CONTRIBUTION SPONSORS API
 	muxApi.Handle("/osscontributionsponsors/all", loadAdminPage((rtApi.GetAllOssContributionSponsors)))
