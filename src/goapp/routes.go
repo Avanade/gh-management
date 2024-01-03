@@ -188,19 +188,19 @@ func setApiRoutes(mux *mux.Router) {
 	muxApi.Handle("/getActiveApprovalTypes", loadAzGHAuthPage(rtApi.GetActiveApprovalTypes))
 
 	//APPROVAL TYPES API
-	muxApi.Handle("/approval/type", loadAzAuthPage(rtApi.CreateApprovalType)).Methods("POST")
-	muxApi.Handle("/approval/type/{id}", loadAzAuthPage(rtApi.EditApprovalTypeById)).Methods("PUT")
-	muxApi.Handle("/approval/type/{id}/archived", loadAzAuthPage(rtApi.SetIsArchivedApprovalTypeById)).Methods("PUT")
-	muxApi.Handle("/approval/types", loadAzAuthPage(rtApi.GetApprovalTypes)).Methods("GET")
-	muxApi.Handle("/approval/type/{id}", loadAzAuthPage(rtApi.GetApprovalTypeById)).Methods("GET")
+	muxApi.Handle("/approval-types", loadAzAuthPage(rtApi.CreateApprovalType)).Methods("POST")
+	muxApi.Handle("/approval-types/{id}", loadAzAuthPage(rtApi.EditApprovalTypeById)).Methods("PUT")
+	muxApi.Handle("/approval-types/{id}/archived", loadAzAuthPage(rtApi.SetIsArchivedApprovalTypeById)).Methods("PUT")
+	muxApi.Handle("/approval-types", loadAzAuthPage(rtApi.GetApprovalTypes)).Methods("GET")
+	muxApi.Handle("/approval-types/{id}", loadAzAuthPage(rtApi.GetApprovalTypeById)).Methods("GET")
 
 	//EXTERNAL LINKS API
-	muxApi.Handle("/externallinks/create", loadAdminPage(rtApi.CreateExternalLinks)).Methods("POST")
-	muxApi.Handle("/externallinks/update/{id}", loadAdminPage(rtApi.UpdateExternalLinks)).Methods("PUT")
-	muxApi.Handle("/externallinks/", loadAdminPage(rtApi.GetExternalLinks))
-	muxApi.Handle("/externallinks/enabled", loadAzAuthPage(rtApi.GetExternalLinksAllEnabled))
-	muxApi.Handle("/externallinks/{id}", loadAdminPage(rtApi.GetExternalLinksById))
-	muxApi.Handle("/externallinks/{action:delete}/{id}", loadAdminPage(rtApi.ExternalLinksDelete))
+	muxApi.Handle("/external-links", loadAdminPage(rtApi.GetExternalLinks)).Methods("GET")
+	muxApi.Handle("/external-links/{id}", loadAdminPage(rtApi.GetExternalLinkById)).Methods("GET")
+	muxApi.Handle("/external-links/enabled", loadAzAuthPage(rtApi.GetExternalLinksEnabled)).Methods("GET")
+	muxApi.Handle("/external-links", loadAdminPage(rtApi.CreateExternalLinks)).Methods("POST")
+	muxApi.Handle("/external-links/{id}", loadAdminPage(rtApi.UpdateExternalLinksById)).Methods("PUT")
+	muxApi.Handle("/external-links/{id}", loadAdminPage(rtApi.DeleteExternalLinkById)).Methods("DELETE")
 
 	// APPROVALS API
 	muxApi.HandleFunc("/approvals/project/callback", rtApi.UpdateApprovalStatusProjects).Methods("POST")

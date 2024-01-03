@@ -48,7 +48,7 @@ func GetExternalLinks(w http.ResponseWriter, r *http.Request) {
 	w.Write(jsonResp)
 }
 
-func GetExternalLinksAllEnabled(w http.ResponseWriter, r *http.Request) {
+func GetExternalLinksEnabled(w http.ResponseWriter, r *http.Request) {
 	logger := appinsights_wrapper.NewClient()
 	defer logger.EndOperation()
 
@@ -75,7 +75,7 @@ func GetExternalLinksAllEnabled(w http.ResponseWriter, r *http.Request) {
 	w.Write(jsonResp)
 }
 
-func GetExternalLinksById(w http.ResponseWriter, r *http.Request) {
+func GetExternalLinkById(w http.ResponseWriter, r *http.Request) {
 	logger := appinsights_wrapper.NewClient()
 	defer logger.EndOperation()
 
@@ -137,7 +137,7 @@ func CreateExternalLinks(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func UpdateExternalLinks(w http.ResponseWriter, r *http.Request) {
+func UpdateExternalLinksById(w http.ResponseWriter, r *http.Request) {
 	logger := appinsights_wrapper.NewClient()
 	defer logger.EndOperation()
 
@@ -171,7 +171,7 @@ func UpdateExternalLinks(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func ExternalLinksDelete(w http.ResponseWriter, r *http.Request) {
+func DeleteExternalLinkById(w http.ResponseWriter, r *http.Request) {
 	logger := appinsights_wrapper.NewClient()
 	defer logger.EndOperation()
 

@@ -125,7 +125,7 @@
                 var modal = Alpine.store('master').modal
                 modal.update('loading', 'Loading', 'Please wait for a moment.', '', '')
 
-                const res = await fetch('/api/externallinks/' + id)
+                const res = await fetch('/api/external-links/' + id)
                 const externallinks = await res.json()
 
                 modal.visible = false
@@ -204,13 +204,13 @@
                     case 'add':
                         console.log(this.form.IconSVG)
                         Alpine.store('master').modal.show()
-                        Alpine.store('master').postData(`/api/externallinks/create`, this.form,
+                        Alpine.store('master').postData(`/api/external-links`, this.form,
                             "External links has been added.", "Go to list of external links", "/admin/externallinks"
                             )
                         break;
                     case 'edit':
                         Alpine.store('master').modal.show()
-                        Alpine.store('master').putData(`/api/externallinks/update/` + this.id, this.form,
+                        Alpine.store('master').putData(`/api/external-links/${this.id}`, this.form,
                             "External Link has been saved.", "Go to list of external link", "/admin/externallinks")
                         break;
                 }

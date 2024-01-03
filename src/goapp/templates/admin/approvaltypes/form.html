@@ -117,7 +117,7 @@
                 var modal = Alpine.store('master').modal
                 modal.update('loading', 'Loading', 'Please wait for a moment.', '', '')
 
-                const res = await fetch(`/api/approval/type/${this.id}`)
+                const res = await fetch(`/api/approval-types/${this.id}`)
                 const data = await res.json()
 
                 this.form.name = data.name;
@@ -166,19 +166,19 @@
                 switch (this.action.toLowerCase()) {
                     case 'add':
                         Alpine.store('master').modal.show()
-                        Alpine.store('master').postData("/api/approval/type", data, "Approval type has been added.",
+                        Alpine.store('master').postData("/api/approval-types", data, "Approval type has been added.",
                             "Go to list of approval types", "/admin/approvaltypes")
                         break;
 
                     case 'edit':
                         Alpine.store('master').modal.show()
-                        Alpine.store('master').putData(`/api/approval/type/${this.id}`, data,
+                        Alpine.store('master').putData(`/api/approval-types/${this.id}`, data,
                             "Approval type has been saved.", "Go to list of approval types", "/admin/approvaltypes")
                         break;
                     case 'delete':
                         data.isArchived = true
                         Alpine.store('master').modal.show()
-                        Alpine.store('master').putData(`/api/approval/type/${this.id}/archived`, data,
+                        Alpine.store('master').putData(`/api/approval-types/${this.id}/archived`, data,
                             "Approval type has been moved archive.", "Go to list of approval types",
                             "/admin/approvaltypes")
                         break;
