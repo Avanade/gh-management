@@ -52,7 +52,7 @@
         const offset = e.filter * e.page;
         const search = encodeURIComponent(e.search)
         const res = await fetch(
-            `/api/contributionarea?filter=${e.filter}&offset=${offset}&search=${search}&orderby=${e.orderby}&ordertype=${e.ordertype}`
+            `/api/contribution-areas?filter=${e.filter}&offset=${offset}&search=${search}&orderby=${e.orderby}&ordertype=${e.ordertype}`
             )
         const data = await res.json()
         return data

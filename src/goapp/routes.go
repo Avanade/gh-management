@@ -151,11 +151,11 @@ func setApiRoutes(mux *mux.Router) {
 	muxApi.HandleFunc("/communityapprovers/GetCommunityApproversList/{id}", rtApi.GetCommunityApproversById)
 
 	// CONTRIBUTION AREAS API
-	muxApi.Handle("/contributionarea", loadAzGHAuthPage(rtApi.CreateContributionAreas)).Methods("POST")
-	muxApi.Handle("/contributionarea", loadAzGHAuthPage(rtApi.GetContributionAreas)).Methods("GET")
-	muxApi.Handle("/contributionarea", loadAzGHAuthPage(rtApi.UpdateContributionArea)).Methods("PUT")
-	muxApi.Handle("/contributionarea/{id}", loadAzGHAuthPage(rtApi.GetContributionAreaById)).Methods("GET")
-	muxApi.Handle("/contributionarea/activity/{id}", loadAzGHAuthPage(rtApi.GetContributionAreasByActivityId)).Methods("GET")
+	muxApi.Handle("/contribution-areas", loadAzGHAuthPage(rtApi.CreateContributionAreas)).Methods("POST")
+	muxApi.Handle("/contribution-areas", loadAzGHAuthPage(rtApi.GetContributionAreas)).Methods("GET")
+	muxApi.Handle("/contribution-areas", loadAzGHAuthPage(rtApi.UpdateContributionArea)).Methods("PUT")
+	muxApi.Handle("/contribution-areas/{id}", loadAzGHAuthPage(rtApi.GetContributionAreaById)).Methods("GET")
+	muxApi.Handle("/activities/{id}/contribution-areas", loadAzGHAuthPage(rtApi.GetContributionAreasByActivityId)).Methods("GET")
 
 	// CATEGORIES API
 	muxApi.Handle("/Category", loadAzGHAuthPage(rtApi.CategoryAPIHandler)).Methods("POST")

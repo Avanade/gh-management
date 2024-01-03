@@ -300,7 +300,7 @@
     }
 
     async function getContributionAreas() {
-        const res = await fetch('/api/contributionarea')
+        const res = await fetch('/api/contribution-areas')
 
         const data = await res.json()
         return data.data
@@ -312,7 +312,7 @@
     }
 
     async function getAdditionalContributionAreasByActivityId(activityId) {
-        const res = await fetch(`/api/contributionarea/activity/${activityId}`)
+        const res = await fetch(`/api/activities/${activityId}/contribution-areas`)
         return res.json()
     }
 </script>
