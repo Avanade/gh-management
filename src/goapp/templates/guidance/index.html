@@ -181,7 +181,7 @@
       search: '',
       getcategory() {
 
-        fetch('/api/Category/list')
+        fetch('/api/categories')
           .then(r => {
             r.json().then(body => {
               this.CategoryList = body

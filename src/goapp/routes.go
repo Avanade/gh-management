@@ -158,10 +158,10 @@ func setApiRoutes(mux *mux.Router) {
 	muxApi.Handle("/activities/{id}/contribution-areas", loadAzGHAuthPage(rtApi.GetContributionAreasByActivityId)).Methods("GET")
 
 	// CATEGORIES API
-	muxApi.Handle("/Category", loadAzGHAuthPage(rtApi.CategoryAPIHandler)).Methods("POST")
-	muxApi.Handle("/Category/list", loadAzGHAuthPage(rtApi.CategoryListAPIHandler))
-	muxApi.Handle("/Category/update", loadAzGHAuthPage(rtApi.CategoryUpdate))
-	muxApi.Handle("/Category/{id}", loadAzGHAuthPage(rtApi.GetCategoryByID))
+	muxApi.Handle("/categories", loadAzGHAuthPage(rtApi.CategoryAPIHandler)).Methods("POST")
+	muxApi.Handle("/categories", loadAzGHAuthPage(rtApi.CategoryListAPIHandler)).Methods("GET")
+	muxApi.Handle("/categories/{id}", loadAzGHAuthPage(rtApi.CategoryUpdate)).Methods("PUT")
+	muxApi.Handle("/categories/{id}", loadAzGHAuthPage(rtApi.GetCategoryByID)).Methods("GET")
 
 	// CATEGORY ARTICLES API
 	muxApi.Handle("/CategoryArticlesById/{id}", loadAzGHAuthPage(rtApi.GetCategoryArticlesById))

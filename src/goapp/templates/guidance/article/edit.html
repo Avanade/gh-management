@@ -14,7 +14,7 @@
                         <span class="pl-1 text-xs">(Please press Enter to insert Category)</span>
                         <div>
                             <div x-data="combobox({
-                                    ajax: getnames,
+                                    ajax: getCategories,
                                     id : 'Id',
                                     text : 'Name',
                                     isInsertable : true,
@@ -228,9 +228,9 @@
             }
         }
     }
-    async function getnames() {
+    async function getCategories() {
 
-        const res = await fetch('/api/Category/list')
+        const res = await fetch('/api/categories')
 
         const data = await res.json()
         return data
