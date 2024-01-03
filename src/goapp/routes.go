@@ -113,8 +113,7 @@ func setApiRoutes(mux *mux.Router) {
 	muxApi := mux.PathPrefix("/api").Subrouter()
 
 	// ACTIVITY TYPES API
-	muxApi.Handle("/activity/type", loadAzGHAuthPage(rtApi.GetActivityTypes)).Methods("GET")
-	muxApi.Handle("/activity/type", loadAzGHAuthPage(rtApi.CreateActivityType)).Methods("POST")
+	muxApi.Handle("/activity-types", loadAzGHAuthPage(rtApi.GetActivityTypes)).Methods("GET")
 
 	// ACTIVITY API
 	muxApi.Handle("/activity", loadAzGHAuthPage(rtApi.CreateActivity)).Methods("POST")

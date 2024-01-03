@@ -293,7 +293,7 @@
     }
 
     async function getTypes() {
-        const res = await fetch('/api/activity/type')
+        const res = await fetch('/api/activity-types')
 
         const data = await res.json()
         return data
