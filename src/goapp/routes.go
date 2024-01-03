@@ -208,10 +208,10 @@ func setApiRoutes(mux *mux.Router) {
 	muxApi.Handle("/users/{username}/approvals", loadAzAuthPage(rtApi.DownloadProjectApprovalsByUsername))
 
 	// OSS CONTRIBUTION SPONSORS API
-	muxApi.Handle("/osscontributionsponsors/all", loadAdminPage((rtApi.GetAllOssContributionSponsors)))
-	muxApi.Handle("/osscontributionsponsors/enabled", loadAzAuthPage((rtApi.GetAllEnabledOssContributionSponsors)))
-	muxApi.Handle("/osscontributionsponsors/add", loadAdminPage((rtApi.AddSponsor)))
-	muxApi.Handle("/osscontributionsponsors/update", loadAdminPage((rtApi.UpdateSponsor)))
+	muxApi.Handle("/oss-contribution-sponsors", loadAdminPage((rtApi.GetAllOssContributionSponsors))).Methods("GET")
+	muxApi.Handle("/oss-contribution-sponsors/enabled", loadAzAuthPage((rtApi.GetAllEnabledOssContributionSponsors))).Methods("GET")
+	muxApi.Handle("/oss-contribution-sponsors", loadAdminPage((rtApi.AddSponsor))).Methods("POST")
+	muxApi.Handle("/oss-contribution-sponsors/{id}", loadAdminPage((rtApi.UpdateSponsor))).Methods(("PUT"))
 
 	// LEGACY APIS
 	muxApi.Handle("/searchresult/{searchText}", loadGuidAuthApi(rtApi.LegacySearchHandler))

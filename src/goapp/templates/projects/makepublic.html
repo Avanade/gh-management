@@ -157,7 +157,7 @@
         }
     }
     async function getSponsorOptions() {
-        let uri = '/api/osscontributionsponsors/enabled'
+        let uri = '/api/oss-contribution-sponsors/enabled'
         let encoded = encodeURI(uri);
         const res = await fetch(encoded)
         const data = await res.json()
