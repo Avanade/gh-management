@@ -204,7 +204,7 @@
 
 
         if (!this.CategoryList[i]["statusLoaded"]) {
-          fetch('/api/CategoryArticlesById/' + id)
+          fetch(`/api/categories/${id}/articles`)
             .then(r => {
               r.json().then(body => {
                 this.CategoryList[i]["articles"] = body

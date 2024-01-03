@@ -164,9 +164,9 @@ func setApiRoutes(mux *mux.Router) {
 	muxApi.Handle("/categories/{id}", loadAzGHAuthPage(rtApi.GetCategoryByID)).Methods("GET")
 
 	// CATEGORY ARTICLES API
-	muxApi.Handle("/CategoryArticlesById/{id}", loadAzGHAuthPage(rtApi.GetCategoryArticlesById))
-	muxApi.Handle("/CategoryArticlesByArticlesID/{id}", loadAzGHAuthPage(rtApi.GetCategoryArticlesByArticlesID))
-	muxApi.Handle("/CategoryArticlesUpdate", loadAzGHAuthPage(rtApi.CategoryArticlesUpdate))
+	muxApi.Handle("/categories/{id}/articles", loadAzGHAuthPage(rtApi.GetCategoryArticlesByCategoryId)).Methods("GET")
+	muxApi.Handle("/articles/{id}", loadAzGHAuthPage(rtApi.GetCategoryArticlesById)).Methods("GET")
+	muxApi.Handle("/articles/{id}", loadAzGHAuthPage(rtApi.UpdateCategoryArticlesById)).Methods("PUT")
 
 	// REPOSITORIES API
 	muxApi.Handle("/repositories", loadAzGHAuthPage(rtApi.RequestRepository)).Methods("POST")
