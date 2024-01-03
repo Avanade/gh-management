@@ -279,7 +279,7 @@
                 }
 
                 Alpine.store('master').modal.show()
-                Alpine.store('master').postData("/api/activity", data, "Your activity has been added.",
+                Alpine.store('master').postData("/api/activities", data, "Your activity has been added.",
                     "Go to your activity list", "/activities")
             }
         }
@@ -307,7 +307,7 @@
     }
 
     async function getActivityById(id) {
-        const res = await fetch(`/api/activity/${id}`)
+        const res = await fetch(`/api/activities/${id}`)
         return res.json()
     }
 
