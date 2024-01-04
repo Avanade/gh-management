@@ -132,17 +132,17 @@ func setApiRoutes(mux *mux.Router) {
 	muxApi.Handle("/communities/{id}/sponsors", loadAzGHAuthPage(rtApi.GetCommunitySponsorsByCommunityId)).Methods("GET")
 	muxApi.Handle("/communities/{id}/tags", loadAzGHAuthPage(rtApi.GetCommunityTagsByCommunityId)).Methods("GET")
 	muxApi.Handle("/communities/{id}/onboarding", loadAzGHAuthPage(rtApi.GetCommunityOnBoardingInfo)).Methods("GET", "POST", "DELETE")
-	muxApi.Handle("/communities/{id}/status", loadAzGHAuthPage(rtApi.GetRequestStatusByCommunity)).Methods("GET")
-	muxApi.Handle("/communities/{id}/related-communities", loadAzAuthPage(rtApi.RelatedCommunitiesSelect)).Methods("GET")
+	muxApi.Handle("/communities/{id}/status", loadAzGHAuthPage(rtApi.GetRequestStatusByCommunityId)).Methods("GET")
+	muxApi.Handle("/communities/{id}/related-communities", loadAzAuthPage(rtApi.GetRelatedCommunitiesByCommunityId)).Methods("GET")
 
 	muxApi.HandleFunc("/approvals/community/reassign/callback", rtApi.UpdateCommunityApprovalReassignApprover).Methods("POST")
 	muxApi.HandleFunc("/approvals/community/callback", rtApi.UpdateApprovalStatusCommunity).Methods("POST")
 
 	// COMMUNITY APPROVERS API
-	muxApi.HandleFunc("/communityapprovers/update", rtApi.CommunityApproversListUpdate)
-	muxApi.HandleFunc("/communityapprovers/GetCommunityApproversList", rtApi.GetCommunityApproversList)
-	muxApi.HandleFunc("/communityapprovers/GetAllActiveCommunityApprovers", rtApi.GetAllActiveCommunityApprovers)
-	muxApi.HandleFunc("/communityapprovers/GetCommunityApproversList/{id}", rtApi.GetCommunityApproversById)
+	muxApi.HandleFunc("/community-approvers", rtApi.SubmitCommunityApprover).Methods("POST")
+	muxApi.HandleFunc("/community-approvers", rtApi.GetCommunityApproversList).Methods("GET")
+	muxApi.HandleFunc("/community-approvers/active", rtApi.GetAllActiveCommunityApprovers).Methods("GET")
+	muxApi.HandleFunc("/community-approvers/{id}", rtApi.GetCommunityApproversById).Methods("GET")
 
 	// CONTRIBUTION AREAS API
 	muxApi.Handle("/contribution-areas", loadAzGHAuthPage(rtApi.CreateContributionAreas)).Methods("POST")

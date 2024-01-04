@@ -199,7 +199,7 @@ func AddCommunity(w http.ResponseWriter, r *http.Request) {
 	go getTeamsChannelMembers(body.ChannelId, id)
 }
 
-func GetRequestStatusByCommunity(w http.ResponseWriter, r *http.Request) {
+func GetRequestStatusByCommunityId(w http.ResponseWriter, r *http.Request) {
 	logger := appinsights_wrapper.NewClient()
 	defer logger.EndOperation()
 
@@ -548,7 +548,7 @@ func RelatedCommunitiesDelete(w http.ResponseWriter, r *http.Request) {
 	w.Write(jsonResp)
 }
 
-func RelatedCommunitiesSelect(w http.ResponseWriter, r *http.Request) {
+func GetRelatedCommunitiesByCommunityId(w http.ResponseWriter, r *http.Request) {
 	logger := appinsights_wrapper.NewClient()
 	defer logger.EndOperation()
 
@@ -718,7 +718,7 @@ func GetAllActiveCommunityApprovers(w http.ResponseWriter, r *http.Request) {
 	w.Write(jsonResp)
 }
 
-func CommunityApproversListUpdate(w http.ResponseWriter, r *http.Request) {
+func SubmitCommunityApprover(w http.ResponseWriter, r *http.Request) {
 	sessionaz, _ := session.Store.Get(r, "auth-session")
 	iprofile := sessionaz.Values["profile"]
 	profile := iprofile.(map[string]interface{})

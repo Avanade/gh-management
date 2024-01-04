@@ -274,7 +274,7 @@
           })
       },
       getActiveApprovers() {
-        fetch('/api/communityapprovers/GetAllActiveCommunityApprovers')
+        fetch('/api/community-approvers/active')
           .then(r => {
             r.json().then(body => {
               if (body && body.length > 0) {

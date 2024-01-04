@@ -207,28 +207,11 @@
                 postData = this.form;
                 console.log("postData")
                 console.log(postData)
-                Alpine.store('master').postData('/api/communityapprovers/update', postData,
+                Alpine.store('master').postData('/api/community-approvers', postData,
                     "Your community approvers has been updated.",
                     "Close")
 
 
-
-
-            },
-            submit2(id) {
-                if (this.approver.selected != "") {
-                    var modal = Alpine.store('master').modal
-                    modal.update('loading', 'Saving', 'Please wait.', '', '')
-                    if (!this.form.id) {
-                        this.form.id = 0
-
-                    }
-
-                    postData = this.form;
-                    Alpine.store('master').postData('/api/communityapprovers/update', postData,
-                        "Your community approvers has been updated.",
-                        "update communityapprovers")
-                }
 
 
             },
@@ -242,7 +225,7 @@
                 this.formUpdate.id = id
                 this.formUpdate.name = ApproverUserPrincipalName
                 postData2 = this.formUpdate;
-                Alpine.store('master').postData('/api/communityapprovers/update', postData2,
+                Alpine.store('master').postData('/api/community-approvers', postData2,
                     "Your community approvers has been updated.",
                     "Close")
 
@@ -253,7 +236,7 @@
 
                 this.mode = "Edit"
 
-                await fetch('/api/communityapprovers/GetCommunityApproversList/' + id)
+                await fetch(`/api/community-approvers/${id}`)
                     .then(r => {
                         r.json().then(body => {
                             this.formUpdate.id = body[0]["Id"]
@@ -278,7 +261,7 @@
             },
             getCommunityApprover() {
 
-                fetch('/api/communityapprovers/GetCommunityApproversList')
+                fetch('/api/community-approvers')
                     .then(r => {
                         r.json().then(body => {
                             this.approvers = body

@@ -316,7 +316,7 @@
             communityCreatedBy: '',
             async init() {
                 modal.update('loading', 'Loading', 'Please wait', '', '')
-                fetch('/api/communityapprovers/GetAllActiveCommunityApprovers')
+                fetch('/api/community-approvers/active')
                     .then(r => {
                         r.json().then(body => {
                             if (!body || body.length < 1) {
