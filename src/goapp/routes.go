@@ -199,18 +199,18 @@ func setApiRoutes(mux *mux.Router) {
 	muxApi.Handle("/external-links/{id}", loadAdminPage(rtApi.UpdateExternalLinksById)).Methods("PUT")
 	muxApi.Handle("/external-links/{id}", loadAdminPage(rtApi.DeleteExternalLinkById)).Methods("DELETE")
 
+	// OSS CONTRIBUTION SPONSORS API
+	muxApi.Handle("/oss-contribution-sponsors", loadAdminPage((rtApi.GetAllOssContributionSponsors))).Methods("GET")
+	muxApi.Handle("/oss-contribution-sponsors/enabled", loadAzAuthPage((rtApi.GetAllEnabledOssContributionSponsors))).Methods("GET")
+	muxApi.Handle("/oss-contribution-sponsors", loadAdminPage((rtApi.AddSponsor))).Methods("POST")
+	muxApi.Handle("/oss-contribution-sponsors/{id}", loadAdminPage((rtApi.UpdateSponsor))).Methods(("PUT"))
+
 	// APPROVALS API
 	muxApi.HandleFunc("/approvals/community/callback", rtApi.UpdateApprovalStatusCommunity).Methods("POST")
 	muxApi.HandleFunc("/approvals/community/reassign/callback", rtApi.UpdateCommunityApprovalReassignApprover).Methods("POST")
 	muxApi.HandleFunc("/approvals/project/callback", rtApi.UpdateApprovalStatusProjects).Methods("POST")
 	muxApi.HandleFunc("/approvals/project/reassign/callback", rtApi.UpdateApprovalReassignApprover).Methods("POST")
 	muxApi.Handle("/users/{username}/approvals", loadAzAuthPage(rtApi.DownloadProjectApprovalsByUsername))
-
-	// OSS CONTRIBUTION SPONSORS API
-	muxApi.Handle("/oss-contribution-sponsors", loadAdminPage((rtApi.GetAllOssContributionSponsors))).Methods("GET")
-	muxApi.Handle("/oss-contribution-sponsors/enabled", loadAzAuthPage((rtApi.GetAllEnabledOssContributionSponsors))).Methods("GET")
-	muxApi.Handle("/oss-contribution-sponsors", loadAdminPage((rtApi.AddSponsor))).Methods("POST")
-	muxApi.Handle("/oss-contribution-sponsors/{id}", loadAdminPage((rtApi.UpdateSponsor))).Methods(("PUT"))
 
 	// LEGACY APIS
 	muxApi.Handle("/searchresult/{searchText}", loadGuidAuthApi(rtApi.LegacySearchHandler))
