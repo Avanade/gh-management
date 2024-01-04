@@ -279,12 +279,12 @@
 <script src="https://cdn.jsdelivr.net/npm/marked@2.1.3/marked.min.js"></script>
 <script type="text/javascript">
     async function getCommunitiesisexternals() {
-        const res = await fetch('/api/communities/1/isexternal')
+        const res = await fetch('/api/communities/isexternal/1')
         const data = await res.json()
         return data.filter(item => {return item.id != '{{.Id}}'})
     }
     async function getCommunitiesinternals() {
-        const res = await fetch('/api/communities/0/isexternal')
+        const res = await fetch('/api/communities/isexternal/0')
         const data = await res.json()
         return data.filter(item => {return item.id != '{{.Id}}'})
     }

@@ -126,7 +126,7 @@ func setApiRoutes(mux *mux.Router) {
 	muxApi.Handle("/communities/imanage", loadAzGHAuthPage(rtApi.GetIManageCommunities)).Methods("GET")
 	muxApi.Handle("/communities/{id}/members", loadAzAuthPage(rtApi.GetCommunityMembersByCommunityId)).Methods("GET")
 	muxApi.Handle("/communities/{id}", loadAzGHAuthPage(rtApi.GetCommunityById)).Methods("GET")
-	muxApi.Handle("/communities/{isexternal}/isexternal", loadAzGHAuthPage(rtApi.GetCommunitiesIsExternal)).Methods("GET")
+	muxApi.Handle("/communities/isexternal/{isexternal}", loadAzGHAuthPage(rtApi.GetCommunitiesIsExternal)).Methods("GET")
 	muxApi.Handle("/communities", loadAzGHAuthPage(rtApi.AddCommunity)).Methods("POST")
 	muxApi.Handle("/communities/{id}/members", loadAzGHAuthPage(rtApi.UploadCommunityMembers)).Methods("POST")
 	muxApi.Handle("/communities/{id}/sponsors", loadAzGHAuthPage(rtApi.GetCommunitySponsorsByCommunityId)).Methods("GET")
