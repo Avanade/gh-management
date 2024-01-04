@@ -122,21 +122,18 @@ func setApiRoutes(mux *mux.Router) {
 
 	// COMMUNITIES API
 	muxApi.Handle("/communities", loadAzAuthPage(rtApi.GetCommunities)).Methods("GET")
-	muxApi.Handle("/community/{id}/members", loadAzAuthPage(rtApi.GetCommunityMembers)).Methods("GET")
-	muxApi.Handle("/communities/my", loadAzGHAuthPage(rtApi.GetMyCommunitylist)).Methods("GET")
-	muxApi.Handle("/communities/imanage", loadAzGHAuthPage(rtApi.GetCommunityIManagelist)).Methods("GET")
-	muxApi.Handle("/community/getcommunity/{id}", loadAzGHAuthPage(rtApi.GetUserCommunity)).Methods("GET")
-	muxApi.Handle("/community/getCommunitiesisexternal/{isexternal}", loadAzGHAuthPage(rtApi.GetCommunitiesIsexternal)).Methods("GET")
-	muxApi.Handle("/community", loadAzGHAuthPage(rtApi.AddCommunity)).Methods("POST")
-	muxApi.Handle("/community/members/processfile/{id}", loadAzGHAuthPage(rtApi.ProcessCommunityMembersListExcel)).Methods("POST")
-	muxApi.Handle("/communitySponsors", loadAzGHAuthPage(rtApi.CommunitySponsorsAPIHandler))
-	muxApi.Handle("/CommunitySponsorsPerCommunityId/{id}", loadAzGHAuthPage(rtApi.CommunitySponsorsPerCommunityId))
-	muxApi.Handle("/CommunityTagPerCommunityId/{id}", loadAzGHAuthPage(rtApi.CommunityTagPerCommunityId))
-	muxApi.Handle("/community/onboarding/{id}", loadAzGHAuthPage(rtApi.GetCommunityOnBoardingInfo)).Methods("GET", "POST", "DELETE")
-	muxApi.Handle("/communitystatus/{id}", loadAzGHAuthPage(rtApi.GetRequestStatusByCommunity))
-
-	// RELATED COMMUNITIES API
-	muxApi.Handle("/relatedcommunity/{id}", loadAzAuthPage(rtApi.RelatedCommunitiesSelect)).Methods("GET")
+	muxApi.Handle("/communities/my", loadAzGHAuthPage(rtApi.GetMyCommunities)).Methods("GET")
+	muxApi.Handle("/communities/imanage", loadAzGHAuthPage(rtApi.GetIManageCommunities)).Methods("GET")
+	muxApi.Handle("/communities/{id}/members", loadAzAuthPage(rtApi.GetCommunityMembersByCommunityId)).Methods("GET")
+	muxApi.Handle("/communities/{id}", loadAzGHAuthPage(rtApi.GetCommunityById)).Methods("GET")
+	muxApi.Handle("/communities/{isexternal}/isexternal", loadAzGHAuthPage(rtApi.GetCommunitiesIsExternal)).Methods("GET")
+	muxApi.Handle("/communities", loadAzGHAuthPage(rtApi.AddCommunity)).Methods("POST")
+	muxApi.Handle("/communities/{id}/members", loadAzGHAuthPage(rtApi.UploadCommunityMembers)).Methods("POST")
+	muxApi.Handle("/communities/{id}/sponsors", loadAzGHAuthPage(rtApi.GetCommunitySponsorsByCommunityId)).Methods("GET")
+	muxApi.Handle("/communities/{id}/tags", loadAzGHAuthPage(rtApi.GetCommunityTagsByCommunityId)).Methods("GET")
+	muxApi.Handle("/communities/{id}/onboarding", loadAzGHAuthPage(rtApi.GetCommunityOnBoardingInfo)).Methods("GET", "POST", "DELETE")
+	muxApi.Handle("/communities/{id}/status", loadAzGHAuthPage(rtApi.GetRequestStatusByCommunity)).Methods("GET")
+	muxApi.Handle("/communities/{id}/related-communities", loadAzAuthPage(rtApi.RelatedCommunitiesSelect)).Methods("GET")
 
 	muxApi.HandleFunc("/approvals/community/reassign/callback", rtApi.UpdateCommunityApprovalReassignApprover).Methods("POST")
 	muxApi.HandleFunc("/approvals/community/callback", rtApi.UpdateApprovalStatusCommunity).Methods("POST")

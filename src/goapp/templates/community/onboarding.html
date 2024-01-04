@@ -150,7 +150,7 @@
             alreadyMember() {
                 var modal = Alpine.store('master').modal
                 modal.update('loading', 'Processing', 'Adding you to our database.', '', '')
-                fetch(`/api/community/onboarding/${this.community.Id}`, {
+                fetch(`/api/communities/${this.community.Id}/onboarding`, {
                         method: 'POST'
                     })
                     .then(() => {
@@ -164,7 +164,7 @@
             removeMember() {
                 var modal = Alpine.store('master').modal
                 modal.update('loading', 'Processing', 'Removing you from our database.', '', '')
-                fetch(`/api/community/onboarding/${this.community.Id}`, {
+                fetch(`/api/communities/${this.community.Id}/onboarding`, {
                         method: 'DELETE'
                     })
                     .then(() => {
@@ -179,7 +179,7 @@
                 var modal = Alpine.store('master').modal
                 this.community.loaded = false
                 modal.update('loading', 'Loading', 'Please wait', '', '')
-                fetch(`/api/community/onboarding/${this.community.Id}`).then(j => j.json()
+                fetch(`/api/communities/${this.community.Id}/onboarding`).then(j => j.json()
                         .then(data => {
                             if (!data.Community.Sponsors) data.Community.Sponsors = []
                             if (!data.Community.Communities) data.Community.Communities = []

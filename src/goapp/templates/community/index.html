@@ -290,7 +290,7 @@
         }
 
         if (!this.Communitylist[i]["statusLoaded"]) {
-          fetch('/api/communitystatus/' + id)
+          fetch(`/api/communities/${id}/status`)
             .then(r => {
               r.json().then(body => {
                 this.Communitylist[i]["approvalStatus"] = body

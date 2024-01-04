@@ -227,7 +227,7 @@ func GetRequestStatusByCommunity(w http.ResponseWriter, r *http.Request) {
 	w.Write(jsonResp)
 }
 
-func GetCommunitiesIsexternal(w http.ResponseWriter, r *http.Request) {
+func GetCommunitiesIsExternal(w http.ResponseWriter, r *http.Request) {
 	logger := appinsights_wrapper.NewClient()
 	defer logger.EndOperation()
 
@@ -263,7 +263,7 @@ func GetCommunitiesIsexternal(w http.ResponseWriter, r *http.Request) {
 	w.Write(jsonResp)
 }
 
-func ProcessCommunityMembersListExcel(w http.ResponseWriter, r *http.Request) {
+func UploadCommunityMembers(w http.ResponseWriter, r *http.Request) {
 	logger := appinsights_wrapper.NewClient()
 	defer logger.EndOperation()
 
@@ -388,7 +388,7 @@ func GetCommunities(w http.ResponseWriter, r *http.Request) {
 	w.Write(jsonResp)
 }
 
-func GetCommunityMembers(w http.ResponseWriter, r *http.Request) {
+func GetCommunityMembersByCommunityId(w http.ResponseWriter, r *http.Request) {
 	logger := appinsights_wrapper.NewClient()
 	defer logger.EndOperation()
 
@@ -408,55 +408,7 @@ func GetCommunityMembers(w http.ResponseWriter, r *http.Request) {
 	w.Write(jsonResp)
 }
 
-func CommunitySponsorsAPIHandler(w http.ResponseWriter, r *http.Request) {
-	logger := appinsights_wrapper.NewClient()
-	defer logger.EndOperation()
-
-	sessionaz, _ := session.Store.Get(r, "auth-session")
-	iprofile := sessionaz.Values["profile"]
-	profile := iprofile.(map[string]interface{})
-	username := profile["preferred_username"]
-
-	var body CommunitySponsorsDto
-	err := json.NewDecoder(r.Body).Decode(&body)
-	if err != nil {
-		logger.LogException(err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	switch r.Method {
-	case "POST":
-		param := map[string]interface{}{
-
-			"CommunityId":       body.CommunityId,
-			"UserPrincipalName": body.UserPrincipalName,
-			"CreatedBy":         username,
-		}
-
-		_, err := db.CommunitySponsorsInsert(param)
-		if err != nil {
-			logger.LogException(err)
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-
-	case "PUT":
-		param := map[string]interface{}{
-			"CommunityId":       body.CommunityId,
-			"UserPrincipalName": body.UserPrincipalName,
-			"CreatedBy":         username,
-		}
-		_, err := db.CommunitySponsorsUpdate(param)
-		if err != nil {
-			logger.LogException(err)
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-	}
-}
-
-func CommunitySponsorsPerCommunityId(w http.ResponseWriter, r *http.Request) {
+func GetCommunitySponsorsByCommunityId(w http.ResponseWriter, r *http.Request) {
 	logger := appinsights_wrapper.NewClient()
 	defer logger.EndOperation()
 
@@ -488,7 +440,7 @@ func CommunitySponsorsPerCommunityId(w http.ResponseWriter, r *http.Request) {
 	w.Write(jsonResp)
 }
 
-func CommunityTagPerCommunityId(w http.ResponseWriter, r *http.Request) {
+func GetCommunityTagsByCommunityId(w http.ResponseWriter, r *http.Request) {
 	logger := appinsights_wrapper.NewClient()
 	defer logger.EndOperation()
 
@@ -627,7 +579,7 @@ func RelatedCommunitiesSelect(w http.ResponseWriter, r *http.Request) {
 	w.Write(jsonResp)
 }
 
-func GetMyCommunitylist(w http.ResponseWriter, r *http.Request) {
+func GetMyCommunities(w http.ResponseWriter, r *http.Request) {
 	// Get email address of the user
 	sessionaz, _ := session.Store.Get(r, "auth-session")
 	iprofile := sessionaz.Values["profile"]
@@ -653,7 +605,7 @@ func GetMyCommunitylist(w http.ResponseWriter, r *http.Request) {
 	w.Write(jsonResp)
 }
 
-func GetCommunityIManagelist(w http.ResponseWriter, r *http.Request) {
+func GetIManageCommunities(w http.ResponseWriter, r *http.Request) {
 	sessionaz, _ := session.Store.Get(r, "auth-session")
 	iprofile := sessionaz.Values["profile"]
 	profile := iprofile.(map[string]interface{})
@@ -680,7 +632,7 @@ func GetCommunityIManagelist(w http.ResponseWriter, r *http.Request) {
 	w.Write(jsonResp)
 }
 
-func GetUserCommunity(w http.ResponseWriter, r *http.Request) {
+func GetCommunityById(w http.ResponseWriter, r *http.Request) {
 	req := mux.Vars(r)
 	id := req["id"]
 

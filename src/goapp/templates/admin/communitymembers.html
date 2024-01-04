@@ -105,7 +105,7 @@
             this.members = this.communities[index].members
           } else {
             this.membersLoaded = false
-            fetch('/api/community/' + community.Id + '/members')
+            fetch('/api/communities/' + community.Id + '/members')
               .then(r => {
                 r.json().then(body => {
                   if (!body) {
