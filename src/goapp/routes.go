@@ -194,8 +194,8 @@ func setApiRoutes(mux *mux.Router) {
 
 	//EXTERNAL LINKS API
 	muxApi.Handle("/external-links", loadAdminPage(rtApi.GetExternalLinks)).Methods("GET")
-	muxApi.Handle("/external-links/{id}", loadAdminPage(rtApi.GetExternalLinkById)).Methods("GET")
 	muxApi.Handle("/external-links/enabled", loadAzAuthPage(rtApi.GetExternalLinksEnabled)).Methods("GET")
+	muxApi.Handle("/external-links/{id}", loadAdminPage(rtApi.GetExternalLinkById)).Methods("GET")
 	muxApi.Handle("/external-links", loadAdminPage(rtApi.CreateExternalLinks)).Methods("POST")
 	muxApi.Handle("/external-links/{id}", loadAdminPage(rtApi.UpdateExternalLinksById)).Methods("PUT")
 	muxApi.Handle("/external-links/{id}", loadAdminPage(rtApi.DeleteExternalLinkById)).Methods("DELETE")
