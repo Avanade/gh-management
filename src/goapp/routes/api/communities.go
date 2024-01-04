@@ -771,7 +771,7 @@ func ApprovalSystemRequestCommunity(data db.CommunityApproval, logger *appinsigh
 
 	url := os.Getenv("APPROVAL_SYSTEM_APP_URL")
 	if url != "" {
-		url = url + "/request"
+		url = url + "/api/request"
 		ch := make(chan *http.Response)
 		// var res *http.Response
 

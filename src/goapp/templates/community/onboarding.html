@@ -201,7 +201,7 @@
                     })
             },
             getCommunity() {
-                fetch('/api/relatedcommunity/' + '{{.Id}}')
+                fetch('/api/communities/{{.Id}}/related-communities')
                     .then(r => {
                         r.json().then(body => {
                             if (body) {
