@@ -93,7 +93,7 @@ type RequestMakePublicDto struct {
 	OSSContributionInformation string `json:"osscontributionInformation"`
 }
 
-func RequestRepository(w http.ResponseWriter, r *http.Request) {
+func CreateRepository(w http.ResponseWriter, r *http.Request) {
 	logger := appinsights_wrapper.NewClient()
 	defer logger.EndOperation()
 
@@ -259,7 +259,7 @@ func UpdateRepositoryEcattIdById(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
-func GetUserProjects(w http.ResponseWriter, r *http.Request) {
+func GetMyRepositories(w http.ResponseWriter, r *http.Request) {
 	logger := appinsights_wrapper.NewClient()
 	defer logger.EndOperation()
 
@@ -328,7 +328,7 @@ func GetUsersWithGithub(w http.ResponseWriter, r *http.Request) {
 	w.Write(jsonResp)
 }
 
-func GetRequestStatusByProject(w http.ResponseWriter, r *http.Request) {
+func GetRequestStatusByRepoId(w http.ResponseWriter, r *http.Request) {
 	logger := appinsights_wrapper.NewClient()
 	defer logger.EndOperation()
 
@@ -533,7 +533,7 @@ func ArchiveProject(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
-func GetAllRepositories(w http.ResponseWriter, r *http.Request) {
+func GetRepositories(w http.ResponseWriter, r *http.Request) {
 	logger := appinsights_wrapper.NewClient()
 	defer logger.EndOperation()
 

@@ -121,7 +121,7 @@
             return []
         }
 
-        const res = await fetch(`/api/search/users/${search}`)
+        const res = await fetch(`/api/users/${search}/search`)
         const users = await res.json()
         return users
     }
@@ -170,7 +170,7 @@
             async getUsersList() {
 
 
-                await fetch('/api/allusers').then(j => j.json()
+                await fetch('/api/users').then(j => j.json()
                         .then(data => {
 
                             this.approver.data = data

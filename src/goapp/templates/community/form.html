@@ -301,7 +301,7 @@
             return []
         }
 
-        const res = await fetch(`/api/search/users/${search}`)
+        const res = await fetch(`/api/users/${search}/search`)
         const users = await res.json()
 
         return users

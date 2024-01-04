@@ -978,7 +978,7 @@
 
   const getPopularTopics = async (rowCount) => {
     const res = await fetch(
-      `/api/repositories/topics/popular?offset=0&rowCount=${rowCount}`
+      `/api/popular-topics?offset=0&rowCount=${rowCount}`
     )
 
     const data = await res.json()
@@ -1017,7 +1017,7 @@
       getUserRepositories() {
         if (!this.userRepositoriesList || this.userRepositoriesList.length === 0) {
           this.showSpinner = true
-          fetch('/api/repositories/list')
+          fetch('/api/repositories/my')
             .then(r => {
               r.json().then(body => {
                 console.log(body)
@@ -1032,7 +1032,7 @@
       },
       getAllRepositories() {
         this.showSpinner = true
-        fetch(`/api/allrepositories?search=${this.search? this.search : ''}&offset=${this.offset}`)
+        fetch(`/api/repositories?search=${this.search? this.search : ''}&offset=${this.offset}`)
           .then(r => {
             r.json().then(body => {
               this.allRepositoriesList = body.data
@@ -1048,7 +1048,7 @@
       },
       getRepositoryApprovalStatus(id, i, source) {
         if (!this.userRepositoriesList[i]["statusLoaded"] && source === 'GitHub') {
-          fetch('/api/repositories/' + id)
+          fetch(`/api/repositories/${id}/status`)
             .then(r => {
               r.json().then(body => {
                 console.log(body)
@@ -1069,7 +1069,7 @@
         this.view = v ? v : 'my'
         this.search = urlParams.get('search')
 
-        fetch('/api/getActiveApprovalTypes')
+        fetch('/api/approval-types/active')
           .then(r => {
             r.json().then(body => {
               if (body && body.length > 0) {
@@ -1121,7 +1121,7 @@
         }
       },
       archiveRepository(repositoryName, repositoryId, visibility, isArchived) {
-        let url = `/api/repositories/archive/${repositoryName}/${repositoryId}/${visibility}/${isArchived? '0': '1'}`
+        let url = `/api/repositories/${repositoryId}/archive/${repositoryName}/${visibility}/${isArchived? '0': '1'}`
 
         let f = () => {
           Alpine.store('master').modal.show()
@@ -1136,7 +1136,7 @@
         Alpine.store('master').confirmationModal.show()
       },
       setVisibility(repositoryName, repositoryId, currentState, desiredState) {
-        let url = `/api/repositories/visibility/${repositoryName}/${repositoryId}/${currentState}/${desiredState}`
+        let url = `/api/repositories/${repositoryId}/visibility/${repositoryName}/${currentState}/${desiredState}`
         let f = () => {
           Alpine.store('master').modal.show()
           Alpine.store('master').getData(url, `Repository has been made ${desiredState}`, "Refresh repository list",
@@ -1184,7 +1184,7 @@
       },
       getUserRepoCollaborators(id, i) {
         if (!this.userRepositoriesList[i]["collaboratorsLoaded"]) {
-          fetch(`/api/repositories/collaborators/${id}`)
+          fetch(`/api/repositories/${id}/collaborators`)
             .then(r => {
               if (r.status === 200) {
                 r.json().then(body => {
@@ -1203,7 +1203,7 @@
       },
       getRepoCollaborators(id, i) {
         if (!this.allRepositoriesList[i]["collaboratorsLoaded"]) {
-          fetch(`/api/repositories/collaborators/${id}`)
+          fetch(`/api/repositories/${id}/collaborators`)
             .then(r => {
               if (r.status === 200) {
                 r.json().then(body => {
@@ -1222,7 +1222,7 @@
       },
       gitHubRepoPermissions: ['admin', 'pull', 'triage', 'push', 'maintain'],
       getGitHubUsers() {
-        fetch(`/api/alluserswithgithub`)
+        fetch(`/api/users/with-github`)
           .then(r => {
             r.json().then(body => {
               this.githubUsers = body
@@ -1239,8 +1239,8 @@
       submit() {
         Alpine.store('master').modal.reset()
         Alpine.store('master').modal.show()
-        Alpine.store('master').getData(
-          `/api/repositories/collaborators/add/${this.form.repoId}/${this.form.ghUsername}/${this.form.permission}`,
+        Alpine.store('master').postData(
+          `/api/repositories/${this.form.repoId}/collaborators/${this.form.ghUsername}/${this.form.permission}`, null,
           "GitHub user has been invited to the repository.", "Close", "/repositories")
         this.form.repoId = ''
         this.form.ghUsername = ''
@@ -1266,10 +1266,10 @@
         this.showAddCollaboratorModal = true
       },
       removeCollaborator(id, user, permission) {
-        let url = `/api/repositories/collaborators/remove/${id}/${user}/${permission}`
+        let url = `/api/repositories/${id}/collaborators/${user}/${permission}`
         let f = () => {
           Alpine.store('master').modal.show()
-          Alpine.store('master').getData(url, `Collaborator was successfully removed.`, "Refresh repository list",
+          Alpine.store('master').deleteData(url, null, `Collaborator was successfully removed.`, "Refresh repository list",
             "/repositories")
         }
 

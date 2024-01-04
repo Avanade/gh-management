@@ -134,7 +134,7 @@
             submit() {
                 Alpine.store('master').modal.reset()
                 Alpine.store('master').modal.show()
-                Alpine.store('master').postData("/api/repositories/request/public", this.form,
+                Alpine.store('master').putData(`/api/repositories/${this.form.id}/public`, this.form,
                     "Your request has been submitted.", "Go to your repository list", "/repositories")
             },
             get isValid() {

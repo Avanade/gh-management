@@ -160,30 +160,35 @@ func setApiRoutes(mux *mux.Router) {
 	muxApi.Handle("/articles/{id}", loadAzGHAuthPage(rtApi.UpdateCategoryArticlesById)).Methods("PUT")
 
 	// REPOSITORIES API
-	muxApi.Handle("/allrepositories", loadAzAuthPage(rtApi.GetAllRepositories))
-	muxApi.Handle("/repositories", loadAzGHAuthPage(rtApi.RequestRepository)).Methods("POST")
+	muxApi.Handle("/repositories", loadAzAuthPage(rtApi.GetRepositories)).Methods("GET")
+	muxApi.Handle("/repositories/my", loadAzGHAuthPage(rtApi.GetMyRepositories)).Methods("GET")
+	muxApi.Handle("/repositories/{id}/status", loadAzGHAuthPage(rtApi.GetRequestStatusByRepoId)).Methods("GET")
+	muxApi.Handle("/repositories", loadAzGHAuthPage(rtApi.CreateRepository)).Methods("POST")
 	muxApi.Handle("/repositories/{id}", loadAzGHAuthPage(rtApi.UpdateRepositoryById)).Methods("PUT")
 	muxApi.Handle("/repositories/{id}/ecattid", loadAzGHAuthPage(rtApi.UpdateRepositoryEcattIdById)).Methods("PUT")
-	muxApi.Handle("/repositories/list", loadAzGHAuthPage(rtApi.GetUserProjects))
-	muxApi.Handle("/repositories/{id}", loadAzGHAuthPage(rtApi.GetRequestStatusByProject))
 
-	muxApi.Handle("/repositories/request/public", loadAzGHAuthPage(rtApi.RequestMakePublic))
-	muxApi.Handle("/repositories/collaborators/{id}", loadAzGHAuthPage(rtApi.GetRepoCollaboratorsByRepoId))
-	muxApi.Handle("/repositories/collaborators/add/{id}/{ghUser}/{permission}", loadAzGHAuthPage(rtApi.AddCollaborator))
-	muxApi.Handle("/repositories/collaborators/remove/{id}/{ghUser}/{permission}", loadAzGHAuthPage(rtApi.RemoveCollaborator))
-	muxApi.Handle("/repositories/archive/{project}/{projectId}/{state}/{archive}", loadAzGHAuthPage(rtApi.ArchiveProject))
-	muxApi.Handle("/repositories/visibility/{project}/{projectId}/{currentState}/{desiredState}", loadAzGHAuthPage(rtApi.SetVisibility))
-	muxApi.Handle("/repositories/topics/popular", loadAzGHAuthPage(rtApi.GetPopularTopics))
-	muxApi.Handle("/allusers", loadAzAuthPage(rtApi.GetAllUserFromActiveDirectory))
-	muxApi.Handle("/alluserswithgithub", loadAzAuthPage(rtApi.GetUsersWithGithub))
-	muxApi.Handle("/search/users/{search}", loadAzAuthPage(rtApi.SearchUserFromActiveDirectory))
-	muxApi.Handle("/getActiveApprovalTypes", loadAzGHAuthPage(rtApi.GetActiveApprovalTypes))
+	muxApi.Handle("/repositories/{id}/collaborators", loadAzGHAuthPage(rtApi.GetRepoCollaboratorsByRepoId)).Methods("GET")
+	muxApi.Handle("/repositories/{id}/collaborators/{ghUser}/{permission}", loadAzGHAuthPage(rtApi.AddCollaborator)).Methods("POST")
+	muxApi.Handle("/repositories/{id}/collaborators/{ghUser}/{permission}", loadAzGHAuthPage(rtApi.RemoveCollaborator)).Methods("DELETE")
+
+	muxApi.Handle("/repositories/{id}/public", loadAzGHAuthPage(rtApi.RequestMakePublic)).Methods("PUT")
+	muxApi.Handle("/repositories/{projectId}/archive/{project}/{state}/{archive}", loadAzGHAuthPage(rtApi.ArchiveProject))
+	muxApi.Handle("/repositories/{projectId}/visibility/{project}/{currentState}/{desiredState}", loadAzGHAuthPage(rtApi.SetVisibility))
+
+	// USERS API
+	muxApi.Handle("/users", loadAzAuthPage(rtApi.GetAllUserFromActiveDirectory)).Methods("GET")
+	muxApi.Handle("/users/with-github", loadAzAuthPage(rtApi.GetUsersWithGithub))
+	muxApi.Handle("/users/{search}/search", loadAzAuthPage(rtApi.SearchUserFromActiveDirectory))
+
+	// POPULAR TOPICS API
+	muxApi.Handle("/popular-topics", loadAzGHAuthPage(rtApi.GetPopularTopics))
 
 	//APPROVAL TYPES API
 	muxApi.Handle("/approval-types", loadAzAuthPage(rtApi.CreateApprovalType)).Methods("POST")
 	muxApi.Handle("/approval-types/{id}", loadAzAuthPage(rtApi.EditApprovalTypeById)).Methods("PUT")
 	muxApi.Handle("/approval-types/{id}/archived", loadAzAuthPage(rtApi.SetIsArchivedApprovalTypeById)).Methods("PUT")
 	muxApi.Handle("/approval-types", loadAzAuthPage(rtApi.GetApprovalTypes)).Methods("GET")
+	muxApi.Handle("/approval-types/active", loadAzGHAuthPage(rtApi.GetActiveApprovalTypes)).Methods("GET")
 	muxApi.Handle("/approval-types/{id}", loadAzAuthPage(rtApi.GetApprovalTypeById)).Methods("GET")
 
 	//EXTERNAL LINKS API
