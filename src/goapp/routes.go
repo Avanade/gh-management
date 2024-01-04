@@ -135,9 +135,6 @@ func setApiRoutes(mux *mux.Router) {
 	muxApi.Handle("/communities/{id}/status", loadAzGHAuthPage(rtApi.GetRequestStatusByCommunityId)).Methods("GET")
 	muxApi.Handle("/communities/{id}/related-communities", loadAzAuthPage(rtApi.GetRelatedCommunitiesByCommunityId)).Methods("GET")
 
-	muxApi.HandleFunc("/approvals/community/reassign/callback", rtApi.UpdateCommunityApprovalReassignApprover).Methods("POST")
-	muxApi.HandleFunc("/approvals/community/callback", rtApi.UpdateApprovalStatusCommunity).Methods("POST")
-
 	// COMMUNITY APPROVERS API
 	muxApi.HandleFunc("/community-approvers", rtApi.SubmitCommunityApprover).Methods("POST")
 	muxApi.HandleFunc("/community-approvers", rtApi.GetCommunityApproversList).Methods("GET")
@@ -157,7 +154,7 @@ func setApiRoutes(mux *mux.Router) {
 	muxApi.Handle("/categories/{id}", loadAzGHAuthPage(rtApi.CategoryUpdate)).Methods("PUT")
 	muxApi.Handle("/categories/{id}", loadAzGHAuthPage(rtApi.GetCategoryByID)).Methods("GET")
 
-	// CATEGORY ARTICLES API
+	// CATEGORY ARTICLES API/
 	muxApi.Handle("/categories/{id}/articles", loadAzGHAuthPage(rtApi.GetCategoryArticlesByCategoryId)).Methods("GET")
 	muxApi.Handle("/articles/{id}", loadAzGHAuthPage(rtApi.GetCategoryArticlesById)).Methods("GET")
 	muxApi.Handle("/articles/{id}", loadAzGHAuthPage(rtApi.UpdateCategoryArticlesById)).Methods("PUT")
@@ -198,8 +195,10 @@ func setApiRoutes(mux *mux.Router) {
 	muxApi.Handle("/external-links/{id}", loadAdminPage(rtApi.DeleteExternalLinkById)).Methods("DELETE")
 
 	// APPROVALS API
+	muxApi.HandleFunc("/approvals/community/callback", rtApi.UpdateApprovalStatusCommunity).Methods("POST")
+	muxApi.HandleFunc("/approvals/community/reassign/callback", rtApi.UpdateCommunityApprovalReassignApprover).Methods("POST")
 	muxApi.HandleFunc("/approvals/project/callback", rtApi.UpdateApprovalStatusProjects).Methods("POST")
-	muxApi.HandleFunc("/approvals/project/reassign/callback", rtApi.UpdateApprovalReassignApprover)
+	muxApi.HandleFunc("/approvals/project/reassign/callback", rtApi.UpdateApprovalReassignApprover).Methods("POST")
 	muxApi.Handle("/users/{username}/approvals", loadAzAuthPage(rtApi.DownloadProjectApprovalsByUsername))
 
 	// OSS CONTRIBUTION SPONSORS API
