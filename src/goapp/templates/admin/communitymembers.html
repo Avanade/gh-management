@@ -90,7 +90,7 @@
         members: [],
         selectedCommunity: -1,
         getCommunities() {
-          fetch('/api/community/all')
+          fetch('/api/communities')
             .then(r => {
               r.json().then(body => {
                 this.communities = body

@@ -627,30 +627,6 @@ func RelatedCommunitiesSelect(w http.ResponseWriter, r *http.Request) {
 	w.Write(jsonResp)
 }
 
-func GetUserCommunitylist(w http.ResponseWriter, r *http.Request) {
-	sessionaz, _ := session.Store.Get(r, "auth-session")
-	iprofile := sessionaz.Values["profile"]
-	profile := iprofile.(map[string]interface{})
-	username := profile["preferred_username"].(string)
-	communities, err := db.CommunitiesByCreatedBy(username)
-	if err != nil {
-		log.Println(err.Error())
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	w.WriteHeader(http.StatusOK)
-	w.Header().Set("Content-Type", "application/json")
-	jsonResp, err := json.Marshal(communities)
-	if err != nil {
-		log.Println(err.Error())
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	w.Write(jsonResp)
-}
-
 func GetMyCommunitylist(w http.ResponseWriter, r *http.Request) {
 	// Get email address of the user
 	sessionaz, _ := session.Store.Get(r, "auth-session")

@@ -228,7 +228,7 @@
         this.showSpinner = true
         this.Communitylist = []
 
-        fetch('/api/community')
+        fetch('/api/communities')
           .then(r => {
             r.json().then(body => {
               this.Communitylist = body

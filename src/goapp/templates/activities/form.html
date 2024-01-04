@@ -286,7 +286,7 @@
     }
 
     async function getCommunity() {
-        const res = await fetch('/api/community/all')
+        const res = await fetch('/api/communities')
 
         const data = await res.json()
         return data
