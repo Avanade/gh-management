@@ -1216,7 +1216,7 @@ func RequestApproval(projectId int64, email string, logger *appinsights_wrapper.
 func ApprovalSystemRequest(data db.ProjectApprovalApprovers, logger *appinsights_wrapper.TelemetryClient) error {
 	url := os.Getenv("APPROVAL_SYSTEM_APP_URL")
 	if url != "" {
-		url = url + "/request"
+		url = url + "/api/request"
 		ch := make(chan *http.Response)
 		// var res *http.Response
 
