@@ -122,14 +122,14 @@ func setApiRoutes(mux *mux.Router) {
 
 	// COMMUNITIES API
 	muxApi.Handle("/community", loadAzGHAuthPage(rtApi.GetUserCommunitylist)).Methods("GET")
-	muxApi.Handle("/community", loadAzGHAuthPage(rtApi.AddCommunity)).Methods("POST")
 	muxApi.Handle("/community/all", loadAzAuthPage(rtApi.GetCommunities)).Methods("GET")
 	muxApi.Handle("/community/{id}/members", loadAzAuthPage(rtApi.GetCommunityMembers)).Methods("GET")
+	muxApi.Handle("/communities/my", loadAzGHAuthPage(rtApi.GetMyCommunitylist)).Methods("GET")
+	muxApi.Handle("/communities/imanage", loadAzGHAuthPage(rtApi.GetCommunityIManagelist)).Methods("GET")
+	muxApi.Handle("/community/getcommunity/{id}", loadAzGHAuthPage(rtApi.GetUserCommunity)).Methods("GET")
+	muxApi.Handle("/community", loadAzGHAuthPage(rtApi.AddCommunity)).Methods("POST")
 	muxApi.Handle("/community/getCommunitiesisexternal/{isexternal}", loadAzGHAuthPage(rtApi.GetCommunitiesIsexternal))
 	muxApi.Handle("/community/members/processfile/{id}", loadAzGHAuthPage(rtApi.ProcessCommunityMembersListExcel)).Methods("POST")
-	muxApi.Handle("/communities/my", loadAzGHAuthPage(rtApi.GetMyCommunitylist))
-	muxApi.Handle("/communities/imanage", loadAzGHAuthPage(rtApi.GetCommunityIManagelist))
-	muxApi.Handle("/community/getcommunity/{id}", loadAzGHAuthPage(rtApi.GetUserCommunity))
 	muxApi.Handle("/communitySponsors", loadAzGHAuthPage(rtApi.CommunitySponsorsAPIHandler))
 	muxApi.Handle("/CommunitySponsorsPerCommunityId/{id}", loadAzGHAuthPage(rtApi.CommunitySponsorsPerCommunityId))
 	muxApi.Handle("/CommunityTagPerCommunityId/{id}", loadAzGHAuthPage(rtApi.CommunityTagPerCommunityId))
@@ -137,11 +137,9 @@ func setApiRoutes(mux *mux.Router) {
 	muxApi.Handle("/communitystatus/{id}", loadAzGHAuthPage(rtApi.GetRequestStatusByCommunity))
 
 	// RELATED COMMUNITIES API
-	muxApi.Handle("/relatedcommunityAdd", loadAzAuthPage(rtApi.RelatedCommunitiesInsert))
-	muxApi.Handle("/relatedcommunityDelete", loadAzAuthPage(rtApi.RelatedCommunitiesDelete))
 	muxApi.Handle("/relatedcommunity/{id}", loadAzAuthPage(rtApi.RelatedCommunitiesSelect)).Methods("GET")
 
-	muxApi.HandleFunc("/approvals/community/reassign/callback", rtApi.UpdateCommunityApprovalReassignApprover)
+	muxApi.HandleFunc("/approvals/community/reassign/callback", rtApi.UpdateCommunityApprovalReassignApprover).Methods("POST")
 	muxApi.HandleFunc("/approvals/community/callback", rtApi.UpdateApprovalStatusCommunity).Methods("POST")
 
 	// COMMUNITY APPROVERS API
@@ -169,11 +167,13 @@ func setApiRoutes(mux *mux.Router) {
 	muxApi.Handle("/articles/{id}", loadAzGHAuthPage(rtApi.UpdateCategoryArticlesById)).Methods("PUT")
 
 	// REPOSITORIES API
+	muxApi.Handle("/allrepositories", loadAzAuthPage(rtApi.GetAllRepositories))
 	muxApi.Handle("/repositories", loadAzGHAuthPage(rtApi.RequestRepository)).Methods("POST")
 	muxApi.Handle("/repositories/{id}", loadAzGHAuthPage(rtApi.UpdateRepositoryById)).Methods("PUT")
 	muxApi.Handle("/repositories/{id}/ecattid", loadAzGHAuthPage(rtApi.UpdateRepositoryEcattIdById)).Methods("PUT")
 	muxApi.Handle("/repositories/list", loadAzGHAuthPage(rtApi.GetUserProjects))
 	muxApi.Handle("/repositories/{id}", loadAzGHAuthPage(rtApi.GetRequestStatusByProject))
+
 	muxApi.Handle("/repositories/request/public", loadAzGHAuthPage(rtApi.RequestMakePublic))
 	muxApi.Handle("/repositories/collaborators/{id}", loadAzGHAuthPage(rtApi.GetRepoCollaboratorsByRepoId))
 	muxApi.Handle("/repositories/collaborators/add/{id}/{ghUser}/{permission}", loadAzGHAuthPage(rtApi.AddCollaborator))
@@ -184,7 +184,6 @@ func setApiRoutes(mux *mux.Router) {
 	muxApi.Handle("/allusers", loadAzAuthPage(rtApi.GetAllUserFromActiveDirectory))
 	muxApi.Handle("/alluserswithgithub", loadAzAuthPage(rtApi.GetUsersWithGithub))
 	muxApi.Handle("/search/users/{search}", loadAzAuthPage(rtApi.SearchUserFromActiveDirectory))
-	muxApi.Handle("/allrepositories", loadAzAuthPage(rtApi.GetAllRepositories))
 	muxApi.Handle("/getActiveApprovalTypes", loadAzGHAuthPage(rtApi.GetActiveApprovalTypes))
 
 	//APPROVAL TYPES API
