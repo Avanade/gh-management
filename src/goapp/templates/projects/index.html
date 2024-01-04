@@ -1125,7 +1125,7 @@
 
         let f = () => {
           Alpine.store('master').modal.show()
-          Alpine.store('master').getData(url, `Repository has been ${isArchived? 'unarchived.' : 'archived.'}`,
+          Alpine.store('master').putData(url, null, `Repository has been ${isArchived? 'unarchived.' : 'archived.'}`,
             "Refresh repository list", "/repositories")
         }
 
@@ -1139,7 +1139,7 @@
         let url = `/api/repositories/${repositoryId}/visibility/${repositoryName}/${currentState}/${desiredState}`
         let f = () => {
           Alpine.store('master').modal.show()
-          Alpine.store('master').getData(url, `Repository has been made ${desiredState}`, "Refresh repository list",
+          Alpine.store('master').putData(url, null, `Repository has been made ${desiredState}`, "Refresh repository list",
             "/repositories")
         }
 

@@ -172,16 +172,16 @@ func setApiRoutes(mux *mux.Router) {
 	muxApi.Handle("/repositories/{id}/collaborators/{ghUser}/{permission}", loadAzGHAuthPage(rtApi.RemoveCollaborator)).Methods("DELETE")
 
 	muxApi.Handle("/repositories/{id}/public", loadAzGHAuthPage(rtApi.RequestMakePublic)).Methods("PUT")
-	muxApi.Handle("/repositories/{projectId}/archive/{project}/{state}/{archive}", loadAzGHAuthPage(rtApi.ArchiveProject))
-	muxApi.Handle("/repositories/{projectId}/visibility/{project}/{currentState}/{desiredState}", loadAzGHAuthPage(rtApi.SetVisibility))
+	muxApi.Handle("/repositories/{projectId}/archive/{project}/{state}/{archive}", loadAzGHAuthPage(rtApi.ArchiveProject)).Methods("PUT")
+	muxApi.Handle("/repositories/{projectId}/visibility/{project}/{currentState}/{desiredState}", loadAzGHAuthPage(rtApi.SetVisibility)).Methods("PUT")
 
 	// USERS API
 	muxApi.Handle("/users", loadAzAuthPage(rtApi.GetAllUserFromActiveDirectory)).Methods("GET")
-	muxApi.Handle("/users/with-github", loadAzAuthPage(rtApi.GetUsersWithGithub))
-	muxApi.Handle("/users/{search}/search", loadAzAuthPage(rtApi.SearchUserFromActiveDirectory))
+	muxApi.Handle("/users/with-github", loadAzAuthPage(rtApi.GetUsersWithGithub)).Methods("GET")
+	muxApi.Handle("/users/{search}/search", loadAzAuthPage(rtApi.SearchUserFromActiveDirectory)).Methods("GET")
 
 	// POPULAR TOPICS API
-	muxApi.Handle("/popular-topics", loadAzGHAuthPage(rtApi.GetPopularTopics))
+	muxApi.Handle("/popular-topics", loadAzGHAuthPage(rtApi.GetPopularTopics)).Methods("GET")
 
 	//APPROVAL TYPES API
 	muxApi.Handle("/approval-types", loadAzAuthPage(rtApi.CreateApprovalType)).Methods("POST")
