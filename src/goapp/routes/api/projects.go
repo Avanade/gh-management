@@ -984,11 +984,22 @@ func RecurringApproval(w http.ResponseWriter, r *http.Request) {
 
 		daysSinceCreationFloor := math.Floor(daysSinceCreation)
 
+		projectApprovalApprovers, err := db.GetApprovalRequestApproversByApprovalRequestId(projectApproval["ProjectApprovalId"].(int))
+		if err != nil {
+			logger.LogException(err)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			continue
+		}
+
+		var recipients []string
+
+		for _, projectApprovalApprover := range projectApprovalApprovers {
+			recipients = append(recipients, projectApprovalApprover.ApproverEmail)
+		}
+
 		if int(daysSinceCreationFloor)%7 == 0 && daysSinceCreationFloor != 0 {
 			messageBody := notification.RepositoryPublicApprovalRemainderMessageBody{
-				Recipients: []string{
-					projectApproval["ApproverUserPrincipalName"].(string),
-				},
+				Recipients:   recipients,
 				ApprovalLink: fmt.Sprintf("%s/response/%s/%s/%s/1", os.Getenv("APPROVAL_SYSTEM_APP_URL"), os.Getenv("APPROVAL_SYSTEM_APP_ID"), os.Getenv("APPROVAL_SYSTEM_APP_MODULE_PROJECTS"), projectApproval["ItemId"].(string)),
 				ApprovalType: projectApproval["ApprovalType"].(string),
 				RepoLink:     projectApproval["RepoLink"].(string),

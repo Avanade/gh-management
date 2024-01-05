@@ -5,6 +5,7 @@ CREATE PROCEDURE [dbo].[PR_ProjectApprovals_Select_By_StatusId]
 AS
 BEGIN
   SELECT
+	PA.Id AS ProjectApprovalId,
 	CONVERT(varchar(36), PA.ApprovalSystemGUID, 1) AS ItemId,
 	T.Name AS ApprovalType,
 	P.TFSProjectReference AS RepoLink,
