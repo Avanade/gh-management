@@ -166,7 +166,7 @@
 
                 const data = this.form;
 
-                Alpine.store('master').putData(`/api/articles/${id}`, data,
+                Alpine.store('master').putData(`/api/articles/${this.form.id}`, data,
                     "Your category has been created.",
                     "Go to category list", "/guidance")
 
