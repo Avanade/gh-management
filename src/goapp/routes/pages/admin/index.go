@@ -6,6 +6,6 @@ import (
 	"main/pkg/template"
 )
 
-func AdminIndex(w http.ResponseWriter, r *http.Request) {
+func AdminIndexHandler(w http.ResponseWriter, r *http.Request) {
 	template.UseTemplate(&w, r, "admin/index", nil)
 }

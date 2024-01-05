@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"net/mail"
 	"os"
@@ -72,6 +73,16 @@ type CommunityApprovalSystemPost struct {
 	Subject             string
 	Body                string
 	RequesterEmail      string
+}
+
+type CommunityApprovers struct {
+	Id                        int    `json:"id"`
+	ApproverUserPrincipalName string `json:"name"`
+	Disabled                  bool   `json:"disabled"`
+	Created                   string `json:"created"`
+	CreatedBy                 string `json:"createdBy"`
+	Modified                  string `json:"modified"`
+	ModifiedBy                string `json:"modifiedBy"`
 }
 
 func AddCommunity(w http.ResponseWriter, r *http.Request) {
@@ -188,7 +199,7 @@ func AddCommunity(w http.ResponseWriter, r *http.Request) {
 	go getTeamsChannelMembers(body.ChannelId, id)
 }
 
-func GetRequestStatusByCommunity(w http.ResponseWriter, r *http.Request) {
+func GetRequestStatusByCommunityId(w http.ResponseWriter, r *http.Request) {
 	logger := appinsights_wrapper.NewClient()
 	defer logger.EndOperation()
 
@@ -216,7 +227,7 @@ func GetRequestStatusByCommunity(w http.ResponseWriter, r *http.Request) {
 	w.Write(jsonResp)
 }
 
-func GetCommunitiesIsexternal(w http.ResponseWriter, r *http.Request) {
+func GetCommunitiesIsExternal(w http.ResponseWriter, r *http.Request) {
 	logger := appinsights_wrapper.NewClient()
 	defer logger.EndOperation()
 
@@ -252,7 +263,7 @@ func GetCommunitiesIsexternal(w http.ResponseWriter, r *http.Request) {
 	w.Write(jsonResp)
 }
 
-func ProcessCommunityMembersListExcel(w http.ResponseWriter, r *http.Request) {
+func UploadCommunityMembers(w http.ResponseWriter, r *http.Request) {
 	logger := appinsights_wrapper.NewClient()
 	defer logger.EndOperation()
 
@@ -377,7 +388,7 @@ func GetCommunities(w http.ResponseWriter, r *http.Request) {
 	w.Write(jsonResp)
 }
 
-func GetCommunityMembers(w http.ResponseWriter, r *http.Request) {
+func GetCommunityMembersByCommunityId(w http.ResponseWriter, r *http.Request) {
 	logger := appinsights_wrapper.NewClient()
 	defer logger.EndOperation()
 
@@ -397,55 +408,7 @@ func GetCommunityMembers(w http.ResponseWriter, r *http.Request) {
 	w.Write(jsonResp)
 }
 
-func CommunitySponsorsAPIHandler(w http.ResponseWriter, r *http.Request) {
-	logger := appinsights_wrapper.NewClient()
-	defer logger.EndOperation()
-
-	sessionaz, _ := session.Store.Get(r, "auth-session")
-	iprofile := sessionaz.Values["profile"]
-	profile := iprofile.(map[string]interface{})
-	username := profile["preferred_username"]
-
-	var body CommunitySponsorsDto
-	err := json.NewDecoder(r.Body).Decode(&body)
-	if err != nil {
-		logger.LogException(err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	switch r.Method {
-	case "POST":
-		param := map[string]interface{}{
-
-			"CommunityId":       body.CommunityId,
-			"UserPrincipalName": body.UserPrincipalName,
-			"CreatedBy":         username,
-		}
-
-		_, err := db.CommunitySponsorsInsert(param)
-		if err != nil {
-			logger.LogException(err)
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-
-	case "PUT":
-		param := map[string]interface{}{
-			"CommunityId":       body.CommunityId,
-			"UserPrincipalName": body.UserPrincipalName,
-			"CreatedBy":         username,
-		}
-		_, err := db.CommunitySponsorsUpdate(param)
-		if err != nil {
-			logger.LogException(err)
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-	}
-}
-
-func CommunitySponsorsPerCommunityId(w http.ResponseWriter, r *http.Request) {
+func GetCommunitySponsorsByCommunityId(w http.ResponseWriter, r *http.Request) {
 	logger := appinsights_wrapper.NewClient()
 	defer logger.EndOperation()
 
@@ -477,7 +440,7 @@ func CommunitySponsorsPerCommunityId(w http.ResponseWriter, r *http.Request) {
 	w.Write(jsonResp)
 }
 
-func CommunityTagPerCommunityId(w http.ResponseWriter, r *http.Request) {
+func GetCommunityTagsByCommunityId(w http.ResponseWriter, r *http.Request) {
 	logger := appinsights_wrapper.NewClient()
 	defer logger.EndOperation()
 
@@ -585,7 +548,7 @@ func RelatedCommunitiesDelete(w http.ResponseWriter, r *http.Request) {
 	w.Write(jsonResp)
 }
 
-func RelatedCommunitiesSelect(w http.ResponseWriter, r *http.Request) {
+func GetRelatedCommunitiesByCommunityId(w http.ResponseWriter, r *http.Request) {
 	logger := appinsights_wrapper.NewClient()
 	defer logger.EndOperation()
 
@@ -616,8 +579,168 @@ func RelatedCommunitiesSelect(w http.ResponseWriter, r *http.Request) {
 	w.Write(jsonResp)
 }
 
-func requestCommunityApproval(id int64, logger *appinsights_wrapper.TelemetryClient) error {
+func GetMyCommunities(w http.ResponseWriter, r *http.Request) {
+	// Get email address of the user
+	sessionaz, _ := session.Store.Get(r, "auth-session")
+	iprofile := sessionaz.Values["profile"]
+	profile := iprofile.(map[string]interface{})
+	username := profile["preferred_username"].(string)
 
+	communities, err := db.MyCommunitites(username)
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Header().Set("Content-Type", "application/json")
+	jsonResp, err := json.Marshal(communities)
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Write(jsonResp)
+}
+
+func GetIManageCommunities(w http.ResponseWriter, r *http.Request) {
+	sessionaz, _ := session.Store.Get(r, "auth-session")
+	iprofile := sessionaz.Values["profile"]
+	profile := iprofile.(map[string]interface{})
+	username := profile["preferred_username"]
+
+	params := make(map[string]interface{})
+	params["UserPrincipalName"] = username
+	communities, err := db.CommunityIManageExecuteSelect(params)
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Header().Set("Content-Type", "application/json")
+	jsonResp, err := json.Marshal(communities)
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Write(jsonResp)
+}
+
+func GetCommunityById(w http.ResponseWriter, r *http.Request) {
+	req := mux.Vars(r)
+	id := req["id"]
+
+	communities, err := db.CommunitiesSelectByID(id)
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Header().Set("Content-Type", "application/json")
+	jsonResp, err := json.Marshal(communities)
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Write(jsonResp)
+}
+
+func GetCommunityApproversById(w http.ResponseWriter, r *http.Request) {
+	req := mux.Vars(r)
+	id := req["id"]
+
+	approvers, err := db.GetCommunityApproversById(id)
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Header().Set("Content-Type", "application/json")
+	jsonResp, err := json.Marshal(approvers)
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Write(jsonResp)
+}
+
+func GetCommunityApproversList(w http.ResponseWriter, r *http.Request) {
+	approvers, err := db.GetCommunityApprovers()
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Header().Set("Content-Type", "application/json")
+	jsonResp, err := json.Marshal(approvers)
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Write(jsonResp)
+}
+
+func GetAllActiveCommunityApprovers(w http.ResponseWriter, r *http.Request) {
+	approvers, err := db.GetActiveCommunityApprovers()
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Header().Set("Content-Type", "application/json")
+	jsonResp, err := json.Marshal(approvers)
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Write(jsonResp)
+}
+
+func SubmitCommunityApprover(w http.ResponseWriter, r *http.Request) {
+	sessionaz, _ := session.Store.Get(r, "auth-session")
+	iprofile := sessionaz.Values["profile"]
+	profile := iprofile.(map[string]interface{})
+	username := profile["preferred_username"].(string)
+	var body CommunityApprovers
+
+	err := json.NewDecoder(r.Body).Decode(&body)
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	_, err = db.UpdateCommunityApproversById(body.Id, body.Disabled, body.ApproverUserPrincipalName, username)
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+}
+
+func requestCommunityApproval(id int64, logger *appinsights_wrapper.TelemetryClient) error {
 	communityApprovals := db.PopulateCommunityApproval(id)
 
 	for _, v := range communityApprovals {
@@ -648,7 +771,7 @@ func ApprovalSystemRequestCommunity(data db.CommunityApproval, logger *appinsigh
 
 	url := os.Getenv("APPROVAL_SYSTEM_APP_URL")
 	if url != "" {
-		url = url + "/request"
+		url = url + "/api/request"
 		ch := make(chan *http.Response)
 		// var res *http.Response
 

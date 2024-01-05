@@ -80,7 +80,7 @@
             showSpinner: true,
             sponsors: [],
             getAllSponsors() {
-                let uri = '/api/osscontributionsponsors/all'
+                let uri = '/api/oss-contribution-sponsors'
                 let encoded = encodeURI(uri);
                 fetch(encoded)
                     .then(r => {

@@ -9,7 +9,7 @@
             <!-- <p class="mt-2 text-sm text-gray-700">Description here...</p> -->
         </div>
         <div class="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
-            <a href="/admin/contributionarea/add"
+            <a href="/admin/contributionareas/add"
                 class="inline-flex items-center justify-center rounded-md border border-transparent bg-orange-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 sm:w-auto">Add
                 a Contribution Area</a>
         </div>
@@ -46,13 +46,13 @@
 <script src="/public/components/table.js"></script>
 <script type="text/javascript">
     function renderAction(value) {
-        return `<a href="/admin/contributionarea/edit/${value}">EDIT</a>`
+        return `<a href="/admin/contributionareas/edit/${value}">EDIT</a>`
     }
     async function getContributionAreas(e) {
         const offset = e.filter * e.page;
         const search = encodeURIComponent(e.search)
         const res = await fetch(
-            `/api/contributionarea?filter=${e.filter}&offset=${offset}&search=${search}&orderby=${e.orderby}&ordertype=${e.ordertype}`
+            `/api/contribution-areas?filter=${e.filter}&offset=${offset}&search=${search}&orderby=${e.orderby}&ordertype=${e.ordertype}`
             )
         const data = await res.json()
         return data

@@ -10,7 +10,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func GuidanceHandler(w http.ResponseWriter, r *http.Request) {
+func IndexHandler(w http.ResponseWriter, r *http.Request) {
 
 	req := mux.Vars(r)
 	id := req["id"]
@@ -27,15 +27,35 @@ func GuidanceHandler(w http.ResponseWriter, r *http.Request) {
 		"Id":      id,
 		"IsAdmin": isAdmin,
 	}
-	template.UseTemplate(&w, r, "/guidance/guidance", data)
+	template.UseTemplate(&w, r, "/guidance/index", data)
 }
 
-func CategoriesHandler(w http.ResponseWriter, r *http.Request) {
+func NewArticleHandler(w http.ResponseWriter, r *http.Request) {
 
-	template.UseTemplate(&w, r, "/guidance/categories", nil)
+	template.UseTemplate(&w, r, "/guidance/article/new", nil)
 }
 
-func CategoryUpdateHandler(w http.ResponseWriter, r *http.Request) {
+func EditArticleHandler(w http.ResponseWriter, r *http.Request) {
+	req := mux.Vars(r)
+	id := req["id"]
+	isAdmin, err := session.IsUserAdmin(w, r)
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if !isAdmin {
+		http.Error(w, "Not enough privilege to do the action.", http.StatusForbidden)
+		return
+	}
+	data := map[string]interface{}{
+		"Id": id,
+	}
+	template.UseTemplate(&w, r, "/guidance/article/edit", data)
+}
+
+func EditCategoryHandler(w http.ResponseWriter, r *http.Request) {
 
 	req := mux.Vars(r)
 	id := req["id"]
@@ -53,25 +73,5 @@ func CategoryUpdateHandler(w http.ResponseWriter, r *http.Request) {
 	data := map[string]interface{}{
 		"Id": id,
 	}
-	template.UseTemplate(&w, r, "/guidance/categoryupdate", data)
-}
-
-func ArticleHandler(w http.ResponseWriter, r *http.Request) {
-	req := mux.Vars(r)
-	id := req["id"]
-	isAdmin, err := session.IsUserAdmin(w, r)
-	if err != nil {
-		log.Println(err.Error())
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	if !isAdmin {
-		http.Error(w, "Not enough privilege to do the action.", http.StatusForbidden)
-		return
-	}
-	data := map[string]interface{}{
-		"Id": id,
-	}
-	template.UseTemplate(&w, r, "/guidance/article", data)
+	template.UseTemplate(&w, r, "/guidance/category/edit", data)
 }

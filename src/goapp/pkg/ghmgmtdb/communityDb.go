@@ -252,22 +252,6 @@ func MyCommunitites(username string) ([]map[string]interface{}, error) {
 	return result, nil
 }
 
-func CommunitiesByCreatedBy(createdBy string) ([]map[string]interface{}, error) {
-	db := ConnectDb()
-	defer db.Close()
-
-	param := map[string]interface{}{
-
-		"CreatedBy": createdBy,
-	}
-
-	result, err := db.ExecuteStoredProcedureWithResult("PR_Communities_select", param)
-	if err != nil {
-		return nil, err
-	}
-	return result, nil
-}
-
 func CommunityApprovalslUpdateApproverUserPrincipalName(params map[string]interface{}) ([]map[string]interface{}, error) {
 	db := ConnectDb()
 	defer db.Close()

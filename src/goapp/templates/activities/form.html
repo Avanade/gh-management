@@ -1,5 +1,5 @@
 {{ define "content" }}
-<div id="pageTitle">{{ .Action }} an Activity</div>
+<div id="pageTitle">{{ .Action }} Activity</div>
 
 <form x-data="activityForm({
         action : '{{ .Action }}',
@@ -90,7 +90,7 @@
                             <div x-html="template"></div>
                         </div>
                     </div>
-                    <template x-if="action.toLowerCase() == 'add'">
+                    <template x-if="action.toLowerCase() == 'new'">
                         <div class="sm:col-span-6 pt-2 sm:pt-2 border-t-2 border-gray-100">
                             <div role="group" aria-labelledby="label-notifications">
                                 <div class="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-baseline">
@@ -186,7 +186,7 @@
                 this.action = action,
                     this.id = id
 
-                if (this.action.toLowerCase() == 'add') return;
+                if (this.action.toLowerCase() == 'new') return;
 
                 var modal = Alpine.store('master').modal
                 modal.update('loading', 'Loading', 'Please wait for a moment.', '', '')
@@ -279,40 +279,40 @@
                 }
 
                 Alpine.store('master').modal.show()
-                Alpine.store('master').postData("/api/activity", data, "Your activity has been added.",
+                Alpine.store('master').postData("/api/activities", data, "Your activity has been added.",
                     "Go to your activity list", "/activities")
             }
         }
     }
 
     async function getCommunity() {
-        const res = await fetch('/api/community/all')
+        const res = await fetch('/api/communities')
 
         const data = await res.json()
         return data
     }
 
     async function getTypes() {
-        const res = await fetch('/api/activity/type')
+        const res = await fetch('/api/activity-types')
 
         const data = await res.json()
         return data
     }
 
     async function getContributionAreas() {
-        const res = await fetch('/api/contributionarea')
+        const res = await fetch('/api/contribution-areas')
 
         const data = await res.json()
         return data.data
     }
 
     async function getActivityById(id) {
-        const res = await fetch(`/api/activity/${id}`)
+        const res = await fetch(`/api/activities/${id}`)
         return res.json()
     }
 
     async function getAdditionalContributionAreasByActivityId(activityId) {
-        const res = await fetch(`/api/contributionarea/activity/${activityId}`)
+        const res = await fetch(`/api/activities/${activityId}/contribution-areas`)
         return res.json()
     }
 </script>

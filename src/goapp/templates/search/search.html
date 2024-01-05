@@ -138,7 +138,7 @@
 
         <template x-for="(results, n) in FilteredSearchBy" :key="n">
           <tr x-show="resultsTable"
-            @click="results.Source === 'Communities' ? window.location.href=`/communities/list` : '',
+            @click="results.Source === 'Communities' ? window.location.href=`/communities` : '',
                       results.Source === 'Repositories' ? window.location.href=`/repositories?view=all&search=${results.Name}` : '' "
             class="cursor-pointer">
             {{/* <tr x-show="resultsTable" @click="results.Source === 'Repositories' ? isSourceClicked('repositories') : isSourceClicked('community')" class="cursor-pointer"> */}}
@@ -374,9 +374,8 @@ class="cursor-pointer focus:outline-none"> */}}
             break
           case 'community':
             communitynumber = ""
-            window.location.href = "/community/" + communitynumber
+            window.location.href = "/communities/" + communitynumber
             console.log("COMMUNITY NUMBER --> " + this.form.searchList.table.ROW)
-            //window.location.href=`/community/${results.Id}`
             break
           case 'users':
             window.location.href = "/"

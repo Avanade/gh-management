@@ -121,7 +121,7 @@
             return []
         }
 
-        const res = await fetch(`/api/search/users/${search}`)
+        const res = await fetch(`/api/users/${search}/search`)
         const users = await res.json()
         return users
     }
@@ -170,7 +170,7 @@
             async getUsersList() {
 
 
-                await fetch('/api/allusers').then(j => j.json()
+                await fetch('/api/users').then(j => j.json()
                         .then(data => {
 
                             this.approver.data = data
@@ -207,28 +207,11 @@
                 postData = this.form;
                 console.log("postData")
                 console.log(postData)
-                Alpine.store('master').postData('/api/communityapprovers/update', postData,
+                Alpine.store('master').postData('/api/community-approvers', postData,
                     "Your community approvers has been updated.",
                     "Close")
 
 
-
-
-            },
-            submit2(id) {
-                if (this.approver.selected != "") {
-                    var modal = Alpine.store('master').modal
-                    modal.update('loading', 'Saving', 'Please wait.', '', '')
-                    if (!this.form.id) {
-                        this.form.id = 0
-
-                    }
-
-                    postData = this.form;
-                    Alpine.store('master').postData('/api/communityapprovers/update', postData,
-                        "Your community approvers has been updated.",
-                        "update communityapprovers")
-                }
 
 
             },
@@ -242,7 +225,7 @@
                 this.formUpdate.id = id
                 this.formUpdate.name = ApproverUserPrincipalName
                 postData2 = this.formUpdate;
-                Alpine.store('master').postData('/api/communityapprovers/update', postData2,
+                Alpine.store('master').postData('/api/community-approvers', postData2,
                     "Your community approvers has been updated.",
                     "Close")
 
@@ -253,7 +236,7 @@
 
                 this.mode = "Edit"
 
-                await fetch('/api/communityapprovers/GetCommunityApproversList/' + id)
+                await fetch(`/api/community-approvers/${id}`)
                     .then(r => {
                         r.json().then(body => {
                             this.formUpdate.id = body[0]["Id"]
@@ -278,7 +261,7 @@
             },
             getCommunityApprover() {
 
-                fetch('/api/communityapprovers/GetCommunityApproversList')
+                fetch('/api/community-approvers')
                     .then(r => {
                         r.json().then(body => {
                             this.approvers = body
@@ -328,26 +311,6 @@
 
             }
         }
-    }
-    async function getnames() {
-
-        const res = await fetch('/api/Category/list')
-
-        const data = await res.json()
-
-        return data
-
-
-    }
-    async function getnames() {
-
-        const res = await fetch('/api/Category/list')
-
-        const data = await res.json()
-
-        return data
-
-
     }
 </script>
 {{ end }}

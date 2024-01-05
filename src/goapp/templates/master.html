@@ -102,6 +102,26 @@
               this.modal.update("error", "Failed", msg, "", "")
             })
         },
+        deleteData(endpoint, body, successMessage, actionButtonText, redirectUrl) {
+          axios.delete(endpoint, body, {
+              headers: {
+                'Content-Type': 'application/json'
+              },
+            })
+            .then(r => {
+              if (r.status === 200) {
+                this.modal.update('success', 'Success', successMessage, actionButtonText, redirectUrl)
+              } else {
+                r.text().then(body => {
+                  this.modal.update("error", "Failed", body, "", "")
+                });
+              }
+            })
+            .catch(e => {
+              var msg = e.response.data.error ? e.response.data.error : "An error occured while processing."
+              this.modal.update("error", "Failed", msg, "", "")
+            })
+        },
         getData(endpoint, successMessage, actionButtonText, redirectUrl) {
           axios.get(endpoint)
             .then(r => {
@@ -691,7 +711,7 @@
           localStorage.clear()
         },
         getEnabledExternalLinks() {
-          let uri = '/api/externallinks/enabled'
+          let uri = '/api/external-links/enabled'
           let encoded = encodeURI(uri);
           fetch(encoded)
             .then(r => {

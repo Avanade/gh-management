@@ -56,6 +56,7 @@ func main() {
 	setPageRoutes(mux)
 	setAdminPageRoutes(mux)
 	setApiRoutes(mux)
+	setUtilityRoutes(mux)
 
 	mux.NotFoundHandler = http.HandlerFunc(rtPages.NotFoundHandler)
 

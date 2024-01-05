@@ -69,12 +69,12 @@
                 switch (this.mode) {
                     case 'add':
                         Alpine.store('master').modal.show()
-                        Alpine.store('master').postData(`/api/osscontributionsponsors/add`, this.form,
+                        Alpine.store('master').postData(`/api/oss-contribution-sponsors`, this.form,
                             "Sponsor has been added.", "Go to list of sponsors", "/admin/osscontributionsponsors")
                         break;
                     case 'edit':
                         Alpine.store('master').modal.show()
-                        Alpine.store('master').putData(`/api/osscontributionsponsors/update`, this.form,
+                        Alpine.store('master').putData(`/api/oss-contribution-sponsors/${this.form.id}`, this.form,
                             "Sponsor has been updated.", "Go to list of sponsors", "/admin/osscontributionsponsors")
                         break;
                 }
