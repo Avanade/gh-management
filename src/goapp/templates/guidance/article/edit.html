@@ -14,7 +14,7 @@
                         <span class="pl-1 text-xs">(Please press Enter to insert Category)</span>
                         <div>
                             <div x-data="combobox({
-                                    ajax: getnames,
+                                    ajax: getCategories,
                                     id : 'Id',
                                     text : 'Name',
                                     isInsertable : true,
@@ -164,9 +164,9 @@
                 this.form.CategoryName = this.form.CategoryNames[0]["text"].toString()
                 this.form.categoryId = Number(this.form.CategoryNames[0]["id"].toString())
 
-                postData = this.form;
+                const data = this.form;
 
-                Alpine.store('master').postData('/api/CategoryArticlesUpdate', postData,
+                Alpine.store('master').putData(`/api/articles/${this.form.id}`, data,
                     "Your category has been created.",
                     "Go to category list", "/guidance")
 
@@ -184,7 +184,7 @@
             },
             getCategoryArticlesById(id) {
 
-                fetch('/api/CategoryArticlesById/' + id)
+                fetch(`/api/categories/${id}/articles`)
                     .then(r => {
                         r.json().then(body => {
                             this.categoryArticle = body
@@ -200,7 +200,7 @@
                 if (this.form.id) {
                     this.mode = 'view'
 
-                    await fetch('/api/CategoryArticlesByArticlesID/' + '{{.Id}}')
+                    await fetch(`/api/articles/${this.form.id}`)
                         .then(r => {
                             r.json().then(body => {
                                 this.form.id = body[0]["Id"]
@@ -228,9 +228,9 @@
             }
         }
     }
-    async function getnames() {
+    async function getCategories() {
 
-        const res = await fetch('/api/Category/list')
+        const res = await fetch('/api/categories')
 
         const data = await res.json()
         return data

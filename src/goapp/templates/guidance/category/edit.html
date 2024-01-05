@@ -93,7 +93,7 @@
 
 
                 postData = this.form;
-                Alpine.store('master').postData('/api/Category/update', postData, "Your category has been Updated.",
+                Alpine.store('master').putData(`/api/categories/${this.form.id}`, postData, "Your category has been Updated.",
                     "Go to category list", "/guidance")
 
             },
@@ -115,7 +115,7 @@
                 if (this.form.id) {
                     this.mode = 'view'
 
-                    await fetch('/api/Category/' + '{{.Id}}')
+                    await fetch('/api/categories/' + '{{.Id}}')
                         .then(r => {
                             r.json().then(body => {
                                 this.form.id = body[0]["Id"]

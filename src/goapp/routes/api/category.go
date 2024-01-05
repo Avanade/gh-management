@@ -120,7 +120,7 @@ func CategoryListAPIHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write(jsonResp)
 }
 
-func GetCategoryArticlesById(w http.ResponseWriter, r *http.Request) {
+func GetCategoryArticlesByCategoryId(w http.ResponseWriter, r *http.Request) {
 	logger := appinsights_wrapper.NewClient()
 	defer logger.EndOperation()
 
@@ -148,7 +148,7 @@ func GetCategoryArticlesById(w http.ResponseWriter, r *http.Request) {
 	w.Write(jsonResp)
 }
 
-func GetCategoryArticlesByArticlesID(w http.ResponseWriter, r *http.Request) {
+func GetCategoryArticlesById(w http.ResponseWriter, r *http.Request) {
 	logger := appinsights_wrapper.NewClient()
 	defer logger.EndOperation()
 
@@ -205,7 +205,7 @@ func GetCategoryByID(w http.ResponseWriter, r *http.Request) {
 	w.Write(jsonResp)
 }
 
-func CategoryArticlesUpdate(w http.ResponseWriter, r *http.Request) {
+func UpdateCategoryArticlesById(w http.ResponseWriter, r *http.Request) {
 	logger := appinsights_wrapper.NewClient()
 	defer logger.EndOperation()
 

@@ -290,24 +290,23 @@ func ProcessApprovalProjects(r *http.Request, module string) error {
 		approvalStatusId = REJECTED
 	}
 
-	var spName string
 	switch module {
 	case "projects":
-		spName = "PR_ProjectsApproval_Update_ApproverResponse"
-	case "community":
-		spName = "PR_CommunityApproval_Update_ApproverResponse"
-	}
+		_, err = db.UpdateProjectApprovalApproverResponse(req.ItemId, req.Remarks, req.ResponseDate, req.RespondedBy, approvalStatusId)
+		if err != nil {
+			return err
+		}
 
-	_, err = db.UpdateApprovalApproverResponse(spName, req.ItemId, req.Remarks, req.ResponseDate, req.RespondedBy, approvalStatusId)
-	if err != nil {
-		return err
-	}
-
-	if module == "projects" {
 		projectApproval := db.GetProjectApprovalByGUID(req.ItemId)
 
 		go CheckAllRequests(projectApproval.ProjectId, r.Host)
+	case "community":
+		_, err = db.UpdateCommunityApprovalApproverResponse(req.ItemId, req.Remarks, req.ResponseDate, approvalStatusId)
+		if err != nil {
+			return err
+		}
 	}
+
 	return nil
 }
 

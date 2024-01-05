@@ -5,6 +5,7 @@ go 1.18
 require (
 	github.com/codegangsta/negroni v1.0.0
 	github.com/coreos/go-oidc v2.2.1+incompatible
+	github.com/gofrs/uuid v3.3.0+incompatible
 	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/google/go-github/v50 v50.1.0
 	github.com/gorilla/mux v1.8.0
@@ -18,7 +19,6 @@ require (
 	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.2.0 // indirect
 	github.com/denisenkom/go-mssqldb v0.12.0 // indirect
 	github.com/goccy/go-json v0.10.2 // indirect
-	github.com/gofrs/uuid v3.3.0+incompatible // indirect
 	github.com/golang-sql/civil v0.0.0-20220223132316-b832511892a9 // indirect
 	github.com/golang-sql/sqlexp v0.0.0-20170517235910-f1bb20e5a188 // indirect
 	github.com/google/go-querystring v1.1.0 // indirect
@@ -42,6 +42,7 @@ require (
 	golang.org/x/crypto v0.17.0 // indirect
 	golang.org/x/net v0.17.0 // indirect
 	golang.org/x/oauth2 v0.0.0-20220411215720-9780585627b5
+	golang.org/x/text v0.14.0
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/protobuf v1.25.0 // indirect
 	gopkg.in/square/go-jose.v2 v2.6.0 // indirect

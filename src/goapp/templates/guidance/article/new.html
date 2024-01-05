@@ -13,7 +13,7 @@
                     </div>
                     <div class="focus:ring-red-500 focus:border-red-500">
                         <div id="NowBtn" x-data="combobox({
-                                ajax: getnames,
+                                ajax: getCategories,
                                 id : 'Id',
                                 text : 'Name',
                                 isInsertable : true,
@@ -150,7 +150,7 @@
 
                 postData = this.form;
 
-                Alpine.store('master').postData('/api/Category', postData, "Your category has been created.",
+                Alpine.store('master').postData('/api/categories', postData, "Your category has been created.",
                     "Go to category list", "/guidance")
 
             },
@@ -171,9 +171,9 @@
             }
         }
     }
-    async function getnames() {
+    async function getCategories() {
 
-        const res = await fetch('/api/Category/list')
+        const res = await fetch('/api/categories')
 
         const data = await res.json()
         return data

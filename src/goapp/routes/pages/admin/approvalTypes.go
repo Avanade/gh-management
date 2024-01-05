@@ -3,27 +3,29 @@ package routes
 import (
 	"net/http"
 	"strconv"
-	"strings"
 
 	"main/pkg/template"
 
 	"github.com/gorilla/mux"
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 )
 
-func ListApprovalTypes(w http.ResponseWriter, r *http.Request) {
+func ApprovalTypesHandler(w http.ResponseWriter, r *http.Request) {
 	template.UseTemplate(&w, r, "admin/approvaltypes/index", nil)
 }
 
-func ApprovalTypeForm(w http.ResponseWriter, r *http.Request) {
+func ApprovalTypeFormHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id, _ := strconv.Atoi(vars["id"])
 
 	action := vars["action"]
+	caser := cases.Title(language.Und, cases.NoLower)
 	template.UseTemplate(&w, r, "admin/approvaltypes/form", struct {
 		Id     int
 		Action string
 	}{
 		Id:     id,
-		Action: strings.Title(action),
+		Action: caser.String(action),
 	})
 }

@@ -93,7 +93,7 @@ type RequestMakePublicDto struct {
 	OSSContributionInformation string `json:"osscontributionInformation"`
 }
 
-func RequestRepository(w http.ResponseWriter, r *http.Request) {
+func CreateRepository(w http.ResponseWriter, r *http.Request) {
 	logger := appinsights_wrapper.NewClient()
 	defer logger.EndOperation()
 
@@ -259,7 +259,7 @@ func UpdateRepositoryEcattIdById(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
-func GetUserProjects(w http.ResponseWriter, r *http.Request) {
+func GetMyRepositories(w http.ResponseWriter, r *http.Request) {
 	logger := appinsights_wrapper.NewClient()
 	defer logger.EndOperation()
 
@@ -328,7 +328,7 @@ func GetUsersWithGithub(w http.ResponseWriter, r *http.Request) {
 	w.Write(jsonResp)
 }
 
-func GetRequestStatusByProject(w http.ResponseWriter, r *http.Request) {
+func GetRequestStatusByRepoId(w http.ResponseWriter, r *http.Request) {
 	logger := appinsights_wrapper.NewClient()
 	defer logger.EndOperation()
 
@@ -533,7 +533,7 @@ func ArchiveProject(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
-func GetAllRepositories(w http.ResponseWriter, r *http.Request) {
+func GetRepositories(w http.ResponseWriter, r *http.Request) {
 	logger := appinsights_wrapper.NewClient()
 	defer logger.EndOperation()
 
@@ -984,11 +984,22 @@ func RecurringApproval(w http.ResponseWriter, r *http.Request) {
 
 		daysSinceCreationFloor := math.Floor(daysSinceCreation)
 
+		projectApprovalApprovers, err := db.GetApprovalRequestApproversByApprovalRequestId(int(projectApproval["ProjectApprovalId"].(int64)))
+		if err != nil {
+			logger.LogException(err)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			continue
+		}
+
+		var recipients []string
+
+		for _, projectApprovalApprover := range projectApprovalApprovers {
+			recipients = append(recipients, projectApprovalApprover.ApproverEmail)
+		}
+
 		if int(daysSinceCreationFloor)%7 == 0 && daysSinceCreationFloor != 0 {
 			messageBody := notification.RepositoryPublicApprovalRemainderMessageBody{
-				Recipients: []string{
-					projectApproval["ApproverUserPrincipalName"].(string),
-				},
+				Recipients:   recipients,
 				ApprovalLink: fmt.Sprintf("%s/response/%s/%s/%s/1", os.Getenv("APPROVAL_SYSTEM_APP_URL"), os.Getenv("APPROVAL_SYSTEM_APP_ID"), os.Getenv("APPROVAL_SYSTEM_APP_MODULE_PROJECTS"), projectApproval["ItemId"].(string)),
 				ApprovalType: projectApproval["ApprovalType"].(string),
 				RepoLink:     projectApproval["RepoLink"].(string),
@@ -1216,7 +1227,7 @@ func RequestApproval(projectId int64, email string, logger *appinsights_wrapper.
 func ApprovalSystemRequest(data db.ProjectApprovalApprovers, logger *appinsights_wrapper.TelemetryClient) error {
 	url := os.Getenv("APPROVAL_SYSTEM_APP_URL")
 	if url != "" {
-		url = url + "/request"
+		url = url + "/api/request"
 		ch := make(chan *http.Response)
 		// var res *http.Response
 

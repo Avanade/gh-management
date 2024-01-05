@@ -279,12 +279,12 @@
 <script src="https://cdn.jsdelivr.net/npm/marked@2.1.3/marked.min.js"></script>
 <script type="text/javascript">
     async function getCommunitiesisexternals() {
-        const res = await fetch('/api/community/getCommunitiesisexternal/1')
+        const res = await fetch('/api/communities/isexternal/1')
         const data = await res.json()
         return data.filter(item => {return item.id != '{{.Id}}'})
     }
     async function getCommunitiesinternals() {
-        const res = await fetch('/api/community/getCommunitiesisexternal/0')
+        const res = await fetch('/api/communities/isexternal/0')
         const data = await res.json()
         return data.filter(item => {return item.id != '{{.Id}}'})
     }
@@ -301,7 +301,7 @@
             return []
         }
 
-        const res = await fetch(`/api/search/users/${search}`)
+        const res = await fetch(`/api/users/${search}/search`)
         const users = await res.json()
 
         return users
@@ -316,13 +316,13 @@
             communityCreatedBy: '',
             async init() {
                 modal.update('loading', 'Loading', 'Please wait', '', '')
-                fetch('/api/communityapprovers/GetAllActiveCommunityApprovers')
+                fetch('/api/community-approvers/active')
                     .then(r => {
                         r.json().then(body => {
                             if (!body || body.length < 1) {
                                 if (this.mode !== 'view') {
 
-                                    window.location.href = '/communities/list';
+                                    window.location.href = '/communities';
                                 } else {
                                     this.hasApprovers = false;
                                     this.onLoad();
@@ -355,7 +355,7 @@
             },
             showUploadMembersFileModal: false,
             uploadFile() {
-                let url = `/api/community/members/processfile/${this.form.id}`
+                let url = `/api/communities/${this.form.id}/members`
                 let f = () => {
                     const fileInput = document.querySelector("#fileupload");
                     const formData = new FormData()
@@ -368,7 +368,7 @@
                     Alpine.store('master').modal.reset()
                     Alpine.store('master').modal.show()
                     Alpine.store('master').uploadFile(url, formData, successMessage,
-                        "Close", `/community/${this.form.id}`)
+                        "Close", `/communities/${this.form.id}`)
                 }
 
                 let title = "Confirmation"
@@ -417,12 +417,12 @@
                 spinnercount = 4
                 if (this.form.id) {
                     this.mode = 'view'
-                    fetch('/community/getcommunity/' + '{{.Id}}')
+                    fetch('/api/communities/' + '{{.Id}}')
                         .then(r => {
                             r.json().then(body => {
                                 if (body[0]['ApprovalStatusId'] !== 5 && body[0]['CreatedBy'] !==
                                     '{{.Email}}') {
-                                    window.location.href = '/communities/list';
+                                    window.location.href = '/communities';
                                 } else {
                                     this.communityCreatedBy = body[0]['CreatedBy']
                                     this.form.id = body[0]["Id"]
@@ -451,7 +451,7 @@
                             spinnercount = spinnercount - 1
                         })
 
-                    fetch('/api/relatedcommunity/' + '{{.Id}}')
+                    fetch('/api/communities/{{.Id}}/related-communities')
                         .then(r => {
                             r.json().then(body => {
                                 if (body) {
@@ -495,7 +495,7 @@
                         .catch(e => {
                             spinnercount = spinnercount - 1
                         })
-                    fetch('/api/CommunitySponsorsPerCommunityId/' + '{{.Id}}')
+                    fetch('/api/communities/{{.Id}}/sponsors')
                         .then(r => {
                             r.json().then(body => {
                                 if (body) {
@@ -520,7 +520,7 @@
                             spinnercount = spinnercount - 1
                         })
 
-                    fetch('/api/CommunityTagPerCommunityId/' + '{{.Id}}')
+                    fetch('/api/communities/{{.Id}}/tags')
                         .then(r => {
                             r.json().then(body => {
                                 if (body) {
@@ -551,7 +551,7 @@
                 if (this.form.id) {
                     this.onLoad()
                 } else {
-                    window.location.href = '/communities/list'
+                    window.location.href = '/communities'
                 }
             },
 
@@ -607,8 +607,8 @@
                     );
 
                 }
-                Alpine.store('master').postData('/api/community', postData, "Your community has been created.",
-                    "Go to communities list", "/communities/list")
+                Alpine.store('master').postData('/api/communities', postData, "Your community has been created.",
+                    "Go to communities list", "/communities")
 
             },
             datapush() {
@@ -617,7 +617,7 @@
             },
 
             onBoarding() {
-                window.location.href = `/community/${this.form.id}/onboarding`
+                window.location.href = `/communities/${this.form.id}/onboarding`
             },
 
             get isValid() {
