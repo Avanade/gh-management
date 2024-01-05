@@ -984,7 +984,7 @@ func RecurringApproval(w http.ResponseWriter, r *http.Request) {
 
 		daysSinceCreationFloor := math.Floor(daysSinceCreation)
 
-		projectApprovalApprovers, err := db.GetApprovalRequestApproversByApprovalRequestId(projectApproval["ProjectApprovalId"].(int))
+		projectApprovalApprovers, err := db.GetApprovalRequestApproversByApprovalRequestId(int(projectApproval["ProjectApprovalId"].(int64)))
 		if err != nil {
 			logger.LogException(err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
