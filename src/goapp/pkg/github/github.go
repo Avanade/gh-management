@@ -211,14 +211,22 @@ func IsOrganizationMember(token, org, ghUser string) (bool, error) {
 
 func OrganizationInvitation(token string, username string, org string) *github.Invitation {
 	client := CreateClient(token)
-	Email := ""
-	Role := "direct_member"
-	teamid := []int64{}
-	user, _, _ := client.Users.Get(context.Background(), username)
-	intid2 := user.ID
-	options := &github.CreateOrgInvitationOptions{InviteeID: intid2, Email: &Email, Role: &Role, TeamID: teamid}
+	REINSTATE_ROLE := "reinstate"
 
-	invite, _, _ := client.Organizations.CreateOrgInvitation(context.Background(), org, options)
+	teamid := []int64{}
+	email := ""
+	user, _, _ := client.Users.Get(context.Background(), username)
+	options := &github.CreateOrgInvitationOptions{InviteeID: user.ID, Email: &email, Role: &REINSTATE_ROLE, TeamID: teamid}
+
+	var invite *github.Invitation
+
+	invite, resp, _ := client.Organizations.CreateOrgInvitation(context.Background(), org, options)
+
+	if resp.StatusCode != 201 {
+		DIRECT_MEMBER_ROLE := "direct_member"
+		options.Role = &DIRECT_MEMBER_ROLE
+		invite, _, _ = client.Organizations.CreateOrgInvitation(context.Background(), org, options)
+	}
 
 	return invite
 }
