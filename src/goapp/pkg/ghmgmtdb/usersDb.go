@@ -171,3 +171,22 @@ func UsersGetEmail(GithubUser string) (string, error) {
 		return result[0]["UserPrincipalName"].(string), err
 	}
 }
+
+func GetUserEmailByGithubId(GithubId string) (string, error) {
+	db := ConnectDb()
+	defer db.Close()
+
+	param := map[string]interface{}{
+		"GithubId": GithubId,
+	}
+
+	result, err := db.ExecuteStoredProcedureWithResult("PR_Users_GetEmailByGitHubId", param)
+	if err != nil {
+		return "0", err
+	}
+	if len(result) == 0 {
+		return "", nil
+	} else {
+		return result[0]["UserPrincipalName"].(string), err
+	}
+}

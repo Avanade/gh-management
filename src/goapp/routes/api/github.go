@@ -97,26 +97,26 @@ func ClearOrgMembers(w http.ResponseWriter, r *http.Request) {
 	emailSupport := os.Getenv("EMAIL_SUPPORT")
 	var convertedOutsideCollabsList []string
 	users := ghAPI.OrgListMembers(token, organization)
-	for _, list := range users {
-		email, err := db.UsersGetEmail(*list.Login)
+	for _, user := range users {
+		email, err := db.GetUserEmailByGithubId(fmt.Sprint(user.GetID()))
 		if err != nil {
 			logger.LogException(err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 		if len(email) > 0 {
-			activeUser, err := msgraph.ActiveUsers(email)
+			activeUser, err := msgraph.GetUserByUserPrincipalName(email)
 			if err != nil {
 				logger.LogException(err)
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
 			}
 			if activeUser == nil {
-				ghAPI.RemoveOrganizationsMember(token, organization, *list.Login)
+				ghAPI.RemoveOrganizationsMember(token, organization, *user.Login)
 
 			}
 		} else {
-			ghAPI.RemoveOrganizationsMember(token, organization, *list.Login)
+			ghAPI.RemoveOrganizationsMember(token, organization, *user.Login)
 
 		}
 
@@ -126,22 +126,22 @@ func ClearOrgMembers(w http.ResponseWriter, r *http.Request) {
 	organizationsOpen := os.Getenv("GH_ORG_OPENSOURCE")
 
 	usersOpenOrg := ghAPI.OrgListMembers(token, organizationsOpen)
-	for _, list := range usersOpenOrg {
-		email, err := db.UsersGetEmail(*list.Login)
+	for _, user := range usersOpenOrg {
+		email, err := db.GetUserEmailByGithubId(fmt.Sprint(user.GetID()))
 		if err != nil {
 			logger.LogException(err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 		if len(email) > 0 {
-			activeUser, _ := msgraph.ActiveUsers(email)
+			activeUser, _ := msgraph.GetUserByUserPrincipalName(email)
 			if activeUser == nil {
-				ghAPI.ConvertMemberToOutsideCollaborator(token, organizationsOpen, *list.Login)
-				convertedOutsideCollabsList = append(convertedOutsideCollabsList, *list.Login)
+				ghAPI.ConvertMemberToOutsideCollaborator(token, organizationsOpen, *user.Login)
+				convertedOutsideCollabsList = append(convertedOutsideCollabsList, *user.Login)
 			}
 		} else {
-			ghAPI.ConvertMemberToOutsideCollaborator(token, organizationsOpen, *list.Login)
-			convertedOutsideCollabsList = append(convertedOutsideCollabsList, *list.Login)
+			ghAPI.ConvertMemberToOutsideCollaborator(token, organizationsOpen, *user.Login)
+			convertedOutsideCollabsList = append(convertedOutsideCollabsList, *user.Login)
 		}
 	}
 
@@ -165,7 +165,7 @@ func ClearOrgMembers(w http.ResponseWriter, r *http.Request) {
 			}
 
 			for _, collab := range repoAdmins {
-				collabEmail, _ := db.UsersGetEmail(*collab.Login)
+				collabEmail, _ := db.GetUserEmailByGithubId(fmt.Sprint(collab.GetID()))
 
 				if len(convertedInRepo) > 0 {
 					EmailRepoAdminConvertToColaborator(collabEmail, repo.Name, convertedInRepo, logger)

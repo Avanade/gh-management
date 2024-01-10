@@ -392,7 +392,7 @@ func GetToken() (string, error) {
 	return tokenResponse.AccessToken, nil
 }
 
-func ActiveUsers(search string) ([]User, error) {
+func GetUserByUserPrincipalName(userPrincipalName string) ([]User, error) {
 	accessToken, err := GetToken()
 	if err != nil {
 		return nil, err
@@ -402,14 +402,14 @@ func ActiveUsers(search string) ([]User, error) {
 		Timeout: time.Second * 10,
 	}
 
-	urlPath := `https://graph.microsoft.com/v1.0/users?$filter=accountEnabled+eq+true`
+	urlPath := `https://graph.microsoft.com/v1.0/users`
 	URL, errURL := url.Parse(urlPath)
 	if err != nil {
 		return nil, errURL
 	}
 	query := URL.Query()
 	query.Set("$select", "displayName,otherMails,mail")
-	query.Set("$search", fmt.Sprintf(`"displayName:%s" OR "otherMails:%s" OR "mail:%s"`, search, search, search))
+	query.Set("$search", fmt.Sprintf(`"displayName:%s" OR "otherMails:%s" OR "mail:%s"`, userPrincipalName, userPrincipalName, userPrincipalName))
 	URL.RawQuery = query.Encode()
 
 	req, err := http.NewRequest("GET", URL.String(), nil)
