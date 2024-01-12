@@ -1,8 +1,7 @@
-param resourceName string = 'Ghmgm'
 param env string
-
 param appSettings object
 
+var resourceName = 'Ghmgm'
 var logicAppName = '${resourceName}LA${toUpper(first(env))}${substring(env, 1)}'
 
 resource LALogicApp 'Microsoft.Web/sites@2022-03-01' existing = {

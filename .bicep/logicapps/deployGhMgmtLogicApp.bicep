@@ -1,8 +1,8 @@
-param resourceName string = 'Ghmgm'
 param env string
 param location string = resourceGroup().location
 param laManageIdentityName string
 
+var resourceName = 'Ghmgm'
 var logicAppName = '${resourceName}LA${toUpper(first(env))}${substring(env, 1)}'
 var fileShare = 'fs${toLower(logicAppName)}'
 var accountKey = LAStorageAccount.listKeys().keys[0].value
