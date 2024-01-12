@@ -30,11 +30,13 @@ jobs:
         uses: azure/powershell@v1
         with:
           inlineScript: |
-            $output = . ./.bicep/logicapps/setup_workflows_config.ps1
+            $result = . ./.bicep/logicapps/setup_workflows_config.ps1
             New-WokflowsConfig `
               -WorkflowsPath ./.bicep/logicapps/workflows
+
+            echo $result
             
-            echo "::set-output name=value::$output"
+            echo "::set-result name=value::$result"
           azPSVersion: "latest"
       
       - name: SET THE IAC PARAMETERS
