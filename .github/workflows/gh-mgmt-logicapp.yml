@@ -94,7 +94,7 @@ jobs:
           subscriptionId: ${{ fromJSON(secrets.AZURE_CREDENTIALS)['subscriptionId'] }}
           resourceGroupName: ${{ secrets.AZURE_RG }}
           template: ./.bicep/logicapps/deploySetWorkflowsAppsettings.bicep
-          parameters: appSettings=${{ steps.logicapp_workflows_config.outputs.value}} env=${{ env.ACTIVE_ENV }}
+          parameters:  ${{ steps.logicapp_workflows_config.outputs.value}} env=${{ env.ACTIVE_ENV }}
           failOnStdErr: false
           scope: resourcegroup
         
