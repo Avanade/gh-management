@@ -26,6 +26,7 @@ jobs:
       - uses: actions/checkout@v2
 
       - name: Setup Logic App Workflows Config
+        id: logicapp_workflows_config
         uses: azure/powershell@v1
         with:
           inlineScript: |
@@ -33,12 +34,13 @@ jobs:
             New-WokflowsConfig `
               -WorkflowsPath ./.bicep/logicapps/workflows
             
-            echo "WORKFLOWS_APPSETTINGS=$output" >> $GITHUB_ENV
+            echo "WORKFLOWS_APPSETTINGS=$output" >> $GITHUB_OUTPUT
+            Write-Output "##vso[task.setvariable variable=value;isOutput=true]$output
           azPSVersion: "latest"
       
       - name: SET THE IAC PARAMETERS
         run: |
-          echo ${{ env.WORKFLOWS_APPSETTINGS}}
+          echo ${{ steps.logicapp_workflows_config.outputs.value }}
 
       # - name: Set GH_Domain and ACTIVE_ENV
       #   run: |
