@@ -36,7 +36,7 @@ jobs:
 
             echo "HELLO WORLD : $result"
             
-            echo "::set-result name=value::$result"
+            echo "::set-output name=value::$result"
           azPSVersion: "latest"
       
       - name: SET THE IAC PARAMETERS
