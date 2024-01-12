@@ -34,7 +34,6 @@ jobs:
             New-WokflowsConfig `
               -WorkflowsPath ./.bicep/logicapps/workflows
             
-            echo "WORKFLOWS_APPSETTINGS=$output" >> $GITHUB_OUTPUT
             Write-Output "##vso[task.setvariable variable=value;isOutput=true]$output
           azPSVersion: "latest"
       
