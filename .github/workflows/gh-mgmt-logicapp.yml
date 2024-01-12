@@ -83,18 +83,19 @@ jobs:
             . ./.bicep/logicapps/setup_workflows_config.ps1
             New-WokflowsConfig `
               -WorkflowsPath ./.bicep/logicapps/workflows
+            echo ${{ env.WORKFLOWS_APPSETTINGS }}
           azPSVersion: "latest"
         
 
-      - name: Set Workflows Appsettings
-        uses: azure/arm-deploy@v1
-        with:
-          subscriptionId: ${{ fromJSON(secrets.AZURE_CREDENTIALS)['subscriptionId'] }}
-          resourceGroupName: ${{ secrets.AZURE_RG }}
-          template: ./.bicep/logicapps/deploySetWorkflowsAppsettings.bicep
-          parameters: appSettings=${{ env.WORKFLOWS_APPSETTINGS}} env=${{ env.ACTIVE_ENV }}
-          failOnStdErr: false
-          scope: resourcegroup
+      # - name: Set Workflows Appsettings
+      #   uses: azure/arm-deploy@v1
+      #   with:
+      #     subscriptionId: ${{ fromJSON(secrets.AZURE_CREDENTIALS)['subscriptionId'] }}
+      #     resourceGroupName: ${{ secrets.AZURE_RG }}
+      #     template: ./.bicep/logicapps/deploySetWorkflowsAppsettings.bicep
+      #     parameters: appSettings=${{ env.WORKFLOWS_APPSETTINGS}} env=${{ env.ACTIVE_ENV }}
+      #     failOnStdErr: false
+      #     scope: resourcegroup
         
 
       - name: Deploy Connection Bicep File
