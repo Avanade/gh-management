@@ -34,7 +34,7 @@ jobs:
             New-WokflowsConfig `
               -WorkflowsPath ./.bicep/logicapps/workflows
             
-            Write-Output "##vso[task.setvariable variable=value;isOutput=true]$output
+            Write-Output "##vso[task.setvariable variable=value;isOutput=true]$output"
           azPSVersion: "latest"
       
       - name: SET THE IAC PARAMETERS
