@@ -30,8 +30,8 @@ jobs:
         uses: azure/powershell@v1
         with:
           inlineScript: |
-            $result = . ./.bicep/logicapps/setup_workflows_config.ps1
-            New-WokflowsConfig `
+            . ./.bicep/logicapps/setup_workflows_config.ps1
+            $result = New-WokflowsConfig `
               -WorkflowsPath ./.bicep/logicapps/workflows
 
             echo "HELLO WORLD : $result"
