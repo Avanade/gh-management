@@ -88,13 +88,21 @@ jobs:
             echo "::set-output name=value::$result"
           azPSVersion: "latest"
 
+      - name: Setup Workflow Parameters
+        uses: microsoft/variable-substitution@v1 
+        with:
+          files: ./.bicep/logicapps/parameters.json
+        env:
+          parameters.env.value: ${{ env.ACTIVE_ENV }}
+          parameters.appServiceSettings.value: ${{ steps.logicapp_workflows_config.outputs.value }}
+
       - name: Set Workflows Appsettings
         uses: azure/arm-deploy@v1
         with:
           subscriptionId: ${{ fromJSON(secrets.AZURE_CREDENTIALS)['subscriptionId'] }}
           resourceGroupName: ${{ secrets.AZURE_RG }}
           template: ./.bicep/logicapps/deploySetWorkflowsAppsettings.bicep
-          parameters:  ${{ steps.logicapp_workflows_config.outputs.value}} env=${{ env.ACTIVE_ENV }}
+          parameters:  ./.bicep/logicapps/parameters.json
           failOnStdErr: false
           scope: resourcegroup
         
