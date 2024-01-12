@@ -34,14 +34,14 @@ jobs:
             New-WokflowsConfig `
               -WorkflowsPath ./.bicep/logicapps/workflows
 
-            echo $result
+            echo "HELLO WORLD : $result"
             
             echo "::set-result name=value::$result"
           azPSVersion: "latest"
       
       - name: SET THE IAC PARAMETERS
         run: |
-          echo ${{ steps.logicapp_workflows_config.outputs.value }}
+          echo "HELLO WORLD : ${{ steps.logicapp_workflows_config.outputs.value }}"
 
       # - name: Set GH_Domain and ACTIVE_ENV
       #   run: |
