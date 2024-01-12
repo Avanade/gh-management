@@ -29,9 +29,11 @@ jobs:
         uses: azure/powershell@v1
         with:
           inlineScript: |
-            . ./.bicep/logicapps/setup_workflows_config.ps1
+            $output = . ./.bicep/logicapps/setup_workflows_config.ps1
             New-WokflowsConfig `
               -WorkflowsPath ./.bicep/logicapps/workflows
+            
+            echo "WORKFLOWS_APPSETTINGS=$output" >> $GITHUB_ENV
           azPSVersion: "latest"
       
       - name: SET THE IAC PARAMETERS

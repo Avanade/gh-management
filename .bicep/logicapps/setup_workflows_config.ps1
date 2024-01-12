@@ -16,5 +16,5 @@ function New-WokflowsConfig {
         $workflowNamesDictionary[$workflowName] = $false
     }
 
-    echo "WORKFLOWS_APPSETTINGS=$workflowNamesDictionary" >> $GITHUB_ENV
+    return $workflowNamesDictionary
 }
