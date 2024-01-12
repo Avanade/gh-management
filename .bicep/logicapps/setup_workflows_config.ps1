@@ -16,5 +16,7 @@ function New-WokflowsConfig {
         $workflowNamesDictionary[$workflowName] = $false
     }
 
-    return $workflowNamesDictionary
+    $result = $workflowNamesDictionary | ConvertTo-Json
+
+    return $result
 }
