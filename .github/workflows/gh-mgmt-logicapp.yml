@@ -94,7 +94,7 @@ jobs:
           files: ./.bicep/logicapps/parameters.json
         env:
           parameters.env.value: ${{ env.ACTIVE_ENV }}
-          parameters.appServiceSettings.value: ${{ steps.logicapp_workflows_config.outputs.value }}
+          parameters.appSettings.value: ${{ steps.logicapp_workflows_config.outputs.value }}
 
       - name: Set Workflows Appsettings
         uses: azure/arm-deploy@v1
