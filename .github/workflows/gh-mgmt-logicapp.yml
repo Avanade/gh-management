@@ -76,6 +76,16 @@ jobs:
             chmod +x ./.bicep/logicapps/upload_workflows.sh
             ./.bicep/logicapps/upload_workflows.sh ${{steps.deploy_main_bicep.outputs.accountName}} ${{steps.deploy_main_bicep.outputs.destination}} ./.bicep/logicapps/workflows
 
+      - name: Setup Logic App Workflows Config
+        uses: azure/powershell@v1
+        with:
+          inlineScript: |
+            . ./.bicep/logicapps/setup_workflows_config.ps1
+            New-WokflowsConfig `
+              -WorkflowsPath ./.bicep/logicapps/workflows
+          azPSVersion: "latest"
+        
+
       - name: Set Workflows Appsettings
         uses: azure/arm-deploy@v1
         with:
