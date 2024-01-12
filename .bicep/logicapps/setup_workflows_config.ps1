@@ -15,8 +15,6 @@ function New-WokflowsConfig {
     foreach ($workflowName in $workflowNamesArray) {
         $workflowNamesDictionary[$workflowName] = $false
     }
-    
-    $result = $deploymentParameters | ConvertTo-Json
 
-    return $result
+    $workflowNamesDictionary
 }
