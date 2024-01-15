@@ -2,9 +2,6 @@ name: Deploy Logic App Workflows
 run-name: Deploy Logic App Workflows [${{inputs.selected_environment}}]
 
 on:
-  push:
-    branches:
-      - main
   workflow_dispatch:
     inputs:
       selected_environment:
@@ -58,7 +55,7 @@ jobs:
           subscriptionId: ${{ fromJSON(secrets.AZURE_CREDENTIALS)['subscriptionId'] }}
           resourceGroupName: ${{ secrets.AZURE_RG }}
           template: ./.bicep/logicapps/deployGhMgmtLogicApp.bicep
-          parameters: env=${{ env.ACTIVE_ENV }} laManageIdentityName=${{ env.LA_MANAGE_IDENTITY_NAME }}
+          parameters: ./.bicep/logicapps/parameters.json env=${{ env.ACTIVE_ENV }} laManageIdentityName=${{ env.LA_MANAGE_IDENTITY_NAME }}
           failOnStdErr: false
           scope: resourcegroup
 
@@ -78,7 +75,7 @@ jobs:
           inlineScript: |
             chmod +x ./.bicep/logicapps/upload_workflows.sh
             ./.bicep/logicapps/upload_workflows.sh ${{steps.deploy_main_bicep.outputs.accountName}} ${{steps.deploy_main_bicep.outputs.destination}} ./.bicep/logicapps/workflows
-
+        
       - name: Deploy Connection Bicep File
         uses: azure/arm-deploy@v1
         id: deploy_connection_bicep
