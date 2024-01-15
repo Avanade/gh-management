@@ -89,7 +89,7 @@ jobs:
           subscriptionId: ${{ fromJSON(secrets.AZURE_CREDENTIALS)['subscriptionId'] }}
           resourceGroupName: ${{ secrets.AZURE_RG }}
           template: ./.bicep/logicapps/deploySetWorkflowsAppsettings.bicep
-          parameters:  ./.bicep/logicapps/parameters.json
+          parameters:  ./.bicep/logicapps/parameters.json existingAppSettings=${{steps.deploy_main_bicep.outputs.appSettings}}
           failOnStdErr: false
           scope: resourcegroup
         
