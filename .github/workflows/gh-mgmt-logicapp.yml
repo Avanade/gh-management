@@ -13,6 +13,94 @@ on:
         - test
         - uat
         - prod
+      cleanup_organization:
+        description: 'Set workflow status'
+        required: true
+        default: 'Disabled'
+        type: choice
+        options:
+          - Disabled
+          - Enabled
+      expiring_invitation:
+        description: 'Set workflow status'
+        required: true
+        default: 'Disabled'
+        type: choice
+        options:
+          - Disabled
+          - Enabled
+      fillout_approval_request_approvers:
+        description: 'Set workflow status'
+        required: true
+        default: 'Disabled'
+        type: choice
+        options:
+          - Disabled
+          - Enabled
+      fillout_approvers:
+        description: 'Set workflow status'
+        required: true
+        default: 'Disabled'
+        type: choice
+        options:
+          - Disabled
+          - Enabled
+      fillout_items_approvers:
+        description: 'Set workflow status'
+        required: true
+        default: 'Disabled'
+        type: choice
+        options:
+          - Disabled
+          - Enabled
+      index_org_repos:
+        description: 'Set workflow status'
+        required: true
+        default: 'Disabled'
+        type: choice
+        options:
+          - Disabled
+          - Enabled
+      innersource_check_outside_collaborators:
+        description: 'Set workflow status'
+        required: true
+        default: 'Disabled'
+        type: choice
+        options:
+          - Disabled
+          - Enabled
+      migrate_oss_sponsors:
+        description: 'Set workflow status'
+        required: true
+        default: 'Disabled'
+        type: choice
+        options:
+          - Disabled
+          - Enabled
+      opensource_check_outside_collaboratros:
+        description: 'Set workflow status'
+        required: true
+        default: 'Disabled'
+        type: choice
+        options:
+          - Disabled
+          - Enabled
+      recurring_approval:
+        description: 'Set workflow status'
+        required: true
+        default: 'Disabled'
+        type: choice
+        options:
+          - Disabled
+          - Enabled
+      repo_owner_scan:
+        description: 'Set workflow status'
+        required: true
+        default: 'Disabled'
+        type: choice
+        options:
+          - Disabled
+          - Enabled
 
 env:
   PROJECT_NAME: ava-gh-mgmt
@@ -76,25 +164,23 @@ jobs:
             chmod +x ./.bicep/logicapps/upload_workflows.sh
             ./.bicep/logicapps/upload_workflows.sh ${{steps.deploy_main_bicep.outputs.accountName}} ${{steps.deploy_main_bicep.outputs.destination}} ./.bicep/logicapps/workflows
 
-      - name: Setup Logic App Workflows Config
-        id: logicapp_workflows_config
-        uses: azure/powershell@v1
-        with:
-          inlineScript: |
-            . ./.bicep/logicapps/setup_workflows_config.ps1
-            $result = New-WokflowsConfig `
-              -WorkflowsPath ./.bicep/logicapps/workflows
-
-            echo "::set-output name=value::$result"
-          azPSVersion: "latest"
-
       - name: Setup Workflow Parameters
         uses: microsoft/variable-substitution@v1 
         with:
           files: ./.bicep/logicapps/parameters.json
         env:
           parameters.env.value: ${{ env.ACTIVE_ENV }}
-          parameters.appSettings.value: ${{ steps.logicapp_workflows_config.outputs.value }}
+          parameters.appSettings.value.Workflows.CleanupOrganization.FlowState: ${{ github.event.inputs.cleanup_organization }}
+          parameters.appSettings.value.Workflows.ExpiringInvitation.FlowState: ${{ github.event.inputs.expiring_invitation }}
+          parameters.appSettings.value.Workflows.FillOutApprovalRequestApprovers.FlowState: ${{ github.event.inputs.fillout_approval_request_approvers }}
+          parameters.appSettings.value.Workflows.FillOutApprovers.FlowState: ${{ github.event.inputs.fillout_approvers }}
+          parameters.appSettings.value.Workflows.FillOutItemsApprovers.FlowState: ${{ github.event.inputs.fillout_items_approvers }}
+          parameters.appSettings.value.Workflows.IndexOrgRepos.FlowState: ${{ github.event.inputs.index_org_repos }}
+          parameters.appSettings.value.Workflows.InnersourceCheckOutsideCollaborators.FlowState: ${{ github.event.inputs.innersource_check_outside_collaborators }}
+          parameters.appSettings.value.Workflows.OpensourceCheckOutsideCollaborators.FlowState: ${{ github.event.inputs.opensource_check_outside_collaboratros }}
+          parameters.appSettings.value.Workflows.MigrateOssSponsors.FlowState: ${{ github.event.inputs.migrate_oss_sponsors }}
+          parameters.appSettings.value.Workflows.RecurringApproval.FlowState: ${{ github.event.inputs.recurring_approval }}
+          parameters.appSettings.value.Workflows.RepoOwnerScan.FlowState: ${{ github.event.inputs.repo_owner_scan }}
 
       - name: Set Workflows Appsettings
         uses: azure/arm-deploy@v1
