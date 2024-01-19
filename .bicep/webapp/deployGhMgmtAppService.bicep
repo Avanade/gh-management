@@ -9,7 +9,7 @@ param imageName string
 param runDeployFrontDoor bool
 param frontDoorCustomDomain string
 
-param appinsightsRetentionDays int
+param appinsightsRetentionDays string
 
 @allowed([
   'test'
