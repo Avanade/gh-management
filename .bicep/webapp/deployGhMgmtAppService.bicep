@@ -39,7 +39,7 @@ param appServiceSettings object
 ])
 param sku string = 'P1v2'
 
-resource ghmgmtAppServicePlan 'Microsoft.Web/serverfarms@2023-01-01' = {
+resource ghmgmtAppServicePlan 'Microsoft.Web/serverfarms@2022-03-01' = {
   name: appServicePlanName
   location: location
   properties: {
