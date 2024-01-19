@@ -151,7 +151,7 @@ resource logAnalyticsWorkspace 'Microsoft.OperationalInsights/workspaces@2020-08
     sku: {
       name: 'PerGB2018'
     }
-    retentionInDays: 45 // appinsightsRetentionDays
+    retentionInDays: 31 // appinsightsRetentionDays
     features: {
       searchVersion: 1
       legacy: 0
