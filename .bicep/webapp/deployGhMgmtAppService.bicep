@@ -39,7 +39,7 @@ param appServiceSettings object
 ])
 param sku string = 'P1v2'
 
-resource ghmgmtAppServicePlan 'Microsoft.Web/serverfarms@2020-06-01' = {
+resource ghmgmtAppServicePlan 'Microsoft.Web/serverfarms@2022-09-01' = {
   name: appServicePlanName
   location: location
   properties: {
@@ -48,7 +48,7 @@ resource ghmgmtAppServicePlan 'Microsoft.Web/serverfarms@2020-06-01' = {
   sku: {
     name: sku
   }
-  kind: 'Linux'
+  kind: 'linux'
 }
 
 var appServiceName = '${projectName}-${activeEnv}'
