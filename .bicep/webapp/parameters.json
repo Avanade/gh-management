@@ -8,7 +8,7 @@
         "activeEnv": {"value": ""},
         "sqlServerName": {"value": ""},
         "containerServer": {"value": ""},
-        "appinsightsRetentionDays": {"value": ""},
+        "appinsightsRetentionDays": {"value": 0},
         "appServiceSettings": {
             "value": {
                 "APP_TITLE":"",
