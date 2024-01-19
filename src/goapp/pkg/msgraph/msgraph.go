@@ -21,7 +21,7 @@ type TokenResponse struct {
 	AccessToken  string `json:"access_token"`
 }
 
-type ListUSersResponse struct {
+type ListUsersResponse struct {
 	DataContext string `json:"@odata.context"`
 	Value       []User `json:"value"`
 }
@@ -110,7 +110,7 @@ func SearchUsers(search string) ([]User, error) {
 	}
 	defer response.Body.Close()
 
-	var listUsersResponse ListUSersResponse
+	var listUsersResponse ListUsersResponse
 	err = json.NewDecoder(response.Body).Decode(&listUsersResponse)
 	if err != nil {
 		return nil, err
@@ -153,7 +153,7 @@ func GetAllUsers() ([]User, error) {
 	}
 	defer response.Body.Close()
 
-	var listUsersResponse ListUSersResponse
+	var listUsersResponse ListUsersResponse
 	err = json.NewDecoder(response.Body).Decode(&listUsersResponse)
 	if err != nil {
 		return nil, err
@@ -392,53 +392,48 @@ func GetToken() (string, error) {
 	return tokenResponse.AccessToken, nil
 }
 
-func ActiveUsers(search string) ([]User, error) {
+func IsUserExist(userPrincipalName string) (bool, error) {
 	accessToken, err := GetToken()
 	if err != nil {
-		return nil, err
+		return false, err
 	}
 
 	client := &http.Client{
 		Timeout: time.Second * 10,
 	}
 
-	urlPath := `https://graph.microsoft.com/v1.0/users?$filter=accountEnabled+eq+true`
+	urlPath := `https://graph.microsoft.com/v1.0/users`
 	URL, errURL := url.Parse(urlPath)
 	if err != nil {
-		return nil, errURL
+		return false, errURL
 	}
 	query := URL.Query()
-	query.Set("$select", "displayName,otherMails,mail")
-	query.Set("$search", fmt.Sprintf(`"displayName:%s" OR "otherMails:%s" OR "mail:%s"`, search, search, search))
+	query.Set("$select", "displayName")
+	query.Set("$search", fmt.Sprintf(`"displayName:%[1]s" OR "otherMails:%[1]s" OR "mail:%[1]s" OR "userPrincipalName:%[1]s"`, userPrincipalName))
 	URL.RawQuery = query.Encode()
 
 	req, err := http.NewRequest("GET", URL.String(), nil)
 	if err != nil {
-		return nil, err
+		return false, err
 	}
 	req.Header.Add("Authorization", "Bearer "+accessToken)
 	req.Header.Add("ConsistencyLevel", "eventual")
 	response, err := client.Do(req)
 	if err != nil {
-		return nil, err
+		return false, err
 	}
 	defer response.Body.Close()
 
-	var listUsersResponse ListUSersResponse
+	var listUsersResponse ListUsersResponse
+
 	err = json.NewDecoder(response.Body).Decode(&listUsersResponse)
 	if err != nil {
-		return nil, err
+		return false, err
 	}
 
-	// Remove users without email address
-	var users []User
-	for _, user := range listUsersResponse.Value {
-		if len(user.OtherMails) > 0 {
-			users = append(users, user)
-		}
-	}
+	isMember := len(listUsersResponse.Value) > 0
 
-	return users, nil
+	return isMember, nil
 }
 
 func GetTeamsMembers(ChannelId string, token string) ([]User, error) {
@@ -466,7 +461,7 @@ func GetTeamsMembers(ChannelId string, token string) ([]User, error) {
 	}
 	defer response.Body.Close()
 
-	var listUsersResponse ListUSersResponse
+	var listUsersResponse ListUsersResponse
 	err = json.NewDecoder(response.Body).Decode(&listUsersResponse)
 	if err != nil {
 		return nil, err

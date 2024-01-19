@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"os"
@@ -13,6 +14,7 @@ import (
 	"main/pkg/msgraph"
 	"main/pkg/notification"
 
+	"github.com/microsoft/ApplicationInsights-Go/appinsights"
 	"github.com/microsoft/ApplicationInsights-Go/appinsights/contracts"
 )
 
@@ -78,7 +80,10 @@ func CheckAvaOpenSource(w http.ResponseWriter, r *http.Request) {
 					http.Error(w, err.Error(), http.StatusInternalServerError)
 					return
 				}
-				emailAdmin(admin, email, collab.Name, repoOutsideCollabsList, logger)
+
+				if email != "" {
+					emailAdmin(admin, email, collab.Name, repoOutsideCollabsList, logger)
+				}
 			}
 
 		}
@@ -97,27 +102,25 @@ func ClearOrgMembers(w http.ResponseWriter, r *http.Request) {
 	emailSupport := os.Getenv("EMAIL_SUPPORT")
 	var convertedOutsideCollabsList []string
 	users := ghAPI.OrgListMembers(token, organization)
-	for _, list := range users {
-		email, err := db.UsersGetEmail(*list.Login)
+	for _, user := range users {
+		email, err := db.GetUserEmailByGithubId(fmt.Sprint(user.GetID()))
 		if err != nil {
 			logger.LogException(err)
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
+			continue
 		}
-		if len(email) > 0 {
-			activeUser, err := msgraph.ActiveUsers(email)
+		if email != "" {
+			isUserExist, err := msgraph.IsUserExist(email)
 			if err != nil {
 				logger.LogException(err)
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return
+				continue
 			}
-			if activeUser == nil {
-				ghAPI.RemoveOrganizationsMember(token, organization, *list.Login)
-
+			if !isUserExist {
+				logger.TrackTrace(fmt.Sprint("GitHub ID: ", user.GetID(), " not found on AD"), contracts.Information)
+				// ghAPI.RemoveOrganizationsMember(token, organization, *user.Login)
 			}
 		} else {
-			ghAPI.RemoveOrganizationsMember(token, organization, *list.Login)
-
+			logger.TrackTrace(fmt.Sprint("GitHub ID: ", user.GetID(), " not found"), contracts.Information)
+			// ghAPI.RemoveOrganizationsMember(token, organization, *user.Login)
 		}
 
 	}
@@ -126,28 +129,40 @@ func ClearOrgMembers(w http.ResponseWriter, r *http.Request) {
 	organizationsOpen := os.Getenv("GH_ORG_OPENSOURCE")
 
 	usersOpenOrg := ghAPI.OrgListMembers(token, organizationsOpen)
-	for _, list := range usersOpenOrg {
-		email, err := db.UsersGetEmail(*list.Login)
+	for _, user := range usersOpenOrg {
+		email, err := db.GetUserEmailByGithubId(fmt.Sprint(user.GetID()))
 		if err != nil {
 			logger.LogException(err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		if len(email) > 0 {
-			activeUser, _ := msgraph.ActiveUsers(email)
-			if activeUser == nil {
-				ghAPI.ConvertMemberToOutsideCollaborator(token, organizationsOpen, *list.Login)
-				convertedOutsideCollabsList = append(convertedOutsideCollabsList, *list.Login)
+		if email != "" {
+			isUserExist, _ := msgraph.IsUserExist(email)
+			if !isUserExist {
+				logger.TrackTrace(fmt.Sprint("GitHub ID: ", user.GetID(), " not found on AD"), contracts.Information)
+				// ghAPI.ConvertMemberToOutsideCollaborator(token, organizationsOpen, *user.Login)
+				convertedOutsideCollabsList = append(convertedOutsideCollabsList, email)
 			}
 		} else {
-			ghAPI.ConvertMemberToOutsideCollaborator(token, organizationsOpen, *list.Login)
-			convertedOutsideCollabsList = append(convertedOutsideCollabsList, *list.Login)
+			logger.TrackTrace(fmt.Sprint("GitHub ID: ", user.GetID(), " not found"), contracts.Information)
+			// ghAPI.ConvertMemberToOutsideCollaborator(token, organizationsOpen, *user.Login)
+			convertedOutsideCollabsList = append(convertedOutsideCollabsList, email)
 		}
 	}
 
 	if len(convertedOutsideCollabsList) > 0 {
 		// to list of new outside collaborators to ospo
-		EmailAdminConvertToColaborator(emailSupport, convertedOutsideCollabsList, logger)
+		// EmailAdminConvertToColaborator(emailSupport, convertedOutsideCollabsList, logger)
+		emailConvertedCollaboratorTC := appinsights.NewTraceTelemetry(fmt.Sprintf("COLLAB EMAIL : %s", emailSupport), contracts.Information)
+
+		convertedOutsideCollabsListJson, err := json.Marshal(convertedOutsideCollabsList)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+
+		emailConvertedCollaboratorTC.Properties["ConvertedOutsideCollabsList"] = string(convertedOutsideCollabsListJson)
+		logger.Track(emailConvertedCollaboratorTC)
 
 		// to repo admins with converted users
 		repos, _ := ghAPI.GetRepositoriesFromOrganization(organizationsOpen)
@@ -165,10 +180,21 @@ func ClearOrgMembers(w http.ResponseWriter, r *http.Request) {
 			}
 
 			for _, collab := range repoAdmins {
-				collabEmail, _ := db.UsersGetEmail(*collab.Login)
+				collabEmail, _ := db.GetUserEmailByGithubId(fmt.Sprint(collab.GetID()))
 
 				if len(convertedInRepo) > 0 {
-					EmailRepoAdminConvertToColaborator(collabEmail, repo.Name, convertedInRepo, logger)
+					// EmailRepoAdminConvertToColaborator(collabEmail, repo.Name, convertedInRepo, logger)
+					emailAdminConvertedCollaboratorTC := appinsights.NewTraceTelemetry(fmt.Sprintf("COLLAB EMAIL : %s", collabEmail), contracts.Information)
+
+					convertInRepoJson, err := json.Marshal(convertedInRepo)
+					if err != nil {
+						fmt.Println(err)
+						return
+					}
+
+					emailAdminConvertedCollaboratorTC.Properties["RepoName"] = repo.Name
+					emailAdminConvertedCollaboratorTC.Properties["ConvertedOutsideCollabsList"] = string(convertInRepoJson)
+					logger.Track(emailAdminConvertedCollaboratorTC)
 				}
 			}
 
