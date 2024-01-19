@@ -1,8 +1,10 @@
-param resourceName string = 'Ghmgm'
 param env string
 param location string = resourceGroup().location
 param laManageIdentityName string
 
+param appSettings object
+
+var resourceName = 'Ghmgm'
 var logicAppName = '${resourceName}LA${toUpper(first(env))}${substring(env, 1)}'
 var fileShare = 'fs${toLower(logicAppName)}'
 var accountKey = LAStorageAccount.listKeys().keys[0].value
@@ -91,7 +93,7 @@ resource LALogicApp 'Microsoft.Web/sites@2022-03-01' = {
 resource LALogicAppConfig 'Microsoft.Web/sites/config@2022-03-01' = {
   name: 'appsettings'
   parent: LALogicApp
-  properties: {
+  properties: union({
     APP_KIND : 'workflowApp'
     AzureFunctionsJobHost__extensionBundle__id : 'Microsoft.Azure.Functions.ExtensionBundle.Workflows'
     AzureFunctionsJobHost__extensionBundle__version : '[1.*, 2.0.0)'
@@ -101,7 +103,7 @@ resource LALogicAppConfig 'Microsoft.Web/sites/config@2022-03-01' = {
     WEBSITE_CONTENTAZUREFILECONNECTIONSTRING : 'DefaultEndpointsProtocol=https;AccountName=${accountName};AccountKey=${accountKey};EndpointSuffix=core.windows.net'
     WEBSITE_CONTENTSHARE : fileShare
     WEBSITE_NODE_DEFAULT_VERSION : '~14'
-  }
+  }, appSettings)
 }
 
 // TAGS
@@ -137,7 +139,6 @@ resource LALogicAppTags 'Microsoft.Resources/tags@2022-09-01' = {
     }
   }
 }
-
 
 output accountName string = LAStorageAccount.name
 output destination string = '${fileShare}/site/wwwroot'
