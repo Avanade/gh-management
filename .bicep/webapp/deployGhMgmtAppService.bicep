@@ -9,6 +9,8 @@ param imageName string
 param runDeployFrontDoor bool
 param frontDoorCustomDomain string
 
+param appinsightsRetentionDays int
+
 @allowed([
   'test'
   'uat'
@@ -149,7 +151,7 @@ resource logAnalyticsWorkspace 'Microsoft.OperationalInsights/workspaces@2020-08
     sku: {
       name: 'PerGB2018'
     }
-    retentionInDays: 90
+    retentionInDays: appinsightsRetentionDays
     features: {
       searchVersion: 1
       legacy: 0
