@@ -48,7 +48,7 @@ resource ghmgmtAppServicePlan 'Microsoft.Web/serverfarms@2020-06-01' = {
   sku: {
     name: sku
   }
-  kind: 'linux'
+  kind: 'Linux'
 }
 
 var appServiceName = '${projectName}-${activeEnv}'
