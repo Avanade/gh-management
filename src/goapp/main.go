@@ -31,7 +31,7 @@ func main() {
 		SSLRedirect:           true,                                            // Strict-Transport-Security
 		SSLHost:               os.Getenv("SSL_HOST"),                           // Strict-Transport-Security
 		SSLProxyHeaders:       map[string]string{"X-Forwarded-Proto": "https"}, // Strict-Transport-Security
-		FrameDeny:             true,
+		FrameDeny:             false,
 		ContentTypeNosniff:    true, // X-Content-Type-Options
 		BrowserXssFilter:      true,
 		ReferrerPolicy:        "strict-origin", // Referrer-Policy
