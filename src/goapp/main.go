@@ -27,12 +27,12 @@ func main() {
 		log.Print(err.Error())
 	}
 
-	secureMiddleware := secure.New(secure.Options{
+	secureOptions := secure.Options{
 		SSLRedirect:           true,                                            // Strict-Transport-Security
 		SSLHost:               os.Getenv("SSL_HOST"),                           // Strict-Transport-Security
 		SSLProxyHeaders:       map[string]string{"X-Forwarded-Proto": "https"}, // Strict-Transport-Security
-		FrameDeny:             false,                                           // X-FRAME-OPTIONS
-		ContentTypeNosniff:    true,                                            // X-Content-Type-Options
+		FrameDeny:             true,
+		ContentTypeNosniff:    true, // X-Content-Type-Options
 		BrowserXssFilter:      true,
 		ReferrerPolicy:        "strict-origin", // Referrer-Policy
 		ContentSecurityPolicy: os.Getenv("CONTENT_SECURITY_POLICY"),
@@ -40,7 +40,13 @@ func main() {
 		STSSeconds:            31536000,                        // Strict-Transport-Security
 		STSIncludeSubdomains:  true,                            // Strict-Transport-Security
 		IsDevelopment:         os.Getenv("IS_DEVELOPMENT") == "true",
-	})
+	}
+
+	if os.Getenv("FRAME_EMBEDDOR") != "" {
+		secureOptions.CustomFrameOptionsValue = fmt.Sprint("ALLOW-FROM ", os.Getenv("FRAME_EMBEDDOR"))
+	}
+
+	secureMiddleware := secure.New(secureOptions)
 
 	// Create session and GitHubClient
 	session.InitializeSession()
@@ -69,10 +75,24 @@ func main() {
 	go reports.ScheduleJob(ctx, offset, reports.DailySummaryReport)
 	go checkFailedApprovalRequests()
 
-	mux.Use(secureMiddleware.Handler)
+	mux.Use(
+		secureMiddleware.Handler,
+		commonHeadersMiddleware,
+	)
 	http.Handle("/", mux)
 
 	port := ev.GetEnvVar("PORT", "8080")
 	fmt.Printf("Now listening on port %v\n", port)
 	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%v", port), mux))
+}
+
+// commonHeadersMiddleware is the middleware function to set common headers
+func commonHeadersMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Set common headers for all requests
+		w.Header().Set("Cache-Control", "no-store")
+
+		// Call the next handler in the chain
+		next.ServeHTTP(w, r)
+	})
 }
