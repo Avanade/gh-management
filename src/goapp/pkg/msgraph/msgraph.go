@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/base64"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -421,6 +422,9 @@ func IsUserExist(userPrincipalName string) (bool, error) {
 	response, err := client.Do(req)
 	if err != nil {
 		return false, err
+	}
+	if response.StatusCode != 200 {
+		return false, errors.New(response.Status)
 	}
 	defer response.Body.Close()
 

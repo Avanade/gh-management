@@ -100,7 +100,7 @@ func ClearOrgMembers(w http.ResponseWriter, r *http.Request) {
 	// Remove GitHub users from innersource who are not employees
 	organization := os.Getenv("GH_ORG_INNERSOURCE")
 	emailSupport := os.Getenv("EMAIL_SUPPORT")
-	var convertedOutsideCollabsList []string
+
 	users := ghAPI.OrgListMembers(token, organization)
 	for _, user := range users {
 		email, err := db.GetUserEmailByGithubId(fmt.Sprint(user.GetID()))
@@ -115,17 +115,18 @@ func ClearOrgMembers(w http.ResponseWriter, r *http.Request) {
 				continue
 			}
 			if !isUserExist {
-				logger.TrackTrace(fmt.Sprint("GitHub ID: ", user.GetID(), " not found on AD"), contracts.Information)
+				logger.TrackTrace(fmt.Sprint("GitHub ID: ", user.GetID(), " not found on AD | INTERNAL"), contracts.Information)
 				// ghAPI.RemoveOrganizationsMember(token, organization, *user.Login)
 			}
 		} else {
-			logger.TrackTrace(fmt.Sprint("GitHub ID: ", user.GetID(), " not found"), contracts.Information)
+			logger.TrackTrace(fmt.Sprint("GitHub ID: ", user.GetID(), " not found | INTERNAL"), contracts.Information)
 			// ghAPI.RemoveOrganizationsMember(token, organization, *user.Login)
 		}
 
 	}
 
 	// Convert users who are not employees to an outside collaborator
+	var convertedOutsideCollabsList []string
 	organizationsOpen := os.Getenv("GH_ORG_OPENSOURCE")
 
 	usersOpenOrg := ghAPI.OrgListMembers(token, organizationsOpen)
@@ -139,21 +140,21 @@ func ClearOrgMembers(w http.ResponseWriter, r *http.Request) {
 		if email != "" {
 			isUserExist, _ := msgraph.IsUserExist(email)
 			if !isUserExist {
-				logger.TrackTrace(fmt.Sprint("GitHub ID: ", user.GetID(), " not found on AD"), contracts.Information)
+				logger.TrackTrace(fmt.Sprint("GitHub ID: ", user.GetID(), " not found on AD | EXTERNAL"), contracts.Information)
 				// ghAPI.ConvertMemberToOutsideCollaborator(token, organizationsOpen, *user.Login)
-				convertedOutsideCollabsList = append(convertedOutsideCollabsList, email)
+				convertedOutsideCollabsList = append(convertedOutsideCollabsList, *user.Login)
 			}
 		} else {
-			logger.TrackTrace(fmt.Sprint("GitHub ID: ", user.GetID(), " not found"), contracts.Information)
+			logger.TrackTrace(fmt.Sprint("GitHub ID: ", user.GetID(), " not found | EXTERNAL"), contracts.Information)
 			// ghAPI.ConvertMemberToOutsideCollaborator(token, organizationsOpen, *user.Login)
-			convertedOutsideCollabsList = append(convertedOutsideCollabsList, email)
+			convertedOutsideCollabsList = append(convertedOutsideCollabsList, *user.Login)
 		}
 	}
 
 	if len(convertedOutsideCollabsList) > 0 {
 		// to list of new outside collaborators to ospo
 		// EmailAdminConvertToColaborator(emailSupport, convertedOutsideCollabsList, logger)
-		emailConvertedCollaboratorTC := appinsights.NewTraceTelemetry(fmt.Sprintf("COLLAB EMAIL : %s", emailSupport), contracts.Information)
+		emailConvertedCollaboratorTC := appinsights.NewTraceTelemetry(fmt.Sprintf("SUPPORT EMAIL : %s", emailSupport), contracts.Information)
 
 		convertedOutsideCollabsListJson, err := json.Marshal(convertedOutsideCollabsList)
 		if err != nil {
@@ -179,12 +180,12 @@ func ClearOrgMembers(w http.ResponseWriter, r *http.Request) {
 				}
 			}
 
-			for _, collab := range repoAdmins {
-				collabEmail, _ := db.GetUserEmailByGithubId(fmt.Sprint(collab.GetID()))
+			if len(convertedInRepo) > 0 {
+				for _, collab := range repoAdmins {
+					collabEmail, _ := db.GetUserEmailByGithubId(fmt.Sprint(collab.GetID()))
 
-				if len(convertedInRepo) > 0 {
 					// EmailRepoAdminConvertToColaborator(collabEmail, repo.Name, convertedInRepo, logger)
-					emailAdminConvertedCollaboratorTC := appinsights.NewTraceTelemetry(fmt.Sprintf("COLLAB EMAIL : %s", collabEmail), contracts.Information)
+					emailAdminConvertedCollaboratorTC := appinsights.NewTraceTelemetry(fmt.Sprintf("ADMIN EMAIL : %s", collabEmail), contracts.Information)
 
 					convertInRepoJson, err := json.Marshal(convertedInRepo)
 					if err != nil {
@@ -193,7 +194,7 @@ func ClearOrgMembers(w http.ResponseWriter, r *http.Request) {
 					}
 
 					emailAdminConvertedCollaboratorTC.Properties["RepoName"] = repo.Name
-					emailAdminConvertedCollaboratorTC.Properties["ConvertedOutsideCollabsList"] = string(convertInRepoJson)
+					emailAdminConvertedCollaboratorTC.Properties["ConvertedInRepo"] = string(convertInRepoJson)
 					logger.Track(emailAdminConvertedCollaboratorTC)
 				}
 			}
