@@ -49,6 +49,10 @@ func NewAuthenticator(host string) (*Authenticator, error) {
 }
 
 func VerifyAccessToken(r *http.Request) (*jwt.Token, error) {
+	authorization := r.Header.Get("Authorization")
+	if authorization == "" {
+		return nil, fmt.Errorf("no authorization header found")
+	}
 	tokenString := strings.Split(r.Header.Get("Authorization"), "Bearer ")[1]
 	keySet, err := jwk.Fetch(r.Context(), "https://login.microsoftonline.com/common/discovery/v2.0/keys")
 	if err != nil {
@@ -58,7 +62,7 @@ func VerifyAccessToken(r *http.Request) (*jwt.Token, error) {
 
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		if token.Method.Alg() != jwa.RS256.String() {
-			return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
+			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
 		kid, ok := token.Header["kid"].(string)
 		if !ok {
@@ -67,7 +71,7 @@ func VerifyAccessToken(r *http.Request) (*jwt.Token, error) {
 
 		keys, ok := keySet.LookupKeyID(kid)
 		if !ok {
-			return nil, fmt.Errorf("key %v not found", kid)
+
 		}
 
 		publickey := &rsa.PublicKey{}
