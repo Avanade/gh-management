@@ -184,18 +184,20 @@ func ClearOrgMembers(w http.ResponseWriter, r *http.Request) {
 				for _, collab := range repoAdmins {
 					collabEmail, _ := db.GetUserEmailByGithubId(fmt.Sprint(collab.GetID()))
 
-					// EmailRepoAdminConvertToColaborator(collabEmail, repo.Name, convertedInRepo, logger)
-					emailAdminConvertedCollaboratorTC := appinsights.NewTraceTelemetry(fmt.Sprintf("ADMIN EMAIL : %s", collabEmail), contracts.Information)
+					if collabEmail != "" {
+						// EmailRepoAdminConvertToColaborator(collabEmail, repo.Name, convertedInRepo, logger)
+						emailAdminConvertedCollaboratorTC := appinsights.NewTraceTelemetry(fmt.Sprintf("ADMIN EMAIL : %s", collabEmail), contracts.Information)
 
-					convertInRepoJson, err := json.Marshal(convertedInRepo)
-					if err != nil {
-						fmt.Println(err)
-						return
+						convertInRepoJson, err := json.Marshal(convertedInRepo)
+						if err != nil {
+							fmt.Println(err)
+							return
+						}
+
+						emailAdminConvertedCollaboratorTC.Properties["RepoName"] = repo.Name
+						emailAdminConvertedCollaboratorTC.Properties["ConvertedInRepo"] = string(convertInRepoJson)
+						logger.Track(emailAdminConvertedCollaboratorTC)
 					}
-
-					emailAdminConvertedCollaboratorTC.Properties["RepoName"] = repo.Name
-					emailAdminConvertedCollaboratorTC.Properties["ConvertedInRepo"] = string(convertInRepoJson)
-					logger.Track(emailAdminConvertedCollaboratorTC)
 				}
 			}
 
