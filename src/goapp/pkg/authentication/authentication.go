@@ -3,6 +3,7 @@ package authentication
 import (
 	"context"
 	"crypto/rsa"
+	"errors"
 	"fmt"
 	"log"
 	"main/pkg/envvar"
@@ -51,7 +52,7 @@ func NewAuthenticator(host string) (*Authenticator, error) {
 func VerifyAccessToken(r *http.Request) (*jwt.Token, error) {
 	authorization := r.Header.Get("Authorization")
 	if authorization == "" {
-		return nil, fmt.Errorf("no authorization header found")
+		return nil, errors.New("no authorization header found")
 	}
 	tokenString := strings.Split(r.Header.Get("Authorization"), "Bearer ")[1]
 	keySet, err := jwk.Fetch(r.Context(), "https://login.microsoftonline.com/common/discovery/v2.0/keys")
@@ -71,7 +72,7 @@ func VerifyAccessToken(r *http.Request) (*jwt.Token, error) {
 
 		keys, ok := keySet.LookupKeyID(kid)
 		if !ok {
-
+			return nil, fmt.Errorf("key %v not found", kid)
 		}
 
 		publickey := &rsa.PublicKey{}
