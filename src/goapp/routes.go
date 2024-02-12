@@ -31,7 +31,7 @@ func setPageRoutes(mux *mux.Router) {
 	mux.Handle("/activities/{action:edit|view}/{id}", loadAzGHAuthPage(rtActivities.FormHandler))
 
 	// REPOSITORIES PAGE
-	mux.Handle("/repositories", loadAzGHAuthPage(rtProjects.IndexHandler))
+	mux.Handle("/repositories", loadAzAuthPage(rtProjects.IndexHandler))
 	mux.Handle("/repositories/new", loadAzGHAuthPage(rtProjects.FormHandler))
 	mux.Handle("/repositories/makepublic/{id}", loadAzGHAuthPage(rtProjects.MakePublicHandler))
 
@@ -181,7 +181,7 @@ func setApiRoutes(mux *mux.Router) {
 	muxApi.Handle("/users/{search}/search", loadAzAuthPage(rtApi.SearchUserFromActiveDirectory)).Methods("GET")
 
 	// POPULAR TOPICS API
-	muxApi.Handle("/popular-topics", loadAzGHAuthPage(rtApi.GetPopularTopics)).Methods("GET")
+	muxApi.Handle("/popular-topics", loadAzAuthPage(rtApi.GetPopularTopics)).Methods("GET")
 
 	//APPROVAL TYPES API
 	muxApi.Handle("/approval-types", loadAzAuthPage(rtApi.CreateApprovalType)).Methods("POST")

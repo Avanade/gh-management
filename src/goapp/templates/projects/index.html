@@ -3,20 +3,23 @@
 
 <div id="pageTitle">Repositories</div>
 
-<div x-data="myRepositoriesData()" x-init="getPageDetails();">
+<div x-data="myRepositoriesData({{ .profileGH.IsValid }})" x-init="getPageDetails();">
   <div class="flex justify-between">
     <div>
       <nav class="flex space-x-4" aria-label="Tabs">
-
+        {{ if .profileGH.IsValid}}
         <div @click="switchTo('my')" class="px-3 py-2 font-medium text-sm rounded-md cursor-pointer"
           x-bind:class="view==='my' ? 'bg-[#fff2eb] text-[#FF5800]':'text-gray-500 hover:text-gray-700'"> Your
-          Repositories </div>
-
+          Repositories 
+        </div>
+        {{ end }}
         <div @click="switchTo('all')" class="px-3 py-2 font-medium text-sm rounded-md cursor-pointer"
           x-bind:class="view==='all' ? 'bg-[#fff2eb] text-[#FF5800]':'text-gray-500 hover:text-gray-700'"> All
-          Repositories </div>
+          Repositories 
+        </div>
       </nav>
     </div>
+    {{ if .profileGH.IsValid}}
     <div class="flex">
       <a href="/repositories/new">
         <button class="bg-[#FF5800] hover:bg-[#FF4300] text-white font-bold py-2 px-4 rounded">
@@ -24,6 +27,7 @@
         </button>
       </a>
     </div>
+    {{ end }}
   </div>
   <div>
     <!-- SPINNER -->
@@ -470,7 +474,7 @@
         <template x-for="(repository, index) in allRepositoriesList">
           <li>
             <div class="px-4 py-4 sm:px-6 hover:bg-gray-50 cursor-pointer"
-              @click="getRepoCollaborators(repository.Id, index); repository.showStatus = !repository.showStatus">
+              @click="getRepoCollaborators(repository.Id, index)">
               <div class="flex items-center justify-between">
                 <div @click.stop @click="window.open(repository.TFSProjectReference)">
                   <span class="text-sm font-medium truncate"
@@ -481,7 +485,7 @@
                 </div>
                 {{ if .isAdmin }}
                 <div @click.stop @click.outside="closeUserRepositoryOptions(-1)"
-                  x-show="repository.RepositorySource==='GitHub' && repository.Visibility==='Public'">
+                  x-show="repository.RepositorySource==='GitHub' && repository.Visibility==='Public' && isGHAssociated">
                   <div class="relative mt-1">
                     <button
                       @click="repository.showOptions = !repository.showOptions; closeUserRepositoryOptions(index);"
@@ -720,7 +724,6 @@
     </div>
   </div>
 
-
   <!-- Modal -->
   <template x-if="showAddCollaboratorModal">
     <div class="relative z-10" aria-labelledby="modal-title" role="dialog" aria-modal="true">
@@ -881,7 +884,7 @@
       </div>
     </div>
   </template>
-
+</div>
 
 <script src="/public/components/combobox.js"></script>
 <script src="/public/components/popup.js"></script>
@@ -985,14 +988,16 @@
     return data
   }
 
-  function myRepositoriesData() {
+  function myRepositoriesData(
+    isGHAssociated
+  ) {
     return {
+      isGHAssociated: false,
       showSpinner: true,
       view: '',
       search: '',
       userRepositoriesList: [],
       allRepositoriesList: [],
-      filteredAllRepositories: [],
       currentSelected: -1,
       offset: 0,
       total: 0,
@@ -1062,14 +1067,17 @@
         }
       },
       getPageDetails() {
+        this.isGHAssociated = isGHAssociated
         this.getGitHubUsers()
         const queryString = window.location.search;
         const urlParams = new URLSearchParams(queryString);
         let v = urlParams.get('view')
         this.view = v ? v : 'my'
+        this.view = this.isGHAssociated ? 'my' : 'all'
         this.search = urlParams.get('search')
 
-        fetch('/api/approval-types/active')
+        if (this.isGHAssociated) {
+          fetch('/api/approval-types/active')
           .then(r => {
             r.json().then(body => {
               if (body && body.length > 0) {
@@ -1077,6 +1085,7 @@
               }
             })
           })
+        }
 
         if (this.view === 'my') {
           this.getUserRepositories()
@@ -1100,17 +1109,6 @@
         this.offset = 0;
         this.page = 0;
         this.getAllRepositories();
-      },
-      openLink(link) {
-        window.open(link, '_blank').focus();
-      },
-      closeOptions(newSelected) {
-        if (newSelected !== this.currentSelected) {
-          if (this.currentSelected > -1) {
-            this.filteredAllRepositories[this.currentSelected].showOptions = false
-          }
-          this.currentSelected = newSelected
-        }
       },
       closeUserRepositoryOptions(newSelected) {
         if (newSelected !== this.currentSelected) {
@@ -1175,13 +1173,6 @@
 
         this.getAllRepositories();
       },
-      getRepoOwners(owner, coowner) {
-        let owners = []
-        if (owner) owners.push(owner)
-        if (coowner) owners.push(coowner)
-        if (owners.length < 1) return 'No owner data'
-        return owners.join(', ')
-      },
       getUserRepoCollaborators(id, i) {
         if (!this.userRepositoriesList[i]["collaboratorsLoaded"]) {
           fetch(`/api/repositories/${id}/collaborators`)
@@ -1202,6 +1193,8 @@
         }
       },
       getRepoCollaborators(id, i) {
+        if (!this.isGHAssociated) return
+        this.repository.showStatus = !this.repository.showStatus
         if (!this.allRepositoriesList[i]["collaboratorsLoaded"]) {
           fetch(`/api/repositories/${id}/collaborators`)
             .then(r => {
