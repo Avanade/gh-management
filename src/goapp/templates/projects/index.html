@@ -1087,8 +1087,8 @@
         }
 
         this.search = this.url.searchParams.get('search') ?? ''
-        this.page = this.url.searchParams.get('page') ? parseInt(this.url.searchParams.get('page')) : this.page
-        this.offset = this.url.searchParams.get('offset') ? parseInt(this.url.searchParams.get('offset')) : this.offset
+        this.page = this.url.searchParams.get('page') ? parseInt(this.url.searchParams.get('page')) : 0
+        this.offset = this.url.searchParams.get('offset') ? parseInt(this.url.searchParams.get('offset')) : 0
 
         if (this.isGHAssociated) {
           fetch('/api/approval-types/active')
