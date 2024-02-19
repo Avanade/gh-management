@@ -2,7 +2,7 @@
 <div id="pageTitle">
     Admin Tools
 </div>
-<div class="px-4 sm:px-6 lg:px-8">
+<div x-data="deeplink" class="px-4 sm:px-6 lg:px-8">
     <div class="sm:flex sm:items-center">
         <div class="sm:flex-auto">
             <h1 class="text-xl font-semibold text-gray-900">List of Contribution Areas</h1>
@@ -18,6 +18,9 @@
         <div class="-my-2 -mx-4 overflow-x-auto sm:-mx-6 lg:-mx-8">
             <div class="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
                 <div x-data="table({
+                    setDefault : setDefault(url),
+                    initCallback : initCallback,
+                    stateChangeCallback : stateChangeCallback,
                     callback : getContributionAreas,
                     data : 'data',
                     total : 'total',
@@ -44,6 +47,7 @@
     </div>
 </div>
 <script src="/public/components/table.js"></script>
+<script src="/public/components/deeplink.js"></script>
 <script type="text/javascript">
     function renderAction(value) {
         return `<a href="/admin/contributionareas/edit/${value}">EDIT</a>`
@@ -56,6 +60,44 @@
             )
         const data = await res.json()
         return data
+    }
+    function setDefault(e) {
+        return {
+            // FILTER
+            search : e.searchParams.get('search') ?? '',
+            filter : e.searchParams.get('filter') ? parseInt(e.searchParams.get('filter')) : 10,
+            page : e.searchParams.get('page') ? parseInt(e.searchParams.get('page')) : 0,
+
+            // ORDER BY
+            orderby : e.searchParams.get('orderby') ?? '',
+            ordertype : e.searchParams.get('ordertype') ?? '',
+        }
+    }
+    function initCallback(e) {
+        e.onSetPopsetEventListener(e, onURLChangeCallback)
+    }
+    function onURLChangeCallback(e) {
+        e.onSetState(
+            // FILTER
+            e.url.searchParams.get('search') ?? '',
+            e.url.searchParams.get('filter') ? parseInt(e.url.searchParams.get('filter')) : 10,
+            e.url.searchParams.get('page') ? parseInt(e.url.searchParams.get('page')) : 0,
+
+            // ORDER BY
+            e.url.searchParams.get('orderby') ?? '',
+            e.url.searchParams.get('ordertype') ?? '',
+        )
+        e.initLoad()
+    }
+
+    function stateChangeCallback(e) {
+        e.$data.onSetParams([
+            { name : 'filter', value : e.filter },
+            { name : 'page', value : e.page },
+            { name : 'search', value : encodeURIComponent(e.search) },
+            { name : 'orderby', value : e.orderby },
+            { name : 'ordertype', value : e.ordertype },
+        ])
     }
 </script>
 {{ end }}
