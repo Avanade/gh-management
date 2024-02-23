@@ -153,34 +153,57 @@ func CreateRepository(w http.ResponseWriter, r *http.Request) {
 			HttpResponseError(w, http.StatusInternalServerError, "There is a problem creating the GitHub repository.", logger)
 			return
 		}
+
+		logger.LogTrace(repo.GetName(), contracts.Information) // TEMP LOG - END TEMP LOG
+
 		body.GithubId = repo.GetID()
 		body.TFSProjectReference = repo.GetHTMLURL()
 		body.Visibility = 1
 
 		innersource := os.Getenv("GH_ORG_INNERSOURCE")
 		if isEnterpriseOrg {
-			err := ghAPI.SetProjectVisibility(repo.GetName(), "internal", innersource)
+			resp, err := ghAPI.SetProjectVisibility(repo.GetName(), "internal", innersource)
 			if err != nil {
 				logger.LogException(err)
 				HttpResponseError(w, http.StatusInternalServerError, err.Error(), logger)
 				return
 			}
 			body.Visibility = 2
+
+			jsonString, err := json.Marshal(resp.Header) // TEMP LOG
+			if err != nil {
+				fmt.Println("Error marshalling JSON:", err)
+				return
+			}
+			logger.LogTrace(string(jsonString), contracts.Information) // END TEMP LOG
 		}
 
 		repoId := db.PRProjectsInsert(body, username.(string))
 
 		// Add  requestor and coowner as repo admins
-		err = AddCollaboratorToRequestedRepo(username.(string), body.Name, repoId, logger)
+		resp, err := AddCollaboratorToRequestedRepo(username.(string), body.Name, repoId, logger)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		err = AddCollaboratorToRequestedRepo(body.Coowner, body.Name, repoId, logger)
+		jsonString, err := json.Marshal(resp.Header) // TEMP LOG
+		if err != nil {
+			fmt.Println("Error marshalling JSON:", err)
+			return
+		}
+		logger.LogTrace(string(jsonString), contracts.Information) // END TEMP LOG
+
+		resp, err = AddCollaboratorToRequestedRepo(body.Coowner, body.Name, repoId, logger)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
+		jsonString, err = json.Marshal(resp.Header) // TEMP LOG
+		if err != nil {
+			fmt.Println("Error marshalling JSON:", err)
+			return
+		}
+		logger.LogTrace(string(jsonString), contracts.Information) // END TEMP LOG
 
 		recipients := []string{
 			username.(string),
@@ -610,7 +633,7 @@ func SetVisibility(w http.ResponseWriter, r *http.Request) {
 
 	if currentState == "Public" {
 		// Set repo to desired visibility then move to innersource
-		err := ghAPI.SetProjectVisibility(project, desiredState, opensource)
+		_, err := ghAPI.SetProjectVisibility(project, desiredState, opensource)
 		if err != nil {
 			logger.LogException(err)
 			http.Error(w, "Failed to make the repository "+desiredState, http.StatusInternalServerError)
@@ -634,7 +657,7 @@ func SetVisibility(w http.ResponseWriter, r *http.Request) {
 		}
 	} else {
 		// Set repo to desired visibility
-		err := ghAPI.SetProjectVisibility(project, desiredState, innersource)
+		_, err := ghAPI.SetProjectVisibility(project, desiredState, innersource)
 		if err != nil {
 			logger.LogException(err)
 			http.Error(w, "Failed to make the repository "+desiredState, http.StatusInternalServerError)
@@ -1370,29 +1393,30 @@ func IsRepoNameValid(value string) bool {
 	return matched[0] == value
 }
 
-func AddCollaboratorToRequestedRepo(user string, repo string, repoId int64, logger *appinsights_wrapper.TelemetryClient) error {
+func AddCollaboratorToRequestedRepo(user string, repo string, repoId int64, logger *appinsights_wrapper.TelemetryClient) (*github.Response, error) {
 	innersource := os.Getenv("GH_ORG_INNERSOURCE")
 	ghUser := db.Users_Get_GHUser(user)
 
 	isInnersourceMember, err := ghAPI.IsOrganizationMember(os.Getenv("GH_TOKEN"), os.Getenv("GH_ORG_INNERSOURCE"), ghUser)
 	if err != nil {
 		logger.LogException(err)
-		return err
+		return nil, err
 	}
 
+	var resp *github.Response
 	if isInnersourceMember {
-		_, err := ghAPI.AddCollaborator(innersource, repo, ghUser, "admin")
+		resp, err = ghAPI.AddCollaborator(innersource, repo, ghUser, "admin")
 		if err != nil {
 			logger.LogException(err)
-			return err
+			return resp, err
 		}
 		err = db.RepoOwnersInsert(repoId, user)
 		if err != nil {
 			logger.LogException(err)
-			return err
+			return resp, err
 		}
 	}
-	return nil
+	return resp, nil
 }
 
 func GetPopularTopics(w http.ResponseWriter, r *http.Request) {
