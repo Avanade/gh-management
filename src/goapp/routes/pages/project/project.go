@@ -15,9 +15,11 @@ import (
 
 func IndexHandler(w http.ResponseWriter, r *http.Request) {
 	isAdmin, _ := session.IsUserAdmin(w, r)
+	sessiongh, _ := session.GetGitHubUserData(w, r)
 
 	data := map[string]interface{}{
-		"isAdmin": isAdmin,
+		"profileGH": sessiongh,
+		"isAdmin":   isAdmin,
 	}
 	template.UseTemplate(&w, r, "projects/index", data)
 }

@@ -169,16 +169,16 @@ func GetRepositoriesFromOrganization(org string) ([]Repo, error) {
 	return repoList, nil
 }
 
-func SetProjectVisibility(projectName string, visibility string, org string) error {
+func SetProjectVisibility(projectName string, visibility string, org string) (*github.Response, error) {
 	client := CreateClient(os.Getenv("GH_TOKEN"))
 	opt := &github.Repository{Visibility: github.String(visibility)}
 
-	_, _, err := client.Repositories.Edit(context.Background(), org, projectName, opt)
+	_, resp, err := client.Repositories.Edit(context.Background(), org, projectName, opt)
 	if err != nil {
-		return err
+		return resp, err
 
 	}
-	return nil
+	return resp, nil
 }
 
 func ArchiveProject(projectName string, archive bool, org string) error {
