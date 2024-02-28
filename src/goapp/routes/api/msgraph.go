@@ -78,7 +78,7 @@ func IndexADGroups(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		if !hasGitHubAccess {
+		if hasGitHubAccess {
 			db.ADGroup_Insert(group.Id, group.Name)
 		}
 	}
