@@ -69,3 +69,7 @@ func FormHandler(w http.ResponseWriter, r *http.Request) {
 
 	template.UseTemplate(&w, r, "projects/form", data)
 }
+
+func ViewHandler(w http.ResponseWriter, r *http.Request) {
+	template.UseTemplate(&w, r, "projects/view", nil)
+}
