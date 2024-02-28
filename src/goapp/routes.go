@@ -233,4 +233,5 @@ func setUtilityRoutes(mux *mux.Router) {
 	muxUtility.Handle("/fillout-approvers", loadGuidAuthApi(rtApi.FillOutApprovers)).Methods("GET")
 	muxUtility.Handle("/fillout-approvalrequest-approvers", loadGuidAuthApi(rtApi.FillOutApprovalRequestApprovers)).Methods("GET")
 	muxUtility.Handle("/migrate-oss-sponsors", loadGuidAuthApi(rtApi.MigrateToOssSponsorsTable)).Methods("GET")
+	muxUtility.HandleFunc("/index-ad-groups", rtApi.IndexADGroups).Methods("GET")
 }
