@@ -26,7 +26,8 @@
           "interval": 1,
           "schedule": {
             "monthDays": [-1]
-          }
+          },
+          "timeZone": "GMT Standard Time"
         }
       }
     }
