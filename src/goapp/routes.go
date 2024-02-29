@@ -164,6 +164,7 @@ func setApiRoutes(mux *mux.Router) {
 	muxApi.Handle("/repositories", loadAzAuthPage(rtApi.GetRepositories)).Methods("GET")
 	muxApi.Handle("/repositories/my", loadAzGHAuthPage(rtApi.GetMyRepositories)).Methods("GET")
 	muxApi.Handle("/repositories/{id}/status", loadAzGHAuthPage(rtApi.GetRequestStatusByRepoId)).Methods("GET")
+	muxApi.Handle("/repositories/{id}", loadAzAuthPage(rtApi.GetRepositoriesById)).Methods("GET")
 	muxApi.Handle("/repositories", loadAzGHAuthPage(rtApi.CreateRepository)).Methods("POST")
 	muxApi.Handle("/repositories/{id}", loadAzGHAuthPage(rtApi.UpdateRepositoryById)).Methods("PUT")
 	muxApi.Handle("/repositories/{id}/ecattid", loadAzGHAuthPage(rtApi.UpdateRepositoryEcattIdById)).Methods("PUT")
