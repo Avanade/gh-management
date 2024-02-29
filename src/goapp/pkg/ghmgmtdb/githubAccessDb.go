@@ -16,3 +16,20 @@ func ADGroup_Insert(objectId string, ADGroup string) error {
 
 	return nil
 }
+
+func ADGroup_SelectAll() ([]string, error) {
+	db := ConnectDb()
+	defer db.Close()
+
+	var list []string
+	result, err := db.ExecuteStoredProcedureWithResult("PR_GitHubAccess_SelectAll", nil)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, group := range result {
+		list = append(list, group["ObjectId"].(string))
+	}
+
+	return list, nil
+}
