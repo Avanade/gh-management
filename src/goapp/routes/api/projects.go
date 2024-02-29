@@ -380,6 +380,32 @@ func GetRequestStatusByRepoId(w http.ResponseWriter, r *http.Request) {
 	w.Write(jsonResp)
 }
 
+func GetRepositoryReadmeById(w http.ResponseWriter, r *http.Request) {
+	logger := appinsights_wrapper.NewClient()
+	defer logger.EndOperation()
+
+	req := mux.Vars(r)
+	repoName := req["repoName"]
+	visibility := req["visibility"]
+
+	readme, err := ghAPI.GetRepositoryReadmeById(repoName, visibility)
+	if err != nil {
+		logger.LogException(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Header().Set("Content-Type", "application/json")
+	jsonResp, err := json.Marshal(readme)
+	if err != nil {
+		logger.LogException(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.Write(jsonResp)
+}
+
 func GetRepoCollaboratorsByRepoId(w http.ResponseWriter, r *http.Request) {
 	logger := appinsights_wrapper.NewClient()
 	defer logger.EndOperation()
@@ -642,7 +668,7 @@ func GetRepositoriesById(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(repo)
+	json.NewEncoder(w).Encode(repo[0])
 }
 
 func SetVisibility(w http.ResponseWriter, r *http.Request) {

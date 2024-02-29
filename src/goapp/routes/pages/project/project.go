@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 
 	db "main/pkg/ghmgmtdb"
 	ghAPI "main/pkg/github"
@@ -71,5 +72,12 @@ func FormHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func ViewHandler(w http.ResponseWriter, r *http.Request) {
-	template.UseTemplate(&w, r, "projects/view", nil)
+	vars := mux.Vars(r)
+	id, _ := strconv.Atoi(vars["id"])
+
+	template.UseTemplate(&w, r, "projects/view", struct {
+		Id int
+	}{
+		Id: id,
+	})
 }
