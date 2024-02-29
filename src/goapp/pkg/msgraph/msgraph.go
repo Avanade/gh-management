@@ -549,7 +549,7 @@ func GetADGroups() ([]ADGroup, error) {
 }
 
 func HasGitHubAccess(objectId string) (bool, error) {
-	appReg := os.Getenv("GITHUB_ACCESS_APPREG")
+	appReg := os.Getenv("GH_AZURE_AD_GROUP")
 	accessToken, err := GetToken()
 	if err != nil {
 		return false, err
