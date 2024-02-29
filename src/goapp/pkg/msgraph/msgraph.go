@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	db "main/pkg/ghmgmtdb"
 	"net/http"
 	"net/url"
 	"os"
@@ -226,19 +227,15 @@ func IsGithubEnterpriseMember(user string) (bool, error) {
 		Timeout: time.Second * 10,
 	}
 
-	urlPath := fmt.Sprintf("https://graph.microsoft.com/v1.0/users/%s/checkMemberGroups", user)
-
-	groupId, err := GetAzGroupIdByName(os.Getenv("GH_AZURE_AD_GROUP"))
+	adGroups, err := db.ADGroup_SelectAll()
 	if err != nil {
 		return false, err
 	}
 
-	groupIds := []string{
-		groupId,
-	}
+	urlPath := fmt.Sprintf("https://graph.microsoft.com/v1.0/users/%s/checkMemberGroups", user)
 
 	postBody, _ := json.Marshal(map[string]interface{}{
-		"groupIds": groupIds,
+		"groupIds": adGroups,
 	})
 
 	reqBody := bytes.NewBuffer(postBody)
@@ -265,11 +262,10 @@ func IsGithubEnterpriseMember(user string) (bool, error) {
 		fmt.Print(err)
 	}
 
-	for _, v := range data.Value {
-		if v == groupId {
-			return true, nil
-		}
+	if len(data.Value) > 0 {
+		return true, nil
 	}
+
 	return false, nil
 }
 
