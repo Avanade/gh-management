@@ -1,0 +1,36 @@
+{
+  "definition": {
+    "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+    "actions": {
+      "HTTP_INDEX_ADGROUPS": {
+        "type": "Http",
+        "inputs": {
+          "uri": "@concat(parameters('GHMgmDomain'), '/utility/index-ad-groups')",
+          "method": "GET",
+          "authentication": {
+            "identity": "@concat('/subscriptions/59d64684-e7c9-4397-8982-6b775a473b74/resourcegroups/OpenTech_GitHub_Mgmt/providers/Microsoft.ManagedIdentity/userAssignedIdentities/', parameters('ManagedIdentityName'))",
+            "type": "ManagedServiceIdentity"
+          }
+        },
+        "runAfter": {},
+        "trackedProperties": {}
+      }
+    },
+    "contentVersion": "1.0.0.0",
+    "outputs": {},
+    "triggers": {
+      "Recurrence": {
+        "type": "Recurrence",
+        "recurrence": {
+          "frequency": "Month",
+          "interval": 1,
+          "schedule": {
+            "monthDays": [-1]
+          },
+          "timeZone": "GMT Standard Time"
+        }
+      }
+    }
+  },
+  "kind": "Stateful"
+}

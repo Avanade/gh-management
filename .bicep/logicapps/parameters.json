@@ -17,7 +17,8 @@
                 "Workflows.MigrateOssSponsors.FlowState": "Disabled",
                 "Workflows.OpensourceCheckOutsideCollaborators.FlowState": "Disabled",
                 "Workflows.RecurringApproval.FlowState": "Disabled",
-                "Workflows.RepoOwnerScan.FlowState": "Disabled"
+                "Workflows.RepoOwnerScan.FlowState": "Disabled",
+                "Workflows.IndexADGroups.FlowState": "Disabled"
             }
         }
     }
