@@ -479,7 +479,7 @@
               <div class="px-4 py-4 sm:px-6 hover:bg-gray-50 cursor-pointer"
                 @click="getRepoCollaborators(repository.Id, index)">
                 <div class="flex items-center justify-between">
-                  <div @click.stop @click="window.open(repository.TFSProjectReference)">
+                  <div @click.stop @click="window.location.href = `/repositories/view/${repository.Id}`">
                     <span class="text-sm font-medium truncate"
                       x-bind:class="repository.IsArchived? 'text-gray-600' : 'text-indigo-600'" x-text="repository.Name"
                       title="Repository name"></span>

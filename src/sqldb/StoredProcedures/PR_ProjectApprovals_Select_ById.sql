@@ -23,7 +23,8 @@ SELECT
 	p.[Avanadeofferingsassets],
 	p.[Willbecommercialversion], 
 	p.[OSSContributionInformation],
-	PA.RespondedBy
+	PA.RespondedBy,
+	PA.Created
     
 FROM 
     ProjectApprovals PA

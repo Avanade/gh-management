@@ -1,19 +1,20 @@
 {{ define "content" }}
 <div x-data="viewData({
-    id: '{{ .Id }}'
+    id: '{{ .id }}',
+    isOwner: {{ .isOwner }},
+    isAdmin: {{ .isAdmin }},
+    isGHValid: {{ .profileGH.IsValid }}
 })">
     <div class="flex mb-3">
         <div class="flex-grow font-bold self-center py-2">
-            <h4 class="text-lg" x-text="about.name">repository-name</h4>
+            <h4 class="text-lg" x-text="state.about.name">repository-name</h4>
         </div>
-        <div class="flex-none">
+        <div class="flex-none" x-show="state.isGHValid">
             <a 
-                x-bind:href="about.link"
+                x-bind:href="state.about.link"
                 target="_blank"
                 class="flex items-center bg-[#FF5800] hover:bg-[#FF4300] text-white py-2 px-4 rounded">
-                <span>
-                    Open in GitHub
-                </span>
+                <span x-text="`Open in ${state.about.repositorySource}`"></span>
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="flex-shrink-0 w-5 h-5 ml-2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
                 </svg>
@@ -23,28 +24,279 @@
     <div class="flex flex-wrap">
         <div class="border rounded-xl p-5 w-full order-last lg:order-first lg:w-2/3">
             <nav class="flex space-x-4" aria-label="Tabs">
-                <div class="px-3 py-2 font-medium text-sm rounded-md cursor-pointer bg-[#fff2eb] text-[#FF5800]">
-                    Read Me
-                </div>
-                <div class="px-3 py-2 font-medium text-sm rounded-md cursor-pointer text-gray-500 hover:text-gray-700">
+                <template x-if="state.about.repositorySource != 'AzureDevOps'">
+                    <div 
+                        class="px-3 py-2 font-medium text-sm rounded-md cursor-pointer"
+                        x-bind:class="isTabActive('readme') ? 'bg-[#fff2eb] text-[#FF5800]' : 'text-gray-500 hover:text-gray-700'"
+                        x-on:click="onSelectTab('readme')">
+                        Read Me
+                    </div>
+                </template>
+                <div class="px-3 py-2 font-medium text-sm rounded-md cursor-pointer"
+                    x-bind:class="isTabActive('collaborators') ? 'bg-[#fff2eb] text-[#FF5800]' : 'text-gray-500 hover:text-gray-700'"
+                    x-on:click="onSelectTab('collaborators')">
                     Collaborators 
                 </div>
-                <div class="px-3 py-2 font-medium text-sm rounded-md cursor-pointer text-gray-500 hover:text-gray-700">
-                    Approval Requests 
-                </div>
+                <template x-if="(state.isAdmin || state.isOwner) && state.isGHValid">
+                    <div
+                        x-show="state.about.repositorySource != 'AzureDevOps'" 
+                        class="px-3 py-2 font-medium text-sm rounded-md cursor-pointer"
+                        x-bind:class="isTabActive('approvalrequests') ? 'bg-[#fff2eb] text-[#FF5800]' : 'text-gray-500 hover:text-gray-700'"
+                        x-on:click="onSelectTab('approvalrequests')">
+                        Approval Requests 
+                    </div>
+                </template>
             </nav>
-            <div x-data="markdownEditor({
-                disabledTab: true,
-                defaultTab: 'preview',
-                overflowPreview: 'auto'
-            })" x-modelable="body" x-model="readme">
-                <div x-html="template"></div>
+            <!-- READ ME TAB -->
+            <template x-if="state.about.repositorySource != 'AzureDevOps'">
+                <div x-show="isTabActive('readme')">
+                    <template x-if="state.isLoading">
+                        <svg role="status"
+                            class="w-8 h-8 text-gray-200 animate-spin dark:text-gray-600 fill-[#FF5800] m-auto my-5"
+                            viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path
+                                d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z"
+                                fill="currentColor" />
+                            <path
+                                d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z"
+                                fill="currentFill" />
+                        </svg>                    
+                    </template>
+                    <template x-if="state.readme == '' && !state.isLoading">
+                        <div class="text-center mt-5">
+                            <svg 
+                                xmlns="http://www.w3.org/2000/svg" 
+                                fill="none" 
+                                viewBox="0 0 24 24" 
+                                stroke-width="1.5" 
+                                stroke="currentColor" 
+                                class="mx-auto h-12 w-12 text-gray-400">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
+                            </svg>
+                            <h3 class="mt-2 text-sm font-semibold text-gray-900">No Content</h3>
+                            <p class="mt-1 text-sm text-gray-500">No readme file found on main branch</p>
+                        </div>
+                    </template>
+                    <template x-if="state.readme != '' && !state.isLoading">
+                        <div x-data="markdownEditor({
+                            disabledTab: true,
+                            defaultTab: 'preview',
+                            overflowPreview: 'auto'
+                        })" x-modelable="body" x-model="state.readme">
+                            <div x-html="template"></div>
+                        </div>
+                    </template>
+                </div>
+            </template>
+            <!-- COLLABORATORS TAB -->
+            <div x-show="isTabActive('collaborators')" class="mt-3">
+                <div class="relative mb-3">
+                    <div class="absolute inset-0 flex items-center" aria-hidden="true">
+                        <div class="w-full border-t border-gray-300"></div>
+                    </div>
+                    <div class="relative flex flex-row-reverse items-center justify-between">
+                        <template x-if="(state.isAdmin || state.isOwner) && state.isGHValid && state.about.repositorySource != 'AzureDevOps'">
+                            <button type="button"
+                                class="inline-flex items-center gap-x-1.5 rounded-full bg-white px-3 py-1.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
+                                <svg class="-ml-1 -mr-0.5 h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor"
+                                    aria-hidden="true">
+                                    <path
+                                    d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z" />
+                                </svg>
+                                <span>Add</span>
+                            </button>
+                        </template>
+                    </div>
+                </div>
+                <div class="overflow-x-auto bg-gray-50">
+                    <div class="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
+                        <table class="min-w-full divide-y divide-gray-300">
+                            <thead>
+                                <tr>
+                                    <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-0">
+                                        Name
+                                    </th>
+                                    <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                                        GitHub Username
+                                    </th>
+                                    <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                                        Email
+                                    </th>
+                                    <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                                        Permission
+                                    </th>
+                                    <th scope="col" class="relative py-3.5 pl-3 pr-4 sm:pr-0">
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-200">
+                                <!-- SPINNER -->
+                                <tr>
+                                    <td x-bind:colspan='5'>
+                                        <div class="flex items-center justify-center h-20"
+                                            x-show="state.isLoading">
+                                            <svg role="status"
+                                                class="w-8 h-8 mr-2 text-gray-200 animate-spin dark:text-gray-600 fill-[#FF5800]"
+                                                viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                <path
+                                                    d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z"
+                                                    fill="currentColor" />
+                                                <path
+                                                    d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z"
+                                                    fill="currentFill" />
+                                            </svg>
+                                        </div>
+                                        <!-- NO COLLABORATORS -->
+                                        <template x-if="!state.collaborators && !state.isLoading">
+                                            <div class="flex items-center justify-center h-20">
+                                                No collaborators on this repository.
+                                            </div>
+                                        </template>
+                                    </td>
+                                </tr>
+                                <!-- LIST OF COLLABORATORS -->
+                                <template x-if="state.collaborators && !state.isLoading">
+                                    <template x-for="item of state.collaborators">
+                                        <tr>
+                                            <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm text-gray-900 sm:pl-0"
+                                                x-text="item.name===''? '-':item.name"></td>
+                                            <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                                                <span x-text="item.ghUsername"></span> <br> <span
+                                                    x-show="item.isOutsideCollaborator"
+                                                    class="text-xs font-light italic">Outside Collaborator</span>
+                                            </td>
+                                            <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500"
+                                                x-text="item.email===''? '-':item.email"></td>
+                                            <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500"
+                                                x-text="item.role"></td>
+                                            <template x-if="(state.isAdmin || state.isOwner) && state.isGHValid && state.about.repositorySource != 'AzureDevOps'">
+                                                <td
+                                                    class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm sm:pr-0">
+                                                    <a class="text-indigo-600 hover:text-indigo-900 hover:cursor-pointer">
+                                                        Update
+                                                    </a> |
+                                                    <a href="#"
+                                                        class="text-indigo-600 hover:text-indigo-900 hover:cursor-pointer">
+                                                        Remove
+                                                    </a>
+                                                </td>
+                                            </template>
+                                        </tr>
+                                    </template>
+                                </template>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
+            <!-- APPROVAL REQUESTS -->
+            <template x-if="state.about.repositorySource != 'AzureDevOps' && (state.isAdmin || state.isOwner) && state.isGHValid">
+                <div x-show="isTabActive('approvalrequests')" class="mt-3 px-3">
+                    <template x-if="state.isLoading">
+                        <svg role="status"
+                            class="w-8 h-8 text-gray-200 animate-spin dark:text-gray-600 fill-[#FF5800] m-auto my-5"
+                            viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path
+                                d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z"
+                                fill="currentColor" />
+                            <path
+                                d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z"
+                                fill="currentFill" />
+                        </svg>
+                    </template>
+                    <template x-if="!state.statuses && !state.isLoading">
+                        <div class="text-center mt-5">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                                stroke="currentColor" class="mx-auto h-12 w-12 text-gray-400">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z" />
+                            </svg>
+                            <h3 class="mt-2 text-sm font-semibold text-gray-900">No Content</h3>
+                            <p class="mt-1 text-sm text-gray-500">No approval data found for this repository.</p>
+                        </div>
+                    </template>
+                    <template x-if="state.statuses && !state.isLoading">
+                        <template x-for="status in state.statuses">
+                            <div x-data="{ item : status }">
+                                <div class="relative mb-3">
+                                    <div class="absolute inset-0 flex items-center" aria-hidden="true">
+                                        <div class="w-full border-t border-gray-300"></div>
+                                    </div>
+                                    <div class="relative flex items-center justify-between">
+                                        <p
+                                            class="inline-flex items-center bg-white pr-3 py-3 text-sm font-semibold text-gray-900">
+                                            <span x-data="{ created : new Date(item.created) }"
+                                                x-text="created.toDateString()"></span>
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="mt-3 bg-gray-50 shadow overflow-hidden sm:rounded-md">
+                                    <ul role="list" class="divide-y divide-gray-200">
+                                        <template x-for="approvalRequest in item.approvalRequests">
+                                            <li>
+                                                <div class="px-4 py-4 sm:px-6">
+                                                    <div class="flex items-center justify-between">
+                                                        <p class="text-sm font-medium text-gray-800 truncate"
+                                                            x-text="approvalRequest.ApprovalDescription"></p>
+                                                        <div class="ml-2 flex-shrink-0 flex">
+                                                            <p class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full"
+                                                                x-bind:class="approvalRequest.RequestStatus === 'Approved' ? ' bg-green-100 text-green-800': approvalRequest.RequestStatus === 'Rejected' ? ' bg-red-100 text-red-800' : ' bg-gray-200 text-gray-800'"
+                                                                x-text="approvalRequest.RequestStatus"></p>
+                                                        </div>
+                                                    </div>
+                                                    <div class="mt-2 sm:flex ">
+                                                        <div class="sm:flex w-1/2">
+                                                            <p class="flex items-center text-sm text-gray-500"
+                                                                x-data="{ approver: 'Approver: ' + approvalRequest.Approvers}"
+                                                                x-text="approver">
+                                                            </p>
+                                                        </div>
+                                                        <div
+                                                            class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
+                                                            <p x-show="approvalRequest.ApprovalDate">
+                                                                Responded on
+                                                                <time
+                                                                    x-data="{date: new Date(approvalRequest.ApprovalDate)}"
+                                                                    x-text="date.toLocaleString('en-US',{dateStyle: 'medium', timeStyle: 'short'})"></time>
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                    <div class="mt-2 sm:flex ">
+                                                        <div
+                                                            class="sm:flex w-1/2 mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
+                                                            <p x-show="approvalRequest.ApprovalRemarks"
+                                                                x-data="{ remarks: 'Remarks: ' + approvalRequest.ApprovalRemarks }"
+                                                                x-text="remarks"></p>
+                                                        </div>
+                                                        <div
+                                                            class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
+                                                            <p x-show="approvalRequest.RespondedBy"
+                                                                x-data="{ respondedBy: 'Responded by: ' + approvalRequest.RespondedBy }"
+                                                                x-text="respondedBy"></p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </li>
+                                        </template>
+                                    </ul>
+                                </div>
+                        </template>
+                    </template>
+                </div>
+            </template>
         </div>
         <div class="p-5 w-full lg:w-1/3">
+            <div class="bg-yellow-50 p-4 mb-3" x-show="!state.isGHValid">
+                <div class="flex">
+                    <div class="ml-3 flex-1 md:flex md:justify-between">
+                        <p class="text-sm text-yellow-700">You'll need to login a GitHub account to view the files on
+                            the repository.</p>
+                    </div>
+                </div>
+            </div>
             <article class="text-wrap mb-3">
                 <h3 class="text-gray-600 font-medium mb-2">About</h3>
-                <p class="text-gray-500" x-text="about.description">
+                <p class="text-gray-500" x-text="state.about.description">
                     Lorem ipsum is placeholder text commonly used in the graphic, print, and publishing industries for previewing layouts and visual mockups.
                 </p>
             </article>
@@ -54,7 +306,7 @@
                   <path stroke-linecap="round" stroke-linejoin="round"
                     d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5" />
                 </svg>
-                <span x-text="about.repositorySource">GitHub</span>
+                <span x-text="state.about.repositorySource">GitHub</span>
             </div>
             <div class="flex items-center text-sm text-gray-500 mb-2" title="Visibility">
                 <svg xmlns="http://www.w3.org/2000/svg" class="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400"
@@ -62,7 +314,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round"
                     d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M18 18l2-1v-2.5" />
                 </svg>
-                <span x-text="about.visibility">Private</span>
+                <span x-text="state.about.visibility">Private</span>
             </div>
             <div class="flex items-center text-sm text-gray-500 mb-5">
                 <svg class="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg"
@@ -72,18 +324,19 @@
                     clip-rule="evenodd" />
                 </svg>
                 <span>
-                    Created on <time x-text="about.created">Feb 23, 2024, 7:28 PM</time>
+                    Created on <time x-text="state.about.created">Feb 23, 2024, 7:28 PM</time>
                 </span>
             </div>
             <div class="flex flex-wrap mt-2">
-                <template x-if="about.topics" >
-                    <template x-for="(topic) in about.topics" >
-                      <a x-bind:href="'/search?search=' + topic">
-                        <div class="text-xs px-2 py-1 mr-2 mb-1 bg-sky-100 rounded-lg text-sky-800 items-center flex whitespace-nowrap" x-text="topic">
-                        </div>
-                      </a>
+                <template x-if="state.about.topics">
+                    <template x-for="(topic) in state.about.topics">
+                        <a x-bind:href="'/search?search=' + topic">
+                            <div class="text-xs px-2 py-1 mr-2 mb-1 bg-sky-100 rounded-lg text-sky-800 items-center flex whitespace-nowrap"
+                                x-text="topic">
+                            </div>
+                        </a>
                     </template>
-                  </template>
+                </template>
             </div>
         </div>
     </div>
@@ -94,31 +347,44 @@
 <script src="https://cdn.jsdelivr.net/npm/emojione@3.1.2/lib/js/emojione.min.js"></script>
 <script type="text/javascript">
     const viewData = ({
-        id = undefined
+        id = undefined,
+        isOwner = false,
+        isAdmin = false,
+        isGHValid = false
     }) => {
         return {
-            id: 0,
-            readme: "",
-            about: {
-                name: "",
-                repoId: 0,
-                description: "",
-                repositorySource: "",
-                visibility: "",
-                created: "",
-                topics: []
+            state: {
+                id: 0,
+                isAdmin: false,
+                isGHValid: false,
+
+                readme: "",
+                about: {
+                    name: "",
+                    repoId: 0,
+                    description: "",
+                    repositorySource: "",
+                    visibility: "",
+                    created: "",
+                    topics: []
+                },
+                collaborators: [],
+                statuses: [],
+
+                isLoading: false,
+                activeTab: "readme"
             },
-            async init(){
-                this.id = id;
+            async init() {
+                this.state.isLoading = true;
 
-                const repoDetails = await getRepositoryById(this.id)
+                this.state.id = id;
+                this.state.isOwner = isOwner;
+                this.state.isAdmin = isAdmin;
+                this.state.isGHValid = isGHValid;
 
-                const readme = await getRepositoryReadme(repoDetails.Visibility, repoDetails.Name)
-                
+                const repoDetails = await getRepositoryById(this.state.id)
                 const created = new Date(repoDetails.Created)
-                
-                this.readme = readme;
-                this.about = {
+                this.state.about = {
                     name: repoDetails.Name,
                     repoId: repoDetails.Id,
                     description: repoDetails.Description,
@@ -128,6 +394,51 @@
                     link: repoDetails.TFSProjectReference,
                     topics: repoDetails.RepoTopics
                 };
+                console.log('ABOUT: ', this.state.about)
+
+                if(this.state.about.repositorySource != 'AzureDevOps'){
+                    const readme = await getRepositoryReadme(repoDetails.Visibility, repoDetails.Name)
+                    this.state.readme = readme;
+                    console.log(readme)
+                }
+
+                this.state.activeTab = this.state.about.repositorySource == 'AzureDevOps' ? 'collaborators' : 'readme'
+
+                const collaborators = await getRepositoryCollaboratorsById(this.state.id)
+                console.log(collaborators)
+                
+                this.state.collaborators = collaborators
+                
+                if((this.state.isAdmin || this.state.isOwner) && this.state.isGHValid && this.state.about.repositorySource != 'AzureDevOps') {
+                    const statuses = await getRepositoryStatusById(this.state.id)
+                    console.log(statuses)
+
+                    const categorizedStatusByCreated = {};
+
+                    statuses.forEach(item => {
+                        if (!categorizedStatusByCreated[item.Created]) {
+                            categorizedStatusByCreated[item.Created] = [];
+                        }
+                        categorizedStatusByCreated[item.Created].push(item);
+                    });
+
+                    this.state.statuses = Object.entries(categorizedStatusByCreated)
+                    .sort((a, b) => new Date(a[0]) - new Date(b[0]))
+                    .map(([created, approvalRequests]) => ({
+                        created,
+                        approvalRequests
+                    }));
+                }
+
+                this.state.isLoading = false;
+            },
+            // FUNCTION
+            isTabActive(tab) {
+                return this.state.activeTab == tab;
+            },
+            // EVENT HANDLER
+            onSelectTab(tab) {
+                this.state.activeTab = tab;
             }
         }
     }
@@ -144,6 +455,24 @@
     async function getRepositoryReadme(visibility, repoName) {
         const res = await fetch(
             `/api/repositories/${visibility}/${repoName}/readme`
+        )
+
+        const data = await res.json()
+        return data
+    }
+
+    async function getRepositoryCollaboratorsById(id) {
+        const res = await fetch(
+            `/api/repositories/${id}/collaborators`
+        )
+
+        const data = await res.json()
+        return data
+    }
+
+    async function getRepositoryStatusById(id) {
+        const res = await fetch(
+            `/api/repositories/${id}/status`
         )
 
         const data = await res.json()
