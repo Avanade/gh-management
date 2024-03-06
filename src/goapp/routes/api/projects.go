@@ -388,12 +388,7 @@ func GetRepositoryReadmeById(w http.ResponseWriter, r *http.Request) {
 	repoName := req["repoName"]
 	visibility := req["visibility"]
 
-	readme, err := ghAPI.GetRepositoryReadmeById(repoName, visibility)
-	if err != nil {
-		logger.LogException(err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
+	readme, _ := ghAPI.GetRepositoryReadmeById(repoName, visibility)
 
 	w.WriteHeader(http.StatusOK)
 	w.Header().Set("Content-Type", "application/json")

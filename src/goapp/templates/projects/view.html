@@ -470,19 +470,23 @@
 
                     const categorizedStatusByCreated = {};
 
-                    statuses.forEach(item => {
-                        if (!categorizedStatusByCreated[item.Created]) {
-                            categorizedStatusByCreated[item.Created] = [];
-                        }
-                        categorizedStatusByCreated[item.Created].push(item);
-                    });
+                    if(statuses != null) {
+                        statuses.forEach(item => {
+                            if (!categorizedStatusByCreated[item.Created]) {
+                                categorizedStatusByCreated[item.Created] = [];
+                            }
+                            categorizedStatusByCreated[item.Created].push(item);
+                        });
 
-                    this.state.statuses = Object.entries(categorizedStatusByCreated)
-                    .sort((a, b) => new Date(a[0]) - new Date(b[0]))
-                    .map(([created, approvalRequests]) => ({
-                        created,
-                        approvalRequests
-                    }));
+                        this.state.statuses = Object.entries(categorizedStatusByCreated)
+                        .sort((a, b) => new Date(a[0]) - new Date(b[0]))
+                        .map(([created, approvalRequests]) => ({
+                            created,
+                            approvalRequests
+                        }));
+                    } else {
+                        this.state.statuses = null
+                    }
                 }
 
                 this.state.isLoading = false;
