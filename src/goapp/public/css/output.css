@@ -1883,6 +1883,10 @@ select {
   z-index: 50;
 }
 
+.order-last {
+  order: 9999;
+}
+
 .float-right {
   float: right;
 }
@@ -1992,11 +1996,6 @@ select {
   margin-bottom: 2rem;
 }
 
-.mx-2 {
-  margin-left: 0.5rem;
-  margin-right: 0.5rem;
-}
-
 .-ml-0 {
   margin-left: -0px;
 }
@@ -2071,10 +2070,6 @@ select {
 
 .ml-3 {
   margin-left: 0.75rem;
-}
-
-.ml-5 {
-  margin-left: 1.25rem;
 }
 
 .mr-1 {
@@ -2420,6 +2415,10 @@ select {
 
 .flex-1 {
   flex: 1 1 0%;
+}
+
+.flex-none {
+  flex: none;
 }
 
 .flex-shrink {
@@ -3356,6 +3355,10 @@ select {
   border-radius: 0px;
 }
 
+.rounded-xl {
+  border-radius: 0.75rem;
+}
+
 .rounded-b {
   border-bottom-right-radius: 0.25rem;
   border-bottom-left-radius: 0.25rem;
@@ -3900,11 +3903,6 @@ select {
   padding-bottom: 1rem;
 }
 
-.py-5 {
-  padding-top: 1.25rem;
-  padding-bottom: 1.25rem;
-}
-
 .py-6 {
   padding-top: 1.5rem;
   padding-bottom: 1.5rem;
@@ -4098,10 +4096,6 @@ select {
   line-height: 2.5rem;
 }
 
-.text-\[32px\] {
-  font-size: 32px;
-}
-
 .text-base {
   font-size: 1rem;
   line-height: 1.5rem;
@@ -4221,10 +4215,6 @@ select {
 
 .leading-6 {
   line-height: 1.5rem;
-}
-
-.leading-none {
-  line-height: 1;
 }
 
 .tracking-tight {
@@ -6297,6 +6287,16 @@ select {
     text-align: left;
   }
 
+  .sm\:text-3xl {
+    font-size: 1.875rem;
+    line-height: 2.25rem;
+  }
+
+  .sm\:text-4xl {
+    font-size: 2.25rem;
+    line-height: 2.5rem;
+  }
+
   .sm\:text-5xl {
     font-size: 3rem;
     line-height: 1;
@@ -6305,26 +6305,6 @@ select {
   .sm\:text-sm {
     font-size: 0.875rem;
     line-height: 1.25rem;
-  }
-
-  .sm\:text-base {
-    font-size: 1rem;
-    line-height: 1.5rem;
-  }
-
-  .sm\:text-xl {
-    font-size: 1.25rem;
-    line-height: 1.75rem;
-  }
-
-  .sm\:text-2xl {
-    font-size: 1.5rem;
-    line-height: 2rem;
-  }
-
-  .sm\:text-3xl {
-    font-size: 1.875rem;
-    line-height: 2.25rem;
   }
 
   .sm\:text-gray-700 {
@@ -6415,9 +6395,21 @@ select {
 }
 
 @media (min-width: 1024px) {
+  .lg\:order-first {
+    order: -9999;
+  }
+
   .lg\:-mx-8 {
     margin-left: -2rem;
     margin-right: -2rem;
+  }
+
+  .lg\:w-1\/3 {
+    width: 33.333333%;
+  }
+
+  .lg\:w-2\/3 {
+    width: 66.666667%;
   }
 
   .lg\:px-8 {

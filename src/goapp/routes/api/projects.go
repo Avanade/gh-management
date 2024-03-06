@@ -380,6 +380,27 @@ func GetRequestStatusByRepoId(w http.ResponseWriter, r *http.Request) {
 	w.Write(jsonResp)
 }
 
+func GetRepositoryReadmeById(w http.ResponseWriter, r *http.Request) {
+	logger := appinsights_wrapper.NewClient()
+	defer logger.EndOperation()
+
+	req := mux.Vars(r)
+	repoName := req["repoName"]
+	visibility := req["visibility"]
+
+	readme, _ := ghAPI.GetRepositoryReadmeById(repoName, visibility)
+
+	w.WriteHeader(http.StatusOK)
+	w.Header().Set("Content-Type", "application/json")
+	jsonResp, err := json.Marshal(readme)
+	if err != nil {
+		logger.LogException(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.Write(jsonResp)
+}
+
 func GetRepoCollaboratorsByRepoId(w http.ResponseWriter, r *http.Request) {
 	logger := appinsights_wrapper.NewClient()
 	defer logger.EndOperation()
@@ -605,6 +626,44 @@ func GetRepositories(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.Write(jsonResp)
+}
+
+func GetRepositoriesById(w http.ResponseWriter, r *http.Request) {
+	logger := appinsights_wrapper.NewClient()
+	defer logger.EndOperation()
+
+	req := mux.Vars(r)
+
+	id, err := strconv.ParseInt(req["id"], 10, 64)
+	if err != nil {
+		logger.LogException(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	data := db.GetProjectById(id)
+	s, err := json.Marshal(data)
+	if err != nil {
+		logger.LogException(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	var repo []RepoDto
+	err = json.Unmarshal(s, &repo)
+	if err != nil {
+		logger.LogException(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if data[0]["Topics"] != nil {
+		repo[0].Topics = strings.Split(data[0]["Topics"].(string), ",")
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(repo[0])
 }
 
 func SetVisibility(w http.ResponseWriter, r *http.Request) {

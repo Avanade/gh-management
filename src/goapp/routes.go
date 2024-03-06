@@ -33,6 +33,7 @@ func setPageRoutes(mux *mux.Router) {
 	// REPOSITORIES PAGE
 	mux.Handle("/repositories", loadAzAuthPage(rtProjects.IndexHandler))
 	mux.Handle("/repositories/new", loadAzGHAuthPage(rtProjects.FormHandler))
+	mux.Handle("/repositories/view/{id}", loadAzAuthPage(rtProjects.ViewHandler))
 	mux.Handle("/repositories/makepublic/{id}", loadAzGHAuthPage(rtProjects.MakePublicHandler))
 
 	// GUIDANCE PAGE
@@ -162,12 +163,14 @@ func setApiRoutes(mux *mux.Router) {
 	// REPOSITORIES API
 	muxApi.Handle("/repositories", loadAzAuthPage(rtApi.GetRepositories)).Methods("GET")
 	muxApi.Handle("/repositories/my", loadAzGHAuthPage(rtApi.GetMyRepositories)).Methods("GET")
+	muxApi.Handle("/repositories/{id}", loadAzAuthPage(rtApi.GetRepositoriesById)).Methods("GET")
 	muxApi.Handle("/repositories/{id}/status", loadAzGHAuthPage(rtApi.GetRequestStatusByRepoId)).Methods("GET")
+	muxApi.Handle("/repositories/{visibility}/{repoName}/readme", loadAzAuthPage(rtApi.GetRepositoryReadmeById)).Methods("GET")
 	muxApi.Handle("/repositories", loadAzGHAuthPage(rtApi.CreateRepository)).Methods("POST")
 	muxApi.Handle("/repositories/{id}", loadAzGHAuthPage(rtApi.UpdateRepositoryById)).Methods("PUT")
 	muxApi.Handle("/repositories/{id}/ecattid", loadAzGHAuthPage(rtApi.UpdateRepositoryEcattIdById)).Methods("PUT")
 
-	muxApi.Handle("/repositories/{id}/collaborators", loadAzGHAuthPage(rtApi.GetRepoCollaboratorsByRepoId)).Methods("GET")
+	muxApi.Handle("/repositories/{id}/collaborators", loadAzAuthPage(rtApi.GetRepoCollaboratorsByRepoId)).Methods("GET")
 	muxApi.Handle("/repositories/{id}/collaborators/{ghUser}/{permission}", loadAzGHAuthPage(rtApi.AddCollaborator)).Methods("POST")
 	muxApi.Handle("/repositories/{id}/collaborators/{ghUser}/{permission}", loadAzGHAuthPage(rtApi.RemoveCollaborator)).Methods("DELETE")
 
