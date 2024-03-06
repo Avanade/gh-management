@@ -581,7 +581,7 @@
                 let url = `/api/repositories/${id}/collaborators/${user}/${permission}`
                 let f = () => {
                 Alpine.store('master').modal.show()
-                Alpine.store('master').deleteData(url, null, `Collaborator was successfully removed.`, "Refresh repository list",
+                Alpine.store('master').deleteData(url, null, `Collaborator was successfully removed.`, "Close",
                     `/repositories/view/${id}?tab=collaborators`)
                 }
 
