@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 
 	db "main/pkg/ghmgmtdb"
 	ghAPI "main/pkg/github"
@@ -68,4 +69,43 @@ func FormHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	template.UseTemplate(&w, r, "projects/form", data)
+}
+
+func ViewHandler(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+
+	isAdmin, _ := session.IsUserAdmin(w, r)
+	sessiongh, _ := session.GetGitHubUserData(w, r)
+
+	sessionaz, _ := session.Store.Get(r, "auth-session")
+	iprofile := sessionaz.Values["profile"]
+	profile := iprofile.(map[string]interface{})
+	username := profile["preferred_username"]
+
+	id, err := strconv.ParseInt(vars["id"], 10, 64)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	repoOwners, err := db.RepoOwnersByUserAndProjectId(id, username.(string))
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	isOwner := false
+
+	if len(repoOwners) > 0 {
+		isOwner = true
+	}
+
+	data := map[string]interface{}{
+		"id":        id,
+		"profileGH": sessiongh,
+		"isAdmin":   isAdmin,
+		"isOwner":   isOwner,
+	}
+
+	template.UseTemplate(&w, r, "projects/view", data)
 }

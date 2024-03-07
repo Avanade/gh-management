@@ -2,11 +2,14 @@ package routes
 
 import (
 	"encoding/json"
+	"fmt"
 	"main/pkg/appinsights_wrapper"
+	db "main/pkg/ghmgmtdb"
 	"main/pkg/msgraph"
 	"net/http"
 
 	"github.com/gorilla/mux"
+	"github.com/microsoft/ApplicationInsights-Go/appinsights/contracts"
 )
 
 func GetAllUserFromActiveDirectory(w http.ResponseWriter, r *http.Request) {
@@ -55,4 +58,36 @@ func SearchUserFromActiveDirectory(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.Write(jsonResp)
+}
+
+func IndexADGroups(w http.ResponseWriter, r *http.Request) {
+	logger := appinsights_wrapper.NewClient()
+	defer logger.EndOperation()
+
+	logger.LogTrace("Pulling list of AD groups...", contracts.Information)
+	groups, err := msgraph.GetADGroups()
+	logger.LogTrace(fmt.Sprintf("%d AD groups found", len(groups)), contracts.Information)
+	if err != nil {
+		logger.LogException(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	ctr := 0
+	for _, group := range groups {
+		hasGitHubAccess, err := msgraph.HasGitHubAccess(group.Id)
+		if err != nil {
+			logger.LogException(err)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		if hasGitHubAccess {
+			db.ADGroup_Insert(group.Id, group.Name)
+			ctr++
+		}
+	}
+	logger.LogTrace(fmt.Sprintf("%d AD groups indexed.", ctr), contracts.Information)
+
+	w.WriteHeader(http.StatusOK)
 }
