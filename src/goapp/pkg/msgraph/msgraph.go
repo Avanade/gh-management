@@ -552,7 +552,7 @@ func HasGitHubAccess(objectId string) (bool, error) {
 	}
 
 	client := &http.Client{
-		Timeout: time.Second * 10,
+		Timeout: time.Second * 60,
 	}
 
 	urlPath := fmt.Sprintf("https://graph.microsoft.com/v1.0/groups/%s/appRoleAssignments", objectId)
