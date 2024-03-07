@@ -7,6 +7,7 @@ import (
 	db "main/pkg/ghmgmtdb"
 	"main/pkg/msgraph"
 	"net/http"
+	"sync"
 
 	"github.com/gorilla/mux"
 	"github.com/microsoft/ApplicationInsights-Go/appinsights/contracts"
@@ -73,21 +74,33 @@ func IndexADGroups(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ctr := 0
-	for _, group := range groups {
-		hasGitHubAccess, err := msgraph.HasGitHubAccess(group.Id)
-		if err != nil {
-			logger.LogException(err)
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
+	var wg sync.WaitGroup
+	maxGoroutines := 100
+	guard := make(chan struct{}, maxGoroutines)
 
-		if hasGitHubAccess {
-			db.ADGroup_Insert(group.Id, group.Name)
-			ctr++
-		}
+	for _, repo := range groups {
+		guard <- struct{}{}
+		wg.Add(1)
+		go func(g msgraph.ADGroup) {
+			indexGroup(g, logger)
+			<-guard
+			wg.Done()
+		}(repo)
 	}
-	logger.LogTrace(fmt.Sprintf("%d AD groups indexed.", ctr), contracts.Information)
+	wg.Wait()
 
 	w.WriteHeader(http.StatusOK)
+}
+
+func indexGroup(g msgraph.ADGroup, logger *appinsights_wrapper.TelemetryClient) {
+	hasGitHubAccess, err := msgraph.HasGitHubAccess(g.Id)
+	if err != nil {
+		logger.LogException(err)
+		return
+	}
+
+	if hasGitHubAccess {
+		db.ADGroup_Insert(g.Id, g.Name)
+		logger.LogTrace(fmt.Sprintf("%s indexed.", g.Name), contracts.Information)
+	}
 }
