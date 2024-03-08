@@ -177,12 +177,12 @@ func CreateRepository(w http.ResponseWriter, r *http.Request) {
 		repoId := db.PRProjectsInsert(body, username.(string))
 
 		// Add  requestor and coowner as repo admins
-		for {
+		for x := 1; x <= 3; x++ {
 			time.Sleep(1 * time.Second)
-			logger.LogTrace("Adding requestor as a collaborator...", contracts.Information)
+			logger.LogTrace(fmt.Sprintf("Attempt %d: Adding requestor as a collaborator...", x), contracts.Information)
 			resp, err := AddCollaboratorToRequestedRepo(username.(string), body.Name, repoId, logger)
 			if err != nil {
-				http.Error(w, err.Error(), http.StatusInternalServerError)
+				logger.LogException(err)
 				continue
 			}
 			if resp.StatusCode != 403 {
@@ -190,12 +190,12 @@ func CreateRepository(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 
-		for {
+		for x := 1; x <= 3; x++ {
 			time.Sleep(1 * time.Second)
-			logger.LogTrace("Adding coowner as a collaborator...", contracts.Information)
+			logger.LogTrace(fmt.Sprintf("Attempt %d: Adding coowner as a collaborator...", x), contracts.Information)
 			resp, err := AddCollaboratorToRequestedRepo(body.Coowner, body.Name, repoId, logger)
 			if err != nil {
-				http.Error(w, err.Error(), http.StatusInternalServerError)
+				logger.LogException(err)
 				continue
 			}
 			if resp.StatusCode != 403 {
