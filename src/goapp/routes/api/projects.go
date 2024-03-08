@@ -178,7 +178,7 @@ func CreateRepository(w http.ResponseWriter, r *http.Request) {
 
 		// Add  requestor and coowner as repo admins
 		for x := 1; x <= 3; x++ {
-			time.Sleep(1 * time.Second)
+			time.Sleep(2 * time.Second)
 			logger.LogTrace(fmt.Sprintf("Attempt %d: Adding requestor as a collaborator...", x), contracts.Information)
 			resp, err := AddCollaboratorToRequestedRepo(username.(string), body.Name, repoId, logger)
 			if err != nil {
@@ -191,7 +191,7 @@ func CreateRepository(w http.ResponseWriter, r *http.Request) {
 		}
 
 		for x := 1; x <= 3; x++ {
-			time.Sleep(1 * time.Second)
+			time.Sleep(2 * time.Second)
 			logger.LogTrace(fmt.Sprintf("Attempt %d: Adding coowner as a collaborator...", x), contracts.Information)
 			resp, err := AddCollaboratorToRequestedRepo(body.Coowner, body.Name, repoId, logger)
 			if err != nil {
