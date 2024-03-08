@@ -29,9 +29,10 @@ type ListUsersResponse struct {
 }
 
 type User struct {
-	Name       string   `json:"displayName"`
-	Email      string   `json:"mail"`
-	OtherMails []string `json:"otherMails"`
+	Name           string   `json:"displayName"`
+	Email          string   `json:"mail"`
+	OtherMails     []string `json:"otherMails"`
+	AccountEnabled bool     `json:"accountEnabled"`
 }
 
 type ADGroupsResponse struct {
@@ -398,10 +399,10 @@ func GetToken() (string, error) {
 	return tokenResponse.AccessToken, nil
 }
 
-func IsUserExist(userPrincipalName string) (bool, error) {
+func IsUserExist(userPrincipalName string) (isMember bool, isAccountEnabled bool, err error) {
 	accessToken, err := GetToken()
 	if err != nil {
-		return false, err
+		return
 	}
 
 	client := &http.Client{
@@ -409,27 +410,28 @@ func IsUserExist(userPrincipalName string) (bool, error) {
 	}
 
 	urlPath := `https://graph.microsoft.com/v1.0/users`
-	URL, errURL := url.Parse(urlPath)
+	URL, err := url.Parse(urlPath)
 	if err != nil {
-		return false, errURL
+		return
 	}
 	query := URL.Query()
-	query.Set("$select", "displayName")
+	query.Set("$select", "accountEnabled")
 	query.Set("$search", fmt.Sprintf(`"displayName:%[1]s" OR "otherMails:%[1]s" OR "mail:%[1]s" OR "userPrincipalName:%[1]s"`, userPrincipalName))
 	URL.RawQuery = query.Encode()
 
 	req, err := http.NewRequest("GET", URL.String(), nil)
 	if err != nil {
-		return false, err
+		return
 	}
 	req.Header.Add("Authorization", "Bearer "+accessToken)
 	req.Header.Add("ConsistencyLevel", "eventual")
 	response, err := client.Do(req)
 	if err != nil {
-		return false, err
+		return
 	}
 	if response.StatusCode != 200 {
-		return false, errors.New(response.Status)
+		err = errors.New(response.Status)
+		return
 	}
 	defer response.Body.Close()
 
@@ -437,12 +439,16 @@ func IsUserExist(userPrincipalName string) (bool, error) {
 
 	err = json.NewDecoder(response.Body).Decode(&listUsersResponse)
 	if err != nil {
-		return false, err
+		return
 	}
 
-	isMember := len(listUsersResponse.Value) > 0
+	isMember = len(listUsersResponse.Value) > 0
 
-	return isMember, nil
+	if isMember {
+		isAccountEnabled = listUsersResponse.Value[0].AccountEnabled
+	}
+
+	return
 }
 
 func GetTeamsMembers(ChannelId string, token string) ([]User, error) {
