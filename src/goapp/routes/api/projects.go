@@ -147,6 +147,7 @@ func CreateRepository(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+		logger.LogTrace("Creating repository...", contracts.Information)
 		repo, err := ghAPI.CreatePrivateGitHubRepository(body.Name, body.Description, username.(string))
 		if err != nil {
 			logger.LogException(err)
@@ -162,48 +163,45 @@ func CreateRepository(w http.ResponseWriter, r *http.Request) {
 
 		innersource := os.Getenv("GH_ORG_INNERSOURCE")
 		if isEnterpriseOrg {
-			resp, err := ghAPI.SetProjectVisibility(repo.GetName(), "internal", innersource)
+			logger.LogTrace("Making the repository as internal...", contracts.Information)
+			_, err := ghAPI.SetProjectVisibility(repo.GetName(), "internal", innersource)
 			if err != nil {
 				logger.LogException(err)
 				HttpResponseError(w, http.StatusInternalServerError, err.Error(), logger)
 				return
 			}
 			body.Visibility = 2
-
-			jsonString, err := json.Marshal(resp.Header) // TEMP LOG
-			if err != nil {
-				fmt.Println("Error marshalling JSON:", err)
-				return
-			}
-			logger.LogTrace(string(jsonString), contracts.Information) // END TEMP LOG
 		}
 
+		logger.LogTrace("Adding repository to database...", contracts.Information)
 		repoId := db.PRProjectsInsert(body, username.(string))
 
 		// Add  requestor and coowner as repo admins
-		resp, err := AddCollaboratorToRequestedRepo(username.(string), body.Name, repoId, logger)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
+		for {
+			time.Sleep(1 * time.Second)
+			logger.LogTrace("Adding requestor as a collaborator...", contracts.Information)
+			resp, err := AddCollaboratorToRequestedRepo(username.(string), body.Name, repoId, logger)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				continue
+			}
+			if resp.StatusCode != 403 {
+				break
+			}
 		}
-		jsonString, err := json.Marshal(resp.Header) // TEMP LOG
-		if err != nil {
-			fmt.Println("Error marshalling JSON:", err)
-			return
-		}
-		logger.LogTrace(string(jsonString), contracts.Information) // END TEMP LOG
 
-		resp, err = AddCollaboratorToRequestedRepo(body.Coowner, body.Name, repoId, logger)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
+		for {
+			time.Sleep(1 * time.Second)
+			logger.LogTrace("Adding coowner as a collaborator...", contracts.Information)
+			resp, err := AddCollaboratorToRequestedRepo(body.Coowner, body.Name, repoId, logger)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				continue
+			}
+			if resp.StatusCode != 403 {
+				break
+			}
 		}
-		jsonString, err = json.Marshal(resp.Header) // TEMP LOG
-		if err != nil {
-			fmt.Println("Error marshalling JSON:", err)
-			return
-		}
-		logger.LogTrace(string(jsonString), contracts.Information) // END TEMP LOG
 
 		recipients := []string{
 			username.(string),
