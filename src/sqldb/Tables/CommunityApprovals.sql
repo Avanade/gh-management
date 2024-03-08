@@ -2,6 +2,7 @@
 (
 	[Id] INT NOT NULL PRIMARY KEY IDENTITY, 
     [CommunityId] INT NOT NULL, 
+    [Category] VARCHAR(500) NOT NULL DEFAULT 'community'
     [ApproverUserPrincipalName] VARCHAR(100) NOT NULL, 
     [ApprovalStatusId] INT NOT NULL, 
     [ApprovalDescription] VARCHAR(500) NULL,
@@ -14,6 +15,7 @@
     [Modified] DATETIME NOT NULL DEFAULT getdate(), 
     [ModifiedBy] VARCHAR(100) NULL
     CONSTRAINT [FK_CommunityApprovals_Communities] FOREIGN KEY (CommunityId) REFERENCES Communities(Id), 
+    CONSTRAINT [FK_CommunityApprovals_Organizations] FOREIGN KEY (CommunityId) REFERENCES Organizations(Id), 
     CONSTRAINT [FK_CommunityApprovals_Users] FOREIGN KEY (ApproverUserPrincipalName) REFERENCES Users(UserPrincipalName), 
     CONSTRAINT [FK_CommunityApprovals_ApprovalStatus] FOREIGN KEY (ApprovalStatusId) REFERENCES ApprovalStatus(Id)
 )
