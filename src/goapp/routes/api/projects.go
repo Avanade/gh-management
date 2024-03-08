@@ -147,6 +147,7 @@ func CreateRepository(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+		logger.LogTrace("Creating repository...", contracts.Information)
 		repo, err := ghAPI.CreatePrivateGitHubRepository(body.Name, body.Description, username.(string))
 		if err != nil {
 			logger.LogException(err)
@@ -162,48 +163,45 @@ func CreateRepository(w http.ResponseWriter, r *http.Request) {
 
 		innersource := os.Getenv("GH_ORG_INNERSOURCE")
 		if isEnterpriseOrg {
-			resp, err := ghAPI.SetProjectVisibility(repo.GetName(), "internal", innersource)
+			logger.LogTrace("Making the repository as internal...", contracts.Information)
+			_, err := ghAPI.SetProjectVisibility(repo.GetName(), "internal", innersource)
 			if err != nil {
 				logger.LogException(err)
 				HttpResponseError(w, http.StatusInternalServerError, err.Error(), logger)
 				return
 			}
 			body.Visibility = 2
-
-			jsonString, err := json.Marshal(resp.Header) // TEMP LOG
-			if err != nil {
-				fmt.Println("Error marshalling JSON:", err)
-				return
-			}
-			logger.LogTrace(string(jsonString), contracts.Information) // END TEMP LOG
 		}
 
+		logger.LogTrace("Adding repository to database...", contracts.Information)
 		repoId := db.PRProjectsInsert(body, username.(string))
 
 		// Add  requestor and coowner as repo admins
-		resp, err := AddCollaboratorToRequestedRepo(username.(string), body.Name, repoId, logger)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
+		for x := 1; x <= 3; x++ {
+			time.Sleep(2 * time.Second)
+			logger.LogTrace(fmt.Sprintf("Attempt %d: Adding requestor as a collaborator...", x), contracts.Information)
+			resp, err := AddCollaboratorToRequestedRepo(username.(string), body.Name, repoId, logger)
+			if err != nil {
+				logger.LogException(err)
+				continue
+			}
+			if resp.StatusCode != 403 {
+				break
+			}
 		}
-		jsonString, err := json.Marshal(resp.Header) // TEMP LOG
-		if err != nil {
-			fmt.Println("Error marshalling JSON:", err)
-			return
-		}
-		logger.LogTrace(string(jsonString), contracts.Information) // END TEMP LOG
 
-		resp, err = AddCollaboratorToRequestedRepo(body.Coowner, body.Name, repoId, logger)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
+		for x := 1; x <= 3; x++ {
+			time.Sleep(2 * time.Second)
+			logger.LogTrace(fmt.Sprintf("Attempt %d: Adding coowner as a collaborator...", x), contracts.Information)
+			resp, err := AddCollaboratorToRequestedRepo(body.Coowner, body.Name, repoId, logger)
+			if err != nil {
+				logger.LogException(err)
+				continue
+			}
+			if resp.StatusCode != 403 {
+				break
+			}
 		}
-		jsonString, err = json.Marshal(resp.Header) // TEMP LOG
-		if err != nil {
-			fmt.Println("Error marshalling JSON:", err)
-			return
-		}
-		logger.LogTrace(string(jsonString), contracts.Information) // END TEMP LOG
 
 		recipients := []string{
 			username.(string),
@@ -372,6 +370,27 @@ func GetRequestStatusByRepoId(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	w.Header().Set("Content-Type", "application/json")
 	jsonResp, err := json.Marshal(projects)
+	if err != nil {
+		logger.LogException(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.Write(jsonResp)
+}
+
+func GetRepositoryReadmeById(w http.ResponseWriter, r *http.Request) {
+	logger := appinsights_wrapper.NewClient()
+	defer logger.EndOperation()
+
+	req := mux.Vars(r)
+	repoName := req["repoName"]
+	visibility := req["visibility"]
+
+	readme, _ := ghAPI.GetRepositoryReadmeById(repoName, visibility)
+
+	w.WriteHeader(http.StatusOK)
+	w.Header().Set("Content-Type", "application/json")
+	jsonResp, err := json.Marshal(readme)
 	if err != nil {
 		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -605,6 +624,44 @@ func GetRepositories(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.Write(jsonResp)
+}
+
+func GetRepositoriesById(w http.ResponseWriter, r *http.Request) {
+	logger := appinsights_wrapper.NewClient()
+	defer logger.EndOperation()
+
+	req := mux.Vars(r)
+
+	id, err := strconv.ParseInt(req["id"], 10, 64)
+	if err != nil {
+		logger.LogException(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	data := db.GetProjectById(id)
+	s, err := json.Marshal(data)
+	if err != nil {
+		logger.LogException(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	var repo []RepoDto
+	err = json.Unmarshal(s, &repo)
+	if err != nil {
+		logger.LogException(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if data[0]["Topics"] != nil {
+		repo[0].Topics = strings.Split(data[0]["Topics"].(string), ",")
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(repo[0])
 }
 
 func SetVisibility(w http.ResponseWriter, r *http.Request) {

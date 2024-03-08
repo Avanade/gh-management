@@ -9,9 +9,9 @@ BEGIN
 	SET NOCOUNT ON;
 
     -- Insert statements for procedure here
-SELECT [Id],
+SELECT p.[Id],
        [GithubId],
-       [Name],
+       p.[Name],
        [CoOwner],
        [Description],
        [ConfirmAvaIP],
@@ -23,9 +23,12 @@ SELECT [Id],
        [Modified],
        [ModifiedBy],
        [TFSProjectReference],
-       [RepositorySource]
+       [RepositorySource],
+       [v].[Name] AS "Visibility",
+       (SELECT STRING_AGG(r.Topic, ',') FROM dbo.RepoTopics AS r WHERE r.ProjectId=p.Id) AS "Topics"
   FROM 
-       [dbo].[Projects]
+       [dbo].[Projects] AS p
+        LEFT JOIN [dbo].[Visibility] AS v ON p.VisibilityId = v.Id
   WHERE
-      [Id] = @Id
+      p.[Id] = @Id
 END

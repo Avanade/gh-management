@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	db "main/pkg/ghmgmtdb"
 	"net/http"
 	"net/url"
 	"os"
@@ -34,12 +35,21 @@ type User struct {
 }
 
 type ADGroupsResponse struct {
-	Value []ADGroup `json:"value"`
+	NextLink string    `json:"@odata.nextLink"`
+	Value    []ADGroup `json:"value"`
 }
 
 type ADGroup struct {
 	Id   string `json:"id"`
 	Name string `json:"displayName"`
+}
+
+type AppRoleAssignmentResponse struct {
+	Value []AppRoleAssignment `json:"value"`
+}
+
+type AppRoleAssignment struct {
+	ResourceDisplayName string `json:"resourceDisplayName"`
 }
 
 func GetAzGroupIdByName(groupName string) (string, error) {
@@ -217,19 +227,15 @@ func IsGithubEnterpriseMember(user string) (bool, error) {
 		Timeout: time.Second * 10,
 	}
 
-	urlPath := fmt.Sprintf("https://graph.microsoft.com/v1.0/users/%s/checkMemberGroups", user)
-
-	groupId, err := GetAzGroupIdByName(os.Getenv("GH_AZURE_AD_GROUP"))
+	adGroups, err := db.ADGroup_SelectAll()
 	if err != nil {
 		return false, err
 	}
 
-	groupIds := []string{
-		groupId,
-	}
+	urlPath := fmt.Sprintf("https://graph.microsoft.com/v1.0/users/%s/checkMemberGroups", user)
 
 	postBody, _ := json.Marshal(map[string]interface{}{
-		"groupIds": groupIds,
+		"groupIds": adGroups,
 	})
 
 	reqBody := bytes.NewBuffer(postBody)
@@ -256,11 +262,10 @@ func IsGithubEnterpriseMember(user string) (bool, error) {
 		fmt.Print(err)
 	}
 
-	for _, v := range data.Value {
-		if v == groupId {
-			return true, nil
-		}
+	if len(data.Value) > 0 {
+		return true, nil
 	}
+
 	return false, nil
 }
 
@@ -479,4 +484,100 @@ func GetTeamsMembers(ChannelId string, token string) ([]User, error) {
 	}
 
 	return users, nil
+}
+
+func GetADGroups() ([]ADGroup, error) {
+	accessToken, err := GetToken()
+	if err != nil {
+		return nil, err
+	}
+
+	client := &http.Client{
+		Timeout: time.Second * 10,
+	}
+
+	urlPath := "https://graph.microsoft.com/v1.0/groups"
+
+	req, err := http.NewRequest("GET", urlPath, nil)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Add("Authorization", "Bearer "+accessToken)
+	response, err := client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer response.Body.Close()
+
+	var listGroupResponse ADGroupsResponse
+	var finalList []ADGroup
+	err = json.NewDecoder(response.Body).Decode(&listGroupResponse)
+	if err != nil {
+		return nil, err
+	}
+	finalList = append(finalList, listGroupResponse.Value...)
+	nextLink := listGroupResponse.NextLink
+
+	for nextLink != "" {
+		req, err = http.NewRequest("GET", nextLink, nil)
+		if err != nil {
+			return nil, err
+		}
+		req.Header.Add("Authorization", "Bearer "+accessToken)
+		response, err = client.Do(req)
+		if err != nil {
+			return nil, err
+		}
+
+		err = json.NewDecoder(response.Body).Decode(&listGroupResponse)
+		if err != nil {
+			return nil, err
+		}
+		finalList = append(finalList, listGroupResponse.Value...)
+		if nextLink != listGroupResponse.NextLink {
+			nextLink = listGroupResponse.NextLink
+		} else {
+			nextLink = ""
+		}
+	}
+
+	return finalList, nil
+}
+
+func HasGitHubAccess(objectId string) (bool, error) {
+	appReg := os.Getenv("GH_AZURE_AD_GROUP")
+	accessToken, err := GetToken()
+	if err != nil {
+		return false, err
+	}
+
+	client := &http.Client{
+		Timeout: time.Second * 60,
+	}
+
+	urlPath := fmt.Sprintf("https://graph.microsoft.com/v1.0/groups/%s/appRoleAssignments", objectId)
+
+	req, err := http.NewRequest("GET", urlPath, nil)
+	if err != nil {
+		return false, err
+	}
+	req.Header.Add("Authorization", "Bearer "+accessToken)
+	response, err := client.Do(req)
+	if err != nil {
+		return false, err
+	}
+	defer response.Body.Close()
+
+	var appRoleAssignmentResponse AppRoleAssignmentResponse
+	err = json.NewDecoder(response.Body).Decode(&appRoleAssignmentResponse)
+	if err != nil {
+		return false, err
+	}
+
+	for _, appRoleAssignment := range appRoleAssignmentResponse.Value {
+		if appRoleAssignment.ResourceDisplayName == appReg {
+			return true, nil
+		}
+	}
+	return false, nil
 }

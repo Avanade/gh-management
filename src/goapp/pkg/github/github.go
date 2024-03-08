@@ -2,6 +2,7 @@ package githubAPI
 
 import (
 	"context"
+	"encoding/base64"
 	"fmt"
 	"log"
 	"os"
@@ -95,6 +96,39 @@ func GetRepository(repoName string, org string) (*github.Repository, error) {
 		return nil, err
 	}
 	return repo, nil
+}
+
+func GetRepositoryReadmeById(repoName string, visibility string) (string, error) {
+	client := CreateClient(os.Getenv("GH_TOKEN"))
+
+	if visibility == "" {
+		return "", fmt.Errorf("invalid visibility")
+	}
+
+	var owner string
+
+	if visibility != "Public" {
+		owner = os.Getenv("GH_ORG_INNERSOURCE")
+	} else {
+		owner = os.Getenv("GH_ORG_OPENSOURCE")
+	}
+
+	readme, resp, err := client.Repositories.GetReadme(context.Background(), owner, repoName, nil)
+	if err != nil {
+		return "", err
+	}
+
+	if resp.StatusCode != 200 {
+		return "", fmt.Errorf("unexpected response status: %v", resp.Status)
+	}
+
+	// Decode the base64-encoded content of the README
+	decodedContent, err := base64.StdEncoding.DecodeString(*readme.Content)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return string(decodedContent), nil
 }
 
 func IsArchived(repoName string, org string) (bool, error) {
