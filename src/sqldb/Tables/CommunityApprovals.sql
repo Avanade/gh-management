@@ -2,7 +2,7 @@
 (
 	[Id] INT NOT NULL PRIMARY KEY IDENTITY, 
     [CommunityId] INT NOT NULL, 
-    [Category] VARCHAR(500) NOT NULL DEFAULT 'community'
+    [Category] VARCHAR(500) NOT NULL DEFAULT 'community',
     [ApproverUserPrincipalName] VARCHAR(100) NOT NULL, 
     [ApprovalStatusId] INT NOT NULL, 
     [ApprovalDescription] VARCHAR(500) NULL,
