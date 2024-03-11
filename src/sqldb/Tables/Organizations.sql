@@ -1,7 +1,7 @@
 CREATE TABLE [dbo].[Organizations]
 (
 	[Id] INT NOT NULL PRIMARY KEY IDENTITY, 
-    [Region] VARCHAR(100) NOT NULL,
+    [Region] INT NOT NULL,
     [ClientName] VARCHAR(100) NOT NULL,
     [ProjectName] VARCHAR(100) NOT NULL,
     [WBS] VARCHAR(50) NOT NULL,
