@@ -109,7 +109,7 @@ func ClearOrgMembers(w http.ResponseWriter, r *http.Request) {
 			continue
 		}
 		if email != "" {
-			isUserExist, err := msgraph.IsUserExist(email)
+			isUserExist, isAccountEnabled, err := msgraph.IsUserExist(email)
 			if err != nil {
 				logger.LogException(err)
 				continue
@@ -117,6 +117,9 @@ func ClearOrgMembers(w http.ResponseWriter, r *http.Request) {
 			if !isUserExist {
 				logger.TrackTrace(fmt.Sprint("GitHub ID: ", user.GetID(), " not found on AD | INTERNAL"), contracts.Information)
 				// ghAPI.RemoveOrganizationsMember(token, organization, *user.Login)
+			}
+			if !isAccountEnabled {
+				logger.TrackTrace(fmt.Sprint("GitHub ID: ", user.GetID(), " found on AD but account disabled | INTERNAL"), contracts.Information)
 			}
 		} else {
 			logger.TrackTrace(fmt.Sprint("GitHub ID: ", user.GetID(), " not found | INTERNAL"), contracts.Information)
@@ -138,11 +141,18 @@ func ClearOrgMembers(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		if email != "" {
-			isUserExist, _ := msgraph.IsUserExist(email)
+			isUserExist, isAccountEnabled, err := msgraph.IsUserExist(email)
+			if err != nil {
+				logger.LogException(err)
+				continue
+			}
 			if !isUserExist {
 				logger.TrackTrace(fmt.Sprint("GitHub ID: ", user.GetID(), " not found on AD | EXTERNAL"), contracts.Information)
 				// ghAPI.ConvertMemberToOutsideCollaborator(token, organizationsOpen, *user.Login)
 				convertedOutsideCollabsList = append(convertedOutsideCollabsList, *user.Login)
+			}
+			if !isAccountEnabled {
+				logger.TrackTrace(fmt.Sprint("GitHub ID: ", user.GetID(), " found on AD but account disabled | EXTERNAL"), contracts.Information)
 			}
 		} else {
 			logger.TrackTrace(fmt.Sprint("GitHub ID: ", user.GetID(), " not found | EXTERNAL"), contracts.Information)
