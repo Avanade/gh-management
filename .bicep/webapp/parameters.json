@@ -57,6 +57,7 @@
                 "APPROVAL_SYSTEM_APP_ID":"",
                 "APPROVAL_SYSTEM_APP_MODULE_PROJECTS":"",
                 "APPROVAL_SYSTEM_APP_MODULE_COMMUNITY":"",
+                "APPROVAL_SYSTEM_APP_MODULE_ORGANIZATION":"",
                 "GH_AZURE_AD_GROUP":"",
                 "GH_AZURE_AD_ADMIN_GROUP":"",
                 

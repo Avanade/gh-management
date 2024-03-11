@@ -208,6 +208,9 @@ func setApiRoutes(mux *mux.Router) {
 	muxApi.Handle("/oss-contribution-sponsors", loadAdminPage((rtApi.AddSponsor))).Methods("POST")
 	muxApi.Handle("/oss-contribution-sponsors/{id}", loadAdminPage((rtApi.UpdateSponsor))).Methods(("PUT"))
 
+	// ORGANIZATION API
+	muxApi.HandleFunc("/github-organization", rtApi.AddOrganization).Methods("POST")
+
 	// APPROVALS API
 	muxApi.HandleFunc("/approvals/community/callback", rtApi.UpdateApprovalStatusCommunity).Methods("POST")
 	muxApi.HandleFunc("/approvals/community/reassign/callback", rtApi.UpdateCommunityApprovalReassignApprover).Methods("POST")
