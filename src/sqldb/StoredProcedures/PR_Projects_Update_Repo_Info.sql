@@ -1,4 +1,4 @@
-CREATE PROCEDURE PR_Projects_Update_Repo_Info
+CREATE PROCEDURE [dbo].[PR_Projects_Update_Repo_Info]
 (
 		@Id INT,
 		@GithubId INT,
