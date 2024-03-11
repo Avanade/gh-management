@@ -12,6 +12,7 @@ BEGIN
 
 SELECT [p].[Id],
        [p].[Name],
+       [p].[Organization],
        [CoOwner],
        [Description],
        [ConfirmAvaIP],

@@ -66,7 +66,7 @@
         x-show="!showSpinner && userRepositoriesList && view==='my'">
         <ul role="list" class="divide-y divide-gray-200">
           <template x-for="(repository, index) in userRepositoriesList">
-            <li @click.stop @click="window.location.href = `/repositories/view/${repository.Id}`">
+            <li @click.stop @click="window.location.href = `/repositories/view/${repository.Organization}/${repository.Name}`">
               <div class="px-4 py-4 sm:px-6 hover:bg-gray-50 cursor-pointer">
                 <div class="flex items-center justify-between">
                   <div>
@@ -257,7 +257,7 @@
         x-show="!showSpinner && allRepositoriesList && view==='all'">
         <ul role="list" class="divide-y divide-gray-100">
           <template x-for="(repository, index) in allRepositoriesList">
-            <li @click.stop @click="window.location.href = `/repositories/view/${repository.Id}`">
+            <li @click.stop @click="window.location.href = `/repositories/view/${repository.Organization}/${repository.Name}`">
               <div class="px-4 py-4 sm:px-6 hover:bg-gray-50 cursor-pointer">
                 <div class="flex items-center justify-between">
                   <div>

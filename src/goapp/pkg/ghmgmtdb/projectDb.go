@@ -510,6 +510,24 @@ func GetProjectByName(projectName string) []map[string]interface{} {
 	return result
 }
 
+func GetProjectIdByOrgName(orgName, repoName string) (int64, error) {
+
+	db := ConnectDb()
+	defer db.Close()
+
+	param := map[string]interface{}{
+		"Name":         repoName,
+		"Organization": orgName,
+	}
+
+	result, err := db.ExecuteStoredProcedureWithResult("PR_Projects_SelectProjectId_ByOrgName", param)
+	if err != nil {
+		return 0, err
+	}
+
+	return result[0]["Id"].(int64), nil
+}
+
 func GetProjectById(id int64) []map[string]interface{} {
 	db := ConnectDb()
 	defer db.Close()
