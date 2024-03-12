@@ -516,7 +516,7 @@ func GetProjectIdByOrgName(orgName, repoName string) (int64, error) {
 	defer db.Close()
 
 	param := map[string]interface{}{
-		"Name":         repoName,
+		"AssetCode":    repoName,
 		"Organization": orgName,
 	}
 
