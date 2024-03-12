@@ -7,6 +7,7 @@ BEGIN
     SET NOCOUNT ON
 SELECT DISTINCT [p].[Id],
         [p].[Name],
+        [P].[AssetCode],
         [p].[Organization],
         [p].[Description],
         [p].[IsArchived],
