@@ -35,6 +35,7 @@ type RepositoryListDto struct {
 type RepoDto struct {
 	Id                     int      `json:"Id"`
 	Name                   string   `json:"Name"`
+	AssetCode              string   `json:"AssetCode"`
 	Organization           string   `json:"Organization"`
 	Description            string   `json:"Description"`
 	IsArchived             bool     `json:"IsArchived"`
