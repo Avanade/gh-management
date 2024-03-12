@@ -13,18 +13,19 @@ CREATE PROCEDURE [dbo].[PR_Projects_Update_Repo_Info]
 AS
 BEGIN
 	SET NOCOUNT ON;
-UPDATE 
-		[dbo].[Projects]
-   SET 
-		[Name] = @Name,
-		[GithubId] = @GithubId,
-		[Description] = @Description,
-		[Organization] = @Organization,
-		[IsArchived] = @IsArchived,
-		[VisibilityId] = @VisibilityId,
-		[TFSProjectReference] = @TFSProjectReference,
-		[Created] = @Created,
-		[Modified] = GETDATE()
- WHERE  
-		[Id] = @Id
+	UPDATE 
+			[dbo].[Projects]
+	SET 
+			[Name] = @Name,
+			[AssetCode] = @Name,
+			[GithubId] = @GithubId,
+			[Description] = @Description,
+			[Organization] = @Organization,
+			[IsArchived] = @IsArchived,
+			[VisibilityId] = @VisibilityId,
+			[TFSProjectReference] = @TFSProjectReference,
+			[Created] = @Created,
+			[Modified] = GETDATE()
+	WHERE  
+			[Id] = @Id
 END
