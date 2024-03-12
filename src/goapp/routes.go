@@ -11,6 +11,7 @@ import (
 	rtAdmin "main/routes/pages/admin"
 	rtCommunity "main/routes/pages/community"
 	rtGuidance "main/routes/pages/guidance"
+	rtOtherRequests "main/routes/pages/otherRequests"
 	rtProjects "main/routes/pages/project"
 	rtSearch "main/routes/pages/search"
 
@@ -47,6 +48,9 @@ func setPageRoutes(mux *mux.Router) {
 	mux.Handle("/communities/new", loadAzGHAuthPage(rtCommunity.FormHandler))
 	mux.Handle("/communities/{id}", loadAzGHAuthPage(rtCommunity.FormHandler))
 	mux.Handle("/communities/{id}/onboarding", loadAzGHAuthPage(rtCommunity.OnBoardingHandler))
+
+	// OTHER REQUESTS PAGE
+	mux.Handle("/other-requests", loadAzGHAuthPage(rtOtherRequests.IndexHandler))
 
 	// AUTHENTICATION
 	mux.HandleFunc("/loginredirect", rtPages.LoginRedirectHandler)
@@ -209,7 +213,8 @@ func setApiRoutes(mux *mux.Router) {
 	muxApi.Handle("/oss-contribution-sponsors/{id}", loadAdminPage((rtApi.UpdateSponsor))).Methods(("PUT"))
 
 	// ORGANIZATION API
-	muxApi.HandleFunc("/github-organization", rtApi.AddOrganization).Methods("POST")
+	muxApi.Handle("/github-organization", loadAzGHAuthPage(rtApi.AddOrganization)).Methods("POST")
+	muxApi.Handle("/github-organization/region", loadAzGHAuthPage((rtApi.GetAllRegionalOrganizations))).Methods("GET")
 
 	// APPROVALS API
 	muxApi.HandleFunc("/approvals/community/callback", rtApi.UpdateApprovalStatusCommunity).Methods("POST")

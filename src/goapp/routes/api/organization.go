@@ -269,3 +269,23 @@ func CreateOrganizationApprovalRequest(data OrganizationDto, logger *appinsights
 	}
 	return nil
 }
+
+func GetAllRegionalOrganizations(w http.ResponseWriter, r *http.Request) {
+	logger := appinsights_wrapper.NewClient()
+	defer logger.EndOperation()
+	regOrgs, err := db.GetAllRegionalOrganizations()
+	if err != nil {
+		logger.LogException(err)
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Header().Set("Content-Type", "application/json")
+	jsonResp, err := json.Marshal(regOrgs)
+	if err != nil {
+		logger.LogException(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.Write(jsonResp)
+
+}

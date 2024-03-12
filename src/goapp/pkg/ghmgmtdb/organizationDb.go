@@ -31,3 +31,15 @@ func GetRegionalOrganizationById(id int) ([]map[string]interface{}, error) {
 
 	return result, err
 }
+
+func GetAllRegionalOrganizations() ([]map[string]interface{}, error) {
+	db := ConnectDb()
+	defer db.Close()
+
+	result, err := db.ExecuteStoredProcedureWithResult("dbo.PR_RegionalOrganizations_SelectAll", nil)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	return result, err
+}
