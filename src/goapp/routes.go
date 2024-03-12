@@ -51,6 +51,7 @@ func setPageRoutes(mux *mux.Router) {
 
 	// OTHER REQUESTS PAGE
 	mux.Handle("/other-requests", loadAzGHAuthPage(rtOtherRequests.IndexHandler))
+	mux.Handle("/other-requests/organization", loadAzGHAuthPage(rtOtherRequests.RequestOrganization))
 
 	// AUTHENTICATION
 	mux.HandleFunc("/loginredirect", rtPages.LoginRedirectHandler)
