@@ -3,6 +3,7 @@ CREATE PROCEDURE [dbo].[PR_Projects_Update_Repo_Info]
 		@Id INT,
 		@GithubId INT,
 		@Name VARCHAR(50),
+		@AssetCode VARCHAR(50),
 		@Description VARCHAR(1000),
 		@Organization VARCHAR(100),
 		@IsArchived BIT,
@@ -17,7 +18,7 @@ BEGIN
 			[dbo].[Projects]
 	SET 
 			[Name] = @Name,
-			[AssetCode] = @Name,
+			[AssetCode] = @AssetCode,
 			[GithubId] = @GithubId,
 			[Description] = @Description,
 			[Organization] = @Organization,

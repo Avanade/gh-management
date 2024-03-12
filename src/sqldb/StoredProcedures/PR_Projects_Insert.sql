@@ -27,7 +27,6 @@ DECLARE @ResultTable TABLE(Id INT);
 INSERT INTO Projects (
 	[GithubId],
 	[Name],
-	[AssetCode],
 	[Description],
 	[IsArchived],
 	[ConfirmAvaIP],
@@ -47,7 +46,6 @@ INSERT INTO Projects (
 OUTPUT INSERTED.Id INTO @ResultTable
 VALUES (
 	@GithubId,
-	@Name,
 	@Name,
 	@Description,
 	@IsArchived,

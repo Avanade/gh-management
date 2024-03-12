@@ -1186,6 +1186,7 @@ func indexRepo(repo ghAPI.Repo, logger *appinsights_wrapper.TelemetryClient) {
 	param := map[string]interface{}{
 		"GithubId":            repo.GithubId,
 		"Name":                repo.Name,
+		"AssetCode":           repo.Name,
 		"Description":         repo.Description,
 		"Organization":        repo.Org,
 		"IsArchived":          repo.IsArchived,
