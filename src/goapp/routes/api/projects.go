@@ -161,7 +161,6 @@ func CreateRepository(w http.ResponseWriter, r *http.Request) {
 
 		body.GithubId = repo.GetID()
 		body.TFSProjectReference = repo.GetHTMLURL()
-		body.Visibility = 1
 
 		innersource := os.Getenv("GH_ORG_INNERSOURCE")
 		if isEnterpriseOrg {
@@ -172,7 +171,6 @@ func CreateRepository(w http.ResponseWriter, r *http.Request) {
 				HttpResponseError(w, http.StatusInternalServerError, err.Error(), logger)
 				return
 			}
-			body.Visibility = 2
 		}
 
 		logger.LogTrace("Adding repository to database...", contracts.Information)
