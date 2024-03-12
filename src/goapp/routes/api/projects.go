@@ -159,12 +159,13 @@ func CreateRepository(w http.ResponseWriter, r *http.Request) {
 
 		logger.LogTrace(repo.GetName(), contracts.Information) // TEMP LOG - END TEMP LOG
 
+		body.AssetCode = body.Name
 		body.GithubId = repo.GetID()
 		body.TFSProjectReference = repo.GetHTMLURL()
-		body.Visibility = 1
 
 		innersource := os.Getenv("GH_ORG_INNERSOURCE")
-		if isEnterpriseOrg {
+		body.Organization = innersource
+		if isEnterpriseOrg && body.Visibility == 2 {
 			logger.LogTrace("Making the repository as internal...", contracts.Information)
 			_, err := ghAPI.SetProjectVisibility(repo.GetName(), "internal", innersource)
 			if err != nil {
@@ -172,7 +173,6 @@ func CreateRepository(w http.ResponseWriter, r *http.Request) {
 				HttpResponseError(w, http.StatusInternalServerError, err.Error(), logger)
 				return
 			}
-			body.Visibility = 2
 		}
 
 		logger.LogTrace("Adding repository to database...", contracts.Information)
