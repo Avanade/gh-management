@@ -12,6 +12,8 @@ BEGIN
 
 SELECT [p].[Id],
        [p].[Name],
+       [p].[AssetCode],
+       [p].[Organization],
        [CoOwner],
        [Description],
        [ConfirmAvaIP],

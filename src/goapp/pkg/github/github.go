@@ -145,7 +145,7 @@ func IsRepoExisting(repoName string) (bool, error) {
 	organizations := []string{os.Getenv("GH_ORG_INNERSOURCE"), os.Getenv("GH_ORG_OPENSOURCE")}
 
 	for _, org := range organizations {
-		_, err := GetRepository(repoName, org)
+		repo, err := GetRepository(repoName, org)
 		if err != nil {
 			if strings.Contains(err.Error(), "Not Found") {
 				continue
@@ -153,7 +153,9 @@ func IsRepoExisting(repoName string) (bool, error) {
 				return false, err
 			}
 		} else {
-			exists = true
+			if *repo.GetOwner().Login == org {
+				exists = true
+			}
 		}
 	}
 
@@ -188,7 +190,7 @@ func GetRepositoriesFromOrganization(org string) ([]Repo, error) {
 			FullName:            repo.GetFullName(),
 			Name:                repo.GetName(),
 			Link:                repo.GetHTMLURL(),
-			Org:                 org,
+			Org:                 *repo.GetOwner().Login,
 			Description:         repo.GetDescription(),
 			Private:             repo.GetPrivate(),
 			Created:             repo.GetCreatedAt(),
