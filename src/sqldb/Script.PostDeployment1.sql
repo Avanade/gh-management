@@ -58,3 +58,5 @@ IF NOT EXISTS (SELECT Id FROM Visibility WHERE Id = 3)
 INSERT INTO Visibility (Id, [Name]) VALUES (3, 'Public')
 
 SET IDENTITY_INSERT Visibility OFF
+
+EXEC [dbo].[PR_Projects_UpdateOrganization_AllAzureDevOps]

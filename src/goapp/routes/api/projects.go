@@ -35,6 +35,8 @@ type RepositoryListDto struct {
 type RepoDto struct {
 	Id                     int      `json:"Id"`
 	Name                   string   `json:"Name"`
+	AssetCode              string   `json:"AssetCode"`
+	Organization           string   `json:"Organization"`
 	Description            string   `json:"Description"`
 	IsArchived             bool     `json:"IsArchived"`
 	Created                string   `json:"Created"`
@@ -1183,7 +1185,9 @@ func indexRepo(repo ghAPI.Repo, logger *appinsights_wrapper.TelemetryClient) {
 	param := map[string]interface{}{
 		"GithubId":            repo.GithubId,
 		"Name":                repo.Name,
+		"AssetCode":           repo.Name,
 		"Description":         repo.Description,
+		"Organization":        repo.Org,
 		"IsArchived":          repo.IsArchived,
 		"VisibilityId":        visibilityId,
 		"TFSProjectReference": repo.TFSProjectReference,
