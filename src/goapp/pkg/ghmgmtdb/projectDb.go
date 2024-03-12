@@ -56,8 +56,10 @@ type Project struct {
 	Id                      string
 	GithubId                int64
 	Name                    string
+	AssetCode               string
 	Coowner                 string
 	Description             string
+	Organization            string
 	ConfirmAvaIP            bool
 	ConfirmSecIPScan        bool
 	ConfirmNotClientProject bool
@@ -126,8 +128,10 @@ func PRProjectsInsert(project Project, user string) (id int64) {
 	param := map[string]interface{}{
 		"GithubId":                project.GithubId,
 		"Name":                    project.Name,
+		"AssetCode":               project.AssetCode,
 		"CoOwner":                 project.Coowner,
 		"Description":             project.Description,
+		"Organization":            project.Organization,
 		"ConfirmAvaIP":            project.ConfirmAvaIP,
 		"ConfirmEnabledSecurity":  project.ConfirmSecIPScan,
 		"ConfirmNotClientProject": project.ConfirmNotClientProject,

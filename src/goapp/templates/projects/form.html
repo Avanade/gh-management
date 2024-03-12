@@ -157,26 +157,6 @@
                     <div class="space-y-5">
                         <div class="relative flex items-start">
                             <div class="flex h-6 items-center">
-                                <input id="small" aria-describedby="small-description" name="plan" type="radio" x-model="form.visibility" value="3"
-                                    class="focus:ring-orange-500 h-4 w-4 text-orange-600 border-gray-300 my-auto">
-                            </div>
-                            <div class="ml-3 text-sm leading-6">
-                                <div class="flex items-center text-sm text-gray-500" title="Repository Source">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                        stroke-width="1.5" stroke="currentColor" class="w-6 h-6 mr-2">
-                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                            d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25" />
-                                    </svg>
-                                    <div>
-                                        <label for="small" class="font-medium text-gray-900">Public</label>
-                                        <p id="small-description" class="text-gray-500 text-xs">Anyone on the internet can see this
-                                            repository. You choose who can commit.</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="relative flex items-start">
-                            <div class="flex h-6 items-center">
                                 <input id="small" aria-describedby="small-description" name="plan" type="radio" x-model="form.visibility" value="2"
                                     class="focus:ring-orange-500 h-4 w-4 text-orange-600 border-gray-300 my-auto">
                             </div>
@@ -319,7 +299,7 @@
             },
             submit() {
                 if (this.isFieldsetDisabled()) return;
-
+                this.form.visibility = parseInt(this.form.visibility)
                 Alpine.store('master').modal.reset()
                 Alpine.store('master').modal.show()
                 Alpine.store('master').postData("/api/repositories", this.form, "Your repository has been created.",
