@@ -2,6 +2,7 @@
 (
 	[Id] INT NOT NULL PRIMARY KEY IDENTITY, 
     [ApproverUserPrincipalName] VARCHAR(100) NOT NULL, 
+    [Category] VARCHAR(100) NOT NULL DEFAULT 'community',
     [Created] DATETIME NOT NULL DEFAULT getdate(), 
     [CreatedBy] VARCHAR(100) NULL, 
     [Modified] DATETIME NOT NULL DEFAULT getdate(), 

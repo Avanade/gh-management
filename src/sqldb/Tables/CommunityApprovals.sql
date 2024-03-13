@@ -12,8 +12,7 @@
     [Created] DATETIME NOT NULL DEFAULT getdate(), 
     [CreatedBy] VARCHAR(100) NULL, 
     [Modified] DATETIME NOT NULL DEFAULT getdate(), 
-    [ModifiedBy] VARCHAR(100) NULL
-    CONSTRAINT [FK_CommunityApprovals_Communities] FOREIGN KEY (CommunityId) REFERENCES Communities(Id), 
+    [ModifiedBy] VARCHAR(100) NULL,
     CONSTRAINT [FK_CommunityApprovals_Users] FOREIGN KEY (ApproverUserPrincipalName) REFERENCES Users(UserPrincipalName), 
     CONSTRAINT [FK_CommunityApprovals_ApprovalStatus] FOREIGN KEY (ApprovalStatusId) REFERENCES ApprovalStatus(Id)
 )

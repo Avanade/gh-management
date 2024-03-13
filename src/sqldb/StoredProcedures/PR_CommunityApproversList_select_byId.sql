@@ -6,6 +6,7 @@ CREATE PROCEDURE [dbo].[PR_CommunityApproversList_select_byId]
 BEGIN
  SELECT [Id]
       ,[ApproverUserPrincipalName]
+      ,[Category]
       ,[Created]
       ,[CreatedBy]
       ,[Modified]
