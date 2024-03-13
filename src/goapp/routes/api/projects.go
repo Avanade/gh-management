@@ -115,22 +115,22 @@ func CreateRepository(w http.ResponseWriter, r *http.Request) {
 	}
 
 	innersource := os.Getenv("GH_ORG_INNERSOURCE")
-	ownerTotalOwnedPrivateRepo, err := db.CountOwnedPrivateRepo(username.(string), innersource)
+	isValid, message, err := ValidateOwnedPrivateRepo(username.(string), body.Coowner, innersource)
 	if err != nil {
-		logger.TrackTrace("Failed to count the user's owned private repositories.", contracts.Error)
-		HttpResponseError(w, http.StatusBadRequest, "Failed to count the user's owned private repositories.", logger)
+		logger.TrackTrace(fmt.Sprint(message, " : ", err), contracts.Error)
+		HttpResponseError(w, http.StatusBadRequest, message, logger)
 		return
 	}
 
-	if ownerTotalOwnedPrivateRepo >= 3 {
-		logger.TrackTrace("", contracts.Error)
-		HttpResponseError(w, http.StatusBadRequest, "Failed to count user's owned private repo.", logger)
+	if !isValid {
+		logger.TrackTrace(message, contracts.Error)
+		HttpResponseError(w, http.StatusBadRequest, message, logger)
 		return
 	}
 
 	if !IsRepoNameValid(body.Name) {
-		logger.TrackTrace("Failed to create repository because the user already owns three repositories, which is the maximum allowed.", contracts.Error)
-		HttpResponseError(w, http.StatusBadRequest, "Failed to create repository because the user already owns three repositories, which is the maximum allowed.", logger)
+		logger.TrackTrace("Invalid repository name.", contracts.Error)
+		HttpResponseError(w, http.StatusBadRequest, "Invalid repository name.", logger)
 		return
 	}
 
@@ -1761,4 +1761,36 @@ func EmailcoownerDeficient(to string, Org string, reponame string) {
 	}
 
 	email.SendEmail(m, true)
+}
+
+func ValidateOwnedPrivateRepo(owner, coOwner, org string) (isValid bool, message string, err error) {
+	isValid = true
+	ownerTotalOwnedPrivateRepo, err := db.CountOwnedPrivateRepo(owner, org)
+	if err != nil {
+		isValid = false
+		message = "Failed to count the requestor owned private repositories."
+		return
+	}
+
+	coOwnerTotalOwnedPrivateRepo, err := db.CountOwnedPrivateRepo(coOwner, org)
+	if err != nil {
+		isValid = false
+		message = "Failed to count the co-owner owned private repositories."
+		return
+	}
+
+	var invalidUsers []string
+
+	if ownerTotalOwnedPrivateRepo >= 3 {
+		invalidUsers = append(invalidUsers, fmt.Sprint("owner, ", owner))
+	}
+
+	if coOwnerTotalOwnedPrivateRepo >= 3 {
+		invalidUsers = append(invalidUsers, fmt.Sprint("co-owner, ", coOwner))
+	}
+
+	if len(invalidUsers) != 0 {
+		isValid = false
+		message = fmt.Sprintf("Failed to create repository because the %v already owns three repositories, which is the maximum allowed.", strings.Join(invalidUsers, " and "))
+	}
 }
