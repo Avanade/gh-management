@@ -70,6 +70,7 @@ func UseTemplate(w *http.ResponseWriter, r *http.Request, page string, pageData 
 	menu = append(menu, Menu{Name: "Activities", Url: "/activities", IconPath: "/public/icons/activity.svg", External: false})
 	menu = append(menu, Menu{Name: "Guidance", Url: "/guidance", IconPath: "/public/icons/guidance.svg", External: false})
 	menu = append(menu, Menu{Name: "Approvals", Url: approvalSystemUrl, IconPath: "/public/icons/approvals.svg", External: true})
+	menu = append(menu, Menu{Name: "Other Requests", Url: "/other-requests", IconPath: "public/icons/otherrequests.svg", External: false})
 	if isAdmin {
 		menu = append(menu, Menu{Name: "Admin", Url: "/admin", IconPath: "/public/icons/lock.svg", External: false})
 	}

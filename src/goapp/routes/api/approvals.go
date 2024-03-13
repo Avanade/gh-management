@@ -55,6 +55,16 @@ func UpdateApprovalStatusCommunity(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
+func UpdateApprovalStatusOrganization(w http.ResponseWriter, r *http.Request) {
+	err := ProcessApprovalProjects(r, "organization")
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+}
+
 func UpdateApprovalReassignApprover(w http.ResponseWriter, r *http.Request) {
 	var req ApprovalReAssignRequestBody
 	err := json.NewDecoder(r.Body).Decode(&req)
@@ -302,6 +312,11 @@ func ProcessApprovalProjects(r *http.Request, module string) error {
 		go CheckAllRequests(projectApproval.ProjectId, r.Host)
 	case "community":
 		_, err = db.UpdateCommunityApprovalApproverResponse(req.ItemId, req.Remarks, req.ResponseDate, approvalStatusId)
+		if err != nil {
+			return err
+		}
+	case "organization":
+		_, err = db.UpdateOrganizationApprovalApproverResponse(req.ItemId, req.Remarks, req.ResponseDate, approvalStatusId)
 		if err != nil {
 			return err
 		}

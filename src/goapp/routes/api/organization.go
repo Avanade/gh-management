@@ -11,6 +11,8 @@ import (
 	"main/pkg/appinsights_wrapper"
 	db "main/pkg/ghmgmtdb"
 	"main/pkg/session"
+
+	"github.com/gorilla/mux"
 )
 
 type OrganizationDto struct {
@@ -19,9 +21,10 @@ type OrganizationDto struct {
 	ProjectName               string `json:"projectName"`
 	WBS                       string `json:"wbs"`
 	Username                  string
-	Id                        int
+	Id                        int64
 	ApproverUserPrincipalName []string
 	RegionName                string
+	RequestId                 int64
 }
 
 func AddOrganization(w http.ResponseWriter, r *http.Request) {
@@ -70,6 +73,7 @@ func AddOrganization(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var approverList []string
+	var reqId int64
 	for _, approver := range approvers {
 		approverList = append(approverList, approver["ApproverUserPrincipalName"].(string))
 
@@ -86,11 +90,13 @@ func AddOrganization(w http.ResponseWriter, r *http.Request) {
 			logger.LogException(err)
 		}
 
+		reqId = approvalRequestId[0]["Id"].(int64)
+
 		// Insert link record
 		req = map[string]interface{}{
 
 			"OrganizationId": id,
-			"RequestId":      approvalRequestId[0]["Id"],
+			"RequestId":      reqId,
 		}
 		err = db.OrganizationApprovalInsert(req)
 		if err != nil {
@@ -106,8 +112,9 @@ func AddOrganization(w http.ResponseWriter, r *http.Request) {
 	}
 	body.RegionName = regOrg[0]["Name"].(string)
 	body.ApproverUserPrincipalName = approverList
-	body.Id = id
+	body.RequestId = reqId
 	body.Username = username.(string)
+	body.Id = int64(id)
 	err = CreateOrganizationApprovalRequest(body, logger)
 	if err != nil {
 		logger.LogException(err)
@@ -264,7 +271,8 @@ func CreateOrganizationApprovalRequest(data OrganizationDto, logger *appinsights
 				return err
 			}
 
-			db.CommunityApprovalUpdateGUID(int64(data.Id), res.ItemId)
+			db.CommunityApprovalUpdateGUID(data.RequestId, res.ItemId)
+			db.OrganizationUpdateApprovalStatus(data.Id, 2)
 		}
 	}
 	return nil
@@ -287,5 +295,76 @@ func GetAllRegionalOrganizations(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.Write(jsonResp)
+}
 
+func GetAllActiveOrganizationApprovers(w http.ResponseWriter, r *http.Request) {
+	logger := appinsights_wrapper.NewClient()
+	defer logger.EndOperation()
+
+	approvers, err := db.GetActiveCommunityApprovers("organization")
+	if err != nil {
+		logger.LogException(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Header().Set("Content-Type", "application/json")
+	jsonResp, err := json.Marshal(approvers)
+	if err != nil {
+		logger.LogException(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Write(jsonResp)
+}
+
+func GetAllOrganizationRequest(w http.ResponseWriter, r *http.Request) {
+	logger := appinsights_wrapper.NewClient()
+	defer logger.EndOperation()
+
+	// Get username
+	sessionaz, _ := session.Store.Get(r, "auth-session")
+	iprofile := sessionaz.Values["profile"]
+	profile := iprofile.(map[string]interface{})
+	username := profile["preferred_username"]
+
+	orgs, err := db.GetAllOrganizationRequest(username.(string))
+	if err != nil {
+		logger.LogException(err)
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Header().Set("Content-Type", "application/json")
+	jsonResp, err := json.Marshal(orgs)
+	if err != nil {
+		logger.LogException(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.Write(jsonResp)
+}
+
+func GetOrganizationApprovalRequests(w http.ResponseWriter, r *http.Request) {
+	logger := appinsights_wrapper.NewClient()
+	defer logger.EndOperation()
+
+	req := mux.Vars(r)
+	id, err := strconv.ParseInt(req["id"], 10, 64)
+
+	approvals, err := db.GetOrganizationApprovalRequest(id)
+	if err != nil {
+		logger.LogException(err)
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Header().Set("Content-Type", "application/json")
+	jsonResp, err := json.Marshal(approvals)
+	if err != nil {
+		logger.LogException(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.Write(jsonResp)
 }

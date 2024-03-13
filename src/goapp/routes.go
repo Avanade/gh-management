@@ -215,10 +215,16 @@ func setApiRoutes(mux *mux.Router) {
 
 	// ORGANIZATION API
 	muxApi.Handle("/github-organization", loadAzGHAuthPage(rtApi.AddOrganization)).Methods("POST")
+	muxApi.Handle("/github-organization", loadAzGHAuthPage(rtApi.GetAllOrganizationRequest)).Methods("GET")
 	muxApi.Handle("/github-organization/region", loadAzGHAuthPage((rtApi.GetAllRegionalOrganizations))).Methods("GET")
+	muxApi.Handle("/github-organization/{id}/status", loadAzGHAuthPage((rtApi.GetOrganizationApprovalRequests))).Methods("GET")
+
+	//ORGANIZATION APPROVERS API
+	muxApi.Handle("/github-organization-approvers/active", loadAzGHAuthPage(rtApi.GetAllActiveOrganizationApprovers)).Methods("GET")
 
 	// APPROVALS API
 	muxApi.HandleFunc("/approvals/community/callback", rtApi.UpdateApprovalStatusCommunity).Methods("POST")
+	muxApi.HandleFunc("/approvals/organization/callback", rtApi.UpdateApprovalStatusOrganization).Methods("POST")
 	muxApi.HandleFunc("/approvals/community/reassign/callback", rtApi.UpdateCommunityApprovalReassignApprover).Methods("POST")
 	muxApi.HandleFunc("/approvals/project/callback", rtApi.UpdateApprovalStatusProjects).Methods("POST")
 	muxApi.HandleFunc("/approvals/project/reassign/callback", rtApi.UpdateApprovalReassignApprover).Methods("POST")
