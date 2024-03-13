@@ -4,7 +4,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"strconv"
 
 	db "main/pkg/ghmgmtdb"
 	ghAPI "main/pkg/github"
@@ -82,7 +81,7 @@ func ViewHandler(w http.ResponseWriter, r *http.Request) {
 	profile := iprofile.(map[string]interface{})
 	username := profile["preferred_username"]
 
-	id, err := strconv.ParseInt(vars["id"], 10, 64)
+	id, err := db.GetProjectIdByOrgName(vars["org"], vars["repo"])
 	if err != nil {
 		log.Println(err)
 		return

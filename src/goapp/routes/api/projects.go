@@ -35,6 +35,8 @@ type RepositoryListDto struct {
 type RepoDto struct {
 	Id                     int      `json:"Id"`
 	Name                   string   `json:"Name"`
+	AssetCode              string   `json:"AssetCode"`
+	Organization           string   `json:"Organization"`
 	Description            string   `json:"Description"`
 	IsArchived             bool     `json:"IsArchived"`
 	Created                string   `json:"Created"`
@@ -171,11 +173,13 @@ func CreateRepository(w http.ResponseWriter, r *http.Request) {
 
 		logger.LogTrace(repo.GetName(), contracts.Information) // TEMP LOG - END TEMP LOG
 
+		body.AssetCode = body.Name
 		body.GithubId = repo.GetID()
 		body.TFSProjectReference = repo.GetHTMLURL()
-		body.Visibility = 1
 
-		if isEnterpriseOrg {
+		innersource := os.Getenv("GH_ORG_INNERSOURCE")
+		body.Organization = innersource
+		if isEnterpriseOrg && body.Visibility == 2 {
 			logger.LogTrace("Making the repository as internal...", contracts.Information)
 			_, err := ghAPI.SetProjectVisibility(repo.GetName(), "internal", innersource)
 			if err != nil {
@@ -183,7 +187,6 @@ func CreateRepository(w http.ResponseWriter, r *http.Request) {
 				HttpResponseError(w, http.StatusInternalServerError, err.Error(), logger)
 				return
 			}
-			body.Visibility = 2
 		}
 
 		logger.LogTrace("Adding repository to database...", contracts.Information)
@@ -1196,7 +1199,9 @@ func indexRepo(repo ghAPI.Repo, logger *appinsights_wrapper.TelemetryClient) {
 	param := map[string]interface{}{
 		"GithubId":            repo.GithubId,
 		"Name":                repo.Name,
+		"AssetCode":           repo.Name,
 		"Description":         repo.Description,
+		"Organization":        repo.Org,
 		"IsArchived":          repo.IsArchived,
 		"VisibilityId":        visibilityId,
 		"TFSProjectReference": repo.TFSProjectReference,

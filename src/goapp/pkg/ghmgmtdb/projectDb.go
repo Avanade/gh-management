@@ -56,8 +56,10 @@ type Project struct {
 	Id                      string
 	GithubId                int64
 	Name                    string
+	AssetCode               string
 	Coowner                 string
 	Description             string
+	Organization            string
 	ConfirmAvaIP            bool
 	ConfirmSecIPScan        bool
 	ConfirmNotClientProject bool
@@ -126,8 +128,10 @@ func PRProjectsInsert(project Project, user string) (id int64) {
 	param := map[string]interface{}{
 		"GithubId":                project.GithubId,
 		"Name":                    project.Name,
+		"AssetCode":               project.AssetCode,
 		"CoOwner":                 project.Coowner,
 		"Description":             project.Description,
+		"Organization":            project.Organization,
 		"ConfirmAvaIP":            project.ConfirmAvaIP,
 		"ConfirmEnabledSecurity":  project.ConfirmSecIPScan,
 		"ConfirmNotClientProject": project.ConfirmNotClientProject,
@@ -508,6 +512,24 @@ func GetProjectByName(projectName string) []map[string]interface{} {
 	result, _ := db.ExecuteStoredProcedureWithResult("PR_Projects_Select_ByName", param)
 
 	return result
+}
+
+func GetProjectIdByOrgName(orgName, repoName string) (int64, error) {
+
+	db := ConnectDb()
+	defer db.Close()
+
+	param := map[string]interface{}{
+		"AssetCode":    repoName,
+		"Organization": orgName,
+	}
+
+	result, err := db.ExecuteStoredProcedureWithResult("PR_Projects_SelectProjectId_ByOrgName", param)
+	if err != nil {
+		return 0, err
+	}
+
+	return result[0]["Id"].(int64), nil
 }
 
 func GetProjectById(id int64) []map[string]interface{} {
