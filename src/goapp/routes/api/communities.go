@@ -204,12 +204,15 @@ func GetRequestStatusByCommunityId(w http.ResponseWriter, r *http.Request) {
 	defer logger.EndOperation()
 
 	req := mux.Vars(r)
-	id := req["id"]
+	id, err := strconv.ParseInt(req["id"], 10, 64)
+	if err != nil {
+		logger.LogException(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 
 	// Get project list
-	params := make(map[string]interface{})
-	params["Id"] = id
-	projects, err := db.CommunityApprovalsSelectById(params)
+	approvalRequests, err := db.CommunityApprovalsSelectById(id)
 	if err != nil {
 		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -218,7 +221,7 @@ func GetRequestStatusByCommunityId(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusOK)
 	w.Header().Set("Content-Type", "application/json")
-	jsonResp, err := json.Marshal(projects)
+	jsonResp, err := json.Marshal(approvalRequests)
 	if err != nil {
 		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -744,7 +747,15 @@ func requestCommunityApproval(id int64, logger *appinsights_wrapper.TelemetryCli
 	communityApprovals := db.PopulateCommunityApproval(id)
 
 	for _, v := range communityApprovals {
-		err := ApprovalSystemRequestCommunity(v, logger)
+		// Insert record to CommunityApproval Requests
+		err := db.CommunityApprovalInsert(int(v.CommunityId), v.Id)
+		if err != nil {
+			logger.LogTrace("ID:"+strconv.FormatInt(v.Id, 10)+" "+err.Error(), contracts.Error)
+			return err
+		}
+
+		// Create Approval Request
+		err = ApprovalSystemRequestCommunity(v, logger)
 		if err != nil {
 			logger.LogTrace("ID:"+strconv.FormatInt(v.Id, 10)+" "+err.Error(), contracts.Error)
 			return err

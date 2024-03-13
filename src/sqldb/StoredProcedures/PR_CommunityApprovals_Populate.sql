@@ -4,7 +4,6 @@ AS
 
 INSERT INTO CommunityApprovals
 	(
-		CommunityId,
 		ApproverUserPrincipalName,
 		ApprovalStatusId,
 		ApprovalDescription,
@@ -12,7 +11,7 @@ INSERT INTO CommunityApprovals
 		ModifiedBy
 	)
 	
-SELECT @CommunityId, CAL.ApproverUserPrincipalName, 1, 'For Approval - ' + C.[Name], C.CreatedBy, C.CreatedBy
+SELECT CAL.ApproverUserPrincipalName, 1, 'For Approval - ' + C.[Name], C.CreatedBy, C.CreatedBy
 FROM Communities C, CommunityApproversList CAL
 WHERE C.Id = @CommunityId
 AND CAL.Disabled =0 AND CAL.Category = 'community'

@@ -20,9 +20,10 @@ UC.UserPrincipalName [RequesterUserPrincipalName],
 CA.[ApproverUserPrincipalName],
 CA.[ApprovalDescription],
 s.Name [ApprovalStatus]
-FROM CommunityApprovals CA
-INNER JOIN Communities C ON CA.CommunityId = C.Id
-INNER JOIN Users UC ON C.CreatedBy = UC.UserPrincipalName
-INNER JOIN ApprovalStatus S ON S.Id = CA.ApprovalStatusId
-WHERE C.Id = @Id
+FROM CommunityApprovalRequests CAR
+LEFT JOIN CommunityApprovals CA ON CAR.RequestId = CA.Id
+LEFT JOIN Communities C ON CAR.CommunityId = C.Id
+LEFT JOIN Users UC ON C.CreatedBy = UC.UserPrincipalName
+LEFT JOIN ApprovalStatus S ON S.Id = CA.ApprovalStatusId
+WHERE CAR.CommunityId = @Id
 
