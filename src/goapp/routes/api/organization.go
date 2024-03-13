@@ -268,7 +268,7 @@ func CreateOrganizationApprovalRequest(data OrganizationDto, logger *appinsights
 
 		postParams := CommunityApprovalSystemPost{
 			ApplicationId:       os.Getenv("APPROVAL_SYSTEM_APP_ID"),
-			ApplicationModuleId: os.Getenv("APPROVAL_SYSTEM_APP_MODULE_COMMUNITY"),
+			ApplicationModuleId: os.Getenv("APPROVAL_SYSTEM_APP_MODULE_ORGANIZATION"),
 			Emails:              data.ApproverUserPrincipalName,
 			Subject:             fmt.Sprintf("[GH-Management] New Organization Request - %v - %v", data.ClientName, data.ProjectName),
 			Body:                body,
