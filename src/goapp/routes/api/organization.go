@@ -55,21 +55,26 @@ func AddOrganization(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Insert record on organization table
-
 	result, err := db.OrganizationInsert(param)
 	if err != nil {
 		logger.LogException(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 
 	id, _ := strconv.Atoi(fmt.Sprint(result[0]["Id"]))
 	if err != nil {
 		logger.LogException(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 
 	// Get approver list
 	approvers, err := db.GetActiveCommunityApprovers("organization")
 	if err != nil {
 		logger.LogException(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 
 	var approverList []string
@@ -88,6 +93,8 @@ func AddOrganization(w http.ResponseWriter, r *http.Request) {
 		approvalRequestId, err := db.ApprovalInsert(req)
 		if err != nil {
 			logger.LogException(err)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
 		}
 
 		reqId = approvalRequestId[0]["Id"].(int64)
@@ -101,6 +108,8 @@ func AddOrganization(w http.ResponseWriter, r *http.Request) {
 		err = db.OrganizationApprovalInsert(req)
 		if err != nil {
 			logger.LogException(err)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
 		}
 
 	}
@@ -109,6 +118,8 @@ func AddOrganization(w http.ResponseWriter, r *http.Request) {
 	regOrg, err := db.GetRegionalOrganizationById(body.Region)
 	if err != nil {
 		logger.LogException(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 	body.RegionName = regOrg[0]["Name"].(string)
 	body.ApproverUserPrincipalName = approverList
@@ -118,6 +129,8 @@ func AddOrganization(w http.ResponseWriter, r *http.Request) {
 	err = CreateOrganizationApprovalRequest(body, logger)
 	if err != nil {
 		logger.LogException(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 }
 
@@ -281,9 +294,12 @@ func CreateOrganizationApprovalRequest(data OrganizationDto, logger *appinsights
 func GetAllRegionalOrganizations(w http.ResponseWriter, r *http.Request) {
 	logger := appinsights_wrapper.NewClient()
 	defer logger.EndOperation()
+
 	regOrgs, err := db.GetAllRegionalOrganizations()
 	if err != nil {
 		logger.LogException(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 
 	w.WriteHeader(http.StatusOK)
@@ -333,6 +349,8 @@ func GetAllOrganizationRequest(w http.ResponseWriter, r *http.Request) {
 	orgs, err := db.GetAllOrganizationRequest(username.(string))
 	if err != nil {
 		logger.LogException(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 
 	w.WriteHeader(http.StatusOK)
@@ -352,10 +370,17 @@ func GetOrganizationApprovalRequests(w http.ResponseWriter, r *http.Request) {
 
 	req := mux.Vars(r)
 	id, err := strconv.ParseInt(req["id"], 10, 64)
+	if err != nil {
+		logger.LogException(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 
 	approvals, err := db.GetOrganizationApprovalRequest(id)
 	if err != nil {
 		logger.LogException(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 
 	w.WriteHeader(http.StatusOK)
