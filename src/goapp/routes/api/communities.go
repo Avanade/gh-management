@@ -679,7 +679,7 @@ func GetCommunityApproversById(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetCommunityApproversList(w http.ResponseWriter, r *http.Request) {
-	approvers, err := db.GetCommunityApprovers()
+	approvers, err := db.GetCommunityApprovers("community")
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -699,7 +699,7 @@ func GetCommunityApproversList(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetAllActiveCommunityApprovers(w http.ResponseWriter, r *http.Request) {
-	approvers, err := db.GetActiveCommunityApprovers()
+	approvers, err := db.GetActiveCommunityApprovers("community")
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -732,7 +732,7 @@ func SubmitCommunityApprover(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err = db.UpdateCommunityApproversById(body.Id, body.Disabled, body.ApproverUserPrincipalName, username)
+	_, err = db.UpdateCommunityApproversById(body.Id, body.Disabled, body.ApproverUserPrincipalName, username, "community")
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)

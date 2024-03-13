@@ -5,10 +5,8 @@ CREATE PROCEDURE  [dbo].[PR_CommunityApproversList_Insert]
 	@Disabled BIT = 0,
 	@CreatedBy VARCHAR(50),
 	@ModifiedBy VARCHAR(50),
-	@Id  INT = NULL
-
-	 
-          
+	@Id  INT = NULL,
+	@Category VARCHAR(100)       
 )
 AS
 BEGIN   
@@ -21,6 +19,7 @@ BEGIN
 
 INSERT INTO [dbo].[CommunityApproversList]
            ([ApproverUserPrincipalName]
+		   ,[Category]
            ,[Created]
            ,[CreatedBy]
            ,[Modified]
@@ -28,6 +27,7 @@ INSERT INTO [dbo].[CommunityApproversList]
            ,[Disabled])
      VALUES
            (@ApproverUserPrincipalName
+		   ,@Category
            ,GETDATE()
            ,@CreatedBy
            ,GETDATE()

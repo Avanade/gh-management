@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	"main/pkg/appinsights_wrapper"
 	"main/pkg/email"
 	"main/pkg/envvar"
 	db "main/pkg/ghmgmtdb"
@@ -36,9 +37,12 @@ type ApprovalStatusRequestBody struct {
 }
 
 func UpdateApprovalStatusProjects(w http.ResponseWriter, r *http.Request) {
+	logger := appinsights_wrapper.NewClient()
+	defer logger.EndOperation()
+
 	err := ProcessApprovalProjects(r, "projects")
 	if err != nil {
-		log.Println(err.Error())
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -46,9 +50,25 @@ func UpdateApprovalStatusProjects(w http.ResponseWriter, r *http.Request) {
 }
 
 func UpdateApprovalStatusCommunity(w http.ResponseWriter, r *http.Request) {
+	logger := appinsights_wrapper.NewClient()
+	defer logger.EndOperation()
+
 	err := ProcessApprovalProjects(r, "community")
 	if err != nil {
-		log.Println(err.Error())
+		logger.LogException(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+}
+
+func UpdateApprovalStatusOrganization(w http.ResponseWriter, r *http.Request) {
+	logger := appinsights_wrapper.NewClient()
+	defer logger.EndOperation()
+
+	err := ProcessApprovalProjects(r, "organization")
+	if err != nil {
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -56,10 +76,13 @@ func UpdateApprovalStatusCommunity(w http.ResponseWriter, r *http.Request) {
 }
 
 func UpdateApprovalReassignApprover(w http.ResponseWriter, r *http.Request) {
+	logger := appinsights_wrapper.NewClient()
+	defer logger.EndOperation()
+
 	var req ApprovalReAssignRequestBody
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
-		log.Println(err.Error())
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -72,7 +95,7 @@ func UpdateApprovalReassignApprover(w http.ResponseWriter, r *http.Request) {
 
 	result, err := db.ProjectsApprovalUpdateApproverUserPrincipalName(param)
 	if err != nil {
-		log.Println(err.Error())
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -105,7 +128,7 @@ func UpdateApprovalReassignApprover(w http.ResponseWriter, r *http.Request) {
 
 		err = SendReassignEmail(data)
 		if err != nil {
-			log.Println(err.Error())
+			logger.LogException(err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
@@ -115,10 +138,13 @@ func UpdateApprovalReassignApprover(w http.ResponseWriter, r *http.Request) {
 }
 
 func UpdateCommunityApprovalReassignApprover(w http.ResponseWriter, r *http.Request) {
+	logger := appinsights_wrapper.NewClient()
+	defer logger.EndOperation()
+
 	var req ApprovalReAssignRequestBody
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
-		log.Println(err.Error())
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -130,7 +156,7 @@ func UpdateCommunityApprovalReassignApprover(w http.ResponseWriter, r *http.Requ
 	}
 	result, err := db.CommunityApprovalslUpdateApproverUserPrincipalName(param)
 	if err != nil {
-		log.Println(err.Error())
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -157,7 +183,7 @@ func UpdateCommunityApprovalReassignApprover(w http.ResponseWriter, r *http.Requ
 
 		err = SendReassignEmailCommunity(data)
 		if err != nil {
-			log.Println(err.Error())
+			logger.LogException(err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
@@ -302,6 +328,11 @@ func ProcessApprovalProjects(r *http.Request, module string) error {
 		go CheckAllRequests(projectApproval.ProjectId, r.Host)
 	case "community":
 		_, err = db.UpdateCommunityApprovalApproverResponse(req.ItemId, req.Remarks, req.ResponseDate, approvalStatusId)
+		if err != nil {
+			return err
+		}
+	case "organization":
+		_, err = db.UpdateOrganizationApprovalApproverResponse(req.ItemId, req.Remarks, req.ResponseDate, approvalStatusId)
 		if err != nil {
 			return err
 		}
