@@ -1,10 +1,31 @@
 package ghmgmt
 
-func OrganizationInsert(params map[string]interface{}) ([]map[string]interface{}, error) {
+type OrganizationDto struct {
+	Region                    int    `json:"region"`
+	ClientName                string `json:"clientName"`
+	ProjectName               string `json:"projectName"`
+	WBS                       string `json:"wbs"`
+	Username                  string
+	Id                        int64
+	ApproverUserPrincipalName []string
+	RegionName                string
+	RequestId                 int64
+}
+
+func OrganizationInsert(body OrganizationDto) ([]map[string]interface{}, error) {
 	db := ConnectDb()
 	defer db.Close()
 
-	result, err := db.ExecuteStoredProcedureWithResult("dbo.PR_Organizations_Insert", params)
+	param := map[string]interface{}{
+
+		"Region":      body.Region,
+		"ClientName":  body.ClientName,
+		"ProjectName": body.ProjectName,
+		"WBS":         body.WBS,
+		"CreatedBy":   body.Username,
+	}
+
+	result, err := db.ExecuteStoredProcedureWithResult("dbo.PR_Organizations_Insert", param)
 	if err != nil {
 		return nil, err
 	}

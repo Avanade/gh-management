@@ -4,9 +4,16 @@ import (
 	"fmt"
 )
 
-func ApprovalInsert(params map[string]interface{}) ([]map[string]interface{}, error) {
+func ApprovalInsert(approver string, description string, username string) ([]map[string]interface{}, error) {
 	db := ConnectDb()
 	defer db.Close()
+
+	params := map[string]interface{}{
+
+		"ApproverUserPrincipalName": approver,
+		"Name":                      description,
+		"CreatedBy":                 username,
+	}
 
 	result, err := db.ExecuteStoredProcedureWithResult("dbo.PR_CommunityApprovals_Insert", params)
 	if err != nil {
@@ -16,9 +23,15 @@ func ApprovalInsert(params map[string]interface{}) ([]map[string]interface{}, er
 	return result, err
 }
 
-func OrganizationApprovalInsert(params map[string]interface{}) error {
+func OrganizationApprovalInsert(organizationId int, requestId int64) error {
 	db := ConnectDb()
 	defer db.Close()
+
+	params := map[string]interface{}{
+
+		"OrganizationId": organizationId,
+		"RequestId":      requestId,
+	}
 
 	_, err := db.ExecuteStoredProcedure("dbo.PR_OrganizationsApprovalRequests_Insert", params)
 	if err != nil {

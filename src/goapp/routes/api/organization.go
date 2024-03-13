@@ -15,18 +15,6 @@ import (
 	"github.com/gorilla/mux"
 )
 
-type OrganizationDto struct {
-	Region                    int    `json:"region"`
-	ClientName                string `json:"clientName"`
-	ProjectName               string `json:"projectName"`
-	WBS                       string `json:"wbs"`
-	Username                  string
-	Id                        int64
-	ApproverUserPrincipalName []string
-	RegionName                string
-	RequestId                 int64
-}
-
 func AddOrganization(w http.ResponseWriter, r *http.Request) {
 	logger := appinsights_wrapper.NewClient()
 	defer logger.EndOperation()
@@ -37,25 +25,17 @@ func AddOrganization(w http.ResponseWriter, r *http.Request) {
 	profile := iprofile.(map[string]interface{})
 	username := profile["preferred_username"]
 
-	var body OrganizationDto
+	var body db.OrganizationDto
 	err := json.NewDecoder(r.Body).Decode(&body)
 	if err != nil {
 		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-
-	param := map[string]interface{}{
-
-		"Region":      body.Region,
-		"ClientName":  body.ClientName,
-		"ProjectName": body.ProjectName,
-		"WBS":         body.WBS,
-		"CreatedBy":   username.(string),
-	}
+	body.Username = username.(string)
 
 	// Insert record on organization table
-	result, err := db.OrganizationInsert(param)
+	result, err := db.OrganizationInsert(body)
 	if err != nil {
 		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -80,17 +60,11 @@ func AddOrganization(w http.ResponseWriter, r *http.Request) {
 	var approverList []string
 	var reqId int64
 	for _, approver := range approvers {
-		approverList = append(approverList, approver["ApproverUserPrincipalName"].(string))
+		approverUserPrincipalName := approver["ApproverUserPrincipalName"].(string)
+		approverList = append(approverList, approverUserPrincipalName)
 
 		// Insert approval request record
-		req := map[string]interface{}{
-
-			"ApproverUserPrincipalName": approver["ApproverUserPrincipalName"].(string),
-			"Name":                      fmt.Sprintf("GitHub Organization for %s - %s", body.ClientName, body.ProjectName),
-			"CreatedBy":                 username.(string),
-		}
-
-		approvalRequestId, err := db.ApprovalInsert(req)
+		approvalRequestId, err := db.ApprovalInsert(approverUserPrincipalName, fmt.Sprintf("GitHub Organization for %s - %s", body.ClientName, body.ProjectName), body.Username)
 		if err != nil {
 			logger.LogException(err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -100,12 +74,7 @@ func AddOrganization(w http.ResponseWriter, r *http.Request) {
 		reqId = approvalRequestId[0]["Id"].(int64)
 
 		// Insert link record
-		req = map[string]interface{}{
-
-			"OrganizationId": id,
-			"RequestId":      reqId,
-		}
-		err = db.OrganizationApprovalInsert(req)
+		err = db.OrganizationApprovalInsert(id, reqId)
 		if err != nil {
 			logger.LogException(err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -124,7 +93,6 @@ func AddOrganization(w http.ResponseWriter, r *http.Request) {
 	body.RegionName = regOrg[0]["Name"].(string)
 	body.ApproverUserPrincipalName = approverList
 	body.RequestId = reqId
-	body.Username = username.(string)
 	body.Id = int64(id)
 	err = CreateOrganizationApprovalRequest(body, logger)
 	if err != nil {
@@ -134,7 +102,7 @@ func AddOrganization(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func CreateOrganizationApprovalRequest(data OrganizationDto, logger *appinsights_wrapper.TelemetryClient) error {
+func CreateOrganizationApprovalRequest(data db.OrganizationDto, logger *appinsights_wrapper.TelemetryClient) error {
 
 	url := os.Getenv("APPROVAL_SYSTEM_APP_URL")
 	if url != "" {
