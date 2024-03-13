@@ -72,4 +72,4 @@ WHERE CommunityId IS NOT NULL
 
 UPDATE CommunityApprovals
 SET CommunityId = NULL
-WHERE CommunityIs IS NOT NULL
+WHERE CommunityId IS NOT NULL
