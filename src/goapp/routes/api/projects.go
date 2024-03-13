@@ -112,9 +112,23 @@ func CreateRepository(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	innersource := os.Getenv("GH_ORG_INNERSOURCE")
+	ownerTotalOwnedPrivateRepo, err := db.CountOwnedPrivateRepo(username.(string), innersource)
+	if err != nil {
+		logger.TrackTrace("Failed to count the user's owned private repositories.", contracts.Error)
+		HttpResponseError(w, http.StatusBadRequest, "Failed to count the user's owned private repositories.", logger)
+		return
+	}
+
+	if ownerTotalOwnedPrivateRepo >= 3 {
+		logger.TrackTrace("", contracts.Error)
+		HttpResponseError(w, http.StatusBadRequest, "Failed to count user's owned private repo.", logger)
+		return
+	}
+
 	if !IsRepoNameValid(body.Name) {
-		logger.TrackTrace("Invalid repository name.", contracts.Error)
-		HttpResponseError(w, http.StatusBadRequest, "Invalid repository name.", logger)
+		logger.TrackTrace("Failed to create repository because the user already owns three repositories, which is the maximum allowed.", contracts.Error)
+		HttpResponseError(w, http.StatusBadRequest, "Failed to create repository because the user already owns three repositories, which is the maximum allowed.", logger)
 		return
 	}
 
@@ -161,7 +175,6 @@ func CreateRepository(w http.ResponseWriter, r *http.Request) {
 		body.TFSProjectReference = repo.GetHTMLURL()
 		body.Visibility = 1
 
-		innersource := os.Getenv("GH_ORG_INNERSOURCE")
 		if isEnterpriseOrg {
 			logger.LogTrace("Making the repository as internal...", contracts.Information)
 			_, err := ghAPI.SetProjectVisibility(repo.GetName(), "internal", innersource)
