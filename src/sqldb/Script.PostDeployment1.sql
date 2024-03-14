@@ -60,3 +60,16 @@ INSERT INTO Visibility (Id, [Name]) VALUES (3, 'Public')
 SET IDENTITY_INSERT Visibility OFF
 
 EXEC [dbo].[PR_Projects_UpdateOrganization_AllAzureDevOps]
+
+INSERT INTO CommunityApprovalRequests
+(
+    CommunityId,
+    RequestId
+)
+SELECT CommunityId, Id
+FROM CommunityApprovals
+WHERE CommunityId IS NOT NULL
+
+UPDATE CommunityApprovals
+SET CommunityId = NULL
+WHERE CommunityId IS NOT NULL
