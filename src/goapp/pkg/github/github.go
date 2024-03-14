@@ -392,3 +392,26 @@ func OrgListMembers(token string, org string) []*github.User {
 
 	return members
 }
+
+func GetOrganizations(token string) ([]*github.Organization, error) {
+	client := CreateClient(token)
+	opts := &github.ListOptions{PerPage: 30}
+	var orgs []*github.Organization
+
+	for {
+		listOrgs, resp, err := client.Organizations.List(context.Background(), "", opts)
+		if err != nil {
+			log.Printf("ERROR : %s", err.Error())
+			return nil, err
+		}
+
+		orgs = append(orgs, listOrgs...)
+		if resp.NextPage == 0 {
+			break
+		}
+		opts.Page = resp.NextPage
+	}
+
+	return orgs, nil
+
+}

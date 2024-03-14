@@ -10,9 +10,11 @@ import (
 
 	"main/pkg/appinsights_wrapper"
 	db "main/pkg/ghmgmtdb"
+	ghAPI "main/pkg/github"
 	"main/pkg/session"
 
 	"github.com/gorilla/mux"
+	"github.com/microsoft/ApplicationInsights-Go/appinsights/contracts"
 )
 
 func AddOrganization(w http.ResponseWriter, r *http.Request) {
@@ -360,4 +362,33 @@ func GetOrganizationApprovalRequests(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.Write(jsonResp)
+}
+
+func IndexRegionalOrganizations(w http.ResponseWriter, r *http.Request) {
+	logger := appinsights_wrapper.NewClient()
+	defer logger.EndOperation()
+
+	token := os.Getenv("GH_TOKEN")
+	orgs, err := ghAPI.GetOrganizations(token)
+	if err != nil {
+		logger.LogException(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	for _, org := range orgs {
+		prefix := os.Getenv("REGIONAL_ORG_PREFIX")
+		if strings.HasPrefix(strings.ToLower(*org.Login), prefix) {
+			err = db.RegionalOrganizationInsert(*org.ID, *org.Login)
+			logger.LogTrace("Indexing "+*org.Login, contracts.Information)
+			if err != nil {
+				logger.LogException(err)
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+		}
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Header().Set("Content-Type", "application/json")
 }
