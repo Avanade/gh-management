@@ -747,15 +747,8 @@ func requestCommunityApproval(id int64, logger *appinsights_wrapper.TelemetryCli
 	communityApprovals := db.PopulateCommunityApproval(id)
 
 	for _, v := range communityApprovals {
-		// Insert record to CommunityApproval Requests
-		err := db.CommunityApprovalInsert(int(v.CommunityId), v.Id)
-		if err != nil {
-			logger.LogTrace("ID:"+strconv.FormatInt(v.Id, 10)+" "+err.Error(), contracts.Error)
-			return err
-		}
-
 		// Create Approval Request
-		err = ApprovalSystemRequestCommunity(v, logger)
+		err := ApprovalSystemRequestCommunity(v, logger)
 		if err != nil {
 			logger.LogTrace("ID:"+strconv.FormatInt(v.Id, 10)+" "+err.Error(), contracts.Error)
 			return err
