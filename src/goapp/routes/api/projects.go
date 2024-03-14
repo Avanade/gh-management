@@ -114,20 +114,6 @@ func CreateRepository(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	innersource := os.Getenv("GH_ORG_INNERSOURCE")
-	isValid, message, err := ValidateOwnedPrivateRepo(username.(string), body.Coowner, innersource)
-	if err != nil {
-		logger.TrackTrace(fmt.Sprint(message, " : ", err), contracts.Error)
-		HttpResponseError(w, http.StatusBadRequest, message, logger)
-		return
-	}
-
-	if !isValid {
-		logger.TrackTrace(message, contracts.Error)
-		HttpResponseError(w, http.StatusBadRequest, message, logger)
-		return
-	}
-
 	if !IsRepoNameValid(body.Name) {
 		logger.TrackTrace("Invalid repository name.", contracts.Error)
 		HttpResponseError(w, http.StatusBadRequest, "Invalid repository name.", logger)
@@ -634,6 +620,59 @@ func GetRepositories(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	w.Header().Set("Content-Type", "application/json")
 	jsonResp, err := json.Marshal(result)
+	if err != nil {
+		logger.LogException(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.Write(jsonResp)
+}
+
+func GetTotalRepositoriesOwnedByUsers(w http.ResponseWriter, r *http.Request) {
+	logger := appinsights_wrapper.NewClient()
+	defer logger.EndOperation()
+
+	vars := mux.Vars(r)
+	user := vars["user"]
+
+	visibility := 0
+
+	params := r.URL.Query()
+
+	// 0/NONE - ALL | 1 - PRIVATE | 2 - INTERNAL | 3 - PUBLIC
+	if params.Has("visibility") {
+		visibility, _ = strconv.Atoi(params["visibility"][0])
+	}
+
+	organization := os.Getenv("GH_ORG_INNERSOURCE")
+	// public - GH_ORG_OPENSOURCE | private/none - GH_ORG_INNERSOURCE
+	if params.Has("orgtype") {
+		if params["orgtype"][0] == "public" {
+			organization = os.Getenv("GH_ORG_OPENSOURCE")
+		}
+	}
+
+	if user == "me" {
+		sessionaz, _ := session.Store.Get(r, "auth-session")
+		iprofile := sessionaz.Values["profile"]
+		profile := iprofile.(map[string]interface{})
+		user = fmt.Sprint(profile["preferred_username"])
+	}
+
+	total, err := db.CountOwnedRepoByVisibility(user, organization, visibility)
+	if err != nil {
+		logger.LogException(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Header().Set("Content-Type", "application/json")
+	jsonResp, err := json.Marshal(struct {
+		Total int `json:"total"`
+	}{
+		Total: total,
+	})
 	if err != nil {
 		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -1761,37 +1800,4 @@ func EmailcoownerDeficient(to string, Org string, reponame string) {
 	}
 
 	email.SendEmail(m, true)
-}
-
-func ValidateOwnedPrivateRepo(owner, coOwner, org string) (isValid bool, message string, err error) {
-	isValid = true
-	ownerTotalOwnedPrivateRepo, err := db.CountOwnedPrivateRepo(owner, org)
-	if err != nil {
-		isValid = false
-		message = "Failed to count the requestor owned private repositories."
-		return
-	}
-
-	coOwnerTotalOwnedPrivateRepo, err := db.CountOwnedPrivateRepo(coOwner, org)
-	if err != nil {
-		isValid = false
-		message = "Failed to count the co-owner owned private repositories."
-		return
-	}
-
-	var invalidUsers []string
-
-	if ownerTotalOwnedPrivateRepo >= 3 {
-		invalidUsers = append(invalidUsers, fmt.Sprint("owner, ", owner))
-	}
-
-	if coOwnerTotalOwnedPrivateRepo >= 3 {
-		invalidUsers = append(invalidUsers, fmt.Sprint("co-owner, ", coOwner))
-	}
-
-	if len(invalidUsers) != 0 {
-		isValid = false
-		message = fmt.Sprintf("Failed to create repository because the %v already owns three repositories, which is the maximum allowed.", strings.Join(invalidUsers, " and "))
-	}
-	return
 }
