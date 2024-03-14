@@ -1793,4 +1793,5 @@ func ValidateOwnedPrivateRepo(owner, coOwner, org string) (isValid bool, message
 		isValid = false
 		message = fmt.Sprintf("Failed to create repository because the %v already owns three repositories, which is the maximum allowed.", strings.Join(invalidUsers, " and "))
 	}
+	return
 }
