@@ -400,16 +400,13 @@
                 }
 
                 if (invalidUsers.length != 0 && this.form.visibility == 1) {
+                    invalidUsersStr = invalidUsers.join(" and ")
                     this.isValidOwnedPrivateRepo.isValid = false;
-                    this.isValidOwnedPrivateRepo.message = `Repository requests are disabled because ${invalidUsers.join(" and ")} already own three private repositories, which is the maximum allowed. To enable the form again, change the visibility to internal.`
+                    this.isValidOwnedPrivateRepo.message = `${invalidUsersStr.charAt(0).toUpperCase()}${invalidUsersStr.slice(1)} already own three private repositories, which is the maximum allowed. Change the visibility to internal to continue.`
                 } else {
                     this.isValidOwnedPrivateRepo.isValid = true;
                     this.isValidOwnedPrivateRepo.message = ''
                 }
-
-                console.log(this.form)
-                console.log(this.isValidOwnedPrivateRepo)
-                console.log(this.ownerTotalOwnedPrivateRepo, this.coownerTotalOwnedPrivateRepo)
             },
 
 
