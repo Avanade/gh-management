@@ -23,7 +23,10 @@ UPDATE
     [ApprovalSystemGUID] = @ApprovalSystemGUID
 END
 
+DECLARE @RequestId INT
+SELECT @RequestId = Id FROM CommunityApprovals WHERE [ApprovalSystemGUID] = @ApprovalSystemGUID
+
 DECLARE @CommunityId INT
-SELECT @CommunityId = CommunityId FROM CommunityApprovals WHERE [ApprovalSystemGUID] = @ApprovalSystemGUID
+SELECT @CommunityId = CommunityId FROM CommunityApprovalRequests WHERE [RequestId] = @RequestId
 
 EXEC PR_Communities_Update_Status @CommunityId

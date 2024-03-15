@@ -103,3 +103,20 @@ func GetOrganizationApprovalRequest(id int64) ([]map[string]interface{}, error) 
 
 	return result, err
 }
+
+func RegionalOrganizationInsert(id int64, name string) error {
+	db := ConnectDb()
+	defer db.Close()
+
+	param := map[string]interface{}{
+		"Id":   id,
+		"Name": name,
+	}
+
+	_, err := db.ExecuteStoredProcedure("dbo.PR_RegionalOrganizations_Insert", param)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

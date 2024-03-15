@@ -132,11 +132,16 @@ func CommunitiesUpdate(params map[string]interface{}) (sql.Result, error) {
 	return result, err
 }
 
-func CommunityApprovalsSelectById(params map[string]interface{}) ([]map[string]interface{}, error) {
+func CommunityApprovalsSelectById(id int64) ([]map[string]interface{}, error) {
 	db := ConnectDb()
 	defer db.Close()
 
-	result, err := db.ExecuteStoredProcedureWithResult("dbo.PR_CommunityApprovals_Select_ById", params)
+	param := map[string]interface{}{
+
+		"Id": id,
+	}
+
+	result, err := db.ExecuteStoredProcedureWithResult("dbo.PR_CommunityApprovals_Select_ById", param)
 	if err != nil {
 		fmt.Println(err)
 	}
