@@ -628,6 +628,59 @@ func GetRepositories(w http.ResponseWriter, r *http.Request) {
 	w.Write(jsonResp)
 }
 
+func GetTotalRepositoriesOwnedByUsers(w http.ResponseWriter, r *http.Request) {
+	logger := appinsights_wrapper.NewClient()
+	defer logger.EndOperation()
+
+	vars := mux.Vars(r)
+	user := vars["user"]
+
+	visibility := 0
+
+	params := r.URL.Query()
+
+	// 0/NONE - ALL | 1 - PRIVATE | 2 - INTERNAL | 3 - PUBLIC
+	if params.Has("visibility") {
+		visibility, _ = strconv.Atoi(params["visibility"][0])
+	}
+
+	organization := os.Getenv("GH_ORG_INNERSOURCE")
+	// public - GH_ORG_OPENSOURCE | private/none - GH_ORG_INNERSOURCE
+	if params.Has("orgtype") {
+		if params["orgtype"][0] == "public" {
+			organization = os.Getenv("GH_ORG_OPENSOURCE")
+		}
+	}
+
+	if user == "me" {
+		sessionaz, _ := session.Store.Get(r, "auth-session")
+		iprofile := sessionaz.Values["profile"]
+		profile := iprofile.(map[string]interface{})
+		user = fmt.Sprint(profile["preferred_username"])
+	}
+
+	total, err := db.CountOwnedRepoByVisibility(user, organization, visibility)
+	if err != nil {
+		logger.LogException(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Header().Set("Content-Type", "application/json")
+	jsonResp, err := json.Marshal(struct {
+		Total int `json:"total"`
+	}{
+		Total: total,
+	})
+	if err != nil {
+		logger.LogException(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.Write(jsonResp)
+}
+
 func GetRepositoriesById(w http.ResponseWriter, r *http.Request) {
 	logger := appinsights_wrapper.NewClient()
 	defer logger.EndOperation()

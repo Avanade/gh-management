@@ -486,8 +486,8 @@
         this.isShowWordCloudLoading = false
       },
       template : `<div>
-                    <span class="font-bold mr-2 pl-1">Popular Topics</span>
                     <template x-if="topFivePopularTopics.length != 0">
+                      <span class="font-bold mr-2 pl-1">Popular Topics</span>
                       <span>
                         <template x-for="(popularTopic, index) in topFivePopularTopics">
                           <a x-bind:href="'/search?search=' + popularTopic.Topic">

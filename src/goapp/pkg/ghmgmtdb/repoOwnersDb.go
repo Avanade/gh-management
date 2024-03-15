@@ -104,6 +104,24 @@ func GetRepoOwnersByProjectIdWithGHUsername(id int64) ([]map[string]interface{},
 	return result, nil
 }
 
+func CountOwnedRepoByVisibility(userPrincipalName, organization string, visibility int) (total int, err error) {
+	db := ConnectDb()
+	defer db.Close()
+
+	param := map[string]interface{}{
+		"UserPrincipalName": userPrincipalName,
+		"Organization":      organization,
+		"Visibility":        visibility,
+	}
+
+	result, err := db.ExecuteStoredProcedureWithResult("PR_Projects_Count_OwnedRepoByVisibility", param)
+	if err != nil {
+		return 0, err
+	}
+
+	return int(result[0]["Total"].(int64)), nil
+}
+
 func DeleteRepoOwnerRecordByUserAndProjectId(id int64, userPrincipalName string) error {
 	db := ConnectDb()
 	defer db.Close()
