@@ -835,6 +835,17 @@ func IndexOrgRepos(w http.ResponseWriter, r *http.Request) {
 
 	orgs := []string{os.Getenv("GH_ORG_INNERSOURCE"), os.Getenv("GH_ORG_OPENSOURCE")}
 
+	regOrgs, err := db.GetAllRegionalOrganizations()
+	if err != nil {
+		logger.LogException(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	for _, regOrg := range regOrgs {
+		orgs = append(orgs, regOrg["Name"].(string))
+	}
+
 	for _, org := range orgs {
 		reposByOrg, err := ghAPI.GetRepositoriesFromOrganization(org)
 		if err != nil {
