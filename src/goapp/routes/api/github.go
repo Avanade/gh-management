@@ -98,34 +98,21 @@ func ClearOrgMembers(w http.ResponseWriter, r *http.Request) {
 	token := os.Getenv("GH_TOKEN")
 
 	// Remove GitHub users from innersource who are not employees
-	organization := os.Getenv("GH_ORG_INNERSOURCE")
-	emailSupport := os.Getenv("EMAIL_SUPPORT")
+	innersourceOrgs := []string{os.Getenv("GH_ORG_INNERSOURCE")}
 
-	users := ghAPI.OrgListMembers(token, organization)
-	for _, user := range users {
-		email, err := db.GetUserEmailByGithubId(fmt.Sprint(user.GetID()))
-		if err != nil {
-			logger.LogException(err)
-			continue
-		}
-		if email != "" {
-			isUserExist, isAccountEnabled, err := msgraph.IsUserExist(email)
-			if err != nil {
-				logger.LogException(err)
-				continue
-			}
-			if !isUserExist {
-				logger.TrackTrace(fmt.Sprint("GitHub ID: ", user.GetID(), " not found on AD | INTERNAL"), contracts.Information)
-				// ghAPI.RemoveOrganizationsMember(token, organization, *user.Login)
-			}
-			if !isAccountEnabled {
-				logger.TrackTrace(fmt.Sprint("GitHub ID: ", user.GetID(), " found on AD but account disabled | INTERNAL"), contracts.Information)
-			}
-		} else {
-			logger.TrackTrace(fmt.Sprint("GitHub ID: ", user.GetID(), " not found | INTERNAL"), contracts.Information)
-			// ghAPI.RemoveOrganizationsMember(token, organization, *user.Login)
-		}
+	regOrgs, err := db.GetAllRegionalOrganizations()
+	if err != nil {
+		logger.LogException(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 
+	for _, regOrg := range regOrgs {
+		innersourceOrgs = append(innersourceOrgs, regOrg["Name"].(string))
+	}
+
+	for _, innersourceOrg := range innersourceOrgs {
+		ClearOrgMembersInnersource(token, innersourceOrg, logger)
 	}
 
 	// Convert users who are not employees to an outside collaborator
@@ -162,6 +149,7 @@ func ClearOrgMembers(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if len(convertedOutsideCollabsList) > 0 {
+		emailSupport := os.Getenv("EMAIL_SUPPORT")
 		// to list of new outside collaborators to ospo
 		// EmailAdminConvertToColaborator(emailSupport, convertedOutsideCollabsList, logger)
 		emailConvertedCollaboratorTC := appinsights.NewTraceTelemetry(fmt.Sprintf("SUPPORT EMAIL : %s", emailSupport), contracts.Information)
@@ -331,4 +319,68 @@ func emailAdmin(admin string, adminemail string, reponame string, outisideCollab
 		return
 	}
 	logger.TrackTrace(fmt.Sprintf(" GitHub Repo Collaborators Scan on %s was sent.", e), contracts.Information)
+}
+
+type RemovedMember struct {
+	Id          int64  `json:"id"`
+	Username    string `json:"username"`
+	Information string `json:"information"`
+}
+
+func ClearOrgMembersInnersource(token, org string, logger *appinsights_wrapper.TelemetryClient) {
+	var removedMembers []RemovedMember
+
+	users := ghAPI.OrgListMembers(token, org)
+	for _, user := range users {
+		email, err := db.GetUserEmailByGithubId(fmt.Sprint(user.GetID()))
+		if err != nil {
+			logger.LogException(err)
+			continue
+		}
+		if email != "" {
+			isUserExist, isAccountEnabled, err := msgraph.IsUserExist(email)
+			if err != nil {
+				logger.LogException(err)
+				continue
+			}
+			if !isUserExist {
+				information := fmt.Sprint("GitHub ID: ", user.GetID(), " not found on AD | INTERNAL")
+				removedMembers = append(removedMembers, RemovedMember{
+					Id:          user.GetID(),
+					Username:    user.GetLogin(),
+					Information: information,
+				})
+				logger.TrackTrace(information, contracts.Information)
+				// ghAPI.RemoveOrganizationsMember(token, organization, *user.Login)
+			}
+			if !isAccountEnabled {
+				information := fmt.Sprint("GitHub ID: ", user.GetID(), " found on AD but account disabled | INTERNAL")
+				removedMembers = append(removedMembers, RemovedMember{
+					Id:          user.GetID(),
+					Username:    user.GetLogin(),
+					Information: information,
+				})
+				logger.TrackTrace(information, contracts.Information)
+			}
+		} else {
+			information := fmt.Sprint("GitHub ID: ", user.GetID(), " not found | INTERNAL")
+			removedMembers = append(removedMembers, RemovedMember{
+				Id:          user.GetID(),
+				Username:    user.GetLogin(),
+				Information: information,
+			})
+			logger.TrackTrace(information, contracts.Information)
+			// ghAPI.RemoveOrganizationsMember(token, organization, *user.Login)
+		}
+	}
+	removedMembersTC := appinsights.NewTraceTelemetry(fmt.Sprintf("INNERSOURCE ORG : %s", org), contracts.Information)
+
+	removedMembersJson, err := json.Marshal(removedMembers)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	removedMembersTC.Properties["RemovedMembers"] = string(removedMembersJson)
+	logger.Track(removedMembersTC)
 }
