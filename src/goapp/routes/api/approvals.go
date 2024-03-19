@@ -356,33 +356,35 @@ func ProcessApprovalProjects(r *http.Request, module string) error {
 		}
 
 		// If approved add the user to GitHub Copilot License Group
-		gc, err := db.GetGitHubCopilotbyGUID(req.ItemId)
-		if err != nil {
-			return err
-		}
-		org := gc[0]["RegionName"].(string)
-		ghUsername := gc[0]["GitHubUsername"].(string)
-
-		// Check if team is existing
-		ghToken := os.Getenv("GH_TOKEN")
-		slug := os.Getenv("COPILOT_GROUP_SLUG")
-		team, err := ghAPI.GetTeam(ghToken, org, slug)
-		if err != nil {
-			return err
-		}
-
-		// If not existing create the team
-		if team == nil {
-			_, err := ghAPI.CreateTeam(ghToken, org, "GitHub Copilot License Group")
+		if approvalStatusId == APPROVED {
+			gc, err := db.GetGitHubCopilotbyGUID(req.ItemId)
 			if err != nil {
 				return err
 			}
-		}
+			org := gc[0]["RegionName"].(string)
+			ghUsername := gc[0]["GitHubUsername"].(string)
 
-		// Add user to the team
-		_, err = ghAPI.AddMemberToTeam(ghToken, org, slug, ghUsername, "member")
-		if err != nil {
-			return err
+			// Check if team is existing
+			ghToken := os.Getenv("GH_TOKEN")
+			slug := os.Getenv("COPILOT_GROUP_SLUG")
+			team, err := ghAPI.GetTeam(ghToken, org, slug)
+			if err != nil {
+				return err
+			}
+
+			// If not existing create the team
+			if team == nil {
+				_, err := ghAPI.CreateTeam(ghToken, org, "GitHub Copilot License Group")
+				if err != nil {
+					return err
+				}
+			}
+
+			// Add user to the team
+			_, err = ghAPI.AddMemberToTeam(ghToken, org, slug, ghUsername, "member")
+			if err != nil {
+				return err
+			}
 		}
 
 	}

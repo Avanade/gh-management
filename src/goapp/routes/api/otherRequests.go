@@ -51,21 +51,6 @@ func AddGitHubCopilot(w http.ResponseWriter, r *http.Request) {
 	body.GitHubId = int64(ghId)
 	body.GitHubUsername = ghUser
 
-	// Insert record on GitHubCopilot table
-	result, err := db.GitHubCopilotInsert(body)
-	if err != nil {
-		logger.LogException(err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	id, err := strconv.Atoi(fmt.Sprint(result[0]["Id"]))
-	if err != nil {
-		logger.LogException(err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
 	// Get organization owners to produce list of approvers
 	var approvers []string
 	token := os.Getenv("GH_TOKEN")
@@ -91,6 +76,27 @@ func AddGitHubCopilot(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	if len(approvers) == 0 {
+		logger.LogException("Can't find email address of organization owners.")
+		http.Error(w, "Can't find email address of organization owners.", http.StatusInternalServerError)
+		return
+	}
+
+	// Insert record on GitHubCopilot table
+	result, err := db.GitHubCopilotInsert(body)
+	if err != nil {
+		logger.LogException(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	id, err := strconv.Atoi(fmt.Sprint(result[0]["Id"]))
+	if err != nil {
+		logger.LogException(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
 	var reqId []int64
 	for _, approver := range approvers {
 
@@ -111,7 +117,6 @@ func AddGitHubCopilot(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-
 	}
 
 	body.ApproverUserPrincipalName = approvers
