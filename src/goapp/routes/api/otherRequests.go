@@ -14,10 +14,9 @@ import (
 	"main/pkg/session"
 
 	"github.com/gorilla/mux"
-	"github.com/microsoft/ApplicationInsights-Go/appinsights/contracts"
 )
 
-func AddOrganization(w http.ResponseWriter, r *http.Request) {
+func AddGitHubCopilot(w http.ResponseWriter, r *http.Request) {
 	logger := appinsights_wrapper.NewClient()
 	defer logger.EndOperation()
 
@@ -27,17 +26,33 @@ func AddOrganization(w http.ResponseWriter, r *http.Request) {
 	profile := iprofile.(map[string]interface{})
 	username := profile["preferred_username"]
 
-	var body db.OrganizationDto
-	err := json.NewDecoder(r.Body).Decode(&body)
+	// Get GitHub ID
+	sessiongh, _ := session.Store.Get(r, "gh-auth-session")
+	ghProfile := sessiongh.Values["ghProfile"].(string)
+	var p map[string]interface{}
+	err := json.Unmarshal([]byte(ghProfile), &p)
+	if err != nil {
+		logger.LogException(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	ghId := p["id"].(float64)
+	ghUser := fmt.Sprintf("%s", p["login"])
+
+	// Parse request body
+	var body db.GitHubCopilotDto
+	err = json.NewDecoder(r.Body).Decode(&body)
 	if err != nil {
 		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 	body.Username = username.(string)
+	body.GitHubId = int64(ghId)
+	body.GitHubUsername = ghUser
 
-	// Insert record on organization table
-	result, err := db.OrganizationInsert(body)
+	// Insert record on GitHubCopilot table
+	result, err := db.GitHubCopilotInsert(body)
 	if err != nil {
 		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -51,22 +66,36 @@ func AddOrganization(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Get approver list
-	approvers, err := db.GetActiveCommunityApprovers("organization")
+	// Get organization owners to produce list of approvers
+	var approvers []string
+	token := os.Getenv("GH_TOKEN")
+	orgOwners, err := ghAPI.OrgListMembers(token, body.RegionName, "admin")
 	if err != nil {
 		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	var approverList []string
+	exemption := os.Getenv("EXEMPTION")
+
+	for _, owner := range orgOwners {
+		email, err := db.GetUserEmailByGithubId(strconv.FormatInt(*owner.ID, 10))
+		if err != nil {
+			logger.LogException(err)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		if email != "" && email != exemption {
+			approvers = append(approvers, email)
+		}
+	}
+
 	var reqId []int64
 	for _, approver := range approvers {
-		approverUserPrincipalName := approver["ApproverUserPrincipalName"].(string)
-		approverList = append(approverList, approverUserPrincipalName)
 
 		// Insert approval request record
-		approvalRequestId, err := db.ApprovalInsert(approverUserPrincipalName, fmt.Sprintf("GitHub Organization for %s - %s", body.ClientName, body.ProjectName), body.Username)
+		approvalRequestId, err := db.ApprovalInsert(approver, "GitHub Copilot License Request", body.Username)
 		if err != nil {
 			logger.LogException(err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -76,7 +105,7 @@ func AddOrganization(w http.ResponseWriter, r *http.Request) {
 		reqId = append(reqId, approvalRequestId[0]["Id"].(int64))
 
 		// Insert link record
-		err = db.OrganizationApprovalInsert(id, approvalRequestId[0]["Id"].(int64))
+		err = db.GitHubCopilotApprovalInsert(id, approvalRequestId[0]["Id"].(int64))
 		if err != nil {
 			logger.LogException(err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -85,18 +114,10 @@ func AddOrganization(w http.ResponseWriter, r *http.Request) {
 
 	}
 
-	// Create approval request
-	regOrg, err := db.GetRegionalOrganizationById(body.Region)
-	if err != nil {
-		logger.LogException(err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	body.RegionName = regOrg[0]["Name"].(string)
-	body.ApproverUserPrincipalName = approverList
+	body.ApproverUserPrincipalName = approvers
 	body.RequestId = reqId
 	body.Id = int64(id)
-	err = CreateOrganizationApprovalRequest(body, logger)
+	err = CreateGitHubCopilotApprovalRequest(body, logger)
 	if err != nil {
 		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -104,7 +125,7 @@ func AddOrganization(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func CreateOrganizationApprovalRequest(data db.OrganizationDto, logger *appinsights_wrapper.TelemetryClient) error {
+func CreateGitHubCopilotApprovalRequest(data db.GitHubCopilotDto, logger *appinsights_wrapper.TelemetryClient) error {
 
 	url := os.Getenv("APPROVAL_SYSTEM_APP_URL")
 	if url != "" {
@@ -170,7 +191,7 @@ func CreateOrganizationApprovalRequest(data db.OrganizationDto, logger *appinsig
 							<table style="width: 100%; max-width: 700px;" class="margin-auto">
 								<tr>
 									<td style="font-size: 18px; font-weight: 600; padding-top: 20px">
-									Request for a GitHub Enterprise Organization
+									Request for a GitHub Copilot License
 									</td>
 								</tr>
 							</table>
@@ -181,7 +202,7 @@ func CreateOrganizationApprovalRequest(data db.OrganizationDto, logger *appinsig
 							<table style="width: 100%; max-width: 700px; margin: auto">
 								<tr class="border-top">
 									<td style="font-size: 14px; padding-top: 15px; font-weight: 600;">
-										Region
+										GitHub Organization
 									</td>
 									<td style="font-size: 14px; padding-top: 15px; font-weight: 400;">
 										|Region|
@@ -189,26 +210,10 @@ func CreateOrganizationApprovalRequest(data db.OrganizationDto, logger *appinsig
 								</tr>
 								<tr class="border-top">
 									<td style="font-size: 14px; padding-top: 15px; font-weight: 600;">
-										Client Name
+										GitHub Username
 									</td>
 									<td style="font-size: 14px; padding-top: 15px; font-weight: 400;">
-										|ClientName|
-									</td>
-								</tr>
-								<tr class="border-top">
-									<td style="font-size: 14px; padding-top: 15px; font-weight: 600;">
-										Project Name
-									</td>
-									<td style="font-size: 14px; padding-top: 15px; font-weight: 400;">
-										|ProjectName|
-									</td>
-								</tr>
-								<tr class="border-top">
-									<td style="font-size: 14px; padding-top: 15px; font-weight: 600;">
-										WBS
-									</td>
-									<td style="font-size: 14px; padding-top: 15px; font-weight: 400;">
-										|WBS|
+										|GitHubUsername|
 									</td>
 								</tr>
 								<tr class="border-top">
@@ -229,18 +234,16 @@ func CreateOrganizationApprovalRequest(data db.OrganizationDto, logger *appinsig
 		`
 
 		replacer := strings.NewReplacer("|Region|", data.RegionName,
-			"|ClientName|", data.ClientName,
-			"|ProjectName|", data.ProjectName,
-			"|WBS|", data.WBS,
+			"|GitHubUsername|", data.GitHubUsername,
 			"|RequestedBy|", data.Username,
 		)
 		body := replacer.Replace(bodyTemplate)
 
 		postParams := CommunityApprovalSystemPost{
 			ApplicationId:       os.Getenv("APPROVAL_SYSTEM_APP_ID"),
-			ApplicationModuleId: os.Getenv("APPROVAL_SYSTEM_APP_MODULE_ORGANIZATION"),
+			ApplicationModuleId: os.Getenv("APPROVAL_SYSTEM_APP_MODULE_COPILOT"),
 			Emails:              data.ApproverUserPrincipalName,
-			Subject:             fmt.Sprintf("[GH-Management] New Organization Request - %v - %v", data.ClientName, data.ProjectName),
+			Subject:             "[GH-Management] New GitHub Copilot License Request",
 			Body:                body,
 			RequesterEmail:      data.Username,
 		}
@@ -256,58 +259,12 @@ func CreateOrganizationApprovalRequest(data db.OrganizationDto, logger *appinsig
 			for _, reqId := range data.RequestId {
 				db.CommunityApprovalUpdateGUID(reqId, res.ItemId)
 			}
-			db.OrganizationUpdateApprovalStatus(data.Id, 2)
 		}
 	}
 	return nil
 }
 
-func GetAllRegionalOrganizations(w http.ResponseWriter, r *http.Request) {
-	logger := appinsights_wrapper.NewClient()
-	defer logger.EndOperation()
-
-	regOrgs, err := db.GetAllRegionalOrganizations()
-	if err != nil {
-		logger.LogException(err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	w.WriteHeader(http.StatusOK)
-	w.Header().Set("Content-Type", "application/json")
-	jsonResp, err := json.Marshal(regOrgs)
-	if err != nil {
-		logger.LogException(err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	w.Write(jsonResp)
-}
-
-func GetAllActiveOrganizationApprovers(w http.ResponseWriter, r *http.Request) {
-	logger := appinsights_wrapper.NewClient()
-	defer logger.EndOperation()
-
-	approvers, err := db.GetActiveCommunityApprovers("organization")
-	if err != nil {
-		logger.LogException(err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	w.WriteHeader(http.StatusOK)
-	w.Header().Set("Content-Type", "application/json")
-	jsonResp, err := json.Marshal(approvers)
-	if err != nil {
-		logger.LogException(err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	w.Write(jsonResp)
-}
-
-func GetAllOrganizationRequest(w http.ResponseWriter, r *http.Request) {
+func GetAllGitHubCopilotRequest(w http.ResponseWriter, r *http.Request) {
 	logger := appinsights_wrapper.NewClient()
 	defer logger.EndOperation()
 
@@ -317,7 +274,7 @@ func GetAllOrganizationRequest(w http.ResponseWriter, r *http.Request) {
 	profile := iprofile.(map[string]interface{})
 	username := profile["preferred_username"]
 
-	orgs, err := db.GetAllOrganizationRequest(username.(string))
+	orgs, err := db.GetAllGitHubCopilotRequest(username.(string))
 	if err != nil {
 		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -335,7 +292,7 @@ func GetAllOrganizationRequest(w http.ResponseWriter, r *http.Request) {
 	w.Write(jsonResp)
 }
 
-func GetOrganizationApprovalRequests(w http.ResponseWriter, r *http.Request) {
+func GetGitHubCopilotApprovalRequests(w http.ResponseWriter, r *http.Request) {
 	logger := appinsights_wrapper.NewClient()
 	defer logger.EndOperation()
 
@@ -347,7 +304,7 @@ func GetOrganizationApprovalRequests(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	approvals, err := db.GetOrganizationApprovalRequest(id)
+	approvals, err := db.GetGitHubCopilotApprovalRequest(id)
 	if err != nil {
 		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -363,33 +320,4 @@ func GetOrganizationApprovalRequests(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.Write(jsonResp)
-}
-
-func IndexRegionalOrganizations(w http.ResponseWriter, r *http.Request) {
-	logger := appinsights_wrapper.NewClient()
-	defer logger.EndOperation()
-
-	token := os.Getenv("GH_TOKEN")
-	orgs, err := ghAPI.GetOrganizations(token)
-	if err != nil {
-		logger.LogException(err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	for _, org := range orgs {
-		prefix := os.Getenv("REGIONAL_ORG_PREFIX")
-		if strings.HasPrefix(strings.ToLower(*org.Login), prefix) {
-			err = db.RegionalOrganizationInsert(*org.ID, *org.Login)
-			logger.LogTrace("Indexing "+*org.Login, contracts.Information)
-			if err != nil {
-				logger.LogException(err)
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return
-			}
-		}
-	}
-
-	w.WriteHeader(http.StatusOK)
-	w.Header().Set("Content-Type", "application/json")
 }

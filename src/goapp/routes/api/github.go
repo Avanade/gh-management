@@ -101,7 +101,13 @@ func ClearOrgMembers(w http.ResponseWriter, r *http.Request) {
 	organization := os.Getenv("GH_ORG_INNERSOURCE")
 	emailSupport := os.Getenv("EMAIL_SUPPORT")
 
-	users := ghAPI.OrgListMembers(token, organization)
+	users, err := ghAPI.OrgListMembers(token, organization, "all")
+	if err != nil {
+		logger.LogException(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
 	for _, user := range users {
 		email, err := db.GetUserEmailByGithubId(fmt.Sprint(user.GetID()))
 		if err != nil {
@@ -132,7 +138,12 @@ func ClearOrgMembers(w http.ResponseWriter, r *http.Request) {
 	var convertedOutsideCollabsList []string
 	organizationsOpen := os.Getenv("GH_ORG_OPENSOURCE")
 
-	usersOpenOrg := ghAPI.OrgListMembers(token, organizationsOpen)
+	usersOpenOrg, err := ghAPI.OrgListMembers(token, organizationsOpen, "all")
+	if err != nil {
+		logger.LogException(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 	for _, user := range usersOpenOrg {
 		email, err := db.GetUserEmailByGithubId(fmt.Sprint(user.GetID()))
 		if err != nil {

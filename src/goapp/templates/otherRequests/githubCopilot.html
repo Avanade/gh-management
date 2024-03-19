@@ -1,0 +1,88 @@
+{{ define "content" }}
+
+
+<div id="pageTitle">Request</div>
+
+<div x-data="data()">
+    <form onsubmit="event.preventDefault()" autocomplete="off">
+        <fieldset>
+            <h3 class="text-lg font-medium leading-6 text-gray-900">GitHub Copilot License</h3>
+            
+            <div class="flex  mt-5 flex-nowrap">
+                <div class="basis-1/3 md:base-full md:flex-row mx-3 self-center">
+                    <div class="flex flex-col pl-2 ml-3 mt-1 text-sm text-gray-900">
+                        Region
+                    </div>
+                </div>
+                <div class="basis-2/3 md:base-full  md:flex-row mx-3 self-center">
+                    <div class="ml-3" x-data="combobox({
+                            ajax: getRegionOptions,
+                            id : 'Id',
+                            text : 'Name',
+                            isInsertable : false,
+                            isDisplayItem : false
+                        })" x-modelable="selected" x-model="form.regionOptions">
+                        <div x-html="template"></div>
+                    </div>
+                </div>
+            </div>
+        </fieldset>
+        <div class="flex mt-7 justify-end">
+            <div align="right">
+                <button type="submit" class="inline-flex justify-center py-2 px-4 rounded-md text-white"
+                    x-bind:class="!isValid ? 'bg-orange-100' : 'bg-orange-500'" x-bind:disabled="!isValid" @click="submit()">
+                    <span>Submit</span>
+                </button>
+            </div>
+            <div class="ml-3">
+                <button type="button" class="bg-orange-500  inline-flex justify-center py-2 px-4 rounded-md text-white"
+                    @click="goto('/other-requests?view=copilot')">
+                    <span>Cancel</span>
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script src="/public/components/combobox.js"></script>
+
+<script type="text/javascript">
+    function data() {
+        return {
+            form: {
+                regionOptions: [],
+                region: '',
+                regionName: ''
+            },
+            submit() {
+                console.log(this.form)
+                Alpine.store('master').modal.reset()
+                Alpine.store('master').modal.show()
+                Alpine.store('master').postData(`/api/github-copilot`, this.form,
+                    "Your request has been submitted.", "Go back", "/other-requests?view=copilot")
+            },
+            get isValid() {
+                if (this.form.regionOptions.length > 0) {
+                    this.form.region = this.form.regionOptions[0]["id"]
+                    this.form.regionName = this.form.regionOptions[0]["text"]
+                }
+                if (!!this.form.region) {
+                    return true
+                } else {
+                    return false
+                }
+            },
+            goto(url) {
+                window.location.href = url
+            }
+        }
+    }
+    async function getRegionOptions() {
+        let uri = '/api/github-organization/region'
+        let encoded = encodeURI(uri);
+        const res = await fetch(encoded)
+        const data = await res.json()
+        return data
+    }
+</script>
+{{ end }}
