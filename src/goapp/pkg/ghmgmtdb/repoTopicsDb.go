@@ -50,7 +50,7 @@ func GetPopularTopics(offset, rowCount int) ([]PopularTopics, error) {
 		return nil, err
 	}
 
-	var popularTopics []PopularTopics
+	popularTopics := make([]PopularTopics, 0)
 
 	for _, v := range result {
 		popularTopic := PopularTopics{

@@ -186,6 +186,8 @@ func setApiRoutes(mux *mux.Router) {
 
 	// USERS API
 	muxApi.Handle("/users", loadAzAuthPage(rtApi.GetAllUserFromActiveDirectory)).Methods("GET")
+	// Retrieve the total number of repositories owned by a me|{user}, categorized by visibility. Default visibility is set to private.
+	muxApi.Handle("/users/{user}/repositories/total", loadAzGHAuthPage(rtApi.GetTotalRepositoriesOwnedByUsers)).Methods("GET")
 	muxApi.Handle("/users/with-github", loadAzAuthPage(rtApi.GetUsersWithGithub)).Methods("GET")
 	muxApi.Handle("/users/{search}/search", loadAzAuthPage(rtApi.SearchUserFromActiveDirectory)).Methods("GET")
 

@@ -8,6 +8,8 @@ import (
 	"os"
 	"strings"
 
+	db "main/pkg/ghmgmtdb"
+
 	"github.com/google/go-github/v50/github"
 	"golang.org/x/oauth2"
 )
@@ -142,9 +144,15 @@ func IsArchived(repoName string, org string) (bool, error) {
 
 func IsRepoExisting(repoName string) (bool, error) {
 	exists := false
-	organizations := []string{os.Getenv("GH_ORG_INNERSOURCE"), os.Getenv("GH_ORG_OPENSOURCE")}
+	orgs := []string{os.Getenv("GH_ORG_INNERSOURCE"), os.Getenv("GH_ORG_OPENSOURCE")}
 
-	for _, org := range organizations {
+	regOrgs, _ := db.GetAllRegionalOrganizations()
+
+	for _, regOrg := range regOrgs {
+		orgs = append(orgs, regOrg["Name"].(string))
+	}
+
+	for _, org := range orgs {
 		repo, err := GetRepository(repoName, org)
 		if err != nil {
 			if strings.Contains(err.Error(), "Not Found") {
