@@ -52,6 +52,7 @@ func setPageRoutes(mux *mux.Router) {
 	// OTHER REQUESTS PAGE
 	mux.Handle("/other-requests", loadAzGHAuthPage(rtOtherRequests.IndexHandler))
 	mux.Handle("/other-requests/organization", loadAzGHAuthPage(rtOtherRequests.RequestOrganization))
+	mux.Handle("/other-requests/github-copilot", loadAzGHAuthPage(rtOtherRequests.RequestGitHubCopilot))
 
 	// AUTHENTICATION
 	mux.HandleFunc("/loginredirect", rtPages.LoginRedirectHandler)
@@ -215,11 +216,14 @@ func setApiRoutes(mux *mux.Router) {
 	muxApi.Handle("/oss-contribution-sponsors", loadAdminPage((rtApi.AddSponsor))).Methods("POST")
 	muxApi.Handle("/oss-contribution-sponsors/{id}", loadAdminPage((rtApi.UpdateSponsor))).Methods(("PUT"))
 
-	// ORGANIZATION API
+	// OTHER REQUESTS
 	muxApi.Handle("/github-organization", loadAzGHAuthPage(rtApi.AddOrganization)).Methods("POST")
 	muxApi.Handle("/github-organization", loadAzGHAuthPage(rtApi.GetAllOrganizationRequest)).Methods("GET")
-	muxApi.Handle("/github-organization/region", loadAzGHAuthPage((rtApi.GetAllRegionalOrganizations))).Methods("GET")
-	muxApi.Handle("/github-organization/{id}/status", loadAzGHAuthPage((rtApi.GetOrganizationApprovalRequests))).Methods("GET")
+	muxApi.Handle("/github-organization/region", loadAzGHAuthPage(rtApi.GetAllRegionalOrganizations)).Methods("GET")
+	muxApi.Handle("/github-organization/{id}/status", loadAzGHAuthPage(rtApi.GetOrganizationApprovalRequests)).Methods("GET")
+	muxApi.Handle("/github-copilot", loadAzGHAuthPage(rtApi.AddGitHubCopilot)).Methods("POST")
+	muxApi.Handle("/github-copilot", loadAzGHAuthPage(rtApi.GetAllGitHubCopilotRequest)).Methods("GET")
+	muxApi.Handle("/github-copilot/{id}/status", loadAzGHAuthPage(rtApi.GetGitHubCopilotApprovalRequests)).Methods("GET")
 
 	//ORGANIZATION APPROVERS API
 	muxApi.Handle("/github-organization-approvers/active", loadAzGHAuthPage(rtApi.GetAllActiveOrganizationApprovers)).Methods("GET")
@@ -227,6 +231,7 @@ func setApiRoutes(mux *mux.Router) {
 	// APPROVALS API
 	muxApi.HandleFunc("/approvals/community/callback", rtApi.UpdateApprovalStatusCommunity).Methods("POST")
 	muxApi.HandleFunc("/approvals/organization/callback", rtApi.UpdateApprovalStatusOrganization).Methods("POST")
+	muxApi.HandleFunc("/approvals/github-copilot/callback", rtApi.UpdateApprovalStatusCopilot).Methods("POST")
 	muxApi.HandleFunc("/approvals/community/reassign/callback", rtApi.UpdateCommunityApprovalReassignApprover).Methods("POST")
 	muxApi.HandleFunc("/approvals/project/callback", rtApi.UpdateApprovalStatusProjects).Methods("POST")
 	muxApi.HandleFunc("/approvals/project/reassign/callback", rtApi.UpdateApprovalReassignApprover).Methods("POST")

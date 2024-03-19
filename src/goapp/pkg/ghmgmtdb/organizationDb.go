@@ -9,7 +9,7 @@ type OrganizationDto struct {
 	Id                        int64
 	ApproverUserPrincipalName []string
 	RegionName                string
-	RequestId                 int64
+	RequestId                 []int64
 }
 
 func OrganizationInsert(body OrganizationDto) ([]map[string]interface{}, error) {
@@ -114,6 +114,24 @@ func RegionalOrganizationInsert(id int64, name string) error {
 	}
 
 	_, err := db.ExecuteStoredProcedure("dbo.PR_RegionalOrganizations_Insert", param)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func OrganizationApprovalInsert(organizationId int, requestId int64) error {
+	db := ConnectDb()
+	defer db.Close()
+
+	params := map[string]interface{}{
+
+		"OrganizationId": organizationId,
+		"RequestId":      requestId,
+	}
+
+	_, err := db.ExecuteStoredProcedure("dbo.PR_OrganizationsApprovalRequests_Insert", params)
 	if err != nil {
 		return err
 	}

@@ -19,24 +19,6 @@ func ApprovalInsert(approver string, description string, username string) ([]map
 	return result, nil
 }
 
-func OrganizationApprovalInsert(organizationId int, requestId int64) error {
-	db := ConnectDb()
-	defer db.Close()
-
-	params := map[string]interface{}{
-
-		"OrganizationId": organizationId,
-		"RequestId":      requestId,
-	}
-
-	_, err := db.ExecuteStoredProcedure("dbo.PR_OrganizationsApprovalRequests_Insert", params)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
 func CommunityApprovalInsert(communityId int, requestId int64) error {
 	db := ConnectDb()
 	defer db.Close()

@@ -119,7 +119,12 @@ func ClearOrgMembers(w http.ResponseWriter, r *http.Request) {
 	var convertedOutsideCollabsList []string
 	organizationsOpen := os.Getenv("GH_ORG_OPENSOURCE")
 
-	usersOpenOrg := ghAPI.OrgListMembers(token, organizationsOpen)
+	usersOpenOrg, err := ghAPI.OrgListMembers(token, organizationsOpen, "all")
+	if err != nil {
+		logger.LogException(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 	for _, user := range usersOpenOrg {
 		email, err := db.GetUserEmailByGithubId(fmt.Sprint(user.GetID()))
 		if err != nil {
@@ -330,7 +335,7 @@ type RemovedMember struct {
 func ClearOrgMembersInnersource(token, org string, logger *appinsights_wrapper.TelemetryClient) {
 	var removedMembers []RemovedMember
 
-	users := ghAPI.OrgListMembers(token, org)
+	users, _ := ghAPI.OrgListMembers(token, org, "all")
 	for _, user := range users {
 		email, err := db.GetUserEmailByGithubId(fmt.Sprint(user.GetID()))
 		if err != nil {

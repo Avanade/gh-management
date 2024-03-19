@@ -1,9 +1,10 @@
-CREATE PROCEDURE [dbo].[PR_CommunityApproval_UpdateOrganization_ApproverResponse]
+CREATE PROCEDURE [dbo].[PR_CommunityApproval_UpdateApproverResponse]
 (
   @ApprovalSystemGUID UNIQUEIDENTIFIER,
   @ApprovalStatusId INT,
   @ApprovalRemarks VARCHAR(255),
-  @ApprovalDate DATETIME
+  @ApprovalDate DATETIME,
+  @Approver VARCHAR(100)
 )
 AS
 BEGIN
@@ -20,5 +21,6 @@ UPDATE
     [Modified] = GETDATE(),
     [ApprovalDate] = convert(DATETIME, @ApprovalDate)
   WHERE
-    [ApprovalSystemGUID] = @ApprovalSystemGUID
+    [ApprovalSystemGUID] = @ApprovalSystemGUID AND
+    [ApproverUserPrincipalName] = @Approver
 END

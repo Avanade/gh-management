@@ -75,6 +75,19 @@ func UpdateApprovalStatusOrganization(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
+func UpdateApprovalStatusCopilot(w http.ResponseWriter, r *http.Request) {
+	logger := appinsights_wrapper.NewClient()
+	defer logger.EndOperation()
+
+	err := ProcessApprovalProjects(r, "github-copilot")
+	if err != nil {
+		logger.LogException(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+}
+
 func UpdateApprovalReassignApprover(w http.ResponseWriter, r *http.Request) {
 	logger := appinsights_wrapper.NewClient()
 	defer logger.EndOperation()
@@ -332,10 +345,48 @@ func ProcessApprovalProjects(r *http.Request, module string) error {
 			return err
 		}
 	case "organization":
-		_, err = db.UpdateOrganizationApprovalApproverResponse(req.ItemId, req.Remarks, req.ResponseDate, approvalStatusId)
+		_, err = db.UpdateApprovalApproverResponse(req.ItemId, req.Remarks, req.ResponseDate, approvalStatusId, req.RespondedBy)
 		if err != nil {
 			return err
 		}
+	case "github-copilot":
+		_, err = db.UpdateApprovalApproverResponse(req.ItemId, req.Remarks, req.ResponseDate, approvalStatusId, req.RespondedBy)
+		if err != nil {
+			return err
+		}
+
+		// If approved add the user to GitHub Copilot License Group
+		if approvalStatusId == APPROVED {
+			gc, err := db.GetGitHubCopilotbyGUID(req.ItemId)
+			if err != nil {
+				return err
+			}
+			org := gc[0]["RegionName"].(string)
+			ghUsername := gc[0]["GitHubUsername"].(string)
+
+			// Check if team is existing
+			ghToken := os.Getenv("GH_TOKEN")
+			slug := os.Getenv("COPILOT_GROUP_SLUG")
+			team, err := ghAPI.GetTeam(ghToken, org, slug)
+			if err != nil {
+				return err
+			}
+
+			// If not existing create the team
+			if team == nil {
+				_, err := ghAPI.CreateTeam(ghToken, org, "GitHub Copilot License Group")
+				if err != nil {
+					return err
+				}
+			}
+
+			// Add user to the team
+			_, err = ghAPI.AddMemberToTeam(ghToken, org, slug, ghUsername, "member")
+			if err != nil {
+				return err
+			}
+		}
+
 	}
 
 	return nil

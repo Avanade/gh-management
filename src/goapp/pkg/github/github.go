@@ -377,10 +377,10 @@ func RepositoriesListCollaborators(token string, org string, repo string, role s
 	return collaborators
 }
 
-func OrgListMembers(token string, org string) []*github.User {
+func OrgListMembers(token string, org string, role string) ([]*github.User, error) {
 	client := CreateClient(token)
 
-	opts := &github.ListMembersOptions{ListOptions: github.ListOptions{PerPage: 30}}
+	opts := &github.ListMembersOptions{Role: role, ListOptions: github.ListOptions{PerPage: 30}}
 
 	var members []*github.User
 
@@ -388,7 +388,7 @@ func OrgListMembers(token string, org string) []*github.User {
 		listMembers, resp, err := client.Organizations.ListMembers(context.Background(), org, opts)
 		if err != nil {
 			log.Printf("ERROR : %s", err.Error())
-			return nil
+			return nil, err
 		}
 
 		members = append(members, listMembers...)
@@ -398,7 +398,7 @@ func OrgListMembers(token string, org string) []*github.User {
 		opts.Page = resp.NextPage
 	}
 
-	return members
+	return members, nil
 }
 
 func GetOrganizations(token string) ([]*github.Organization, error) {
@@ -422,4 +422,44 @@ func GetOrganizations(token string) ([]*github.Organization, error) {
 
 	return orgs, nil
 
+}
+
+func GetTeam(token string, org string, slug string) (*github.Team, error) {
+	client := CreateClient(token)
+
+	team, resp, err := client.Teams.GetTeamBySlug(context.Background(), org, slug)
+	if err != nil && resp.StatusCode != 404 {
+		log.Printf("ERROR : %s", err.Error())
+		return nil, err
+	}
+
+	return team, nil
+}
+
+func CreateTeam(token string, org string, teamName string) (*github.Team, error) {
+	client := CreateClient(token)
+	newTeam := github.NewTeam{
+		Name: teamName,
+	}
+
+	team, _, err := client.Teams.CreateTeam(context.Background(), org, newTeam)
+	if err != nil {
+		log.Printf("ERROR : %s", err.Error())
+		return nil, err
+	}
+
+	return team, nil
+}
+
+func AddMemberToTeam(token string, org string, slug string, user string, role string) (*github.Membership, error) {
+	client := CreateClient(token)
+	opts := &github.TeamAddTeamMembershipOptions{Role: role}
+
+	teamMembership, _, err := client.Teams.AddTeamMembershipBySlug(context.Background(), org, slug, user, opts)
+	if err != nil {
+		log.Printf("ERROR : %s", err.Error())
+		return nil, err
+	}
+
+	return teamMembership, nil
 }
