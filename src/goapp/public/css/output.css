@@ -4046,6 +4046,30 @@ select {
   padding-top: 1.25rem;
 }
 
+.pl-7 {
+  padding-left: 1.75rem;
+}
+
+.pl-12 {
+  padding-left: 3rem;
+}
+
+.pl-\[25px\] {
+  padding-left: 25px;
+}
+
+.pl-\[75px\] {
+  padding-left: 75px;
+}
+
+.pl-\[65px\] {
+  padding-left: 65px;
+}
+
+.pl-\[48px\] {
+  padding-left: 48px;
+}
+
 .text-left {
   text-align: left;
 }
