@@ -367,7 +367,7 @@ func CheckAllRequests(id int64, host string) {
 		db.UpdateProjectVisibilityId(id, PUBLIC)
 
 		repoResp, _ := ghAPI.GetRepository(repo, newOwner)
-		db.UpdateTFSProjectReferenceById(id, repoResp.GetHTMLURL())
+		db.UpdateTFSProjectReferenceById(id, repoResp.GetHTMLURL(), *repoResp.GetOwner().Login)
 	}
 
 	// Check if all requests are responded by approvers.

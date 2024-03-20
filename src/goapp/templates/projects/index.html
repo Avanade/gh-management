@@ -72,7 +72,7 @@
                   <div>
                     <span id="reponameValue"
                       class="text-sm font-medium truncate z-50"
-                      x-bind:class="repository.IsArchived? 'text-gray-600' : 'text-indigo-600'" x-text="repository.Name"
+                      x-bind:class="repository.IsArchived? 'text-gray-600' : 'text-indigo-600'" x-text="`${repository.Organization}/${repository.Name}`"
                       title="Repository name"> </span>
                     <span class="text-sm font-medium text-gray-400 truncate"
                       x-show="repository.IsArchived">(Archived)</span>
@@ -129,6 +129,12 @@
                           class="hover:bg-[#fff2eb] relative cursor-pointer select-none py-2 pl-3 pr-9 text-gray-900"
                           id="option-0" role="option" tabindex="-1">
                           <span class="block truncate">Make Public</span>
+                        </li>
+                        <li x-show="repository.IsOrgRegional"
+                          @click="moveToInnersource(repository.Id)"
+                          class="hover:bg-[#fff2eb] relative cursor-pointer select-none py-2 pl-3 pr-9 text-gray-900"
+                          id="option-0" role="option" tabindex="-1">
+                          <span class="block truncate">Move to Innersource</span>
                         </li>
                       </ul>
                     </div>
@@ -262,7 +268,7 @@
                 <div class="flex items-center justify-between">
                   <div>
                     <span class="text-sm font-medium truncate"
-                      x-bind:class="repository.IsArchived? 'text-gray-600' : 'text-indigo-600'" x-text="repository.Name"
+                      x-bind:class="repository.IsArchived? 'text-gray-600' : 'text-indigo-600'" x-text="`${repository.Organization}/${repository.Name}`"
                       title="Repository name"></span>
                     <span class="text-sm font-medium text-gray-400 truncate"
                       x-show="repository.IsArchived">(Archived)</span>
@@ -535,6 +541,7 @@
       search: '',
       userRepositoriesList: [],
       allRepositoriesList: [],
+      regionalOrganizations: [],
       currentSelected: -1,
       offset: 0,
       total: 0,
@@ -543,7 +550,8 @@
       page: 0,
       hasApprovers: false,
       showECATTFormModal: false,
-      init() {
+      async init() {
+        this.regionalOrganizations = await getRegionalOrganizations()
         this.getPageDetails();
         this.onSetPopsetEventListener(this, this.onURLChangeCallback)
       },
@@ -553,7 +561,10 @@
           fetch('/api/repositories/my')
             .then(r => {
               r.json().then(body => {
-                console.log(body)
+                console.log(body.map(v => {
+                  v['IsOrgRegional'] = this.regionalOrganizations.some(regionalOrganization => { return regionalOrganization.Name == v.Organization})
+                  return v
+                }))
                 this.userRepositoriesList = body
                 this.showSpinner = false
               });
@@ -667,6 +678,15 @@
         Alpine.store('master').confirmationModal.update(title, message, f)
         Alpine.store('master').confirmationModal.show()
       },
+      moveToInnersource(projectId) {
+        let f = () => {
+          Alpine.store('master').modal.show()
+          Alpine.store('master').putData(`/api/repositories/${projectId}/transfer`, {"newOrg":"innersource"}, "Repository has been transferred to innersource org", "Refresh repository list",
+            "/")
+        }
+        Alpine.store('master').confirmationModal.update("Confirmation", "Are you sure you want to transfer this repository to innersource org?", f)
+        Alpine.store('master').confirmationModal.show()
+      },
       goto(url) {
         window.location.href = url
       },
@@ -717,6 +737,12 @@
         e.getPageDetails();
       }
     }
+  }
+
+  async function getRegionalOrganizations(){
+      const res = await fetch('/api/github-organization/region')
+      const data = await res.json()
+      return data
   }
 
   function wordCloud(selector) {

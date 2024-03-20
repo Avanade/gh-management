@@ -634,13 +634,14 @@ func UpdateProjectVisibilityId(id int64, visibilityId int64) error {
 	return nil
 }
 
-func UpdateTFSProjectReferenceById(id int64, tFSProjectReference string) error {
+func UpdateTFSProjectReferenceById(id int64, tFSProjectReference, organization string) error {
 	db := ConnectDb()
 	defer db.Close()
 
 	param := map[string]interface{}{
 		"Id":                  id,
 		"TFSProjectReference": tFSProjectReference,
+		"Organization":        organization,
 	}
 
 	_, err := db.ExecuteStoredProcedure("PR_Projects_Update_TFSProjectReference_ById", param)
