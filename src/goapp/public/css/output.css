@@ -3994,6 +3994,10 @@ select {
   padding-left: 2rem;
 }
 
+.pl-\[48px\] {
+  padding-left: 48px;
+}
+
 .pr-0 {
   padding-right: 0px;
 }
@@ -4044,30 +4048,6 @@ select {
 
 .pt-5 {
   padding-top: 1.25rem;
-}
-
-.pl-7 {
-  padding-left: 1.75rem;
-}
-
-.pl-12 {
-  padding-left: 3rem;
-}
-
-.pl-\[25px\] {
-  padding-left: 25px;
-}
-
-.pl-\[75px\] {
-  padding-left: 75px;
-}
-
-.pl-\[65px\] {
-  padding-left: 65px;
-}
-
-.pl-\[48px\] {
-  padding-left: 48px;
 }
 
 .text-left {

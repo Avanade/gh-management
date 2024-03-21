@@ -126,6 +126,8 @@ func CreateRepository(w http.ResponseWriter, r *http.Request) {
 	var existsDb bool
 	var existsGH bool
 	dashedProjName := strings.ReplaceAll(body.Name, " ", "-")
+	description := strings.ReplaceAll(body.Description, "\n", " ")
+
 	go func() { checkDB <- db.ProjectsIsExisting(body.Name) }()
 	go func() { b, _ := ghAPI.IsRepoExisting(dashedProjName); checkGH <- b }()
 
@@ -150,7 +152,8 @@ func CreateRepository(w http.ResponseWriter, r *http.Request) {
 		}
 
 		logger.LogTrace("Creating repository...", contracts.Information)
-		repo, err := ghAPI.CreatePrivateGitHubRepository(body.Name, body.Description, username.(string))
+		repo, err := ghAPI.CreatePrivateGitHubRepository(body.Name, description, username.(string))
+
 		if err != nil {
 			logger.LogException(err)
 			HttpResponseError(w, http.StatusInternalServerError, "There is a problem creating the GitHub repository.", logger)
