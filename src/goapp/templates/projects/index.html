@@ -515,7 +515,7 @@
         Alpine.store('master').putData(`/api/repositories/${this.form.projectId}/transfer`, {"newOrg":this.form.selectedRegionalOrg[0].text}, `Repository has been transferred to ${this.form.selectedRegionalOrg[0].text}`, "Refresh repository list",
             "/repositories")
         }
-        Alpine.store('master').confirmationModal.update("Confirmation", `Are you sure you want to transfer this repository to ${this.form.selectedRegionalOrg[0].text} org?`, f)
+        Alpine.store('master').confirmationModal.update("Confirmation", `Repository collaborators who are not members of ${this.form.selectedRegionalOrg[0].text} will be removed from the repository. Do you wish to continue?`, f)
         Alpine.store('master').confirmationModal.show()
       },
       onClose: function() {

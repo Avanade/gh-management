@@ -240,9 +240,9 @@ func TransferRepository(name string, owner string, newOwner string) (*github.Rep
 	client := CreateClient(os.Getenv("GH_TOKEN"))
 	opt := github.TransferRequest{NewOwner: newOwner}
 
-	repo, resp, _ := client.Repositories.Transfer(context.Background(), owner, name, opt)
+	repo, resp, err := client.Repositories.Transfer(context.Background(), owner, name, opt)
 	if resp.StatusCode != 202 {
-		return nil, fmt.Errorf("status Code:%v \nfailed to transfer the %v repository from %v to %v", resp.Status, name, owner, newOwner)
+		return nil, err
 	}
 	return repo, nil
 }
