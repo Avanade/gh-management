@@ -4,7 +4,7 @@
 <div id="pageTitle">Repositories</div>
 
 <div x-data="deeplink">
-  <div x-data="myRepositoriesData({{ .profileGH.IsValid }})">
+  <div x-data="myRepositoriesData({{ .profileGH.IsValid }}, '{{ .innersource }}', '{{ .opensource }}')">
     <div class="flex justify-between">
       <div>
         <nav class="flex space-x-4" aria-label="Tabs">
@@ -72,16 +72,16 @@
                   <div>
                     <span id="reponameValue"
                       class="text-sm font-medium truncate z-50"
-                      x-bind:class="repository.IsArchived? 'text-gray-600' : 'text-indigo-600'" x-text="repository.Name"
+                      x-bind:class="repository.IsArchived? 'text-gray-600' : 'text-indigo-600'" x-text="`${repository.Organization}/${repository.Name}`"
                       title="Repository name"> </span>
                     <span class="text-sm font-medium text-gray-400 truncate"
                       x-show="repository.IsArchived">(Archived)</span>
                   </div>
-                  <div @click.stop @click.outside="closeUserRepositoryOptions(-1)"
+                  <div @click.stop
                     x-show="repository.RepositorySource==='GitHub'">
                     <div class="relative mt-1">
                       <button
-                        @click="repository.showOptions = !repository.showOptions; closeUserRepositoryOptions(index);"
+                        @click="repository.showOptions = !repository.showOptions;"
                         type="button"
                         class="absolute inset-y-0 right-0 flex items-center rounded-r-md px-2 focus:outline-none">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" fill="none"
@@ -129,6 +129,12 @@
                           class="hover:bg-[#fff2eb] relative cursor-pointer select-none py-2 pl-3 pr-9 text-gray-900"
                           id="option-0" role="option" tabindex="-1">
                           <span class="block truncate">Make Public</span>
+                        </li>
+                        <li x-show="repository.IsOrgRegional"
+                          @click="moveToInnersource(repository.Id)"
+                          class="hover:bg-[#fff2eb] relative cursor-pointer select-none py-2 pl-3 pr-9 text-gray-900"
+                          id="option-0" role="option" tabindex="-1">
+                          <span class="block truncate" x-text="`Move to ${innersource}`"></span>
                         </li>
                       </ul>
                     </div>
@@ -262,17 +268,17 @@
                 <div class="flex items-center justify-between">
                   <div>
                     <span class="text-sm font-medium truncate"
-                      x-bind:class="repository.IsArchived? 'text-gray-600' : 'text-indigo-600'" x-text="repository.Name"
+                      x-bind:class="repository.IsArchived? 'text-gray-600' : 'text-indigo-600'" x-text="`${repository.Organization}/${repository.Name}`"
                       title="Repository name"></span>
                     <span class="text-sm font-medium text-gray-400 truncate"
                       x-show="repository.IsArchived">(Archived)</span>
                   </div>
                   {{ if .isAdmin }}
-                  <div @click.stop @click.outside="closeUserRepositoryOptions(-1)"
-                    x-show="repository.RepositorySource==='GitHub' && repository.Visibility==='Public' && isGHAssociated">
+                  <div @click.stop
+                    x-show="repository.RepositorySource==='GitHub' && isGHAssociated && (repository.Visibility==='Public' || !repository.IsOrgRegional)">
                     <div class="relative mt-1">
                       <button
-                        @click="repository.showOptions = !repository.showOptions; closeUserRepositoryOptions(index);"
+                        @click="repository.showOptions = !repository.showOptions"
                         type="button"
                         class="absolute inset-y-0 right-0 flex items-center rounded-r-md px-2 focus:outline-none">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" fill="none"
@@ -285,9 +291,16 @@
                         class="absolute z-10 mt-1 max-h-60 right-0 top-1 overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm"
                         id="options" role="listbox">
                         <li @click="setVisibility(repository.Name,repository.Id,repository.Visibility,'private')"
+                          x-show="repository.Visibility==='Public'"
                           class="hover:bg-[#fff2eb] relative cursor-pointer select-none py-2 pl-3 pr-9 text-gray-900"
                           id="option-0" role="option" tabindex="-1">
                           <span class="block truncate">Make Private</span>
+                        </li>
+                        <li @click="transferRepoRegionalOrg.onOpen(repository.Id)"
+                          x-show="!repository.IsOrgRegional"
+                          class="hover:bg-[#fff2eb] relative cursor-pointer select-none py-2 pl-3 pr-9 text-gray-900"
+                          id="option-0" role="option" tabindex="-1">
+                          <span class="block truncate">Move to Regional Org</span>
                         </li>
                       </ul>
                     </div>
@@ -420,14 +433,98 @@
         </div>
       </div>
     </template>
+
+    <div>
+      <template x-if="transferRepoRegionalOrg.state.isShowModal">
+        <div class="relative z-10" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+          <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity opacity-100"></div>
+        
+          <div class="fixed inset-0 z-10 overflow-y-auto">
+            <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+              <div class="relative transform overflow-hidden rounded-lg bg-white px-4 pb-4 pt-5 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg sm:p-6 opacity-100 translate-y-0 sm:scale-100">
+                
+                <div class="mt-1 sm:mt-2">
+                  <h3 class="text-base font-semibold leading-6 text-gray-900" id="modal-title">TRANSFER TO REGIONAL ORG</h3>
+                  <div class="mt-2">
+                    <form class="space-y-6" onsubmit="event.preventDefault()" autocomplete="off">
+                      <div class="space-y-8 divide-y divide-gray-200 sm:space-y-5">
+                        <div x-data="combobox({
+                                            data: regionalOrganizations,
+                                            id : 'Id',
+                                            text : 'Name',
+                                            label : 'Regional Organization*',
+                                            isInsertable : false,
+                                            displaySearch : false
+                                        })" x-modelable="selected" x-model="transferRepoRegionalOrg.form.selectedRegionalOrg">
+                            <div x-html="template"></div>
+                        </div>
+                      </div>
+                      <div class="mt-5 sm:mt-6">
+                        <button 
+                          x-bind:disabled="transferRepoRegionalOrg.form.selectedRegionalOrg.length == 0"
+                          @click="transferRepoRegionalOrg.onSubmit()"
+                          type="submit" 
+                          class="inline-flex justify-center rounded-md bg-[#FF5800] px-5 mr-2 py-2 text-sm font-semibold text-white shadow-sm  focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:bg-orange-300">
+                          Submit
+                        </button>
+                        <button
+                          @click="transferRepoRegionalOrg.onClose()"
+                          type="button"
+                          class="inline-flex justify-center rounded-md bg-gray-200 px-3 py-2 text-sm font-semibold text-gray-700 shadow-sm  focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
+                          Cancel
+                        </button>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+    
+              </div>
+            </div>
+          </div>
+        </div>
+      </template>
+    </div>
   </div>
 </div>
 
 <script src="/public/components/popup.js"></script>
 <script src="/public/components/deeplink.js"></script>
 <script src="https://d3js.org/d3.v3.min.js"></script>
+<script src="/public/components/combobox.js"></script>
 <script src="https://rawgit.com/jasondavies/d3-cloud/master/build/d3.layout.cloud.js"></script>
 <script type="text/javascript">
+  function TransferRepoRegionalOrgForm() {
+    return {
+      state: {
+        isShowModal: false
+      },
+      form: {
+        projectId: 0,
+        selectedRegionalOrg: []
+      },
+      onOpen: function(projectId) {
+        this.form.projectId = projectId
+        this.state.isShowModal = true
+      },
+      onSubmit: function() {
+        if (this.form.selectedRegionalOrg.length == 0) 
+          return
+        
+        let f = () => {
+        Alpine.store('master').modal.show()
+        Alpine.store('master').putData(`/api/repositories/${this.form.projectId}/transfer`, {"newOrg":this.form.selectedRegionalOrg[0].text}, `Repository has been transferred to ${this.form.selectedRegionalOrg[0].text}`, "Refresh repository list",
+            "/repositories")
+        }
+        Alpine.store('master').confirmationModal.update("Confirmation", `Repository collaborators who are not members of ${this.form.selectedRegionalOrg[0].text} will be removed from the repository. Do you wish to continue?`, f)
+        Alpine.store('master').confirmationModal.show()
+      },
+      onClose: function() {
+        this.state.isShowModal = false;
+        this.form.selectedRegionalOrg = [];
+      }
+    }
+  }
+
   const popularTopics = () => {
     return {
       topFivePopularTopics: [
@@ -526,15 +623,20 @@
   }
 
   function myRepositoriesData(
-    isGHAssociated
+    isGHAssociated,
+    innersource,
+    opensource
   ) {
     return {
+      innersource: '',
+      opensource: '',
       isGHAssociated: false,
       showSpinner: true,
       view: '',
       search: '',
       userRepositoriesList: [],
       allRepositoriesList: [],
+      regionalOrganizations: [],
       currentSelected: -1,
       offset: 0,
       total: 0,
@@ -543,17 +645,24 @@
       page: 0,
       hasApprovers: false,
       showECATTFormModal: false,
-      init() {
+      async init() {
+        this.innersource = innersource
+        this.opensource = opensource
+        this.regionalOrganizations = await getRegionalOrganizations()
         this.getPageDetails();
         this.onSetPopsetEventListener(this, this.onURLChangeCallback)
       },
+      transferRepoRegionalOrg: TransferRepoRegionalOrgForm(),
       getUserRepositories() {
         if (!this.userRepositoriesList || this.userRepositoriesList.length === 0) {
           this.showSpinner = true
           fetch('/api/repositories/my')
             .then(r => {
               r.json().then(body => {
-                console.log(body)
+                body.map(v => {
+                  v['IsOrgRegional'] = this.regionalOrganizations.some(regionalOrganization => { return regionalOrganization.Name == v.Organization})
+                  return v
+                })
                 this.userRepositoriesList = body
                 this.showSpinner = false
               });
@@ -568,6 +677,10 @@
         fetch(`/api/repositories?search=${this.search? this.search : ''}&offset=${this.offset}`)
           .then(r => {
             r.json().then(body => {
+              body.data.map(v => {
+                v['IsOrgRegional'] = this.regionalOrganizations.some(regionalOrganization => { return regionalOrganization.Name == v.Organization})
+                return v
+              })
               this.allRepositoriesList = body.data
               this.total = body.total
               this.showStart = this.allRepositoriesList?.length > 0 ? ((this.page * 15) + 1) : 0;
@@ -629,14 +742,6 @@
         this.getAllRepositories();
         this.setState(this.view, this.search, this.page, this.offset)
       },
-      closeUserRepositoryOptions(newSelected) {
-        if (newSelected !== this.currentSelected) {
-          if (this.currentSelected > -1) {
-            this.userRepositoriesList[this.currentSelected].showOptions = false
-          }
-          this.currentSelected = newSelected
-        }
-      },
       archiveRepository(repositoryName, repositoryId, visibility, isArchived) {
         let url = `/api/repositories/${repositoryId}/archive/${repositoryName}/${visibility}/${isArchived? '0': '1'}`
 
@@ -665,6 +770,15 @@
           `This repository will be moved to innersource and repository visibility will be ${desiredState}.` :
           `You are about to change your repository's visibility to ${desiredState}.`
         Alpine.store('master').confirmationModal.update(title, message, f)
+        Alpine.store('master').confirmationModal.show()
+      },
+      moveToInnersource(projectId) {
+        let f = () => {
+          Alpine.store('master').modal.show()
+          Alpine.store('master').putData(`/api/repositories/${projectId}/transfer`, {"newOrg":"innersource"}, "Repository has been transferred to innersource org", "Refresh repository list",
+            "/repositories")
+        }
+        Alpine.store('master').confirmationModal.update("Confirmation", `Repository collaborators who are not members of ${this.innersource} will be removed from the repository. Do you wish to continue?`, f)
         Alpine.store('master').confirmationModal.show()
       },
       goto(url) {
@@ -717,6 +831,12 @@
         e.getPageDetails();
       }
     }
+  }
+
+  async function getRegionalOrganizations(){
+      const res = await fetch('/api/github-organization/region')
+      const data = await res.json()
+      return data
   }
 
   function wordCloud(selector) {

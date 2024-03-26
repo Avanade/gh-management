@@ -236,15 +236,15 @@ func ArchiveProject(projectName string, archive bool, org string) error {
 	return nil
 }
 
-func TransferRepository(repo string, owner string, newOwner string) (*github.Repository, error) {
+func TransferRepository(name string, owner string, newOwner string) (*github.Repository, error) {
 	client := CreateClient(os.Getenv("GH_TOKEN"))
 	opt := github.TransferRequest{NewOwner: newOwner}
 
-	resp, _, err := client.Repositories.Transfer(context.Background(), owner, repo, opt)
-	if err != nil {
+	repo, resp, err := client.Repositories.Transfer(context.Background(), owner, name, opt)
+	if resp.StatusCode != 202 {
 		return nil, err
 	}
-	return resp, nil
+	return repo, nil
 }
 
 func IsOrganizationMember(token, org, ghUser string) (bool, error) {

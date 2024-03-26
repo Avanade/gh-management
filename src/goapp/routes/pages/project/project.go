@@ -18,8 +18,10 @@ func IndexHandler(w http.ResponseWriter, r *http.Request) {
 	sessiongh, _ := session.GetGitHubUserData(w, r)
 
 	data := map[string]interface{}{
-		"profileGH": sessiongh,
-		"isAdmin":   isAdmin,
+		"profileGH":   sessiongh,
+		"isAdmin":     isAdmin,
+		"innersource": os.Getenv("GH_ORG_INNERSOURCE"),
+		"opensource":  os.Getenv("GH_ORG_OPENSOURCE"),
 	}
 	template.UseTemplate(&w, r, "projects/index", data)
 }

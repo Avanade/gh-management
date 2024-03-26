@@ -95,6 +95,10 @@ type RequestMakePublicDto struct {
 	OSSContributionInformation string `json:"osscontributionInformation"`
 }
 
+type TransferRepoDto struct {
+	NewOrg string `json:"newOrg"`
+}
+
 func CreateRepository(w http.ResponseWriter, r *http.Request) {
 	logger := appinsights_wrapper.NewClient()
 	defer logger.EndOperation()
@@ -755,7 +759,12 @@ func SetVisibility(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		ghAPI.TransferRepository(project, opensource, innersource)
+		_, err = ghAPI.TransferRepository(project, opensource, innersource)
+		if err != nil {
+			logger.LogException(err)
+			http.Error(w, "Failed to make the repository "+desiredState, http.StatusInternalServerError)
+			return
+		}
 
 		time.Sleep(3 * time.Second)
 		repoResp, err := ghAPI.GetRepository(project, innersource)
@@ -764,7 +773,7 @@ func SetVisibility(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		err = db.UpdateTFSProjectReferenceById(id, repoResp.GetHTMLURL())
+		err = db.UpdateTFSProjectReferenceById(id, repoResp.GetHTMLURL(), *repoResp.GetOwner().Login)
 		if err != nil {
 			logger.LogException(err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -781,6 +790,69 @@ func SetVisibility(w http.ResponseWriter, r *http.Request) {
 	}
 
 	err = db.UpdateProjectVisibilityId(id, int64(visibilityId))
+	if err != nil {
+		logger.LogException(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+}
+
+func TransferRepository(w http.ResponseWriter, r *http.Request) {
+	logger := appinsights_wrapper.NewClient()
+	defer logger.EndOperation()
+
+	vars := mux.Vars(r)
+
+	projectId, err := strconv.Atoi(vars["projectId"])
+	if err != nil {
+		logger.LogException(err)
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	var body TransferRepoDto
+	r.ParseForm()
+	err = json.NewDecoder(r.Body).Decode(&body)
+	if err != nil {
+		logger.LogException(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	var newOwner string
+
+	if body.NewOrg == "innersource" {
+		newOwner = os.Getenv("GH_ORG_INNERSOURCE")
+	} else if body.NewOrg == "opensource" {
+		newOwner = os.Getenv("GH_ORG_OPENSOURCE")
+	} else {
+		newOwner = body.NewOrg
+	}
+
+	project := db.GetProjectById(int64(projectId))
+	name := project[0]["Name"].(string)
+	owner := project[0]["Organization"].(string)
+
+	ValidateOrgMembers(owner, name, newOwner, logger)
+
+	_, err = ghAPI.TransferRepository(name, owner, newOwner)
+	if err != nil {
+		logger.LogException(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	time.Sleep(3 * time.Second)
+	repository, err := ghAPI.GetRepository(name, newOwner)
+	if err != nil {
+		logger.LogException(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	err = db.UpdateTFSProjectReferenceById(int64(projectId), repository.GetHTMLURL(), *repository.GetOwner().Login)
 	if err != nil {
 		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -1814,4 +1886,32 @@ func EmailcoownerDeficient(to string, Org string, reponame string) {
 	}
 
 	email.SendEmail(m, true)
+}
+
+func ValidateOrgMembers(org, repo, newOrg string, logger *appinsights_wrapper.TelemetryClient) (isSuccessful bool) {
+	isSuccessful = true
+	// GET ALL MEMBERS OF THE REPO
+	collaborators := ghAPI.RepositoriesListCollaborators(os.Getenv("GH_TOKEN"), org, repo, "", "")
+
+	// CHECK EACH COLLABORATORS OF THE REPO IF THEY ARE MEMBER OF THE NEW ORG
+	// IF NOT REMOVE THEM FROM REPO
+	for _, collaborator := range collaborators {
+		isMember, err := ghAPI.IsOrganizationMember(os.Getenv("GH_TOKEN"), newOrg, collaborator.GetLogin())
+		if err != nil {
+			isSuccessful = false
+			logger.LogException(err)
+			continue
+		}
+
+		if !isMember {
+			_, err := ghAPI.RemoveCollaborator(org, repo, collaborator.GetLogin(), "")
+			if err != nil {
+				isSuccessful = false
+				logger.LogException(err)
+				continue
+			}
+		}
+	}
+
+	return
 }

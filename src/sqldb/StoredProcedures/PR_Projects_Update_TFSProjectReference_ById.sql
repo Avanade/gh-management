@@ -1,6 +1,7 @@
 CREATE PROCEDURE [dbo].[PR_Projects_Update_TFSProjectReference_ById]
-  @Id INT,
-	@TFSProjectReference VARCHAR(150)
+  	@Id INT,
+	@TFSProjectReference VARCHAR(150),
+	@Organization VARCHAR(150)
 AS
 
 BEGIN
@@ -13,6 +14,7 @@ BEGIN
 		[dbo].[Projects]
    SET 
 		[TFSProjectReference] = @TFSProjectReference,
+		[Organization] = @Organization,
 		[Modified] = GETDATE()
  WHERE  
 		[Id] = @Id
