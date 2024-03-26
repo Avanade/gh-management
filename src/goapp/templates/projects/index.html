@@ -775,7 +775,7 @@
           Alpine.store('master').putData(`/api/repositories/${projectId}/transfer`, {"newOrg":"innersource"}, "Repository has been transferred to innersource org", "Refresh repository list",
             "/")
         }
-        Alpine.store('master').confirmationModal.update("Confirmation", "Are you sure you want to transfer this repository to innersource org?", f)
+        Alpine.store('master').confirmationModal.update("Confirmation", `Repository collaborators who are not members of innersource will be removed from the repository. Do you wish to continue?`, f)
         Alpine.store('master').confirmationModal.show()
       },
       goto(url) {
