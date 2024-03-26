@@ -4,7 +4,7 @@
 <div id="pageTitle">Repositories</div>
 
 <div x-data="deeplink">
-  <div x-data="myRepositoriesData({{ .profileGH.IsValid }})">
+  <div x-data="myRepositoriesData({{ .profileGH.IsValid }}, '{{ .innersource }}', '{{ .opensource }}')">
     <div class="flex justify-between">
       <div>
         <nav class="flex space-x-4" aria-label="Tabs">
@@ -134,7 +134,7 @@
                           @click="moveToInnersource(repository.Id)"
                           class="hover:bg-[#fff2eb] relative cursor-pointer select-none py-2 pl-3 pr-9 text-gray-900"
                           id="option-0" role="option" tabindex="-1">
-                          <span class="block truncate">Move to Innersource</span>
+                          <span class="block truncate" x-text="`Move to ${innersource}`"></span>
                         </li>
                       </ul>
                     </div>
@@ -623,9 +623,13 @@
   }
 
   function myRepositoriesData(
-    isGHAssociated
+    isGHAssociated,
+    innersource,
+    opensource
   ) {
     return {
+      innersource: '',
+      opensource: '',
       isGHAssociated: false,
       showSpinner: true,
       view: '',
@@ -642,6 +646,8 @@
       hasApprovers: false,
       showECATTFormModal: false,
       async init() {
+        this.innersource = innersource
+        this.opensource = opensource
         this.regionalOrganizations = await getRegionalOrganizations()
         this.getPageDetails();
         this.onSetPopsetEventListener(this, this.onURLChangeCallback)
@@ -772,7 +778,7 @@
           Alpine.store('master').putData(`/api/repositories/${projectId}/transfer`, {"newOrg":"innersource"}, "Repository has been transferred to innersource org", "Refresh repository list",
             "/repositories")
         }
-        Alpine.store('master').confirmationModal.update("Confirmation", `Repository collaborators who are not members of innersource will be removed from the repository. Do you wish to continue?`, f)
+        Alpine.store('master').confirmationModal.update("Confirmation", `Repository collaborators who are not members of ${this.innersource} will be removed from the repository. Do you wish to continue?`, f)
         Alpine.store('master').confirmationModal.show()
       },
       goto(url) {
