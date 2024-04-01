@@ -107,6 +107,24 @@ func GetOrganizationAccessByApprovalRequestItemId(itemId string) (*OrganizationA
 	return &organizationAccess, err
 }
 
+func HasOrganizationAccessPendingRequest(userPrincipalName string, organizationId int64) (hasPendingRequest bool, err error) {
+	db := ConnectDb()
+	defer db.Close()
+
+	param := map[string]interface{}{
+		"UserPrincipalName": userPrincipalName,
+		"OrganizationId":    organizationId,
+	}
+
+	result, err := db.ExecuteStoredProcedureWithResult("dbo.PR_OrganizationAcess_HasPendingRequest", param)
+	if err != nil {
+		return
+	}
+
+	hasPendingRequest = result[0]["HasPendingRequest"].(bool)
+	return
+}
+
 //  APPROVAL REQUESTS
 
 func InsertOrganizationAccessApprovalRequest(organizationAccessId, requestId int64) error {

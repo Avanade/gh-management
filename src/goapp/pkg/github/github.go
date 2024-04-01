@@ -253,6 +253,12 @@ func IsOrganizationMember(token, org, ghUser string) (bool, error) {
 	return isOrgMember, err
 }
 
+func UserMembership(token, org, ghUser string) (*github.Membership, error) {
+	client := CreateClient(token)
+	membership, _, err := client.Organizations.GetOrgMembership(context.Background(), ghUser, org)
+	return membership, err
+}
+
 func OrganizationInvitation(token string, username string, org string) *github.Invitation {
 	client := CreateClient(token)
 	REINSTATE_ROLE := "reinstate"

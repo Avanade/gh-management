@@ -364,16 +364,30 @@ func RequestOrganizationAccess(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	token := os.Getenv("GH_TOKEN")
-	isExist, err := ghAPI.IsOrganizationMember(token, regionalOrg.Name, ghUsername)
+	membership, _ := ghAPI.UserMembership(token, regionalOrg.Name, ghUsername)
+	if membership != nil {
+		switch membership.GetState() {
+		case "active":
+			logger.LogException(err)
+			http.Error(w, "The request cannot proceed because you are already a member of this organization.", http.StatusBadRequest)
+			return
+		case "pending":
+			logger.LogException(err)
+			http.Error(w, fmt.Sprint("The request cannot proceed because you have pending invitation from this organization, ", regionalOrg.Name), http.StatusBadRequest)
+			return
+		}
+	}
+
+	hasPendingRequest, err := db.HasOrganizationAccessPendingRequest(username, regionalOrg.Id)
 	if err != nil {
 		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	if isExist {
+	if hasPendingRequest {
 		logger.LogException(err)
-		http.Error(w, "the request cannot proceed because you are already a member of this organization.", http.StatusBadRequest)
+		http.Error(w, "The request cannot proceed because you have pending request.", http.StatusBadRequest)
 		return
 	}
 
@@ -560,6 +574,17 @@ func CreateOrganizationAccessApprovalRequest(
 													<td style="font-size: 14px; padding-top: 15px; font-weight: 400;">
 														|RequestedBy|
 													</td>
+												</tr>
+												<tr>
+													<th class="center-table">
+														<table style="width: 100%; max-width: 700px;" class="margin-auto">
+															<tr>
+																<td style="padding-top: 20px">
+																Note: Approving the request will create an invitation for the requestor to join the organization.
+																</td>
+															</tr>
+														</table>
+													</th>
 												</tr>
 											</table>
 										</th>
