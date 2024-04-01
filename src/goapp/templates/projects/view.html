@@ -5,11 +5,12 @@
         isOwner: {{ .isOwner }},
         isAdmin: {{ .isAdmin }},
         isGHValid: {{ .profileGH.IsValid }},
-        isMember: {{ .isMember}}
+        isMember: {{ .isMember}},
+        orgName: '{{ .orgName }}'
     })">
         <div class="flex mb-3">
             <div class="flex-grow font-bold self-center py-2">
-                <h4 class="text-lg" x-text="state.about.name">repository-name</h4>
+                <h4 class="text-lg" x-text="`${state.orgName}/${state.about.name}`">repository-name</h4>
             </div>
             <div class="flex-none" x-show="state.isGHValid">
                 <template x-if="state.isMember">
@@ -429,7 +430,8 @@
         isOwner = false,
         isAdmin = false,
         isGHValid = false,
-        isMember = false
+        isMember = false,
+        orgName = ""
     }) => {
         return {
             state: {
@@ -437,6 +439,7 @@
                 isAdmin: false,
                 isGHValid: false,
                 isMember: false,
+                orgName: "",
 
                 readme: "",
                 about: {
@@ -468,6 +471,7 @@
                 this.state.isAdmin = isAdmin;
                 this.state.isGHValid = isGHValid;
                 this.state.isMember = isMember;
+                this.state.orgName = orgName;
 
                 const repoDetails = await getRepositoryById(this.state.id)
                 const created = new Date(repoDetails.Created)

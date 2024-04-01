@@ -116,6 +116,7 @@ func ViewHandler(w http.ResponseWriter, r *http.Request) {
 		"isAdmin":   isAdmin,
 		"isOwner":   isOwner,
 		"isMember":  isMember,
+		"orgName":   orgName,
 	}
 
 	template.UseTemplate(&w, r, "projects/view", data)
