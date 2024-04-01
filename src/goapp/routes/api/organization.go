@@ -60,23 +60,23 @@ func AddOrganization(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var approverList []string
-	var reqId []int64
+	var requestIds []int64
 	for _, approver := range approvers {
 		approverUserPrincipalName := approver["ApproverUserPrincipalName"].(string)
 		approverList = append(approverList, approverUserPrincipalName)
 
 		// Insert approval request record
-		approvalRequestId, err := db.ApprovalInsert(approverUserPrincipalName, fmt.Sprintf("GitHub Organization for %s - %s", body.ClientName, body.ProjectName), body.Username)
+		requestId, err := db.ApprovalInsert(approverUserPrincipalName, fmt.Sprintf("GitHub Organization for %s - %s", body.ClientName, body.ProjectName), body.Username)
 		if err != nil {
 			logger.LogException(err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 
-		reqId = append(reqId, approvalRequestId[0]["Id"].(int64))
+		requestIds = append(requestIds, requestId)
 
 		// Insert link record
-		err = db.OrganizationApprovalInsert(id, approvalRequestId[0]["Id"].(int64))
+		err = db.OrganizationApprovalInsert(id, requestId)
 		if err != nil {
 			logger.LogException(err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -94,7 +94,7 @@ func AddOrganization(w http.ResponseWriter, r *http.Request) {
 	}
 	body.RegionName = regOrg[0]["Name"].(string)
 	body.ApproverUserPrincipalName = approverList
-	body.RequestId = reqId
+	body.RequestId = requestIds
 	body.Id = int64(id)
 	err = CreateOrganizationApprovalRequest(body, logger)
 	if err != nil {
