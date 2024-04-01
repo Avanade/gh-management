@@ -373,7 +373,7 @@ func RequestOrganizationAccess(w http.ResponseWriter, r *http.Request) {
 
 	if isExist {
 		logger.LogException(err)
-		http.Error(w, "you are already a member of this organization.", http.StatusBadRequest)
+		http.Error(w, "the request cannot proceed because you are already a member of this organization.", http.StatusBadRequest)
 		return
 	}
 
