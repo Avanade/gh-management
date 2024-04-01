@@ -5,7 +5,7 @@ CREATE PROCEDURE [dbo].[PR_OrganizationAcess_HasPendingRequest] (
 BEGIN
     DECLARE @HasPendingRequest BIT
 
-    SET @HasPendingRequest = SELECT
+    SET @HasPendingRequest = (SELECT
             HasPendingRequest = CASE 
                 WHEN COUNT(*) > 0 THEN 0
                 ELSE 1
@@ -23,7 +23,7 @@ BEGIN
                     UserPrincipalName = @UserPrincipalName AND 
                     OrganizationId = @OrganizationId
                 ORDER BY Created DESC
-            ) AND CA.ApprovalStatusId NOT IN (1, 2)
+            ) AND CA.ApprovalStatusId NOT IN (1, 2))
 
     SELECT @HasPendingRequest HasPendingRequest
 END
