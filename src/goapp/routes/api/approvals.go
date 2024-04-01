@@ -88,6 +88,19 @@ func UpdateApprovalStatusCopilot(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
+func UpdateApprovalStatusOrganizationAccess(w http.ResponseWriter, r *http.Request) {
+	logger := appinsights_wrapper.NewClient()
+	defer logger.EndOperation()
+
+	err := ProcessApprovalProjects(r, "orgaccess")
+	if err != nil {
+		logger.LogException(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+}
+
 func UpdateApprovalReassignApprover(w http.ResponseWriter, r *http.Request) {
 	logger := appinsights_wrapper.NewClient()
 	defer logger.EndOperation()
@@ -386,7 +399,19 @@ func ProcessApprovalProjects(r *http.Request, module string) error {
 				return err
 			}
 		}
+	case "orgaccess":
+		_, err = db.UpdateApprovalApproverResponse(req.ItemId, req.Remarks, req.ResponseDate, approvalStatusId, req.RespondedBy)
+		if err != nil {
+			return err
+		}
 
+		if approvalStatusId == APPROVED {
+			orgAccess, err := db.GetOrganizationAccessByApprovalRequestItemId(req.ItemId)
+			if err != nil {
+				return err
+			}
+			ghAPI.OrganizationInvitation(os.Getenv("GH_TOKEN"), orgAccess.User.GithubUsername, orgAccess.Organization.Name)
+		}
 	}
 
 	return nil

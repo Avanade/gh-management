@@ -1,6 +1,6 @@
 package ghmgmt
 
-func ApprovalInsert(approver string, description string, username string) ([]map[string]interface{}, error) {
+func ApprovalInsert(approver string, description string, username string) (requestId int64, err error) {
 	db := ConnectDb()
 	defer db.Close()
 
@@ -13,10 +13,11 @@ func ApprovalInsert(approver string, description string, username string) ([]map
 
 	result, err := db.ExecuteStoredProcedureWithResult("dbo.PR_CommunityApprovals_Insert", params)
 	if err != nil {
-		return nil, err
+		return
 	}
 
-	return result, nil
+	requestId = result[0]["Id"].(int64)
+	return
 }
 
 func CommunityApprovalInsert(communityId int, requestId int64) error {

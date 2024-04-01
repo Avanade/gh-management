@@ -4,22 +4,37 @@
         id: '{{ .id }}',
         isOwner: {{ .isOwner }},
         isAdmin: {{ .isAdmin }},
-        isGHValid: {{ .profileGH.IsValid }}
+        isGHValid: {{ .profileGH.IsValid }},
+        isMember: {{ .isMember}},
+        orgName: '{{ .orgName }}'
     })">
         <div class="flex mb-3">
             <div class="flex-grow font-bold self-center py-2">
-                <h4 class="text-lg" x-text="state.about.name">repository-name</h4>
+                <h4 class="text-lg" x-text="`${state.orgName}/${state.about.name}`">repository-name</h4>
             </div>
             <div class="flex-none" x-show="state.isGHValid">
-                <a 
-                    x-bind:href="state.about.link"
-                    target="_blank"
-                    class="flex items-center bg-[#FF5800] hover:bg-[#FF4300] text-white py-2 px-4 rounded">
-                    <span x-text="`Open in ${state.about.repositorySource}`"></span>
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="flex-shrink-0 w-5 h-5 ml-2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
-                    </svg>
-                </a>
+                <template x-if="state.isMember">
+                    <a 
+                        x-bind:href="state.about.link"
+                        target="_blank"
+                        class="flex items-center bg-[#FF5800] hover:bg-[#FF4300] text-white py-2 px-4 rounded">
+                        <span x-text="`Open in ${state.about.repositorySource}`"></span>
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="flex-shrink-0 w-5 h-5 ml-2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+                        </svg>
+                    </a>
+                </template>
+                <template x-if="!state.isMember">
+                    <a 
+                        href="/other-requests/organization-access"
+                        target="_blank"
+                        class="flex items-center bg-[#FF5800] hover:bg-[#FF4300] text-white py-2 px-4 rounded">
+                        <span>Request Access</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="flex-shrink-0 w-5 h-5 ml-2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+                        </svg>
+                    </a>
+                </template>
             </div>
         </div>
         <div class="flex flex-wrap">
@@ -414,13 +429,17 @@
         id = undefined,
         isOwner = false,
         isAdmin = false,
-        isGHValid = false
+        isGHValid = false,
+        isMember = false,
+        orgName = ""
     }) => {
         return {
             state: {
                 id: 0,
                 isAdmin: false,
                 isGHValid: false,
+                isMember: false,
+                orgName: "",
 
                 readme: "",
                 about: {
@@ -438,6 +457,7 @@
                 activeTab: "readme",
             },
             async init() {
+                console.log("IS MEMBER: ", isMember)
                 this.onSetPopsetEventListener(this, this.onURLChangeCallback)
 
                 if(this.url.searchParams.get('tab')) {
@@ -450,6 +470,8 @@
                 this.state.isOwner = isOwner;
                 this.state.isAdmin = isAdmin;
                 this.state.isGHValid = isGHValid;
+                this.state.isMember = isMember;
+                this.state.orgName = orgName;
 
                 const repoDetails = await getRepositoryById(this.state.id)
                 const created = new Date(repoDetails.Created)
