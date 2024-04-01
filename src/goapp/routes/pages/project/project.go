@@ -83,7 +83,9 @@ func ViewHandler(w http.ResponseWriter, r *http.Request) {
 	profile := iprofile.(map[string]interface{})
 	username := profile["preferred_username"]
 
-	id, err := db.GetProjectIdByOrgName(vars["org"], vars["repo"])
+	orgName := vars["org"]
+
+	id, err := db.GetProjectIdByOrgName(orgName, vars["repo"])
 	if err != nil {
 		log.Println(err)
 		return
@@ -101,11 +103,19 @@ func ViewHandler(w http.ResponseWriter, r *http.Request) {
 		isOwner = true
 	}
 
+	token := os.Getenv("GH_TOKEN")
+	isMember, err := ghAPI.IsOrganizationMember(token, orgName, sessiongh.Username)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
 	data := map[string]interface{}{
 		"id":        id,
 		"profileGH": sessiongh,
 		"isAdmin":   isAdmin,
 		"isOwner":   isOwner,
+		"isMember":  isMember,
 	}
 
 	template.UseTemplate(&w, r, "projects/view", data)
