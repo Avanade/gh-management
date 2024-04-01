@@ -39,24 +39,6 @@ func InsertOrganizationAccess(userPrincipalName string, organizationId int64) (i
 	return
 }
 
-func IsOrganizationExist(userPrincipalName string, organizationId int64) (isExist bool, err error) {
-	db := ConnectDb()
-	defer db.Close()
-
-	param := map[string]interface{}{
-		"UserPrincipalName": userPrincipalName,
-		"OrganizationId":    organizationId,
-	}
-
-	result, err := db.ExecuteStoredProcedureWithResult("dbo.PR_OrganizationAcess_IsExist", param)
-	if err != nil {
-		return
-	}
-
-	isExist = result[0]["IsExist"].(bool)
-	return
-}
-
 func GetOrganizationAccessByUserPrincipalName(userPrincipalName string) ([]OrganizationAccess, error) {
 	db := ConnectDb()
 	defer db.Close()

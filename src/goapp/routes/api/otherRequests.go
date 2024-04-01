@@ -363,23 +363,22 @@ func RequestOrganizationAccess(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-
-	isExist, err := db.IsOrganizationExist(username, regionalOrg.Id)
+	token := os.Getenv("GH_TOKEN")
+	isExist, err := ghAPI.IsOrganizationMember(token, regionalOrg.Name, ghUsername)
 	if err != nil {
 		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	if !isExist {
+	if isExist {
 		logger.LogException(err)
-		http.Error(w, "The request for access to this organization has already been made.", http.StatusBadRequest)
+		http.Error(w, "you are already a member of this organization.", http.StatusBadRequest)
 		return
 	}
 
 	// Get organization owners to produce list of approvers
 	var approvers []string
-	token := os.Getenv("GH_TOKEN")
 	orgOwners, err := ghAPI.OrgListMembers(token, regionalOrg.Name, "admin")
 	if err != nil {
 		logger.LogException(err)
