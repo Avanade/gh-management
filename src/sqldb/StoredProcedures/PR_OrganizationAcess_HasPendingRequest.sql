@@ -7,8 +7,8 @@ BEGIN
 
     SET @HasPendingRequest = (SELECT
             HasPendingRequest = CASE 
-                WHEN COUNT(*) > 0 THEN 0
-                ELSE 1
+                WHEN COUNT(*) > 0 THEN 1
+                ELSE 0
             END
         FROM
             OrganizationAccessApprovalRequests AS OAAR
@@ -23,7 +23,8 @@ BEGIN
                     UserPrincipalName = @UserPrincipalName AND 
                     OrganizationId = @OrganizationId
                 ORDER BY Created DESC
-            ) AND CA.ApprovalStatusId NOT IN (1, 2))
+            ) 
+            AND NOT(CA.ApprovalStatusId NOT IN (1, 2)))
 
     SELECT @HasPendingRequest HasPendingRequest
 END
