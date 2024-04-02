@@ -2,12 +2,12 @@ CREATE PROCEDURE [dbo].[PR_CommunityApprovals_Select_FailedRequestOrganizationAc
 AS
 BEGIN
 	SELECT
-    OA.Id [Id],
-    RO.Name [RegionalOrgName],
-    UC.GitHubUser [GitHubUsername],
-    UC.UserPrincipalName [UserPrincipalName],
+    OA.Id                                         [Id],
+    RO.Name                                       [RegionalOrgName],
+    UC.GitHubUser                                 [GitHubUsername],
+    UC.UserPrincipalName                          [UserPrincipalName],
     STRING_AGG(CA.ApproverUserPrincipalName, ',') [Approvers],
-    STRING_AGG(CA.Id, ',') [RequestIds]
+    STRING_AGG(CA.Id, ',')                        [RequestIds]
 	FROM CommunityApprovals CA
 	INNER JOIN OrganizationAccessApprovalRequests AS OAAR ON OAAR.RequestId = CA.Id
 	INNER JOIN OrganizationAccess OA ON OA.Id = OAAR.OrganizationAccessId

@@ -74,6 +74,7 @@ func checkFailedApprovalRequests() {
 			go rtApi.ReprocessRequestApproval()
 			go rtApi.ReprocessCommunityApprovalRequestCommunities()
 			go rtApi.ReprocessCommunityApprovalRequestOrganizationAccess()
+			go rtApi.ReprocessCommunityApprovalRequestGitHubCoPilots()
 		}
 	}
 }

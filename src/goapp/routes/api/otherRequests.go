@@ -42,7 +42,7 @@ func AddGitHubCopilot(w http.ResponseWriter, r *http.Request) {
 	ghUser := fmt.Sprintf("%s", p["login"])
 
 	// Parse request body
-	var body db.GitHubCopilotDto
+	var body db.GitHubCopilot
 	err = json.NewDecoder(r.Body).Decode(&body)
 	if err != nil {
 		logger.LogException(err)
@@ -121,8 +121,8 @@ func AddGitHubCopilot(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	body.ApproverUserPrincipalName = approvers
-	body.RequestId = requestIds
+	body.Approvers = approvers
+	body.RequestIds = requestIds
 	body.Id = int64(id)
 	err = CreateGitHubCopilotApprovalRequest(body, logger)
 	if err != nil {
@@ -132,7 +132,7 @@ func AddGitHubCopilot(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func CreateGitHubCopilotApprovalRequest(data db.GitHubCopilotDto, logger *appinsights_wrapper.TelemetryClient) error {
+func CreateGitHubCopilotApprovalRequest(data db.GitHubCopilot, logger *appinsights_wrapper.TelemetryClient) error {
 
 	url := os.Getenv("APPROVAL_SYSTEM_APP_URL")
 	if url != "" {
@@ -249,7 +249,7 @@ func CreateGitHubCopilotApprovalRequest(data db.GitHubCopilotDto, logger *appins
 		postParams := CommunityApprovalSystemPost{
 			ApplicationId:       os.Getenv("APPROVAL_SYSTEM_APP_ID"),
 			ApplicationModuleId: os.Getenv("APPROVAL_SYSTEM_APP_MODULE_COPILOT"),
-			Emails:              data.ApproverUserPrincipalName,
+			Emails:              data.Approvers,
 			Subject:             "[GH-Management] New GitHub Copilot License Request",
 			Body:                body,
 			RequesterEmail:      data.Username,
@@ -263,7 +263,7 @@ func CreateGitHubCopilotApprovalRequest(data db.GitHubCopilotDto, logger *appins
 			if err != nil {
 				return err
 			}
-			for _, reqId := range data.RequestId {
+			for _, reqId := range data.RequestIds {
 				db.CommunityApprovalUpdateGUID(reqId, res.ItemId)
 			}
 		}
@@ -327,6 +327,20 @@ func GetGitHubCopilotApprovalRequests(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.Write(jsonResp)
+}
+
+func ReprocessCommunityApprovalRequestGitHubCoPilots() {
+	logger := appinsights_wrapper.NewClient()
+	defer logger.EndOperation()
+
+	items := db.GetFailedCommunityApprovalRequestGitHubCoPilots()
+
+	for _, item := range items {
+		err := CreateGitHubCopilotApprovalRequest(item, logger)
+		if err != nil {
+			logger.LogTrace("ID:"+strconv.FormatInt(item.Id, 10)+" "+err.Error(), contracts.Error)
+		}
+	}
 }
 
 // ORGANIZATION ACCESS
