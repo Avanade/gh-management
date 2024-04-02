@@ -486,11 +486,11 @@ func PopulateCommunityApproval(id int64) (CommunityApprovals []CommunityApproval
 	return
 }
 
-func GetFailedCommunityApprovalRequests() (CommunityApprovals []CommunityApproval) {
+func GetFailedCommunityApprovalRequestCommunities() (CommunityApprovals []CommunityApproval) {
 	db := ConnectDb()
 	defer db.Close()
 
-	result, _ := db.ExecuteStoredProcedureWithResult("PR_CommunityApprovals_Select_Failed", nil)
+	result, _ := db.ExecuteStoredProcedureWithResult("PR_CommunityApprovals_Select_FailedRequestCommunities", nil)
 
 	for _, v := range result {
 		data := CommunityApproval{
