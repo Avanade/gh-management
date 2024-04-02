@@ -14,6 +14,7 @@ import (
 	"main/pkg/session"
 
 	"github.com/gorilla/mux"
+	"github.com/microsoft/ApplicationInsights-Go/appinsights/contracts"
 )
 
 // GITHUB COPILOT LICENSE
@@ -662,4 +663,25 @@ func GetOrganizationAccessApprovalRequests(w http.ResponseWriter, r *http.Reques
 		return
 	}
 	w.Write(jsonResp)
+}
+
+func ReprocessCommunityApprovalRequestOrganizationAccess() {
+	logger := appinsights_wrapper.NewClient()
+	defer logger.EndOperation()
+
+	items := db.GetFailedCommunityApprovalRequestOrganizationAccess()
+
+	for _, item := range items {
+		err := CreateOrganizationAccessApprovalRequest(
+			item.RegionName,
+			item.GitHubUsername,
+			item.UserPrincipalName,
+			item.Approvers,
+			item.RequestIds,
+			logger,
+		)
+		if err != nil {
+			logger.LogTrace("ID:"+strconv.FormatInt(item.Id, 10)+" "+err.Error(), contracts.Error)
+		}
+	}
 }
