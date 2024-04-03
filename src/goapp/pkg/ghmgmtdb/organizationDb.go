@@ -10,6 +10,8 @@ type OrganizationDto struct {
 	ApproverUserPrincipalName []string
 	RegionName                string
 	RequestId                 []int64
+	GitHubUsername            string
+	GitHubId                  float64
 }
 
 func OrganizationInsert(body OrganizationDto) ([]map[string]interface{}, error) {
