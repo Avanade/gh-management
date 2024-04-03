@@ -111,9 +111,10 @@ func GetFailedCommunityApprovalRequestGitHubCoPilots() []GitHubCopilot {
 	var gitHubCopilots []GitHubCopilot
 
 	for _, v := range result {
+		githubId, _ := strconv.ParseInt(v["GitHubId"].(string), 0, 64)
 		data := GitHubCopilot{
 			Region:         int(v["RegionId"].(int64)),
-			GitHubId:       v["GitHubId"].(int64),
+			GitHubId:       githubId,
 			GitHubUsername: v["GitHubUsername"].(string),
 			Username:       v["Username"].(string),
 			Id:             v["Id"].(int64),
