@@ -1,4 +1,4 @@
-CREATE PROCEDURE [dbo].[PR_Projects_Select_ByOrgName]
+CREATE PROCEDURE [dbo].[PR_Projects_SelectProjectId_ByOrgName]
 (
 	@AssetCode VARCHAR(50),
 	@Organization VARCHAR(100)
@@ -6,7 +6,7 @@ CREATE PROCEDURE [dbo].[PR_Projects_Select_ByOrgName]
 AS
 BEGIN
     SELECT 
-        *
+        Id
     FROM 
         [dbo].[Projects] 
     WHERE 

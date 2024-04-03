@@ -1,24 +1,29 @@
 package ghmgmt
 
-type OrganizationDto struct {
-	Region                    int    `json:"region"`
-	ClientName                string `json:"clientName"`
-	ProjectName               string `json:"projectName"`
-	WBS                       string `json:"wbs"`
-	Username                  string
-	Id                        int64
-	ApproverUserPrincipalName []string
-	RegionName                string
-	RequestId                 []int64
+import (
+	"strconv"
+	"strings"
+)
+
+type Organization struct {
+	Id          int64
+	RegionId    int `json:"region"`
+	RegionName  string
+	ClientName  string `json:"clientName"`
+	ProjectName string `json:"projectName"`
+	WBS         string `json:"wbs"`
+	Username    string
+	Approvers   []string
+	RequestIds  []int64
 }
 
-func OrganizationInsert(body OrganizationDto) ([]map[string]interface{}, error) {
+func OrganizationInsert(body Organization) ([]map[string]interface{}, error) {
 	db := ConnectDb()
 	defer db.Close()
 
 	param := map[string]interface{}{
 
-		"Region":      body.Region,
+		"Region":      body.RegionId,
 		"ClientName":  body.ClientName,
 		"ProjectName": body.ProjectName,
 		"WBS":         body.WBS,
@@ -137,4 +142,47 @@ func OrganizationApprovalInsert(organizationId int, requestId int64) error {
 	}
 
 	return nil
+}
+
+func GetFailedCommunityApprovalRequestNewOrganizations() []Organization {
+	db := ConnectDb()
+	defer db.Close()
+
+	result, _ := db.ExecuteStoredProcedureWithResult("PR_CommunityApprovals_Select_FailedRequestOrganizations", nil)
+
+	var organizations []Organization
+
+	for _, v := range result {
+		data := Organization{
+			Id:          v["Id"].(int64),
+			RegionId:    int(v["RegionId"].(int64)),
+			RegionName:  v["RegionName"].(string),
+			ClientName:  v["ClientName"].(string),
+			ProjectName: v["ProjectName"].(string),
+			WBS:         v["WBS"].(string),
+			Username:    v["Username"].(string),
+		}
+
+		if v["Approvers"] != nil {
+			approversStr := v["Approvers"].(string)
+			data.Approvers = strings.Split(approversStr, ",")
+		}
+
+		if v["RequestIds"] != nil {
+			requestIdsStr := v["RequestIds"].(string)
+			requestIds := strings.Split(requestIdsStr, ",")
+
+			for _, v := range requestIds {
+				requestId, err := strconv.ParseInt(v, 0, 64)
+				if err != nil {
+					continue
+				}
+				data.RequestIds = append(data.RequestIds, int64(requestId))
+			}
+		}
+
+		organizations = append(organizations, data)
+	}
+
+	return organizations
 }

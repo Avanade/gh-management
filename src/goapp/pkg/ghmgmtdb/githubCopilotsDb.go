@@ -1,17 +1,22 @@
 package ghmgmt
 
-type GitHubCopilotDto struct {
-	Region                    int    `json:"region"`
-	GitHubId                  int64  `json:"githubId"`
-	GitHubUsername            string `json:"githubUsername"`
-	Username                  string
-	Id                        int64
-	ApproverUserPrincipalName []string
-	RegionName                string `json:"regionName"`
-	RequestId                 []int64
+import (
+	"strconv"
+	"strings"
+)
+
+type GitHubCopilot struct {
+	Region         int    `json:"region"`
+	GitHubId       int64  `json:"githubId"`
+	GitHubUsername string `json:"githubUsername"`
+	Username       string
+	Id             int64
+	RegionName     string `json:"regionName"`
+	Approvers      []string
+	RequestIds     []int64
 }
 
-func GitHubCopilotInsert(body GitHubCopilotDto) ([]map[string]interface{}, error) {
+func GitHubCopilotInsert(body GitHubCopilot) ([]map[string]interface{}, error) {
 	db := ConnectDb()
 	defer db.Close()
 
@@ -95,4 +100,49 @@ func GetGitHubCopilotbyGUID(id string) ([]map[string]interface{}, error) {
 	}
 
 	return result, err
+}
+
+func GetFailedCommunityApprovalRequestGitHubCoPilots() []GitHubCopilot {
+	db := ConnectDb()
+	defer db.Close()
+
+	result, _ := db.ExecuteStoredProcedureWithResult("PR_CommunityApprovals_Select_FailedRequestGitHubCoPilots", nil)
+
+	var gitHubCopilots []GitHubCopilot
+
+	for _, v := range result {
+		githubId, _ := strconv.ParseInt(v["GitHubId"].(string), 0, 64)
+		data := GitHubCopilot{
+			Region:         int(v["RegionId"].(int64)),
+			GitHubId:       githubId,
+			GitHubUsername: v["GitHubUsername"].(string),
+			Username:       v["Username"].(string),
+			Id:             v["Id"].(int64),
+			RegionName:     v["RegionName"].(string),
+			Approvers:      []string{},
+			RequestIds:     []int64{},
+		}
+
+		if v["Approvers"] != nil {
+			approversStr := v["Approvers"].(string)
+			data.Approvers = strings.Split(approversStr, ",")
+		}
+
+		if v["RequestIds"] != nil {
+			requestIdsStr := v["RequestIds"].(string)
+			requestIds := strings.Split(requestIdsStr, ",")
+
+			for _, v := range requestIds {
+				requestId, err := strconv.ParseInt(v, 0, 64)
+				if err != nil {
+					continue
+				}
+				data.RequestIds = append(data.RequestIds, int64(requestId))
+			}
+		}
+
+		gitHubCopilots = append(gitHubCopilots, data)
+	}
+
+	return gitHubCopilots
 }

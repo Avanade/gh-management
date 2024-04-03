@@ -757,11 +757,11 @@ func requestCommunityApproval(id int64, logger *appinsights_wrapper.TelemetryCli
 	return nil
 }
 
-func ReprocessRequestCommunityApproval() {
+func ReprocessCommunityApprovalRequestCommunities() {
 	logger := appinsights_wrapper.NewClient()
 	defer logger.EndOperation()
 
-	projectApprovals := db.GetFailedCommunityApprovalRequests()
+	projectApprovals := db.GetFailedCommunityApprovalRequestCommunities()
 
 	for _, v := range projectApprovals {
 		err := ApprovalSystemRequestCommunity(v, logger)
