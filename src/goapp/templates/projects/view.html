@@ -26,7 +26,7 @@
                 </template>
                 <template x-if="!state.isMember">
                     <a 
-                        href="/other-requests/organization-access"
+                        x-bind:href="requestAccess()"
                         target="_blank"
                         class="flex items-center bg-[#FF5800] hover:bg-[#FF4300] text-white py-2 px-4 rounded">
                         <span>Request Access</span>
@@ -457,7 +457,6 @@
                 activeTab: "readme",
             },
             async init() {
-                console.log("IS MEMBER: ", isMember)
                 this.onSetPopsetEventListener(this, this.onURLChangeCallback)
 
                 if(this.url.searchParams.get('tab')) {
@@ -539,6 +538,9 @@
             },
             onURLChangeCallback(e) {
                 e.setActiveTab()
+            },
+            requestAccess() {
+                return `/other-requests/organization-access?regionName=${this.state.orgName}`
             },
             collaboratorModal: collaboratorModalData()
         }

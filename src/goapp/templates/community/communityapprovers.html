@@ -192,7 +192,6 @@
                     'datapush()')
             },
             submit() {
-                console.log(this.form)
                 var dd = new clsDropdown()
 
                 this.approver.data = this.form.approver[0]
@@ -205,8 +204,6 @@
                 }
                 this.form.name = this.form.approver[0].id
                 postData = this.form;
-                console.log("postData")
-                console.log(postData)
                 Alpine.store('master').postData('/api/community-approvers', postData,
                     "Your community approvers has been updated.",
                     "Close")
