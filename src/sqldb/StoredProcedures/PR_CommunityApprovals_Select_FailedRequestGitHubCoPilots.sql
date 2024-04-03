@@ -8,7 +8,7 @@ BEGIN
     UC.GitHubId                                     [GitHubId],
     UC.GitHubUser                                   [GitHubUsername],
     UC.UserPrincipalName                            [Username],
-    STRING_AGG(CA.ApproverUserPrincipalName, ',')  [Approvers],
+    STRING_AGG(CA.ApproverUserPrincipalName, ',')   [Approvers],
     STRING_AGG(CA.Id, ',')                          [RequestIds]
 	FROM CommunityApprovals CA
 	INNER JOIN GitHubCopilotApprovalRequests GCAR ON GCAR.RequestId = CA.Id

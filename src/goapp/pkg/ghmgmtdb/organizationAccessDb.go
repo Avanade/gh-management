@@ -9,7 +9,7 @@ import (
 type OrganizationAccess struct {
 	Id           int64
 	User         User
-	Organization Organization
+	Organization RegionalOrganization
 	Created      time.Time
 }
 
@@ -28,7 +28,7 @@ type User struct {
 	GithubUsername    string
 }
 
-type Organization struct {
+type RegionalOrganization struct {
 	Id   int64
 	Name string
 }
@@ -75,7 +75,7 @@ func GetOrganizationAccessByUserPrincipalName(userPrincipalName string) ([]Organ
 				GithubId:          v["GitHubId"].(string),
 				GithubUsername:    v["GitHubUser"].(string),
 			},
-			Organization: Organization{
+			Organization: RegionalOrganization{
 				Id:   v["OrganizationId"].(int64),
 				Name: v["OrganizationName"].(string),
 			},
@@ -110,7 +110,7 @@ func GetOrganizationAccessByApprovalRequestItemId(itemId string) (*OrganizationA
 			GithubId:          v["GitHubId"].(string),
 			GithubUsername:    v["GitHubUser"].(string),
 		},
-		Organization: Organization{
+		Organization: RegionalOrganization{
 			Id:   v["OrganizationId"].(int64),
 			Name: v["OrganizationName"].(string),
 		},

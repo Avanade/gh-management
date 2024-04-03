@@ -27,7 +27,7 @@ func AddOrganization(w http.ResponseWriter, r *http.Request) {
 	profile := iprofile.(map[string]interface{})
 	username := profile["preferred_username"]
 
-	var body db.OrganizationDto
+	var body db.Organization
 	err := json.NewDecoder(r.Body).Decode(&body)
 	if err != nil {
 		logger.LogException(err)
@@ -86,15 +86,15 @@ func AddOrganization(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Create approval request
-	regOrg, err := db.GetRegionalOrganizationById(body.Region)
+	regOrg, err := db.GetRegionalOrganizationById(body.RegionId)
 	if err != nil {
 		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	body.RegionName = regOrg[0]["Name"].(string)
-	body.ApproverUserPrincipalName = approverList
-	body.RequestId = requestIds
+	body.Approvers = approverList
+	body.RequestIds = requestIds
 	body.Id = int64(id)
 	err = CreateOrganizationApprovalRequest(body, logger)
 	if err != nil {
@@ -104,7 +104,7 @@ func AddOrganization(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func CreateOrganizationApprovalRequest(data db.OrganizationDto, logger *appinsights_wrapper.TelemetryClient) error {
+func CreateOrganizationApprovalRequest(data db.Organization, logger *appinsights_wrapper.TelemetryClient) error {
 
 	url := os.Getenv("APPROVAL_SYSTEM_APP_URL")
 	if url != "" {
@@ -239,7 +239,7 @@ func CreateOrganizationApprovalRequest(data db.OrganizationDto, logger *appinsig
 		postParams := CommunityApprovalSystemPost{
 			ApplicationId:       os.Getenv("APPROVAL_SYSTEM_APP_ID"),
 			ApplicationModuleId: os.Getenv("APPROVAL_SYSTEM_APP_MODULE_ORGANIZATION"),
-			Emails:              data.ApproverUserPrincipalName,
+			Emails:              data.Approvers,
 			Subject:             fmt.Sprintf("[GH-Management] New Organization Request - %v - %v", data.ClientName, data.ProjectName),
 			Body:                body,
 			RequesterEmail:      data.Username,
@@ -253,7 +253,7 @@ func CreateOrganizationApprovalRequest(data db.OrganizationDto, logger *appinsig
 			if err != nil {
 				return err
 			}
-			for _, reqId := range data.RequestId {
+			for _, reqId := range data.RequestIds {
 				db.CommunityApprovalUpdateGUID(reqId, res.ItemId)
 			}
 			db.OrganizationUpdateApprovalStatus(data.Id, 2)
@@ -392,4 +392,21 @@ func IndexRegionalOrganizations(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusOK)
 	w.Header().Set("Content-Type", "application/json")
+}
+
+func ReprocessCommunityApprovalRequestNewOrganizations() {
+	logger := appinsights_wrapper.NewClient()
+	defer logger.EndOperation()
+
+	items := db.GetFailedCommunityApprovalRequestNewOrganizations()
+
+	for _, item := range items {
+		err := CreateOrganizationApprovalRequest(
+			item,
+			logger,
+		)
+		if err != nil {
+			logger.LogTrace("ID:"+strconv.FormatInt(item.Id, 10)+" "+err.Error(), contracts.Error)
+		}
+	}
 }
