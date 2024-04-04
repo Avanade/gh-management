@@ -124,7 +124,7 @@
                           <span class="block truncate">Make Internal</span>
                         </li>
                         <li
-                          x-show="repository.Visibility !== 'Public' && !repository.IsArchived && ((repository.ApprovalStatusId===1) || (repository.ApprovalStatusId===5)) && hasApprovers"
+                          x-show="!repository.IsOrgRegional && repository.Visibility !== 'Public' && !repository.IsArchived && ((repository.ApprovalStatusId===1) || (repository.ApprovalStatusId===5)) && hasApprovers"
                           @click="goto('/repositories/makepublic/' + repository.Id)"
                           class="hover:bg-[#fff2eb] relative cursor-pointer select-none py-2 pl-3 pr-9 text-gray-900"
                           id="option-0" role="option" tabindex="-1">
