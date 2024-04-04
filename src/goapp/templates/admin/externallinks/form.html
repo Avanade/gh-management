@@ -202,7 +202,6 @@
                 this.form.IconSVG = data.find((v) => v.id == this.testing[0].id).iconpath;
                 switch (this.action.toLowerCase()) {
                     case 'add':
-                        console.log(this.form.IconSVG)
                         Alpine.store('master').modal.show()
                         Alpine.store('master').postData(`/api/external-links`, this.form,
                             "External links has been added.", "Go to list of external links", "/admin/externallinks"

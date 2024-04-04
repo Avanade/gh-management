@@ -111,7 +111,6 @@
                 wbs: '',
             },
             submit() {
-                console.log(this.form)
                 Alpine.store('master').modal.reset()
                 Alpine.store('master').modal.show()
                 Alpine.store('master').postData(`/api/github-organization`, this.form,
