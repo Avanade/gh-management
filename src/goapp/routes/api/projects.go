@@ -759,6 +759,7 @@ func SetVisibility(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+		ValidateOrgMembers(opensource, project, innersource, logger)
 		_, err = ghAPI.TransferRepository(project, opensource, innersource)
 		if err != nil {
 			logger.LogException(err)
@@ -1889,6 +1890,10 @@ func EmailcoownerDeficient(to string, Org string, reponame string) {
 }
 
 func ValidateOrgMembers(org, repo, newOrg string, logger *appinsights_wrapper.TelemetryClient) (isSuccessful bool) {
+	if logger == nil {
+		logger := appinsights_wrapper.NewClient()
+		defer logger.EndOperation()
+	}
 	isSuccessful = true
 	// GET ALL MEMBERS OF THE REPO
 	collaborators := ghAPI.RepositoriesListCollaborators(os.Getenv("GH_TOKEN"), org, repo, "", "")

@@ -435,6 +435,8 @@ func CheckAllRequests(id int64, host string) {
 	if allApproved {
 		owner := os.Getenv("GH_ORG_INNERSOURCE")
 		newOwner := os.Getenv("GH_ORG_OPENSOURCE")
+
+		ValidateOrgMembers(owner, repo, newOwner, nil)
 		ghAPI.TransferRepository(repo, owner, newOwner)
 
 		time.Sleep(3 * time.Second)
