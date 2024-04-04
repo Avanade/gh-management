@@ -128,30 +128,27 @@ func CreateActivity(w http.ResponseWriter, r *http.Request) {
 	if body.Help.Id != 0 {
 		if os.Getenv("NOTIFICATION_EMAIL_SUPPORT") == "" {
 			logger.LogTrace("Activity does not send successfully because the notification support email environment is not set.", contracts.Error)
-			return
-		}
+		} else {
+			recipients := strings.Split(os.Getenv("NOTIFICATION_EMAIL_SUPPORT"), ",")
 
-		recipients := strings.Split(os.Getenv("NOTIFICATION_EMAIL_SUPPORT"), ",")
+			scheme := envvar.GetEnvVar("SCHEME", "https")
 
-		scheme := envvar.GetEnvVar("SCHEME", "https")
+			activityLink := fmt.Sprint(scheme, "://", r.Host, "/activities/view/", communityActivityId)
 
-		activityLink := fmt.Sprint(scheme, "://", r.Host, "/activities/view/", communityActivityId)
+			messageBody := notification.ActivityAddedRequestForHelpMessageBody{
+				Recipients:   recipients,
+				ActivityLink: activityLink,
+				UserName:     profile["name"].(string),
+			}
+			err = messageBody.Send()
+			if err != nil {
+				logger.LogException(err)
+			}
 
-		messageBody := notification.ActivityAddedRequestForHelpMessageBody{
-			Recipients:   recipients,
-			ActivityLink: activityLink,
-			UserName:     profile["name"].(string),
-		}
-		err = messageBody.Send()
-		if err != nil {
-			logger.LogException(err)
-		}
-
-		errHelp := processHelp(communityActivityId, activityLink, username, profile["name"].(string), body.Help)
-		if errHelp != nil {
-			logger.LogException(err)
-			http.Error(w, errHelp.Error(), http.StatusBadRequest)
-			return
+			errHelp := processHelp(communityActivityId, activityLink, username, profile["name"].(string), body.Help)
+			if errHelp != nil {
+				logger.LogException(err)
+			}
 		}
 	}
 
