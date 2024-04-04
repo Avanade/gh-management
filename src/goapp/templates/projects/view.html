@@ -618,7 +618,7 @@
                 Alpine.store('master').modal.reset()
                 Alpine.store('master').modal.show()
                 Alpine.store('master').postData(`/api/repositories/${this.state.id}/collaborators/${this.state.username}/${this.state.permission[0].id}`, null,
-                "GitHub user has been invited to the repository.", "Close", `/repositories/view/${this.state.id}?tab=collaborators`)
+                "GitHub user has been invited to the repository.", "Close", `/repositories/view/${this.state.orgName}/${this.state.about.repoName}?tab=collaborators`)
 
                 this.onHide()
             }
