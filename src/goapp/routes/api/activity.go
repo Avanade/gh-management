@@ -296,7 +296,7 @@ func processHelp(activityId int, activityLink, requestorEmail string, requestorN
 						</th>
 					</tr>
 					<tr>
-						<tr class="center-table">
+						<td class="center-table" align="center">
 							<table style="width: 100%; max-width: 700px;" class="margin-auto">
 								<tr>
 									<td style="padding-top: 20px">
@@ -305,7 +305,7 @@ func processHelp(activityId int, activityLink, requestorEmail string, requestorN
 									</td>
 								</tr>
 							</table>
-						</tr>
+						</td>
 					</tr>
 				</table>
 				<br>
