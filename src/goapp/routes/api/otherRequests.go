@@ -257,7 +257,7 @@ func CreateGitHubCopilotApprovalRequest(data db.GitHubCopilotDto, logger *appins
 						</th>
 					</tr>
 					<tr>
-						<th class="center-table">
+						<td class="center-table">
 							<table style="width: 100%; max-width: 700px;" class="margin-auto">
 								<tr>
 									<td style="padding-top: 20px">
@@ -265,7 +265,7 @@ func CreateGitHubCopilotApprovalRequest(data db.GitHubCopilotDto, logger *appins
 									</td>
 								</tr>
 							</table>
-						</th>
+						</td>
 					</tr>
 				</table>
 				<br>
@@ -624,7 +624,7 @@ func CreateOrganizationAccessApprovalRequest(
 										</th>
 									</tr>
 									<tr>
-										<th class="center-table">
+										<td class="center-table">
 											<table style="width: 100%; max-width: 700px;" class="margin-auto">
 												<tr>
 													<td style="padding-top: 20px">
@@ -632,7 +632,7 @@ func CreateOrganizationAccessApprovalRequest(
 													</td>
 												</tr>
 											</table>
-										</th>
+										</td>
 									</tr>
 								</table>
 							</body>

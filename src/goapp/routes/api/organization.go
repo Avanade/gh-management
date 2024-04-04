@@ -252,7 +252,7 @@ func CreateOrganizationApprovalRequest(data db.OrganizationDto, logger *appinsig
 						</th>
 					</tr>
 					<tr>
-						<th class="center-table">
+						<td class="center-table">
 							<table style="width: 100%; max-width: 700px;" class="margin-auto">
 								<tr>
 									<td style="padding-top: 20px">
@@ -260,7 +260,7 @@ func CreateOrganizationApprovalRequest(data db.OrganizationDto, logger *appinsig
 									</td>
 								</tr>
 							</table>
-						</th>
+						</td>
 					</tr>
 				</table>
 				<br>

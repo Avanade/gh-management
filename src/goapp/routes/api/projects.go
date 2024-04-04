@@ -1537,7 +1537,7 @@ func ApprovalSystemRequest(data db.ProjectApprovalApprovers, logger *appinsights
 							<table style="width: 100%; max-width: 700px; margin: auto">
 								<tr class="border-top">
 									<td style="font-size: 14px; padding-top: 15px; font-weight: 600;">
-										Project Name
+										Repository Name
 									</td>
 									<td style="font-size: 14px; padding-top: 15px; font-weight: 400;">
 										|ProjectName|

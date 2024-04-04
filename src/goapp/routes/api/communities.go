@@ -845,7 +845,7 @@ func ApprovalSystemRequestCommunity(data db.CommunityApproval, logger *appinsigh
 						</th>
 					</tr>
 					<tr>
-						<th class="center-table">
+						<td class="center-table">
 							<table style="width: 100%; max-width: 700px;" class="margin-auto">
 								<tr>
 									<td style="padding-top: 20px">
@@ -855,7 +855,7 @@ func ApprovalSystemRequestCommunity(data db.CommunityApproval, logger *appinsigh
 									</td>
 								</tr>
 							</table>
-						</th>
+						</td>
 					</tr>
 					<tr>
 						<th class="center-table">
@@ -896,7 +896,7 @@ func ApprovalSystemRequestCommunity(data db.CommunityApproval, logger *appinsigh
 						</th>
 					</tr>
 					<tr>
-						<th class="center-table">
+						<td class="center-table">
 							<table style="width: 100%; max-width: 700px;" class="margin-auto">
 								<tr>
 									<td style="padding-top: 20px">
@@ -904,7 +904,7 @@ func ApprovalSystemRequestCommunity(data db.CommunityApproval, logger *appinsigh
 									</td>
 								</tr>
 							</table>
-						</th>
+						</td>
 					</tr>
 				</table>
 				<br>
