@@ -1520,7 +1520,7 @@ func ApprovalSystemRequest(data db.ProjectApprovalApprovers, logger *appinsights
 						</th>
 					</tr>
 					<tr>
-						<th class="center-table">
+						<td class="center-table"  align="center">
 							<table style="width: 100%; max-width: 700px;" class="margin-auto">
 								<tr>
 									<td style="padding-top: 20px">
@@ -1530,7 +1530,7 @@ func ApprovalSystemRequest(data db.ProjectApprovalApprovers, logger *appinsights
 									</td>
 								</tr>
 							</table>
-						</th>
+						</td>
 					</tr>
 					<tr>
 						<th class="center-table">
@@ -1606,7 +1606,7 @@ func ApprovalSystemRequest(data db.ProjectApprovalApprovers, logger *appinsights
 						</th>
 					</tr>
 					<tr>
-						<th class="center-table">
+						<td class="center-table" align="center">
 							<table style="width: 100%; max-width: 700px;" class="margin-auto">
 								<tr>
 									<td style="padding-top: 20px">
@@ -1614,7 +1614,7 @@ func ApprovalSystemRequest(data db.ProjectApprovalApprovers, logger *appinsights
 									</td>
 								</tr>
 							</table>
-						</th>
+						</td>
 					</tr>
 				</table>
 				<br>

@@ -252,7 +252,7 @@ func CreateOrganizationApprovalRequest(data db.Organization, logger *appinsights
 						</th>
 					</tr>
 					<tr>
-						<td class="center-table">
+						<td class="center-table"  align="center">
 							<table style="width: 100%; max-width: 700px;" class="margin-auto">
 								<tr>
 									<td style="padding-top: 20px">

@@ -258,7 +258,7 @@ func CreateGitHubCopilotApprovalRequest(data db.GitHubCopilot, logger *appinsigh
 						</th>
 					</tr>
 					<tr>
-						<td class="center-table">
+						<td class="center-table"  align="center">
 							<table style="width: 100%; max-width: 700px;" class="margin-auto">
 								<tr>
 									<td style="padding-top: 20px">
@@ -639,7 +639,7 @@ func CreateOrganizationAccessApprovalRequest(
 										</th>
 									</tr>
 									<tr>
-										<td class="center-table">
+										<td class="center-table"  align="center">
 											<table style="width: 100%; max-width: 700px;" class="margin-auto">
 												<tr>
 													<td style="padding-top: 20px">
