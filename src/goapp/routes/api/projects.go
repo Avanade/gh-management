@@ -2053,7 +2053,7 @@ func EmailAdminConvertToColaborator(to string, outisideCollab []string, logger *
 	`
 	replacer := strings.NewReplacer(
 		"|Admin|", to,
-		"|Message", message,
+		"|Message|", message,
 		"|ConvertedList|", collabList,
 	)
 
@@ -2172,7 +2172,7 @@ func EmailRepoAdminConvertToColaborator(to string, repoName string, outisideColl
 
 	replacer := strings.NewReplacer(
 		"|Admin|", to,
-		"|Message", message,
+		"|Message|", message,
 		"|ConvertedList|", collabList,
 	)
 
@@ -2293,7 +2293,7 @@ func EmailOspoOwnerDeficient(to string, org string, repoName []string, logger *a
 
 	replacer := strings.NewReplacer(
 		"|Admin|", to,
-		"|Message", message,
+		"|Message|", message,
 		"|RepoList|", repoNameList,
 	)
 
