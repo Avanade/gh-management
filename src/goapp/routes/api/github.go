@@ -361,17 +361,6 @@ func emailAdmin(admin string, adminemail string, reponame string, outsideCollab 
 						</th>
 					</tr>
 					<tr>
-						<th class="center-table">
-							<table style="width: 100%; max-width: 700px;" class="margin-auto">
-								<tr>
-									<td style="font-size: 18px; font-weight: 600; padding-top: 20px">
-									Activity - Request for Help
-									</td>
-								</tr>
-							</table>
-						</th>
-					</tr>
-					<tr>
 						<td class="center-table" align="center">
 							<table style="width: 100%; max-width: 700px;" class="margin-auto">
 								<tr>
