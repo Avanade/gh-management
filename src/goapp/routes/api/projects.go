@@ -2400,7 +2400,7 @@ func EmailcoownerDeficient(to string, Org string, reponame string) {
 
 	replacer := strings.NewReplacer(
 		"|Admin|", to,
-		"|RepoName", reponame,
+		"|RepoName|", reponame,
 		"|Link|", link,
 	)
 
