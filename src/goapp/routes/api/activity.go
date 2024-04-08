@@ -300,7 +300,7 @@ func processHelp(activityId int, activityLink, requestorEmail string, requestorN
 							<table style="width: 100%; max-width: 700px;" class="margin-auto">
 								<tr>
 									<td style="padding-top: 20px">
-										|RequestorName| added an <a href=\"|ActivityLink|\">activity</a> and is requesting for help below are the details of the request.<br>
+										|RequestorName| added an <a href="|ActivityLink|">activity</a> and is requesting for help below are the details of the request.<br>
 										DETAILS: |Details|
 									</td>
 								</tr>

@@ -412,7 +412,7 @@ func SendReassignEmail(data db.ProjectApproval) error {
 		</html>
 		`
 
-	replacer := strings.NewReplacer("|ApproverUserPrincipalName|", data.ApproverUserPrincipalName,
+	replacer := strings.NewReplacer(
 		"|RequesterName|", data.RequesterName,
 		"|ApprovalType|", data.ApprovalType,
 		"|ProjectName|", data.ProjectName,
@@ -433,7 +433,7 @@ func SendReassignEmail(data db.ProjectApproval) error {
 
 	body := replacer.Replace(bodyTemplate)
 	m := email.Message{
-		Subject: fmt.Sprintf("[GH-Management] New Project For Review - %v", data.ProjectName),
+		Subject: fmt.Sprintf("Request for %v Review - %v", data.ApprovalType, data.ProjectName),
 		Body: email.Body{
 			Content: body,
 			Type:    email.HtmlMessageType,
@@ -788,7 +788,7 @@ func SendReassignEmailCommunity(data db.CommunityApproval) error {
 	)
 	body := replacer.Replace(bodyTemplate)
 	m := email.Message{
-		Subject: fmt.Sprintf("[GH-Management] New Community For Approval - %v", data.CommunityName),
+		Subject: fmt.Sprintf("New Community For Approval - %v", data.CommunityName),
 		Body: email.Body{
 			Content: body,
 			Type:    email.HtmlMessageType,

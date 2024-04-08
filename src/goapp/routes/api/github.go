@@ -295,13 +295,13 @@ func sendNotification(token, org string, logger *appinsights_wrapper.TelemetryCl
 }
 
 // Repo Collaborators Scan
-func emailAdmin(admin string, adminemail string, reponame string, outisideCollab []string, logger *appinsights_wrapper.TelemetryClient) {
+func emailAdmin(admin string, adminemail string, reponame string, outsideCollab []string, logger *appinsights_wrapper.TelemetryClient) {
 	e := time.Now()
 
 	link := "https://github.com/" + os.Getenv("GH_ORG_OPENSOURCE") + "/" + reponame
 	link = "<a href=\"" + link + "\">" + reponame + "</a>"
 	collabList := "</p> <table  >"
-	for _, collab := range outisideCollab {
+	for _, collab := range outsideCollab {
 		collabList = collabList + " <tr> <td>" + collab + " </td></tr>"
 	}
 	collabList = collabList + " </table  > <p>"
@@ -395,7 +395,7 @@ func emailAdmin(admin string, adminemail string, reponame string, outisideCollab
 	replacer := strings.NewReplacer(
 		"|Admin|", admin,
 		"|Link|", link,
-		"|NumberOfOutsideCollaborators|", strconv.Itoa(len(outisideCollab)),
+		"|NumberOfOutsideCollaborators|", strconv.Itoa(len(outsideCollab)),
 		"|CollabList|", collabList,
 	)
 	body := replacer.Replace(bodyTemplate)
