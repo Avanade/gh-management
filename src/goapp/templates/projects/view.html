@@ -483,9 +483,9 @@
                     link: repoDetails.TFSProjectReference,
                     topics: repoDetails.RepoTopics
                 };
-
+                
                 if(this.state.about.repositorySource != 'AzureDevOps'){
-                    const readme = await getRepositoryReadme(repoDetails.Visibility, repoDetails.Name)
+                    const readme = await getRepositoryReadme(this.state.orgName, this.state.about.name)
                     this.state.readme = readme;
                 } else {
                     this.state.activeTab = this.state.about.repositorySource == 'AzureDevOps' ? 'collaborators' : 'readme'
@@ -734,9 +734,9 @@
         return data
     }
 
-    async function getRepositoryReadme(visibility, repoName) {
+    async function getRepositoryReadme(orgName, repoName) {
         const res = await fetch(
-            `/api/repositories/${visibility}/${repoName}/readme`
+            `/api/repositories/${orgName}/${repoName}/readme`
         )
 
         const data = await res.json()
