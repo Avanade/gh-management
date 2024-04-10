@@ -193,7 +193,7 @@
                                                             Update
                                                         </a> |
                                                         <a class="text-indigo-600 hover:text-indigo-900 hover:cursor-pointer"
-                                                            x-on:click="collaboratorModal.removeCollaborator(state.id, item.ghUsername, item.role)">
+                                                            x-on:click="collaboratorModal.removeCollaborator(state.id, state.orgName, state.about.name, item.ghUsername, item.role)">
                                                             Remove
                                                         </a>
                                                     </td>
@@ -397,7 +397,7 @@
                                         <div class="mt-5 sm:mt-6">
                                             <button 
                                                 type="submit" 
-                                                @click="(e) => { collaboratorModal.onSubmit(e) }" 
+                                                @click="(e) => { collaboratorModal.onSubmit(state.orgName, state.about.name) }" 
                                                 x-bind:disabled="!collaboratorModal.isValid()"
                                                 x-text="collaboratorModal.getButtonLabel()"
                                                 class="inline-flex justify-center rounded-md bg-[#FF5800] px-5 mr-2 py-2 text-sm font-semibold text-white shadow-sm  focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:bg-slate-300">
@@ -601,12 +601,12 @@
                 this.state.permission = permission == '' ? [] : [{ id: permission, text: permission }]
                 this.state.isShow = true
             },
-            removeCollaborator(id, user, permission) {
+            removeCollaborator(id, orgName, repoName, user, permission) {
                 let url = `/api/repositories/${id}/collaborators/${user}/${permission}`
                 let f = () => {
                 Alpine.store('master').modal.show()
                 Alpine.store('master').deleteData(url, null, `Collaborator was successfully removed.`, "Close",
-                    `/repositories/view/${id}?tab=collaborators`)
+                    `/repositories/view/${orgName}/${repoName}?tab=collaborators`)
                 }
 
                 let title = "Confirmation"
@@ -614,11 +614,11 @@
                 Alpine.store('master').confirmationModal.update(title, message, f)
                 Alpine.store('master').confirmationModal.show()
             },
-            onSubmit(e) {
+            onSubmit(orgName, repoName) {
                 Alpine.store('master').modal.reset()
                 Alpine.store('master').modal.show()
                 Alpine.store('master').postData(`/api/repositories/${this.state.id}/collaborators/${this.state.username}/${this.state.permission[0].id}`, null,
-                "GitHub user has been invited to the repository.", "Close", `/repositories/view/${this.state.orgName}/${this.state.about.repoName}?tab=collaborators`)
+                "GitHub user has been invited to the repository.", "Close", `/repositories/view/${orgName}/${repoName}?tab=collaborators`)
 
                 this.onHide()
             }
