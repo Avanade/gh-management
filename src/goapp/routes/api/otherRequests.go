@@ -69,6 +69,19 @@ func AddGitHubCopilot(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Check if there is a pending request
+	result, err := db.GitHubCopilotGetPendingByUserAndOrganization(body)
+	if err != nil {
+		logger.LogException(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	if result != nil {
+		logger.LogException(err)
+		http.Error(w, "You have a pending request on this organization. Wait for response from the approvers. ", http.StatusBadRequest)
+		return
+	}
+
 	// Get organization owners to produce list of approvers
 	var approvers []string
 	orgOwners, err := ghAPI.OrgListMembers(token, body.RegionName, "admin")
@@ -100,7 +113,7 @@ func AddGitHubCopilot(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Insert record on GitHubCopilot table
-	result, err := db.GitHubCopilotInsert(body)
+	result, err = db.GitHubCopilotInsert(body)
 	if err != nil {
 		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)

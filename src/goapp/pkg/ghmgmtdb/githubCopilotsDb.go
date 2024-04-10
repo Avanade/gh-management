@@ -102,6 +102,23 @@ func GetGitHubCopilotbyGUID(id string) ([]map[string]interface{}, error) {
 	return result, err
 }
 
+func GitHubCopilotGetPendingByUserAndOrganization(body GitHubCopilot) ([]map[string]interface{}, error) {
+	db := ConnectDb()
+	defer db.Close()
+
+	param := map[string]interface{}{
+		"Username":     body.Username,
+		"Organization": body.RegionName,
+	}
+
+	result, err := db.ExecuteStoredProcedureWithResult("dbo.PR_GitHubCopilot_SelectPendingByUserAndOrganization", param)
+	if err != nil {
+		return nil, err
+	}
+
+	return result, nil
+}
+
 func GetFailedCommunityApprovalRequestGitHubCoPilots() []GitHubCopilot {
 	db := ConnectDb()
 	defer db.Close()
