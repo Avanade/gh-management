@@ -45,7 +45,7 @@
       </div>
   
       <!-- IF THE USER HAS NO PROJECTS -->
-      <div class="h-40" x-show="!showSpinner && !userRepositoriesList && view==='my'">
+      <div class="h-40" x-show="!showSpinner && userRepositoriesList.length == 0 && view==='my'">
         <div class="flex items-center justify-center mt-20">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor"
             stroke-width="2">

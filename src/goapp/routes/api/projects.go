@@ -310,23 +310,26 @@ func GetMyRepositories(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	s, err := json.Marshal(projects)
-	if err != nil {
-		logger.LogException(err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	var list []RepoDto
-	err = json.Unmarshal(s, &list)
-	if err != nil {
-		logger.LogException(err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
+	list := make([]RepoDto, 0)
+	if projects != nil {
+		s, err := json.Marshal(projects)
+		if err != nil {
+			logger.LogException(err)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
 
-	for i := 0; i < len(list); i++ {
-		if projects[i]["Topics"] != nil {
-			list[i].Topics = strings.Split(projects[i]["Topics"].(string), ",")
+		err = json.Unmarshal(s, &list)
+		if err != nil {
+			logger.LogException(err)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		for i := 0; i < len(list); i++ {
+			if projects[i]["Topics"] != nil {
+				list[i].Topics = strings.Split(projects[i]["Topics"].(string), ",")
+			}
 		}
 	}
 
