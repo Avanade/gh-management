@@ -529,6 +529,10 @@ func GetProjectIdByOrgName(orgName, repoName string) (int64, error) {
 		return 0, err
 	}
 
+	if result == nil {
+		return 0, fmt.Errorf("project with the organization name '%v' and the repository name '%v' does not exist", orgName, repoName)
+	}
+
 	return result[0]["Id"].(int64), nil
 }
 

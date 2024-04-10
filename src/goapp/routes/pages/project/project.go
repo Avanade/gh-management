@@ -27,7 +27,33 @@ func IndexHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func MakePublicHandler(w http.ResponseWriter, r *http.Request) {
-	template.UseTemplate(&w, r, "projects/makepublic", nil)
+	token := os.Getenv("GH_TOKEN")
+	innerSourceOrgName := os.Getenv("GH_ORG_INNERSOURCE")
+	openSourceOrgName := os.Getenv("GH_ORG_OPENSOURCE")
+	sessiongh, _ := session.GetGitHubUserData(w, r)
+	isInvalidToken := false
+
+	isInnerSourceMember, errInnerSource := ghAPI.IsOrganizationMember(token, innerSourceOrgName, sessiongh.Username)
+	if errInnerSource != nil {
+		log.Println(errInnerSource.Error())
+		isInvalidToken = true
+	}
+
+	isOpenSourceMember, errOpenSource := ghAPI.IsOrganizationMember(token, openSourceOrgName, sessiongh.Username)
+	if errOpenSource != nil {
+		log.Println(errOpenSource.Error())
+		isInvalidToken = true
+	}
+
+	data := map[string]interface{}{
+		"isInvalidToken":      isInvalidToken,
+		"isInnerSourceMember": isInnerSourceMember,
+		"isOpenSourceMember":  isOpenSourceMember,
+		"innersourceOrg":      innerSourceOrgName,
+		"opensourceOrg":       openSourceOrgName,
+	}
+
+	template.UseTemplate(&w, r, "projects/makepublic", data)
 }
 
 func FormHandler(w http.ResponseWriter, r *http.Request) {
@@ -87,7 +113,7 @@ func ViewHandler(w http.ResponseWriter, r *http.Request) {
 
 	id, err := db.GetProjectIdByOrgName(orgName, vars["repo"])
 	if err != nil {
-		log.Println(err)
+		http.Redirect(w, r, "/repositories", http.StatusNotFound)
 		return
 	}
 
