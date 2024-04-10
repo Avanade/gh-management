@@ -437,11 +437,9 @@ func CheckAllRequests(id int64, host string) {
 		newOwner := os.Getenv("GH_ORG_OPENSOURCE")
 
 		ValidateOrgMembers(owner, repo, newOwner, nil)
+		ghAPI.SetProjectVisibility(repo, "public", owner)
 		ghAPI.TransferRepository(repo, owner, newOwner)
-
 		time.Sleep(3 * time.Second)
-		ghAPI.SetProjectVisibility(repo, "public", newOwner)
-
 		db.UpdateProjectVisibilityId(id, PUBLIC)
 
 		repoResp, _ := ghAPI.GetRepository(repo, newOwner)
