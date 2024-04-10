@@ -113,7 +113,7 @@ func ViewHandler(w http.ResponseWriter, r *http.Request) {
 
 	id, err := db.GetProjectIdByOrgName(orgName, vars["repo"])
 	if err != nil {
-		log.Println(err)
+		http.Redirect(w, r, "/repositories", http.StatusNotFound)
 		return
 	}
 
