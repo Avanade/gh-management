@@ -100,20 +100,8 @@ func GetRepository(repoName string, org string) (*github.Repository, error) {
 	return repo, nil
 }
 
-func GetRepositoryReadmeById(repoName string, visibility string) (string, error) {
+func GetRepositoryReadmeById(owner, repoName string) (string, error) {
 	client := CreateClient(os.Getenv("GH_TOKEN"))
-
-	if visibility == "" {
-		return "", fmt.Errorf("invalid visibility")
-	}
-
-	var owner string
-
-	if visibility != "Public" {
-		owner = os.Getenv("GH_ORG_INNERSOURCE")
-	} else {
-		owner = os.Getenv("GH_ORG_OPENSOURCE")
-	}
 
 	readme, resp, err := client.Repositories.GetReadme(context.Background(), owner, repoName, nil)
 	if err != nil {
