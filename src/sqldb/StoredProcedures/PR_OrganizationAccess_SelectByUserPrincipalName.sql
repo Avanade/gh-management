@@ -17,5 +17,5 @@ BEGIN
     LEFT JOIN [dbo].[RegionalOrganizations] AS RO ON RO.Id = OA.OrganizationId
     LEFT JOIN [dbo].[Users] AS U ON U.UserPrincipalName = OA.UserPrincipalName
     WHERE OA.UserPrincipalName = @UserPrincipalName
-    ORDER BY CA.Created DESC
+    ORDER BY OA.Created DESC
 END
