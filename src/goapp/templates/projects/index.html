@@ -646,9 +646,17 @@
       hasApprovers: false,
       showECATTFormModal: false,
       async init() {
+        this.isGHAssociated = isGHAssociated
+        if(this.isGHAssociated) {
+          this.view = this.url.searchParams.get('view') ?? 'my'
+          this.regionalOrganizations = await getRegionalOrganizations()
+        }
+        else {
+          this.view = 'all'
+        }
+
         this.innersource = innersource
         this.opensource = opensource
-        this.regionalOrganizations = await getRegionalOrganizations()
         this.getPageDetails();
         this.onSetPopsetEventListener(this, this.onURLChangeCallback)
       },
@@ -693,15 +701,6 @@
           })
       },
       getPageDetails() {
-        this.isGHAssociated = isGHAssociated
-        
-        if(this.isGHAssociated) {
-          this.view = this.url.searchParams.get('view') ?? 'my'
-        }
-        else {
-          this.view = 'all'
-        }
-
         this.search = this.url.searchParams.get('search') ?? ''
         this.page = this.url.searchParams.get('page') ? parseInt(this.url.searchParams.get('page')) : 0
         this.offset = this.url.searchParams.get('offset') ? parseInt(this.url.searchParams.get('offset')) : 0
