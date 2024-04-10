@@ -136,6 +136,12 @@
                           id="option-0" role="option" tabindex="-1">
                           <span class="block truncate" x-text="`Move to ${innersource}`"></span>
                         </li>
+                        <li @click="transferRepoRegionalOrg.onOpen(repository.Id)"
+                          x-show="!repository.IsOrgRegional"
+                          class="hover:bg-[#fff2eb] relative cursor-pointer select-none py-2 pl-3 pr-9 text-gray-900"
+                          id="option-0" role="option" tabindex="-1">
+                          <span class="block truncate">Move to Regional Org</span>
+                        </li>
                       </ul>
                     </div>
                   </div>
@@ -275,7 +281,7 @@
                   </div>
                   {{ if .isAdmin }}
                   <div @click.stop
-                    x-show="repository.RepositorySource==='GitHub' && isGHAssociated && (repository.Visibility==='Public' || !repository.IsOrgRegional)">
+                    x-show="repository.RepositorySource==='GitHub' && isGHAssociated && (repository.Visibility==='Public')">
                     <div class="relative mt-1">
                       <button
                         @click="repository.showOptions = !repository.showOptions"
@@ -295,12 +301,6 @@
                           class="hover:bg-[#fff2eb] relative cursor-pointer select-none py-2 pl-3 pr-9 text-gray-900"
                           id="option-0" role="option" tabindex="-1">
                           <span class="block truncate">Make Private</span>
-                        </li>
-                        <li @click="transferRepoRegionalOrg.onOpen(repository.Id)"
-                          x-show="!repository.IsOrgRegional"
-                          class="hover:bg-[#fff2eb] relative cursor-pointer select-none py-2 pl-3 pr-9 text-gray-900"
-                          id="option-0" role="option" tabindex="-1">
-                          <span class="block truncate">Move to Regional Org</span>
                         </li>
                       </ul>
                     </div>
