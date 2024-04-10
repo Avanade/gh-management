@@ -214,11 +214,23 @@ func RepoOwnerScan(w http.ResponseWriter, r *http.Request) {
 	logger := appinsights_wrapper.NewClient()
 	defer logger.EndOperation()
 
-	organizationsOpen := [...]string{os.Getenv("GH_ORG_OPENSOURCE"), os.Getenv("GH_ORG_INNERSOURCE")}
+	orgs := []string{os.Getenv("GH_ORG_OPENSOURCE"), os.Getenv("GH_ORG_INNERSOURCE")}
+
+	regOrgs, err := db.GetAllRegionalOrganizations()
+	if err != nil {
+		logger.LogException(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	for _, regOrg := range regOrgs {
+		orgs = append(orgs, regOrg["Name"].(string))
+	}
+
 	var repoOnwerDeficient []string
 	var email string
 	emailSupport := os.Getenv("EMAIL_SUPPORT")
-	for _, org := range organizationsOpen {
+	for _, org := range orgs {
 
 		repoOnwerDeficient = nil
 		repos, err := ghAPI.GetRepositoriesFromOrganization(org)
