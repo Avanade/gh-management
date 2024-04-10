@@ -15,6 +15,8 @@ type Organization struct {
 	Username    string
 	Approvers   []string
 	RequestIds  []int64
+	GitHubUsername            string
+	GitHubId                  float64
 }
 
 func OrganizationInsert(body Organization) ([]map[string]interface{}, error) {

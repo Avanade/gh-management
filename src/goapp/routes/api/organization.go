@@ -36,6 +36,19 @@ func AddOrganization(w http.ResponseWriter, r *http.Request) {
 	}
 	body.Username = username.(string)
 
+	// Get GitHub ID
+	sessiongh, _ := session.Store.Get(r, "gh-auth-session")
+	ghProfile := sessiongh.Values["ghProfile"].(string)
+	var p map[string]interface{}
+	err = json.Unmarshal([]byte(ghProfile), &p)
+	if err != nil {
+		logger.LogException(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	body.GitHubId = p["id"].(float64)
+	body.GitHubUsername = fmt.Sprintf("%s", p["login"])
+
 	// Insert record on organization table
 	result, err := db.OrganizationInsert(body)
 	if err != nil {
@@ -219,10 +232,38 @@ func CreateOrganizationApprovalRequest(data db.Organization, logger *appinsights
 										|RequestedBy|
 									</td>
 								</tr>
+								<tr class="border-top">
+									<td style="font-size: 14px; padding-top: 15px; font-weight: 600;">
+										GitHub Id
+									</td>
+									<td style="font-size: 14px; padding-top: 15px; font-weight: 400;">
+										|GitHubId|
+									</td>
+								</tr>
+								<tr class="border-top">
+									<td style="font-size: 14px; padding-top: 15px; font-weight: 600;">
+										GitHub Username
+									</td>
+									<td style="font-size: 14px; padding-top: 15px; font-weight: 400;">
+										|GitHubUsername|
+									</td>
+								</tr>
 							</table>
 						</th>
 					</tr>
+					<tr>
+						<td class="center-table"  align="center">
+							<table style="width: 100%; max-width: 700px;" class="margin-auto">
+								<tr>
+									<td style="padding-top: 20px">
+										Note: Before you approve the request, you'll have to manually create the organization and add the requestor as an organization owner.
+									</td>
+								</tr>
+							</table>
+						</td>
+					</tr>
 				</table>
+				<br>
 			</body>
 
 		</html>
@@ -233,6 +274,8 @@ func CreateOrganizationApprovalRequest(data db.Organization, logger *appinsights
 			"|ProjectName|", data.ProjectName,
 			"|WBS|", data.WBS,
 			"|RequestedBy|", data.Username,
+			"|GitHubId|", strconv.FormatFloat(data.GitHubId, 'f', -1, 64),
+			"|GitHubUsername|", data.GitHubUsername,
 		)
 		body := replacer.Replace(bodyTemplate)
 
@@ -240,7 +283,7 @@ func CreateOrganizationApprovalRequest(data db.Organization, logger *appinsights
 			ApplicationId:       os.Getenv("APPROVAL_SYSTEM_APP_ID"),
 			ApplicationModuleId: os.Getenv("APPROVAL_SYSTEM_APP_MODULE_ORGANIZATION"),
 			Emails:              data.Approvers,
-			Subject:             fmt.Sprintf("[GH-Management] New Organization Request - %v - %v", data.ClientName, data.ProjectName),
+			Subject:             fmt.Sprintf("New Organization Request - %v - %v", data.ClientName, data.ProjectName),
 			Body:                body,
 			RequesterEmail:      data.Username,
 		}

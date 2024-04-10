@@ -53,9 +53,37 @@ func AddGitHubCopilot(w http.ResponseWriter, r *http.Request) {
 	body.GitHubId = int64(ghId)
 	body.GitHubUsername = ghUser
 
+	// Check user's membership
+	token := os.Getenv("GH_TOKEN")
+	membership, _ := ghAPI.UserMembership(token, body.RegionName, body.GitHubUsername)
+	if membership != nil {
+		switch membership.GetState() {
+		case "pending":
+			logger.LogException(err)
+			http.Error(w, fmt.Sprint("The request cannot proceed because you have pending invitation from this organization. Join the organization first by accepting the invitation. ", body.RegionName), http.StatusBadRequest)
+			return
+		}
+	} else {
+		logger.LogException(err)
+		http.Error(w, "The request cannot proceed because you are not a member of this organization. ", http.StatusBadRequest)
+		return
+	}
+
+	// Check if there is a pending request
+	result, err := db.GitHubCopilotGetPendingByUserAndOrganization(body)
+	if err != nil {
+		logger.LogException(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	if result != nil {
+		logger.LogException(err)
+		http.Error(w, "You have a pending request on this organization. Wait for response from the approvers. ", http.StatusBadRequest)
+		return
+	}
+
 	// Get organization owners to produce list of approvers
 	var approvers []string
-	token := os.Getenv("GH_TOKEN")
 	orgOwners, err := ghAPI.OrgListMembers(token, body.RegionName, "admin")
 	if err != nil {
 		logger.LogException(err)
@@ -85,7 +113,7 @@ func AddGitHubCopilot(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Insert record on GitHubCopilot table
-	result, err := db.GitHubCopilotInsert(body)
+	result, err = db.GitHubCopilotInsert(body)
 	if err != nil {
 		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -217,6 +245,14 @@ func CreateGitHubCopilotApprovalRequest(data db.GitHubCopilot, logger *appinsigh
 								</tr>
 								<tr class="border-top">
 									<td style="font-size: 14px; padding-top: 15px; font-weight: 600;">
+										GitHub Id
+									</td>
+									<td style="font-size: 14px; padding-top: 15px; font-weight: 400;">
+										|GitHubId|
+									</td>
+								</tr>
+								<tr class="border-top">
+									<td style="font-size: 14px; padding-top: 15px; font-weight: 600;">
 										GitHub Username
 									</td>
 									<td style="font-size: 14px; padding-top: 15px; font-weight: 400;">
@@ -234,13 +270,26 @@ func CreateGitHubCopilotApprovalRequest(data db.GitHubCopilot, logger *appinsigh
 							</table>
 						</th>
 					</tr>
+					<tr>
+						<td class="center-table"  align="center">
+							<table style="width: 100%; max-width: 700px;" class="margin-auto">
+								<tr>
+									<td style="padding-top: 20px">
+										Note: Approving the request will add the requestor to GitHub Copilot License Group team on |Region|
+									</td>
+								</tr>
+							</table>
+						</td>
+					</tr>
 				</table>
+				<br>
 			</body>
 
 		</html>
 		`
 
 		replacer := strings.NewReplacer("|Region|", data.RegionName,
+			"|GitHubId|", strconv.FormatInt(data.GitHubId, 10),
 			"|GitHubUsername|", data.GitHubUsername,
 			"|RequestedBy|", data.Username,
 		)
@@ -250,7 +299,7 @@ func CreateGitHubCopilotApprovalRequest(data db.GitHubCopilot, logger *appinsigh
 			ApplicationId:       os.Getenv("APPROVAL_SYSTEM_APP_ID"),
 			ApplicationModuleId: os.Getenv("APPROVAL_SYSTEM_APP_MODULE_COPILOT"),
 			Emails:              data.Approvers,
-			Subject:             "[GH-Management] New GitHub Copilot License Request",
+			Subject:             "New GitHub Copilot License Request",
 			Body:                body,
 			RequesterEmail:      data.Username,
 		}
@@ -603,7 +652,7 @@ func CreateOrganizationAccessApprovalRequest(
 										</th>
 									</tr>
 									<tr>
-										<th class="center-table">
+										<td class="center-table"  align="center">
 											<table style="width: 100%; max-width: 700px;" class="margin-auto">
 												<tr>
 													<td style="padding-top: 20px">
@@ -611,7 +660,7 @@ func CreateOrganizationAccessApprovalRequest(
 													</td>
 												</tr>
 											</table>
-										</th>
+										</td>
 									</tr>
 								</table>
 							</body>
