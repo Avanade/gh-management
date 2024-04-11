@@ -1,4 +1,3 @@
-
 CREATE PROCEDURE  [dbo].[PR_CommunityApproversList_Insert]
 (
 	@ApproverUserPrincipalName VARCHAR(100),
@@ -12,7 +11,7 @@ AS
 BEGIN   
     SET NOCOUNT ON 
 	DECLARE @returnID AS INT
-	   SELECT @id= id FROM  CommunityApproversList WHERE ApproverUserPrincipalName = @ApproverUserPrincipalName
+	   SELECT @id= id FROM  CommunityApproversList WHERE ApproverUserPrincipalName = @ApproverUserPrincipalName AND Category = @Category
 
 	IF ( @Id = 0  OR @Id IS NULL )
 	BEGIN
@@ -44,5 +43,3 @@ INSERT INTO [dbo].[CommunityApproversList]
 	SELECT @Id Id
 	END
 END
-
- 
