@@ -124,7 +124,7 @@
                           <span class="block truncate">Make Internal</span>
                         </li>
                         <li
-                          x-show="!repository.IsOrgRegional && repository.Visibility !== 'Public' && !repository.IsArchived && ((repository.ApprovalStatusId===1) || (repository.ApprovalStatusId===5)) && hasApprovers"
+                          x-show="!repository.IsOrgRegional && repository.Visibility !== 'Public' && !repository.IsArchived && !hasPendingRequest(repository.ApprovalStatusId) && hasApprovers"
                           @click="goto('/repositories/makepublic/' + repository.Id)"
                           class="hover:bg-[#fff2eb] relative cursor-pointer select-none py-2 pl-3 pr-9 text-gray-900"
                           id="option-0" role="option" tabindex="-1">
@@ -659,6 +659,13 @@
         this.opensource = opensource
         this.getPageDetails();
         this.onSetPopsetEventListener(this, this.onURLChangeCallback)
+      },
+      hasPendingRequest(statusId){
+        const pendingStatuses = [
+          1, // NEW 
+          2  // INREVIEW
+        ]
+        return pendingStatuses.includes(statusId)
       },
       transferRepoRegionalOrg: TransferRepoRegionalOrgForm(),
       getUserRepositories() {
