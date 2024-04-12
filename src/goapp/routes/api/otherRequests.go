@@ -677,7 +677,7 @@ func CreateOrganizationAccessApprovalRequest(
 			ApplicationId:       os.Getenv("APPROVAL_SYSTEM_APP_ID"),
 			ApplicationModuleId: os.Getenv("APPROVAL_SYSTEM_APP_MODULE_ORGACCESS"),
 			Emails:              approverUserPrincipalName,
-			Subject:             "[GH-Management] New Organization Access Request",
+			Subject:             "New Organization Access Request",
 			Body:                body,
 			RequesterEmail:      username,
 		}

@@ -845,7 +845,7 @@ func ApprovalSystemRequestCommunity(data db.CommunityApproval, logger *appinsigh
 						</th>
 					</tr>
 					<tr>
-						<td class="center-table">
+						<td class="center-table"  align="center">
 							<table style="width: 100%; max-width: 700px;" class="margin-auto">
 								<tr>
 									<td style="padding-top: 20px">
@@ -896,7 +896,7 @@ func ApprovalSystemRequestCommunity(data db.CommunityApproval, logger *appinsigh
 						</th>
 					</tr>
 					<tr>
-						<td class="center-table">
+						<td class="center-table"  align="center">
 							<table style="width: 100%; max-width: 700px;" class="margin-auto">
 								<tr>
 									<td style="padding-top: 20px">
@@ -928,7 +928,7 @@ func ApprovalSystemRequestCommunity(data db.CommunityApproval, logger *appinsigh
 			ApplicationId:       os.Getenv("APPROVAL_SYSTEM_APP_ID"),
 			ApplicationModuleId: os.Getenv("APPROVAL_SYSTEM_APP_MODULE_COMMUNITY"),
 			Emails:              []string{data.ApproverUserPrincipalName},
-			Subject:             fmt.Sprintf("[GH-Management] New Community For Approval - %v", data.CommunityName),
+			Subject:             fmt.Sprintf("New Community For Approval - %v", data.CommunityName),
 			Body:                body,
 			RequesterEmail:      data.RequesterUserPrincipalName,
 		}
