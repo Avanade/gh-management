@@ -1,4 +1,4 @@
-ALTER PROCEDURE [dbo].[PR_ProjectApprovals_Select_By_ProjectId]
+CREATE PROCEDURE [dbo].[PR_ProjectApprovals_Select_By_ProjectId]
   (
   @Id INT
 )
