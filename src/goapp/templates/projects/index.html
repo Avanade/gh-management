@@ -124,7 +124,7 @@
                           <span class="block truncate">Make Internal</span>
                         </li>
                         <li
-                          x-show="!repository.IsOrgRegional && repository.Visibility !== 'Public' && !repository.IsArchived && !hasPendingRequest(repository.ApprovalStatusId) && hasApprovers"
+                          x-show="!repository.IsOrgRegional && repository.Visibility !== 'Public' && !repository.IsArchived && (repository.TotalPendingRequest == 0) && hasApprovers"
                           @click="goto('/repositories/makepublic/' + repository.Id)"
                           class="hover:bg-[#fff2eb] relative cursor-pointer select-none py-2 pl-3 pr-9 text-gray-900"
                           id="option-0" role="option" tabindex="-1">
@@ -678,6 +678,7 @@
                   v['IsOrgRegional'] = this.regionalOrganizations.some(regionalOrganization => { return regionalOrganization.Name == v.Organization})
                   return v
                 })
+                console.log(body)
                 this.userRepositoriesList = body
                 this.showSpinner = false
               });
