@@ -45,6 +45,7 @@ type RepoDto struct {
 	Visibility             string   `json:"Visibility"`
 	ApprovalStatus         bool     `json:"ApprovalStatus"`
 	ApprovalStatusId       int      `json:"ApprovalStatusId"`
+	TotalPendingRequest    int      `json:"TotalPendingRequest"`
 	CoOwner                string   `json:"CoOwner"`
 	ConfirmAvaIP           bool     `json:"ConfirmAvaIP"`
 	ConfirmEnabledSecurity bool     `json:"ConfirmEnabledSecurity"`
