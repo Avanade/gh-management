@@ -152,12 +152,8 @@ func AddGitHubCopilot(w http.ResponseWriter, r *http.Request) {
 	body.Approvers = approvers
 	body.RequestIds = requestIds
 	body.Id = int64(id)
-	err = CreateGitHubCopilotApprovalRequest(body, logger)
-	if err != nil {
-		logger.LogException(err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
+
+	CreateGitHubCopilotApprovalRequest(body, logger)
 }
 
 func CreateGitHubCopilotApprovalRequest(data db.GitHubCopilot, logger *appinsights_wrapper.TelemetryClient) error {
@@ -514,12 +510,7 @@ func RequestOrganizationAccess(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	err = CreateOrganizationAccessApprovalRequest(regionalOrg.Name, ghUsername, username, approvers, requestIds, logger)
-	if err != nil {
-		logger.LogException(err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
+	CreateOrganizationAccessApprovalRequest(regionalOrg.Name, ghUsername, username, approvers, requestIds, logger)
 }
 
 func GetMyOrganizationAccess(w http.ResponseWriter, r *http.Request) {
