@@ -12,8 +12,8 @@ BEGIN
   -- interfering with SELECT statements.
   SET NOCOUNT ON
 
-UPDATE
-	[dbo].[CommunityApprovals]
+  UPDATE
+    [dbo].[CommunityApprovals]
   SET
     [ApprovalStatusId] = @ApprovalStatusId,
     [ApprovalRemarks] = @ApprovalRemarks,
@@ -22,5 +22,14 @@ UPDATE
     [ApprovalDate] = convert(DATETIME, @ApprovalDate)
   WHERE
     [ApprovalSystemGUID] = @ApprovalSystemGUID AND
-    [ApproverUserPrincipalName] = @Approver
+    [ApproverUserPrincipalName] = @Approver;
+
+  UPDATE
+  	[dbo].[CommunityApprovals]
+  SET
+    [ApprovalStatusId] = 7,
+    [Modified] = GETDATE()
+  WHERE
+    [ApprovalSystemGUID] = @ApprovalSystemGUID AND
+    [ApproverUserPrincipalName] != @Approver;
 END
