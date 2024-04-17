@@ -109,12 +109,7 @@ func AddOrganization(w http.ResponseWriter, r *http.Request) {
 	body.Approvers = approverList
 	body.RequestIds = requestIds
 	body.Id = int64(id)
-	err = CreateOrganizationApprovalRequest(body, logger)
-	if err != nil {
-		logger.LogException(err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
+	CreateOrganizationApprovalRequest(body, logger)
 }
 
 func CreateOrganizationApprovalRequest(data db.Organization, logger *appinsights_wrapper.TelemetryClient) error {
