@@ -57,11 +57,16 @@
                 "APPROVAL_SYSTEM_APP_ID":"",
                 "APPROVAL_SYSTEM_APP_MODULE_PROJECTS":"",
                 "APPROVAL_SYSTEM_APP_MODULE_COMMUNITY":"",
+                "APPROVAL_SYSTEM_APP_MODULE_ORGANIZATION":"",
+                "APPROVAL_SYSTEM_APP_MODULE_COPILOT":"",
+                
                 "GH_AZURE_AD_GROUP":"",
                 "GH_AZURE_AD_ADMIN_GROUP":"",
                 
                 "SUMMARY_REPORT_TRIGGER":"",
-                "CONTENT_SECURITY_POLICY":""
+                "CONTENT_SECURITY_POLICY":"",
+                "COPILOT_GROUP_SLUG": "",
+                "EXEMPTION": ""
             }
         }
     }

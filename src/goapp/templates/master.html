@@ -7,7 +7,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="icon" href="{{ .Header.LogoPath }}" type="image/icon type">
   <script defer src="https://unpkg.com/alpinejs@3.10.5/dist/cdn.min.js"></script>
-  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
   <link rel="stylesheet" href="/public/css/output.css" />
   <title>{{ .Header.Title }}</title>
   <!-- Global Store -->
@@ -98,7 +98,7 @@
               }
             })
             .catch(e => {
-              var msg = e.response.data.error ? e.response.data.error : "An error occured while processing."
+              var msg = e.response.data ? e.response.data : "An error occured while processing."
               this.modal.update("error", "Failed", msg, "", "")
             })
         },
@@ -118,7 +118,7 @@
               }
             })
             .catch(e => {
-              var msg = e.response.data.error ? e.response.data.error : "An error occured while processing."
+              var msg = e.response.data ? e.response.data : "An error occured while processing."
               this.modal.update("error", "Failed", msg, "", "")
             })
         },
@@ -186,7 +186,7 @@
             <div class="flex-shrink-0 flex items-center px-4">
               <img class="h-8 w-auto" src="/public/ava-logo.png" alt="Workflow" />
             </div>
-            <div class="pl-4 text-sm pb-7">Open Technology</div>
+            <div class="pl-[48px] text-sm pb-7">Community</div>
             <nav class="mt-5 px-2 space-y-1">
               {{ $page := .Header.Page}}
               {{ range $menu := .Header.Menu }}
@@ -273,7 +273,7 @@
               <img class="h-8 w-auto" src="/public/ava-logo.png" alt="Avanade" />
             </a>
           </div>
-          <div class="pl-4 text-sm pb-7"><a href="***REMOVED***">Open Technology</a>
+          <div class="pl-[48px] text-sm pb-7"><a href="***REMOVED***">Community</a>
           </div>
           <nav class="mt-5 px-2 space-y-1">
             {{ $page := .Header.Page}}
@@ -359,7 +359,7 @@
             <div class="flex items-center flex-shrink-0 px-4">
               <img class="h-8 w-auto" src="/public/ava-logo.png" alt="Avanade" />
             </div>
-            <div class="pl-4 text-sm pb-2">Open Technology</div>
+            <div class="pl-[48px] text-sm pb-2">Community</div>
           </div>
         </div>
       </div>
@@ -549,7 +549,7 @@
 
           </nav>
           <p class="mt-6 text-center text-gray-400 text-xs">
-            &copy; 2022 Avanade, Inc. All rights reserved.
+            &copy; 2024 Avanade, Inc. All rights reserved.
           </p>
         </div>
       </footer>
@@ -686,7 +686,6 @@
 
         },
         showClearBtn() {
-          console.log(this.searchBar)
           if (this.searchBar == '') {
             this.clearBtn = false
           } else {

@@ -72,3 +72,42 @@ func UpdateCommunityApprovalApproverResponse(itemId, remarks, responseDate strin
 
 	return true, nil
 }
+
+func UpdateOrganizationApprovalApproverResponse(itemId, remarks, responseDate string, approvalStatusId int) (bool, error) {
+	db := ConnectDb()
+	defer db.Close()
+
+	params := map[string]interface{}{
+		"ApprovalSystemGUID": itemId,
+		"ApprovalStatusId":   approvalStatusId,
+		"ApprovalRemarks":    remarks,
+		"ApprovalDate":       responseDate,
+	}
+
+	_, err := db.ExecuteStoredProcedure("PR_CommunityApproval_UpdateOrganization_ApproverResponse", params)
+	if err != nil {
+		return false, err
+	}
+
+	return true, nil
+}
+
+func UpdateApprovalApproverResponse(itemId, remarks, responseDate string, approvalStatusId int, respondedBy string) (bool, error) {
+	db := ConnectDb()
+	defer db.Close()
+
+	params := map[string]interface{}{
+		"ApprovalSystemGUID": itemId,
+		"ApprovalStatusId":   approvalStatusId,
+		"ApprovalRemarks":    remarks,
+		"ApprovalDate":       responseDate,
+		"Approver":           respondedBy,
+	}
+
+	_, err := db.ExecuteStoredProcedure("PR_CommunityApproval_UpdateApproverResponse", params)
+	if err != nil {
+		return false, err
+	}
+
+	return true, nil
+}

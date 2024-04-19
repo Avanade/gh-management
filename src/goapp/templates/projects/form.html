@@ -78,7 +78,7 @@
                                     <li x-show="showName('{{$user.UserPrincipalName}}', '{{$user.GithubUser}}')"
                                         class="relative cursor-default select-none py-2 pl-3 pr-9 text-gray-900"
                                         id="option-0" role="option"
-                                        @click="form.coowner = '{{$user.UserPrincipalName}}'; coowner.show = !coowner.show"
+                                        @click="onSelectCoOwner('{{$user.UserPrincipalName}}'); coowner.show = !coowner.show"
                                         tabindex="-1">
                                         <div class="flex">
 
@@ -124,28 +124,90 @@
 
             </div>
 
-            <div class="flex flex-col md:flex-row  ">
-                <div class="basis-1/2 md:base-full  md:flex-row   mx-3">
-                    <div class="flex flex-col ">
-                        <div>
-                            <h3 class="block text-sm font-medium text-gray-700">Repository description</h3>
+            <div class="flex flex-col md:flex-row ">
+                <div class="basis-1/2 md:base-full  md:flex-row">
+                    <div class="basis-1/2 md:base-full  md:flex-row   mx-3">
+                        <div class="flex flex-col ">
+                            <div>
+                                <h3 class="block text-sm font-medium text-gray-700">Repository description</h3>
+                            </div>
+                            <div>
+                                <textarea name="description" id="description" x-model="form.description" rows="3"
+                                    maxlength="350"
+                                    class="mt-1 focus:ring-orange-500 focus:border-orange-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md border-2">
+                                </textarea>
+                            </div>
+                            <div class="mt-1 text-sm text-gray-500">Be verbose in the description. Describe what the
+                                asset
+                                does and how it achieves this. If
+                                your
+                                improves an existing product or approach then be sure to explicitly state how it does
+                                this.
+                                Provide
+                                information on business value and potential effort saving or avoidance.</div>
                         </div>
-                        <div>
-                            <textarea name="description" id="description" x-model="form.description" rows="3"
-                                maxlength="350"
-                                class="mt-1 focus:ring-orange-500 focus:border-orange-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md  border-2">
-                        </textarea>
+                    </div>
+                    <div class="basis-1/2 md:base-full  md:flex-row   mx-3">
+                        <div class="flex flex-col ">
                         </div>
-                        <div class="mt-1 text-sm text-gray-500">Be verbose in the description. Describe what the asset
-                            does and how it achieves this. If
-                            your
-                            improves an existing product or approach then be sure to explicitly state how it does this.
-                            Provide
-                            information on business value and potential effort saving or avoidance.</div>
                     </div>
                 </div>
-                <div class="basis-1/2 md:base-full  md:flex-row   mx-3">
-                    <div class="flex flex-col ">
+                <div class="basis-1/2 md:base-full md:flex-row px-3">
+                    <div class="mb-1">
+                        <h3 class="block text-sm font-medium text-gray-700">Visibility</h3>
+                    </div>
+                    <div class="space-y-5">
+                        <div class="relative flex items-start">
+                            <div class="flex h-6 items-center">
+                                <input id="small" aria-describedby="small-description" name="plan" type="radio"
+                                    x-model="form.visibility" value="2"
+                                    class="focus:ring-orange-500 h-4 w-4 text-orange-600 border-gray-300 my-auto">
+                            </div>
+                            <div class="ml-3 text-sm leading-6">
+                                <div class="flex items-center text-sm text-gray-500" title="Repository Source">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                        stroke-width="1.5" stroke="currentColor" class="w-6 h-6 mr-2">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75M6.75 21v-3.375c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21M3 3h12m-.75 4.5H21m-3.75 3.75h.008v.008h-.008v-.008Zm0 3h.008v.008h-.008v-.008Zm0 3h.008v.008h-.008v-.008Z" />
+                                    </svg>
+                                    <div>
+                                        <label for="small" class="font-medium text-gray-900">Internal</label>
+                                        <p id="small-description" class="text-gray-500 text-xs">Enterprise members can
+                                            see this repository. You can choose who can commit.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="relative flex items-start">
+                            <div class="flex h-6 items-center">
+                                <input id="small" aria-describedby="small-description" name="plan" type="radio"
+                                    x-model="form.visibility" value="1"
+                                    class="focus:ring-orange-500 h-4 w-4 text-orange-600 border-gray-300 my-auto">
+                            </div>
+                            <div class="ml-3 text-sm leading-6">
+                                <div class="flex items-center text-sm text-gray-500" title="Repository Source">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                        stroke-width="1.5" stroke="currentColor" class="w-6 h-6 mr-3">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" />
+                                    </svg>
+
+                                    <div>
+                                        <label for="small" class="font-medium text-gray-900">Private</label>
+                                        <p id="small-description" class="text-gray-500 text-xs">You choose who can see
+                                            and commit to this repository.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div x-show="!isValidOwnedPrivateRepo.isValid && isValidOwnedPrivateRepo.message != ''" class="bg-red-50 p-4 mb-3">
+                            <div class="flex">
+                                <div class="ml-3 flex-1 md:flex md:justify-between">
+                                    <p class="text-sm text-red-700" x-text="isValidOwnedPrivateRepo.message">
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -225,6 +287,7 @@
 
 
 </div>
+<script src="/public/components/memberValidationMessage.js"></script>
 <script src="/public/components/combobox.js"></script>
 <script type="text/javascript">
     const data = (
@@ -239,6 +302,13 @@
                 confirmAvaIP: false,
                 confirmSecIPScan: false,
                 confirmNotClientProject: false,
+                visibility: 2 // 1 - PRIVATE | 2 - INTERNAL | 3 - PUBLIC
+            },
+            ownerTotalOwnedPrivateRepo: 0,
+            coownerTotalOwnedPrivateRepo: 0,
+            isValidOwnedPrivateRepo: {
+                isValid: true,
+                message: "",
             },
             coowner: {
                 show: false,
@@ -251,10 +321,13 @@
                 this.isInnersourceMember = isInnersourceMember;
                 this.isOpensourceOrgMember = isOpensourceOrgMember;
                 modal.visible = false
+                this.$watch('form.visibility', e => {
+                    this.onChangeSelectedVisibility(e);
+                })
             },
             submit() {
                 if (this.isFieldsetDisabled()) return;
-
+                this.form.visibility = parseInt(this.form.visibility)
                 Alpine.store('master').modal.reset()
                 Alpine.store('master').modal.show()
                 Alpine.store('master').postData("/api/repositories", this.form, "Your repository has been created.",
@@ -276,6 +349,7 @@
                     this.form.confirmAvaIP &&
                     this.form.confirmSecIPScan &&
                     this.form.confirmNotClientProject &&
+                    this.isValidOwnedPrivateRepo.isValid &&
                     this.validateRepositoryName(this.form.name)
                 ) {
                     return true
@@ -289,8 +363,53 @@
             },
 
             clearCoowner() {
+                this.coownerTotalOwnedPrivateRepo = 0
                 this.form.coowner = ""
+                this.validateOwnedPrivateRepo()
+
             },
+            async onSelectCoOwner(selectedCoOwner) {
+                this.isValidOwnedPrivateRepo.isValid = false;
+                this.isValidOwnedPrivateRepo.message = ''
+                coownerTotalOwnedPrivateRepo = await getTotalOwnedInnersourcePrivateRepo(selectedCoOwner)
+                this.coownerTotalOwnedPrivateRepo = coownerTotalOwnedPrivateRepo.total
+                this.form.coowner = selectedCoOwner
+                this.validateOwnedPrivateRepo()
+            },
+            async onChangeSelectedVisibility(selectedVisibility) {
+                if (selectedVisibility == 1) {
+                    this.isValidOwnedPrivateRepo.isValid = false;
+                    this.isValidOwnedPrivateRepo.message = ''
+                    ownerTotalOwnedPrivateRepo = await getTotalOwnedInnersourcePrivateRepo('me')
+                    this.ownerTotalOwnedPrivateRepo = ownerTotalOwnedPrivateRepo.total
+                    if (this.form.coowner != "") {
+                        coownerTotalOwnedPrivateRepo = await getTotalOwnedInnersourcePrivateRepo(this.form.coowner)
+                        this.coownerTotalOwnedPrivateRepo = coownerTotalOwnedPrivateRepo.total
+                    }
+                }
+                this.validateOwnedPrivateRepo()
+            },
+            validateOwnedPrivateRepo() {
+                let invalidUsers = []
+
+                if (this.ownerTotalOwnedPrivateRepo >= 3) {
+                    invalidUsers.push("you")
+                }
+
+                if (this.coownerTotalOwnedPrivateRepo >= 3) {
+                    invalidUsers.push(`the coowner`)
+                }
+
+                if (invalidUsers.length != 0 && this.form.visibility == 1) {
+                    invalidUsersStr = invalidUsers.join(" and ")
+                    this.isValidOwnedPrivateRepo.isValid = false;
+                    this.isValidOwnedPrivateRepo.message = `${invalidUsersStr.charAt(0).toUpperCase()}${invalidUsersStr.slice(1)} already own three private repositories, which is the maximum allowed. Change the visibility to internal to continue.`
+                } else {
+                    this.isValidOwnedPrivateRepo.isValid = true;
+                    this.isValidOwnedPrivateRepo.message = ''
+                }
+            },
+
 
             validateRepositoryName(value) {
                 if (value.length >= 100)
@@ -315,65 +434,13 @@
         }
     }
 
-    const message = (
-        isInnersourceMember,
-        isOpensourceOrgMember,
-        innersourceOrg,
-        openSourceOrg,
-        isInvalidToken
-    ) => {
-        return {
-            isInvalidToken: false,
-            isInnersourceMember: false,
-            isOpensourceOrgMember: false,
-            innersourceOrg: "",
-            openSourceOrg: "",
-            init() {
-                this.isInvalidToken = isInvalidToken;
-                this.isInnersourceMember = isInnersourceMember;
-                this.isOpensourceOrgMember = isOpensourceOrgMember;
-                this.innersourceOrg = innersourceOrg;
-                this.openSourceOrg = openSourceOrg;
-            },
-            isDisplayMessage() {
-                return !this.isInnersourceMember || !this.isOpensourceOrgMember
-            },
-            displayMessage() {
-                const innersourceOrgLink = this.getOrgInvitationLink(this.innersourceOrg)
-                const opensourceOrgLink = this.getOrgInvitationLink(this.openSourceOrg)
+    async function getTotalOwnedInnersourcePrivateRepo(user = "me") {
+        // VISIBILITY = 1 = PRIVATE
+        // ORG TYPE = private = innersource
+        const res = await fetch(`/api/users/${user}/repositories/total?visibility=1&orgtype=private`)
 
-                if (this.isInvalidToken) {
-                    return `We currently can't check your membership on ${innersourceOrgLink} and ${opensourceOrgLink}. Please try again later.`
-                }
-
-                if (!this.isInnersourceMember && !this.isOpensourceOrgMember) {
-                    return `You have a pending invitation to ${innersourceOrgLink} and ${opensourceOrgLink}. You need to join these organizations before you can request for a repository.`
-                } else if (!this.isInnersourceMember) {
-                    return `You have a pending invitation to ${innersourceOrgLink}. You need to join these organizations before you can request for a repository.`
-                } else if (!this.isOpensourceMember) {
-                    return `You have a pending invitation to ${opensourceOrgLink}. You need to join these organizations before you can request for a repository.`
-                }
-            },
-            getOrgInvitationLink(orgName) {
-                return `<a href="https://github.com/orgs/${orgName}/invitation" target="_blank"><b>${orgName}</b></a>`
-            },
-            template: `<template x-if="isDisplayMessage">
-                            <div class="bg-red-50 p-4 mb-3">
-                                <div class="flex">
-                                    <div class="flex-shrink-0">
-                                        <svg class="h-5 w-5 text-red-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
-                                        </svg>
-                                    </div>
-                                    <div class="ml-3 flex-1 md:flex md:justify-between">
-                                        <p class="text-sm text-red-700">
-                                            <span x-html="displayMessage"></span>
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-                        </template>`
-        }
+        const data = res.json()
+        return data
     }
 </script>
 {{ end }}

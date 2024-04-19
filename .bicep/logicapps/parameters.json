@@ -18,7 +18,8 @@
                 "Workflows.OpensourceCheckOutsideCollaborators.FlowState": "Disabled",
                 "Workflows.RecurringApproval.FlowState": "Disabled",
                 "Workflows.RepoOwnerScan.FlowState": "Disabled",
-                "Workflows.IndexADGroups.FlowState": "Disabled"
+                "Workflows.IndexADGroups.FlowState": "Disabled",
+                "Workflows.IndexRegionalOrganizations.FlowState": "Disabled"
             }
         }
     }

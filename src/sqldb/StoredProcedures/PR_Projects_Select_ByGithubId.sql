@@ -12,6 +12,7 @@ BEGIN
 SELECT [Id],
        [GithubId],
        [Name],
+       [Organization],
        [CoOwner],
        [Description],
        [ConfirmAvaIP],

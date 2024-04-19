@@ -4,22 +4,37 @@
         id: '{{ .id }}',
         isOwner: {{ .isOwner }},
         isAdmin: {{ .isAdmin }},
-        isGHValid: {{ .profileGH.IsValid }}
+        isGHValid: {{ .profileGH.IsValid }},
+        isMember: {{ .isMember}},
+        orgName: '{{ .orgName }}'
     })">
         <div class="flex mb-3">
             <div class="flex-grow font-bold self-center py-2">
-                <h4 class="text-lg" x-text="state.about.name">repository-name</h4>
+                <h4 class="text-lg" x-text="`${state.orgName}/${state.about.name}`">repository-name</h4>
             </div>
             <div class="flex-none" x-show="state.isGHValid">
-                <a 
-                    x-bind:href="state.about.link"
-                    target="_blank"
-                    class="flex items-center bg-[#FF5800] hover:bg-[#FF4300] text-white py-2 px-4 rounded">
-                    <span x-text="`Open in ${state.about.repositorySource}`"></span>
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="flex-shrink-0 w-5 h-5 ml-2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
-                    </svg>
-                </a>
+                <template x-if="state.isMember">
+                    <a 
+                        x-bind:href="state.about.link"
+                        target="_blank"
+                        class="flex items-center bg-[#FF5800] hover:bg-[#FF4300] text-white py-2 px-4 rounded">
+                        <span x-text="`Open in ${state.about.repositorySource}`"></span>
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="flex-shrink-0 w-5 h-5 ml-2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+                        </svg>
+                    </a>
+                </template>
+                <template x-if="!state.isMember">
+                    <a 
+                        x-bind:href="requestAccess()"
+                        target="_blank"
+                        class="flex items-center bg-[#FF5800] hover:bg-[#FF4300] text-white py-2 px-4 rounded">
+                        <span>Request Access</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="flex-shrink-0 w-5 h-5 ml-2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+                        </svg>
+                    </a>
+                </template>
             </div>
         </div>
         <div class="flex flex-wrap">
@@ -178,7 +193,7 @@
                                                             Update
                                                         </a> |
                                                         <a class="text-indigo-600 hover:text-indigo-900 hover:cursor-pointer"
-                                                            x-on:click="collaboratorModal.removeCollaborator(state.id, item.ghUsername, item.role)">
+                                                            x-on:click="collaboratorModal.removeCollaborator(state.id, state.orgName, state.about.name, item.ghUsername, item.role)">
                                                             Remove
                                                         </a>
                                                     </td>
@@ -382,7 +397,7 @@
                                         <div class="mt-5 sm:mt-6">
                                             <button 
                                                 type="submit" 
-                                                @click="(e) => { collaboratorModal.onSubmit(e) }" 
+                                                @click="(e) => { collaboratorModal.onSubmit(state.orgName, state.about.name) }" 
                                                 x-bind:disabled="!collaboratorModal.isValid()"
                                                 x-text="collaboratorModal.getButtonLabel()"
                                                 class="inline-flex justify-center rounded-md bg-[#FF5800] px-5 mr-2 py-2 text-sm font-semibold text-white shadow-sm  focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:bg-slate-300">
@@ -414,13 +429,17 @@
         id = undefined,
         isOwner = false,
         isAdmin = false,
-        isGHValid = false
+        isGHValid = false,
+        isMember = false,
+        orgName = ""
     }) => {
         return {
             state: {
                 id: 0,
                 isAdmin: false,
                 isGHValid: false,
+                isMember: false,
+                orgName: "",
 
                 readme: "",
                 about: {
@@ -450,6 +469,8 @@
                 this.state.isOwner = isOwner;
                 this.state.isAdmin = isAdmin;
                 this.state.isGHValid = isGHValid;
+                this.state.isMember = isMember;
+                this.state.orgName = orgName;
 
                 const repoDetails = await getRepositoryById(this.state.id)
                 const created = new Date(repoDetails.Created)
@@ -462,9 +483,9 @@
                     link: repoDetails.TFSProjectReference,
                     topics: repoDetails.RepoTopics
                 };
-
+                
                 if(this.state.about.repositorySource != 'AzureDevOps'){
-                    const readme = await getRepositoryReadme(repoDetails.Visibility, repoDetails.Name)
+                    const readme = await getRepositoryReadme(this.state.orgName, this.state.about.name)
                     this.state.readme = readme;
                 } else {
                     this.state.activeTab = this.state.about.repositorySource == 'AzureDevOps' ? 'collaborators' : 'readme'
@@ -517,6 +538,9 @@
             },
             onURLChangeCallback(e) {
                 e.setActiveTab()
+            },
+            requestAccess() {
+                return `/other-requests/organization-access?regionName=${this.state.orgName}`
             },
             collaboratorModal: collaboratorModalData()
         }
@@ -577,12 +601,12 @@
                 this.state.permission = permission == '' ? [] : [{ id: permission, text: permission }]
                 this.state.isShow = true
             },
-            removeCollaborator(id, user, permission) {
+            removeCollaborator(id, orgName, repoName, user, permission) {
                 let url = `/api/repositories/${id}/collaborators/${user}/${permission}`
                 let f = () => {
                 Alpine.store('master').modal.show()
                 Alpine.store('master').deleteData(url, null, `Collaborator was successfully removed.`, "Close",
-                    `/repositories/view/${id}?tab=collaborators`)
+                    `/repositories/view/${orgName}/${repoName}?tab=collaborators`)
                 }
 
                 let title = "Confirmation"
@@ -590,11 +614,11 @@
                 Alpine.store('master').confirmationModal.update(title, message, f)
                 Alpine.store('master').confirmationModal.show()
             },
-            onSubmit(e) {
+            onSubmit(orgName, repoName) {
                 Alpine.store('master').modal.reset()
                 Alpine.store('master').modal.show()
                 Alpine.store('master').postData(`/api/repositories/${this.state.id}/collaborators/${this.state.username}/${this.state.permission[0].id}`, null,
-                "GitHub user has been invited to the repository.", "Close", `/repositories/view/${this.state.id}?tab=collaborators`)
+                "GitHub user has been invited to the repository.", "Close", `/repositories/view/${orgName}/${repoName}?tab=collaborators`)
 
                 this.onHide()
             }
@@ -710,9 +734,9 @@
         return data
     }
 
-    async function getRepositoryReadme(visibility, repoName) {
+    async function getRepositoryReadme(orgName, repoName) {
         const res = await fetch(
-            `/api/repositories/${visibility}/${repoName}/readme`
+            `/api/repositories/${orgName}/${repoName}/readme`
         )
 
         const data = await res.json()

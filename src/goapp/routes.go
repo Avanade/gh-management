@@ -11,6 +11,7 @@ import (
 	rtAdmin "main/routes/pages/admin"
 	rtCommunity "main/routes/pages/community"
 	rtGuidance "main/routes/pages/guidance"
+	rtOtherRequests "main/routes/pages/otherRequests"
 	rtProjects "main/routes/pages/project"
 	rtSearch "main/routes/pages/search"
 
@@ -33,7 +34,8 @@ func setPageRoutes(mux *mux.Router) {
 	// REPOSITORIES PAGE
 	mux.Handle("/repositories", loadAzAuthPage(rtProjects.IndexHandler))
 	mux.Handle("/repositories/new", loadAzGHAuthPage(rtProjects.FormHandler))
-	mux.Handle("/repositories/view/{id}", loadAzAuthPage(rtProjects.ViewHandler))
+	mux.Handle("/repositories/view/{githubId}", loadAzAuthPage(rtProjects.ViewByIdHandler))
+	mux.Handle("/repositories/view/{org}/{repo}", loadAzAuthPage(rtProjects.ViewHandler))
 	mux.Handle("/repositories/makepublic/{id}", loadAzGHAuthPage(rtProjects.MakePublicHandler))
 
 	// GUIDANCE PAGE
@@ -47,6 +49,12 @@ func setPageRoutes(mux *mux.Router) {
 	mux.Handle("/communities/new", loadAzGHAuthPage(rtCommunity.FormHandler))
 	mux.Handle("/communities/{id}", loadAzGHAuthPage(rtCommunity.FormHandler))
 	mux.Handle("/communities/{id}/onboarding", loadAzGHAuthPage(rtCommunity.OnBoardingHandler))
+
+	// OTHER REQUESTS PAGE
+	mux.Handle("/other-requests", loadAzGHAuthPage(rtOtherRequests.IndexHandler))
+	mux.Handle("/other-requests/organization", loadAzGHAuthPage(rtOtherRequests.RequestNewOrganization))
+	mux.Handle("/other-requests/github-copilot", loadAzGHAuthPage(rtOtherRequests.RequestGitHubCopilot))
+	mux.Handle("/other-requests/organization-access", loadAzGHAuthPage(rtOtherRequests.RequestOrganizationAccess))
 
 	// AUTHENTICATION
 	mux.HandleFunc("/loginredirect", rtPages.LoginRedirectHandler)
@@ -165,7 +173,7 @@ func setApiRoutes(mux *mux.Router) {
 	muxApi.Handle("/repositories/my", loadAzGHAuthPage(rtApi.GetMyRepositories)).Methods("GET")
 	muxApi.Handle("/repositories/{id}", loadAzAuthPage(rtApi.GetRepositoriesById)).Methods("GET")
 	muxApi.Handle("/repositories/{id}/status", loadAzGHAuthPage(rtApi.GetRequestStatusByRepoId)).Methods("GET")
-	muxApi.Handle("/repositories/{visibility}/{repoName}/readme", loadAzAuthPage(rtApi.GetRepositoryReadmeById)).Methods("GET")
+	muxApi.Handle("/repositories/{orgName}/{repoName}/readme", loadAzAuthPage(rtApi.GetRepositoryReadmeById)).Methods("GET")
 	muxApi.Handle("/repositories", loadAzGHAuthPage(rtApi.CreateRepository)).Methods("POST")
 	muxApi.Handle("/repositories/{id}", loadAzGHAuthPage(rtApi.UpdateRepositoryById)).Methods("PUT")
 	muxApi.Handle("/repositories/{id}/ecattid", loadAzGHAuthPage(rtApi.UpdateRepositoryEcattIdById)).Methods("PUT")
@@ -177,9 +185,12 @@ func setApiRoutes(mux *mux.Router) {
 	muxApi.Handle("/repositories/{id}/public", loadAzGHAuthPage(rtApi.RequestMakePublic)).Methods("PUT")
 	muxApi.Handle("/repositories/{projectId}/archive/{project}/{state}/{archive}", loadAzGHAuthPage(rtApi.ArchiveProject)).Methods("PUT")
 	muxApi.Handle("/repositories/{projectId}/visibility/{project}/{currentState}/{desiredState}", loadAzGHAuthPage(rtApi.SetVisibility)).Methods("PUT")
+	muxApi.Handle("/repositories/{projectId}/transfer", loadAzAuthPage(rtApi.TransferRepository)).Methods("PUT")
 
 	// USERS API
 	muxApi.Handle("/users", loadAzAuthPage(rtApi.GetAllUserFromActiveDirectory)).Methods("GET")
+	// Retrieve the total number of repositories owned by a me|{user}, categorized by visibility. Default visibility is set to private.
+	muxApi.Handle("/users/{user}/repositories/total", loadAzGHAuthPage(rtApi.GetTotalRepositoriesOwnedByUsers)).Methods("GET")
 	muxApi.Handle("/users/with-github", loadAzAuthPage(rtApi.GetUsersWithGithub)).Methods("GET")
 	muxApi.Handle("/users/{search}/search", loadAzAuthPage(rtApi.SearchUserFromActiveDirectory)).Methods("GET")
 
@@ -208,8 +219,28 @@ func setApiRoutes(mux *mux.Router) {
 	muxApi.Handle("/oss-contribution-sponsors", loadAdminPage((rtApi.AddSponsor))).Methods("POST")
 	muxApi.Handle("/oss-contribution-sponsors/{id}", loadAdminPage((rtApi.UpdateSponsor))).Methods(("PUT"))
 
+	// OTHER REQUESTS
+	muxApi.Handle("/github-organization", loadAzGHAuthPage(rtApi.AddOrganization)).Methods("POST")
+	muxApi.Handle("/github-organization", loadAzGHAuthPage(rtApi.GetAllOrganizationRequest)).Methods("GET")
+	muxApi.Handle("/github-organization/region", loadAzGHAuthPage(rtApi.GetAllRegionalOrganizations)).Methods("GET")
+	muxApi.Handle("/github-organization/{id}/status", loadAzGHAuthPage(rtApi.GetOrganizationApprovalRequests)).Methods("GET")
+
+	muxApi.Handle("/github-copilot", loadAzGHAuthPage(rtApi.AddGitHubCopilot)).Methods("POST")
+	muxApi.Handle("/github-copilot", loadAzGHAuthPage(rtApi.GetAllGitHubCopilotRequest)).Methods("GET")
+	muxApi.Handle("/github-copilot/{id}/status", loadAzGHAuthPage(rtApi.GetGitHubCopilotApprovalRequests)).Methods("GET")
+
+	muxApi.Handle("/organization-access", loadAzGHAuthPage(rtApi.RequestOrganizationAccess)).Methods("POST")
+	muxApi.Handle("/organization-access/me", loadAzGHAuthPage(rtApi.GetMyOrganizationAccess)).Methods("GET")
+	muxApi.Handle("/organization-access/{id}/status", loadAzGHAuthPage(rtApi.GetOrganizationAccessApprovalRequests)).Methods("GET")
+
+	//ORGANIZATION APPROVERS API
+	muxApi.Handle("/github-organization-approvers/active", loadAzGHAuthPage(rtApi.GetAllActiveOrganizationApprovers)).Methods("GET")
+
 	// APPROVALS API
 	muxApi.HandleFunc("/approvals/community/callback", rtApi.UpdateApprovalStatusCommunity).Methods("POST")
+	muxApi.HandleFunc("/approvals/organization/callback", rtApi.UpdateApprovalStatusOrganization).Methods("POST")
+	muxApi.HandleFunc("/approvals/github-copilot/callback", rtApi.UpdateApprovalStatusCopilot).Methods("POST")
+	muxApi.HandleFunc("/approvals/organization-access/callback", rtApi.UpdateApprovalStatusOrganizationAccess).Methods("POST")
 	muxApi.HandleFunc("/approvals/community/reassign/callback", rtApi.UpdateCommunityApprovalReassignApprover).Methods("POST")
 	muxApi.HandleFunc("/approvals/project/callback", rtApi.UpdateApprovalStatusProjects).Methods("POST")
 	muxApi.HandleFunc("/approvals/project/reassign/callback", rtApi.UpdateApprovalReassignApprover).Methods("POST")
@@ -237,4 +268,5 @@ func setUtilityRoutes(mux *mux.Router) {
 	muxUtility.Handle("/fillout-approvalrequest-approvers", loadGuidAuthApi(rtApi.FillOutApprovalRequestApprovers)).Methods("GET")
 	muxUtility.Handle("/migrate-oss-sponsors", loadGuidAuthApi(rtApi.MigrateToOssSponsorsTable)).Methods("GET")
 	muxUtility.Handle("/index-ad-groups", loadGuidAuthApi(rtApi.IndexADGroups)).Methods("GET")
+	muxUtility.Handle("/index-regional-organizations", loadGuidAuthApi(rtApi.IndexRegionalOrganizations)).Methods("GET")
 }

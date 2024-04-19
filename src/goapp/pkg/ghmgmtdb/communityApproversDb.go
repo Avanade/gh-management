@@ -1,10 +1,14 @@
 package ghmgmt
 
-func GetCommunityApprovers() ([]map[string]interface{}, error) {
+func GetCommunityApprovers(category string) ([]map[string]interface{}, error) {
 	db := ConnectDb()
 	defer db.Close()
 
-	result, err := db.ExecuteStoredProcedureWithResult("PR_CommunityApproversList_select", nil)
+	param := map[string]interface{}{
+		"Category": category,
+	}
+
+	result, err := db.ExecuteStoredProcedureWithResult("PR_CommunityApproversList_select", param)
 	if err != nil {
 		return nil, err
 	}
@@ -12,11 +16,15 @@ func GetCommunityApprovers() ([]map[string]interface{}, error) {
 	return result, nil
 }
 
-func GetActiveCommunityApprovers() ([]map[string]interface{}, error) {
+func GetActiveCommunityApprovers(category string) ([]map[string]interface{}, error) {
 	db := ConnectDb()
 	defer db.Close()
 
-	result, err := db.ExecuteStoredProcedureWithResult("PR_CommunityApproversList_SelectAllActive", nil)
+	param := map[string]interface{}{
+		"Category": category,
+	}
+
+	result, err := db.ExecuteStoredProcedureWithResult("PR_CommunityApproversList_SelectAllActive", param)
 	if err != nil {
 		return nil, err
 	}
@@ -40,7 +48,7 @@ func GetCommunityApproversById(id string) ([]map[string]interface{}, error) {
 	return result, nil
 }
 
-func UpdateCommunityApproversById(id int, disabled bool, approverUserPrincipalName, username string) (bool, error) {
+func UpdateCommunityApproversById(id int, disabled bool, approverUserPrincipalName, username string, category string) (bool, error) {
 	db := ConnectDb()
 	defer db.Close()
 
@@ -50,6 +58,7 @@ func UpdateCommunityApproversById(id int, disabled bool, approverUserPrincipalNa
 		"CreatedBy":                 username,
 		"ModifiedBy":                username,
 		"Id":                        id,
+		"Category":                  category,
 	}
 
 	_, err := db.ExecuteStoredProcedure("PR_CommunityApproversList_Insert", param)
