@@ -22,6 +22,9 @@ INSERT INTO ApprovalStatus (Id, [Name]) VALUES (5, 'Approved')
 IF NOT EXISTS (SELECT Id FROM ApprovalStatus WHERE Id = 6)
 INSERT INTO ApprovalStatus (Id, [Name]) VALUES (6, 'Retired')
 
+IF NOT EXISTS (SELECT Id FROM ApprovalStatus WHERE Id = 7)
+INSERT INTO ApprovalStatus (Id, [Name]) VALUES (7, 'Archived')
+
 SET IDENTITY_INSERT ApprovalStatus OFF
 
 /* INITIAL DATA FOR APPROVAL TYPES */
