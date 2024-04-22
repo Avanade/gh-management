@@ -43,7 +43,7 @@ require (
 	github.com/pquerna/cachecontrol v0.1.0 // indirect
 	github.com/thedatashed/xlsxreader v1.2.5
 	golang.org/x/crypto v0.21.0 // indirect
-	golang.org/x/net v0.21.0 // indirect
+	golang.org/x/net v0.23.0 // indirect
 	golang.org/x/oauth2 v0.6.0
 	golang.org/x/text v0.14.0
 	google.golang.org/appengine v1.6.7 // indirect
