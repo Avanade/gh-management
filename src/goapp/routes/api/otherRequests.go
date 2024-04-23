@@ -55,19 +55,6 @@ func AddGitHubCopilot(w http.ResponseWriter, r *http.Request) {
 
 	// Check user's membership
 	token := os.Getenv("GH_TOKEN")
-	membership, _ := ghAPI.UserMembership(token, body.RegionName, body.GitHubUsername)
-	if membership != nil {
-		switch membership.GetState() {
-		case "pending":
-			logger.LogException(err)
-			http.Error(w, fmt.Sprint("The request cannot proceed because you have pending invitation from this organization. Join the organization first by accepting the invitation. ", body.RegionName), http.StatusBadRequest)
-			return
-		}
-	} else {
-		logger.LogException(err)
-		http.Error(w, "The request cannot proceed because you are not a member of this organization. ", http.StatusBadRequest)
-		return
-	}
 
 	// Check if there is a pending request
 	result, err := db.GitHubCopilotGetPendingByUserAndOrganization(body)
