@@ -431,6 +431,10 @@ type RemovedMember struct {
 func ClearOrgMembersInnersource(token, org string, logger *appinsights_wrapper.TelemetryClient) {
 	var removedMembers []RemovedMember
 
+	var notFoundDB []string
+	var notFoundAD []string
+	var disabledAccountAD []string
+
 	users, _ := ghAPI.OrgListMembers(token, org, "all")
 	for _, user := range users {
 		email, err := db.GetUserEmailByGithubId(fmt.Sprint(user.GetID()))
@@ -452,6 +456,7 @@ func ClearOrgMembersInnersource(token, org string, logger *appinsights_wrapper.T
 					Information: information,
 				})
 				logger.TrackTrace(information, contracts.Information)
+				notFoundAD = append(notFoundAD, fmt.Sprint(user.GetLogin(), " - ", email))
 				// ghAPI.RemoveOrganizationsMember(token, organization, *user.Login)
 			}
 			if !isAccountEnabled {
@@ -462,6 +467,7 @@ func ClearOrgMembersInnersource(token, org string, logger *appinsights_wrapper.T
 					Information: information,
 				})
 				logger.TrackTrace(information, contracts.Information)
+				disabledAccountAD = append(disabledAccountAD, fmt.Sprint(user.GetLogin(), " - ", email))
 			}
 		} else {
 			information := fmt.Sprint("GitHub ID: ", user.GetID(), " not found | INTERNAL")
@@ -471,6 +477,7 @@ func ClearOrgMembersInnersource(token, org string, logger *appinsights_wrapper.T
 				Information: information,
 			})
 			logger.TrackTrace(information, contracts.Information)
+			notFoundDB = append(notFoundDB, user.GetLogin())
 			// ghAPI.RemoveOrganizationsMember(token, organization, *user.Login)
 		}
 	}
@@ -483,5 +490,8 @@ func ClearOrgMembersInnersource(token, org string, logger *appinsights_wrapper.T
 	}
 
 	removedMembersTC.Properties["RemovedMembers"] = string(removedMembersJson)
+	removedMembersTC.Properties["NotFoundOnAD"] = strings.Join(notFoundAD, ",")
+	removedMembersTC.Properties["NotFoundOnDB"] = strings.Join(notFoundDB, ",")
+	removedMembersTC.Properties["DisabledADAccount"] = strings.Join(disabledAccountAD, ",")
 	logger.Track(removedMembersTC)
 }
