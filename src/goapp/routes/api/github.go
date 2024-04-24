@@ -118,6 +118,9 @@ func ClearOrgMembers(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Convert users who are not employees to an outside collaborator
+	var notFoundDB []string
+	var notFoundAD []string
+	var disabledAccountAD []string
 	var convertedOutsideCollabsList []string
 	organizationsOpen := os.Getenv("GH_ORG_OPENSOURCE")
 
@@ -141,15 +144,15 @@ func ClearOrgMembers(w http.ResponseWriter, r *http.Request) {
 				continue
 			}
 			if !isUserExist {
-				logger.TrackTrace(fmt.Sprint("GitHub ID: ", user.GetID(), " not found on AD | EXTERNAL"), contracts.Information)
+				notFoundAD = append(notFoundAD, fmt.Sprint(user.GetLogin(), " - ", email))
 				// ghAPI.ConvertMemberToOutsideCollaborator(token, organizationsOpen, *user.Login)
 				convertedOutsideCollabsList = append(convertedOutsideCollabsList, *user.Login)
 			}
 			if !isAccountEnabled {
-				logger.TrackTrace(fmt.Sprint("GitHub ID: ", user.GetID(), " found on AD but account disabled | EXTERNAL"), contracts.Information)
+				disabledAccountAD = append(disabledAccountAD, fmt.Sprint(user.GetLogin(), " - ", email))
 			}
 		} else {
-			logger.TrackTrace(fmt.Sprint("GitHub ID: ", user.GetID(), " not found | EXTERNAL"), contracts.Information)
+			notFoundDB = append(notFoundDB, user.GetLogin())
 			// ghAPI.ConvertMemberToOutsideCollaborator(token, organizationsOpen, *user.Login)
 			convertedOutsideCollabsList = append(convertedOutsideCollabsList, *user.Login)
 		}
@@ -168,6 +171,9 @@ func ClearOrgMembers(w http.ResponseWriter, r *http.Request) {
 		}
 
 		emailConvertedCollaboratorTC.Properties["ConvertedOutsideCollabsList"] = string(convertedOutsideCollabsListJson)
+		emailConvertedCollaboratorTC.Properties["NotFoundOnAD"] = strings.Join(notFoundAD, ",")
+		emailConvertedCollaboratorTC.Properties["NotFoundOnDB"] = strings.Join(notFoundDB, ",")
+		emailConvertedCollaboratorTC.Properties["DisabledADAccount"] = strings.Join(disabledAccountAD, ",")
 		logger.Track(emailConvertedCollaboratorTC)
 
 		// to repo admins with converted users
@@ -429,8 +435,6 @@ type RemovedMember struct {
 }
 
 func ClearOrgMembersInnersource(token, org string, logger *appinsights_wrapper.TelemetryClient) {
-	var removedMembers []RemovedMember
-
 	var notFoundDB []string
 	var notFoundAD []string
 	var disabledAccountAD []string
@@ -449,47 +453,19 @@ func ClearOrgMembersInnersource(token, org string, logger *appinsights_wrapper.T
 				continue
 			}
 			if !isUserExist {
-				information := fmt.Sprint("GitHub ID: ", user.GetID(), " not found on AD | INTERNAL")
-				removedMembers = append(removedMembers, RemovedMember{
-					Id:          user.GetID(),
-					Username:    user.GetLogin(),
-					Information: information,
-				})
-				logger.TrackTrace(information, contracts.Information)
 				notFoundAD = append(notFoundAD, fmt.Sprint(user.GetLogin(), " - ", email))
 				// ghAPI.RemoveOrganizationsMember(token, organization, *user.Login)
 			}
 			if !isAccountEnabled {
-				information := fmt.Sprint("GitHub ID: ", user.GetID(), " found on AD but account disabled | INTERNAL")
-				removedMembers = append(removedMembers, RemovedMember{
-					Id:          user.GetID(),
-					Username:    user.GetLogin(),
-					Information: information,
-				})
-				logger.TrackTrace(information, contracts.Information)
 				disabledAccountAD = append(disabledAccountAD, fmt.Sprint(user.GetLogin(), " - ", email))
 			}
 		} else {
-			information := fmt.Sprint("GitHub ID: ", user.GetID(), " not found | INTERNAL")
-			removedMembers = append(removedMembers, RemovedMember{
-				Id:          user.GetID(),
-				Username:    user.GetLogin(),
-				Information: information,
-			})
-			logger.TrackTrace(information, contracts.Information)
 			notFoundDB = append(notFoundDB, user.GetLogin())
 			// ghAPI.RemoveOrganizationsMember(token, organization, *user.Login)
 		}
 	}
 	removedMembersTC := appinsights.NewTraceTelemetry(fmt.Sprintf("INNERSOURCE ORG : %s", org), contracts.Information)
 
-	removedMembersJson, err := json.Marshal(removedMembers)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-
-	removedMembersTC.Properties["RemovedMembers"] = string(removedMembersJson)
 	removedMembersTC.Properties["NotFoundOnAD"] = strings.Join(notFoundAD, ",")
 	removedMembersTC.Properties["NotFoundOnDB"] = strings.Join(notFoundDB, ",")
 	removedMembersTC.Properties["DisabledADAccount"] = strings.Join(disabledAccountAD, ",")
