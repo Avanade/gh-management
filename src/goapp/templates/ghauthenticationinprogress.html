@@ -44,7 +44,9 @@
           document.getElementById("goBackHomeAction").removeAttribute("hidden");
           return;
         }
-        window.location.href = '/'
+        if (event.data == 'success') {
+          window.location.href = '/'
+        }
       }
     </script>
   </body>
