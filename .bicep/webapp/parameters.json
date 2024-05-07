@@ -66,7 +66,9 @@
                 "SUMMARY_REPORT_TRIGGER":"",
                 "CONTENT_SECURITY_POLICY":"",
                 "COPILOT_GROUP_SLUG": "",
-                "EXEMPTION": ""
+                "EXEMPTION": "",
+
+                "ENABLED_REMOVE_COLLABORATORS": ""
             }
         }
     }
