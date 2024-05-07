@@ -584,17 +584,19 @@
       },
       template : `<div>
                     <template x-if="topFivePopularTopics.length != 0">
-                      <span class="font-bold mr-2 pl-1">Popular Topics</span>
-                      <span>
-                        <template x-for="(popularTopic, index) in topFivePopularTopics">
-                          <a x-bind:href="'/search?search=' + popularTopic.Topic">
-                            <span class="text-xs px-2 py-1 mr-2 bg-sky-100 rounded-lg text-sky-800 items-center" x-text="popularTopic.Topic">
-                            </span>
-                          </a>
-                        </template>
-                        <button :disabled="isDisabledExpandButton" class="text-xs px-2 py-1 mr-2 rounded-lg border text-orange-500 items-center" @click="onClickExpand" x-text="wordCloudButtonText" >
-                        </button>
-                      </span>
+                      <div>
+                        <span class="font-bold mr-2 pl-1">Popular Topics</span>
+                        <span>
+                          <template x-for="(popularTopic, index) in topFivePopularTopics">
+                            <a x-bind:href="'/search?search=' + popularTopic.Topic">
+                              <span class="text-xs px-2 py-1 mr-2 bg-sky-100 rounded-lg text-sky-800 items-center" x-text="popularTopic.Topic">
+                              </span>
+                            </a>
+                          </template>
+                          <button :disabled="isDisabledExpandButton" class="text-xs px-2 py-1 mr-2 rounded-lg border text-orange-500 items-center" @click="onClickExpand" x-text="wordCloudButtonText" >
+                          </button>
+                        </span>
+                      </div>
                     </template>
                     <div class="flex items-center justify-center h-40" x-show="isShowWordCloudLoading">
                       <svg role="status" class="w-8 h-8 mr-2 text-gray-200 animate-spin dark:text-gray-600 fill-[#FF5800]"
