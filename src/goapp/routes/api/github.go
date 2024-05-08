@@ -11,6 +11,7 @@ import (
 
 	"main/pkg/appinsights_wrapper"
 	"main/pkg/email"
+	ev "main/pkg/envvar"
 	db "main/pkg/ghmgmtdb"
 	ghAPI "main/pkg/github"
 	"main/pkg/msgraph"
@@ -146,23 +147,33 @@ func ClearOrgMembers(w http.ResponseWriter, r *http.Request) {
 				}
 				if !isUserExist {
 					notFoundAD = append(notFoundAD, fmt.Sprint(user.GetLogin(), " - ", email))
-					// ghAPI.ConvertMemberToOutsideCollaborator(token, organizationsOpen, *user.Login)
-					convertedOutsideCollabsList = append(convertedOutsideCollabsList, *user.Login)
+					if ev.GetEnvVar("ENABLED_REMOVE_COLLABORATORS", "false") == "true" {
+						ghAPI.ConvertMemberToOutsideCollaborator(token, organizationsOpen, user.GetLogin()) // Convert user to outside collaborator
+					}
+					convertedOutsideCollabsList = append(convertedOutsideCollabsList, user.GetLogin())
 				}
 				if !isAccountEnabled {
 					disabledAccountAD = append(disabledAccountAD, fmt.Sprint(user.GetLogin(), " - ", email))
+					if ev.GetEnvVar("ENABLED_REMOVE_COLLABORATORS", "false") == "true" {
+						ghAPI.ConvertMemberToOutsideCollaborator(token, organizationsOpen, user.GetLogin()) // Convert user to outside collaborator
+					}
+					convertedOutsideCollabsList = append(convertedOutsideCollabsList, user.GetLogin())
 				}
 			} else {
 				notFoundDB = append(notFoundDB, user.GetLogin())
-				// ghAPI.ConvertMemberToOutsideCollaborator(token, organizationsOpen, *user.Login)
-				convertedOutsideCollabsList = append(convertedOutsideCollabsList, *user.Login)
+				if ev.GetEnvVar("ENABLED_REMOVE_COLLABORATORS", "false") == "true" {
+					ghAPI.ConvertMemberToOutsideCollaborator(token, organizationsOpen, user.GetLogin()) // Convert user to outside collaborator
+				}
+				convertedOutsideCollabsList = append(convertedOutsideCollabsList, user.GetLogin())
 			}
 		}
 
 		if len(convertedOutsideCollabsList) > 0 {
 			emailSupport := os.Getenv("EMAIL_SUPPORT")
-			// to list of new outside collaborators to ospo
-			// EmailAdminConvertToColaborator(emailSupport, convertedOutsideCollabsList, logger)
+			if ev.GetEnvVar("ENABLED_REMOVE_COLLABORATORS", "false") == "true" {
+				// to list of new outside collaborators to ospo
+				EmailAdminConvertToColaborator(emailSupport, convertedOutsideCollabsList, logger)
+			}
 			emailConvertedCollaboratorTC := appinsights.NewTraceTelemetry(fmt.Sprintf("SUPPORT EMAIL : %s", emailSupport), contracts.Information)
 
 			convertedOutsideCollabsListJson, err := json.Marshal(convertedOutsideCollabsList)
@@ -197,7 +208,9 @@ func ClearOrgMembers(w http.ResponseWriter, r *http.Request) {
 						collabEmail, _ := db.GetUserEmailByGithubId(fmt.Sprint(collab.GetID()))
 
 						if collabEmail != "" {
-							// EmailRepoAdminConvertToColaborator(collabEmail, repo.Name, convertedInRepo, logger)
+							if ev.GetEnvVar("ENABLED_REMOVE_COLLABORATORS", "false") == "true" {
+								EmailRepoAdminConvertToColaborator(collabEmail, repo.Name, convertedInRepo, logger)
+							}
 							emailAdminConvertedCollaboratorTC := appinsights.NewTraceTelemetry(fmt.Sprintf("ADMIN EMAIL : %s", collabEmail), contracts.Information)
 
 							convertInRepoJson, err := json.Marshal(convertedInRepo)
@@ -457,14 +470,21 @@ func ClearOrgMembersInnersource(token, org string, logger *appinsights_wrapper.T
 			}
 			if !isUserExist {
 				notFoundAD = append(notFoundAD, fmt.Sprint(user.GetLogin(), " - ", email))
-				// ghAPI.RemoveOrganizationsMember(token, organization, *user.Login)
+				if ev.GetEnvVar("ENABLED_REMOVE_COLLABORATORS", "false") == "true" {
+					ghAPI.RemoveOrganizationsMember(token, org, user.GetLogin()) // Remove user from organization
+				}
 			}
 			if !isAccountEnabled {
 				disabledAccountAD = append(disabledAccountAD, fmt.Sprint(user.GetLogin(), " - ", email))
+				if ev.GetEnvVar("ENABLED_REMOVE_COLLABORATORS", "false") == "true" {
+					ghAPI.RemoveOrganizationsMember(token, org, user.GetLogin()) // Remove user from organization
+				}
 			}
 		} else {
 			notFoundDB = append(notFoundDB, user.GetLogin())
-			// ghAPI.RemoveOrganizationsMember(token, organization, *user.Login)
+			if ev.GetEnvVar("ENABLED_REMOVE_COLLABORATORS", "false") == "true" {
+				ghAPI.RemoveOrganizationsMember(token, org, user.GetLogin()) // Remove user from organization
+			}
 		}
 	}
 	removedMembersTC := appinsights.NewTraceTelemetry(fmt.Sprintf("INNERSOURCE ORG : %s", org), contracts.Information)
