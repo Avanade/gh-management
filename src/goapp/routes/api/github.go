@@ -148,19 +148,23 @@ func ClearOrgMembers(w http.ResponseWriter, r *http.Request) {
 				if !isUserExist {
 					notFoundAD = append(notFoundAD, fmt.Sprint(user.GetLogin(), " - ", email))
 					if ev.GetEnvVar("ENABLED_REMOVE_COLLABORATORS", "false") == "true" {
-						ghAPI.ConvertMemberToOutsideCollaborator(token, organizationsOpen, *user.Login) // Convert user to outside collaborator
+						ghAPI.ConvertMemberToOutsideCollaborator(token, organizationsOpen, user.GetLogin()) // Convert user to outside collaborator
 					}
-					convertedOutsideCollabsList = append(convertedOutsideCollabsList, *user.Login)
+					convertedOutsideCollabsList = append(convertedOutsideCollabsList, user.GetLogin())
 				}
 				if !isAccountEnabled {
 					disabledAccountAD = append(disabledAccountAD, fmt.Sprint(user.GetLogin(), " - ", email))
+					if ev.GetEnvVar("ENABLED_REMOVE_COLLABORATORS", "false") == "true" {
+						ghAPI.ConvertMemberToOutsideCollaborator(token, organizationsOpen, user.GetLogin()) // Convert user to outside collaborator
+					}
+					convertedOutsideCollabsList = append(convertedOutsideCollabsList, user.GetLogin())
 				}
 			} else {
 				notFoundDB = append(notFoundDB, user.GetLogin())
 				if ev.GetEnvVar("ENABLED_REMOVE_COLLABORATORS", "false") == "true" {
-					ghAPI.ConvertMemberToOutsideCollaborator(token, organizationsOpen, *user.Login) // Convert user to outside collaborator
+					ghAPI.ConvertMemberToOutsideCollaborator(token, organizationsOpen, user.GetLogin()) // Convert user to outside collaborator
 				}
-				convertedOutsideCollabsList = append(convertedOutsideCollabsList, *user.Login)
+				convertedOutsideCollabsList = append(convertedOutsideCollabsList, user.GetLogin())
 			}
 		}
 
@@ -467,16 +471,19 @@ func ClearOrgMembersInnersource(token, org string, logger *appinsights_wrapper.T
 			if !isUserExist {
 				notFoundAD = append(notFoundAD, fmt.Sprint(user.GetLogin(), " - ", email))
 				if ev.GetEnvVar("ENABLED_REMOVE_COLLABORATORS", "false") == "true" {
-					ghAPI.RemoveOrganizationsMember(token, org, *user.Login) // Remove user from organization
+					ghAPI.RemoveOrganizationsMember(token, org, user.GetLogin()) // Remove user from organization
 				}
 			}
 			if !isAccountEnabled {
 				disabledAccountAD = append(disabledAccountAD, fmt.Sprint(user.GetLogin(), " - ", email))
+				if ev.GetEnvVar("ENABLED_REMOVE_COLLABORATORS", "false") == "true" {
+					ghAPI.RemoveOrganizationsMember(token, org, user.GetLogin()) // Remove user from organization
+				}
 			}
 		} else {
 			notFoundDB = append(notFoundDB, user.GetLogin())
 			if ev.GetEnvVar("ENABLED_REMOVE_COLLABORATORS", "false") == "true" {
-				ghAPI.RemoveOrganizationsMember(token, org, *user.Login) // Remove user from organization
+				ghAPI.RemoveOrganizationsMember(token, org, user.GetLogin()) // Remove user from organization
 			}
 		}
 	}
