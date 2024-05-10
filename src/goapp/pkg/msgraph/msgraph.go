@@ -236,9 +236,15 @@ func IsGithubEnterpriseMember(user string) (bool, error) {
 	urlPath := fmt.Sprintf("https://graph.microsoft.com/v1.0/users/%s/checkMemberGroups", user)
 	isMember := false
 
-	for x := 0; x < len(adGroups); x += 5 {
+	for x := 0; x < len(adGroups); x += 20 {
+		end := 0
+		if x+19 > len(adGroups) {
+			end = len(adGroups)
+		} else {
+			end = x + 19
+		}
 		postBody, _ := json.Marshal(map[string]interface{}{
-			"groupIds": adGroups[x : x+4],
+			"groupIds": adGroups[x:end],
 		})
 
 		reqBody := bytes.NewBuffer(postBody)

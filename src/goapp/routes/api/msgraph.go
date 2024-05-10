@@ -96,12 +96,11 @@ func IndexADGroups(w http.ResponseWriter, r *http.Request) {
 }
 
 func indexGroup(g msgraph.ADGroup, logger *appinsights_wrapper.TelemetryClient) {
-	// hasGitHubAccess, err := msgraph.HasGitHubAccess(g.Id)
-	// if err != nil {
-	// 	logger.LogException(err)
-	// 	return
-	// }
-	hasGitHubAccess := true
+	hasGitHubAccess, err := msgraph.HasGitHubAccess(g.Id)
+	if err != nil {
+		logger.LogException(err)
+		return
+	}
 
 	if hasGitHubAccess {
 		db.ADGroup_Insert(g.Id, g.Name)
