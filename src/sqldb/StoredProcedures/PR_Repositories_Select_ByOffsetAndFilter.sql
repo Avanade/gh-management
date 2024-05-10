@@ -8,6 +8,7 @@ BEGIN
 SELECT DISTINCT [p].[Id],
         [p].[Name],
         [P].[AssetCode],
+        [p].[ECATTID],
         [p].[Organization],
         [p].[Description],
         [p].[IsArchived],
