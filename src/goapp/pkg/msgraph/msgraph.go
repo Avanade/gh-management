@@ -238,10 +238,10 @@ func IsGithubEnterpriseMember(user string) (bool, error) {
 
 	for x := 0; x < len(adGroups); x += 20 {
 		end := 0
-		if x+19 > len(adGroups) {
+		if x+20 > len(adGroups) {
 			end = len(adGroups)
 		} else {
-			end = x + 19
+			end = x + 20
 		}
 		postBody, _ := json.Marshal(map[string]interface{}{
 			"groupIds": adGroups[x:end],
