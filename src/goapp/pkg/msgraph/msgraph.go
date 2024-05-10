@@ -234,40 +234,48 @@ func IsGithubEnterpriseMember(user string) (bool, error) {
 	}
 
 	urlPath := fmt.Sprintf("https://graph.microsoft.com/v1.0/users/%s/checkMemberGroups", user)
+	isMember := false
 
-	postBody, _ := json.Marshal(map[string]interface{}{
-		"groupIds": adGroups,
-	})
+	for x := 0; x < len(adGroups); x += 5 {
+		postBody, _ := json.Marshal(map[string]interface{}{
+			"groupIds": adGroups[x : x+4],
+		})
 
-	reqBody := bytes.NewBuffer(postBody)
+		reqBody := bytes.NewBuffer(postBody)
 
-	req, err := http.NewRequest("POST", urlPath, reqBody)
-	if err != nil {
-		return false, err
+		req, err := http.NewRequest("POST", urlPath, reqBody)
+		if err != nil {
+			isMember = false
+			break
+		}
+
+		req.Header.Add("Authorization", "Bearer "+accessToken)
+		req.Header.Add("Content-Type", "application/json")
+		response, err := client.Do(req)
+		if err != nil {
+			isMember = false
+			break
+		}
+		defer response.Body.Close()
+
+		var data struct {
+			Value []string `json:"value"`
+		}
+
+		errDecode := json.NewDecoder(response.Body).Decode(&data)
+		if errDecode != nil {
+			fmt.Print(err)
+			isMember = false
+			break
+		}
+
+		if len(data.Value) > 0 {
+			isMember = true
+			break
+		}
 	}
 
-	req.Header.Add("Authorization", "Bearer "+accessToken)
-	req.Header.Add("Content-Type", "application/json")
-	response, err := client.Do(req)
-	if err != nil {
-		return false, err
-	}
-	defer response.Body.Close()
-
-	var data struct {
-		Value []string `json:"value"`
-	}
-
-	errDecode := json.NewDecoder(response.Body).Decode(&data)
-	if errDecode != nil {
-		fmt.Print(err)
-	}
-
-	if len(data.Value) > 0 {
-		return true, nil
-	}
-
-	return false, nil
+	return isMember, nil
 }
 
 func IsUserAdmin(user string) (bool, error) {
