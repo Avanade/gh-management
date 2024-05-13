@@ -4,7 +4,7 @@ CREATE PROCEDURE [dbo].[PR_Search_communities_projects_users]
 	@rowCount INT = 0,
 	@userprincipal VARCHAR (100) = null
 AS 
-	SELECT
+	(SELECT
 		'Users' [Source],
 		[Name],
 		CONCAT(
@@ -12,16 +12,19 @@ AS
 			'Github ID: ', CASE WHEN [GitHubId] IS NULL THEN 'N/A' ELSE [GitHubId] END, ',',
 			'Github User: ', CASE WHEN [GitHubUser] IS NULL THEN 'N/A' ELSE [GitHubUser] END
 		) [Description],
-		Users.GitHubId [Id]
+		[GitHubId] [Id],
+		COUNT(*) [Score]
 	FROM 
-		[dbo].[Users]
-	WHERE	
-		[Name] LIKE '%'+@searchText+'%' OR 
-		[UserPrincipalName] LIKE '%'+@searchText+'%' OR
-		[GitHubId] LIKE '%'+@searchText+'%' OR
-		[GitHubUser] LIKE '%'+@searchText+'%'
+		[dbo].[Users] AS U
+		JOIN STRING_SPLIT(@searchText, ' ') AS SS ON (
+			[Name] LIKE '%'+ss.Value+'%' OR 
+			[UserPrincipalName] LIKE '%'+ss.Value+'%' OR
+			[GitHubId] LIKE '%'+ss.Value+'%' OR
+			[GitHubUser] LIKE '%'+ss.Value+'%'
+		)
+	GROUP BY [GitHubId], [Name], [UserPrincipalName], [GitHubUser])
 UNION
-	SELECT 
+	(SELECT 
 		'Repositories' [Source], 
 		[Name],
 		CONCAT(
@@ -39,7 +42,8 @@ UNION
 				WHERE ProjectId=Id
 			)
 		) [Description],
-		Id [ID]
+		Id [ID],
+		COUNT(*) Score
 	FROM (
 		SELECT 
 			Name, 
@@ -52,37 +56,31 @@ UNION
 			RepoOwners AS RO ON RO.ProjectId = P.Id
 		LEFT JOIN 
 			RepoTopics RT ON RT.ProjectId = P.Id
-		WHERE	
-			[Name] LIKE '%'+@searchText+'%' OR 
-			RO.UserPrincipalName LIKE '%'+@searchText+'%' OR 
-			RT.Topic LIKE '%'+@searchText+'%'
+		JOIN STRING_SPLIT(@searchText, ' ') AS SS ON (	
+			[Name] LIKE '%'+SS.value+'%' OR 
+			RO.UserPrincipalName LIKE '%'+SS.value+'%' OR 
+			RT.Topic LIKE '%'+SS.value+'%'
+		)
 	) AS Repository
-	GROUP BY Name, CreatedBy, RepositorySource, Id
+	GROUP BY Name, CreatedBy, RepositorySource, Id)
 UNION
-	SELECT 
+	(SELECT 
 		'Communities' [Source],
 		c.[Name],
 		[Description],
-		c.[Id]
+		c.[Id],
+		COUNT(*) Score
 	FROM	
 		[dbo].[Communities] c
 	LEFT JOIN 
 		ApprovalStatus T ON c.ApprovalStatusId = T.Id
-	WHERE 
-		(
-			(
-				c.[Name] LIKE '%'+@searchText+'%' OR 
-				[Description] LIKE '%'+@searchText+'%' 
-			) AND 
-			c.ApprovalStatusId = 5
-		) OR
-		(
-			(
-				c.[Name] LIKE '%'+@searchText+'%' OR 
-				[Description] LIKE '%'+@searchText+'%' 
-			) AND 
-			c.CreatedBy = @userprincipal
-		)
-ORDER BY [Name]
+	JOIN STRING_SPLIT(@searchText, ' ') AS SS ON (
+		c.[Name] LIKE '%'+SS.value+'%' OR 
+		[Description] LIKE '%'+SS.value+'%'
+	)
+	WHERE
+		c.ApprovalStatusId = 5 AND c.CreatedBy = @userprincipal
+	GROUP BY c.Name, c.Description, c.Id)
+ORDER BY Score DESC
 OFFSET @offSet ROWS
 FETCH NEXT @rowCount ROWS ONLY
