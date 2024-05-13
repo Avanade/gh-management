@@ -13,12 +13,13 @@ import (
 )
 
 type PageData struct {
-	Header    interface{}
-	Profile   interface{}
-	ProfileGH interface{}
-	Content   interface{}
-	HasPhoto  bool
-	UserPhoto string
+	Header         interface{}
+	Profile        interface{}
+	ProfileGH      interface{}
+	Content        interface{}
+	IsGHAssociated bool
+	HasPhoto       bool
+	UserPhoto      string
 }
 
 type Headers struct {
@@ -83,7 +84,12 @@ func UseTemplate(w *http.ResponseWriter, r *http.Request, page string, pageData 
 		ProfileGH: sessiongh,
 		Content:   pageData,
 		HasPhoto:  hasPhoto,
-		UserPhoto: userPhoto}
+		UserPhoto: userPhoto,
+	}
+
+	if sessionaz.Values["isGHAssociated"] != nil {
+		data.IsGHAssociated = sessionaz.Values["isGHAssociated"].(bool)
+	}
 
 	tmpl := template.Must(
 		template.ParseFiles("templates/master.html",

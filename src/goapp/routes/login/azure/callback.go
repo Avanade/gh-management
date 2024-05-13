@@ -94,6 +94,8 @@ func CallbackHandler(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/authentication/azure/failed", http.StatusSeeOther)
 		return
 	}
+	ghUser := db.Users_Get_GHUser(userPrincipalName)
+	session.Values["isGHAssociated"] = ghUser != ""
 	session.Values["userHasPhoto"] = hasPhoto
 	session.Values["userPhoto"] = userPhoto
 	session.Options = &sessions.Options{
