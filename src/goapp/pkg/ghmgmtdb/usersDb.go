@@ -79,6 +79,13 @@ func Users_Get_GHUser(UserPrincipalName string) (GHUser string) {
 		return ""
 	}
 
+	if result == nil {
+		return ""
+	}
+
+	if result[0]["GitHubUser"] == nil {
+		return ""
+	}
 	GHUser = result[0]["GitHubUser"].(string)
 	return GHUser
 }

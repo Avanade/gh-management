@@ -95,6 +95,8 @@ func GithubCallbackHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	session.Values["ghIsValid"] = result["IsValid"].(bool)
+	sessionaz.Values["isGHAssociated"] = result["IsValid"].(bool)
+	sessionaz.Save(r, w)
 
 	isDirect, _ := msgraph.IsDirectMember(fmt.Sprintf("%s", azProfile["oid"]))
 	isEnterpriseMember, _ := msgraph.IsGithubEnterpriseMember(fmt.Sprintf("%s", azProfile["oid"]))
