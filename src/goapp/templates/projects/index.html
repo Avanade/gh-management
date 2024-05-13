@@ -5,8 +5,8 @@
 
 <div x-data="deeplink">
   <div x-data="myRepositoriesData({{ .profileGH.IsValid }}, '{{ .innersource }}', '{{ .opensource }}')">
-    <div class="flex justify-between">
-      <div>
+    <div class="flex flex-col lg:flex-row lg:justify-between">
+      <div class="order-last lg:order-first">
         <nav class="flex space-x-4" aria-label="Tabs">
           {{ if .profileGH.IsValid}}
           <div @click="switchTo('my')" class="px-3 py-2 font-medium text-sm rounded-md cursor-pointer"
@@ -21,9 +21,9 @@
         </nav>
       </div>
       {{ if .profileGH.IsValid}}
-      <div class="flex">
+      <div class="order-first lg:order-last">
         <a href="/repositories/new">
-          <button class="bg-[#FF5800] hover:bg-[#FF4300] text-white font-bold py-2 px-4 rounded">
+          <button class="bg-[#FF5800] w-full mb-5 hover:bg-[#FF4300] text-white font-bold py-2 px-4 rounded">
             Request a Repository
           </button>
         </a>
@@ -238,11 +238,13 @@
       <div x-show="!showSpinner && view==='all'">
         <div class="mt-5 flex flex-col rounded-md">
           <div class="relative flex items-stretch flex-grow focus-within:z-10">
-            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 20 20"
-                stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
+            <div class="flex flmd:flex-row">
+              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 20 20"
+                  stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              </div>
             </div>
             <input x-model="search" @keyup.enter="searchAllRepositories()" type="text" name="searchTerm" id="searchTerm"
               class="focus:ring-indigo-500 focus:border-indigo-500 block w-full rounded-md pl-10 sm:text-sm border-gray-300"
