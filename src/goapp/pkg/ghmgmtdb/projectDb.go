@@ -457,23 +457,6 @@ func GetProjectApprovalByGUID(id string) (projectApproval ProjectApproval) {
 	return
 }
 
-func UpdateProjectApprovalById(id int, respondedBy string) error {
-	db := ConnectDb()
-	defer db.Close()
-
-	param := map[string]interface{}{
-		"Id":          id,
-		"RespondedBy": respondedBy,
-	}
-
-	_, err := db.ExecuteStoredProcedure("PR_ProjectApprovals_UpdateRespondedBy_ById", param)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
 func ProjectsApprovalUpdateGUID(id int64, ApprovalSystemGUID string) {
 	db := ConnectDb()
 	defer db.Close()
@@ -700,28 +683,6 @@ func GetGitHubRepositories() ([]map[string]interface{}, error) {
 	}
 
 	return result, nil
-}
-
-func SelectReposWithMakePublicRequest() ([]map[string]interface{}, error) {
-	db := ConnectDb()
-	defer db.Close()
-
-	sponsors, err := db.ExecuteStoredProcedureWithResult("PR_Projects_Select_AllWithMakePublicRequest", nil)
-	if err != nil {
-		return nil, err
-	}
-	return sponsors, nil
-}
-
-func UpdateOssContributionSponsorId(params map[string]interface{}) ([]map[string]interface{}, error) {
-	db := ConnectDb()
-	defer db.Close()
-
-	_, err := db.ExecuteStoredProcedure("PR_Projects_Update_OssSponsorIdById", params)
-	if err != nil {
-		return nil, err
-	}
-	return nil, nil
 }
 
 func LegacySearch(params map[string]interface{}) ([]map[string]interface{}, error) {

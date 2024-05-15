@@ -33,22 +33,6 @@ type ProjectApprovalApprovers struct {
 	OSSContributionInformation string
 }
 
-func InsertApprovalRequestApprover(approvalRequestApprover ApprovalRequestApprover) error {
-	db := ConnectDb()
-	defer db.Close()
-
-	param := map[string]interface{}{
-		"ApprovalRequestId": approvalRequestApprover.ApprovalRequestId,
-		"ApproverEmail":     approvalRequestApprover.ApproverEmail,
-	}
-
-	_, err := db.ExecuteStoredProcedureWithResult("PR_ApprovalRequestApprovers_Insert", param)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
 func GetApprovalRequestApproversByApprovalRequestId(approvalRequestId int) ([]ApprovalRequestApprover, error) {
 	db := ConnectDb()
 	defer db.Close()
