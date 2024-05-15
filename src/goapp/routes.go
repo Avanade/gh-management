@@ -264,9 +264,6 @@ func setUtilityRoutes(mux *mux.Router) {
 	muxUtility.Handle("/repo-owner-cleanup", loadGuidAuthApi(rtApi.RepoOwnersCleanup)).Methods("GET")
 	muxUtility.Handle("/recurring-approval", loadGuidAuthApi(rtApi.RecurringApproval)).Methods("GET")
 	muxUtility.Handle("/expiring-invitations", loadGuidAuthApi(rtApi.ExpiringInvitation)).Methods("GET")
-	muxUtility.Handle("/fillout-approvers", loadGuidAuthApi(rtApi.FillOutApprovers)).Methods("GET")
-	muxUtility.Handle("/fillout-approvalrequest-approvers", loadGuidAuthApi(rtApi.FillOutApprovalRequestApprovers)).Methods("GET")
-	muxUtility.Handle("/migrate-oss-sponsors", loadGuidAuthApi(rtApi.MigrateToOssSponsorsTable)).Methods("GET")
 	muxUtility.Handle("/index-ad-groups", loadGuidAuthApi(rtApi.IndexADGroups)).Methods("GET")
 	muxUtility.Handle("/index-regional-organizations", loadGuidAuthApi(rtApi.IndexRegionalOrganizations)).Methods("GET")
 }

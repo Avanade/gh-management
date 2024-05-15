@@ -9,12 +9,8 @@
             "value": {
                 "Workflows.CleanupOrganization.FlowState" : "Disabled",
                 "Workflows.ExpiringInvitation.FlowState": "Disabled",
-                "Workflows.FillOutApprovalRequestApprovers.FlowState": "Disabled",
-                "Workflows.FillOutApprovers.FlowState": "Disabled",
-                "Workflows.FillOutItemsApprovers.FlowState": "Disabled",
                 "Workflows.IndexOrgRepos.FlowState": "Disabled",
                 "Workflows.InnersourceCheckOutsideCollaborators.FlowState": "Disabled",
-                "Workflows.MigrateOssSponsors.FlowState": "Disabled",
                 "Workflows.OpensourceCheckOutsideCollaborators.FlowState": "Disabled",
                 "Workflows.RecurringApproval.FlowState": "Disabled",
                 "Workflows.RepoOwnerScan.FlowState": "Disabled",
