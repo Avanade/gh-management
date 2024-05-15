@@ -5,7 +5,7 @@
 
 <div x-data="deeplink">
   <div x-data="myRepositoriesData({{ .profileGH.IsValid }}, '{{ .innersource }}', '{{ .opensource }}')">
-    <div class="flex flex-col lg:flex-row lg:justify-between">
+    <div class="flex flex-col lg:flex-row lg:justify-between mb-5">
       <div class="order-last lg:order-first">
         <nav class="flex space-x-4" aria-label="Tabs">
           {{ if .profileGH.IsValid}}
@@ -23,7 +23,7 @@
       {{ if .profileGH.IsValid}}
       <div class="order-first lg:order-last">
         <a href="/repositories/new">
-          <button class="bg-[#FF5800] w-full mb-5 hover:bg-[#FF4300] text-white font-bold py-2 px-4 rounded">
+          <button class="bg-[#FF5800] w-full hover:bg-[#FF4300] text-white font-bold py-2 px-4 rounded">
             Request a Repository
           </button>
         </a>
