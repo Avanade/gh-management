@@ -592,6 +592,10 @@ func GetRepositories(w http.ResponseWriter, r *http.Request) {
 
 	params := r.URL.Query()
 	search := params["search"][0]
+	filter := ""
+	if params["filter"] != nil {
+		filter = params["filter"][0]
+	}
 	offset, err := strconv.Atoi(params["offset"][0])
 	if err != nil {
 		logger.LogException(err)
@@ -599,31 +603,45 @@ func GetRepositories(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Get repository list
-	data := db.ReposSelectByOffsetAndFilter(offset, search)
-	s, err := json.Marshal(data)
-	if err != nil {
-		logger.LogException(err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	var list []RepoDto
-	err = json.Unmarshal(s, &list)
-	if err != nil {
-		logger.LogException(err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	for i := 0; i < len(list); i++ {
-		if data[i]["Topics"] != nil {
-			list[i].Topics = strings.Split(data[i]["Topics"].(string), ",")
+	filterType := 0
+	if params["filterType"] != nil {
+		filterType, err = strconv.Atoi(params["filterType"][0])
+		if err != nil {
+			filterType = 0
 		}
 	}
 
+	// Get repository list
+	data := db.ReposSelectByOffsetAndFilter(offset, search, filterType, filter)
+
+	list := make([]RepoDto, 0)
+	if data != nil {
+		s, err := json.Marshal(data)
+		if err != nil {
+			logger.LogException(err)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		err = json.Unmarshal(s, &list)
+		if err != nil {
+			logger.LogException(err)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		for i := 0; i < len(list); i++ {
+			if data[i]["Topics"] != nil {
+				list[i].Topics = strings.Split(data[i]["Topics"].(string), ",")
+			}
+		}
+	}
+
+	total := db.ReposTotalCountBySearchTerm(search, filterType, filter)
+
 	result := RepositoryListDto{
 		Data:  list,
-		Total: db.ReposTotalCountBySearchTerm(search),
+		Total: total,
 	}
 
 	w.WriteHeader(http.StatusOK)

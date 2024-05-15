@@ -1,6 +1,8 @@
-CREATE PROCEDURE [dbo].[PR_Repositories_Select_ByOffsetAndFilter](
+CREATE PROCEDURE [dbo].[PR_Repositories_Select_ByOffsetAndFilter] (
 	@Offset INT = 0,
-	@Search VARCHAR(50) = ''
+	@Search VARCHAR(50) = '',
+  @Filter VARCHAR(MAX) = '',
+  @FilterType TINYINT = 0
 )
 AS
 BEGIN
@@ -24,6 +26,12 @@ BEGIN
       LEFT JOIN [dbo].[Visibility] AS v ON p.VisibilityId = v.Id
       LEFT JOIN [dbo].[RepoTopics] AS rt ON rt.ProjectId = p.Id
       INNER JOIN STRING_SPLIT(@Search, ' ') AS ss ON (p.Name LIKE '%'+ss.[value]+'%' OR rt.Topic LIKE '%'+ss.[value]+'%')
+      WHERE 
+          @FilterType = 0
+        OR
+          (rt.Topic IN (SELECT value FROM STRING_SPLIT(@Filter, ',')) AND @FilterType = 1)
+        OR
+          (rt.Topic IS NULL AND @FilterType = 2)
       GROUP BY [p].[Id],
           [p].[Name],
           [P].[AssetCode],
