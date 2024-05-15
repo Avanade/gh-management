@@ -38,14 +38,14 @@ func CheckAvaOpenSource(w http.ResponseWriter, r *http.Request) {
 
 	org := os.Getenv("GH_ORG_OPENSOURCE")
 	token := os.Getenv("GH_TOKEN")
-	repos, err := ghAPI.GetRepositoriesFromOrganization(org) //GET ALL REPOSITORIES FROM OPENSOURCE ORG
+	repos, err := ghAPI.GetRepositoriesFromOrganization(org)
 	if err != nil {
 		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	orgOutsideCollaborators := ghAPI.ListOutsideCollaborators(token, org) //GET ALL OUTSIDE COLLABORATORS FROM OPENSOURCE ORG
+	orgOutsideCollaborators := ghAPI.ListOutsideCollaborators(token, org)
 
 	var orgOutsideCollaboratorUsernames []string
 
@@ -57,7 +57,7 @@ func CheckAvaOpenSource(w http.ResponseWriter, r *http.Request) {
 		var repoCollabUsernames []string
 		var repoAdminUsernames []string
 
-		repoCollaborators := ghAPI.RepositoriesListCollaborators(token, org, repo.Name, "", "direct") //GET ALL DIRECT COLLABORATORS
+		repoCollaborators := ghAPI.RepositoriesListCollaborators(token, org, repo.Name, "", "direct")
 		for _, repoCollaborator := range repoCollaborators {
 
 			repoCollabUsernames = append(repoCollabUsernames, *repoCollaborator.Login)
@@ -76,6 +76,8 @@ func CheckAvaOpenSource(w http.ResponseWriter, r *http.Request) {
 		}
 
 		if len(repoOutsideCollaboratorUsernames) > 0 {
+			logger.TrackTrace(fmt.Sprintf("%s has %d outside collaborators", repo.Name, len(repoOutsideCollaboratorUsernames)), contracts.Information)
+
 			for _, repoAdminUsername := range repoAdminUsernames {
 				repoAdminEmail, err := db.UsersGetEmail(repoAdminUsername)
 				if err != nil {
