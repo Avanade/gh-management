@@ -542,13 +542,8 @@ func ArchiveProject(w http.ResponseWriter, r *http.Request) {
 	req := mux.Vars(r)
 	project := req["project"]
 	projectId := req["projectId"]
-	state := req["state"]
+	organization := req["organization"]
 	archive := req["archive"]
-
-	organization := os.Getenv("GH_ORG_INNERSOURCE")
-	if state == "Public" {
-		organization = os.Getenv("GH_ORG_OPENSOURCE")
-	}
 
 	if archive == "1" {
 		err := ghAPI.ArchiveProject(project, archive == "1", organization)
@@ -772,13 +767,6 @@ func SetVisibility(w http.ResponseWriter, r *http.Request) {
 
 	if currentState == "Public" {
 		// Set repo to desired visibility then move to innersource
-		_, err := ghAPI.SetProjectVisibility(project, desiredState, opensource)
-		if err != nil {
-			logger.LogException(err)
-			http.Error(w, "Failed to make the repository "+desiredState, http.StatusInternalServerError)
-			return
-		}
-
 		ValidateOrgMembers(opensource, project, innersource, logger)
 		_, err = ghAPI.TransferRepository(project, opensource, innersource)
 		if err != nil {
@@ -788,6 +776,13 @@ func SetVisibility(w http.ResponseWriter, r *http.Request) {
 		}
 
 		time.Sleep(3 * time.Second)
+		_, err := ghAPI.SetProjectVisibility(project, desiredState, innersource)
+		if err != nil {
+			logger.LogException(err)
+			http.Error(w, "Failed to make the repository "+desiredState, http.StatusInternalServerError)
+			return
+		}
+
 		repoResp, err := ghAPI.GetRepository(project, innersource)
 		if err != nil {
 			logger.LogException(err)
