@@ -542,13 +542,8 @@ func ArchiveProject(w http.ResponseWriter, r *http.Request) {
 	req := mux.Vars(r)
 	project := req["project"]
 	projectId := req["projectId"]
-	state := req["state"]
+	organization := req["organization"]
 	archive := req["archive"]
-
-	organization := os.Getenv("GH_ORG_INNERSOURCE")
-	if state == "Public" {
-		organization = os.Getenv("GH_ORG_OPENSOURCE")
-	}
 
 	if archive == "1" {
 		err := ghAPI.ArchiveProject(project, archive == "1", organization)
@@ -592,6 +587,10 @@ func GetRepositories(w http.ResponseWriter, r *http.Request) {
 
 	params := r.URL.Query()
 	search := params["search"][0]
+	filter := ""
+	if params["filter"] != nil {
+		filter = params["filter"][0]
+	}
 	offset, err := strconv.Atoi(params["offset"][0])
 	if err != nil {
 		logger.LogException(err)
@@ -599,31 +598,45 @@ func GetRepositories(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Get repository list
-	data := db.ReposSelectByOffsetAndFilter(offset, search)
-	s, err := json.Marshal(data)
-	if err != nil {
-		logger.LogException(err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	var list []RepoDto
-	err = json.Unmarshal(s, &list)
-	if err != nil {
-		logger.LogException(err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	for i := 0; i < len(list); i++ {
-		if data[i]["Topics"] != nil {
-			list[i].Topics = strings.Split(data[i]["Topics"].(string), ",")
+	filterType := 0
+	if params["filterType"] != nil {
+		filterType, err = strconv.Atoi(params["filterType"][0])
+		if err != nil {
+			filterType = 0
 		}
 	}
 
+	// Get repository list
+	data := db.ReposSelectByOffsetAndFilter(offset, search, filterType, filter)
+
+	list := make([]RepoDto, 0)
+	if data != nil {
+		s, err := json.Marshal(data)
+		if err != nil {
+			logger.LogException(err)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		err = json.Unmarshal(s, &list)
+		if err != nil {
+			logger.LogException(err)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		for i := 0; i < len(list); i++ {
+			if data[i]["Topics"] != nil {
+				list[i].Topics = strings.Split(data[i]["Topics"].(string), ",")
+			}
+		}
+	}
+
+	total := db.ReposTotalCountBySearchTerm(search, filterType, filter)
+
 	result := RepositoryListDto{
 		Data:  list,
-		Total: db.ReposTotalCountBySearchTerm(search),
+		Total: total,
 	}
 
 	w.WriteHeader(http.StatusOK)
@@ -754,13 +767,6 @@ func SetVisibility(w http.ResponseWriter, r *http.Request) {
 
 	if currentState == "Public" {
 		// Set repo to desired visibility then move to innersource
-		_, err := ghAPI.SetProjectVisibility(project, desiredState, opensource)
-		if err != nil {
-			logger.LogException(err)
-			http.Error(w, "Failed to make the repository "+desiredState, http.StatusInternalServerError)
-			return
-		}
-
 		ValidateOrgMembers(opensource, project, innersource, logger)
 		_, err = ghAPI.TransferRepository(project, opensource, innersource)
 		if err != nil {
@@ -770,6 +776,13 @@ func SetVisibility(w http.ResponseWriter, r *http.Request) {
 		}
 
 		time.Sleep(3 * time.Second)
+		_, err := ghAPI.SetProjectVisibility(project, desiredState, innersource)
+		if err != nil {
+			logger.LogException(err)
+			http.Error(w, "Failed to make the repository "+desiredState, http.StatusInternalServerError)
+			return
+		}
+
 		repoResp, err := ghAPI.GetRepository(project, innersource)
 		if err != nil {
 			logger.LogException(err)

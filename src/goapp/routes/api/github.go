@@ -37,7 +37,6 @@ func CheckAvaOpenSource(w http.ResponseWriter, r *http.Request) {
 	defer logger.EndOperation()
 
 	org := os.Getenv("GH_ORG_OPENSOURCE")
-	var outsideCollabsUsers []string
 	token := os.Getenv("GH_TOKEN")
 	repos, err := ghAPI.GetRepositoriesFromOrganization(org)
 	if err != nil {
@@ -46,51 +45,51 @@ func CheckAvaOpenSource(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	outsidecollabs := ghAPI.ListOutsideCollaborators(token, org)
-	for _, list := range outsidecollabs {
-		outsideCollabsUsers = append(outsideCollabsUsers, *list.Login)
+	orgOutsideCollaborators := ghAPI.ListOutsideCollaborators(token, org)
+
+	var orgOutsideCollaboratorUsernames []string
+
+	for _, orgOutsideCollaborator := range orgOutsideCollaborators {
+		orgOutsideCollaboratorUsernames = append(orgOutsideCollaboratorUsernames, *orgOutsideCollaborator.Login)
 	}
-	var repoOutsideCollabsList []string
-	for _, collab := range repos {
-		var repoCollabsUserNames []string
 
-		var adminmember []string
-		repoOutsideCollabsList = nil
+	for _, repo := range repos {
+		var repoCollabUsernames []string
+		var repoAdminUsernames []string
 
-		repoCollabs := ghAPI.RepositoriesListCollaborators(token, org, collab.Name, "", "direct")
-		for _, list := range repoCollabs {
+		repoCollaborators := ghAPI.RepositoriesListCollaborators(token, org, repo.Name, "", "direct")
+		for _, repoCollaborator := range repoCollaborators {
 
-			repoCollabsUserNames = append(repoCollabsUserNames, *list.Login)
-			if *list.RoleName == "admin" {
-				adminmember = append(adminmember, *list.Login)
-
+			repoCollabUsernames = append(repoCollabUsernames, *repoCollaborator.Login)
+			if *repoCollaborator.RoleName == "admin" {
+				repoAdminUsernames = append(repoAdminUsernames, *repoCollaborator.Login)
 			}
 		}
 
-		for _, list := range repoCollabsUserNames {
-			for _, outsidelist := range outsideCollabsUsers {
-				if list == outsidelist {
-					repoOutsideCollabsList = append(repoOutsideCollabsList, outsidelist)
+		var repoOutsideCollaboratorUsernames []string
+		for _, repoCollabUsername := range repoCollabUsernames {
+			for _, orgOutsideCollaboratorUsername := range orgOutsideCollaboratorUsernames {
+				if repoCollabUsername == orgOutsideCollaboratorUsername {
+					repoOutsideCollaboratorUsernames = append(repoOutsideCollaboratorUsernames, orgOutsideCollaboratorUsername)
 				}
 			}
 		}
-		if len(repoOutsideCollabsList) > 0 {
 
-			for _, admin := range adminmember {
-				email, err := db.UsersGetEmail(admin)
+		if len(repoOutsideCollaboratorUsernames) > 0 {
+			logger.TrackTrace(fmt.Sprintf("%s has %d outside collaborators", repo.Name, len(repoOutsideCollaboratorUsernames)), contracts.Information)
+
+			for _, repoAdminUsername := range repoAdminUsernames {
+				repoAdminEmail, err := db.UsersGetEmail(repoAdminUsername)
 				if err != nil {
-					logger.LogException(err)
-					http.Error(w, err.Error(), http.StatusInternalServerError)
-					return
+					continue
 				}
 
-				if email != "" {
-					emailAdmin(admin, email, collab.Name, repoOutsideCollabsList, logger)
+				if repoAdminEmail != "" {
+					emailAdmin(repoAdminUsername, repoAdminEmail, repo.Name, repoOutsideCollaboratorUsernames, logger)
 				}
 			}
 
 		}
-
 	}
 }
 

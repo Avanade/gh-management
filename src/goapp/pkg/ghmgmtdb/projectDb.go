@@ -457,23 +457,6 @@ func GetProjectApprovalByGUID(id string) (projectApproval ProjectApproval) {
 	return
 }
 
-func UpdateProjectApprovalById(id int, respondedBy string) error {
-	db := ConnectDb()
-	defer db.Close()
-
-	param := map[string]interface{}{
-		"Id":          id,
-		"RespondedBy": respondedBy,
-	}
-
-	_, err := db.ExecuteStoredProcedure("PR_ProjectApprovals_UpdateRespondedBy_ById", param)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
 func ProjectsApprovalUpdateGUID(id int64, ApprovalSystemGUID string) {
 	db := ConnectDb()
 	defer db.Close()
@@ -575,28 +558,35 @@ func GetProjectByAssetCode(assetCode string) []map[string]interface{} {
 	return result
 }
 
-func ReposSelectByOffsetAndFilter(offset int, search string) []map[string]interface{} {
+func ReposSelectByOffsetAndFilter(offset int, search string, filterType int, filter string) []map[string]interface{} {
 	db := ConnectDb()
 	defer db.Close()
 
 	param := map[string]interface{}{
-		"Offset": offset,
-		"Search": search,
+		"Offset":     offset,
+		"Search":     search,
+		"FilterType": filterType,
+		"Filter":     filter,
 	}
 
 	result, _ := db.ExecuteStoredProcedureWithResult("PR_Repositories_Select_ByOffsetAndFilter", param)
 	return result
 }
 
-func ReposTotalCountBySearchTerm(search string) int {
+func ReposTotalCountBySearchTerm(search string, filterType int, filter string) int {
 	db := ConnectDb()
 	defer db.Close()
 
 	param := map[string]interface{}{
-		"search": search,
+		"FilterType": filterType,
+		"Filter":     filter,
+		"search":     search,
 	}
 
 	result, _ := db.ExecuteStoredProcedureWithResult("PR_Repositories_TotalCount_BySearchTerm", param)
+	if result == nil {
+		return 0
+	}
 	total, err := strconv.Atoi(fmt.Sprint(result[0]["Total"]))
 	if err != nil {
 		return 0
@@ -693,28 +683,6 @@ func GetGitHubRepositories() ([]map[string]interface{}, error) {
 	}
 
 	return result, nil
-}
-
-func SelectReposWithMakePublicRequest() ([]map[string]interface{}, error) {
-	db := ConnectDb()
-	defer db.Close()
-
-	sponsors, err := db.ExecuteStoredProcedureWithResult("PR_Projects_Select_AllWithMakePublicRequest", nil)
-	if err != nil {
-		return nil, err
-	}
-	return sponsors, nil
-}
-
-func UpdateOssContributionSponsorId(params map[string]interface{}) ([]map[string]interface{}, error) {
-	db := ConnectDb()
-	defer db.Close()
-
-	_, err := db.ExecuteStoredProcedure("PR_Projects_Update_OssSponsorIdById", params)
-	if err != nil {
-		return nil, err
-	}
-	return nil, nil
 }
 
 func LegacySearch(params map[string]interface{}) ([]map[string]interface{}, error) {

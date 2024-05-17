@@ -183,7 +183,7 @@ func setApiRoutes(mux *mux.Router) {
 	muxApi.Handle("/repositories/{id}/collaborators/{ghUser}/{permission}", loadAzGHAuthPage(rtApi.RemoveCollaborator)).Methods("DELETE")
 
 	muxApi.Handle("/repositories/{id}/public", loadAzGHAuthPage(rtApi.RequestMakePublic)).Methods("PUT")
-	muxApi.Handle("/repositories/{projectId}/archive/{project}/{state}/{archive}", loadAzGHAuthPage(rtApi.ArchiveProject)).Methods("PUT")
+	muxApi.Handle("/repositories/{projectId}/archive/{project}/{organization}/{archive}", loadAzGHAuthPage(rtApi.ArchiveProject)).Methods("PUT")
 	muxApi.Handle("/repositories/{projectId}/visibility/{project}/{currentState}/{desiredState}", loadAzGHAuthPage(rtApi.SetVisibility)).Methods("PUT")
 	muxApi.Handle("/repositories/{projectId}/transfer", loadAzAuthPage(rtApi.TransferRepository)).Methods("PUT")
 
@@ -264,9 +264,6 @@ func setUtilityRoutes(mux *mux.Router) {
 	muxUtility.Handle("/repo-owner-cleanup", loadGuidAuthApi(rtApi.RepoOwnersCleanup)).Methods("GET")
 	muxUtility.Handle("/recurring-approval", loadGuidAuthApi(rtApi.RecurringApproval)).Methods("GET")
 	muxUtility.Handle("/expiring-invitations", loadGuidAuthApi(rtApi.ExpiringInvitation)).Methods("GET")
-	muxUtility.Handle("/fillout-approvers", loadGuidAuthApi(rtApi.FillOutApprovers)).Methods("GET")
-	muxUtility.Handle("/fillout-approvalrequest-approvers", loadGuidAuthApi(rtApi.FillOutApprovalRequestApprovers)).Methods("GET")
-	muxUtility.Handle("/migrate-oss-sponsors", loadGuidAuthApi(rtApi.MigrateToOssSponsorsTable)).Methods("GET")
 	muxUtility.Handle("/index-ad-groups", loadGuidAuthApi(rtApi.IndexADGroups)).Methods("GET")
 	muxUtility.Handle("/index-regional-organizations", loadGuidAuthApi(rtApi.IndexRegionalOrganizations)).Methods("GET")
 }
