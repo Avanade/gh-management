@@ -94,7 +94,7 @@
                         class="absolute z-10 mt-1 max-h-60 right-0 top-1 overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm"
                         id="options" role="listbox">
                         <li
-                          @click="archiveRepository(repository.Name,repository.Id,repository.Visibility,repository.IsArchived)"
+                          @click="archiveRepository(repository.Name,repository.Id,repository.Organization,repository.IsArchived)"
                           class="hover:bg-[#fff2eb] relative cursor-pointer select-none py-2 pl-3 pr-9 text-gray-900"
                           id="option-0" role="option" tabindex="-1">
                           <span class="block truncate"
@@ -145,7 +145,6 @@
                       </ul>
                     </div>
                   </div>
-  
                 </div>
                 <div class="mt-2 sm:flex sm:justify-between">
                   <div class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
@@ -331,7 +330,7 @@
                   </div>
                   {{ if .isAdmin }}
                   <div @click.stop
-                    x-show="repository.RepositorySource==='GitHub' && isGHAssociated && (repository.Visibility==='Public')">
+                    x-show="repository.RepositorySource==='GitHub' && isGHAssociated">
                     <div class="relative mt-1">
                       <button
                         @click="repository.showOptions = !repository.showOptions"
@@ -346,11 +345,41 @@
                       <ul x-show="repository.showOptions"
                         class="absolute z-10 mt-1 max-h-60 right-0 top-1 overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm"
                         id="options" role="listbox">
-                        <li @click="setVisibility(repository.Name,repository.Id,repository.Visibility,'private')"
+                        <li x-show="repository.IsOrgRegional"
+                          @click="moveToInnersource(repository.Id)"
+                          class="hover:bg-[#fff2eb] relative cursor-pointer select-none py-2 pl-3 pr-9 text-gray-900"
+                          id="option-0" role="option" tabindex="-1">
+                          <span class="block truncate" x-text="`Move to ${innersource}`"></span>
+                        </li>
+                        <li @click="transferRepoRegionalOrg.onOpen(repository.Id)"
+                          x-show="!repository.IsOrgRegional"
+                          class="hover:bg-[#fff2eb] relative cursor-pointer select-none py-2 pl-3 pr-9 text-gray-900"
+                          id="option-0" role="option" tabindex="-1">
+                          <span class="block truncate">Move to Regional Org</span>
+                        </li>
+                        <li
+                          @click="archiveRepository(repository.Name,repository.Id,repository.Organization,repository.IsArchived)"
+                          class="hover:bg-[#fff2eb] relative cursor-pointer select-none py-2 pl-3 pr-9 text-gray-900"
+                          id="option-0" role="option" tabindex="-1">
+                          <span class="block truncate"
+                            x-text="repository.IsArchived? 'Unarchive' : 'Archive'">Archive</span>
+                        </li>
+                        <li
+                          class="hover:bg-[#fff2eb] relative cursor-pointer select-none py-2 pl-3 pr-9 text-gray-900"
+                          id="option-0" role="option" tabindex="-1">
+                          <!-- ADD OR UPDATE ECATT ID -->
+                          <template x-if="repository.ECATTID === 0">
+                            <span @click="showECATTFormModal=true; form.repoId=repository.Id" class="block truncate">Add ECATT ID</span>  
+                          </template>
+                          <template x-if="repository.ECATTID !== 0">
+                            <span @click="showECATTFormModal=true; form.repoId=repository.Id" class="block truncate">Update ECATT ID</span>  
+                          </template>
+                        </li>
+                        <li @click="setVisibility(repository.Name,repository.Id,repository.Visibility,'internal')"
                           x-show="repository.Visibility==='Public'"
                           class="hover:bg-[#fff2eb] relative cursor-pointer select-none py-2 pl-3 pr-9 text-gray-900"
                           id="option-0" role="option" tabindex="-1">
-                          <span class="block truncate">Make Private</span>
+                          <span class="block truncate">Make Internal</span>
                         </li>
                       </ul>
                     </div>
@@ -863,8 +892,8 @@
         filter = this.filter.map(e => e.text).join()
         this.setState(this.view, this.search, this.page, this.offset, this.filterType, filter)
       },
-      archiveRepository(repositoryName, repositoryId, visibility, isArchived) {
-        let url = `/api/repositories/${repositoryId}/archive/${repositoryName}/${visibility}/${isArchived? '0': '1'}`
+      archiveRepository(repositoryName, repositoryId, organization, isArchived) {
+        let url = `/api/repositories/${repositoryId}/archive/${repositoryName}/${organization}/${isArchived? '0': '1'}`
 
         let f = () => {
           Alpine.store('master').modal.show()

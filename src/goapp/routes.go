@@ -183,7 +183,7 @@ func setApiRoutes(mux *mux.Router) {
 	muxApi.Handle("/repositories/{id}/collaborators/{ghUser}/{permission}", loadAzGHAuthPage(rtApi.RemoveCollaborator)).Methods("DELETE")
 
 	muxApi.Handle("/repositories/{id}/public", loadAzGHAuthPage(rtApi.RequestMakePublic)).Methods("PUT")
-	muxApi.Handle("/repositories/{projectId}/archive/{project}/{state}/{archive}", loadAzGHAuthPage(rtApi.ArchiveProject)).Methods("PUT")
+	muxApi.Handle("/repositories/{projectId}/archive/{project}/{organization}/{archive}", loadAzGHAuthPage(rtApi.ArchiveProject)).Methods("PUT")
 	muxApi.Handle("/repositories/{projectId}/visibility/{project}/{currentState}/{desiredState}", loadAzGHAuthPage(rtApi.SetVisibility)).Methods("PUT")
 	muxApi.Handle("/repositories/{projectId}/transfer", loadAzAuthPage(rtApi.TransferRepository)).Methods("PUT")
 
