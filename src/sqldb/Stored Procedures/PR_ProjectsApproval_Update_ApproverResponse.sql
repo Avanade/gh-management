@@ -14,7 +14,7 @@ UPDATE
   SET
     [ApprovalStatusId] = @ApprovalStatusId,
     [ApprovalRemarks] = @ApprovalRemarks,
-    [ModifiedBy] = [ApproverUserPrincipalName],
+    [ModifiedBy] = @RespondedBy,
     [Modified] = GETDATE(),
     [ApprovalDate] = convert(DATETIME, @ApprovalDate),
     [RespondedBy] = @RespondedBy

@@ -8,7 +8,6 @@ BEGIN
       PA.Id, PA.ProjectId,
       P.[Name] [ProjectName],
       PA.ApprovalTypeId, T.[Name] ApprovalType,
-      PA.ApproverUserPrincipalName,
       PA.ApprovalDescription,
       S.Name [RequestStatus],
       PA.[ApprovalDate], PA.[ApprovalRemarks]
