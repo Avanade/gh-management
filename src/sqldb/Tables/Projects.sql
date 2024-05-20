@@ -14,8 +14,7 @@
     [CreatedBy] VARCHAR(100) NULL, 
     [Modified] DATETIME NOT NULL DEFAULT getdate(), 
     [ModifiedBy] VARCHAR(100) NULL,
-    [Organization] VARCHAR(100) NULL, -- TEMPORARY NULLABLE
-    [OSSsponsor] [varchar](50) NULL,
+    [Organization] VARCHAR(100) ,
     [OSSContributionSponsorId] INT NULL,
 	[Avanadeofferingsassets] [varchar](50) NULL,
 	[Willbecommercialversion] [varchar](50) NULL,
