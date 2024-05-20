@@ -147,19 +147,6 @@ func GetUserByUserPrincipal(UserPrincipalName string) ([]map[string]interface{},
 	return result, nil
 }
 
-func IsUserAdmin(userPrincipalName string) bool {
-	db := ConnectDb()
-	defer db.Close()
-
-	param := map[string]interface{}{
-		"UserPrincipalName": userPrincipalName,
-	}
-
-	result, _ := db.ExecuteStoredProcedureWithResult("PR_Admins_IsAdmin", param)
-
-	return result[0]["Result"] == "1"
-}
-
 func UsersGetEmail(GithubUser string) (string, error) {
 	db := ConnectDb()
 	defer db.Close()

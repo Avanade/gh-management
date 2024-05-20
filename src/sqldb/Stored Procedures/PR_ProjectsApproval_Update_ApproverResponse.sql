@@ -4,7 +4,7 @@ CREATE PROCEDURE [dbo].[PR_ProjectsApproval_Update_ApproverResponse]
   @ApprovalStatusId INT,
   @ApprovalRemarks VARCHAR(255),
   @ApprovalDate DATETIME,
-  @RespondedBy VARCHAR(100) = NULL -- OBSOLETE REMOVE EQUALS NULL
+  @RespondedBy VARCHAR(100)
 )
 AS
 BEGIN
