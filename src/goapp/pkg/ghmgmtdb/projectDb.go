@@ -432,22 +432,6 @@ func ProjectsApprovalUpdateGUID(id int64, ApprovalSystemGUID string) {
 	db.ExecuteStoredProcedure("PR_ProjectsApproval_Update_ApprovalSystemGUID", param)
 }
 
-func GetProjectForRepoOwner() (repoOwner []RepoOwner) {
-	db := ConnectDb()
-	defer db.Close()
-
-	result, _ := db.ExecuteStoredProcedureWithResult("PR_Projects_ToRepoOwners", nil)
-
-	for _, v := range result {
-		data := RepoOwner{
-			Id:                v["Id"].(int64),
-			UserPrincipalName: v["UserPrincipalName"].(string),
-		}
-		repoOwner = append(repoOwner, data)
-	}
-	return repoOwner
-}
-
 func GetProjectByName(projectName string) []map[string]interface{} {
 	db := ConnectDb()
 	defer db.Close()
