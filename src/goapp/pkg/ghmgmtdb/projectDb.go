@@ -338,18 +338,6 @@ func GetFailedProjectApprovalRequests() (projectApprovals []ProjectApproval) {
 	return
 }
 
-func GetProjectApprovals() ([]map[string]interface{}, error) {
-	db := ConnectDb()
-	defer db.Close()
-
-	result, err := db.ExecuteStoredProcedureWithResult("PR_ProjectApprovals_Select", nil)
-	if err != nil {
-		return nil, err
-	}
-
-	return result, nil
-}
-
 func GetProjectApprovalsByProjectId(id int64) (projectApprovals []ProjectApproval) {
 	db := ConnectDb()
 	defer db.Close()
@@ -430,22 +418,6 @@ func ProjectsApprovalUpdateGUID(id int64, ApprovalSystemGUID string) {
 		"ApprovalSystemGUID": ApprovalSystemGUID,
 	}
 	db.ExecuteStoredProcedure("PR_ProjectsApproval_Update_ApprovalSystemGUID", param)
-}
-
-func GetProjectForRepoOwner() (repoOwner []RepoOwner) {
-	db := ConnectDb()
-	defer db.Close()
-
-	result, _ := db.ExecuteStoredProcedureWithResult("PR_Projects_ToRepoOwners", nil)
-
-	for _, v := range result {
-		data := RepoOwner{
-			Id:                v["Id"].(int64),
-			UserPrincipalName: v["UserPrincipalName"].(string),
-		}
-		repoOwner = append(repoOwner, data)
-	}
-	return repoOwner
 }
 
 func GetProjectByName(projectName string) []map[string]interface{} {

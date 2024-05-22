@@ -161,18 +161,6 @@ func CommunitiesIsexternal(params map[string]interface{}) ([]map[string]interfac
 	return result, err
 }
 
-func CommunitiesInitCommunityType(params map[string]interface{}) ([]map[string]interface{}, error) {
-	db := ConnectDb()
-	defer db.Close()
-
-	result, err := db.ExecuteStoredProcedureWithResult("dbo.PR_Communities_InitCommunityType", params)
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	return result, err
-}
-
 func CommunitySponsorsSelect(params map[string]interface{}) ([]map[string]interface{}, error) {
 	db := ConnectDb()
 	defer db.Close()
