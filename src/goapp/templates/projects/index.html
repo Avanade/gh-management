@@ -111,6 +111,12 @@
                             <span @click="showECATTFormModal=true; form.repoId=repository.Id" class="block truncate">Update ECATT ID</span>  
                           </template>
                         </li>
+                        <li x-show="repository.Visibility !== 'Private' && !repository.IsArchived && repository.Organization !== opensource"
+                          @click="setVisibility(repository.Name,repository.Id,repository.Visibility,'private')"
+                          class="hover:bg-[#fff2eb] relative cursor-pointer select-none py-2 pl-3 pr-9 text-gray-900"
+                          id="option-0" role="option" tabindex="-1">
+                          <span class="block truncate">Make Private</span>
+                        </li>
                         <li x-show="repository.Visibility !== 'Internal' && !repository.IsArchived && repository.Organization !== opensource"
                           @click="setVisibility(repository.Name,repository.Id,repository.Visibility,'internal')"
                           class="hover:bg-[#fff2eb] relative cursor-pointer select-none py-2 pl-3 pr-9 text-gray-900"
