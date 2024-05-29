@@ -43,7 +43,7 @@ func InitializeSession() {
 	gob.Register(map[string]interface{}{})
 }
 
-func IsAuthenticated(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
+func IsAuthenticated(w http.ResponseWriter, r *http.Request) {
 	// Check session if there is saved user profile
 	url := fmt.Sprintf("/loginredirect?redirect=%v", r.URL)
 	session, err := Store.Get(r, "auth-session")
@@ -121,11 +121,11 @@ func IsAuthenticated(w http.ResponseWriter, r *http.Request, next http.HandlerFu
 				}
 			}
 		}
-		next(w, r)
+
 	}
 }
 
-func IsGHAuthenticated(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
+func IsGHAuthenticated(w http.ResponseWriter, r *http.Request) {
 	// Check session if there is saved user profile
 	url := fmt.Sprintf("/gitredirect?redirect=%v", r.URL)
 	session, err := Store.Get(r, "gh-auth-session")
@@ -143,11 +143,10 @@ func IsGHAuthenticated(w http.ResponseWriter, r *http.Request, next http.Handler
 		// Asks user to login if there is no saved user profile
 		http.Redirect(w, r, url, http.StatusTemporaryRedirect)
 	} else {
-		next(w, r)
 	}
 }
 
-func IsGuidAuthenticated(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
+func IsGuidAuthenticated(w http.ResponseWriter, r *http.Request) {
 	// Check header if authenticated
 	_, err := auth.VerifyAccessToken(r)
 	// RETURN ERROR
@@ -155,8 +154,6 @@ func IsGuidAuthenticated(w http.ResponseWriter, r *http.Request, next http.Handl
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	// RETURN SUCCESS
-	next(w, r)
 }
 
 func GetGitHubUserData(w http.ResponseWriter, r *http.Request) (GitHubUser, error) {
@@ -232,11 +229,9 @@ func RemoveGitHubAccount(w http.ResponseWriter, r *http.Request) error {
 	return nil
 }
 
-func IsUserAdminMW(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
+func IsUserAdminMW(w http.ResponseWriter, r *http.Request) {
 	isAdmin, _ := IsUserAdmin(w, r)
-	if isAdmin {
-		next(w, r)
-	} else {
+	if !isAdmin {
 		http.Redirect(w, r, "/", http.StatusSeeOther)
 	}
 }
