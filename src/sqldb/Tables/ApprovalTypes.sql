@@ -1,4 +1,4 @@
-﻿﻿CREATE TABLE [dbo].[ApprovalTypes] (
+CREATE TABLE [dbo].[ApprovalTypes] (
     [Id] [INT] NOT NULL PRIMARY KEY IDENTITY,
     [Name] [VARCHAR](50) NOT NULL,
     [ApproverUserPrincipalName] [VARCHAR](100) NULL,

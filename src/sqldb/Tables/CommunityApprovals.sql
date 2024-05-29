@@ -1,4 +1,4 @@
-﻿﻿CREATE TABLE [dbo].[CommunityApprovals] (
+CREATE TABLE [dbo].[CommunityApprovals] (
     [Id] [INT] NOT NULL PRIMARY KEY IDENTITY,
     [CommunityId] [INT] NULL,
     [ApproverUserPrincipalName] [VARCHAR](100) NOT NULL,

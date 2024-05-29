@@ -15,7 +15,10 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Tables\" />
-    <Folder Include="Stored Procedures\" />
-    <Folder Include="Functions\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Build Remove="Functions\**" />
+    <Build Remove="New Tables\**" />
+    <Build Remove="Stored Procedures\**" />
   </ItemGroup>
 </Project>
