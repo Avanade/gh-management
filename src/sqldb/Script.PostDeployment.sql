@@ -89,106 +89,292 @@ SET IDENTITY_INSERT Visibility OFF
 /* RENAME ALL TABLES */
 
 /* ActivityTypes > ActivityType */
-EXEC sp_rename 'dbo.ActivityTypes', 'ActivityType'
+IF (EXISTS (SELECT * 
+                 FROM INFORMATION_SCHEMA.TABLES 
+                 WHERE TABLE_SCHEMA = 'dbo' 
+                 AND  TABLE_NAME = 'ActivityTypes'))
+BEGIN
+    EXEC sp_rename 'dbo.ActivityTypes', 'ActivityType'
+END
 
 /* ApprovalRequestApprovers > ApprovalRequestApprover */
-EXEC sp_rename 'dbo.ApprovalRequestApprovers', 'ApprovalRequestApprover'
+IF (EXISTS (SELECT * 
+                 FROM INFORMATION_SCHEMA.TABLES 
+                 WHERE TABLE_SCHEMA = 'dbo' 
+                 AND  TABLE_NAME = 'ApprovalRequestApprovers'))
+BEGIN
+    EXEC sp_rename 'dbo.ApprovalRequestApprovers', 'ApprovalRequestApprover'
+END
 
 /* ApprovalStatus > ApprovalStatus */
 
 
 /* ApprovalTypes > RepositoryApprovalType */
-EXEC sp_rename 'dbo.ApprovalTypes', 'RepositoryApprovalType'
+IF (EXISTS (SELECT * 
+                 FROM INFORMATION_SCHEMA.TABLES 
+                 WHERE TABLE_SCHEMA = 'dbo' 
+                 AND  TABLE_NAME = 'ApprovalTypes'))
+BEGIN
+    EXEC sp_rename 'dbo.ApprovalTypes', 'RepositoryApprovalType'
+END
 
 /* Approvers > RepositoryApprover */
-EXEC sp_rename 'dbo.Approvers', 'RepositoryApprover'
+IF (EXISTS (SELECT * 
+                 FROM INFORMATION_SCHEMA.TABLES 
+                 WHERE TABLE_SCHEMA = 'dbo' 
+                 AND  TABLE_NAME = 'Approvers'))
+BEGIN
+    EXEC sp_rename 'dbo.Approvers', 'RepositoryApprover'
+END
 
 /* Category > GuidanceCategory */
-EXEC sp_rename 'dbo.Category', 'GuidanceCategory'
+IF (EXISTS (SELECT * 
+                 FROM INFORMATION_SCHEMA.TABLES 
+                 WHERE TABLE_SCHEMA = 'dbo' 
+                 AND  TABLE_NAME = 'Category'))
+BEGIN
+    EXEC sp_rename 'dbo.Category', 'GuidanceCategory'
+END
 
 /* CategoryArticles > GuidanceCategoryArticle */
-EXEC sp_rename 'dbo.CategoryArticles', 'GuidanceCategoryArticle'
+IF (EXISTS (SELECT * 
+                 FROM INFORMATION_SCHEMA.TABLES 
+                 WHERE TABLE_SCHEMA = 'dbo' 
+                 AND  TABLE_NAME = 'CategoryArticles'))
+BEGIN
+    EXEC sp_rename 'dbo.CategoryArticles', 'GuidanceCategoryArticle'
+END
 
 /* Communities > Community */
-EXEC sp_rename 'dbo.Communities', 'Community'
+IF (EXISTS (SELECT * 
+                 FROM INFORMATION_SCHEMA.TABLES 
+                 WHERE TABLE_SCHEMA = 'dbo' 
+                 AND  TABLE_NAME = 'Communities'))
+BEGIN
+    EXEC sp_rename 'dbo.Communities', 'Community'
+END
 
 /* CommunityActivities > CommunityActivity */
-EXEC sp_rename 'dbo.CommunityActivities', 'CommunityActivity'
+IF (EXISTS (SELECT * 
+                 FROM INFORMATION_SCHEMA.TABLES 
+                 WHERE TABLE_SCHEMA = 'dbo' 
+                 AND  TABLE_NAME = 'CommunityActivities'))
+BEGIN
+    EXEC sp_rename 'dbo.CommunityActivities', 'CommunityActivity'
+END
 
 /* CommunityActivitiesContributionAreas > CommunityActivityContributionArea */
-EXEC sp_rename 'dbo.CommunityActivitiesContributionAreas', 'CommunityActivityContributionArea'
+IF (EXISTS (SELECT * 
+                 FROM INFORMATION_SCHEMA.TABLES 
+                 WHERE TABLE_SCHEMA = 'dbo' 
+                 AND  TABLE_NAME = 'CommunityActivitiesContributionAreas'))
+BEGIN
+    EXEC sp_rename 'dbo.CommunityActivitiesContributionAreas', 'CommunityActivityContributionArea'
+END
 
 /* CommunityActivitiesHelpTypes > CommunityActivityHelpType */
-EXEC sp_rename 'dbo.CommunityActivitiesHelpTypes', 'CommunityActivityHelpType'
+IF (EXISTS (SELECT * 
+                 FROM INFORMATION_SCHEMA.TABLES 
+                 WHERE TABLE_SCHEMA = 'dbo' 
+                 AND  TABLE_NAME = 'CommunityActivitiesHelpTypes'))
+BEGIN
+    EXEC sp_rename 'dbo.CommunityActivitiesHelpTypes', 'CommunityActivityHelpType'
+END
 
 /* CommunityApprovalRequests > CommunityApprovalRequest */
-EXEC sp_rename 'dbo.CommunityApprovalRequests', 'CommunityApprovalRequest'
+IF (EXISTS (SELECT * 
+                 FROM INFORMATION_SCHEMA.TABLES 
+                 WHERE TABLE_SCHEMA = 'dbo' 
+                 AND  TABLE_NAME = 'CommunityApprovalRequests'))
+BEGIN
+    EXEC sp_rename 'dbo.CommunityApprovalRequests', 'CommunityApprovalRequest'
+END
 
 /* CommunityApprovals > ApprovalRequest */
-EXEC sp_rename 'dbo.CommunityApprovals', 'ApprovalRequest'
+IF (EXISTS (SELECT * 
+                 FROM INFORMATION_SCHEMA.TABLES 
+                 WHERE TABLE_SCHEMA = 'dbo' 
+                 AND  TABLE_NAME = 'CommunityApprovals'))
+BEGIN
+    EXEC sp_rename 'dbo.CommunityApprovals', 'ApprovalRequest'
+END
 
 /* CommunityApproversList > CommunityApprover */
-EXEC sp_rename 'dbo.CommunityApproversList', 'CommunityApprover'
+IF (EXISTS (SELECT * 
+                 FROM INFORMATION_SCHEMA.TABLES 
+                 WHERE TABLE_SCHEMA = 'dbo' 
+                 AND  TABLE_NAME = 'CommunityApproversList'))
+BEGIN
+    EXEC sp_rename 'dbo.CommunityApproversList', 'CommunityApprover'
+END
 
 /* CommunityMembers > CommunityMember */
-EXEC sp_rename 'dbo.CommunityMembers', 'CommunityMember'
+IF (EXISTS (SELECT * 
+                 FROM INFORMATION_SCHEMA.TABLES 
+                 WHERE TABLE_SCHEMA = 'dbo' 
+                 AND  TABLE_NAME = 'CommunityMembers'))
+BEGIN
+    EXEC sp_rename 'dbo.CommunityMembers', 'CommunityMember'
+END
 
 /* CommunitySponsors > CommunitySponsor */
-EXEC sp_rename 'dbo.CommunitySponsors', 'CommunitySponsor'
+IF (EXISTS (SELECT * 
+                 FROM INFORMATION_SCHEMA.TABLES 
+                 WHERE TABLE_SCHEMA = 'dbo' 
+                 AND  TABLE_NAME = 'CommunitySponsors'))
+BEGIN
+    EXEC sp_rename 'dbo.CommunitySponsors', 'CommunitySponsor'
+END
 
 /* CommunityTags > CommunityTag */
-EXEC sp_rename 'dbo.CommunityTags', 'CommunityTag'
+IF (EXISTS (SELECT * 
+                 FROM INFORMATION_SCHEMA.TABLES 
+                 WHERE TABLE_SCHEMA = 'dbo' 
+                 AND  TABLE_NAME = 'CommunityTags'))
+BEGIN
+    EXEC sp_rename 'dbo.CommunityTags', 'CommunityTag'
+END
 
 /* ContributionAreas > ContributionArea */
-EXEC sp_rename 'dbo.ContributionAreas', 'ContributionArea'
+IF (EXISTS (SELECT * 
+                 FROM INFORMATION_SCHEMA.TABLES 
+                 WHERE TABLE_SCHEMA = 'dbo' 
+                 AND  TABLE_NAME = 'ContributionAreas'))
+BEGIN
+    EXEC sp_rename 'dbo.ContributionAreas', 'ContributionArea'
+END
 
 /* ExternalLinks > ExternalLink */
-EXEC sp_rename 'dbo.ExternalLinks', 'ExternalLink'
+IF (EXISTS (SELECT * 
+                 FROM INFORMATION_SCHEMA.TABLES 
+                 WHERE TABLE_SCHEMA = 'dbo' 
+                 AND  TABLE_NAME = 'ExternalLinks'))
+BEGIN
+    EXEC sp_rename 'dbo.ExternalLinks', 'ExternalLink'
+END
 
 /* GitHubAccess > GitHubAccessDirectoryGroup */
-EXEC sp_rename 'dbo.GitHubAccess', 'GitHubAccessDirectoryGroup'
+IF (EXISTS (SELECT * 
+                 FROM INFORMATION_SCHEMA.TABLES 
+                 WHERE TABLE_SCHEMA = 'dbo' 
+                 AND  TABLE_NAME = 'GitHubAccess'))
+BEGIN
+    EXEC sp_rename 'dbo.GitHubAccess', 'GitHubAccessDirectoryGroup'
+END
 
 /* GitHubCopilot > GitHubCopilot */
 
 
 /* GitHubCopilotApprovalRequests > GitHubCopilotApprovalRequest */
-EXEC sp_rename 'dbo.GitHubCopilotApprovalRequests', 'GitHubCopilotApprovalRequest'
+IF (EXISTS (SELECT * 
+                 FROM INFORMATION_SCHEMA.TABLES 
+                 WHERE TABLE_SCHEMA = 'dbo' 
+                 AND  TABLE_NAME = 'GitHubCopilotApprovalRequests'))
+BEGIN
+    EXEC sp_rename 'dbo.GitHubCopilotApprovalRequests', 'GitHubCopilotApprovalRequest'
+END
 
 /* OrganizationAccess > OrganizationAccess */
 
 
 /* OrganizationAccessApprovalRequests > OrganizationAccessApprovalRequest */
-EXEC sp_rename 'dbo.OrganizationAccessApprovalRequests', 'OrganizationAccessApprovalRequest'
+IF (EXISTS (SELECT * 
+                 FROM INFORMATION_SCHEMA.TABLES 
+                 WHERE TABLE_SCHEMA = 'dbo' 
+                 AND  TABLE_NAME = 'OrganizationAccessApprovalRequests'))
+BEGIN
+    EXEC sp_rename 'dbo.OrganizationAccessApprovalRequests', 'OrganizationAccessApprovalRequest'
+END
 
 /* OrganizationApprovalRequests > OrganizationApprovalRequest */
-EXEC sp_rename 'dbo.OrganizationApprovalRequests', 'OrganizationApprovalRequest'
+IF (EXISTS (SELECT * 
+                 FROM INFORMATION_SCHEMA.TABLES 
+                 WHERE TABLE_SCHEMA = 'dbo' 
+                 AND  TABLE_NAME = 'OrganizationApprovalRequests'))
+BEGIN
+    EXEC sp_rename 'dbo.OrganizationApprovalRequests', 'OrganizationApprovalRequest'
+END
 
 /* Organizations > Organization */
-EXEC sp_rename 'dbo.Organizations', 'Organization'
+IF (EXISTS (SELECT * 
+                 FROM INFORMATION_SCHEMA.TABLES 
+                 WHERE TABLE_SCHEMA = 'dbo' 
+                 AND  TABLE_NAME = 'Organizations'))
+BEGIN
+    EXEC sp_rename 'dbo.Organizations', 'Organization'
+END
 
 /* OSSContributionSponsors > OSSContributionSponsor */
-EXEC sp_rename 'dbo.OSSContributionSponsors', 'OSSContributionSponsor'
+IF (EXISTS (SELECT * 
+                 FROM INFORMATION_SCHEMA.TABLES 
+                 WHERE TABLE_SCHEMA = 'dbo' 
+                 AND  TABLE_NAME = 'OSSContributionSponsors'))
+BEGIN
+    EXEC sp_rename 'dbo.OSSContributionSponsors', 'OSSContributionSponsor'
+END
 
 /* ProjectApprovals > RepositoryApproval */
-EXEC sp_rename 'dbo.ProjectApprovals', 'RepositoryApproval'
+IF (EXISTS (SELECT * 
+                 FROM INFORMATION_SCHEMA.TABLES 
+                 WHERE TABLE_SCHEMA = 'dbo' 
+                 AND  TABLE_NAME = 'ProjectApprovals'))
+BEGIN
+    EXEC sp_rename 'dbo.ProjectApprovals', 'RepositoryApproval'
+END
 
 /* Projects > Repository */
-EXEC sp_rename 'dbo.Projects', 'Repository'
+IF (EXISTS (SELECT * 
+                 FROM INFORMATION_SCHEMA.TABLES 
+                 WHERE TABLE_SCHEMA = 'dbo' 
+                 AND  TABLE_NAME = 'Projects'))
+BEGIN
+    EXEC sp_rename 'dbo.Projects', 'Repository'
+END
 
 /* RepoTopics > RepositoryTopic */
-EXEC sp_rename 'dbo.RepoTopics', 'RepositoryTopic'
+IF (EXISTS (SELECT * 
+                 FROM INFORMATION_SCHEMA.TABLES 
+                 WHERE TABLE_SCHEMA = 'dbo' 
+                 AND  TABLE_NAME = 'RepoTopics'))
+BEGIN
+    EXEC sp_rename 'dbo.RepoTopics', 'RepositoryTopic'
+END
 
 /* RegionalOrganizations > RegionalOrganization */
-EXEC sp_rename 'dbo.RegionalOrganizations', 'RegionalOrganization'
+IF (EXISTS (SELECT * 
+                 FROM INFORMATION_SCHEMA.TABLES 
+                 WHERE TABLE_SCHEMA = 'dbo' 
+                 AND  TABLE_NAME = 'RegionalOrganizations'))
+BEGIN
+    EXEC sp_rename 'dbo.RegionalOrganizations', 'RegionalOrganization'
+END
 
 /* RelatedCommunities > RelatedCommunity */
-EXEC sp_rename 'dbo.RelatedCommunities', 'RelatedCommunity'
+IF (EXISTS (SELECT * 
+                 FROM INFORMATION_SCHEMA.TABLES 
+                 WHERE TABLE_SCHEMA = 'dbo' 
+                 AND  TABLE_NAME = 'RelatedCommunities'))
+BEGIN
+    EXEC sp_rename 'dbo.RelatedCommunities', 'RelatedCommunity'
+END
 
 /* RepoOwners > RepositoryOwner */
-EXEC sp_rename 'dbo.RepoOwners', 'RepositoryOwner'
+IF (EXISTS (SELECT * 
+                 FROM INFORMATION_SCHEMA.TABLES 
+                 WHERE TABLE_SCHEMA = 'dbo' 
+                 AND  TABLE_NAME = 'RepoOwners'))
+BEGIN
+    EXEC sp_rename 'dbo.RepoOwners', 'RepositoryOwner'
+END
 
 /* Users > User */
-EXEC sp_rename 'dbo.Users', 'User'
+IF (EXISTS (SELECT * 
+                 FROM INFORMATION_SCHEMA.TABLES 
+                 WHERE TABLE_SCHEMA = 'dbo' 
+                 AND  TABLE_NAME = 'Users'))
+BEGIN
+    EXEC sp_rename 'dbo.Users', 'User'
+END
 
 /* Visibility > Visibility */
 
