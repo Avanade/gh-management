@@ -55,6 +55,112 @@ SET IDENTITY_INSERT Visibility ON
         INSERT INTO [dbo].[Visibility] ([Id], [Name]) VALUES (3, 'Public')
 SET IDENTITY_INSERT Visibility OFF
 
+/*  DROP ALL CONSTRAINT */
+IF (NOT EXISTS (SELECT * 
+                 FROM INFORMATION_SCHEMA.TABLES 
+                 WHERE TABLE_SCHEMA = 'dbo' 
+                 AND  TABLE_NAME = 'ActivityType'))
+BEGIN
+    -- ApprovalRequestApprovers
+    ALTER TABLE [dbo].[ApprovalRequestApprovers] DROP CONSTRAINT [PK_ApprovalRequestApprover]
+    ALTER TABLE [dbo].[ApprovalRequestApprovers] DROP CONSTRAINT [FK_ApprovalRequestApprover_ProjectApprovals]
+    ALTER TABLE [dbo].[ApprovalRequestApprovers] DROP CONSTRAINT [FK_ApprovalRequestApprover_Users]
+
+    -- ApprovalTypes
+    ALTER TABLE [dbo].[ApprovalTypes] DROP CONSTRAINT [FK_ApprovalTypes_Users]
+
+    -- Approvers
+    ALTER TABLE [dbo].[Approvers] DROP CONSTRAINT [PK_Approver]
+    ALTER TABLE [dbo].[Approvers] DROP CONSTRAINT [FK_Approvers_ApprovalTypes]
+    ALTER TABLE [dbo].[Approvers] DROP CONSTRAINT [FK_Approvers_Users]
+
+    -- CategoryArticles
+    ALTER TABLE [dbo].[CategoryArticles] DROP CONSTRAINT [FK_CategoryArticles_Category]
+
+    -- Communities
+    ALTER TABLE [dbo].[Communities] DROP CONSTRAINT [FK_Communities_ApprovalStatus] 
+
+    -- CommunityActivities
+    ALTER TABLE [dbo].[CommunityActivities] DROP CONSTRAINT [FK_CommunityActivities_Communities]
+    ALTER TABLE [dbo].[CommunityActivities] DROP CONSTRAINT [FK_CommunityActivities_ActivityTypes]
+
+    -- CommunityActivitiesContributionAreas
+    ALTER TABLE [dbo].[CommunityActivitiesContributionAreas] DROP CONSTRAINT [FK_CommunityActivitiesCA_CommunityActivity]
+    ALTER TABLE [dbo].[CommunityActivitiesContributionAreas] DROP CONSTRAINT [FK_CommunityActivitiesCA_ContributionAreas]
+
+    -- CommunityApprovalRequests
+    ALTER TABLE [dbo].[CommunityApprovalRequests] DROP CONSTRAINT [PK_CommunityApprovalRequests]
+    ALTER TABLE [dbo].[CommunityApprovalRequests] DROP CONSTRAINT [FK_CommunityApprovalRequests_Communities]
+    ALTER TABLE [dbo].[CommunityApprovalRequests] DROP CONSTRAINT [FK_CommunityApprovalRequests_CommunityApprovals]
+
+    -- CommunityApprovals
+    ALTER TABLE [dbo].[CommunityApprovals] DROP CONSTRAINT [FK_CommunityApprovals_Users]
+    ALTER TABLE [dbo].[CommunityApprovals] DROP CONSTRAINT [FK_CommunityApprovals_ApprovalStatus]
+
+    -- CommunityApproversList
+    ALTER TABLE [dbo].[CommunityApproversList] DROP CONSTRAINT [AK_ApproverUserPrincipalName_Categoy]
+    ALTER TABLE [dbo].[CommunityApproversList] DROP CONSTRAINT [FK_CommunityApproversList_Users]
+
+    -- CommunityMembers
+    ALTER TABLE [dbo].[CommunityMembers] DROP CONSTRAINT [PK_CommunityMembers]
+    ALTER TABLE [dbo].[CommunityMembers] DROP CONSTRAINT [FK_CommunityMembers_Communities]
+
+    -- CommunitySponsors
+    ALTER TABLE [dbo].[CommunitySponsors] DROP CONSTRAINT [AK_CommunityId_UserPrincipalName]
+    ALTER TABLE [dbo].[CommunitySponsors] DROP CONSTRAINT [FK_CommunitySponsors_Communities]
+    ALTER TABLE [dbo].[CommunitySponsors] DROP CONSTRAINT [FK_CommunitySponsors_Users]
+
+    -- CommunityTags
+    ALTER TABLE [dbo].[CommunityTags] DROP CONSTRAINT [AK_CommunityId_Tag]
+    ALTER TABLE [dbo].[CommunityTags] DROP CONSTRAINT [FK_CommunityTags_Communities]
+
+    -- GitHubCopilot
+    ALTER TABLE [dbo].[GitHubCopilot] DROP CONSTRAINT [FK_GitHubCopilot_RegionalOrganizations]
+
+    -- GitHubCopilotApprovalRequests
+    ALTER TABLE [dbo].[GitHubCopilotApprovalRequests] DROP CONSTRAINT [PK_GitHubCopilotApprovalRequests]
+    ALTER TABLE [dbo].[GitHubCopilotApprovalRequests] DROP CONSTRAINT [FK_GitHubCopilotApprovalRequests_GitHubCopilot]
+    ALTER TABLE [dbo].[GitHubCopilotApprovalRequests] DROP CONSTRAINT [FK_GitHubCopilotApprovalRequests_CommunityApprovals]
+
+    -- OrganizationAccess
+    ALTER TABLE [dbo].[OrganizationAccess] DROP CONSTRAINT [FK_OrganizationAccess_Users]
+    ALTER TABLE [dbo].[OrganizationAccess] DROP CONSTRAINT [FK_OrganizationAccess_RegionalOrganizations]
+
+    -- OrganizationAccessApprovalRequests
+    ALTER TABLE [dbo].[OrganizationAccessApprovalRequests] DROP CONSTRAINT [PK_OrganizationAccessApprovalRequests]
+    ALTER TABLE [dbo].[OrganizationAccessApprovalRequests] DROP CONSTRAINT [FK_OrganizationAccessApprovalRequests_OrganizationAccess]
+    ALTER TABLE [dbo].[OrganizationAccessApprovalRequests] DROP CONSTRAINT [FK_OrganizationAccessApprovalRequests_CommunityApprovals]
+
+    -- OrganizationApprovalRequests
+    ALTER TABLE [dbo].[OrganizationApprovalRequests] DROP CONSTRAINT [PK_OrganizationApprovalRequests]
+    ALTER TABLE [dbo].[OrganizationApprovalRequests] DROP CONSTRAINT [FK_OrganizationApprovalRequests_Organizations]
+    ALTER TABLE [dbo].[OrganizationApprovalRequests] DROP CONSTRAINT [FK_OrganizationApprovalRequests_CommunityApprovals]
+
+    -- Organizations
+    ALTER TABLE [dbo].[Organizations] DROP CONSTRAINT [FK_Organizations_RegionalOrganizations]
+
+    -- ProjectApprovals
+    ALTER TABLE [dbo].[ProjectApprovals] DROP CONSTRAINT [FK_ProjectApprovals_Projects]
+    ALTER TABLE [dbo].[ProjectApprovals] DROP CONSTRAINT [FK_ProjectApprovals_ApprovalTypes]
+    ALTER TABLE [dbo].[ProjectApprovals] DROP CONSTRAINT [FK_ProjectApprovals_ApprovalStatus]
+
+    -- Projects
+    ALTER TABLE [dbo].[Projects] DROP CONSTRAINT [FK_Projects_ApprovalStatus]
+    ALTER TABLE [dbo].[Projects] DROP CONSTRAINT [FK_Projects_Visibility]
+    ALTER TABLE [dbo].[Projects] DROP CONSTRAINT [FK_Projects_OSSContributionSponsors]
+
+    -- RepoTopics
+    ALTER TABLE [dbo].[RepoTopics] DROP CONSTRAINT [PK_RepoTopics]
+    ALTER TABLE [dbo].[RepoTopics] DROP CONSTRAINT [FK_RepoTags_Project]
+
+    -- RelatedCommunities
+    ALTER TABLE [dbo].[RelatedCommunities] DROP CONSTRAINT [PK_RelatedCommunities]
+
+    -- RepoOwners
+    ALTER TABLE [dbo].[RepoOwners] DROP CONSTRAINT [PK_RepoOwner]
+    ALTER TABLE [dbo].[RepoOwners] DROP CONSTRAINT [FK_RepoOwners_Projects] 
+END
+
 /* RENAME ALL TABLES */
 
 /* ActivityTypes > ActivityType */
