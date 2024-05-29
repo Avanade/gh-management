@@ -1,4 +1,4 @@
-﻿﻿CREATE TABLE [dbo].[CommunityMember] (
+CREATE TABLE [dbo].[CommunityMember] (
     [CommunityId] [INT] NOT NULL,
     [UserPrincipalName] [VARCHAR](100) NOT NULL,
     [Created] [DATETIME] NOT NULL DEFAULT GETDATE(),

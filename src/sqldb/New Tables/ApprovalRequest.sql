@@ -1,4 +1,4 @@
-﻿﻿CREATE TABLE [dbo].[ApprovalRequest] (
+CREATE TABLE [dbo].[ApprovalRequest] (
     [Id] [INT] NOT NULL PRIMARY KEY IDENTITY,
     [CommunityId] [INT] NULL,
     [ApproverUserPrincipalName] [VARCHAR](100) NOT NULL,

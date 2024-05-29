@@ -1,4 +1,4 @@
-﻿﻿CREATE TABLE [dbo].[Repository] (
+CREATE TABLE [dbo].[Repository] (
     [Id] [INT] NOT NULL PRIMARY KEY IDENTITY,
     [Name] [VARCHAR](100) NOT NULL,
     [GithubId] [INT],

@@ -1,4 +1,4 @@
-﻿﻿CREATE TABLE [dbo].[CommunityApprover] (
+CREATE TABLE [dbo].[CommunityApprover] (
     [Id] [INT] NOT NULL PRIMARY KEY IDENTITY,
     [ApproverUserPrincipalName] [VARCHAR](100) NOT NULL,
     [GuidanceCategory] [VARCHAR](100) NOT NULL DEFAULT 'community',

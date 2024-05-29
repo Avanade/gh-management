@@ -14,11 +14,11 @@
     <PostDeploy Include="Script.PostDeployment.sql" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Tables\" />
+    <Folder Include="New Tables\" />
   </ItemGroup>
   <ItemGroup>
     <Build Remove="Functions\**" />
-    <Build Remove="New Tables\**" />
+    <Build Remove="Tables\**" />
     <Build Remove="Stored Procedures\**" />
   </ItemGroup>
 </Project>

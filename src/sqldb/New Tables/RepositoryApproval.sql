@@ -1,4 +1,4 @@
-﻿﻿CREATE TABLE [dbo].[RepositoryApproval] (
+CREATE TABLE [dbo].[RepositoryApproval] (
     [Id] [INT] NOT NULL PRIMARY KEY IDENTITY,
     [ProjectId] [INT] NOT NULL,
     [ApprovalTypeId] [INT] NOT NULL,

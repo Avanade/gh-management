@@ -1,4 +1,4 @@
-﻿﻿CREATE TABLE [dbo].[CommunityActivity] (
+CREATE TABLE [dbo].[CommunityActivity] (
     [Id] [INT] NOT NULL PRIMARY KEY IDENTITY,
     [CommunityId] [INT] NOT NULL,
     [Date] [DATETIME],

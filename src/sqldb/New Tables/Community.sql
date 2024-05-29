@@ -1,4 +1,4 @@
-﻿﻿CREATE TABLE [dbo].[Community] (
+CREATE TABLE [dbo].[Community] (
     [Id] [INT] NOT NULL PRIMARY KEY IDENTITY,
     [Name] [VARCHAR](50) NOT NULL,
     [Url] [VARCHAR](255) NULL,
