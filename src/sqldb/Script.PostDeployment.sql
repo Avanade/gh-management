@@ -179,6 +179,9 @@ IF (NOT EXISTS (SELECT *
                  AND  TABLE_NAME = 'ApprovalRequestApprover'))
 BEGIN
     EXEC sp_rename 'dbo.ApprovalRequestApprovers', 'ApprovalRequestApprover'
+    
+    EXEC sp_rename 'dbo.ApprovalRequestApprover.ApprovalRequestId', 'RepositoryApprovalId', 'COLUMN';
+    EXEC sp_rename 'dbo.ApprovalRequestApprover.ApproverEmail', 'ApproverUserPrincipalName', 'COLUMN';
 END
 
 /* ApprovalStatus > ApprovalStatus */
@@ -200,6 +203,9 @@ IF (NOT EXISTS (SELECT *
                  AND  TABLE_NAME = 'RepositoryApprover'))
 BEGIN
     EXEC sp_rename 'dbo.Approvers', 'RepositoryApprover'
+
+    EXEC sp_rename 'dbo.RepositoryApprover.ApprovalTypeId', 'RepositoryApprovalTypeId', 'COLUMN';
+    EXEC sp_rename 'dbo.RepositoryApprover.ApproverEmail', 'ApproverUserPrincipalName', 'COLUMN';
 END
 
 /* Category > GuidanceCategory */
@@ -218,6 +224,8 @@ IF (NOT EXISTS (SELECT *
                  AND  TABLE_NAME = 'GuidanceCategoryArticle'))
 BEGIN
     EXEC sp_rename 'dbo.CategoryArticles', 'GuidanceCategoryArticle'
+
+    EXEC sp_rename 'dbo.GuidanceCategoryArticle.CategoryId', 'GuidanceCategoryId', 'COLUMN';
 END
 
 /* Communities > Community */
@@ -263,6 +271,8 @@ IF (NOT EXISTS (SELECT *
                  AND  TABLE_NAME = 'CommunityApprovalRequest'))
 BEGIN
     EXEC sp_rename 'dbo.CommunityApprovalRequests', 'CommunityApprovalRequest'
+
+    EXEC sp_rename 'dbo.CommunityApprovalRequest.RequestId', 'ApprovalRequestId', 'COLUMN';
 END
 
 /* CommunityApprovals > ApprovalRequest */
@@ -281,6 +291,8 @@ IF (NOT EXISTS (SELECT *
                  AND  TABLE_NAME = 'CommunityApprover'))
 BEGIN
     EXEC sp_rename 'dbo.CommunityApproversList', 'CommunityApprover'
+
+    EXEC sp_rename 'dbo.CommunityApprover.Disabled', 'IsDisabled', 'COLUMN';
 END
 
 /* CommunityMembers > CommunityMember */
@@ -326,6 +338,8 @@ IF (NOT EXISTS (SELECT *
                  AND  TABLE_NAME = 'ExternalLink'))
 BEGIN
     EXEC sp_rename 'dbo.ExternalLinks', 'ExternalLink'
+
+    EXEC sp_rename 'dbo.ExternalLink.Enabled', 'IsEnabled', 'COLUMN';
 END
 
 /* GitHubAccess > GitHubAccessDirectoryGroup */
@@ -337,9 +351,6 @@ BEGIN
     EXEC sp_rename 'dbo.GitHubAccess', 'GitHubAccessDirectoryGroup'
 END
 
-/* GitHubCopilot > GitHubCopilot */
-
-
 /* GitHubCopilotApprovalRequests > GitHubCopilotApprovalRequest */
 IF (NOT EXISTS (SELECT * 
                  FROM INFORMATION_SCHEMA.TABLES 
@@ -347,10 +358,12 @@ IF (NOT EXISTS (SELECT *
                  AND  TABLE_NAME = 'GitHubCopilotApprovalRequest'))
 BEGIN
     EXEC sp_rename 'dbo.GitHubCopilotApprovalRequests', 'GitHubCopilotApprovalRequest'
+
+    EXEC sp_rename 'dbo.GitHubCopilotApprovalRequest.RequestId', 'ApprovalRequestId', 'COLUMN';
+
+    /* GitHubCopilot > GitHubCopilot */
+    EXEC sp_rename 'dbo.GitHubCopilot.Region', 'RegionalOrganizationId', 'COLUMN';
 END
-
-/* OrganizationAccess > OrganizationAccess */
-
 
 /* OrganizationAccessApprovalRequests > OrganizationAccessApprovalRequest */
 IF (NOT EXISTS (SELECT * 
@@ -359,6 +372,11 @@ IF (NOT EXISTS (SELECT *
                  AND  TABLE_NAME = 'OrganizationAccessApprovalRequest'))
 BEGIN
     EXEC sp_rename 'dbo.OrganizationAccessApprovalRequests', 'OrganizationAccessApprovalRequest'
+
+    EXEC sp_rename 'dbo.OrganizationAccessApprovalRequest.RequestId', 'ApprovalRequestId', 'COLUMN';
+
+    /* OrganizationAccess > OrganizationAccess */
+    EXEC sp_rename 'dbo.OrganizationAccess.OrganizationId', 'RegionalOrganizationId', 'COLUMN';
 END
 
 /* OrganizationApprovalRequests > OrganizationApprovalRequest */
@@ -368,6 +386,8 @@ IF (NOT EXISTS (SELECT *
                  AND  TABLE_NAME = 'OrganizationApprovalRequest'))
 BEGIN
     EXEC sp_rename 'dbo.OrganizationApprovalRequests', 'OrganizationApprovalRequest'
+
+    EXEC sp_rename 'dbo.OrganizationApprovalRequest.RequestId', 'ApprovalRequestId', 'COLUMN';
 END
 
 /* Organizations > Organization */
@@ -377,6 +397,8 @@ IF (NOT EXISTS (SELECT *
                  AND  TABLE_NAME = 'Organization'))
 BEGIN
     EXEC sp_rename 'dbo.Organizations', 'Organization'
+
+    EXEC sp_rename 'dbo.Organization.Region', 'RegionalOrganizationId', 'COLUMN';
 END
 
 /* OSSContributionSponsors > OSSContributionSponsor */
@@ -395,6 +417,9 @@ IF (NOT EXISTS (SELECT *
                  AND  TABLE_NAME = 'RepositoryApproval'))
 BEGIN
     EXEC sp_rename 'dbo.ProjectApprovals', 'RepositoryApproval'
+
+    EXEC sp_rename 'dbo.RepositoryApproval.ProjectId', 'RepositoryId', 'COLUMN';
+    EXEC sp_rename 'dbo.RepositoryApproval.ApprovalTypeId', 'RepositoryApprovalTypeId', 'COLUMN';
 END
 
 /* Projects > Repository */
@@ -413,6 +438,8 @@ IF (NOT EXISTS (SELECT *
                  AND  TABLE_NAME = 'RepositoryTopic'))
 BEGIN
     EXEC sp_rename 'dbo.RepoTopics', 'RepositoryTopic'
+
+    EXEC sp_rename 'dbo.RepositoryTopic.ProjectId', 'RepositoryId', 'COLUMN';
 END
 
 /* RegionalOrganizations > RegionalOrganization */
@@ -440,6 +467,8 @@ IF (NOT EXISTS (SELECT *
                  AND  TABLE_NAME = 'RepositoryOwner'))
 BEGIN
     EXEC sp_rename 'dbo.RepoOwners', 'RepositoryOwner'
+
+    EXEC sp_rename 'dbo.RepositoryOwner.ProjectId', 'RepositoryId', 'COLUMN';
 END
 
 /* Users > User */
@@ -463,21 +492,21 @@ IF (EXISTS (SELECT *
                  WHERE TABLE_SCHEMA = 'dbo' 
                  AND  TABLE_NAME = 'ActivityTypes') )
 BEGIN
-    -- ApprovalRequestApprovers	ApprovalRequestApprover
-    ALTER TABLE [dbo].[ApprovalRequestApprover] ADD CONSTRAINT [PK_ApprovalRequestApprover] PRIMARY KEY ([ApprovalRequestId], [ApproverEmail])
-    ALTER TABLE [dbo].[ApprovalRequestApprover] ADD CONSTRAINT [FK_ApprovalRequestApprover_RepositoryApproval] FOREIGN KEY ([ApprovalRequestId]) REFERENCES [dbo].[RepositoryApproval]([Id])
-    ALTER TABLE [dbo].[ApprovalRequestApprover] ADD CONSTRAINT [FK_ApprovalRequestApprover_User] FOREIGN KEY ([ApproverEmail]) REFERENCES [dbo].[User]([UserPrincipalName])
+    -- ApprovalRequestApprovers    ApprovalRequestApprover
+    ALTER TABLE [dbo].[ApprovalRequestApprover] ADD CONSTRAINT [PK_ApprovalRequestApprover] PRIMARY KEY ([RepositoryApprovalId], [ApproverUserPrincipalName])
+    ALTER TABLE [dbo].[ApprovalRequestApprover] ADD CONSTRAINT [FK_ApprovalRequestApprover_RepositoryApproval] FOREIGN KEY ([RepositoryApprovalId]) REFERENCES [dbo].[RepositoryApproval]([Id])
+    ALTER TABLE [dbo].[ApprovalRequestApprover] ADD CONSTRAINT [FK_ApprovalRequestApprover_User] FOREIGN KEY ([ApproverUserPrincipalName]) REFERENCES [dbo].[User]([UserPrincipalName])
 
     -- ApprovalTypes	RepositoryApprovalType
     ALTER TABLE [dbo].[RepositoryApprovalType] ADD CONSTRAINT [FK_RepositoryApprovalType_User] FOREIGN KEY ([ApproverUserPrincipalName]) REFERENCES [dbo].[User]([UserPrincipalName])
 
     -- Approvers	RepositoryApprover
-    ALTER TABLE [dbo].[RepositoryApprover] ADD CONSTRAINT [PK_RepositoryApprover] PRIMARY KEY ([ApprovalTypeId], [ApproverEmail])
-    ALTER TABLE [dbo].[RepositoryApprover] ADD CONSTRAINT [FK_RepositoryApprover_RepositoryApprovalType] FOREIGN KEY ([ApprovalTypeId]) REFERENCES [dbo].[RepositoryApprovalType]([Id])
-    ALTER TABLE [dbo].[RepositoryApprover] ADD CONSTRAINT [FK_RepositoryApprover_User] FOREIGN KEY ([ApproverEmail]) REFERENCES [dbo].[User]([UserPrincipalName])
+    ALTER TABLE [dbo].[RepositoryApprover] ADD CONSTRAINT [PK_RepositoryApprover] PRIMARY KEY ([RepositoryApprovalTypeId], [ApproverUserPrincipalName])
+    ALTER TABLE [dbo].[RepositoryApprover] ADD CONSTRAINT [FK_RepositoryApprover_RepositoryApprovalType] FOREIGN KEY ([RepositoryApprovalTypeId]) REFERENCES [dbo].[RepositoryApprovalType]([Id])
+    ALTER TABLE [dbo].[RepositoryApprover] ADD CONSTRAINT [FK_RepositoryApprover_User] FOREIGN KEY ([ApproverUserPrincipalName]) REFERENCES [dbo].[User]([UserPrincipalName])
 
     -- CategoryArticles	GuidanceCategoryArticle
-    ALTER TABLE [dbo].[GuidanceCategoryArticle] ADD CONSTRAINT [FK_GuidanceCategoryArticle_GuidanceCategory] FOREIGN KEY([CategoryId]) REFERENCES [dbo].[GuidanceCategory]([Id])
+    ALTER TABLE [dbo].[GuidanceCategoryArticle] ADD CONSTRAINT [FK_GuidanceCategoryArticle_GuidanceCategory] FOREIGN KEY([GuidanceCategoryId]) REFERENCES [dbo].[GuidanceCategory]([Id])
 
     -- Communities	Community
     ALTER TABLE [dbo].[Community] ADD CONSTRAINT [FK_Community_ApprovalStatus] FOREIGN KEY ([ApprovalStatusId]) REFERENCES [dbo].[ApprovalStatus]([Id])
@@ -491,9 +520,9 @@ BEGIN
     ALTER TABLE [dbo].[CommunityActivityContributionArea] ADD CONSTRAINT [FK_CommunityActivityContributionArea_ContributionArea] FOREIGN KEY ([ContributionAreaId]) REFERENCES [dbo].[ContributionArea]([Id])
 
     -- CommunityApprovalRequests	CommunityApprovalRequest
-    ALTER TABLE [dbo].[CommunityApprovalRequest] ADD CONSTRAINT [PK_CommunityApprovalRequest] PRIMARY KEY ([CommunityId], [RequestId])
+    ALTER TABLE [dbo].[CommunityApprovalRequest] ADD CONSTRAINT [PK_CommunityApprovalRequest] PRIMARY KEY ([CommunityId], [ApprovalRequestId])
     ALTER TABLE [dbo].[CommunityApprovalRequest] ADD CONSTRAINT [FK_CommunityApprovalRequest_Community] FOREIGN KEY ([CommunityId]) REFERENCES [dbo].[Community]([Id])
-    ALTER TABLE [dbo].[CommunityApprovalRequest] ADD CONSTRAINT [FK_CommunityApprovalRequest_ApprovalRequest] FOREIGN KEY ([RequestId]) REFERENCES [dbo].[ApprovalRequest]([Id])
+    ALTER TABLE [dbo].[CommunityApprovalRequest] ADD CONSTRAINT [FK_CommunityApprovalRequest_ApprovalRequest] FOREIGN KEY ([ApprovalRequestId]) REFERENCES [dbo].[ApprovalRequest]([Id])
 
     -- CommunityApprovals	ApprovalRequest
     ALTER TABLE [dbo].[ApprovalRequest] ADD CONSTRAINT [FK_ApprovalRequest_User] FOREIGN KEY ([ApproverUserPrincipalName]) REFERENCES [dbo].[User]([UserPrincipalName])
@@ -517,33 +546,33 @@ BEGIN
     ALTER TABLE [dbo].[CommunityTag] ADD CONSTRAINT [AK_CommunityId_Tag] UNIQUE ([CommunityId], [Tag])
 
     -- GitHubCopilot	GitHubCopilot
-    ALTER TABLE [dbo].[GitHubCopilot] ADD CONSTRAINT [FK_GitHubCopilot_RegionalOrganization] FOREIGN KEY ([Region]) REFERENCES [dbo].[RegionalOrganization]([Id])
+    ALTER TABLE [dbo].[GitHubCopilot] ADD CONSTRAINT [FK_GitHubCopilot_RegionalOrganization] FOREIGN KEY ([RegionalOrganizationId]) REFERENCES [dbo].[RegionalOrganization]([Id])
 
     -- GitHubCopilotApprovalRequests	GitHubCopilotApprovalRequest
-    ALTER TABLE [dbo].[GitHubCopilotApprovalRequest] ADD CONSTRAINT [PK_GitHubCopilotApprovalRequest] PRIMARY KEY ([GitHubCopilotId], [RequestId])
+    ALTER TABLE [dbo].[GitHubCopilotApprovalRequest] ADD CONSTRAINT [PK_GitHubCopilotApprovalRequest] PRIMARY KEY ([GitHubCopilotId], [ApprovalRequestId])
     ALTER TABLE [dbo].[GitHubCopilotApprovalRequest] ADD CONSTRAINT [FK_GitHubCopilotApprovalRequest_GitHubCopilot] FOREIGN KEY ([GitHubCopilotId]) REFERENCES [dbo].[GitHubCopilot]([Id])
-    ALTER TABLE [dbo].[GitHubCopilotApprovalRequest] ADD CONSTRAINT [FK_GitHubCopilotApprovalRequest_ApprovalRequest] FOREIGN KEY ([RequestId]) REFERENCES [dbo].[ApprovalRequest]([Id])
+    ALTER TABLE [dbo].[GitHubCopilotApprovalRequest] ADD CONSTRAINT [FK_GitHubCopilotApprovalRequest_ApprovalRequest] FOREIGN KEY ([ApprovalRequestId]) REFERENCES [dbo].[ApprovalRequest]([Id])
 
     -- OrganizationAccess	OrganizationAccess
     ALTER TABLE [dbo].[OrganizationAccess] ADD CONSTRAINT [FK_OrganizationAccess_User] FOREIGN KEY ([UserPrincipalName]) REFERENCES [dbo].[User]([UserPrincipalName])
-    ALTER TABLE [dbo].[OrganizationAccess] ADD CONSTRAINT [FK_OrganizationAccess_RegionalOrganization] FOREIGN KEY ([OrganizationId]) REFERENCES [dbo].[RegionalOrganization]([Id])
+    ALTER TABLE [dbo].[OrganizationAccess] ADD CONSTRAINT [FK_OrganizationAccess_RegionalOrganization] FOREIGN KEY ([RegionalOrganizationId]) REFERENCES [dbo].[RegionalOrganization]([Id])
 
     -- OrganizationAccessApprovalRequests	OrganizationAccessApprovalRequest
-    ALTER TABLE [dbo].[OrganizationAccessApprovalRequest] ADD CONSTRAINT [PK_OrganizationAccessApprovalRequest] PRIMARY KEY ([OrganizationAccessId], [RequestId])
+    ALTER TABLE [dbo].[OrganizationAccessApprovalRequest] ADD CONSTRAINT [PK_OrganizationAccessApprovalRequest] PRIMARY KEY ([OrganizationAccessId], [ApprovalRequestId])
     ALTER TABLE [dbo].[OrganizationAccessApprovalRequest] ADD CONSTRAINT [FK_OrganizationAccessApprovalRequest_OrganizationAccess] FOREIGN KEY ([OrganizationAccessId]) REFERENCES [dbo].[OrganizationAccess]([Id])
-    ALTER TABLE [dbo].[OrganizationAccessApprovalRequest] ADD CONSTRAINT [FK_OrganizationAccessApprovalRequest_ApprovalRequest] FOREIGN KEY ([RequestId]) REFERENCES [dbo].[ApprovalRequest]([Id])
+    ALTER TABLE [dbo].[OrganizationAccessApprovalRequest] ADD CONSTRAINT [FK_OrganizationAccessApprovalRequest_ApprovalRequest] FOREIGN KEY ([ApprovalRequestId]) REFERENCES [dbo].[ApprovalRequest]([Id])
 
     -- OrganizationApprovalRequests	OrganizationApprovalRequest
-    ALTER TABLE [dbo].[OrganizationApprovalRequest] ADD CONSTRAINT [PK_OrganizationApprovalRequest] PRIMARY KEY ([OrganizationId], [RequestId])
+    ALTER TABLE [dbo].[OrganizationApprovalRequest] ADD CONSTRAINT [PK_OrganizationApprovalRequest] PRIMARY KEY ([OrganizationId], [ApprovalRequestId])
     ALTER TABLE [dbo].[OrganizationApprovalRequest] ADD CONSTRAINT [FK_OrganizationApprovalRequest_Organization] FOREIGN KEY ([OrganizationId]) REFERENCES [dbo].[Organization]([Id])
-    ALTER TABLE [dbo].[OrganizationApprovalRequest] ADD CONSTRAINT [FK_OrganizationApprovalRequest_ApprovalRequest] FOREIGN KEY ([RequestId]) REFERENCES [dbo].[ApprovalRequest]([Id])
+    ALTER TABLE [dbo].[OrganizationApprovalRequest] ADD CONSTRAINT [FK_OrganizationApprovalRequest_ApprovalRequest] FOREIGN KEY ([ApprovalRequestId]) REFERENCES [dbo].[ApprovalRequest]([Id])
 
     -- Organizations	Organization
-    ALTER TABLE [dbo].[Organization] ADD CONSTRAINT [FK_Organization_RegionalOrganization] FOREIGN KEY ([Region]) REFERENCES [dbo].[RegionalOrganization]([Id])
+    ALTER TABLE [dbo].[Organization] ADD CONSTRAINT [FK_Organization_RegionalOrganization] FOREIGN KEY ([RegionalOrganizationId]) REFERENCES [dbo].[RegionalOrganization]([Id])
 
     -- ProjectApprovals	RepositoryApproval
-    ALTER TABLE [dbo].[RepositoryApproval] ADD CONSTRAINT [FK_RepositoryApproval_Repository] FOREIGN KEY ([ProjectId]) REFERENCES [dbo].[Repository]([Id])
-    ALTER TABLE [dbo].[RepositoryApproval] ADD CONSTRAINT [FK_RepositoryApproval_RepositoryApprovalType] FOREIGN KEY ([ApprovalTypeId]) REFERENCES [dbo].[RepositoryApprovalType]([Id])
+    ALTER TABLE [dbo].[RepositoryApproval] ADD CONSTRAINT [FK_RepositoryApproval_Repository] FOREIGN KEY ([RepositoryId]) REFERENCES [dbo].[Repository]([Id])
+    ALTER TABLE [dbo].[RepositoryApproval] ADD CONSTRAINT [FK_RepositoryApproval_RepositoryApprovalType] FOREIGN KEY ([RepositoryApprovalTypeId]) REFERENCES [dbo].[RepositoryApprovalType]([Id])
     ALTER TABLE [dbo].[RepositoryApproval] ADD CONSTRAINT [FK_RepositoryApproval_ApprovalStatus] FOREIGN KEY ([ApprovalStatusId]) REFERENCES [dbo].[ApprovalStatus]([Id])
 
     -- Projects	Repository
@@ -555,10 +584,10 @@ BEGIN
     ALTER TABLE [dbo].[RelatedCommunity] ADD CONSTRAINT [PK_RelatedCommunity] PRIMARY KEY ([ParentCommunityId], [RelatedCommunityId])
 
     -- RepoOwners	RepositoryOwner
-    ALTER TABLE [dbo].[RepositoryOwner] ADD CONSTRAINT [PK_RepositoryOwner] PRIMARY KEY ([ProjectId], [UserPrincipalName])
-    ALTER TABLE [dbo].[RepositoryOwner] ADD CONSTRAINT [FK_RepositoryOwner_Repository] FOREIGN KEY ([ProjectId]) REFERENCES [dbo].[Repository]([Id])
+    ALTER TABLE [dbo].[RepositoryOwner] ADD CONSTRAINT [PK_RepositoryOwner] PRIMARY KEY ([RepositoryId], [UserPrincipalName])
+    ALTER TABLE [dbo].[RepositoryOwner] ADD CONSTRAINT [FK_RepositoryOwner_Repository] FOREIGN KEY ([RepositoryId]) REFERENCES [dbo].[Repository]([Id])
 
     -- RepoTopics	RepositoryTopic
-    ALTER TABLE [dbo].[RepositoryTopic] ADD CONSTRAINT [PK_RepositoryTopic] PRIMARY KEY ([Topic], [ProjectId])
-    ALTER TABLE [dbo].[RepositoryTopic] ADD CONSTRAINT [FK_RepositoryTopic_Repository] FOREIGN KEY ([ProjectId]) REFERENCES [dbo].[Repository]([Id])
+    ALTER TABLE [dbo].[RepositoryTopic] ADD CONSTRAINT [PK_RepositoryTopic] PRIMARY KEY ([Topic], [RepositoryId])
+    ALTER TABLE [dbo].[RepositoryTopic] ADD CONSTRAINT [FK_RepositoryTopic_Repository] FOREIGN KEY ([RepositoryId]) REFERENCES [dbo].[Repository]([Id])
 END

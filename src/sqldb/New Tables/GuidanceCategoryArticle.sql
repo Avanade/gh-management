@@ -3,10 +3,10 @@ CREATE TABLE [dbo].[GuidanceCategoryArticle] (
 	[Name] [VARCHAR](100) NULL,
 	[Url] [VARCHAR](255) NULL,
 	[Body] [VARCHAR](2000) NULL,
-	[CategoryId] [INT] NULL,
+	[GuidanceCategoryId] [INT] NULL,
 	[Created] [DATETIME] NULL,
 	[CreatedBy] [VARCHAR](50) NULL,
 	[Modified] [DATETIME] NULL,
 	[ModifiedBy] [VARCHAR](50) NULL,
-	CONSTRAINT [FK_GuidanceCategoryArticle_GuidanceCategory] FOREIGN KEY([CategoryId]) REFERENCES [dbo].[GuidanceCategory]([Id])
+	CONSTRAINT [FK_GuidanceCategoryArticle_GuidanceCategory] FOREIGN KEY([GuidanceCategoryId]) REFERENCES [dbo].[GuidanceCategory]([Id])
 )

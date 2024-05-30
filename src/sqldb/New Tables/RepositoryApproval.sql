@@ -1,7 +1,7 @@
 CREATE TABLE [dbo].[RepositoryApproval] (
     [Id] [INT] NOT NULL PRIMARY KEY IDENTITY,
-    [ProjectId] [INT] NOT NULL,
-    [ApprovalTypeId] [INT] NOT NULL,
+    [RepositoryId] [INT] NOT NULL,
+    [RepositoryApprovalTypeId] [INT] NOT NULL,
     [ApprovalStatusId] [INT] NOT NULL,
     [ApprovalDescription] [VARCHAR](500) NULL,
     [ApprovalRemarks] [VARCHAR](255) NULL,
@@ -13,7 +13,7 @@ CREATE TABLE [dbo].[RepositoryApproval] (
     [CreatedBy] [VARCHAR](100) NULL,
     [Modified] [DATETIME] NOT NULL DEFAULT GETDATE(),
     [ModifiedBy] [VARCHAR](100) NULL,
-    CONSTRAINT [FK_RepositoryApproval_Repository] FOREIGN KEY ([ProjectId]) REFERENCES [dbo].[Repository]([Id]),
-    CONSTRAINT [FK_RepositoryApproval_RepositoryApprovalType] FOREIGN KEY ([ApprovalTypeId]) REFERENCES [dbo].[RepositoryApprovalType]([Id]),
+    CONSTRAINT [FK_RepositoryApproval_Repository] FOREIGN KEY ([RepositoryId]) REFERENCES [dbo].[Repository]([Id]),
+    CONSTRAINT [FK_RepositoryApproval_RepositoryApprovalType] FOREIGN KEY ([RepositoryApprovalTypeId]) REFERENCES [dbo].[RepositoryApprovalType]([Id]),
     CONSTRAINT [FK_RepositoryApproval_ApprovalStatus] FOREIGN KEY ([ApprovalStatusId]) REFERENCES [dbo].[ApprovalStatus]([Id])
 )

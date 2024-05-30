@@ -1,6 +1,6 @@
 CREATE TABLE [dbo].[RepositoryOwner] (
-    [ProjectId] [INT] NOT NULL,
+    [RepositoryId] [INT] NOT NULL,
     [UserPrincipalName] [VARCHAR](100) NOT NULL,
-    CONSTRAINT [PK_RepositoryOwner] PRIMARY KEY ([ProjectId], [UserPrincipalName]),
-    CONSTRAINT [FK_RepositoryOwner_Repository] FOREIGN KEY ([ProjectId]) REFERENCES [dbo].[Repository]([Id])
+    CONSTRAINT [PK_RepositoryOwner] PRIMARY KEY ([RepositoryId], [UserPrincipalName]),
+    CONSTRAINT [FK_RepositoryOwner_Repository] FOREIGN KEY ([RepositoryId]) REFERENCES [dbo].[Repository]([Id])
 )

@@ -6,7 +6,7 @@ CREATE TABLE [dbo].[CommunityApprover] (
     [CreatedBy] [VARCHAR](100) NULL,
     [Modified] [DATETIME] NOT NULL DEFAULT GETDATE(),
     [ModifiedBy] [VARCHAR](100) NULL,
-    [Disabled] [BIT] NULL,
+    [IsDisabled] [BIT] NULL,
     CONSTRAINT [FK_CommunityApprover_User] FOREIGN KEY ([ApproverUserPrincipalName]) REFERENCES [dbo].[User]([UserPrincipalName]),
     CONSTRAINT [AK_ApproverUserPrincipalName_GuidanceCategory] UNIQUE ([ApproverUserPrincipalName], [GuidanceCategory])
 )
