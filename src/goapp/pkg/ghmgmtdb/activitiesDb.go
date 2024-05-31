@@ -149,7 +149,7 @@ func ActivityTypes_Select() interface{} {
 	db := ConnectDb()
 	defer db.Close()
 
-	result, err := db.ExecuteStoredProcedureWithResult("PR_ActivityTypes_Select", nil)
+	result, err := db.ExecuteStoredProcedureWithResult("usp_ActivityType_Select", nil)
 	if err != nil {
 		return err
 	}
@@ -164,7 +164,7 @@ func ActivityTypes_Insert(name string) (int, error) {
 		"Name": name,
 	}
 
-	result, err := db.ExecuteStoredProcedureWithResult("PR_ActivityTypes_Insert", param)
+	result, err := db.ExecuteStoredProcedureWithResult("usp_ActivityType_Insert", param)
 	if err != nil {
 		return -1, err
 	}
