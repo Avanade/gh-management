@@ -45,6 +45,9 @@ const (
 	OrganizationInvitationExpireMessageType      MessageType = "InnerSource.OrganizationInvitationExpire"
 	RepositoryPublicApprovalProvidedMessageType  MessageType = "InnerSource.RepositoryPublicApprovalProvided"
 	ActivityAddedRequestForHelpMessageType       MessageType = "InnerSource.ActivityAddedRequestForHelp"
+	RequestForAnOrganizationMessageType          MessageType = "InnerSource.RequestForAnOrganization"
+	RequestForGitHubCopilotLicenseMessageType    MessageType = "InnerSource.RequestForGitHubCopilotLicense"
+	RequestForOrganizationAccessMessageType      MessageType = "InnerSource.RequestForOrganizationAccess"
 )
 
 type Contract struct {
@@ -104,6 +107,24 @@ type ActivityAddedRequestForHelpMessageBody struct {
 	Recipients   []string
 	ActivityLink string
 	UserName     string
+}
+
+type RequestForAnOrganizationMessageBody struct {
+	Recipients []string
+	UserName   string
+}
+
+type RequestForGitHubCopilotLicenseMessageBody struct {
+	Recipients []string
+	UserName   string
+}
+
+type RequestForOrganizationAccessMessageBody struct {
+	Recipients       []string
+	UserName         string
+	OrganizationName string
+	OrganizationLink string
+	ApprovalLink     string
 }
 
 func (messageBody RepositoryHasBeenCreatedMessageBody) Send() error {
@@ -214,6 +235,57 @@ func (messageBody ActivityAddedRequestForHelpMessageBody) Send() error {
 	contract := Contract{
 		RequestId:   uuid.New().String(),
 		MessageType: ActivityAddedRequestForHelpMessageType,
+		MessageBody: messageBody,
+	}
+
+	err := sendNotification(contract)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (messageBody RequestForAnOrganizationMessageBody) Send() error {
+	messageBody.Recipients = setRecipients(messageBody.Recipients)
+
+	contract := Contract{
+		RequestId:   uuid.New().String(),
+		MessageType: RequestForAnOrganizationMessageType,
+		MessageBody: messageBody,
+	}
+
+	err := sendNotification(contract)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (messageBody RequestForGitHubCopilotLicenseMessageBody) Send() error {
+	messageBody.Recipients = setRecipients(messageBody.Recipients)
+
+	contract := Contract{
+		RequestId:   uuid.New().String(),
+		MessageType: RequestForGitHubCopilotLicenseMessageType,
+		MessageBody: messageBody,
+	}
+
+	err := sendNotification(contract)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (messageBody RequestForOrganizationAccessMessageBody) Send() error {
+	messageBody.Recipients = setRecipients(messageBody.Recipients)
+
+	contract := Contract{
+		RequestId:   uuid.New().String(),
+		MessageType: RequestForOrganizationAccessMessageType,
 		MessageBody: messageBody,
 	}
 

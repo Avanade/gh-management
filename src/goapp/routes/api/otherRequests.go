@@ -11,6 +11,7 @@ import (
 	"main/pkg/appinsights_wrapper"
 	db "main/pkg/ghmgmtdb"
 	ghAPI "main/pkg/github"
+	"main/pkg/notification"
 	"main/pkg/session"
 
 	"github.com/gorilla/mux"
@@ -141,6 +142,16 @@ func AddGitHubCopilot(w http.ResponseWriter, r *http.Request) {
 	body.Id = int64(id)
 
 	CreateGitHubCopilotApprovalRequest(body, logger)
+
+	messageBody := notification.RequestForGitHubCopilotLicenseMessageBody{
+		Recipients: approvers,
+		UserName:   ghUser,
+	}
+
+	err = messageBody.Send()
+	if err != nil {
+		logger.LogException(err)
+	}
 }
 
 func CreateGitHubCopilotApprovalRequest(data db.GitHubCopilot, logger *appinsights_wrapper.TelemetryClient) error {
@@ -498,6 +509,18 @@ func RequestOrganizationAccess(w http.ResponseWriter, r *http.Request) {
 	}
 
 	CreateOrganizationAccessApprovalRequest(regionalOrg.Name, ghUsername, username, approvers, requestIds, logger)
+
+	messageBody := notification.RequestForOrganizationAccessMessageBody{
+		Recipients:       approvers,
+		OrganizationName: regionalOrg.Name,
+		OrganizationLink: fmt.Sprintf("https://github.com/%v", regionalOrg.Name),
+		ApprovalLink:     fmt.Sprintf("https://github.com/orgs/%v/invitation", regionalOrg.Name),
+	}
+
+	err = messageBody.Send()
+	if err != nil {
+		logger.LogException(err)
+	}
 }
 
 func GetMyOrganizationAccess(w http.ResponseWriter, r *http.Request) {
