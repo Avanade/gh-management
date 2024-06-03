@@ -3,5 +3,12 @@ AS
 BEGIN
     SET NOCOUNT ON
 
-    SELECT * FROM [dbo].[ActivityType]
+    SELECT
+        [Id],
+        [Name],
+        [Created],
+        [CreatedBy],
+        [Modified],
+        [ModifiedBy]
+    FROM [dbo].[ActivityType]
 END
