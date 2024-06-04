@@ -243,7 +243,7 @@ func GetCommunitiesIsExternal(w http.ResponseWriter, r *http.Request) {
 
 	param := map[string]interface{}{
 
-		"isexternal":        isExternal,
+		"IsExternal":        isExternal,
 		"UserPrincipalName": username,
 	}
 

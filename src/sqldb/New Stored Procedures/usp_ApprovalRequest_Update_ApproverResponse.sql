@@ -28,5 +28,5 @@ BEGIN
   WHERE
     [AR].[ApprovalSystemGUID] = @ApprovalSystemGUID
 
-  -- EXEC usp_Community_Update_Status @CommunityId
+  EXEC [dbo].[usp_Community_Update_Status] @CommunityId
 END
