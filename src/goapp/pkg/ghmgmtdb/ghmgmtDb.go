@@ -104,7 +104,7 @@ func UpdateApprovalApproverResponse(itemId, remarks, responseDate string, approv
 		"Approver":           respondedBy,
 	}
 
-	_, err := db.ExecuteStoredProcedure("PR_CommunityApproval_UpdateApproverResponse", params)
+	_, err := db.ExecuteStoredProcedure("usp_ApprovalRequest_Update_ApproverResponse", params)
 	if err != nil {
 		return false, err
 	}

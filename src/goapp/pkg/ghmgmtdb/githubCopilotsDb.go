@@ -123,7 +123,7 @@ func GetFailedCommunityApprovalRequestGitHubCoPilots() []GitHubCopilot {
 	db := ConnectDb()
 	defer db.Close()
 
-	result, _ := db.ExecuteStoredProcedureWithResult("PR_CommunityApprovals_Select_FailedRequestGitHubCoPilots", nil)
+	result, _ := db.ExecuteStoredProcedureWithResult("usp_ApprovalRequest_Select_FailedRequestGitHubCopilot", nil)
 
 	var gitHubCopilots []GitHubCopilot
 

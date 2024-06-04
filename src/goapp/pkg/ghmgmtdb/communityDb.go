@@ -249,7 +249,7 @@ func CommunityApprovalslUpdateApproverUserPrincipalName(params map[string]interf
 	db := ConnectDb()
 	defer db.Close()
 
-	result, err := db.ExecuteStoredProcedureWithResult("dbo.PR_CommunityApprovals_Update_ApproverUserPrincipalName", params)
+	result, err := db.ExecuteStoredProcedureWithResult("dbo.usp_ApprovalRequest_Update_ApproverUserPrincipalName", params)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -449,7 +449,7 @@ func PopulateCommunityApproval(id int64) (CommunityApprovals []CommunityApproval
 	param := map[string]interface{}{
 		"CommunityId": id,
 	}
-	result, _ := db.ExecuteStoredProcedureWithResult("PR_CommunityApprovals_Populate", param)
+	result, _ := db.ExecuteStoredProcedureWithResult("usp_ApprovalRequest_Populate", param)
 
 	for _, v := range result {
 		data := CommunityApproval{
@@ -478,7 +478,7 @@ func GetFailedCommunityApprovalRequestCommunities() (CommunityApprovals []Commun
 	db := ConnectDb()
 	defer db.Close()
 
-	result, _ := db.ExecuteStoredProcedureWithResult("PR_CommunityApprovals_Select_FailedRequestCommunities", nil)
+	result, _ := db.ExecuteStoredProcedureWithResult("usp_ApprovalRequest_Select_FailedRequestCommunity", nil)
 
 	for _, v := range result {
 		data := CommunityApproval{
@@ -511,5 +511,5 @@ func CommunityApprovalUpdateGUID(id int64, ApprovalSystemGUID string) {
 		"Id":                 id,
 		"ApprovalSystemGUID": ApprovalSystemGUID,
 	}
-	db.ExecuteStoredProcedure("PR_CommunityApproval_Update_ApprovalSystemGUID", param)
+	db.ExecuteStoredProcedure("usp_ApprovalRequest_Update_ApprovalSystemGUID", param)
 }

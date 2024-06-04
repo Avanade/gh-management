@@ -177,7 +177,7 @@ func GetFailedCommunityApprovalRequestOrganizationAccess() []FailedCommunityAppr
 	db := ConnectDb()
 	defer db.Close()
 
-	result, _ := db.ExecuteStoredProcedureWithResult("PR_CommunityApprovals_Select_FailedRequestOrganizationAccess", nil)
+	result, _ := db.ExecuteStoredProcedureWithResult("usp_ApprovalRequest_Select_FailedRequestOrganizationAccess", nil)
 
 	var failedCommunityApprovalRequestOrganizationAccess []FailedCommunityApprovalRequestOrganizationAccess
 

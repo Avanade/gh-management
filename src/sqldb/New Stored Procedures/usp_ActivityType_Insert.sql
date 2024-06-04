@@ -1,5 +1,5 @@
 CREATE PROCEDURE [dbo].[usp_ActivityType_Insert]
-	@Name VARCHAR(100)
+	@Name [VARCHAR](100)
 AS
 BEGIN
 	SET NOCOUNT ON

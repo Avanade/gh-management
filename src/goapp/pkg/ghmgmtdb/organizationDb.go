@@ -6,17 +6,17 @@ import (
 )
 
 type Organization struct {
-	Id          int64
-	RegionId    int `json:"region"`
-	RegionName  string
-	ClientName  string `json:"clientName"`
-	ProjectName string `json:"projectName"`
-	WBS         string `json:"wbs"`
-	Username    string
-	Approvers   []string
-	RequestIds  []int64
-	GitHubUsername            string
-	GitHubId                  float64
+	Id             int64
+	RegionId       int `json:"region"`
+	RegionName     string
+	ClientName     string `json:"clientName"`
+	ProjectName    string `json:"projectName"`
+	WBS            string `json:"wbs"`
+	Username       string
+	Approvers      []string
+	RequestIds     []int64
+	GitHubUsername string
+	GitHubId       float64
 }
 
 func OrganizationInsert(body Organization) ([]map[string]interface{}, error) {
@@ -150,7 +150,7 @@ func GetFailedCommunityApprovalRequestNewOrganizations() []Organization {
 	db := ConnectDb()
 	defer db.Close()
 
-	result, _ := db.ExecuteStoredProcedureWithResult("PR_CommunityApprovals_Select_FailedRequestOrganizations", nil)
+	result, _ := db.ExecuteStoredProcedureWithResult("usp_ApprovalRequest_Select_FailedRequestOrganization", nil)
 
 	var organizations []Organization
 
