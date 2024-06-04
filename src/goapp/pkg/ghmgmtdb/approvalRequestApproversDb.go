@@ -38,10 +38,10 @@ func GetApprovalRequestApproversByApprovalRequestId(approvalRequestId int) ([]Ap
 	defer db.Close()
 
 	param := map[string]interface{}{
-		"ApprovalRequestId": approvalRequestId,
+		"RepositoryApprovalId": approvalRequestId,
 	}
 
-	result, err := db.ExecuteStoredProcedureWithResult("PR_ApprovalRequestApprovers_Select_ByApprovalRequestId", param)
+	result, err := db.ExecuteStoredProcedureWithResult("usp_ApprovalRequestApprover_Select_ByApprovalRequestId", param)
 	if err != nil {
 		return nil, err
 	}
@@ -50,8 +50,8 @@ func GetApprovalRequestApproversByApprovalRequestId(approvalRequestId int) ([]Ap
 
 	for _, v := range result {
 		approvalRequestApprover := ApprovalRequestApprover{
-			ApprovalRequestId: int(v["ApprovalRequestId"].(int64)),
-			ApproverEmail:     v["ApproverEmail"].(string),
+			ApprovalRequestId: int(v["RepositoryApprovalId"].(int64)),
+			ApproverEmail:     v["ApproverUserPrincipalName"].(string),
 		}
 
 		approvalRequestApprovers = append(approvalRequestApprovers, approvalRequestApprover)
