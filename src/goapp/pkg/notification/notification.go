@@ -3,6 +3,7 @@ package notification
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -398,6 +399,10 @@ func sendNotification(c Contract) error {
 	if err != nil {
 		return err
 	}
+	if response.StatusCode == http.StatusUnauthorized {
+		return errors.New("Unauthorized")
+	}
+
 	defer response.Body.Close()
 
 	contractAfter, _ := json.Marshal(c)
