@@ -509,18 +509,6 @@ func RequestOrganizationAccess(w http.ResponseWriter, r *http.Request) {
 	}
 
 	CreateOrganizationAccessApprovalRequest(regionalOrg.Name, ghUsername, username, approvers, requestIds, logger)
-
-	messageBody := notification.RequestForOrganizationAccessMessageBody{
-		Recipients:       approvers,
-		OrganizationName: regionalOrg.Name,
-		OrganizationLink: fmt.Sprintf("https://github.com/%v", regionalOrg.Name),
-		ApprovalLink:     fmt.Sprintf("https://github.com/orgs/%v/invitation", regionalOrg.Name),
-	}
-
-	err = messageBody.Send()
-	if err != nil {
-		logger.LogException(err)
-	}
 }
 
 func GetMyOrganizationAccess(w http.ResponseWriter, r *http.Request) {
@@ -691,6 +679,21 @@ func CreateOrganizationAccessApprovalRequest(
 			if err != nil {
 				return err
 			}
+
+			url := fmt.Sprintf("%v/response/%v/%v/%v/1", os.Getenv("APPROVAL_SYSTEM_APP_URL"), os.Getenv("APPROVAL_SYSTEM_APP_ID"), os.Getenv("APPROVAL_SYSTEM_APP_MODULE_ORGACCESS"), res.ItemId)
+
+			messageBody := notification.RequestForOrganizationAccessMessageBody{
+				Recipients:       approverUserPrincipalName,
+				OrganizationName: regionName,
+				OrganizationLink: fmt.Sprintf("https://github.com/%v", regionName),
+				ApprovalLink:     url,
+			}
+
+			err = messageBody.Send()
+			if err != nil {
+				logger.LogException(err)
+			}
+
 			for _, requestId := range requestIds {
 				db.CommunityApprovalUpdateGUID(requestId, res.ItemId)
 			}
