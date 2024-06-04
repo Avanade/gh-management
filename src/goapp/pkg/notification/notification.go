@@ -322,6 +322,9 @@ func requestNewToken() (*Response, error) {
 	if err != nil {
 		return nil, err
 	}
+	if res.StatusCode == http.StatusUnauthorized {
+		return nil, errors.New(res.Status)
+	}
 	defer res.Body.Close()
 
 	var response Response
@@ -400,7 +403,7 @@ func sendNotification(c Contract) error {
 		return err
 	}
 	if response.StatusCode == http.StatusUnauthorized {
-		return errors.New("Unauthorized")
+		return errors.New(response.Status)
 	}
 
 	defer response.Body.Close()
