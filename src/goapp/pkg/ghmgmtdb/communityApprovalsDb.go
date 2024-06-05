@@ -30,7 +30,7 @@ func CommunityApprovalInsert(communityId int, requestId int64) error {
 		"RequestId":   requestId,
 	}
 
-	_, err := db.ExecuteStoredProcedure("dbo.PR_CommunityApprovalRequests_Insert", params)
+	_, err := db.ExecuteStoredProcedure("usp_CommunityApproverRequest_Insert", params)
 	if err != nil {
 		return err
 	}
