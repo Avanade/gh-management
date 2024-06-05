@@ -133,7 +133,7 @@ func CommunityActivitiesHelpTypes_Insert(activityId int, helpTypeId int, details
 		"Details":            details,
 	}
 
-	result, err := db.ExecuteStoredProcedureWithResult("PR_CommunityActivitiesHelpTypes_Insert", param)
+	result, err := db.ExecuteStoredProcedureWithResult("usp_CommunityActivityHelpType_Insert", param)
 	if err != nil {
 		return -1, err
 	}

@@ -24,7 +24,7 @@ func CommunityActivitiesContributionAreas_Insert(body CommunityActivitiesContrib
 		"CreatedBy":           body.CreatedBy,
 	}
 
-	result, err := db.ExecuteStoredProcedureWithResult("PR_CommunityActivitiesContributionAreas_Insert", param)
+	result, err := db.ExecuteStoredProcedureWithResult("usp_CommunityActivityContributionArea_Insert", param)
 	if err != nil {
 		return -1, err
 	}
@@ -113,7 +113,7 @@ func AdditionalContributionAreas_Select(activityId int) interface{} {
 		"ActivityId": activityId,
 	}
 
-	result, err := db.ExecuteStoredProcedureWithResult("PR_AdditionalContributionAreas_Select_ByActivityId", param)
+	result, err := db.ExecuteStoredProcedureWithResult("usp_CommunityActivityContributionArea_Select_ByActivityId", param)
 	if err != nil {
 		return err
 	}
