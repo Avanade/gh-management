@@ -687,6 +687,7 @@ func CreateOrganizationAccessApprovalRequest(
 				OrganizationName: regionName,
 				OrganizationLink: fmt.Sprintf("https://github.com/%v", regionName),
 				ApprovalLink:     url,
+				UserName:         ghUsername,
 			}
 
 			err = messageBody.Send()
