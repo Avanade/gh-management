@@ -277,7 +277,7 @@ func Communities_Related(CommunityId int64) (data []RelatedCommunity, err error)
 		"CommunityId": CommunityId,
 	}
 
-	result, err := db.ExecuteStoredProcedureWithResult("dbo.PR_Communities_Select_Related", param)
+	result, err := db.ExecuteStoredProcedureWithResult("dbo.usp_Community_Select_RelatedCommunity", param)
 
 	if err != nil {
 		fmt.Println(err)
