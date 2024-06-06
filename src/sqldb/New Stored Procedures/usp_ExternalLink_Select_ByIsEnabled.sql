@@ -1,5 +1,5 @@
 CREATE PROCEDURE [dbo].[usp_ExternalLink_Select_ByIsEnabled]
-	@Enabled [BIT] = true
+	@IsEnabled [BIT] = true
 AS
 BEGIN
   SELECT
@@ -13,6 +13,6 @@ BEGIN
     [Modified],
     [ModifiedBy] 
   FROM [dbo].[ExternalLink]
-  WHERE [IsEnabled] = @Enabled
+  WHERE [IsEnabled] = @IsEnabled
   ORDER BY [Id] DESC
 END
