@@ -4,7 +4,7 @@ AS
 BEGIN
   SELECT 
     [GC].[RegionalOrganizationId],
-    [RO].[Name] AS RegionName,
+    [RO].[Name] AS [RegionName],
     [GC].[GitHubUsername],
     [GC].[GitHubId],
     [GC].[Id]
