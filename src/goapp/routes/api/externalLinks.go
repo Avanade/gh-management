@@ -53,7 +53,7 @@ func GetExternalLinksEnabled(w http.ResponseWriter, r *http.Request) {
 	defer logger.EndOperation()
 
 	param := map[string]interface{}{
-		"Enabled": true,
+		"IsEnabled": true,
 	}
 
 	externalLinks, err := db.ExternalLinksExecuteAllEnabled(param)
