@@ -51,8 +51,8 @@
                         </a>
                     </td>
                     <td class="whitespace-nowrap px-3 py-3.5 text-sm">
-                        <span x-bind:class="results.Enabled === true ? 'text-[#FF5800]' : 'text-gray-500' "
-                            x-text="results.Enabled ? 'Enabled': 'Disabled'"> </span>
+                        <span x-bind:class="results.IsEnabled === true ? 'text-[#FF5800]' : 'text-gray-500' "
+                            x-text="results.IsEnabled ? 'Enabled': 'Disabled'"> </span>
                     </td>
                     <td class="whitespace-nowrap px-3 py-3.5 text-sm flex">
                         <span @Click="onClickAction(results.Id, 'view')"

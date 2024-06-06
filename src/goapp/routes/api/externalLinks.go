@@ -125,7 +125,7 @@ func CreateExternalLinks(w http.ResponseWriter, r *http.Request) {
 		"IconSVG":   data.IconSVG,
 		"Hyperlink": data.Hyperlink,
 		"LinkName":  data.LinkName,
-		"Enabled":   data.Enabled,
+		"IsEnabled": data.Enabled,
 		"CreatedBy": username,
 	}
 
@@ -159,7 +159,7 @@ func UpdateExternalLinksById(w http.ResponseWriter, r *http.Request) {
 		"IconSVG":    body.IconSVG,
 		"Hyperlink":  body.Hyperlink,
 		"LinkName":   body.LinkName,
-		"Enabled":    body.Enabled,
+		"IsEnabled":  body.Enabled,
 		"ModifiedBy": username,
 	}
 
