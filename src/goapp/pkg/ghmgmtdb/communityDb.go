@@ -113,7 +113,7 @@ func RelatedCommunitiesInsert(params map[string]interface{}) (sql.Result, error)
 func CommunityTagsInsert(params map[string]interface{}) (sql.Result, error) {
 	db := ConnectDb()
 	defer db.Close()
-	result, err := db.ExecuteStoredProcedure("dbo.PR_CommunityTags_Insert", params)
+	result, err := db.ExecuteStoredProcedure("usp_CommunityTag_Insert", params)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -165,7 +165,7 @@ func CommunitySponsorsSelectByCommunityId(params map[string]interface{}) ([]map[
 func CommunityTagsSelectByCommunityId(params map[string]interface{}) ([]map[string]interface{}, error) {
 	db := ConnectDb()
 	defer db.Close()
-	result, err := db.ExecuteStoredProcedureWithResult("dbo.PR_CommunityTags_Select_By_CommunityId", params)
+	result, err := db.ExecuteStoredProcedureWithResult("usp_CommunityTag_Select_ByCommunityId", params)
 	if err != nil {
 		fmt.Println(err)
 	}
