@@ -3,10 +3,10 @@ CREATE PROCEDURE [dbo].[usp_GitHubCopilotApprovalRequest_Insert]
 	@ApprovalRequestId [INT]
 AS
 BEGIN
-	INSERT INTO GitHubCopilotApprovalRequest
+	INSERT INTO [dbo].[GitHubCopilotApprovalRequest]
 	(
-		GitHubCopilotId,
-    	ApprovalRequestId
+		[GitHubCopilotId],
+    [ApprovalRequestId]
 	)
 	VALUES
   (
