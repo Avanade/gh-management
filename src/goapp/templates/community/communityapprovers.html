@@ -85,14 +85,14 @@
                     <div style="flex-grow: 1;" class="  w-1/12" x-text="appro.Id"> </div>
                     <div style="flex-grow: 1 ;" class="  w-9/12" x-text="appro.ApproverUserPrincipalName"> </div>
                     <div style="flex-grow: 2; align-self: start;" class="  w-2/12">
-                        <input type="checkbox" x-data="{ enable: appro.Disabled ? false  : true }" name="Disabled"
+                        <input type="checkbox" x-data="{ enable: appro.IsDisabled ? false  : true }" name="Disabled"
                             id="Disabled" x-model="enable" x-text="enable"
                             @click="update2(appro.Id , appro.ApproverUserPrincipalName ,enable)">
-                        <!-- <input type="checkbox" name="Disabled" id="Disabled" x-model="!appro.Disabled"
-                            x-text="!appro.Disabled"
-                            @click="update2(appro.Id , appro.ApproverUserPrincipalName ,appro.Disabled )"> -->
-                        <!-- <span x-data="{ display: '   Status' }"  x-text="appro.Disabled"> </span>  -->
-                        <span x-text="appro.Disabled ? 'Inactive' : 'Active'"></span>
+                        <!-- <input type="checkbox" name="Disabled" id="Disabled" x-model="!appro.IsDisabled"
+                            x-text="!appro.IsDisabled"
+                            @click="update2(appro.Id , appro.ApproverUserPrincipalName ,appro.IsDisabled )"> -->
+                        <!-- <span x-data="{ display: '   Status' }"  x-text="appro.IsDisabled"> </span>  -->
+                        <span x-text="appro.IsDisabled ? 'Inactive' : 'Active'"></span>
 
                         <!-- <span  > Active</span></template>
                         <span  > Inactiv</span> -->
