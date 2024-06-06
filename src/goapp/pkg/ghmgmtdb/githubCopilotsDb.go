@@ -42,11 +42,11 @@ func GitHubCopilotApprovalInsert(githubCopilotId int, requestId int64) error {
 
 	params := map[string]interface{}{
 
-		"GitHubCopilotId": githubCopilotId,
-		"RequestId":       requestId,
+		"GitHubCopilotId":   githubCopilotId,
+		"ApprovalRequestId": requestId,
 	}
 
-	_, err := db.ExecuteStoredProcedure("dbo.PR_GitHubCopilotApprovalRequests_Insert", params)
+	_, err := db.ExecuteStoredProcedure("usp_GitHubCopilotApprovalRequest_Insert", params)
 	if err != nil {
 		return err
 	}
@@ -75,10 +75,10 @@ func GetGitHubCopilotApprovalRequest(id int64) ([]map[string]interface{}, error)
 	defer db.Close()
 
 	param := map[string]interface{}{
-		"Id": id,
+		"GitHubCopilotId": id,
 	}
 
-	result, err := db.ExecuteStoredProcedureWithResult("dbo.PR_GitHubCopilotApprovalRequests_SelectByCopilotId", param)
+	result, err := db.ExecuteStoredProcedureWithResult("usp_GitHubCopilotApprovalRequest_Select_ByGitHubCopilotId", param)
 	if err != nil {
 		return nil, err
 	}
