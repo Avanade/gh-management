@@ -256,7 +256,7 @@ func Communities_AddMember(CommunityId int, UserPrincipalName string) error {
 		"UserPrincipalName": UserPrincipalName,
 	}
 
-	_, err := db.ExecuteStoredProcedure("dbo.PR_CommunityMembers_Insert", param)
+	_, err := db.ExecuteStoredProcedure("usp_CommunityMember_Insert", param)
 
 	if err != nil {
 		fmt.Println(err)
@@ -359,7 +359,7 @@ func Community_Onboarding_AddMember(CommunityId int64, UserPrincipalName string)
 		"UserPrincipalName": UserPrincipalName,
 	}
 
-	_, err = db.ExecuteStoredProcedure("dbo.PR_CommunityMembers_Insert", param)
+	_, err = db.ExecuteStoredProcedure("usp_CommunityMember_Insert", param)
 
 	if err != nil {
 		fmt.Println(err)
@@ -377,7 +377,7 @@ func Community_Onboarding_RemoveMember(CommunityId int64, UserPrincipalName stri
 		"UserPrincipalName": UserPrincipalName,
 	}
 
-	_, err = db.ExecuteStoredProcedure("dbo.PR_CommunityMembers_Remove", param)
+	_, err = db.ExecuteStoredProcedure("usp_CommunityMember_Delete", param)
 
 	if err != nil {
 		fmt.Println(err)
@@ -395,7 +395,7 @@ func Community_Membership_IsMember(CommunityId int64, UserPrincipalName string) 
 		"UserPrincipalName": UserPrincipalName,
 	}
 
-	result, err := db.ExecuteStoredProcedureWithResult("dbo.PR_CommunityMembers_IsExisting", param)
+	result, err := db.ExecuteStoredProcedureWithResult("usp_CommunityMember_IsExisting", param)
 
 	if err != nil {
 		fmt.Println(err)
@@ -424,7 +424,7 @@ func GetCommunityMembers(id int64) interface{} {
 		"CommunityId": id,
 	}
 
-	result, err := db.ExecuteStoredProcedureWithResult("PR_CommunityMembers_Select_ByCommunityId", param)
+	result, err := db.ExecuteStoredProcedureWithResult("usp_CommunityMember_Select_ByCommunityId", param)
 	if err != nil {
 		return err
 	}
