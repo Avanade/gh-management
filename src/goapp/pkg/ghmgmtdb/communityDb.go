@@ -80,7 +80,7 @@ func CommunitiesInsert(params map[string]interface{}) ([]map[string]interface{},
 func CommunitySponsorsInsert(params map[string]interface{}) (sql.Result, error) {
 	db := ConnectDb()
 	defer db.Close()
-	result, err := db.ExecuteStoredProcedure("dbo.PR_CommunitySponsors_Insert", params)
+	result, err := db.ExecuteStoredProcedure("usp_CommunitySponsor_Insert", params)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -150,35 +150,11 @@ func CommunitiesIsexternal(params map[string]interface{}) ([]map[string]interfac
 	return result, err
 }
 
-func CommunitySponsorsSelect(params map[string]interface{}) ([]map[string]interface{}, error) {
-	db := ConnectDb()
-	defer db.Close()
-
-	result, err := db.ExecuteStoredProcedureWithResult("dbo.PR_CommunitySponsors_Select", params)
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	return result, err
-}
-
-func CommunitySponsorsUpdate(params map[string]interface{}) ([]map[string]interface{}, error) {
-	db := ConnectDb()
-	defer db.Close()
-
-	result, err := db.ExecuteStoredProcedureWithResult("dbo.PR_CommunitySponsors_Update", params)
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	return result, err
-}
-
 func CommunitySponsorsSelectByCommunityId(params map[string]interface{}) ([]map[string]interface{}, error) {
 	db := ConnectDb()
 	defer db.Close()
 
-	result, err := db.ExecuteStoredProcedureWithResult("dbo.PR_CommunitySponsors_Select_By_CommunityId", params)
+	result, err := db.ExecuteStoredProcedureWithResult("usp_CommunitySponsor_Select_ByCommunityId", params)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -304,7 +280,7 @@ func Community_Sponsors(CommunityId int64) (data []CommunitySponsor, err error) 
 		"CommunityId": CommunityId,
 	}
 
-	result, err := db.ExecuteStoredProcedureWithResult("dbo.PR_CommunitySponsors_Select_By_CommunityId", param)
+	result, err := db.ExecuteStoredProcedureWithResult("usp_CommunitySponsor_Select_ByCommunityId", param)
 
 	if err != nil {
 		fmt.Println(err)
