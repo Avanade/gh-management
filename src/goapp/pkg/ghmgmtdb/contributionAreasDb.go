@@ -39,7 +39,7 @@ func ContributionAreas_Select() (interface{}, error) {
 	db := ConnectDb()
 	defer db.Close()
 
-	result, err := db.ExecuteStoredProcedureWithResult("PR_ContributionAreas_Select", nil)
+	result, err := db.ExecuteStoredProcedureWithResult("usp_ContributionArea_Select", nil)
 	if err != nil {
 		return nil, err
 	}
@@ -58,7 +58,7 @@ func ContributionAreas_SelectByFilter(offset, filter int, orderby, ordertype, se
 		"OrderType": ordertype,
 	}
 
-	result, err := db.ExecuteStoredProcedureWithResult("PR_ContributionAreas_Select_ByFilter", param)
+	result, err := db.ExecuteStoredProcedureWithResult("usp_ContributionArea_Select_ByOption", param)
 	if err != nil {
 		return nil, err
 	}
@@ -70,7 +70,7 @@ func SelectTotalContributionAreas() int {
 	db := ConnectDb()
 	defer db.Close()
 
-	result, _ := db.ExecuteStoredProcedureWithResult("PR_ContributionAreas_TotalCount", nil)
+	result, _ := db.ExecuteStoredProcedureWithResult("usp_ContributionArea_TotalCount", nil)
 	total, err := strconv.Atoi(fmt.Sprint(result[0]["Total"]))
 	if err != nil {
 		return 0
@@ -86,7 +86,7 @@ func GetContributionAreaById(id int) interface{} {
 		"Id": id,
 	}
 
-	result, err := db.ExecuteStoredProcedureWithResult("PR_ContributionAreas_SelectById", param)
+	result, err := db.ExecuteStoredProcedureWithResult("usp_ContributionArea_Select_ById", param)
 	if err != nil {
 		return err
 	}
@@ -102,7 +102,7 @@ func UpdateContributionAreaById(id int, name string, username string) {
 		"Name":       name,
 		"ModifiedBy": username,
 	}
-	db.ExecuteStoredProcedure("PR_ContributionAreas_Update_ById", param)
+	db.ExecuteStoredProcedure("usp_ContributionArea_Update", param)
 }
 
 func AdditionalContributionAreas_Select(activityId int) interface{} {
@@ -129,7 +129,7 @@ func ContributionAreas_Insert(name, createdBy string) (int, error) {
 		"CreatedBy": createdBy,
 	}
 
-	result, err := db.ExecuteStoredProcedureWithResult("PR_ContributionAreas_Insert", param)
+	result, err := db.ExecuteStoredProcedureWithResult("usp_ContributionArea_Insert", param)
 	if err != nil {
 		return -1, err
 	}
