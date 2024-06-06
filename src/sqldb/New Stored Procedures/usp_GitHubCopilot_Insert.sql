@@ -5,7 +5,7 @@ CREATE PROCEDURE [dbo].[usp_GitHubCopilot_Insert]
   @Username [VARCHAR](100)
 AS
 BEGIN
-	DECLARE @returnID AS INT
+	DECLARE @returnID AS [INT]
  
 	INSERT INTO [dbo].[GitHubCopilot]
   (
@@ -13,7 +13,8 @@ BEGIN
     [GitHubId],
     [GitHubUsername],
     [CreatedBy],
-    [Created])
+    [Created]
+  )
   VALUES
   (
     @RegionalOrganizationId,
