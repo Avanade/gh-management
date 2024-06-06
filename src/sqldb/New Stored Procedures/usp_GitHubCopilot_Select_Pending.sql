@@ -10,8 +10,8 @@ BEGIN
     [GC].[Created]
   FROM [dbo].[GitHubCopilot] GC
   LEFT JOIN [dbo].[RegionalOrganization] AS [RO] ON [GC].[RegionalOrganizationId] = [RO].[Id]
-  LEFT JOIN [dbo].[GitHubCopilotApprovalRequest] AS [GCAR] ON [GCAR].[GitHubCopilotId] = GC.[Id]
-  LEFT JOIN [dbo].[ApprovalRequest] AS AR ON [AR].[Id] = [GCAR].[ApprovalRequestId]
+  LEFT JOIN [dbo].[GitHubCopilotApprovalRequest] AS [GCAR] ON [GCAR].[GitHubCopilotId] = [GC].[Id]
+  LEFT JOIN [dbo].[ApprovalRequest] AS [AR] ON [AR].[Id] = [GCAR].[ApprovalRequestId]
   WHERE 
     [GC].[CreatedBy]=@Username AND 
     [RO].[Name] =@Organization AND 
