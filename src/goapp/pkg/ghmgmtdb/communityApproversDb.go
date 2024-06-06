@@ -5,10 +5,10 @@ func GetCommunityApprovers(category string) ([]map[string]interface{}, error) {
 	defer db.Close()
 
 	param := map[string]interface{}{
-		"Category": category,
+		"@GuidanceCategory": category,
 	}
 
-	result, err := db.ExecuteStoredProcedureWithResult("PR_CommunityApproversList_select", param)
+	result, err := db.ExecuteStoredProcedureWithResult("usp_CommunityApprover_Select", param)
 	if err != nil {
 		return nil, err
 	}
@@ -21,10 +21,10 @@ func GetActiveCommunityApprovers(category string) ([]map[string]interface{}, err
 	defer db.Close()
 
 	param := map[string]interface{}{
-		"Category": category,
+		"@GuidanceCategory": category,
 	}
 
-	result, err := db.ExecuteStoredProcedureWithResult("PR_CommunityApproversList_SelectAllActive", param)
+	result, err := db.ExecuteStoredProcedureWithResult("usp_CommunityApprover_Select_Active", param)
 	if err != nil {
 		return nil, err
 	}
@@ -40,7 +40,7 @@ func GetCommunityApproversById(id string) ([]map[string]interface{}, error) {
 		"Id": id,
 	}
 
-	result, err := db.ExecuteStoredProcedureWithResult("PR_CommunityApproversList_select_byId", param)
+	result, err := db.ExecuteStoredProcedureWithResult("usp_CommunityApprover_Select_ById", param)
 	if err != nil {
 		return nil, err
 	}
@@ -54,14 +54,14 @@ func UpdateCommunityApproversById(id int, disabled bool, approverUserPrincipalNa
 
 	param := map[string]interface{}{
 		"ApproverUserPrincipalName": approverUserPrincipalName,
-		"Disabled":                  disabled,
+		"IsDisabled":                disabled,
 		"CreatedBy":                 username,
 		"ModifiedBy":                username,
 		"Id":                        id,
-		"Category":                  category,
+		"GuidanceCategory":          category,
 	}
 
-	_, err := db.ExecuteStoredProcedure("PR_CommunityApproversList_Insert", param)
+	_, err := db.ExecuteStoredProcedure("usp_CommunityApprover_Insert", param)
 	if err != nil {
 		return false, err
 	}
