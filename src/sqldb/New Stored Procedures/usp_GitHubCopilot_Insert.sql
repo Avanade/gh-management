@@ -26,5 +26,5 @@ BEGIN
   
   SET @returnID = SCOPE_IDENTITY()
 
-  SELECT @returnID Id
+  SELECT @returnID AS [Id]
 END
