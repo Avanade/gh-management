@@ -8,7 +8,7 @@ BEGIN
     [RO].[Name],
     [GC].[GitHubUsername],
     [GC].[Created]
-  FROM [dbo].[GitHubCopilot] GC
+  FROM [dbo].[GitHubCopilot] AS [GC]
   LEFT JOIN [dbo].[RegionalOrganization] AS [RO] ON [GC].[RegionalOrganizationId] = [RO].[Id]
   LEFT JOIN [dbo].[GitHubCopilotApprovalRequest] AS [GCAR] ON [GCAR].[GitHubCopilotId] = [GC].[Id]
   LEFT JOIN [dbo].[ApprovalRequest] AS [AR] ON [AR].[Id] = [GCAR].[ApprovalRequestId]
