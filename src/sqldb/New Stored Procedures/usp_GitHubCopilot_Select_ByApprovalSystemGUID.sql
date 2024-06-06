@@ -8,9 +8,9 @@ BEGIN
     [GC].[GitHubUsername],
     [GC].[GitHubId],
     [GC].[Id]
-  FROM [dbo].[ApprovalRequest] AR
-  LEFT JOIN [dbo].[GitHubCopilotApprovalRequest] GCAR ON [GCAR].[ApprovalRequestId] = [AR].[Id]
-  LEFT JOIN [dbo].[GitHubCopilot] GC ON [GC].[Id] = [GCAR].[GitHubCopilotId]
-  LEFT JOIN [dbo].[RegionalOrganization] RO ON [GC].[RegionalOrganizationId] = [RO].[Id]
+  FROM [dbo].[ApprovalRequest] AS [AR]
+  LEFT JOIN [dbo].[GitHubCopilotApprovalRequest] AS [GCAR] ON [GCAR].[ApprovalRequestId] = [AR].[Id]
+  LEFT JOIN [dbo].[GitHubCopilot] AS [GC] ON [GC].[Id] = [GCAR].[GitHubCopilotId]
+  LEFT JOIN [dbo].[RegionalOrganization] AS [RO] ON [GC].[RegionalOrganizationId] = [RO].[Id]
   WHERE [AR].[ApprovalSystemGUID] = @ApprovalSystemGUID
 END
