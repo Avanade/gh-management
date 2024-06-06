@@ -9,7 +9,7 @@ func ADGroup_Insert(objectId string, ADGroup string) error {
 		"ADGroup":  ADGroup,
 	}
 
-	_, err := db.ExecuteStoredProcedure("PR_GitHubAccess_Insert", param)
+	_, err := db.ExecuteStoredProcedure("usp_GitHubAccessDirectoryGroup_Insert", param)
 	if err != nil {
 		return err
 	}
@@ -22,7 +22,7 @@ func ADGroup_SelectAll() ([]string, error) {
 	defer db.Close()
 
 	var list []string
-	result, err := db.ExecuteStoredProcedureWithResult("PR_GitHubAccess_SelectAll", nil)
+	result, err := db.ExecuteStoredProcedureWithResult("usp_GitHubAccessDirectoryGroup_Select", nil)
 	if err != nil {
 		return nil, err
 	}
