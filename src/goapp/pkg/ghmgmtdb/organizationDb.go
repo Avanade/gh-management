@@ -25,14 +25,14 @@ func OrganizationInsert(body Organization) ([]map[string]interface{}, error) {
 
 	param := map[string]interface{}{
 
-		"Region":      body.RegionId,
-		"ClientName":  body.ClientName,
-		"ProjectName": body.ProjectName,
-		"WBS":         body.WBS,
-		"CreatedBy":   body.Username,
+		"RegionalOrganizationId": body.RegionId,
+		"ClientName":             body.ClientName,
+		"ProjectName":            body.ProjectName,
+		"WBS":                    body.WBS,
+		"CreatedBy":              body.Username,
 	}
 
-	result, err := db.ExecuteStoredProcedureWithResult("dbo.PR_Organizations_Insert", param)
+	result, err := db.ExecuteStoredProcedureWithResult("usp_Organization_Insert", param)
 	if err != nil {
 		return nil, err
 	}
@@ -76,7 +76,7 @@ func OrganizationUpdateApprovalStatus(id int64, status int) {
 		"Id":               id,
 		"ApprovalStatusID": status,
 	}
-	db.ExecuteStoredProcedure("PR_Organizations_UpdateStatus", param)
+	db.ExecuteStoredProcedure("usp_Organization_Update", param)
 }
 
 func GetAllOrganizationRequest(username string) ([]map[string]interface{}, error) {
@@ -87,7 +87,7 @@ func GetAllOrganizationRequest(username string) ([]map[string]interface{}, error
 		"Username": username,
 	}
 
-	result, err := db.ExecuteStoredProcedureWithResult("dbo.PR_Organizations_SelectByUser", param)
+	result, err := db.ExecuteStoredProcedureWithResult("usp_Organization_Select_ByUsername", param)
 	if err != nil {
 		return nil, err
 	}
