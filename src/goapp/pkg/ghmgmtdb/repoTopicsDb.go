@@ -11,9 +11,9 @@ func DeleteProjectTopics(projectId int) error {
 	defer db.Close()
 
 	param := map[string]interface{}{
-		"ProjectId": projectId,
+		"RepositoryId": projectId,
 	}
-	_, err := db.ExecuteStoredProcedureWithResult("dbo.PR_RepoTopics_Delete_ByProjectId", param)
+	_, err := db.ExecuteStoredProcedureWithResult("usp_RepositoryTopic_Delete", param)
 	if err != nil {
 		return err
 	}
@@ -26,10 +26,10 @@ func InsertProjectTopics(projectId int, topic string) error {
 	defer db.Close()
 
 	param := map[string]interface{}{
-		"ProjectId": projectId,
-		"Topic":     topic,
+		"RepositoryId": projectId,
+		"Topic":        topic,
 	}
-	_, err := db.ExecuteStoredProcedureWithResult("dbo.PR_RepoTopics_Insert", param)
+	_, err := db.ExecuteStoredProcedureWithResult("usp_RepositoryTopic_Insert", param)
 	if err != nil {
 		return err
 	}
@@ -42,10 +42,10 @@ func GetPopularTopics(offset, rowCount int) ([]PopularTopics, error) {
 	defer db.Close()
 
 	param := map[string]interface{}{
-		"offset":   offset,
-		"rowCount": rowCount,
+		"Offset":   offset,
+		"RowCount": rowCount,
 	}
-	result, err := db.ExecuteStoredProcedureWithResult("dbo.PR_RepoTopics_Select_PopularTopics", param)
+	result, err := db.ExecuteStoredProcedureWithResult("usp_RepositoryTopic_Select_PopularTopic", param)
 	if err != nil {
 		return nil, err
 	}
