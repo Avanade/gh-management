@@ -1,5 +1,4 @@
 CREATE PROCEDURE [dbo].[usp_GuidanceCategoryArticle_Insert]
-(
   @Name [VARCHAR](100),
   @Url [VARCHAR](255),
   @Body [VARCHAR](2000),
@@ -7,12 +6,9 @@ CREATE PROCEDURE [dbo].[usp_GuidanceCategoryArticle_Insert]
   @CreatedBy [VARCHAR](50),
   @ModifiedBy [VARCHAR](50),
   @Id  [INT] = NULL
-)
 AS
 BEGIN
-	DECLARE @returnID AS [INT]
-
-	IF ( @Id = 0 )
+	IF NOT EXISTS ( SELECT * FROM [dbo].[GuidanceCategoryArticle] WHERE [Id] = @Id )
 	  BEGIN
   		INSERT INTO [dbo].[GuidanceCategoryArticle]
       (
@@ -36,9 +32,7 @@ BEGIN
         GETDATE(),
         @ModifiedBy
       )
-			SET @returnID = SCOPE_IDENTITY()
-
-      SELECT @returnID AS [Id]
+			SET @Id = SCOPE_IDENTITY()
 	  END
 	ELSE
 	  BEGIN
@@ -50,6 +44,6 @@ BEGIN
 			  @CategoryId,
         @CreatedBy,
         @ModifiedBy  
-	    SELECT @Id AS [Id]
   	END
+  SELECT @Id as [Id]
 END

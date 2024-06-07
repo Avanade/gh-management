@@ -1,6 +1,6 @@
 CREATE PROCEDURE [dbo].[usp_GuidanceCategoryArticle_Update]
 (
-  @Id INT,
+  @Id [INT],
   @Name [VARCHAR](100),
   @Url [VARCHAR](255),
   @Body [VARCHAR](2000),

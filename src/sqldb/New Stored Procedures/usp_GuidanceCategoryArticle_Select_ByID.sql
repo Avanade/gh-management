@@ -5,7 +5,7 @@ BEGIN
   SELECT 
     [CA].[Id],
     [CA].[Name],
-	  [CA].[URL],
+	  [CA].[Url],
 	  [CA].[Body],
 	  [CA].[GuidanceCategoryId],
     [CA].[Created],
@@ -13,7 +13,7 @@ BEGIN
     [CA].[Modified],
     [CA].[ModifiedBy],
 	  C.[Name] [CategoryName]
-  FROM [dbo].[GuidanceCategoryArticle] [CA] INNER JOIN [dbo].[GuidanceCategory] AS [C] ON [CA].[GuidanceCategoryId] = [C].[Id]
+  FROM [dbo].[GuidanceCategoryArticle] AS [CA] INNER JOIN [dbo].[GuidanceCategory] AS [C] ON [CA].[GuidanceCategoryId] = [C].[Id]
   WHERE [CA].[Id] = @Id
 END
 GO
