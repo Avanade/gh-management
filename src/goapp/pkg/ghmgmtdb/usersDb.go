@@ -5,7 +5,7 @@ import "fmt"
 func GetUsersWithGithub() interface{} {
 	db := ConnectDb()
 	defer db.Close()
-	result, _ := db.ExecuteStoredProcedureWithResult("PR_Users_Select_WithGithub", nil)
+	result, _ := db.ExecuteStoredProcedureWithResult("usp_User_Select_ByGitHubIdNotNull", nil)
 
 	return result
 }
@@ -18,7 +18,7 @@ func IsUserExist(userPrincipalName string) bool {
 		"UserPrincipalName": userPrincipalName,
 	}
 
-	result, _ := db.ExecuteStoredProcedureWithResult("PR_Users_IsExisting", param)
+	result, _ := db.ExecuteStoredProcedureWithResult("usp_User_IsExisting", param)
 
 	return result[0]["Result"] == 1
 }
@@ -35,7 +35,7 @@ func InsertUser(userPrincipalName, name, givenName, surName, jobTitle string) er
 		"JobTitle":          jobTitle,
 	}
 
-	_, err := db.ExecuteStoredProcedure("PR_Users_Insert", param)
+	_, err := db.ExecuteStoredProcedure("usp_User_Insert", param)
 	if err != nil {
 		return err
 	}
@@ -54,7 +54,7 @@ func UpdateUserGithub(userPrincipalName, githubId, githubUser string, force int)
 		"Force":             force,
 	}
 
-	result, err := db.ExecuteStoredProcedureWithResult("PR_Users_Update_GitHubUser", param)
+	result, err := db.ExecuteStoredProcedureWithResult("usp_User_Update", param)
 	if err != nil {
 		return nil, err
 	}
@@ -72,7 +72,7 @@ func Users_Get_GHUser(UserPrincipalName string) (GHUser string) {
 		"UserPrincipalName": UserPrincipalName,
 	}
 
-	result, err := db.ExecuteStoredProcedureWithResult("dbo.PR_Users_Get_GHUser", param)
+	result, err := db.ExecuteStoredProcedureWithResult("usp_User_Select_ByGitHubUser", param)
 
 	if err != nil {
 		fmt.Println(err)
@@ -100,7 +100,7 @@ func GetUserByGitHubId(GitHubId string) ([]map[string]interface{}, error) {
 		"GitHubId": GitHubId,
 	}
 
-	result, err := db.ExecuteStoredProcedureWithResult("PR_Users_Select_ByGitHubId", param)
+	result, err := db.ExecuteStoredProcedureWithResult("usp_User_Select_ByGitHubId", param)
 
 	if err != nil {
 		return nil, err
@@ -119,7 +119,7 @@ func GetUserByGitHubUsername(GitHubUser string) ([]map[string]interface{}, error
 		"GitHubUser": GitHubUser,
 	}
 
-	result, err := db.ExecuteStoredProcedureWithResult("PR_Users_Select_ByGitHubUsers", param)
+	result, err := db.ExecuteStoredProcedureWithResult("usp_User_Select_ByGitHubUser", param)
 
 	if err != nil {
 		return nil, err
@@ -138,7 +138,7 @@ func GetUserByUserPrincipal(UserPrincipalName string) ([]map[string]interface{},
 		"UserPrincipalName": UserPrincipalName,
 	}
 
-	result, err := db.ExecuteStoredProcedureWithResult("PR_Users_Select_ByUserPrincipalName", param)
+	result, err := db.ExecuteStoredProcedureWithResult("usp_User_Select_ByUserPrincipalName", param)
 
 	if err != nil {
 		return nil, err
@@ -155,7 +155,7 @@ func UsersGetEmail(GithubUser string) (string, error) {
 		"GithubUser": GithubUser,
 	}
 
-	result, err := db.ExecuteStoredProcedureWithResult("PR_Users_GetEmailByGitHubUsername", param)
+	result, err := db.ExecuteStoredProcedureWithResult("usp_User_Select_ByGitHubUser", param)
 	if err != nil {
 		return "", err
 	}
@@ -174,7 +174,7 @@ func GetUserEmailByGithubId(GithubId string) (string, error) {
 		"GithubId": GithubId,
 	}
 
-	result, err := db.ExecuteStoredProcedureWithResult("PR_Users_GetEmailByGitHubId", param)
+	result, err := db.ExecuteStoredProcedureWithResult("usp_User_Select_ByGitHubId", param)
 	if err != nil {
 		return "", err
 	}
