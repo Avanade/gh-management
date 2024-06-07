@@ -73,10 +73,10 @@ func OrganizationUpdateApprovalStatus(id int64, status int) {
 	defer db.Close()
 
 	param := map[string]interface{}{
-		"Id":               id,
+		"OrganizationId":   id,
 		"ApprovalStatusID": status,
 	}
-	db.ExecuteStoredProcedure("usp_Organization_Update", param)
+	db.ExecuteStoredProcedure("usp_ApprovalRequest_Update_StatusByOrganizationId", param)
 }
 
 func GetAllOrganizationRequest(username string) ([]map[string]interface{}, error) {
