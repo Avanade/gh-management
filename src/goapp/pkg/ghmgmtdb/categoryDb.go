@@ -20,7 +20,7 @@ func CategoryArticlesInsert(params map[string]interface{}) ([]map[string]interfa
 	db := ConnectDb()
 	defer db.Close()
 
-	result, err := db.ExecuteStoredProcedureWithResult("dbo.PR_CategoryArticles_Insert", params)
+	result, err := db.ExecuteStoredProcedureWithResult("usp_GuidanceCategoryArticle_Insert", params)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -44,7 +44,7 @@ func CategoryArticlesselectById(params map[string]interface{}) ([]map[string]int
 	db := ConnectDb()
 	defer db.Close()
 
-	result, err := db.ExecuteStoredProcedureWithResult("dbo.PR_CategoryArticles_select_ById", params)
+	result, err := db.ExecuteStoredProcedureWithResult("usp_GuidanceCategoryArticle_Select_ByCategoryId", params)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -56,7 +56,7 @@ func CategoryArticlesSelectByArticlesID(params map[string]interface{}) ([]map[st
 	db := ConnectDb()
 	defer db.Close()
 
-	result, err := db.ExecuteStoredProcedureWithResult("dbo.PR_CategoryArticles_select_ByArticlesID", params)
+	result, err := db.ExecuteStoredProcedureWithResult("usp_GuidanceCategoryArticle_Select_ByID", params)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -80,7 +80,7 @@ func CategoryArticlesUpdate(params map[string]interface{}) error {
 	db := ConnectDb()
 	defer db.Close()
 
-	_, err := db.ExecuteStoredProcedure("dbo.PR_CategoryArticles_Update", params)
+	_, err := db.ExecuteStoredProcedure("usp_GuidanceCategoryArticle_Update", params)
 	if err != nil {
 		fmt.Println(err)
 	}
