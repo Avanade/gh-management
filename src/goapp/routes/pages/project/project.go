@@ -125,16 +125,10 @@ func ViewByIdHandler(w http.ResponseWriter, r *http.Request) {
 	projectId := projects[0]["Id"].(int64)
 	orgName := projects[0]["Organization"].(string)
 
-	repoOwners, err := db.RepoOwnersByUserAndProjectId(projectId, username.(string))
+	isOwner, err := db.IsOwner(projectId, username.(string))
 	if err != nil {
 		log.Println(err)
 		return
-	}
-
-	isOwner := false
-
-	if len(repoOwners) > 0 {
-		isOwner = true
 	}
 
 	token := os.Getenv("GH_TOKEN")
@@ -175,16 +169,10 @@ func ViewHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	repoOwners, err := db.RepoOwnersByUserAndProjectId(id, username.(string))
+	isOwner, err := db.IsOwner(id, username.(string))
 	if err != nil {
 		log.Println(err)
 		return
-	}
-
-	isOwner := false
-
-	if len(repoOwners) > 0 {
-		isOwner = true
 	}
 
 	token := os.Getenv("GH_TOKEN")
