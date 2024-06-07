@@ -8,7 +8,7 @@ func CategoryInsert(params map[string]interface{}) ([]map[string]interface{}, er
 	db := ConnectDb()
 	defer db.Close()
 
-	result, err := db.ExecuteStoredProcedureWithResult("dbo.PR_Category_Insert", params)
+	result, err := db.ExecuteStoredProcedureWithResult("dbo.usp_GuidanceCategory_Insert", params)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -32,7 +32,7 @@ func CategorySelect() ([]map[string]interface{}, error) {
 	db := ConnectDb()
 	defer db.Close()
 
-	result, err := db.ExecuteStoredProcedureWithResult("dbo.PR_Category_select", nil)
+	result, err := db.ExecuteStoredProcedureWithResult("dbo.usp_GuidanceCategory_Select", nil)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -68,7 +68,7 @@ func CategorySelectById(params map[string]interface{}) ([]map[string]interface{}
 	db := ConnectDb()
 	defer db.Close()
 
-	result, err := db.ExecuteStoredProcedureWithResult("dbo.PR_Category_select_ById", params)
+	result, err := db.ExecuteStoredProcedureWithResult("dbo.usp_GuidanceCategory_Select_ById", params)
 	if err != nil {
 		fmt.Println(err)
 	}
