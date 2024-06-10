@@ -1,5 +1,5 @@
 CREATE PROCEDURE [dbo].[usp_OrganizationAccessApprovalRequest_Select_ByOrganizationAccessId]
-  @Id [INT]
+  @OrganizationAccessId [INT]
 AS
 BEGIN
   SELECT 
@@ -12,5 +12,5 @@ BEGIN
   FROM [dbo].[OrganizationAccessApprovalRequest] AS [OAAR]
   LEFT JOIN [dbo].[ApprovalRequest] AS [AR] ON [OAAR].[ApprovalRequestId] = [AR].[Id]
   LEFT JOIN [dbo].[ApprovalStatus] AS [A] ON [A].[Id] = [AR].[ApprovalStatusId]
-  WHERE [OAAR].[OrganizationAccessId] = @Id
+  WHERE [OAAR].[OrganizationAccessId] = @OrganizationAccessId
 END

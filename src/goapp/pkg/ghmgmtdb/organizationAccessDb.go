@@ -162,7 +162,7 @@ func GetOrganizationAccessApprovalRequest(id int64) ([]map[string]interface{}, e
 	defer db.Close()
 
 	param := map[string]interface{}{
-		"Id": id,
+		"OrganizationAccessId": id,
 	}
 
 	result, err := db.ExecuteStoredProcedureWithResult("usp_OrganizationAccessApprovalRequest_Select_ByOrganizationAccessId", param)

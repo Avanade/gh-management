@@ -100,10 +100,10 @@ func GetOrganizationApprovalRequest(id int64) ([]map[string]interface{}, error) 
 	defer db.Close()
 
 	param := map[string]interface{}{
-		"Id": id,
+		"OrganizationId": id,
 	}
 
-	result, err := db.ExecuteStoredProcedureWithResult("dbo.PR_OrganizationsApprovalRequests_SelectByOrgId", param)
+	result, err := db.ExecuteStoredProcedureWithResult("usp_OrganizationApprovalRequest_Select_ByOrganizationId", param)
 	if err != nil {
 		return nil, err
 	}
@@ -134,11 +134,11 @@ func OrganizationApprovalInsert(organizationId int, requestId int64) error {
 
 	params := map[string]interface{}{
 
-		"OrganizationId": organizationId,
-		"RequestId":      requestId,
+		"OrganizationId":    organizationId,
+		"ApprovalRequestId": requestId,
 	}
 
-	_, err := db.ExecuteStoredProcedure("dbo.PR_OrganizationsApprovalRequests_Insert", params)
+	_, err := db.ExecuteStoredProcedure("usp_OrganizationApprovalRequest_Insert", params)
 	if err != nil {
 		return err
 	}
