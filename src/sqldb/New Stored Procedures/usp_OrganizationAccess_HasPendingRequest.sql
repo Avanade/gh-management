@@ -17,13 +17,13 @@ BEGIN
         WHERE
             [OAAR].[OrganizationAccessId] = (
                 SELECT 
-                    TOP(1) Id 
+                    TOP(1) [Id] 
                 FROM 
                     [dbo].[OrganizationAccess] 
                 WHERE 
                     [UserPrincipalName] = @UserPrincipalName AND 
                     [RegionalOrganizationId] = @OrganizationId
-                ORDER BY Created DESC
+                ORDER BY [Created] DESC
             ) 
             AND NOT([AR].[ApprovalStatusId] NOT IN (1, 2)))
 
