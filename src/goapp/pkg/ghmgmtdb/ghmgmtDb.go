@@ -46,7 +46,7 @@ func UpdateProjectApprovalApproverResponse(itemId, remarks, responseDate, respon
 		"RespondedBy":        respondedBy,
 	}
 
-	_, err := db.ExecuteStoredProcedure("PR_ProjectsApproval_Update_ApproverResponse", params)
+	_, err := db.ExecuteStoredProcedure("usp_RepositoryApproval_Update_ApproverResponse", params)
 	if err != nil {
 		return false, err
 	}

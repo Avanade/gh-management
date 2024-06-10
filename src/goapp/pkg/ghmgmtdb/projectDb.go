@@ -88,7 +88,7 @@ func ProjectApprovalsSelectById(params map[string]interface{}) ([]map[string]int
 	db := ConnectDb()
 	defer db.Close()
 
-	result, err := db.ExecuteStoredProcedureWithResult("dbo.PR_ProjectApprovals_Select_ById", params)
+	result, err := db.ExecuteStoredProcedureWithResult("usp_RepositoryApproval_Select_ById", params)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -112,7 +112,7 @@ func ProjectsApprovalUpdateApproverUserPrincipalName(params map[string]interface
 	db := ConnectDb()
 	defer db.Close()
 
-	result, err := db.ExecuteStoredProcedureWithResult("dbo.PR_ProjectsApproval_Update_ApproverUserPrincipalName", params)
+	result, err := db.ExecuteStoredProcedureWithResult("usp_RepositoryApproval_Update_ApproverUserPrincipalName", params)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -310,22 +310,22 @@ func GetFailedProjectApprovalRequests() (projectApprovals []ProjectApproval) {
 	db := ConnectDb()
 	defer db.Close()
 
-	result, _ := db.ExecuteStoredProcedureWithResult("PR_ProjectApprovals_Select_Failed", nil)
+	result, _ := db.ExecuteStoredProcedureWithResult("usp_RepositoryApproval_Select_FailedRequest", nil)
 
 	for _, v := range result {
 		data := ProjectApproval{
 			Id:                         v["Id"].(int64),
-			ProjectId:                  v["ProjectId"].(int64),
-			ProjectName:                v["ProjectName"].(string),
-			ProjectDescription:         v["ProjectDescription"].(string),
+			ProjectId:                  v["RepositoryId"].(int64),
+			ProjectName:                v["RepositoryName"].(string),
+			ProjectDescription:         v["RepositoryName"].(string),
 			RequesterGivenName:         v["RequesterGivenName"].(string),
 			RequesterSurName:           v["RequesterSurName"].(string),
 			RequesterName:              v["RequesterName"].(string),
 			RequesterUserPrincipalName: v["RequesterUserPrincipalName"].(string),
-			ApprovalTypeId:             v["ApprovalTypeId"].(int64),
+			ApprovalTypeId:             v["RepositoryApprovalTypeId"].(int64),
 			ApprovalType:               v["ApprovalType"].(string),
 			ApprovalDescription:        v["ApprovalDescription"].(string),
-			Newcontribution:            v["newcontribution"].(string),
+			Newcontribution:            v["Newcontribution"].(string),
 			OSSsponsor:                 v["OSSsponsor"].(string),
 			Offeringsassets:            v["Avanadeofferingsassets"].(string),
 			Willbecommercialversion:    v["Willbecommercialversion"].(string),
@@ -346,14 +346,14 @@ func GetProjectApprovalsByProjectId(id int64) (projectApprovals []ProjectApprova
 		"Id": id,
 	}
 
-	result, _ := db.ExecuteStoredProcedureWithResult("PR_ProjectApprovals_Select_By_ProjectId", param)
+	result, _ := db.ExecuteStoredProcedureWithResult("usp_RepositoryApproval_Select_ByRecentProjectId", param)
 
 	for _, v := range result {
 		data := ProjectApproval{
 			Id:                  v["Id"].(int64),
-			ProjectId:           v["ProjectId"].(int64),
-			ProjectName:         v["ProjectName"].(string),
-			ApprovalTypeId:      v["ApprovalTypeId"].(int64),
+			ProjectId:           v["RepositoryId"].(int64),
+			ProjectName:         v["RepositoryName"].(string),
+			ApprovalTypeId:      v["RepositoryApprovalTypeId"].(int64),
 			ApprovalType:        v["ApprovalType"].(string),
 			ApprovalDescription: v["ApprovalDescription"].(string),
 			RequestStatus:       v["RequestStatus"].(string),
@@ -376,7 +376,7 @@ func GetProjectApprovalsByStatusId(approvalStatusId int64) ([]map[string]interfa
 		"ApprovalStatusId": approvalStatusId,
 	}
 
-	result, err := db.ExecuteStoredProcedureWithResult("PR_ProjectApprovals_Select_By_StatusId", param)
+	result, err := db.ExecuteStoredProcedureWithResult("usp_RepositoryApproval_Select_ByApprovalStatusId", param)
 	if err != nil {
 		return nil, err
 	}
@@ -392,14 +392,14 @@ func GetProjectApprovalByGUID(id string) (projectApproval ProjectApproval) {
 		"ApprovalSystemGUID": id,
 	}
 
-	result, _ := db.ExecuteStoredProcedureWithResult("PR_ProjectApprovals_Select_By_ApprovalSystemGUID", param)
+	result, _ := db.ExecuteStoredProcedureWithResult("usp_RepositoryApproval_Select_ByApprovalSystemGUID", param)
 
 	for _, v := range result {
 		projectApproval = ProjectApproval{
 			Id:                  v["Id"].(int64),
-			ProjectId:           v["ProjectId"].(int64),
-			ProjectName:         v["ProjectName"].(string),
-			ApprovalTypeId:      v["ApprovalTypeId"].(int64),
+			ProjectId:           v["RepositoryId"].(int64),
+			ProjectName:         v["RepositoryName"].(string),
+			ApprovalTypeId:      v["RepositoryApprovalTypeId"].(int64),
 			ApprovalType:        v["ApprovalType"].(string),
 			ApprovalDescription: v["ApprovalDescription"].(string),
 			RequestStatus:       v["RequestStatus"].(string),
@@ -417,7 +417,7 @@ func ProjectsApprovalUpdateGUID(id int64, ApprovalSystemGUID string) {
 		"Id":                 id,
 		"ApprovalSystemGUID": ApprovalSystemGUID,
 	}
-	db.ExecuteStoredProcedure("PR_ProjectsApproval_Update_ApprovalSystemGUID", param)
+	db.ExecuteStoredProcedure("usp_RepositoryApproval_Update_ApprovalSystemGUID", param)
 }
 
 func GetProjectByName(projectName string) []map[string]interface{} {
