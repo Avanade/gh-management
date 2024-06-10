@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log"
 	db "main/pkg/ghmgmtdb"
 	"net/http"
 	"net/url"
@@ -15,6 +16,15 @@ import (
 	"strings"
 	"time"
 )
+
+var (
+	token tokenInfo
+)
+
+type tokenInfo struct {
+	AccessToken string
+	ExpiresIn   time.Time
+}
 
 type TokenResponse struct {
 	TokenType    string `json:"token_type"`
@@ -378,6 +388,31 @@ func GetUserPhoto(user string) (bool, string, error) {
 }
 
 func GetToken() (string, error) {
+	if token.AccessToken != "" {
+		if token.ExpiresIn.After(time.Now()) {
+			return token.AccessToken, nil
+		}
+	}
+
+	newToken, err := requestNewToken()
+	if err != nil {
+		log.Println(err.Error())
+		return "", err
+	}
+
+	const ALLOWANCE_TIME_BEFORE_EXPIRATION = 99
+
+	duration, _ := time.ParseDuration(fmt.Sprint(newToken.ExpiresIn-ALLOWANCE_TIME_BEFORE_EXPIRATION, "s"))
+
+	expiresin := time.Now().Add(duration)
+
+	token.AccessToken = newToken.AccessToken
+	token.ExpiresIn = expiresin
+
+	return token.AccessToken, nil
+}
+
+func requestNewToken() (*TokenResponse, error) {
 
 	urlPath := fmt.Sprintf("https://login.microsoftonline.com/%s/oauth2/v2.0/token", os.Getenv("TENANT_ID"))
 	client := &http.Client{
@@ -393,24 +428,24 @@ func GetToken() (string, error) {
 
 	req, err := http.NewRequest("POST", urlPath, strings.NewReader(encodedData))
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 	req.Header.Add("Content-Length", strconv.Itoa(len(data.Encode())))
 	response, err := client.Do(req)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 	defer response.Body.Close()
 
 	var tokenResponse TokenResponse
 	err = json.NewDecoder(response.Body).Decode(&tokenResponse)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	return tokenResponse.AccessToken, nil
+	return &tokenResponse, nil
 }
 
 func IsUserExist(userPrincipalName string) (isMember bool, isAccountEnabled bool, err error) {
