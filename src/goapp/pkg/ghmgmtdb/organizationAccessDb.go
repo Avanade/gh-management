@@ -42,7 +42,7 @@ func InsertOrganizationAccess(userPrincipalName string, organizationId int64) (i
 		"OrganizationId":    organizationId,
 	}
 
-	result, err := db.ExecuteStoredProcedureWithResult("dbo.PR_OrganizationAccess_Insert", param)
+	result, err := db.ExecuteStoredProcedureWithResult("usp_OrganizationAccess_Insert", param)
 	if err != nil {
 		return
 	}
@@ -60,7 +60,7 @@ func GetOrganizationAccessByUserPrincipalName(userPrincipalName string) ([]Organ
 		"UserPrincipalName": userPrincipalName,
 	}
 
-	result, err := db.ExecuteStoredProcedureWithResult("dbo.PR_OrganizationAccess_SelectByUserPrincipalName", param)
+	result, err := db.ExecuteStoredProcedureWithResult("usp_OrganizationAccess_Select_ByUserPrincipalName", param)
 	if err != nil {
 		return nil, err
 	}
@@ -96,7 +96,7 @@ func GetOrganizationAccessByApprovalRequestItemId(itemId string) (*OrganizationA
 		"ApprovalSystemGUID": itemId,
 	}
 
-	result, err := db.ExecuteStoredProcedureWithResult("dbo.PR_OrganizationAccess_SelectByApprovalRequestItemId", param)
+	result, err := db.ExecuteStoredProcedureWithResult("usp_OrganizationAccess_Select_ByApprovalSystemGUID", param)
 	if err != nil {
 		return nil, err
 	}
@@ -129,7 +129,7 @@ func HasOrganizationAccessPendingRequest(userPrincipalName string, organizationI
 		"OrganizationId":    organizationId,
 	}
 
-	result, err := db.ExecuteStoredProcedureWithResult("dbo.PR_OrganizationAcess_HasPendingRequest", param)
+	result, err := db.ExecuteStoredProcedureWithResult("usp_OrganizationAccess_HasPendingRequest", param)
 	if err != nil {
 		return
 	}
