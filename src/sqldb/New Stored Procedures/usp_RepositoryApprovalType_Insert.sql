@@ -33,13 +33,13 @@ BEGIN
 			@ApproverUserPrincipalName,
 			@IsActive,
 			0,
-			getDate(),
+			GETDATE(),
 			@CreatedBy,
-			getDate(),
+			GETDATE(),
 			@CreatedBy
 		)
 		SET @Id = SCOPE_IDENTITY()
 		SET @Status = 1
 	END
-	SELECT @Id [Id], @Status [Status]
+	SELECT @Id AS [Id], @Status AS [Status]
 END

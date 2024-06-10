@@ -31,5 +31,5 @@ BEGIN
 		SET @Status = 1
 	END
 
-	SELECT @Id [Id], @Status [Status]
+	SELECT @Id AS [Id], @Status AS [Status]
 END
