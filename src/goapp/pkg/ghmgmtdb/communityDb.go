@@ -91,7 +91,7 @@ func CommunitySponsorsInsert(params map[string]interface{}) (sql.Result, error) 
 func RelatedCommunitiesDelete(params map[string]interface{}) (sql.Result, error) {
 	db := ConnectDb()
 	defer db.Close()
-	result, err := db.ExecuteStoredProcedure("dbo.PR_RelatedCommunities_Delete", params)
+	result, err := db.ExecuteStoredProcedure("usp_RelatedCommunity_Delete", params)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -102,7 +102,7 @@ func RelatedCommunitiesDelete(params map[string]interface{}) (sql.Result, error)
 func RelatedCommunitiesInsert(params map[string]interface{}) (sql.Result, error) {
 	db := ConnectDb()
 	defer db.Close()
-	result, err := db.ExecuteStoredProcedure("dbo.PR_RelatedCommunities_Insert", params)
+	result, err := db.ExecuteStoredProcedure("usp_RelatedCommunity_Insert", params)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -176,7 +176,7 @@ func CommunityTagsSelectByCommunityId(params map[string]interface{}) ([]map[stri
 func RelatedCommunitiesSelect(params map[string]interface{}) ([]map[string]interface{}, error) {
 	db := ConnectDb()
 	defer db.Close()
-	result, err := db.ExecuteStoredProcedureWithResult("dbo.PR_RelatedCommunities_Select", params)
+	result, err := db.ExecuteStoredProcedureWithResult("usp_RelatedCommunity_Select_ByParentCommunityId", params)
 	if err != nil {
 		fmt.Println(err)
 	}
