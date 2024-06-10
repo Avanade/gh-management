@@ -48,7 +48,7 @@ func GetRegionalOrganizationById(id int) ([]map[string]interface{}, error) {
 		"Id": id,
 	}
 
-	result, err := db.ExecuteStoredProcedureWithResult("dbo.PR_RegionalOrganizations_SelectById", params)
+	result, err := db.ExecuteStoredProcedureWithResult("usp_RegionalOrganization_Select_ById", params)
 	if err != nil {
 		return nil, err
 	}
@@ -60,7 +60,7 @@ func GetAllRegionalOrganizations() ([]map[string]interface{}, error) {
 	db := ConnectDb()
 	defer db.Close()
 
-	result, err := db.ExecuteStoredProcedureWithResult("dbo.PR_RegionalOrganizations_SelectAll", nil)
+	result, err := db.ExecuteStoredProcedureWithResult("usp_RegionalOrganization_Select", nil)
 	if err != nil {
 		return nil, err
 	}
@@ -120,7 +120,7 @@ func RegionalOrganizationInsert(id int64, name string) error {
 		"Name": name,
 	}
 
-	_, err := db.ExecuteStoredProcedure("dbo.PR_RegionalOrganizations_Insert", param)
+	_, err := db.ExecuteStoredProcedure("usp_RegionalOrganization_Insert", param)
 	if err != nil {
 		return err
 	}
