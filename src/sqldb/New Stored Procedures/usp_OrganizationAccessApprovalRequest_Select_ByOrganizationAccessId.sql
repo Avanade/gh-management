@@ -1,5 +1,5 @@
 CREATE PROCEDURE [dbo].[usp_OrganizationAccessApprovalRequest_Select_ByOrganizationAccessId]
-  @Id INT
+  @Id [INT]
 AS
 BEGIN
   SELECT 
