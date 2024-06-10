@@ -146,10 +146,10 @@ func InsertOrganizationAccessApprovalRequest(organizationAccessId, requestId int
 
 	param := map[string]interface{}{
 		"OrganizationAccessId": organizationAccessId,
-		"RequestId":            requestId,
+		"ApprovalRequestId":    requestId,
 	}
 
-	_, err := db.ExecuteStoredProcedure("dbo.PR_OrganizationAccessApprovalRequest_Insert", param)
+	_, err := db.ExecuteStoredProcedure("usp_OrganizationAccessApprovalRequest_Insert", param)
 	if err != nil {
 		return err
 	}
@@ -165,7 +165,7 @@ func GetOrganizationAccessApprovalRequest(id int64) ([]map[string]interface{}, e
 		"Id": id,
 	}
 
-	result, err := db.ExecuteStoredProcedureWithResult("dbo.PR_OrganizationAccessApprovalRequests_SelectByOrganizationAccessId", param)
+	result, err := db.ExecuteStoredProcedureWithResult("usp_OrganizationAccessApprovalRequest_Select_ByOrganizationAccessId", param)
 	if err != nil {
 		return nil, err
 	}
