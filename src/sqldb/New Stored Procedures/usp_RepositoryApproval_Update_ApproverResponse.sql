@@ -20,5 +20,5 @@ BEGIN
   DECLARE @RepositoryId [INT]
   SELECT @RepositoryId = [RepositoryId] FROM [dbo].[RepositoryApproval] WHERE [ApprovalSystemGUID] = @ApprovalSystemGUID
 
-EXEC [dbo].[usp_Repository_Update_Status] @RepositoryId
+  EXEC [dbo].[usp_Repository_Update_Status] @RepositoryId
 END
