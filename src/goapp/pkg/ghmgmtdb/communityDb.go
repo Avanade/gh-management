@@ -127,10 +127,10 @@ func CommunityApprovalsSelectById(id int64) ([]map[string]interface{}, error) {
 
 	param := map[string]interface{}{
 
-		"Id": id,
+		"CommunityId": id,
 	}
 
-	result, err := db.ExecuteStoredProcedureWithResult("PR_CommunityApprovals_Select_ById", param)
+	result, err := db.ExecuteStoredProcedureWithResult("usp_ApprovalRequest_Select_ByCommunityId", param)
 	if err != nil {
 		fmt.Println(err)
 	}
