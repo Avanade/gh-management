@@ -12,13 +12,13 @@ BEGIN
     [ApprovalRemarks] = @ApprovalRemarks,
     [ModifiedBy] = @RespondedBy,
     [Modified] = GETDATE(),
-    [ApprovalDate] = convert(DATETIME, @ApprovalDate),
+    [ApprovalDate] = CONVERT(DATETIME, @ApprovalDate),
     [RespondedBy] = @RespondedBy
   WHERE
     [ApprovalSystemGUID] = @ApprovalSystemGUID
 
-  DECLARE @RepositoryId INT
+  DECLARE @RepositoryId [INT]
   SELECT @RepositoryId = [RepositoryId] FROM [dbo].[RepositoryApproval] WHERE [ApprovalSystemGUID] = @ApprovalSystemGUID
 
-EXEC usp_Repository_Update_Status @RepositoryId
+EXEC [dbo].[usp_Repository_Update_Status] @RepositoryId
 END

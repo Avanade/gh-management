@@ -4,7 +4,7 @@ AS
 BEGIN
   SELECT
     [RA].[Id] AS [RepositoryApprovalId],
-    CONVERT(varchar(36), [RA].[ApprovalSystemGUID], 1) AS [ItemId],
+    CONVERT(VARCHAR(36), [RA].[ApprovalSystemGUID], 1) AS [ItemId],
     [T].[Name] AS [ApprovalType],
     [R].[TFSProjectReference] AS [RepoLink],
     [R].[Name] AS [RepoName],

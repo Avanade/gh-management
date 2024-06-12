@@ -22,7 +22,7 @@ BEGIN
     [T].[IsActive] = 1 AND 
     [T].[IsArchived] = 0
 
-  INSERT INTO ApprovalRequestApprover
+  INSERT INTO [dbo].[ApprovalRequestApprover]
   (
     [RepositoryApprovalId],
     [ApproverUserPrincipalName]
@@ -43,5 +43,5 @@ BEGIN
     [Modified] = GETDATE() 
   WHERE [Id] = @RepositoryId
 
-  EXEC usp_RepositoryApproval_Select_ById @RepositoryId
+  EXEC [dbo].[usp_RepositoryApproval_Select_ById] @RepositoryId
 END
