@@ -108,16 +108,18 @@ func UseTemplate(w *http.ResponseWriter, r *http.Request, page string, pageData 
 	}
 
 	// Check user email to determine if user is member or guest
-	username := data.Profile.(map[string]interface{})["preferred_username"].(string)
-	data.IsMemberAccount = strings.Contains(strings.ToLower(username), strings.ToLower(os.Getenv("ORGANIZATION_NAME")))
+	if data.Profile != nil {
+		username := data.Profile.(map[string]interface{})["preferred_username"].(string)
+		data.IsMemberAccount = strings.Contains(strings.ToLower(username), strings.ToLower(os.Getenv("ORGANIZATION_NAME")))
 
-	// Set profile link and request access link
-	if data.IsMemberAccount {
-		data.ProfileLink = os.Getenv("LINK_MEMBER_PROFILE")
-		data.RequestAccessLink = os.Getenv("LINK_MEMBER_REQUEST_ACCESS")
-	} else {
-		data.ProfileLink = os.Getenv("LINK_GUEST_PROFILE")
-		data.RequestAccessLink = os.Getenv("LINK_GUEST_REQUEST_ACCESS")
+		// Set profile link and request access link
+		if data.IsMemberAccount {
+			data.ProfileLink = os.Getenv("LINK_MEMBER_PROFILE")
+			data.RequestAccessLink = os.Getenv("LINK_MEMBER_REQUEST_ACCESS")
+		} else {
+			data.ProfileLink = os.Getenv("LINK_GUEST_PROFILE")
+			data.RequestAccessLink = os.Getenv("LINK_GUEST_REQUEST_ACCESS")
+		}
 	}
 
 	if sessionaz.Values["isGHAssociated"] != nil {
