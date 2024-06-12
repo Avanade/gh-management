@@ -100,7 +100,7 @@ func ProjectsSelectByUserPrincipalName(params map[string]interface{}) ([]map[str
 	db := ConnectDb()
 	defer db.Close()
 
-	result, err := db.ExecuteStoredProcedureWithResult("dbo.PR_Projects_Select_ByUserPrincipalName", params)
+	result, err := db.ExecuteStoredProcedureWithResult("usp_Repository_Select_ByUserPrincipalName", params)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -139,11 +139,11 @@ func PRProjectsInsert(project Project, user string) (id int64) {
 		"VisibilityId":            project.Visibility,
 		"TFSProjectReference":     project.TFSProjectReference,
 	}
-	result, err := db.ExecuteStoredProcedureWithResult("dbo.PR_Projects_Insert", param)
+	result, err := db.ExecuteStoredProcedureWithResult("usp_Repository_Insert", param)
 	if err != nil {
 		fmt.Println(err)
 	}
-	id = result[0]["ItemId"].(int64)
+	id = result[0]["Id"].(int64)
 	return
 }
 
@@ -152,9 +152,9 @@ func DeleteProjectById(id int) error {
 	defer db.Close()
 
 	param := map[string]interface{}{
-		"Id": id,
+		"RepositoryId": id,
 	}
-	_, err := db.ExecuteStoredProcedure("dbo.PR_Projects_Delete_ById", param)
+	_, err := db.ExecuteStoredProcedure("usp_Repository_Delete", param)
 	if err != nil {
 		fmt.Println(err)
 		return err
@@ -166,7 +166,7 @@ func ProjectInsertByImport(param map[string]interface{}) error {
 	db := ConnectDb()
 	defer db.Close()
 
-	_, err := db.ExecuteStoredProcedure("dbo.PR_Projects_Insert", param)
+	_, err := db.ExecuteStoredProcedure("usp_Repository_Insert", param)
 	if err != nil {
 		return err
 	}
@@ -177,34 +177,11 @@ func ProjectUpdateByImport(param map[string]interface{}) error {
 	db := ConnectDb()
 	defer db.Close()
 
-	_, err := db.ExecuteStoredProcedure("dbo.PR_Projects_Update_Repo_Info", param)
+	_, err := db.ExecuteStoredProcedure("usp_Repository_Update", param)
 	if err != nil {
 		return err
 	}
 	return nil
-}
-
-func PRProjectsUpdate(project Project, user string) (id int64) {
-
-	db := ConnectDb()
-	defer db.Close()
-
-	param := map[string]interface{}{
-		"ID":                      project.Id,
-		"Name":                    project.Name,
-		"CoOwner":                 project.Coowner,
-		"Description":             project.Description,
-		"ConfirmAvaIP":            project.ConfirmAvaIP,
-		"ConfirmEnabledSecurity":  project.ConfirmSecIPScan,
-		"ConfirmNotClientProject": project.ConfirmNotClientProject,
-		"ModifiedBy":              user,
-	}
-	_, err := db.ExecuteStoredProcedure("dbo.PR_Projects_Update", param)
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	return
 }
 
 func UpdateProjectEcattIdById(id, ecattId int, user string) error {
@@ -217,7 +194,7 @@ func UpdateProjectEcattIdById(id, ecattId int, user string) error {
 		"ModifiedBy": user,
 	}
 
-	_, err := db.ExecuteStoredProcedure("PR_Projects_Update_ECATTID_ById", param)
+	_, err := db.ExecuteStoredProcedure("usp_Repository_Update_ECATTID", param)
 	if err != nil {
 		return err
 	}
@@ -238,7 +215,7 @@ func PRProjectsUpdateLegalQuestions(projectRequest ProjectRequest, user string) 
 		"OSSContributionInformation": projectRequest.OSSContributionInformation,
 		"ModifiedBy":                 user,
 	}
-	_, err := db.ExecuteStoredProcedure("PR_Projects_Update_LegalQuestions", param)
+	_, err := db.ExecuteStoredProcedure("usp_Repository_Update_LegalQuestions", param)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -252,7 +229,7 @@ func ProjectsByRepositorySource(repositorySource string) ([]map[string]interface
 		"RepositorySource": repositorySource,
 	}
 
-	result, err := db.ExecuteStoredProcedureWithResult("PR_Projects_Select_ByRepositorySource", param)
+	result, err := db.ExecuteStoredProcedureWithResult("usp_Repository_Select_ByRepositorySource", param)
 	if err != nil {
 		return nil, err
 	}
@@ -269,7 +246,7 @@ func ProjectsIsExisting(name string) bool {
 		"Name": name,
 	}
 
-	result, err := db.ExecuteStoredProcedureWithResult("dbo.PR_Projects_IsExisting", param)
+	result, err := db.ExecuteStoredProcedureWithResult("usp_Repository_IsNameExist", param)
 
 	if err != nil {
 		fmt.Println(err)
@@ -292,7 +269,7 @@ func ProjectsIsExistingByGithubId(githubId int64) bool {
 		"GithubId": githubId,
 	}
 
-	result, err := db.ExecuteStoredProcedureWithResult("dbo.PR_Projects_IsExisting_By_GithubId", param)
+	result, err := db.ExecuteStoredProcedureWithResult("usp_Repository_IsGitHubIdExist", param)
 
 	if err != nil {
 		fmt.Println(err)
@@ -420,19 +397,6 @@ func ProjectsApprovalUpdateGUID(id int64, ApprovalSystemGUID string) {
 	db.ExecuteStoredProcedure("usp_RepositoryApproval_Update_ApprovalSystemGUID", param)
 }
 
-func GetProjectByName(projectName string) []map[string]interface{} {
-	db := ConnectDb()
-	defer db.Close()
-
-	param := map[string]interface{}{
-		"Name": projectName,
-	}
-
-	result, _ := db.ExecuteStoredProcedureWithResult("PR_Projects_Select_ByName", param)
-
-	return result
-}
-
 func GetProjectIdByOrgName(orgName, repoName string) (int64, error) {
 
 	db := ConnectDb()
@@ -443,7 +407,7 @@ func GetProjectIdByOrgName(orgName, repoName string) (int64, error) {
 		"Organization": orgName,
 	}
 
-	result, err := db.ExecuteStoredProcedureWithResult("PR_Projects_SelectProjectId_ByOrgName", param)
+	result, err := db.ExecuteStoredProcedureWithResult("usp_Repository_GetProjectId_ByAssetCodeAndOrganization", param)
 	if err != nil {
 		return 0, err
 	}
@@ -463,7 +427,7 @@ func GetProjectById(id int64) []map[string]interface{} {
 		"Id": id,
 	}
 
-	result, _ := db.ExecuteStoredProcedureWithResult("PR_Projects_Select_ById", param)
+	result, _ := db.ExecuteStoredProcedureWithResult("usp_Repository_Select_ById", param)
 
 	return result
 }
@@ -476,7 +440,7 @@ func GetProjectByGithubId(githubId int64) []map[string]interface{} {
 		"GithubId": githubId,
 	}
 
-	result, _ := db.ExecuteStoredProcedureWithResult("PR_Projects_Select_ByGithubId", param)
+	result, _ := db.ExecuteStoredProcedureWithResult("usp_Repository_Select_ByGitHubId", param)
 
 	return result
 }
@@ -489,7 +453,7 @@ func GetProjectByAssetCode(assetCode string) []map[string]interface{} {
 		"AssetCode": assetCode,
 	}
 
-	result, _ := db.ExecuteStoredProcedureWithResult("PR_Projects_Select_ByAssetCode", param)
+	result, _ := db.ExecuteStoredProcedureWithResult("usp_Repository_Select_ByAssetCode", param)
 
 	return result
 }
@@ -505,7 +469,7 @@ func ReposSelectByOffsetAndFilter(offset int, search string, filterType int, fil
 		"Filter":     filter,
 	}
 
-	result, _ := db.ExecuteStoredProcedureWithResult("PR_Repositories_Select_ByOffsetAndFilter", param)
+	result, _ := db.ExecuteStoredProcedureWithResult("usp_Repository_Select_ByOption", param)
 	return result
 }
 
@@ -516,10 +480,10 @@ func ReposTotalCountBySearchTerm(search string, filterType int, filter string) i
 	param := map[string]interface{}{
 		"FilterType": filterType,
 		"Filter":     filter,
-		"search":     search,
+		"Search":     search,
 	}
 
-	result, _ := db.ExecuteStoredProcedureWithResult("PR_Repositories_TotalCount_BySearchTerm", param)
+	result, _ := db.ExecuteStoredProcedureWithResult("usp_Repository_TotalCount_ByOption", param)
 	if result == nil {
 		return 0
 	}
@@ -539,7 +503,7 @@ func UpdateProjectIsArchived(id int64, isArchived bool) error {
 		"IsArchived": isArchived,
 	}
 
-	_, err := db.ExecuteStoredProcedure("PR_Projects_Update_IsArchived_ById", param)
+	_, err := db.ExecuteStoredProcedure("usp_Repository_Update_IsArchived", param)
 	if err != nil {
 		return err
 	}
@@ -556,7 +520,7 @@ func UpdateProjectVisibilityId(id int64, visibilityId int64) error {
 		"VisibilityId": visibilityId,
 	}
 
-	_, err := db.ExecuteStoredProcedure("PR_Projects_Update_Visibility_ById", param)
+	_, err := db.ExecuteStoredProcedure("usp_Repository_Update_Visibility", param)
 	if err != nil {
 		return err
 	}
@@ -574,7 +538,7 @@ func UpdateTFSProjectReferenceById(id int64, tFSProjectReference, organization s
 		"Organization":        organization,
 	}
 
-	_, err := db.ExecuteStoredProcedure("PR_Projects_Update_TFSProjectReference_ById", param)
+	_, err := db.ExecuteStoredProcedure("usp_Repository_Update_TFSProjectReference", param)
 	if err != nil {
 		return err
 	}
@@ -592,7 +556,7 @@ func GetRequestedReposByDateRange(start time.Time, end time.Time) ([]Repository,
 		"End":   end.Format("2006-01-02"),
 	}
 
-	result, err := db.ExecuteStoredProcedureWithResult("PR_Projects_Select_By_DateRange", param)
+	result, err := db.ExecuteStoredProcedureWithResult("usp_Repository_Select_ByDateRange", param)
 	if err != nil {
 		return nil, err
 	}
@@ -609,23 +573,11 @@ func GetRequestedReposByDateRange(start time.Time, end time.Time) ([]Repository,
 	return requestedRepos, nil
 }
 
-func GetGitHubRepositories() ([]map[string]interface{}, error) {
-	db := ConnectDb()
-	defer db.Close()
-
-	result, err := db.ExecuteStoredProcedureWithResult("PR_Projects_SelectAllGitHub", nil)
-	if err != nil {
-		return nil, err
-	}
-
-	return result, nil
-}
-
 func LegacySearch(params map[string]interface{}) ([]map[string]interface{}, error) {
 	db := ConnectDb()
 	defer db.Close()
 
-	result, err := db.ExecuteStoredProcedureWithResult("PR_Projects_LegacySearch", params)
+	result, err := db.ExecuteStoredProcedureWithResult("usp_Repository_LegacySearch", params)
 	if err != nil {
 		return nil, err
 	}

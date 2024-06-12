@@ -116,7 +116,7 @@ func CountOwnedRepoByVisibility(userPrincipalName, organization string, visibili
 		"Visibility":        visibility,
 	}
 
-	result, err := db.ExecuteStoredProcedureWithResult("PR_Projects_Count_OwnedRepoByVisibility", param)
+	result, err := db.ExecuteStoredProcedureWithResult("usp_Repository_TotalCountOwnedRepository_ByVisibility", param)
 	if err != nil {
 		return 0, err
 	}
