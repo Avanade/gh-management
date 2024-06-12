@@ -141,7 +141,6 @@
             @click="results.Source === 'Communities' ? window.location.href=`/communities` : '',
                       results.Source === 'Repositories' ? window.location.href=`/repositories?view=all&search=${results.Name}` : '' "
             class="cursor-pointer">
-            {{/* <tr x-show="resultsTable" @click="results.Source === 'Repositories' ? isSourceClicked('repositories') : isSourceClicked('community')" class="cursor-pointer"> */}}
             <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-500 sm:pl-6">
               <span x-text="results.Source" class="hover:shadow-md"></span>
             </td>
@@ -156,9 +155,6 @@
       </tbody>
     </table>
   </div>
-  {{/* <a @click="results.Source === 'Projects' ? isSourceClicked('projects') : isSourceClicked('community')" 
-class="cursor-pointer focus:outline-none"> */}}
-  {{/* </a> */}}
   <!-- END of Results Table -->
 
 
@@ -170,7 +166,6 @@ class="cursor-pointer focus:outline-none"> */}}
         Showing
         <span class="font-medium" x-text="SearchBy === null  ? 'false' : offSet + 1 ">-</span>
         to <span class="font-medium" x-text="SearchBy === null  ? 'false' : offSet + SearchBy.length ">-</span>
-        {{/* Total of <span class="font-medium" x-text="SearchBy === null  ? 'false' : SearchBy.length ">-</span> results */}}
       </p>
     </div>
 
@@ -363,29 +358,6 @@ class="cursor-pointer focus:outline-none"> */}}
         this.pagination = false
         console.log("Next Clicked")
       },
-      isSourceClicked(sourceClicked) {
-        switch (sourceClicked) {
-          case 'repositories':
-            githublink = "https://github.com/orgs"
-            organization = "Avanade".replace(/\s/g, "") + "/"
-            reponame = "gh-management".replace(/\s/g, "")
-            window.location.href = githublink + organization + reponame
-            console.log(communityname + ">>>communityname<<<")
-            break
-          case 'community':
-            communitynumber = ""
-            window.location.href = "/communities/" + communitynumber
-            console.log("COMMUNITY NUMBER --> " + this.form.searchList.table.ROW)
-            break
-          case 'users':
-            window.location.href = "/"
-            break
-          default:
-            console.log('defualt')
-            break
-        }
-      },
-
     }
   }
 </script>

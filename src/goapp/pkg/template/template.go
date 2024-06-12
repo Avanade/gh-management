@@ -13,13 +13,18 @@ import (
 )
 
 type PageData struct {
-	Header         interface{}
-	Profile        interface{}
-	ProfileGH      interface{}
-	Content        interface{}
-	IsGHAssociated bool
-	HasPhoto       bool
-	UserPhoto      string
+	Header            interface{}
+	Profile           interface{}
+	ProfileGH         interface{}
+	Content           interface{}
+	IsGHAssociated    bool
+	HasPhoto          bool
+	UserPhoto         string
+	IsMemberAccount   bool // Flag to indicate if user a org member or guest
+	ProfileLink       string
+	RequestAccessLink string
+	CommunitySite     string
+	Footers           []Footer
 }
 
 type Headers struct {
@@ -27,6 +32,11 @@ type Headers struct {
 	Title    string
 	LogoPath string
 	Page     string
+}
+
+type Footer struct {
+	Text string
+	Url  string
 }
 
 type Menu struct {
@@ -78,13 +88,36 @@ func UseTemplate(w *http.ResponseWriter, r *http.Request, page string, pageData 
 
 	masterPageData := Headers{Title: title, LogoPath: logoPath, Menu: menu, Page: GetUrlPath(r.URL.Path)}
 
+	var footers []Footer
+	footerString := os.Getenv("LINK_FOOTERS")
+	res := strings.Split(footerString, ";")
+	for _, footer := range res {
+		f := strings.Split(footer, ">")
+		footers = append(footers, Footer{f[0], f[01]})
+	}
+
 	data := PageData{
-		Header:    masterPageData,
-		Profile:   sessionaz.Values["profile"],
-		ProfileGH: sessiongh,
-		Content:   pageData,
-		HasPhoto:  hasPhoto,
-		UserPhoto: userPhoto,
+		Header:        masterPageData,
+		Profile:       sessionaz.Values["profile"],
+		ProfileGH:     sessiongh,
+		Content:       pageData,
+		HasPhoto:      hasPhoto,
+		UserPhoto:     userPhoto,
+		CommunitySite: os.Getenv("LINK_COMMUNITY_SHAREPOINT_SITE"),
+		Footers:       footers,
+	}
+
+	// Check user email to determine if user is member or guest
+	username := data.Profile.(map[string]interface{})["preferred_username"].(string)
+	data.IsMemberAccount = strings.Contains(strings.ToLower(username), strings.ToLower(os.Getenv("ORGANIZATION_NAME")))
+
+	// Set profile link and request access link
+	if data.IsMemberAccount {
+		data.ProfileLink = os.Getenv("LINK_MEMBER_PROFILE")
+		data.RequestAccessLink = os.Getenv("LINK_MEMBER_REQUEST_ACCESS")
+	} else {
+		data.ProfileLink = os.Getenv("LINK_GUEST_PROFILE")
+		data.RequestAccessLink = os.Getenv("LINK_GUEST_REQUEST_ACCESS")
 	}
 
 	if sessionaz.Values["isGHAssociated"] != nil {

@@ -3,6 +3,7 @@ package routes
 import (
 	"log"
 	"net/http"
+	"os"
 
 	"main/pkg/template"
 )
@@ -13,5 +14,8 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func ToolHandler(w http.ResponseWriter, r *http.Request) {
-	template.UseTemplate(&w, r, "tool", nil)
+	data := map[string]interface{}{
+		"toolApprovalProcess": os.Getenv("LINK_TOOL_APPROVAL_PROCESS"),
+	}
+	template.UseTemplate(&w, r, "tool", data)
 }

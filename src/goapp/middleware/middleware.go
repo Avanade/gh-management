@@ -10,8 +10,9 @@ type Middleware func(http.HandlerFunc) http.HandlerFunc
 func AzureAuth() Middleware {
 	return func(f http.HandlerFunc) http.HandlerFunc {
 		return func(w http.ResponseWriter, r *http.Request) {
-			session.IsAuthenticated(w, r)
-			f(w, r)
+			if session.IsAuthenticated(w, r) {
+				f(w, r)
+			}
 		}
 	}
 }
@@ -19,8 +20,9 @@ func AzureAuth() Middleware {
 func GitHubAuth() Middleware {
 	return func(f http.HandlerFunc) http.HandlerFunc {
 		return func(w http.ResponseWriter, r *http.Request) {
-			session.IsGHAuthenticated(w, r)
-			f(w, r)
+			if session.IsGHAuthenticated(w, r) {
+				f(w, r)
+			}
 		}
 	}
 }
@@ -28,8 +30,9 @@ func GitHubAuth() Middleware {
 func ManagedIdentityAuth() Middleware {
 	return func(f http.HandlerFunc) http.HandlerFunc {
 		return func(w http.ResponseWriter, r *http.Request) {
-			session.IsGuidAuthenticated(w, r)
-			f(w, r)
+			if session.IsGuidAuthenticated(w, r) {
+				f(w, r)
+			}
 		}
 	}
 }
@@ -37,8 +40,9 @@ func ManagedIdentityAuth() Middleware {
 func IsUserAdmin() Middleware {
 	return func(f http.HandlerFunc) http.HandlerFunc {
 		return func(w http.ResponseWriter, r *http.Request) {
-			session.IsUserAdmin(w, r)
-			f(w, r)
+			if session.IsUserAdminMW(w, r) {
+				f(w, r)
+			}
 		}
 	}
 }
