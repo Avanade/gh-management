@@ -65,11 +65,11 @@ func PopulateApprovalRequestApproversProjectApprovalsByProject(projectId int64, 
 	defer db.Close()
 
 	param := map[string]interface{}{
-		"ProjectId":   projectId,
-		"RequestedBy": requestedBy,
+		"RepositoryId": projectId,
+		"RequestedBy":  requestedBy,
 	}
 
-	result, err := db.ExecuteStoredProcedureWithResult("PR_ProjectApprovals_ApprovalRequestApprovers_Populate", param)
+	result, err := db.ExecuteStoredProcedureWithResult("usp_RepositoryApproval_Populate", param)
 	if err != nil {
 		return nil, err
 	}
@@ -79,14 +79,14 @@ func PopulateApprovalRequestApproversProjectApprovalsByProject(projectId int64, 
 	for _, v := range result {
 		projectApprovalApprover := ProjectApprovalApprovers{
 			Id:                         v["Id"].(int64),
-			ProjectId:                  v["ProjectId"].(int64),
-			ProjectName:                v["ProjectName"].(string),
-			ProjectDescription:         v["ProjectDescription"].(string),
+			ProjectId:                  v["RepositoryId"].(int64),
+			ProjectName:                v["RepositoryName"].(string),
+			ProjectDescription:         v["RepositoryDescription"].(string),
 			RequesterName:              v["RequesterName"].(string),
 			RequesterGivenName:         v["RequesterGivenName"].(string),
 			RequesterSurName:           v["RequesterSurName"].(string),
 			RequesterUserPrincipalName: v["RequesterUserPrincipalName"].(string),
-			ApprovalTypeId:             int(v["ApprovalTypeId"].(int64)),
+			ApprovalTypeId:             int(v["RepositoryApprovalTypeId"].(int64)),
 			ApprovalType:               v["ApprovalType"].(string),
 			ApprovalDescription:        v["ApprovalDescription"].(string),
 			RequestStatus:              v["RequestStatus"].(string),
@@ -103,8 +103,8 @@ func PopulateApprovalRequestApproversProjectApprovalsByProject(projectId int64, 
 			projectApprovalApprover.ApprovalRemarks = v["ApprovalRemarks"].(string)
 		}
 
-		if v["newcontribution"] != nil {
-			projectApprovalApprover.NewContribution = v["newcontribution"].(string)
+		if v["Newcontribution"] != nil {
+			projectApprovalApprover.NewContribution = v["Newcontribution"].(string)
 		}
 
 		if v["Willbecommercialversion"] != nil {
