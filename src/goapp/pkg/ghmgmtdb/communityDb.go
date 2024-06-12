@@ -130,7 +130,7 @@ func CommunityApprovalsSelectById(id int64) ([]map[string]interface{}, error) {
 		"Id": id,
 	}
 
-	result, err := db.ExecuteStoredProcedureWithResult("dbo.PR_CommunityApprovals_Select_ById", param)
+	result, err := db.ExecuteStoredProcedureWithResult("PR_CommunityApprovals_Select_ById", param)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -253,7 +253,7 @@ func Communities_Related(CommunityId int64) (data []RelatedCommunity, err error)
 		"CommunityId": CommunityId,
 	}
 
-	result, err := db.ExecuteStoredProcedureWithResult("dbo.usp_Community_Select_RelatedCommunity", param)
+	result, err := db.ExecuteStoredProcedureWithResult("usp_Community_Select_RelatedCommunity", param)
 
 	if err != nil {
 		fmt.Println(err)

@@ -232,26 +232,6 @@ func CreateRepository(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func UpdateRepositoryById(w http.ResponseWriter, r *http.Request) {
-	sessionaz, _ := session.Store.Get(r, "auth-session")
-	iprofile := sessionaz.Values["profile"]
-	profile := iprofile.(map[string]interface{})
-	username := profile["preferred_username"]
-	r.ParseForm()
-
-	var body db.Project
-
-	err := json.NewDecoder(r.Body).Decode(&body)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	db.PRProjectsUpdate(body, username.(string))
-
-	w.WriteHeader(http.StatusOK)
-}
-
 func UpdateRepositoryEcattIdById(w http.ResponseWriter, r *http.Request) {
 	logger := appinsights_wrapper.NewClient()
 	defer logger.EndOperation()
@@ -1176,7 +1156,7 @@ func RepoOwnersCleanup(w http.ResponseWriter, r *http.Request) {
 	token := os.Getenv("GH_TOKEN")
 
 	// Get all repos from database
-	repos, err := db.GetGitHubRepositories()
+	repos, err := db.ProjectsByRepositorySource("GitHub")
 	if err != nil {
 		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
