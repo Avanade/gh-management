@@ -11,7 +11,7 @@ BEGIN
     [U].[GivenName] AS [RequesterGivenName], 
     [U].[SurName] AS [RequesterSurName], 
     [U].[UserPrincipalName] AS [RequesterUserPrincipalName],
-    [C].[Name] [CoownerName], 
+    [C].[Name] AS [CoownerName], 
     [C].[GivenName] AS [CoownerGivenName], 
     [C].[SurName] AS [CoownerSurName], 
     [C].[UserPrincipalName] AS [CoownerUserPrincipalName],

@@ -9,7 +9,7 @@ BEGIN
     [RA].[RepositoryApprovalTypeId],
     [T].[Name] AS [ApprovalType],
     [RA].[ApprovalDescription],
-    [S].[Name] [RequestStatus],
+    [S].[Name] AS [RequestStatus],
     [RA].[ApprovalDate], 
     [RA].[ApprovalRemarks]
   FROM [dbo].[RepositoryApproval] AS [RA]
