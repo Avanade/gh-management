@@ -82,7 +82,7 @@ func CommunitiesActivities_TotalCount() int {
 	db := ConnectDb()
 	defer db.Close()
 
-	result, _ := db.ExecuteStoredProcedureWithResult("PR_CommunityActivities_TotalCount", nil)
+	result, _ := db.ExecuteStoredProcedureWithResult("usp_CommunityActivity_TotalCount_ByOption", nil)
 	total, err := strconv.Atoi(fmt.Sprint(result[0]["Total"]))
 	if err != nil {
 		return 0

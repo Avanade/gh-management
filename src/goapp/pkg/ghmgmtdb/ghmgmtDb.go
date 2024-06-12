@@ -20,13 +20,13 @@ func SearchCommunitiesProjectsUsers(searchText, offSet, rowCount, username strin
 	defer db.Close()
 
 	params := map[string]interface{}{
-		"searchText":    searchText,
-		"offSet":        offSet,
-		"rowCount":      rowCount,
-		"userprincipal": username,
+		"Search":            searchText,
+		"OffSet":            offSet,
+		"RowCount":          rowCount,
+		"UserPrincipalName": username,
 	}
 
-	result, err := db.ExecuteStoredProcedureWithResult("PR_Search_communities_projects_users", params)
+	result, err := db.ExecuteStoredProcedureWithResult("usp_Search", params)
 	if err != nil {
 		return nil, err
 	}
@@ -65,26 +65,7 @@ func UpdateCommunityApprovalApproverResponse(itemId, remarks, responseDate strin
 		"ApprovalDate":       responseDate,
 	}
 
-	_, err := db.ExecuteStoredProcedure("PR_CommunityApproval_Update_ApproverResponse", params)
-	if err != nil {
-		return false, err
-	}
-
-	return true, nil
-}
-
-func UpdateOrganizationApprovalApproverResponse(itemId, remarks, responseDate string, approvalStatusId int) (bool, error) {
-	db := ConnectDb()
-	defer db.Close()
-
-	params := map[string]interface{}{
-		"ApprovalSystemGUID": itemId,
-		"ApprovalStatusId":   approvalStatusId,
-		"ApprovalRemarks":    remarks,
-		"ApprovalDate":       responseDate,
-	}
-
-	_, err := db.ExecuteStoredProcedure("PR_CommunityApproval_UpdateOrganization_ApproverResponse", params)
+	_, err := db.ExecuteStoredProcedure("usp_ApprovalRequest_Update_CommunityApproverResponse", params)
 	if err != nil {
 		return false, err
 	}
