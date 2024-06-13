@@ -27,7 +27,7 @@
   </ItemGroup> -->
 
   <!-- STEP 2 -->
-  <ItemGroup>
+  <!-- <ItemGroup>
     <PostDeploy Include="Script.PostDeployment.sql" />
   </ItemGroup>
   <ItemGroup>
@@ -39,10 +39,10 @@
     <Build Remove="Script.OldPostDeployment.sql" />
     <Build Remove="New Tables\**" />
     <Build Remove="New Stored Procedures\**" />
-  </ItemGroup>
+  </ItemGroup> -->
 
   <!-- NEW TABLES AND STORED PROCEDURES -->
-  <!-- <ItemGroup>
+  <ItemGroup>
     <PostDeploy Include="Script.NewPostDeployment.sql" />
   </ItemGroup>
   <ItemGroup>
@@ -55,5 +55,5 @@
     <Build Remove="Functions\**" />
     <Build Remove="Tables\**" />
     <Build Remove="Stored Procedures\**" />
-  </ItemGroup> -->
+  </ItemGroup>
 </Project>
