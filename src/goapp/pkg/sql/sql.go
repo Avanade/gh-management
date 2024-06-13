@@ -49,6 +49,11 @@ func Init(cp ConnectionParam) (*DB, error) {
 }
 
 func (db *DB) ExecuteStoredProcedure(procedure string, params map[string]interface{}) (sql.Result, error) {
+	fmt.Println(
+		"==================================================\n",
+		"SP : ", procedure,
+		"\n==================================================")
+
 	var args []interface{}
 
 	for i, v := range params {
@@ -66,6 +71,10 @@ func (db *DB) ExecuteStoredProcedure(procedure string, params map[string]interfa
 }
 
 func (db *DB) ExecuteStoredProcedureWithResult(procedure string, params map[string]interface{}) ([]map[string]interface{}, error) {
+	fmt.Println(
+		"==================================================\n",
+		"SP WITH RESULT : ", procedure,
+		"\n==================================================")
 	var args []interface{}
 
 	ctx := context.Background()
