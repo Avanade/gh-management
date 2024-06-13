@@ -69,7 +69,7 @@ func Users_Get_GHUser(UserPrincipalName string) (GHUser string) {
 
 	param := map[string]interface{}{
 
-		"UserPrincipalName": UserPrincipalName,
+		"GitHubUser": UserPrincipalName,
 	}
 
 	result, err := db.ExecuteStoredProcedureWithResult("usp_User_Select_ByGitHubUser", param)
@@ -152,7 +152,7 @@ func UsersGetEmail(GithubUser string) (string, error) {
 	defer db.Close()
 
 	param := map[string]interface{}{
-		"GithubUser": GithubUser,
+		"GitHubUser": GithubUser,
 	}
 
 	result, err := db.ExecuteStoredProcedureWithResult("usp_User_Select_ByGitHubUser", param)
