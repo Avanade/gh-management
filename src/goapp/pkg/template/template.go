@@ -94,7 +94,7 @@ func UseTemplate(w *http.ResponseWriter, r *http.Request, page string, pageData 
 	res := strings.Split(footerString, ";")
 	for _, footer := range res {
 		f := strings.Split(footer, ">")
-		footers = append(footers, Footer{f[0], f[01]})
+		footers = append(footers, Footer{f[0], f[1]})
 	}
 
 	data := PageData{
