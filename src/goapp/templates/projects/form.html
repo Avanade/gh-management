@@ -16,7 +16,7 @@
         <fieldset x-bind:disabled="isFieldsetDisabled">
             <h3 class="text-lg font-medium leading-6 text-gray-900">Repository information</h3>
             <p class="mt-1 text-sm text-gray-500">
-                All repositories start on Avanade’s innersource on GitHub. Once you have identified a business sponsor,
+                All repositories start on {{ .OrganizationName }}’s innersource on GitHub. Once you have identified a business sponsor,
                 and
                 submitted
                 your first automated security scan, you can request to move the repository to open source. If you open
@@ -40,7 +40,7 @@
                         </div>
                         <div class="mt-1 text-sm text-gray-500">The title should represent what the asset does. Avoid
                             acronyms, code names and the use of the word
-                            &#39;Avanade&#39;. <br>
+                            &#39;{{ .OrganizationName }}&#39;. <br>
                         </div>
                     </div>
                 </div>
@@ -219,7 +219,7 @@
                 </div>
                 <div class="ml-3 text-sm">
                     <p class="text-gray-900">
-                        I confirm that this repository is Avanade owned intellectual property, or the legal team have
+                        I confirm that this repository is {{ .OrganizationName }} owned intellectual property, or the legal team have
                         approved
                         this repository.
                     </p>
@@ -256,7 +256,7 @@
 
         </fieldset>
         <br>
-        <p class="ml-3 mt-1 text-sm text-gray-900"> Repositories will be automatically created in Avanade innersource,
+        <p class="ml-3 mt-1 text-sm text-gray-900"> Repositories will be automatically created in {{ .OrganizationName }} innersource,
             and you will receive a Teams notification
             with a link to the repository.<br />
             You can also view your repository under the repositories tab.
@@ -268,7 +268,7 @@
                     <p class="text-sm text-red-700">
                         Before any innersource code can be used on other projects, as the asset owner you must follow
                         <a class="text-blue-700" target="_blank"
-                            href="***REMOVED***">Avanade's
+                            href="{{ .innersourceGeneralGuidelines }}">{{ .OrganizationName }}'s
                             guidelines</a>
                         , covering export compliance, OSS scans, IP reviews, security and data privacy.
                     </p>

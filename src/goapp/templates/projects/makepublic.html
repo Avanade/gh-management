@@ -23,7 +23,7 @@
             <div class="flex flex flex-col md:flex-row mt-7">
                 <div class="basis-1/2 md:base-full  md:flex-row mx-3 self-center">
                     <div class="flex flex-col pl-2 ml-3 mt-1 text-sm text-gray-900">
-                        Is this a new contribution with no prior code development? (i.e., no existing Avanade IP, no
+                        Is this a new contribution with no prior code development? (i.e., no existing {{ .OrganizationName }} IP, no
                         third-party/OSS code, etc.)
                     </div>
                 </div>
@@ -59,7 +59,7 @@
             <div class="flex flex flex-col md:flex-row my-3 mt-5">
                 <div class="basis-1/2 md:base-full md:flex-row mx-3 self-center">
                     <div class="flex flex-col pl-2 ml-3 mt-1 text-sm text-gray-900">
-                        Will Avanade use this contribution in client accounts and/or as part of an Avanade
+                        Will {{ .OrganizationName }} use this contribution in client accounts and/or as part of an {{ .OrganizationName }}
                         offerings/assets?
                     </div>
                 </div>

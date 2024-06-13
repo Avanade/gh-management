@@ -328,7 +328,7 @@ func SendReassignEmail(data db.ProjectApproval) error {
 								<tr class="border-top">
 									<td style="font-size: 14px; padding-top: 15px; font-weight: 600;">
 										Is this a new contribution with no prior code development? <br>
-										(i.e., no existing Avanade IP, no third-party/OSS code, etc.)
+										(i.e., no existing |OrganizationName| IP, no third-party/OSS code, etc.)
 									</td>
 									<td style="font-size: 14px; padding-top: 15px; font-weight: 400;">
 										|Newcontribution|
@@ -336,7 +336,7 @@ func SendReassignEmail(data db.ProjectApproval) error {
 								</tr>
 								<tr class="border-top">
 									<td style="font-size: 14px; padding-top: 15px; font-weight: 600;">
-										Who is sponsoring thapprovalsyscois OSS contribution?
+										Who is sponsoring this OSS contribution?
 									</td>
 									<td style="font-size: 14px; padding-top: 15px; font-weight: 400;">
 										|OSSsponsor|
@@ -344,8 +344,8 @@ func SendReassignEmail(data db.ProjectApproval) error {
 								</tr>
 								<tr class="border-top">
 									<td style="font-size: 14px; padding-top: 15px; font-weight: 600;">
-										Will Avanade use this contribution in client accounts <br>
-										and/or as part of an Avanade offerings/assets?
+										Will |OrganizationName| use this contribution in client accounts <br>
+										and/or as part of an |OrganizationName| offerings/assets?
 									</td>
 									<td style="font-size: 14px; padding-top: 15px; font-weight: 400;">
 										|Avanadeofferingsassets|
@@ -429,6 +429,7 @@ func SendReassignEmail(data db.ProjectApproval) error {
 		"|RejectUrl|", data.RejectUrl,
 		"|ApproveText|", data.ApproveText,
 		"|RejectText|", data.RejectText,
+		"|OrganizationName|", os.Getenv("ORGANIZATION_NAME"),
 	)
 
 	body := replacer.Replace(bodyTemplate)
