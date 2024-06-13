@@ -5,7 +5,7 @@ func GetCommunityApprovers(category string) ([]map[string]interface{}, error) {
 	defer db.Close()
 
 	param := map[string]interface{}{
-		"@GuidanceCategory": category,
+		"GuidanceCategory": category,
 	}
 
 	result, err := db.ExecuteStoredProcedureWithResult("usp_CommunityApprover_Select", param)
@@ -21,7 +21,7 @@ func GetActiveCommunityApprovers(category string) ([]map[string]interface{}, err
 	defer db.Close()
 
 	param := map[string]interface{}{
-		"@GuidanceCategory": category,
+		"GuidanceCategory": category,
 	}
 
 	result, err := db.ExecuteStoredProcedureWithResult("usp_CommunityApprover_Select_Active", param)

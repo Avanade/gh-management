@@ -17,7 +17,7 @@ CREATE PROCEDURE [dbo].[usp_Repository_Insert]
 	@ECATTReference [VARCHAR](150) = NULL
 AS
 BEGIN
-  DECLARE @Id TABLE([Id] [INT]);
+  DECLARE @Id AS [INT]
 
   INSERT INTO [dbo].[Repository]
   (
@@ -40,7 +40,6 @@ BEGIN
     [MaturityRating],
     [ECATTReference]
   )
-  OUTPUT [INSERTED].[Id] INTO @Id
   VALUES 
   (
     @GithubId,
@@ -62,4 +61,7 @@ BEGIN
     @MaturityRating,
     @ECATTReference
   )
+
+  SET @Id = SCOPE_IDENTITY()
+	SELECT @Id [Id]
 END

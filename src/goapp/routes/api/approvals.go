@@ -176,9 +176,9 @@ func UpdateCommunityApprovalReassignApprover(w http.ResponseWriter, r *http.Requ
 	}
 
 	param := map[string]interface{}{
-		"@ApprovalSystemGUID":        req.Id,
-		"@ApproverUserPrincipalName": req.ApproverEmail,
-		"@UserPrincipalName":         req.Username,
+		"ApprovalSystemGUID":        req.Id,
+		"ApproverUserPrincipalName": req.ApproverEmail,
+		"UserPrincipalName":         req.Username,
 	}
 	result, err := db.CommunityApprovalslUpdateApproverUserPrincipalName(param)
 	if err != nil {

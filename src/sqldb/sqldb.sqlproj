@@ -42,7 +42,7 @@
   </ItemGroup> -->
 
   <!-- NEW TABLES AND STORED PROCEDURES -->
-  <!-- <ItemGroup>
+  <ItemGroup>
     <PostDeploy Include="Script.NewPostDeployment.sql" />
   </ItemGroup>
   <ItemGroup>
@@ -55,5 +55,5 @@
     <Build Remove="Functions\**" />
     <Build Remove="Tables\**" />
     <Build Remove="Stored Procedures\**" />
-  </ItemGroup> -->
+  </ItemGroup>
 </Project>

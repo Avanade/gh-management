@@ -73,7 +73,7 @@ func GetRepoOwnersRecordByRepoId(id int64) (repoOwner []RepoOwner, err error) {
 	defer db.Close()
 
 	param := map[string]interface{}{
-		"@RepositoryId": id,
+		"RepositoryId": id,
 	}
 	result, err := db.ExecuteStoredProcedureWithResult("usp_RepositoryOwner_Select_ByRepositoryId", param)
 	if err != nil {
