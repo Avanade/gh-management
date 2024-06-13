@@ -336,7 +336,7 @@ func SendReassignEmail(data db.ProjectApproval) error {
 								</tr>
 								<tr class="border-top">
 									<td style="font-size: 14px; padding-top: 15px; font-weight: 600;">
-										Who is sponsoring thapprovalsyscois OSS contribution?
+										Who is sponsoring this OSS contribution?
 									</td>
 									<td style="font-size: 14px; padding-top: 15px; font-weight: 400;">
 										|OSSsponsor|
