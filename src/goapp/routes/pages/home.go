@@ -10,7 +10,10 @@ import (
 
 func HomeHandler(w http.ResponseWriter, r *http.Request) {
 	log.Printf("APP RUNNING")
-	template.UseTemplate(&w, r, "home", nil)
+	data := map[string]interface{}{
+		"OrganizationName": os.Getenv("ORGANIZATION_NAME"),
+	}
+	template.UseTemplate(&w, r, "home", data)
 }
 
 func ToolHandler(w http.ResponseWriter, r *http.Request) {

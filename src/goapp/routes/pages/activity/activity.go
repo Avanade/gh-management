@@ -1,11 +1,10 @@
 package routes
 
 import (
-	"log"
 	"net/http"
+	"os"
 	"strconv"
 
-	"main/pkg/session"
 	"main/pkg/template"
 
 	"github.com/gorilla/mux"
@@ -14,13 +13,11 @@ import (
 )
 
 func IndexHandler(w http.ResponseWriter, r *http.Request) {
-	sessionaz, err := session.Store.Get(r, "auth-session")
-	if err != nil {
-		log.Println(err.Error())
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	template.UseTemplate(&w, r, "activities/index", sessionaz)
+	template.UseTemplate(&w, r, "activities/index", struct {
+		OrganizationName string
+	}{
+		OrganizationName: os.Getenv("ORGANIZATION_NAME"),
+	})
 }
 
 func FormHandler(w http.ResponseWriter, r *http.Request) {
@@ -32,10 +29,12 @@ func FormHandler(w http.ResponseWriter, r *http.Request) {
 	caser := cases.Title(language.Und, cases.NoLower)
 
 	template.UseTemplate(&w, r, "activities/form", struct {
-		Id     int
-		Action string
+		Id               int
+		Action           string
+		OrganizationName string
 	}{
-		Id:     id,
-		Action: caser.String(action),
+		Id:               id,
+		Action:           caser.String(action),
+		OrganizationName: os.Getenv("ORGANIZATION_NAME"),
 	})
 }

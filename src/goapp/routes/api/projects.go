@@ -1578,7 +1578,7 @@ func ApprovalSystemRequest(data db.ProjectApprovalApprovers, logger *appinsights
 								<tr class="border-top">
 									<td style="font-size: 14px; padding-top: 15px; font-weight: 600;">
 										Is this a new contribution with no prior code development? <br>
-										(i.e., no existing Avanade IP, no third-party/OSS code, etc.)
+										(i.e., no existing |OrganizationName| IP, no third-party/OSS code, etc.)
 									</td>
 									<td style="font-size: 14px; padding-top: 15px; font-weight: 400;">
 										|Newcontribution|
@@ -1594,8 +1594,8 @@ func ApprovalSystemRequest(data db.ProjectApprovalApprovers, logger *appinsights
 								</tr>
 								<tr class="border-top">
 									<td style="font-size: 14px; padding-top: 15px; font-weight: 600;">
-										Will Avanade use this contribution in client accounts <br>
-										and/or as part of an Avanade offerings/assets?
+										Will |OrganizationName| use this contribution in client accounts <br>
+										and/or as part of an |OrganizationName| offerings/assets?
 									</td>
 									<td style="font-size: 14px; padding-top: 15px; font-weight: 400;">
 										|Avanadeofferingsassets|
@@ -1651,6 +1651,7 @@ func ApprovalSystemRequest(data db.ProjectApprovalApprovers, logger *appinsights
 			"|Avanadeofferingsassets|", data.OfferingsAssets,
 			"|Willbecommercialversion|", data.WillBeCommercialVersion,
 			"|OSSContributionInformation|", data.OSSContributionInformation,
+			"|OrganizationName|", os.Getenv("ORGANIZATION_NAME"),
 		)
 		body := replacer.Replace(bodyTemplate)
 		postParams := ProjectApprovalSystemPostDto{

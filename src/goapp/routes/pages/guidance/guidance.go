@@ -3,6 +3,7 @@ package routes
 import (
 	"log"
 	"net/http"
+	"os"
 
 	"main/pkg/session"
 	"main/pkg/template"
@@ -24,8 +25,9 @@ func IndexHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	data := map[string]interface{}{
-		"Id":      id,
-		"IsAdmin": isAdmin,
+		"Id":               id,
+		"IsAdmin":          isAdmin,
+		"OrganizationName": os.Getenv("ORGANIZATION_NAME"),
 	}
 	template.UseTemplate(&w, r, "/guidance/index", data)
 }

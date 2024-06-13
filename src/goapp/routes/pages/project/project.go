@@ -53,6 +53,7 @@ func MakePublicHandler(w http.ResponseWriter, r *http.Request) {
 		"isOpenSourceMember":  isOpenSourceMember,
 		"innersourceOrg":      innerSourceOrgName,
 		"opensourceOrg":       openSourceOrgName,
+		"OrganizationName":    os.Getenv("ORGANIZATION_NAME"),
 	}
 
 	template.UseTemplate(&w, r, "projects/makepublic", data)
@@ -96,6 +97,7 @@ func FormHandler(w http.ResponseWriter, r *http.Request) {
 		"opensourceOrg":                openSourceOrgName,
 		"isInvalidToken":               isInvalidToken,
 		"innersourceGeneralGuidelines": os.Getenv("LINK_INNERSOURCE_GENERAL_GUIDELINES"),
+		"OrganizationName":             os.Getenv("ORGANIZATION_NAME"),
 	}
 
 	template.UseTemplate(&w, r, "projects/form", data)
