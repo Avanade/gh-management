@@ -10,21 +10,50 @@
   <Target Name="BeforeBuild">
     <Delete Files="$(BaseIntermediateOutputPath)\project.assets.json" />
   </Target>
+
+  <!-- STEP 1 -->
+  <ItemGroup>
+    <PostDeploy Include="Script.OldPostDeployment.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Tables\" />
+    <Folder Include="Stored Procedures\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Build Remove="Script.NewPostDeployment.sql" />
+    <Build Remove="Script.PostDeployment.sql" />
+    <Build Remove="New Tables\**" />
+    <Build Remove="New Stored Procedures\**" />
+  </ItemGroup>
+
+  <!-- STEP 2 -->
   <!-- <ItemGroup>
     <PostDeploy Include="Script.PostDeployment.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Tables\" />
+    <Folder Include="Stored Procedures\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Build Remove="Script.NewPostDeployment.sql" />
+    <Build Remove="Script.OldPostDeployment.sql" />
+    <Build Remove="New Tables\**" />
+    <Build Remove="New Stored Procedures\**" />
   </ItemGroup> -->
+
+  <!-- NEW TABLES AND STORED PROCEDURES -->
+  <!-- <ItemGroup>
+    <PostDeploy Include="Script.NewPostDeployment.sql" />
+  </ItemGroup>
   <ItemGroup>
     <Folder Include="New Tables\" />
     <Folder Include="New Stored Procedures\" />
-    <!-- <Folder Include="Tables\" /> -->
-    <!-- <Folder Include="Stored Procedures\" /> -->
   </ItemGroup>
   <ItemGroup>
     <Build Remove="Script.PostDeployment.sql" />
+    <Build Remove="Script.OldPostDeployment.sql" />
     <Build Remove="Functions\**" />
-    <!-- <Build Remove="New Tables\**" /> -->
-    <!-- <Build Remove="New Stored Procedures\**" /> -->
     <Build Remove="Tables\**" />
     <Build Remove="Stored Procedures\**" />
-  </ItemGroup>
+  </ItemGroup> -->
 </Project>
