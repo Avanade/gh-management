@@ -339,8 +339,9 @@ func Community_Onboarding_AddMember(CommunityId int64, UserPrincipalName string)
 
 	if err != nil {
 		fmt.Println(err)
+		return err
 	}
-	return
+	return nil
 }
 
 func Community_Onboarding_RemoveMember(CommunityId int64, UserPrincipalName string) (err error) {
