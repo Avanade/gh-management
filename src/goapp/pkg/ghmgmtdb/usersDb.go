@@ -10,19 +10,6 @@ func GetUsersWithGithub() interface{} {
 	return result
 }
 
-func IsUserExist(userPrincipalName string) bool {
-	db := ConnectDb()
-	defer db.Close()
-
-	param := map[string]interface{}{
-		"UserPrincipalName": userPrincipalName,
-	}
-
-	result, _ := db.ExecuteStoredProcedureWithResult("usp_User_IsExisting", param)
-
-	return result[0]["Result"] == 1
-}
-
 func InsertUser(userPrincipalName, name, givenName, surName, jobTitle string) error {
 	db := ConnectDb()
 	defer db.Close()
