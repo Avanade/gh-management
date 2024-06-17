@@ -155,22 +155,3 @@ func ActivityTypes_Select() interface{} {
 	}
 	return result
 }
-
-func ActivityTypes_Insert(name string) (int, error) {
-	db := ConnectDb()
-	defer db.Close()
-
-	param := map[string]interface{}{
-		"Name": name,
-	}
-
-	result, err := db.ExecuteStoredProcedureWithResult("usp_ActivityType_Insert", param)
-	if err != nil {
-		return -1, err
-	}
-	id, err := strconv.Atoi(fmt.Sprint(result[0]["Id"]))
-	if err != nil {
-		return -1, err
-	}
-	return id, nil
-}
