@@ -16,11 +16,11 @@ func RepoOwnersInsert(ProjectId int64, userPrincipalName string) error {
 	defer db.Close()
 
 	param := map[string]interface{}{
-		"ProjectId":         ProjectId,
+		"RepositoryId":      ProjectId,
 		"UserPrincipalName": userPrincipalName,
 	}
 
-	_, err := db.ExecuteStoredProcedure("PR_RepoOwners_Insert", param)
+	_, err := db.ExecuteStoredProcedure("usp_RepositoryOwner_Insert", param)
 	if err != nil {
 		return err
 	}
@@ -52,14 +52,14 @@ func SelectAllRepoNameAndOwners() (repoOwner []RepoOwner, err error) {
 	db := ConnectDb()
 	defer db.Close()
 
-	result, err := db.ExecuteStoredProcedureWithResult("PR_RepoOwners_SelectAllRepoNameAndOwners", nil)
+	result, err := db.ExecuteStoredProcedureWithResult("usp_RepositoryOwner_Select", nil)
 	if err != nil {
 		println(err)
 	}
 
 	for _, v := range result {
 		data := RepoOwner{
-			Id:                v["ProjectId"].(int64),
+			Id:                v["RepositoryId"].(int64),
 			RepoName:          v["Name"].(string),
 			UserPrincipalName: v["UserPrincipalName"].(string),
 		}
@@ -73,16 +73,16 @@ func GetRepoOwnersRecordByRepoId(id int64) (repoOwner []RepoOwner, err error) {
 	defer db.Close()
 
 	param := map[string]interface{}{
-		"ProjectId": id,
+		"RepositoryId": id,
 	}
-	result, err := db.ExecuteStoredProcedureWithResult("PR_RepoOwners_Select_ByRepoId", param)
+	result, err := db.ExecuteStoredProcedureWithResult("usp_RepositoryOwner_Select_ByRepositoryId", param)
 	if err != nil {
 		return nil, err
 	}
 
 	for _, v := range result {
 		data := RepoOwner{
-			Id:                v["ProjectId"].(int64),
+			Id:                v["RepositoryId"].(int64),
 			UserPrincipalName: v["UserPrincipalName"].(string),
 		}
 		repoOwner = append(repoOwner, data)
@@ -116,7 +116,7 @@ func CountOwnedRepoByVisibility(userPrincipalName, organization string, visibili
 		"Visibility":        visibility,
 	}
 
-	result, err := db.ExecuteStoredProcedureWithResult("PR_Projects_Count_OwnedRepoByVisibility", param)
+	result, err := db.ExecuteStoredProcedureWithResult("usp_Repository_TotalCountOwnedRepository_ByVisibility", param)
 	if err != nil {
 		return 0, err
 	}
@@ -129,10 +129,10 @@ func DeleteRepoOwnerRecordByUserAndProjectId(id int64, userPrincipalName string)
 	defer db.Close()
 
 	param := map[string]interface{}{
-		"ProjectId":         id,
+		"RepositoryId":      id,
 		"UserPrincipalName": userPrincipalName,
 	}
-	_, err := db.ExecuteStoredProcedure("PR_RepoOwners_Delete_ByUserAndProjectId", param)
+	_, err := db.ExecuteStoredProcedure("usp_RepositoryOwner_Delete", param)
 	if err != nil {
 		return err
 	}

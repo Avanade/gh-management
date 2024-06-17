@@ -19,31 +19,14 @@ SET IDENTITY_INSERT ApprovalStatus ON
 SET IDENTITY_INSERT ApprovalStatus OFF
 
 /* INITIAL DATA FOR APPROVAL TYPES */
-IF (EXISTS (SELECT * 
-                 FROM INFORMATION_SCHEMA.TABLES 
-                 WHERE TABLE_SCHEMA = 'dbo' 
-                 AND  TABLE_NAME = 'RepositoryApprovalType'))
-    BEGIN
-        SET IDENTITY_INSERT RepositoryApprovalType ON
-            IF NOT EXISTS (SELECT [Id] FROM [dbo].[RepositoryApprovalType] WHERE [Id] = 1)
-                INSERT INTO [dbo].[RepositoryApprovalType] ([Id], [Name]) VALUES (1, 'Intellectual Property') 
-            IF NOT EXISTS (SELECT [Id] FROM [dbo].[RepositoryApprovalType] WHERE [Id] = 2)
-                INSERT INTO [dbo].[RepositoryApprovalType] ([Id], [Name]) VALUES (2, 'Legal') 
-            IF NOT EXISTS (SELECT [Id] FROM [dbo].[RepositoryApprovalType] WHERE [Id] = 3)
-                INSERT INTO [dbo].[RepositoryApprovalType] ([Id], [Name]) VALUES (3, 'Security')
-        SET IDENTITY_INSERT RepositoryApprovalType OFF
-    END
-ELSE
-    BEGIN
-        SET IDENTITY_INSERT ApprovalTypes ON
-            IF NOT EXISTS (SELECT [Id] FROM [dbo].[ApprovalTypes] WHERE [Id] = 1)
-                INSERT INTO [dbo].[ApprovalTypes] ([Id], [Name]) VALUES (1, 'Intellectual Property') 
-            IF NOT EXISTS (SELECT [Id] FROM [dbo].[ApprovalTypes] WHERE [Id] = 2)
-                INSERT INTO [dbo].[ApprovalTypes] ([Id], [Name]) VALUES (2, 'Legal') 
-            IF NOT EXISTS (SELECT [Id] FROM [dbo].[ApprovalTypes] WHERE [Id] = 3)
-                INSERT INTO [dbo].[ApprovalTypes] ([Id], [Name]) VALUES (3, 'Security')
-        SET IDENTITY_INSERT ApprovalTypes OFF
-    END
+SET IDENTITY_INSERT ApprovalTypes ON
+    IF NOT EXISTS (SELECT [Id] FROM [dbo].[ApprovalTypes] WHERE [Id] = 1)
+        INSERT INTO [dbo].[ApprovalTypes] ([Id], [Name]) VALUES (1, 'Intellectual Property') 
+    IF NOT EXISTS (SELECT [Id] FROM [dbo].[ApprovalTypes] WHERE [Id] = 2)
+        INSERT INTO [dbo].[ApprovalTypes] ([Id], [Name]) VALUES (2, 'Legal') 
+    IF NOT EXISTS (SELECT [Id] FROM [dbo].[ApprovalTypes] WHERE [Id] = 3)
+        INSERT INTO [dbo].[ApprovalTypes] ([Id], [Name]) VALUES (3, 'Security')
+SET IDENTITY_INSERT ApprovalTypes OFF
 
 /* INITIAL DATA FOR VISIBILITY */
 SET IDENTITY_INSERT Visibility ON 
@@ -292,6 +275,7 @@ IF (NOT EXISTS (SELECT *
 BEGIN
     EXEC sp_rename 'dbo.CommunityApproversList', 'CommunityApprover'
 
+    EXEC sp_rename 'dbo.CommunityApprover.Category', 'GuidanceCategory', 'COLUMN';
     EXEC sp_rename 'dbo.CommunityApprover.Disabled', 'IsDisabled', 'COLUMN';
 END
 
@@ -530,7 +514,7 @@ BEGIN
 
     -- CommunityApproversList	CommunityApprover
     ALTER TABLE [dbo].[CommunityApprover] ADD CONSTRAINT [FK_CommunityApprover_User] FOREIGN KEY ([ApproverUserPrincipalName]) REFERENCES [dbo].[User]([UserPrincipalName])
-    ALTER TABLE [dbo].[CommunityApprover] ADD CONSTRAINT [AK_ApproverUserPrincipalName_Categoy] UNIQUE ([ApproverUserPrincipalName], [Category])
+    ALTER TABLE [dbo].[CommunityApprover] ADD CONSTRAINT [AK_ApproverUserPrincipalName_Categoy] UNIQUE ([ApproverUserPrincipalName], [GuidanceCategory])
 
     -- CommunityMembers	CommunityMember
     ALTER TABLE [dbo].[CommunityMember] ADD CONSTRAINT [PK_CommunityMember] PRIMARY KEY ([CommunityId], [UserPrincipalName])

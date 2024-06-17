@@ -129,18 +129,18 @@ func UpdateApprovalReassignApprover(w http.ResponseWriter, r *http.Request) {
 	for _, v := range result {
 		data := db.ProjectApproval{
 			Id:                         v["Id"].(int64),
-			ProjectId:                  v["ProjectId"].(int64),
-			ProjectName:                v["ProjectName"].(string),
-			ProjectDescription:         v["ProjectDescription"].(string),
+			ProjectId:                  v["RepositoryId"].(int64),
+			ProjectName:                v["RepositoryName"].(string),
+			ProjectDescription:         v["RepositoryDescription"].(string),
 			RequesterGivenName:         v["RequesterGivenName"].(string),
 			RequesterSurName:           v["RequesterSurName"].(string),
 			RequesterName:              v["RequesterName"].(string),
 			RequesterUserPrincipalName: v["RequesterUserPrincipalName"].(string),
-			ApprovalTypeId:             v["ApprovalTypeId"].(int64),
+			ApprovalTypeId:             v["RepositoryApprovalTypeId"].(int64),
 			ApprovalType:               v["ApprovalType"].(string),
 			ApproverUserPrincipalName:  v["ApproverUserPrincipalName"].(string),
 			ApprovalDescription:        v["ApprovalDescription"].(string),
-			Newcontribution:            v["newcontribution"].(string),
+			Newcontribution:            v["Newcontribution"].(string),
 			OSSsponsor:                 v["OSSsponsor"].(string),
 			Offeringsassets:            v["Avanadeofferingsassets"].(string),
 			Willbecommercialversion:    v["Willbecommercialversion"].(string),
@@ -176,9 +176,9 @@ func UpdateCommunityApprovalReassignApprover(w http.ResponseWriter, r *http.Requ
 	}
 
 	param := map[string]interface{}{
-		"@ApprovalSystemGUID":        req.Id,
-		"@ApproverUserPrincipalName": req.ApproverEmail,
-		"@UserPrincipalName":         req.Username,
+		"ApprovalSystemGUID":        req.Id,
+		"ApproverUserPrincipalName": req.ApproverEmail,
+		"UserPrincipalName":         req.Username,
 	}
 	result, err := db.CommunityApprovalslUpdateApproverUserPrincipalName(param)
 	if err != nil {

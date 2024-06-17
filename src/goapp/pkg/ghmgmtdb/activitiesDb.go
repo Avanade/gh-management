@@ -23,20 +23,6 @@ func CommunitiesActivities_Select() interface{} {
 	return result
 }
 
-func CommunitiesActivities_Select_ByOffsetAndFilter(offset, filter int, search string) interface{} {
-	db := ConnectDb()
-	defer db.Close()
-
-	param := map[string]interface{}{
-		"Offset": offset,
-		"Filter": filter,
-		"Search": search,
-	}
-
-	result, _ := db.ExecuteStoredProcedureWithResult("usp_CommunityActivity_Select_ByOption", param)
-	return result
-}
-
 func CommunitiesActivities_Select_ByOffsetAndFilterAndCreatedBy(offset, filter int, orderby, ordertype, search, createdBy string) interface{} {
 	db := ConnectDb()
 	defer db.Close()
@@ -82,7 +68,7 @@ func CommunitiesActivities_TotalCount() int {
 	db := ConnectDb()
 	defer db.Close()
 
-	result, _ := db.ExecuteStoredProcedureWithResult("PR_CommunityActivities_TotalCount", nil)
+	result, _ := db.ExecuteStoredProcedureWithResult("usp_CommunityActivity_TotalCount", nil)
 	total, err := strconv.Atoi(fmt.Sprint(result[0]["Total"]))
 	if err != nil {
 		return 0

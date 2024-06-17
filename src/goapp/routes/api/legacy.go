@@ -32,7 +32,7 @@ func LegacySearchHandler(w http.ResponseWriter, r *http.Request) {
 	searchText := req["searchText"]
 
 	param := map[string]interface{}{
-		"searchText": searchText,
+		"Search": searchText,
 	}
 
 	result, err := db.LegacySearch(param)

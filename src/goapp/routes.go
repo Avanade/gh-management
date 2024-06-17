@@ -175,7 +175,6 @@ func setApiRoutes(mux *mux.Router) {
 	muxApi.Handle("/repositories/{id}/status", loadAzGHAuthPage(rtApi.GetRequestStatusByRepoId)).Methods("GET")
 	muxApi.Handle("/repositories/{orgName}/{repoName}/readme", loadAzAuthPage(rtApi.GetRepositoryReadmeById)).Methods("GET")
 	muxApi.Handle("/repositories", loadAzGHAuthPage(rtApi.CreateRepository)).Methods("POST")
-	muxApi.Handle("/repositories/{id}", loadAzGHAuthPage(rtApi.UpdateRepositoryById)).Methods("PUT")
 	muxApi.Handle("/repositories/{id}/ecattid", loadAzGHAuthPage(rtApi.UpdateRepositoryEcattIdById)).Methods("PUT")
 
 	muxApi.Handle("/repositories/{id}/collaborators", loadAzAuthPage(rtApi.GetRepoCollaboratorsByRepoId)).Methods("GET")

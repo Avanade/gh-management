@@ -2,7 +2,8 @@ CREATE PROCEDURE [dbo].[usp_ApprovalRequest_Update_ApproverResponse]
   @ApprovalSystemGUID [UNIQUEIDENTIFIER],
   @ApprovalStatusId [INT],
   @ApprovalRemarks [VARCHAR](255),
-  @ApprovalDate [DATETIME]
+  @ApprovalDate [DATETIME],
+  @Approver [VARCHAR](100)
 AS
 BEGIN
   SET NOCOUNT ON
@@ -14,19 +15,17 @@ BEGIN
     [ApprovalRemarks] = @ApprovalRemarks,
     [ModifiedBy] = [ApproverUserPrincipalName],
     [Modified] = GETDATE(),
-    [ApprovalDate] = convert(DATETIME, @ApprovalDate)
+    [ApprovalDate] = convert([DATETIME], @ApprovalDate)
   WHERE
-    [ApprovalSystemGUID] = @ApprovalSystemGUID;
-    
-  DECLARE @CommunityId INT
+    [ApprovalSystemGUID] = @ApprovalSystemGUID AND
+    [ApproverUserPrincipalName] = @Approver;
 
-  SELECT 
-    @CommunityId = [CAR].[CommunityId] 
-  FROM
-    [dbo].[CommunityApprovalRequest] AS [CAR]
-    INNER JOIN [dbo].[ApprovalRequest] AS [AR] ON [AR].[Id] = [CAR].[ApprovalRequestId]
+  UPDATE
+  	[dbo].[ApprovalRequest]
+  SET
+    [ApprovalStatusId] = 7,
+    [Modified] = GETDATE()
   WHERE
-    [AR].[ApprovalSystemGUID] = @ApprovalSystemGUID
-
-  EXEC [dbo].[usp_Community_Update_Status] @CommunityId
+    [ApprovalSystemGUID] = @ApprovalSystemGUID AND
+    [ApproverUserPrincipalName] != @Approver;
 END
