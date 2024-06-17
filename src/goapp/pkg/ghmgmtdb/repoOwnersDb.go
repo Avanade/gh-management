@@ -48,26 +48,6 @@ func IsOwner(id int64, userPrincipalName string) (isOwner bool, err error) {
 	return isOwner, err
 }
 
-func SelectAllRepoNameAndOwners() (repoOwner []RepoOwner, err error) {
-	db := ConnectDb()
-	defer db.Close()
-
-	result, err := db.ExecuteStoredProcedureWithResult("usp_RepositoryOwner_Select", nil)
-	if err != nil {
-		println(err)
-	}
-
-	for _, v := range result {
-		data := RepoOwner{
-			Id:                v["RepositoryId"].(int64),
-			RepoName:          v["Name"].(string),
-			UserPrincipalName: v["UserPrincipalName"].(string),
-		}
-		repoOwner = append(repoOwner, data)
-	}
-	return repoOwner, err
-}
-
 func GetRepoOwnersRecordByRepoId(id int64) (repoOwner []RepoOwner, err error) {
 	db := ConnectDb()
 	defer db.Close()
