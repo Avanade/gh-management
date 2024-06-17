@@ -1,4 +1,4 @@
-CREATE PROCEDURE [dbo].[usp_CommunityActivity_TotalCount_ByOption]
+CREATE PROCEDURE [dbo].[usp_CommunityActivity_TotalCount]
 AS
 BEGIN
   SET NOCOUNT ON
