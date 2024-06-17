@@ -69,10 +69,10 @@ func Users_Get_GHUser(UserPrincipalName string) (GHUser string) {
 
 	param := map[string]interface{}{
 
-		"GitHubUser": UserPrincipalName,
+		"UserPrincipalName": UserPrincipalName,
 	}
 
-	result, err := db.ExecuteStoredProcedureWithResult("usp_User_Select_ByGitHubUser", param)
+	result, err := db.ExecuteStoredProcedureWithResult("usp_User_Select_ByUserPrincipalName", param)
 
 	if err != nil {
 		fmt.Println(err)
