@@ -31,7 +31,7 @@ BEGIN
   FROM [RepositoryApproval] AS [RA]
   	INNER JOIN [dbo].[RepositoryApprovalType] AS [T] ON [RA].[RepositoryApprovalTypeId] = [T].[Id]
 	  INNER JOIN [dbo].[Repository] AS [R] ON [RA].[RepositoryId] = [R].[Id]
-	  INNER JOIN [dbo].[User] AS [U] ON [R].[CreatedBy] = [U].[UserPrincipalName]
+	  INNER JOIN [dbo].[User] AS [U] ON [RA].[CreatedBy] = [U].[UserPrincipalName]
 	  LEFT JOIN [dbo].[User] AS [C] ON [R].[CoOwner] = [C].[UserPrincipalName]
 	  INNER JOIN [dbo].[ApprovalStatus] AS [S] ON [S].[Id] = [RA].[ApprovalStatusId]
 	  INNER JOIN [dbo].[OSSContributionSponsor] AS [CS] ON [R].[OSSContributionSponsorId] = [CS].[Id]
