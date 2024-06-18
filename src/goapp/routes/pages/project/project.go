@@ -19,10 +19,11 @@ func IndexHandler(w http.ResponseWriter, r *http.Request) {
 	sessiongh, _ := session.GetGitHubUserData(w, r)
 
 	data := map[string]interface{}{
-		"profileGH":   sessiongh,
-		"isAdmin":     isAdmin,
-		"innersource": os.Getenv("GH_ORG_INNERSOURCE"),
-		"opensource":  os.Getenv("GH_ORG_OPENSOURCE"),
+		"profileGH":                             sessiongh,
+		"isAdmin":                               isAdmin,
+		"innersource":                           os.Getenv("GH_ORG_INNERSOURCE"),
+		"opensource":                            os.Getenv("GH_ORG_OPENSOURCE"),
+		"innersourceGeneralLegalGuidelinesLink": os.Getenv("LINK_INNERSOURCE_GENERAL_LEGAL_GUIDELINES"),
 	}
 	template.UseTemplate(&w, r, "projects/index", data)
 }
@@ -52,6 +53,7 @@ func MakePublicHandler(w http.ResponseWriter, r *http.Request) {
 		"isOpenSourceMember":  isOpenSourceMember,
 		"innersourceOrg":      innerSourceOrgName,
 		"opensourceOrg":       openSourceOrgName,
+		"OrganizationName":    os.Getenv("ORGANIZATION_NAME"),
 	}
 
 	template.UseTemplate(&w, r, "projects/makepublic", data)
@@ -86,14 +88,16 @@ func FormHandler(w http.ResponseWriter, r *http.Request) {
 
 	users := db.GetUsersWithGithub()
 	data := map[string]interface{}{
-		"Id":                  id,
-		"users":               users,
-		"email":               username,
-		"isInnersourceMember": isInnerSourceMember,
-		"isOpensourceMember":  isOpenSourceMember,
-		"innersourceOrg":      innerSourceOrgName,
-		"opensourceOrg":       openSourceOrgName,
-		"isInvalidToken":      isInvalidToken,
+		"Id":                           id,
+		"users":                        users,
+		"email":                        username,
+		"isInnersourceMember":          isInnerSourceMember,
+		"isOpensourceMember":           isOpenSourceMember,
+		"innersourceOrg":               innerSourceOrgName,
+		"opensourceOrg":                openSourceOrgName,
+		"isInvalidToken":               isInvalidToken,
+		"innersourceGeneralGuidelines": os.Getenv("LINK_INNERSOURCE_GENERAL_GUIDELINES"),
+		"OrganizationName":             os.Getenv("ORGANIZATION_NAME"),
 	}
 
 	template.UseTemplate(&w, r, "projects/form", data)

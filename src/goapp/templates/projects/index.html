@@ -111,7 +111,7 @@
                             <span @click="showECATTFormModal=true; form.repoId=repository.Id" class="block truncate">Update ECATT ID</span>  
                           </template>
                         </li>
-                        <li x-show="repository.Visibility !== 'Private' && !repository.IsArchived"
+                        <li x-show="repository.Visibility !== 'Private' && !repository.IsArchived && repository.Organization !== opensource"
                           @click="setVisibility(repository.Name,repository.Id,repository.Visibility,'private')"
                           class="hover:bg-[#fff2eb] relative cursor-pointer select-none py-2 pl-3 pr-9 text-gray-900"
                           id="option-0" role="option" tabindex="-1">
@@ -137,7 +137,7 @@
                           <span class="block truncate" x-text="`Move to ${innersource}`"></span>
                         </li>
                         <li @click="transferRepoRegionalOrg.onOpen(repository.Id)"
-                          x-show="!repository.IsOrgRegional"
+                          x-show="!repository.IsOrgRegional && repository.Organization !== opensource"
                           class="hover:bg-[#fff2eb] relative cursor-pointer select-none py-2 pl-3 pr-9 text-gray-900"
                           id="option-0" role="option" tabindex="-1">
                           <span class="block truncate">Move to Regional Org</span>
@@ -233,7 +233,7 @@
         </ul>
       </div>
   
-      <!-- LIST OF AVANADE PROJECTS -->
+      <!-- LIST OF ENTERPRISE PROJECTS -->
       <div x-show="!showSpinner && view==='all'">
         <div class="flex flex-col rounded-md">
           <div class="flex flex-col xl:flex-row border border-gray-200 p-3 rounded-md mb-3 gap-x-4 gap-y-1">
@@ -299,7 +299,7 @@
           </div>
           <div class="italic text-sm pl-1" x-show="allRepositoriesList !== null">
             Before you use any innersource asset or tool, please make sure you read the following <a
-              href="***REMOVED***"
+              href="{{ .innersourceGeneralLegalGuidelinesLink }}"
               target="_blank" class="text-[#ff5800]">InnerSource general legal guidelines</a>
           </div>
           <div x-data="popularTopics()" class="mt-2 mb-3">

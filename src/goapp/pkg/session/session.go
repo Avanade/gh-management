@@ -43,7 +43,7 @@ func InitializeSession() {
 	gob.Register(map[string]interface{}{})
 }
 
-func IsAuthenticated(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
+func IsAuthenticated(w http.ResponseWriter, r *http.Request) bool {
 	// Check session if there is saved user profile
 	url := fmt.Sprintf("/loginredirect?redirect=%v", r.URL)
 	session, err := Store.Get(r, "auth-session")
@@ -57,13 +57,14 @@ func IsAuthenticated(w http.ResponseWriter, r *http.Request, next http.HandlerFu
 			MaxAge: -1}
 		http.SetCookie(w, &cgh)
 		http.Redirect(w, r, url, http.StatusTemporaryRedirect)
-		return
+		return false
 	}
 
 	if _, ok := session.Values["profile"]; !ok {
 
 		// Asks user to login if there is no saved user profile
 		http.Redirect(w, r, url, http.StatusTemporaryRedirect)
+		return false
 
 	} else {
 		// If there is a user profile saved
@@ -71,7 +72,7 @@ func IsAuthenticated(w http.ResponseWriter, r *http.Request, next http.HandlerFu
 
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
+			return false
 		}
 
 		// Retrieve current token data
@@ -96,6 +97,7 @@ func IsAuthenticated(w http.ResponseWriter, r *http.Request, next http.HandlerFu
 
 				// Log out the user if the attempt to refresh the token failed
 				http.Redirect(w, r, "/logout/azure", http.StatusTemporaryRedirect)
+				return false
 
 			} else if newToken != nil {
 				// fmt.Printf("TOKEN REFRESHED\n")
@@ -117,15 +119,15 @@ func IsAuthenticated(w http.ResponseWriter, r *http.Request, next http.HandlerFu
 
 				if err != nil {
 					http.Error(w, err.Error(), http.StatusInternalServerError)
-					return
+					return false
 				}
 			}
 		}
-		next(w, r)
+		return true
 	}
 }
 
-func IsGHAuthenticated(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
+func IsGHAuthenticated(w http.ResponseWriter, r *http.Request) bool {
 	// Check session if there is saved user profile
 	url := fmt.Sprintf("/gitredirect?redirect=%v", r.URL)
 	session, err := Store.Get(r, "gh-auth-session")
@@ -135,28 +137,28 @@ func IsGHAuthenticated(w http.ResponseWriter, r *http.Request, next http.Handler
 			MaxAge: -1}
 		http.SetCookie(w, &c)
 		http.Redirect(w, r, url, http.StatusTemporaryRedirect)
-		return
+		return false
 	}
 
 	if _, ok := session.Values["ghProfile"]; !ok || !session.Values["ghIsValid"].(bool) {
 
 		// Asks user to login if there is no saved user profile
 		http.Redirect(w, r, url, http.StatusTemporaryRedirect)
-	} else {
-		next(w, r)
+		return false
 	}
+	return true
 }
 
-func IsGuidAuthenticated(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
+func IsGuidAuthenticated(w http.ResponseWriter, r *http.Request) bool {
 	// Check header if authenticated
 	_, err := auth.VerifyAccessToken(r)
 	// RETURN ERROR
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+		return false
 	}
-	// RETURN SUCCESS
-	next(w, r)
+
+	return true
 }
 
 func GetGitHubUserData(w http.ResponseWriter, r *http.Request) (GitHubUser, error) {
@@ -232,13 +234,13 @@ func RemoveGitHubAccount(w http.ResponseWriter, r *http.Request) error {
 	return nil
 }
 
-func IsUserAdminMW(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
+func IsUserAdminMW(w http.ResponseWriter, r *http.Request) bool {
 	isAdmin, _ := IsUserAdmin(w, r)
-	if isAdmin {
-		next(w, r)
-	} else {
+	if !isAdmin {
 		http.Redirect(w, r, "/", http.StatusSeeOther)
+		return false
 	}
+	return true
 }
 
 func IsUserAdmin(w http.ResponseWriter, r *http.Request) (bool, error) {

@@ -3,6 +3,7 @@ package routes
 import (
 	"encoding/xml"
 	"net/http"
+	"os"
 	"strconv"
 
 	"main/pkg/appinsights_wrapper"
@@ -56,7 +57,7 @@ func LegacySearchHandler(w http.ResponseWriter, r *http.Request) {
 	var finalResult ArrayOfSearchResultItem
 	finalResult.SearchResultItem = searchResult
 	finalResult.XMLNSI = "http://www.w3.org/2001/XMLSchema-instance"
-	finalResult.XMLNS = "***REMOVED***"
+	finalResult.XMLNS = os.Getenv("LINK_XML_SCHEMA")
 
 	// Wraps the response to Response struct
 	response, err := xml.MarshalIndent(finalResult, "", "  ")
