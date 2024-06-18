@@ -592,7 +592,7 @@ func GetProjectApprovalsByUsername(username string) ([]ApprovalRequest, error) {
 		"ApproverEmail": username,
 	}
 
-	result, err := db.ExecuteStoredProcedureWithResult("usp_ApprovalRequest_Select_ByAppoverUserPrincipalName", params)
+	result, err := db.ExecuteStoredProcedureWithResult("usp_ApprovalRequest_Select_ByApproverUserPrincipalName", params)
 	if err != nil {
 		return nil, err
 	}
