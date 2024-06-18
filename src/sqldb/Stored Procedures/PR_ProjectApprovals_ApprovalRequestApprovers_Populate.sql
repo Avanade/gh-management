@@ -9,7 +9,6 @@ BEGIN
     (
 		ProjectId,
 		ApprovalTypeId,
-		-- ApproverUserPrincipalName,
 		ApprovalStatusId,
 		ApprovalDescription,
 		CreatedBy
@@ -17,7 +16,6 @@ BEGIN
     SELECT 
         @ProjectId, 
         T.Id, 
-        -- T.ApproverUserPrincipalName, 
         1, 
         'For Review - ' + T.[Name], 
         @RequestedBy

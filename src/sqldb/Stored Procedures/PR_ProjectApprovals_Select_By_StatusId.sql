@@ -10,7 +10,6 @@ BEGIN
 	T.Name AS ApprovalType,
 	P.TFSProjectReference AS RepoLink,
 	P.Name AS RepoName,
-	PA.ApproverUserPrincipalName as ApproverUserPrincipalName,
 	U.Name AS Requester,
 	PA.Created
   FROM

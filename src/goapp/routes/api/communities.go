@@ -121,7 +121,7 @@ func AddCommunity(w http.ResponseWriter, r *http.Request) {
 		logger.LogException(err)
 	}
 
-	id, _ := strconv.Atoi(fmt.Sprint(result[0]["Id"]))
+	id, _ := strconv.ParseInt(fmt.Sprint(result[0]["Id"]), 0, 64)
 	if err != nil {
 		logger.LogException(err)
 	}
@@ -193,7 +193,7 @@ func AddCommunity(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	if body.Id == 0 {
-		requestCommunityApproval(int64(id), logger)
+		requestCommunityApproval(id, logger)
 	}
 
 	go getTeamsChannelMembers(body.ChannelId, id)
@@ -243,7 +243,7 @@ func GetCommunitiesIsExternal(w http.ResponseWriter, r *http.Request) {
 
 	param := map[string]interface{}{
 
-		"isexternal":        isExternal,
+		"IsExternal":        isExternal,
 		"UserPrincipalName": username,
 	}
 
@@ -272,7 +272,7 @@ func UploadCommunityMembers(w http.ResponseWriter, r *http.Request) {
 
 	fmt.Println("Process Community Members List By Excel triggered.")
 	vars := mux.Vars(r)
-	id, _ := strconv.Atoi(vars["id"])
+	id, _ := strconv.ParseInt(vars["id"], 0, 64)
 	counter := 0
 
 	r.ParseMultipartForm(32 << 20)
@@ -308,7 +308,7 @@ func UploadCommunityMembers(w http.ResponseWriter, r *http.Request) {
 		for _, cell := range row.Cells {
 			_, err := mail.ParseAddress(cell.Value)
 			if err == nil {
-				err = db.Communities_AddMember(id, cell.Value)
+				err = db.Community_Onboarding_AddMember(id, cell.Value)
 				if err == nil {
 					counter++
 				}
@@ -658,29 +658,6 @@ func GetCommunityById(w http.ResponseWriter, r *http.Request) {
 	w.Write(jsonResp)
 }
 
-func GetCommunityApproversById(w http.ResponseWriter, r *http.Request) {
-	req := mux.Vars(r)
-	id := req["id"]
-
-	approvers, err := db.GetCommunityApproversById(id)
-	if err != nil {
-		log.Println(err.Error())
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	w.WriteHeader(http.StatusOK)
-	w.Header().Set("Content-Type", "application/json")
-	jsonResp, err := json.Marshal(approvers)
-	if err != nil {
-		log.Println(err.Error())
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	w.Write(jsonResp)
-}
-
 func GetCommunityApproversList(w http.ResponseWriter, r *http.Request) {
 	approvers, err := db.GetCommunityApprovers("community")
 	if err != nil {
@@ -948,7 +925,7 @@ func ApprovalSystemRequestCommunity(data db.CommunityApproval, logger *appinsigh
 	return nil
 }
 
-func getTeamsChannelMembers(channelId string, id int) {
+func getTeamsChannelMembers(channelId string, id int64) {
 	logger := appinsights_wrapper.NewClient()
 	defer logger.EndOperation()
 
@@ -960,7 +937,7 @@ func getTeamsChannelMembers(channelId string, id int) {
 
 	if len(teamMembers) > 0 {
 		for _, teamMember := range teamMembers {
-			db.Communities_AddMember(id, teamMember.Email)
+			db.Community_Onboarding_AddMember(id, teamMember.Email)
 		}
 	}
 }

@@ -42,7 +42,7 @@ func InsertOrganizationAccess(userPrincipalName string, organizationId int64) (i
 		"OrganizationId":    organizationId,
 	}
 
-	result, err := db.ExecuteStoredProcedureWithResult("dbo.PR_OrganizationAccess_Insert", param)
+	result, err := db.ExecuteStoredProcedureWithResult("usp_OrganizationAccess_Insert", param)
 	if err != nil {
 		return
 	}
@@ -60,7 +60,7 @@ func GetOrganizationAccessByUserPrincipalName(userPrincipalName string) ([]Organ
 		"UserPrincipalName": userPrincipalName,
 	}
 
-	result, err := db.ExecuteStoredProcedureWithResult("dbo.PR_OrganizationAccess_SelectByUserPrincipalName", param)
+	result, err := db.ExecuteStoredProcedureWithResult("usp_OrganizationAccess_Select_ByUserPrincipalName", param)
 	if err != nil {
 		return nil, err
 	}
@@ -96,7 +96,7 @@ func GetOrganizationAccessByApprovalRequestItemId(itemId string) (*OrganizationA
 		"ApprovalSystemGUID": itemId,
 	}
 
-	result, err := db.ExecuteStoredProcedureWithResult("dbo.PR_OrganizationAccess_SelectByApprovalRequestItemId", param)
+	result, err := db.ExecuteStoredProcedureWithResult("usp_OrganizationAccess_Select_ByApprovalSystemGUID", param)
 	if err != nil {
 		return nil, err
 	}
@@ -129,7 +129,7 @@ func HasOrganizationAccessPendingRequest(userPrincipalName string, organizationI
 		"OrganizationId":    organizationId,
 	}
 
-	result, err := db.ExecuteStoredProcedureWithResult("dbo.PR_OrganizationAcess_HasPendingRequest", param)
+	result, err := db.ExecuteStoredProcedureWithResult("usp_OrganizationAccess_HasPendingRequest", param)
 	if err != nil {
 		return
 	}
@@ -146,10 +146,10 @@ func InsertOrganizationAccessApprovalRequest(organizationAccessId, requestId int
 
 	param := map[string]interface{}{
 		"OrganizationAccessId": organizationAccessId,
-		"RequestId":            requestId,
+		"ApprovalRequestId":    requestId,
 	}
 
-	_, err := db.ExecuteStoredProcedure("dbo.PR_OrganizationAccessApprovalRequest_Insert", param)
+	_, err := db.ExecuteStoredProcedure("usp_OrganizationAccessApprovalRequest_Insert", param)
 	if err != nil {
 		return err
 	}
@@ -162,10 +162,10 @@ func GetOrganizationAccessApprovalRequest(id int64) ([]map[string]interface{}, e
 	defer db.Close()
 
 	param := map[string]interface{}{
-		"Id": id,
+		"OrganizationAccessId": id,
 	}
 
-	result, err := db.ExecuteStoredProcedureWithResult("dbo.PR_OrganizationAccessApprovalRequests_SelectByOrganizationAccessId", param)
+	result, err := db.ExecuteStoredProcedureWithResult("usp_OrganizationAccessApprovalRequest_Select_ByOrganizationAccessId", param)
 	if err != nil {
 		return nil, err
 	}
@@ -177,7 +177,7 @@ func GetFailedCommunityApprovalRequestOrganizationAccess() []FailedCommunityAppr
 	db := ConnectDb()
 	defer db.Close()
 
-	result, _ := db.ExecuteStoredProcedureWithResult("PR_CommunityApprovals_Select_FailedRequestOrganizationAccess", nil)
+	result, _ := db.ExecuteStoredProcedureWithResult("usp_ApprovalRequest_Select_FailedRequestOrganizationAccess", nil)
 
 	var failedCommunityApprovalRequestOrganizationAccess []FailedCommunityApprovalRequestOrganizationAccess
 

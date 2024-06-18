@@ -1,5 +1,4 @@
 CREATE PROCEDURE [dbo].[PR_Communities_select]
-@CreatedBy as varchar(100)=''
 AS
 BEGIN
 SELECT c.[Id]

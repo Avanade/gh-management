@@ -205,10 +205,10 @@
                             r.json().then(body => {
                                 this.form.id = body[0]["Id"]
                                 this.form.name = body[0]["Name"]
-                                this.form.url = body[0]["URL"]
+                                this.form.url = body[0]["Url"]
                                 this.form.body = body[0]["Body"]
                                 this.form.CategoryName = body[0]["CategoryName"]
-                                this.form.categoryId = body[0]["CategoryId"]
+                                this.form.categoryId = body[0]["GuidanceCategoryId"]
 
                                 this.form.CategoryNames.push({
                                     id: this.form.id,

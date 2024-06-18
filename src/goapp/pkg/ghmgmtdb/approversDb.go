@@ -10,11 +10,11 @@ func InsertApprover(approver Approver) error {
 	defer db.Close()
 
 	param := map[string]interface{}{
-		"ApprovalTypeId": approver.ApprovalTypeId,
-		"ApproverEmail":  approver.ApproverEmail,
+		"RepositoryApprovalTypeId":  approver.ApprovalTypeId,
+		"ApproverUserPrincipalName": approver.ApproverEmail,
 	}
 
-	_, err := db.ExecuteStoredProcedureWithResult("PR_Approvers_Insert", param)
+	_, err := db.ExecuteStoredProcedureWithResult("usp_RepositoryApprover_Insert", param)
 	if err != nil {
 		return err
 	}
@@ -26,10 +26,10 @@ func DeleteApproverByApprovalTypeId(approvalTypeId int) error {
 	defer db.Close()
 
 	param := map[string]interface{}{
-		"ApprovalTypeId": approvalTypeId,
+		"RepositoryApprovalTypeId": approvalTypeId,
 	}
 
-	_, err := db.ExecuteStoredProcedureWithResult("PR_Approvers_Delete_ByApprovalTypeId", param)
+	_, err := db.ExecuteStoredProcedureWithResult("usp_RepositoryApprover_Delete", param)
 	if err != nil {
 		return err
 	}
@@ -41,10 +41,10 @@ func GetApproversByApprovalTypeId(approvalTypeId int) ([]Approver, error) {
 	defer db.Close()
 
 	param := map[string]interface{}{
-		"ApprovalTypeId": approvalTypeId,
+		"RepositoryApprovalTypeId": approvalTypeId,
 	}
 
-	result, err := db.ExecuteStoredProcedureWithResult("PR_Approvers_Select_ByApprovalTypeId", param)
+	result, err := db.ExecuteStoredProcedureWithResult("usp_RepositoryApprover_Select_ByApprovalTypeId", param)
 	if err != nil {
 		return nil, err
 	}
@@ -53,8 +53,8 @@ func GetApproversByApprovalTypeId(approvalTypeId int) ([]Approver, error) {
 
 	for _, v := range result {
 		approver := Approver{
-			ApprovalTypeId: int(v["ApprovalTypeId"].(int64)),
-			ApproverEmail:  v["ApproverEmail"].(string),
+			ApprovalTypeId: int(v["RepositoryApprovalTypeId"].(int64)),
+			ApproverEmail:  v["ApproverUserPrincipalName"].(string),
 		}
 
 		approvers = append(approvers, approver)

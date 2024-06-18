@@ -22,7 +22,7 @@ func GetAllActiveApprovers() interface{} {
 	db := ConnectDb()
 	defer db.Close()
 
-	result, err := db.ExecuteStoredProcedureWithResult("PR_ApprovalTypes_SelectAllActive", nil)
+	result, err := db.ExecuteStoredProcedureWithResult("usp_RepositoryApprovalType_Select_Active", nil)
 	if err != nil {
 		return err
 	}
@@ -33,7 +33,7 @@ func SelectApprovalTypes() ([]map[string]interface{}, error) {
 	db := ConnectDb()
 	defer db.Close()
 
-	result, err := db.ExecuteStoredProcedureWithResult("PR_ApprovalTypes_Select", nil)
+	result, err := db.ExecuteStoredProcedureWithResult("usp_RepositoryApprovalType_Select", nil)
 	if err != nil {
 		return nil, err
 	}
@@ -53,7 +53,7 @@ func SelectApprovalTypesByFilter(offset, filter int, orderby, ordertype, search 
 		"OrderType": ordertype,
 	}
 
-	result, err := db.ExecuteStoredProcedureWithResult("PR_ApprovalTypes_Select_ByFilter", param)
+	result, err := db.ExecuteStoredProcedureWithResult("usp_RepositoryApprovalType_Select_ByOption", param)
 	if err != nil {
 		return nil, err
 	}
@@ -65,7 +65,7 @@ func SelectTotalApprovalTypes() int {
 	db := ConnectDb()
 	defer db.Close()
 
-	result, _ := db.ExecuteStoredProcedureWithResult("PR_ApprovalTypes_TotalCount", nil)
+	result, _ := db.ExecuteStoredProcedureWithResult("usp_RepositoryApprovalType_TotalCount", nil)
 	total, err := strconv.Atoi(fmt.Sprint(result[0]["Total"]))
 	if err != nil {
 		return 0
@@ -81,7 +81,7 @@ func SelectApprovalTypeById(id int) (*ApprovalType, error) {
 		"Id": id,
 	}
 
-	result, err := db.ExecuteStoredProcedureWithResult("PR_ApprovalTypes_Select_ById", param)
+	result, err := db.ExecuteStoredProcedureWithResult("usp_RepositoryApprovalType_Select_ById", param)
 	if err != nil {
 		return nil, err
 	}
@@ -124,7 +124,7 @@ func InsertApprovalType(approvalType ApprovalType) (int, error) {
 		"CreatedBy":                 approvalType.CreatedBy,
 	}
 
-	result, err := db.ExecuteStoredProcedureWithResult("PR_ApprovalTypes_Insert", param)
+	result, err := db.ExecuteStoredProcedureWithResult("usp_RepositoryApprovalType_Insert", param)
 	if err != nil {
 		return 0, err
 	}
@@ -143,7 +143,7 @@ func UpdateApprovalType(approvalType ApprovalType) (int, error) {
 		"ModifiedBy":                approvalType.CreatedBy,
 	}
 
-	result, err := db.ExecuteStoredProcedureWithResult("PR_ApprovalTypes_Update_ById", param)
+	result, err := db.ExecuteStoredProcedureWithResult("usp_RepositoryApprovalType_Update", param)
 	if err != nil {
 		return 0, err
 	}
@@ -162,7 +162,7 @@ func SetIsArchiveApprovalTypeById(approvalType ApprovalType) (int, bool, error) 
 		"ModifiedBy":                approvalType.ModifiedBy,
 	}
 
-	result, err := db.ExecuteStoredProcedureWithResult("PR_ApprovalTypes_Update_IsArchived_ById", param)
+	result, err := db.ExecuteStoredProcedureWithResult("usp_RepositoryApprovalType_Update_IsArchived", param)
 	if err != nil {
 		return 0, false, err
 	}

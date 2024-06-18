@@ -8,7 +8,6 @@ SELECT
 	U1.Name [RequesterName], U1.GivenName [RequesterGivenName], U1.SurName [RequesterSurName], U1.UserPrincipalName [RequesterUserPrincipalName],
 	U2.Name [CoownerName], U2.GivenName [CoownerGivenName], U2.SurName [CoownerSurName], U2.UserPrincipalName [CoownerUserPrincipalName],
 	PA.ApprovalTypeId, T.[Name] ApprovalType,
-	PA.ApproverUserPrincipalName,
 	PA.ApprovalDescription,
 	S.Name [RequestStatus],
 	PA.[ApprovalDate], PA.[ApprovalRemarks],

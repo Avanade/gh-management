@@ -1,4 +1,5 @@
 CREATE TABLE [dbo].[RelatedCommunities](
-	[ParentCommunityId] [int] NULL,
-	[RelatedCommunityId] [int] NULL
-) ON [PRIMARY]
+	[ParentCommunityId] [INT] NOT NULL,
+	[RelatedCommunityId] [INT] NOT NULL,
+	CONSTRAINT [PK_RelatedCommunities] PRIMARY KEY ([ParentCommunityId], [RelatedCommunityId])
+)

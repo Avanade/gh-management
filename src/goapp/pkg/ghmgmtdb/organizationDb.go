@@ -6,17 +6,17 @@ import (
 )
 
 type Organization struct {
-	Id          int64
-	RegionId    int `json:"region"`
-	RegionName  string
-	ClientName  string `json:"clientName"`
-	ProjectName string `json:"projectName"`
-	WBS         string `json:"wbs"`
-	Username    string
-	Approvers   []string
-	RequestIds  []int64
-	GitHubUsername            string
-	GitHubId                  float64
+	Id             int64
+	RegionId       int `json:"region"`
+	RegionName     string
+	ClientName     string `json:"clientName"`
+	ProjectName    string `json:"projectName"`
+	WBS            string `json:"wbs"`
+	Username       string
+	Approvers      []string
+	RequestIds     []int64
+	GitHubUsername string
+	GitHubId       float64
 }
 
 func OrganizationInsert(body Organization) ([]map[string]interface{}, error) {
@@ -25,14 +25,14 @@ func OrganizationInsert(body Organization) ([]map[string]interface{}, error) {
 
 	param := map[string]interface{}{
 
-		"Region":      body.RegionId,
-		"ClientName":  body.ClientName,
-		"ProjectName": body.ProjectName,
-		"WBS":         body.WBS,
-		"CreatedBy":   body.Username,
+		"RegionalOrganizationId": body.RegionId,
+		"ClientName":             body.ClientName,
+		"ProjectName":            body.ProjectName,
+		"WBS":                    body.WBS,
+		"CreatedBy":              body.Username,
 	}
 
-	result, err := db.ExecuteStoredProcedureWithResult("dbo.PR_Organizations_Insert", param)
+	result, err := db.ExecuteStoredProcedureWithResult("usp_Organization_Insert", param)
 	if err != nil {
 		return nil, err
 	}
@@ -48,7 +48,7 @@ func GetRegionalOrganizationById(id int) ([]map[string]interface{}, error) {
 		"Id": id,
 	}
 
-	result, err := db.ExecuteStoredProcedureWithResult("dbo.PR_RegionalOrganizations_SelectById", params)
+	result, err := db.ExecuteStoredProcedureWithResult("usp_RegionalOrganization_Select_ById", params)
 	if err != nil {
 		return nil, err
 	}
@@ -60,7 +60,7 @@ func GetAllRegionalOrganizations() ([]map[string]interface{}, error) {
 	db := ConnectDb()
 	defer db.Close()
 
-	result, err := db.ExecuteStoredProcedureWithResult("dbo.PR_RegionalOrganizations_SelectAll", nil)
+	result, err := db.ExecuteStoredProcedureWithResult("usp_RegionalOrganization_Select", nil)
 	if err != nil {
 		return nil, err
 	}
@@ -73,10 +73,10 @@ func OrganizationUpdateApprovalStatus(id int64, status int) {
 	defer db.Close()
 
 	param := map[string]interface{}{
-		"Id":               id,
+		"OrganizationId":   id,
 		"ApprovalStatusID": status,
 	}
-	db.ExecuteStoredProcedure("PR_Organizations_UpdateStatus", param)
+	db.ExecuteStoredProcedure("usp_ApprovalRequest_Update_StatusByOrganizationId", param)
 }
 
 func GetAllOrganizationRequest(username string) ([]map[string]interface{}, error) {
@@ -87,7 +87,7 @@ func GetAllOrganizationRequest(username string) ([]map[string]interface{}, error
 		"Username": username,
 	}
 
-	result, err := db.ExecuteStoredProcedureWithResult("dbo.PR_Organizations_SelectByUser", param)
+	result, err := db.ExecuteStoredProcedureWithResult("usp_Organization_Select_ByUsername", param)
 	if err != nil {
 		return nil, err
 	}
@@ -100,10 +100,10 @@ func GetOrganizationApprovalRequest(id int64) ([]map[string]interface{}, error) 
 	defer db.Close()
 
 	param := map[string]interface{}{
-		"Id": id,
+		"OrganizationId": id,
 	}
 
-	result, err := db.ExecuteStoredProcedureWithResult("dbo.PR_OrganizationsApprovalRequests_SelectByOrgId", param)
+	result, err := db.ExecuteStoredProcedureWithResult("usp_OrganizationApprovalRequest_Select_ByOrganizationId", param)
 	if err != nil {
 		return nil, err
 	}
@@ -120,7 +120,7 @@ func RegionalOrganizationInsert(id int64, name string) error {
 		"Name": name,
 	}
 
-	_, err := db.ExecuteStoredProcedure("dbo.PR_RegionalOrganizations_Insert", param)
+	_, err := db.ExecuteStoredProcedure("usp_RegionalOrganization_Insert", param)
 	if err != nil {
 		return err
 	}
@@ -134,11 +134,11 @@ func OrganizationApprovalInsert(organizationId int, requestId int64) error {
 
 	params := map[string]interface{}{
 
-		"OrganizationId": organizationId,
-		"RequestId":      requestId,
+		"OrganizationId":    organizationId,
+		"ApprovalRequestId": requestId,
 	}
 
-	_, err := db.ExecuteStoredProcedure("dbo.PR_OrganizationsApprovalRequests_Insert", params)
+	_, err := db.ExecuteStoredProcedure("usp_OrganizationApprovalRequest_Insert", params)
 	if err != nil {
 		return err
 	}
@@ -150,7 +150,7 @@ func GetFailedCommunityApprovalRequestNewOrganizations() []Organization {
 	db := ConnectDb()
 	defer db.Close()
 
-	result, _ := db.ExecuteStoredProcedureWithResult("PR_CommunityApprovals_Select_FailedRequestOrganizations", nil)
+	result, _ := db.ExecuteStoredProcedureWithResult("usp_ApprovalRequest_Select_FailedRequestOrganization", nil)
 
 	var organizations []Organization
 

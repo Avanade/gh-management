@@ -11,7 +11,7 @@ func ApprovalInsert(approver string, description string, username string) (reque
 		"CreatedBy":                 username,
 	}
 
-	result, err := db.ExecuteStoredProcedureWithResult("dbo.PR_CommunityApprovals_Insert", params)
+	result, err := db.ExecuteStoredProcedureWithResult("usp_ApprovalRequest_Select_Insert", params)
 	if err != nil {
 		return
 	}
@@ -30,7 +30,7 @@ func CommunityApprovalInsert(communityId int, requestId int64) error {
 		"RequestId":   requestId,
 	}
 
-	_, err := db.ExecuteStoredProcedure("dbo.PR_CommunityApprovalRequests_Insert", params)
+	_, err := db.ExecuteStoredProcedure("usp_CommunityApproverRequest_Insert", params)
 	if err != nil {
 		return err
 	}

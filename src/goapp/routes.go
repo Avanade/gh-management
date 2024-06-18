@@ -144,7 +144,6 @@ func setApiRoutes() {
 	httpRouter.POST("/api/community-approvers", rtApi.SubmitCommunityApprover)
 	httpRouter.GET("/api/community-approvers", rtApi.GetCommunityApproversList)
 	httpRouter.GET("/api/community-approvers/active", rtApi.GetAllActiveCommunityApprovers)
-	httpRouter.GET("/api/community-approvers/{id}", rtApi.GetCommunityApproversById)
 
 	// CONTRIBUTION AREAS API
 	httpRouter.POST("/api/contribution-areas", m.Chain(rtApi.CreateContributionAreas, m.AzureAuth(), m.GitHubAuth()))
@@ -171,7 +170,6 @@ func setApiRoutes() {
 	httpRouter.GET("/api/repositories/{id}/status", m.Chain(rtApi.GetRequestStatusByRepoId, m.AzureAuth(), m.GitHubAuth()))
 	httpRouter.GET("/api/repositories/{orgName}/{repoName}/readme", m.Chain(rtApi.GetRepositoryReadmeById, m.AzureAuth()))
 	httpRouter.POST("/api/repositories", m.Chain(rtApi.CreateRepository, m.AzureAuth(), m.GitHubAuth()))
-	httpRouter.PUT("/api/repositories/{id}", m.Chain(rtApi.UpdateRepositoryById, m.AzureAuth(), m.GitHubAuth()))
 	httpRouter.PUT("/api/repositories/{id}/ecattid", m.Chain(rtApi.UpdateRepositoryEcattIdById, m.AzureAuth(), m.GitHubAuth()))
 
 	httpRouter.GET("/api/repositories/{id}/collaborators", m.Chain(rtApi.GetRepoCollaboratorsByRepoId, m.AzureAuth()))

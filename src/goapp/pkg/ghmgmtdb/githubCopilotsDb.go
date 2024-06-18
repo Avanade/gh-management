@@ -22,13 +22,13 @@ func GitHubCopilotInsert(body GitHubCopilot) ([]map[string]interface{}, error) {
 
 	param := map[string]interface{}{
 
-		"Region":         body.Region,
-		"GitHubId":       body.GitHubId,
-		"GitHubUsername": body.GitHubUsername,
-		"Username":       body.Username,
+		"RegionalOrganizationId": body.Region,
+		"GitHubId":               body.GitHubId,
+		"GitHubUsername":         body.GitHubUsername,
+		"Username":               body.Username,
 	}
 
-	result, err := db.ExecuteStoredProcedureWithResult("dbo.PR_GitHubCopilot_Insert", param)
+	result, err := db.ExecuteStoredProcedureWithResult("usp_GitHubCopilot_Insert", param)
 	if err != nil {
 		return nil, err
 	}
@@ -42,11 +42,11 @@ func GitHubCopilotApprovalInsert(githubCopilotId int, requestId int64) error {
 
 	params := map[string]interface{}{
 
-		"GitHubCopilotId": githubCopilotId,
-		"RequestId":       requestId,
+		"GitHubCopilotId":   githubCopilotId,
+		"ApprovalRequestId": requestId,
 	}
 
-	_, err := db.ExecuteStoredProcedure("dbo.PR_GitHubCopilotApprovalRequests_Insert", params)
+	_, err := db.ExecuteStoredProcedure("usp_GitHubCopilotApprovalRequest_Insert", params)
 	if err != nil {
 		return err
 	}
@@ -62,7 +62,7 @@ func GetAllGitHubCopilotRequest(username string) ([]map[string]interface{}, erro
 		"Username": username,
 	}
 
-	result, err := db.ExecuteStoredProcedureWithResult("dbo.PR_GitHubCopilot_SelectByUser", param)
+	result, err := db.ExecuteStoredProcedureWithResult("usp_GitHubCopilot_Select_ByUsername", param)
 	if err != nil {
 		return nil, err
 	}
@@ -75,10 +75,10 @@ func GetGitHubCopilotApprovalRequest(id int64) ([]map[string]interface{}, error)
 	defer db.Close()
 
 	param := map[string]interface{}{
-		"Id": id,
+		"GitHubCopilotId": id,
 	}
 
-	result, err := db.ExecuteStoredProcedureWithResult("dbo.PR_GitHubCopilotApprovalRequests_SelectByCopilotId", param)
+	result, err := db.ExecuteStoredProcedureWithResult("usp_GitHubCopilotApprovalRequest_Select_ByGitHubCopilotId", param)
 	if err != nil {
 		return nil, err
 	}
@@ -94,7 +94,7 @@ func GetGitHubCopilotbyGUID(id string) ([]map[string]interface{}, error) {
 		"ApprovalSystemGUID": id,
 	}
 
-	result, err := db.ExecuteStoredProcedureWithResult("dbo.PR_GitHubCopilot_SelectByGUID", param)
+	result, err := db.ExecuteStoredProcedureWithResult("usp_GitHubCopilot_Select_ByApprovalSystemGUID", param)
 	if err != nil {
 		return nil, err
 	}
@@ -111,7 +111,7 @@ func GitHubCopilotGetPendingByUserAndOrganization(body GitHubCopilot) ([]map[str
 		"Organization": body.RegionName,
 	}
 
-	result, err := db.ExecuteStoredProcedureWithResult("dbo.PR_GitHubCopilot_SelectPendingByUserAndOrganization", param)
+	result, err := db.ExecuteStoredProcedureWithResult("usp_GitHubCopilot_Select_Pending", param)
 	if err != nil {
 		return nil, err
 	}
@@ -123,7 +123,7 @@ func GetFailedCommunityApprovalRequestGitHubCoPilots() []GitHubCopilot {
 	db := ConnectDb()
 	defer db.Close()
 
-	result, _ := db.ExecuteStoredProcedureWithResult("PR_CommunityApprovals_Select_FailedRequestGitHubCoPilots", nil)
+	result, _ := db.ExecuteStoredProcedureWithResult("usp_ApprovalRequest_Select_FailedRequestGitHubCopilot", nil)
 
 	var gitHubCopilots []GitHubCopilot
 
