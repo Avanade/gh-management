@@ -589,7 +589,7 @@ func GetProjectApprovalsByUsername(username string) ([]ApprovalRequest, error) {
 	defer db.Close()
 
 	params := map[string]interface{}{
-		"ApproverEmail": username,
+		"ApproverUserPrincipalName": username,
 	}
 
 	result, err := db.ExecuteStoredProcedureWithResult("usp_ApprovalRequest_Select_ByApproverUserPrincipalName", params)
