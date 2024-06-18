@@ -148,7 +148,6 @@ func setApiRoutes(mux *mux.Router) {
 	muxApi.HandleFunc("/community-approvers", rtApi.SubmitCommunityApprover).Methods("POST")
 	muxApi.HandleFunc("/community-approvers", rtApi.GetCommunityApproversList).Methods("GET")
 	muxApi.HandleFunc("/community-approvers/active", rtApi.GetAllActiveCommunityApprovers).Methods("GET")
-	muxApi.HandleFunc("/community-approvers/{id}", rtApi.GetCommunityApproversById).Methods("GET")
 
 	// CONTRIBUTION AREAS API
 	muxApi.Handle("/contribution-areas", loadAzGHAuthPage(rtApi.CreateContributionAreas)).Methods("POST")

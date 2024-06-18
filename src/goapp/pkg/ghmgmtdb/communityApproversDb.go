@@ -32,22 +32,6 @@ func GetActiveCommunityApprovers(category string) ([]map[string]interface{}, err
 	return result, nil
 }
 
-func GetCommunityApproversById(id string) ([]map[string]interface{}, error) {
-	db := ConnectDb()
-	defer db.Close()
-
-	param := map[string]interface{}{
-		"Id": id,
-	}
-
-	result, err := db.ExecuteStoredProcedureWithResult("usp_CommunityApprover_Select_ById", param)
-	if err != nil {
-		return nil, err
-	}
-
-	return result, nil
-}
-
 func UpdateCommunityApproversById(id int, disabled bool, approverUserPrincipalName, username string, category string) (bool, error) {
 	db := ConnectDb()
 	defer db.Close()

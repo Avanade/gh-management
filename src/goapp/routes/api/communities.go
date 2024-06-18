@@ -658,29 +658,6 @@ func GetCommunityById(w http.ResponseWriter, r *http.Request) {
 	w.Write(jsonResp)
 }
 
-func GetCommunityApproversById(w http.ResponseWriter, r *http.Request) {
-	req := mux.Vars(r)
-	id := req["id"]
-
-	approvers, err := db.GetCommunityApproversById(id)
-	if err != nil {
-		log.Println(err.Error())
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	w.WriteHeader(http.StatusOK)
-	w.Header().Set("Content-Type", "application/json")
-	jsonResp, err := json.Marshal(approvers)
-	if err != nil {
-		log.Println(err.Error())
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	w.Write(jsonResp)
-}
-
 func GetCommunityApproversList(w http.ResponseWriter, r *http.Request) {
 	approvers, err := db.GetCommunityApprovers("community")
 	if err != nil {

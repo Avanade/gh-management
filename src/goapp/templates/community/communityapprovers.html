@@ -227,30 +227,6 @@
                     "Close")
 
             },
-            async GetformUpdate(id) {
-
-                this.approver.selected = "";
-
-                this.mode = "Edit"
-
-                await fetch(`/api/community-approvers/${id}`)
-                    .then(r => {
-                        r.json().then(body => {
-                            this.formUpdate.id = body[0]["Id"]
-                            this.formUpdate.disabled = true
-                            this.formUpdate.name = body[0]["ApproverUserPrincipalName"]
-
-                            this.approver.selected = this.form.name
-                        });
-                    }).then(
-
-
-                    )
-                    .catch(e => {
-
-                    })
-
-            },
             isValid() {
                 if (this.form.approver.length == 0) return false;
                 return true
