@@ -73,10 +73,10 @@ func checkFailedApprovalRequests() {
 		for range time.NewTicker(time.Duration(freqInt) * time.Minute).C {
 			go rtApi.ReprocessRequestApproval()
 
-			go rtApi.ReprocessCommunityApprovalRequestCommunities()
-			go rtApi.ReprocessCommunityApprovalRequestOrganizationAccess()
-			go rtApi.ReprocessCommunityApprovalRequestGitHubCoPilots()
-			go rtApi.ReprocessCommunityApprovalRequestNewOrganizations()
+			// go rtApi.ReprocessCommunityApprovalRequestCommunities()
+			// go rtApi.ReprocessCommunityApprovalRequestOrganizationAccess()
+			// go rtApi.ReprocessCommunityApprovalRequestGitHubCoPilots()
+			// go rtApi.ReprocessCommunityApprovalRequestNewOrganizations()
 		}
 	}
 }
