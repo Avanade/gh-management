@@ -129,18 +129,18 @@ func UpdateApprovalReassignApprover(w http.ResponseWriter, r *http.Request) {
 	for _, v := range result {
 		data := db.ProjectApproval{
 			Id:                         v["Id"].(int64),
-			ProjectId:                  v["ProjectId"].(int64),
-			ProjectName:                v["ProjectName"].(string),
-			ProjectDescription:         v["ProjectDescription"].(string),
+			ProjectId:                  v["RepositoryId"].(int64),
+			ProjectName:                v["RepositoryName"].(string),
+			ProjectDescription:         v["RepositoryDescription"].(string),
 			RequesterGivenName:         v["RequesterGivenName"].(string),
 			RequesterSurName:           v["RequesterSurName"].(string),
 			RequesterName:              v["RequesterName"].(string),
 			RequesterUserPrincipalName: v["RequesterUserPrincipalName"].(string),
-			ApprovalTypeId:             v["ApprovalTypeId"].(int64),
+			ApprovalTypeId:             v["RepositoryApprovalTypeId"].(int64),
 			ApprovalType:               v["ApprovalType"].(string),
 			ApproverUserPrincipalName:  v["ApproverUserPrincipalName"].(string),
 			ApprovalDescription:        v["ApprovalDescription"].(string),
-			Newcontribution:            v["newcontribution"].(string),
+			Newcontribution:            v["Newcontribution"].(string),
 			OSSsponsor:                 v["OSSsponsor"].(string),
 			Offeringsassets:            v["Avanadeofferingsassets"].(string),
 			Willbecommercialversion:    v["Willbecommercialversion"].(string),
@@ -176,9 +176,9 @@ func UpdateCommunityApprovalReassignApprover(w http.ResponseWriter, r *http.Requ
 	}
 
 	param := map[string]interface{}{
-		"Id":            req.Id,
-		"ApproverEmail": req.ApproverEmail,
-		"Username":      req.Username,
+		"ApprovalSystemGUID":        req.Id,
+		"ApproverUserPrincipalName": req.ApproverEmail,
+		"UserPrincipalName":         req.Username,
 	}
 	result, err := db.CommunityApprovalslUpdateApproverUserPrincipalName(param)
 	if err != nil {
@@ -328,7 +328,7 @@ func SendReassignEmail(data db.ProjectApproval) error {
 								<tr class="border-top">
 									<td style="font-size: 14px; padding-top: 15px; font-weight: 600;">
 										Is this a new contribution with no prior code development? <br>
-										(i.e., no existing Avanade IP, no third-party/OSS code, etc.)
+										(i.e., no existing |OrganizationName| IP, no third-party/OSS code, etc.)
 									</td>
 									<td style="font-size: 14px; padding-top: 15px; font-weight: 400;">
 										|Newcontribution|
@@ -336,7 +336,7 @@ func SendReassignEmail(data db.ProjectApproval) error {
 								</tr>
 								<tr class="border-top">
 									<td style="font-size: 14px; padding-top: 15px; font-weight: 600;">
-										Who is sponsoring thapprovalsyscois OSS contribution?
+										Who is sponsoring this OSS contribution?
 									</td>
 									<td style="font-size: 14px; padding-top: 15px; font-weight: 400;">
 										|OSSsponsor|
@@ -344,8 +344,8 @@ func SendReassignEmail(data db.ProjectApproval) error {
 								</tr>
 								<tr class="border-top">
 									<td style="font-size: 14px; padding-top: 15px; font-weight: 600;">
-										Will Avanade use this contribution in client accounts <br>
-										and/or as part of an Avanade offerings/assets?
+										Will |OrganizationName| use this contribution in client accounts <br>
+										and/or as part of an |OrganizationName| offerings/assets?
 									</td>
 									<td style="font-size: 14px; padding-top: 15px; font-weight: 400;">
 										|Avanadeofferingsassets|
@@ -429,6 +429,7 @@ func SendReassignEmail(data db.ProjectApproval) error {
 		"|RejectUrl|", data.RejectUrl,
 		"|ApproveText|", data.ApproveText,
 		"|RejectText|", data.RejectText,
+		"|OrganizationName|", os.Getenv("ORGANIZATION_NAME"),
 	)
 
 	body := replacer.Replace(bodyTemplate)

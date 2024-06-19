@@ -232,26 +232,6 @@ func CreateRepository(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func UpdateRepositoryById(w http.ResponseWriter, r *http.Request) {
-	sessionaz, _ := session.Store.Get(r, "auth-session")
-	iprofile := sessionaz.Values["profile"]
-	profile := iprofile.(map[string]interface{})
-	username := profile["preferred_username"]
-	r.ParseForm()
-
-	var body db.Project
-
-	err := json.NewDecoder(r.Body).Decode(&body)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	db.PRProjectsUpdate(body, username.(string))
-
-	w.WriteHeader(http.StatusOK)
-}
-
 func UpdateRepositoryEcattIdById(w http.ResponseWriter, r *http.Request) {
 	logger := appinsights_wrapper.NewClient()
 	defer logger.EndOperation()
@@ -1080,14 +1060,14 @@ func AddCollaborator(w http.ResponseWriter, r *http.Request) {
 			} else {
 				//if not admin, check is the user is currently an admin, remove if he is
 				if len(users) > 0 {
-					rec, err := db.RepoOwnersByUserAndProjectId(id, users[0]["UserPrincipalName"].(string))
+					isOwner, err := db.IsOwner(id, users[0]["UserPrincipalName"].(string))
 					if err != nil {
 						logger.LogException(err)
 						http.Error(w, err.Error(), http.StatusInternalServerError)
 						return
 					}
 
-					if len(rec) > 0 {
+					if isOwner {
 						err := db.DeleteRepoOwnerRecordByUserAndProjectId(id, users[0]["UserPrincipalName"].(string))
 						if err != nil {
 							logger.LogException(err)
@@ -1176,7 +1156,7 @@ func RepoOwnersCleanup(w http.ResponseWriter, r *http.Request) {
 	token := os.Getenv("GH_TOKEN")
 
 	// Get all repos from database
-	repos, err := db.GetGitHubRepositories()
+	repos, err := db.ProjectsByRepositorySource("GitHub")
 	if err != nil {
 		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -1221,7 +1201,7 @@ func RecurringApproval(w http.ResponseWriter, r *http.Request) {
 
 		daysSinceCreationFloor := math.Floor(daysSinceCreation)
 
-		projectApprovalApprovers, err := db.GetApprovalRequestApproversByApprovalRequestId(int(projectApproval["ProjectApprovalId"].(int64)))
+		projectApprovalApprovers, err := db.GetApprovalRequestApproversByApprovalRequestId(int(projectApproval["RepositoryApprovalId"].(int64)))
 		if err != nil {
 			logger.LogException(err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -1578,7 +1558,7 @@ func ApprovalSystemRequest(data db.ProjectApprovalApprovers, logger *appinsights
 								<tr class="border-top">
 									<td style="font-size: 14px; padding-top: 15px; font-weight: 600;">
 										Is this a new contribution with no prior code development? <br>
-										(i.e., no existing Avanade IP, no third-party/OSS code, etc.)
+										(i.e., no existing |OrganizationName| IP, no third-party/OSS code, etc.)
 									</td>
 									<td style="font-size: 14px; padding-top: 15px; font-weight: 400;">
 										|Newcontribution|
@@ -1586,7 +1566,7 @@ func ApprovalSystemRequest(data db.ProjectApprovalApprovers, logger *appinsights
 								</tr>
 								<tr class="border-top">
 									<td style="font-size: 14px; padding-top: 15px; font-weight: 600;">
-										Who is sponsoring thapprovalsyscois OSS contribution?
+										Who is sponsoring this OSS contribution?
 									</td>
 									<td style="font-size: 14px; padding-top: 15px; font-weight: 400;">
 										|OSSsponsor|
@@ -1594,8 +1574,8 @@ func ApprovalSystemRequest(data db.ProjectApprovalApprovers, logger *appinsights
 								</tr>
 								<tr class="border-top">
 									<td style="font-size: 14px; padding-top: 15px; font-weight: 600;">
-										Will Avanade use this contribution in client accounts <br>
-										and/or as part of an Avanade offerings/assets?
+										Will |OrganizationName| use this contribution in client accounts <br>
+										and/or as part of an |OrganizationName| offerings/assets?
 									</td>
 									<td style="font-size: 14px; padding-top: 15px; font-weight: 400;">
 										|Avanadeofferingsassets|
@@ -1651,6 +1631,7 @@ func ApprovalSystemRequest(data db.ProjectApprovalApprovers, logger *appinsights
 			"|Avanadeofferingsassets|", data.OfferingsAssets,
 			"|Willbecommercialversion|", data.WillBeCommercialVersion,
 			"|OSSContributionInformation|", data.OSSContributionInformation,
+			"|OrganizationName|", os.Getenv("ORGANIZATION_NAME"),
 		)
 		body := replacer.Replace(bodyTemplate)
 		postParams := ProjectApprovalSystemPostDto{

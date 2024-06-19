@@ -11,6 +11,7 @@ import (
 	"main/pkg/appinsights_wrapper"
 	db "main/pkg/ghmgmtdb"
 	ghAPI "main/pkg/github"
+	"main/pkg/notification"
 	"main/pkg/session"
 
 	"github.com/gorilla/mux"
@@ -110,6 +111,16 @@ func AddOrganization(w http.ResponseWriter, r *http.Request) {
 	body.RequestIds = requestIds
 	body.Id = int64(id)
 	CreateOrganizationApprovalRequest(body, logger)
+
+	messageBody := notification.RequestForAnOrganizationMessageBody{
+		Recipients: approverList,
+		UserName:   body.GitHubUsername,
+	}
+
+	err = messageBody.Send()
+	if err != nil {
+		logger.LogException(err)
+	}
 }
 
 func CreateOrganizationApprovalRequest(data db.Organization, logger *appinsights_wrapper.TelemetryClient) error {

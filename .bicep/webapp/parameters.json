@@ -68,7 +68,20 @@
                 "COPILOT_GROUP_SLUG": "",
                 "EXEMPTION": "",
 
-                "ENABLED_REMOVE_COLLABORATORS": ""
+                "ENABLED_REMOVE_COLLABORATORS": "",
+
+                "ORGANIZATION_NAME":"",
+                
+                "LINK_INNERSOURCE_GENERAL_LEGAL_GUIDELINES":"",
+                "LINK_INNERSOURCE_GENERAL_GUIDELINES":"",
+                "LINK_TOOL_APPROVAL_PROCESS":"",
+                "LINK_XML_SCHEMA":"",
+                "LINK_MEMBER_REQUEST_ACCESS":"",
+                "LINK_GUEST_REQUEST_ACCESS":"",
+                "LINK_MEMBER_PROFILE":"",
+                "LINK_GUEST_PROFILE":"",
+                "LINK_COMMUNITY_SHAREPOINT_SITE":"",
+                "LINK_FOOTERS":""
             }
         }
     }

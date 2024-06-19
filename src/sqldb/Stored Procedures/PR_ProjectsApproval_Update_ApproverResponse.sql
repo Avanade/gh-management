@@ -4,7 +4,7 @@ CREATE PROCEDURE [dbo].[PR_ProjectsApproval_Update_ApproverResponse]
   @ApprovalStatusId INT,
   @ApprovalRemarks VARCHAR(255),
   @ApprovalDate DATETIME,
-  @RespondedBy VARCHAR(100) = NULL -- OBSOLETE REMOVE EQUALS NULL
+  @RespondedBy VARCHAR(100)
 )
 AS
 BEGIN
@@ -14,7 +14,7 @@ UPDATE
   SET
     [ApprovalStatusId] = @ApprovalStatusId,
     [ApprovalRemarks] = @ApprovalRemarks,
-    [ModifiedBy] = [ApproverUserPrincipalName],
+    [ModifiedBy] = @RespondedBy,
     [Modified] = GETDATE(),
     [ApprovalDate] = convert(DATETIME, @ApprovalDate),
     [RespondedBy] = @RespondedBy

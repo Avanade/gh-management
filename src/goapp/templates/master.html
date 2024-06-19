@@ -275,10 +275,10 @@
         <div class="flex-1 flex flex-col pt-5 pb-4 overflow-y-auto">
           <div class="flex items-center flex-shrink-0 px-4">
             <a href="/">
-              <img class="h-8 w-auto" src="/public/ava-logo.png" alt="Avanade" />
+              <img class="h-8 w-auto" src="/public/ava-logo.png" alt="{{ .OrganizationName }}" />
             </a>
           </div>
-          <div class="pl-[48px] text-sm pb-7"><a href="***REMOVED***">Community</a>
+          <div class="pl-[48px] text-sm pb-7"><a href="{{ .CommunitySite }}" target="_blank">Community</a>
           </div>
           <nav class="mt-5 px-2 space-y-1">
             {{ $page := .Header.Page}}
@@ -343,7 +343,7 @@
                 {{ .Profile.name }}
               </p>
               <p class="text-xs font-medium text-gray-500 group-hover:text-gray-700">
-                <a @click="isUserDomain()" class="cursor-pointer"> View Profile</a> | <a href="/logout/azure">Logout</a>
+                <a href="{{ .ProfileLink }}" target="_blank" class="cursor-pointer"> View Profile</a> | <a href="/logout/azure">Logout</a>
               </p>
             </div>
           </div>
@@ -366,7 +366,7 @@
           </div>
           <div>
             <div class="flex items-center flex-shrink-0 px-4">
-              <img class="h-8 w-auto" src="/public/ava-logo.png" alt="Avanade" />
+              <img class="h-8 w-auto" src="/public/ava-logo.png" alt="{{ .OrganizationName }}" />
             </div>
             <div class="pl-[48px] text-sm pb-2">Community</div>
           </div>
@@ -418,54 +418,52 @@
                 </p>
               </div>
               {{ end }}
-              {{ if and (.ProfileGH.LoggedIn) (not .ProfileGH.IsEnterpriseMember)}}
-              <template x-if="profileDomain == 'avanade.com'">
-                <div class="bg-yellow-50 p-4 mb-3">
-                  <div class="flex">
-                    <div class="flex-shrink-0">
-                      <svg class="h-5 w-5 text-yellow-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
-                        fill="currentColor" aria-hidden="true">
-                        <path fill-rule="evenodd"
-                          d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
-                          clip-rule="evenodd" />
-                      </svg>
-                    </div>
-                    <div class="ml-3 flex-1 md:flex md:justify-between">
-                      <p class="text-sm text-yellow-700">Your user account does not have a Visual Studio licence
-                        associated with it. You are able to log into GitHub, but to access GitHub Enterprise, you will
-                        need to request a Visual Studio licence.</p>
-                      <p class="mt-3 text-sm md:mt-0 md:ml-6">
-                        <a href="https://avanade.sharepoint.com/sites/VisualStudioSubscriptions"
-                          class="whitespace-nowrap font-medium text-yellow-700 hover:text-yellow-600">Avanade's Visual
-                          Studio request site<span aria-hidden="true">&rarr;</span></a>
-                      </p>
-                    </div>
+              {{ if and (.ProfileGH.LoggedIn) (not .ProfileGH.IsEnterpriseMember) (.IsMemberAccount) }}
+              <div class="bg-yellow-50 p-4 mb-3">
+                <div class="flex">
+                  <div class="flex-shrink-0">
+                    <svg class="h-5 w-5 text-yellow-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
+                      fill="currentColor" aria-hidden="true">
+                      <path fill-rule="evenodd"
+                        d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                        clip-rule="evenodd" />
+                    </svg>
+                  </div>
+                  <div class="ml-3 flex-1 md:flex md:justify-between">
+                    <p class="text-sm text-yellow-700">Your user account does not have a Visual Studio licence
+                      associated with it. You are able to log into GitHub, but to access GitHub Enterprise, you will
+                      need to request a Visual Studio licence.</p>
+                    <p class="mt-3 text-sm md:mt-0 md:ml-6">
+                      <a href="{{ .RequestAccessLink }}"
+                        class="whitespace-nowrap font-medium text-yellow-700 hover:text-yellow-600">{{ .OrganizationName }}'s Visual
+                        Studio request site<span aria-hidden="true">&rarr;</span></a>
+                    </p>
                   </div>
                 </div>
-              </template>
-              <template x-if="profileDomain == 'accenture.com'">
-                <div class="bg-yellow-50 p-4 mb-3">
-                  <div class="flex">
-                    <div class="flex-shrink-0">
-                      <svg class="h-5 w-5 text-yellow-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
-                        fill="currentColor" aria-hidden="true">
-                        <path fill-rule="evenodd"
-                          d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
-                          clip-rule="evenodd" />
-                      </svg>
-                    </div>
-                    <div class="ml-3 flex-1 md:flex md:justify-between">
-                      <p class="text-sm text-yellow-700">
-                        Your user account has not been granted access to Avanade's GitHub Enterprise licence. If you
-                        have a Visual Studio licence, then open an incognito or private browser window, and
-                        <a href="https://myaccess.microsoft.com/%40avanade.onmicrosoft.com#/access-packages/e9a49c54-74a8-4471-8aa8-00781df3e39c"
-                          class="whitespace-nowrap font-medium text-yellow-700 hover:text-yellow-600">click this
-                          link</a> to request access. Enter your @Accenture.com credentials to login and then click the Request Access button.
-                      </p>
-                    </div>
+              </div>
+              {{ end }}
+              {{ if and (.ProfileGH.LoggedIn) (not .ProfileGH.IsEnterpriseMember) (not .IsMemberAccount) }}
+              <div class="bg-yellow-50 p-4 mb-3">
+                <div class="flex">
+                  <div class="flex-shrink-0">
+                    <svg class="h-5 w-5 text-yellow-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
+                      fill="currentColor" aria-hidden="true">
+                      <path fill-rule="evenodd"
+                        d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                        clip-rule="evenodd" />
+                    </svg>
+                  </div>
+                  <div class="ml-3 flex-1 md:flex md:justify-between">
+                    <p class="text-sm text-yellow-700">
+                      Your user account has not been granted access to {{ .OrganizationName }}'s GitHub Enterprise licence. If you
+                      have a Visual Studio licence, then open an incognito or private browser window, and
+                      <a href="{{ .RequestAccessLink }}"
+                        class="whitespace-nowrap font-medium text-yellow-700 hover:text-yellow-600">click this
+                        link</a> to request access. Enter your @Accenture.com credentials to login and then click the Request Access button.
+                    </p>
                   </div>
                 </div>
-              </template>
+              </div>
               {{ end }}
               {{ if and (.ProfileGH.LoggedIn) (not .ProfileGH.IsValid) }}
               <div class="bg-red-50 p-4 mb-3">
@@ -545,41 +543,16 @@
       <footer class="bg-gray-200">
         <div class="max-w-7xl mx-auto py-2 px-4 overflow-hidden">
           <nav class="-mx-5 -my-2 flex flex-wrap justify-center text-sm" aria-label="Footer">
+            {{ range $footer := .Footers }}
             <div class="px-5 py-2 ">
-              <a href="***REMOVED***" class="text-gray-500 hover:text-gray-900">
-                Privacy Policy
+              <a href="{{ $footer.Url }}" class="text-gray-500 hover:text-gray-900" target="_blank">
+                {{ $footer.Text }}
               </a>
             </div>
-
-            <div class="px-5 py-2">
-              <a href="***REMOVED***" class="text-gray-500 hover:text-gray-900">
-                Terms of Use
-              </a>
-            </div>
-
-            <div class="px-5 py-2">
-              <a href="https://avanade.github.io/code-of-conduct/" class="text-gray-500 hover:text-gray-900">
-                Open Source Code of Conduct
-              </a>
-            </div>
-
-            <div class="px-5 py-2">
-              <a href="***REMOVED***"
-                class="text-gray-500 hover:text-gray-900">
-                Open Source Policy
-              </a>
-            </div>
-
-            <div class="px-5 py-2">
-              <a href="***REMOVED***"
-                class="text-gray-500 hover:text-gray-900 text-sm">
-                Trade Association Policy
-              </a>
-            </div>
-
+            {{ end }}
           </nav>
           <p class="mt-6 text-center text-gray-400 text-xs">
-            &copy; 2024 Avanade, Inc. All rights reserved.
+            &copy; 2024 {{ .OrganizationName }}, Inc. All rights reserved.
           </p>
         </div>
       </footer>
@@ -700,21 +673,6 @@
           Enabled: ''
         },
         externalLinksEnabled: [],
-        get profileDomain() {
-          var domain = this.profile.username.split('@')[1]
-          return domain
-        },
-        get profileUrl() {
-          return 'https://people.' + this.profileDomain
-        },
-        isUserDomain() {
-          if (this.profileDomain === 'avanade.com') {
-            window.location.href = '***REMOVED***'
-          } else {
-            window.location.href = '***REMOVED***'
-          }
-
-        },
         showClearBtn() {
           if (this.searchBar == '') {
             this.clearBtn = false

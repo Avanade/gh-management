@@ -57,7 +57,7 @@ func CommunitiesSelectByID(id string) ([]map[string]interface{}, error) {
 		"Id": id,
 	}
 
-	result, err := db.ExecuteStoredProcedureWithResult("dbo.PR_Communities_select_byID", params)
+	result, err := db.ExecuteStoredProcedureWithResult("usp_Community_Select_ById", params)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -69,7 +69,7 @@ func CommunitiesInsert(params map[string]interface{}) ([]map[string]interface{},
 	db := ConnectDb()
 	defer db.Close()
 
-	result, err := db.ExecuteStoredProcedureWithResult("dbo.PR_Communities_Insert", params)
+	result, err := db.ExecuteStoredProcedureWithResult("usp_Community_Insert", params)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -80,7 +80,7 @@ func CommunitiesInsert(params map[string]interface{}) ([]map[string]interface{},
 func CommunitySponsorsInsert(params map[string]interface{}) (sql.Result, error) {
 	db := ConnectDb()
 	defer db.Close()
-	result, err := db.ExecuteStoredProcedure("dbo.PR_CommunitySponsors_Insert", params)
+	result, err := db.ExecuteStoredProcedure("usp_CommunitySponsor_Insert", params)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -91,7 +91,7 @@ func CommunitySponsorsInsert(params map[string]interface{}) (sql.Result, error) 
 func RelatedCommunitiesDelete(params map[string]interface{}) (sql.Result, error) {
 	db := ConnectDb()
 	defer db.Close()
-	result, err := db.ExecuteStoredProcedure("dbo.PR_RelatedCommunities_Delete", params)
+	result, err := db.ExecuteStoredProcedure("usp_RelatedCommunity_Delete", params)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -102,7 +102,7 @@ func RelatedCommunitiesDelete(params map[string]interface{}) (sql.Result, error)
 func RelatedCommunitiesInsert(params map[string]interface{}) (sql.Result, error) {
 	db := ConnectDb()
 	defer db.Close()
-	result, err := db.ExecuteStoredProcedure("dbo.PR_RelatedCommunities_Insert", params)
+	result, err := db.ExecuteStoredProcedure("usp_RelatedCommunity_Insert", params)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -113,18 +113,7 @@ func RelatedCommunitiesInsert(params map[string]interface{}) (sql.Result, error)
 func CommunityTagsInsert(params map[string]interface{}) (sql.Result, error) {
 	db := ConnectDb()
 	defer db.Close()
-	result, err := db.ExecuteStoredProcedure("dbo.PR_CommunityTags_Insert", params)
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	return result, err
-}
-
-func CommunitiesUpdate(params map[string]interface{}) (sql.Result, error) {
-	db := ConnectDb()
-	defer db.Close()
-	result, err := db.ExecuteStoredProcedure("dbo.PR_Communities_Update", params)
+	result, err := db.ExecuteStoredProcedure("usp_CommunityTag_Insert", params)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -138,10 +127,10 @@ func CommunityApprovalsSelectById(id int64) ([]map[string]interface{}, error) {
 
 	param := map[string]interface{}{
 
-		"Id": id,
+		"CommunityId": id,
 	}
 
-	result, err := db.ExecuteStoredProcedureWithResult("dbo.PR_CommunityApprovals_Select_ById", param)
+	result, err := db.ExecuteStoredProcedureWithResult("usp_ApprovalRequest_Select_ByCommunityId", param)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -153,43 +142,7 @@ func CommunitiesIsexternal(params map[string]interface{}) ([]map[string]interfac
 	db := ConnectDb()
 	defer db.Close()
 
-	result, err := db.ExecuteStoredProcedureWithResult("dbo.PR_Communities_Isexternal", params)
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	return result, err
-}
-
-func CommunitiesInitCommunityType(params map[string]interface{}) ([]map[string]interface{}, error) {
-	db := ConnectDb()
-	defer db.Close()
-
-	result, err := db.ExecuteStoredProcedureWithResult("dbo.PR_Communities_InitCommunityType", params)
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	return result, err
-}
-
-func CommunitySponsorsSelect(params map[string]interface{}) ([]map[string]interface{}, error) {
-	db := ConnectDb()
-	defer db.Close()
-
-	result, err := db.ExecuteStoredProcedureWithResult("dbo.PR_CommunitySponsors_Select", params)
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	return result, err
-}
-
-func CommunitySponsorsUpdate(params map[string]interface{}) ([]map[string]interface{}, error) {
-	db := ConnectDb()
-	defer db.Close()
-
-	result, err := db.ExecuteStoredProcedureWithResult("dbo.PR_CommunitySponsors_Update", params)
+	result, err := db.ExecuteStoredProcedureWithResult("usp_Community_IsExternal", params)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -201,7 +154,7 @@ func CommunitySponsorsSelectByCommunityId(params map[string]interface{}) ([]map[
 	db := ConnectDb()
 	defer db.Close()
 
-	result, err := db.ExecuteStoredProcedureWithResult("dbo.PR_CommunitySponsors_Select_By_CommunityId", params)
+	result, err := db.ExecuteStoredProcedureWithResult("usp_CommunitySponsor_Select_ByCommunityId", params)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -212,7 +165,7 @@ func CommunitySponsorsSelectByCommunityId(params map[string]interface{}) ([]map[
 func CommunityTagsSelectByCommunityId(params map[string]interface{}) ([]map[string]interface{}, error) {
 	db := ConnectDb()
 	defer db.Close()
-	result, err := db.ExecuteStoredProcedureWithResult("dbo.PR_CommunityTags_Select_By_CommunityId", params)
+	result, err := db.ExecuteStoredProcedureWithResult("usp_CommunityTag_Select_ByCommunityId", params)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -223,7 +176,7 @@ func CommunityTagsSelectByCommunityId(params map[string]interface{}) ([]map[stri
 func RelatedCommunitiesSelect(params map[string]interface{}) ([]map[string]interface{}, error) {
 	db := ConnectDb()
 	defer db.Close()
-	result, err := db.ExecuteStoredProcedureWithResult("dbo.PR_RelatedCommunities_Select", params)
+	result, err := db.ExecuteStoredProcedureWithResult("usp_RelatedCommunity_Select_ByParentCommunityId", params)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -235,7 +188,7 @@ func CommunityIManageExecuteSelect(params map[string]interface{}) ([]map[string]
 	db := ConnectDb()
 	defer db.Close()
 
-	result, err := db.ExecuteStoredProcedureWithResult("dbo.PR_Communities_select_IManage", params)
+	result, err := db.ExecuteStoredProcedureWithResult("usp_Community_Select_IManage", params)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -250,7 +203,7 @@ func MyCommunitites(username string) ([]map[string]interface{}, error) {
 	params := map[string]interface{}{
 		"UserPrincipalName": username,
 	}
-	result, err := db.ExecuteStoredProcedureWithResult("PR_Communities_select_my", params)
+	result, err := db.ExecuteStoredProcedureWithResult("usp_Community_Select_MyAllApproved", params)
 	if err != nil {
 		return nil, err
 	}
@@ -261,7 +214,7 @@ func CommunityApprovalslUpdateApproverUserPrincipalName(params map[string]interf
 	db := ConnectDb()
 	defer db.Close()
 
-	result, err := db.ExecuteStoredProcedureWithResult("dbo.PR_CommunityApprovals_Update_ApproverUserPrincipalName", params)
+	result, err := db.ExecuteStoredProcedureWithResult("usp_ApprovalRequest_Update_ApproverUserPrincipalName", params)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -279,7 +232,7 @@ func Communities_AddMember(CommunityId int, UserPrincipalName string) error {
 		"UserPrincipalName": UserPrincipalName,
 	}
 
-	_, err := db.ExecuteStoredProcedure("dbo.PR_CommunityMembers_Insert", param)
+	_, err := db.ExecuteStoredProcedure("usp_CommunityMember_Insert", param)
 
 	if err != nil {
 		fmt.Println(err)
@@ -300,7 +253,7 @@ func Communities_Related(CommunityId int64) (data []RelatedCommunity, err error)
 		"CommunityId": CommunityId,
 	}
 
-	result, err := db.ExecuteStoredProcedureWithResult("dbo.PR_Communities_Select_Related", param)
+	result, err := db.ExecuteStoredProcedureWithResult("usp_Community_Select_RelatedCommunity", param)
 
 	if err != nil {
 		fmt.Println(err)
@@ -327,7 +280,7 @@ func Community_Sponsors(CommunityId int64) (data []CommunitySponsor, err error) 
 		"CommunityId": CommunityId,
 	}
 
-	result, err := db.ExecuteStoredProcedureWithResult("dbo.PR_CommunitySponsors_Select_By_CommunityId", param)
+	result, err := db.ExecuteStoredProcedureWithResult("usp_CommunitySponsor_Select_ByCommunityId", param)
 
 	if err != nil {
 		fmt.Println(err)
@@ -355,7 +308,7 @@ func Community_Info(CommunityId int64) (data CommunityOnBoarding, err error) {
 		"Id": CommunityId,
 	}
 
-	result, err := db.ExecuteStoredProcedureWithResult("dbo.PR_Communities_select_byID", param)
+	result, err := db.ExecuteStoredProcedureWithResult("usp_Community_Select_ById", param)
 
 	if err != nil {
 		fmt.Println(err)
@@ -382,12 +335,13 @@ func Community_Onboarding_AddMember(CommunityId int64, UserPrincipalName string)
 		"UserPrincipalName": UserPrincipalName,
 	}
 
-	_, err = db.ExecuteStoredProcedure("dbo.PR_CommunityMembers_Insert", param)
+	_, err = db.ExecuteStoredProcedure("usp_CommunityMember_Insert", param)
 
 	if err != nil {
 		fmt.Println(err)
+		return err
 	}
-	return
+	return nil
 }
 
 func Community_Onboarding_RemoveMember(CommunityId int64, UserPrincipalName string) (err error) {
@@ -400,7 +354,7 @@ func Community_Onboarding_RemoveMember(CommunityId int64, UserPrincipalName stri
 		"UserPrincipalName": UserPrincipalName,
 	}
 
-	_, err = db.ExecuteStoredProcedure("dbo.PR_CommunityMembers_Remove", param)
+	_, err = db.ExecuteStoredProcedure("usp_CommunityMember_Delete", param)
 
 	if err != nil {
 		fmt.Println(err)
@@ -418,7 +372,7 @@ func Community_Membership_IsMember(CommunityId int64, UserPrincipalName string) 
 		"UserPrincipalName": UserPrincipalName,
 	}
 
-	result, err := db.ExecuteStoredProcedureWithResult("dbo.PR_CommunityMembers_IsExisting", param)
+	result, err := db.ExecuteStoredProcedureWithResult("usp_CommunityMember_IsExisting", param)
 
 	if err != nil {
 		fmt.Println(err)
@@ -432,7 +386,7 @@ func GetCommunities() interface{} {
 	db := ConnectDb()
 	defer db.Close()
 
-	result, err := db.ExecuteStoredProcedureWithResult("PR_Communities_select", nil)
+	result, err := db.ExecuteStoredProcedureWithResult("usp_Community_Select_AllApproved", nil)
 	if err != nil {
 		return err
 	}
@@ -447,7 +401,7 @@ func GetCommunityMembers(id int64) interface{} {
 		"CommunityId": id,
 	}
 
-	result, err := db.ExecuteStoredProcedureWithResult("PR_CommunityMembers_Select_ByCommunityId", param)
+	result, err := db.ExecuteStoredProcedureWithResult("usp_CommunityMember_Select_ByCommunityId", param)
 	if err != nil {
 		return err
 	}
@@ -461,7 +415,7 @@ func PopulateCommunityApproval(id int64) (CommunityApprovals []CommunityApproval
 	param := map[string]interface{}{
 		"CommunityId": id,
 	}
-	result, _ := db.ExecuteStoredProcedureWithResult("PR_CommunityApprovals_Populate", param)
+	result, _ := db.ExecuteStoredProcedureWithResult("usp_ApprovalRequest_Populate", param)
 
 	for _, v := range result {
 		data := CommunityApproval{
@@ -490,7 +444,7 @@ func GetFailedCommunityApprovalRequestCommunities() (CommunityApprovals []Commun
 	db := ConnectDb()
 	defer db.Close()
 
-	result, _ := db.ExecuteStoredProcedureWithResult("PR_CommunityApprovals_Select_FailedRequestCommunities", nil)
+	result, _ := db.ExecuteStoredProcedureWithResult("usp_ApprovalRequest_Select_FailedRequestCommunity", nil)
 
 	for _, v := range result {
 		data := CommunityApproval{
@@ -523,5 +477,5 @@ func CommunityApprovalUpdateGUID(id int64, ApprovalSystemGUID string) {
 		"Id":                 id,
 		"ApprovalSystemGUID": ApprovalSystemGUID,
 	}
-	db.ExecuteStoredProcedure("PR_CommunityApproval_Update_ApprovalSystemGUID", param)
+	db.ExecuteStoredProcedure("usp_ApprovalRequest_Update_ApprovalSystemGUID", param)
 }
