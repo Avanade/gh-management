@@ -7,7 +7,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="icon" href="{{ .Header.LogoPath }}" type="image/icon type">
   <script defer src="https://unpkg.com/alpinejs@3.10.5/dist/cdn.min.js"></script>
-  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
   <link rel="stylesheet" href="/public/css/output.css" />
   <title>{{ .Header.Title }}</title>
   <!-- Global Store -->
@@ -98,7 +98,27 @@
               }
             })
             .catch(e => {
-              var msg = e.response.data.error ? e.response.data.error : "An error occured while processing."
+              var msg = e.response.data ? e.response.data : "An error occured while processing."
+              this.modal.update("error", "Failed", msg, "", "")
+            })
+        },
+        deleteData(endpoint, body, successMessage, actionButtonText, redirectUrl) {
+          axios.delete(endpoint, body, {
+              headers: {
+                'Content-Type': 'application/json'
+              },
+            })
+            .then(r => {
+              if (r.status === 200) {
+                this.modal.update('success', 'Success', successMessage, actionButtonText, redirectUrl)
+              } else {
+                r.text().then(body => {
+                  this.modal.update("error", "Failed", body, "", "")
+                });
+              }
+            })
+            .catch(e => {
+              var msg = e.response.data ? e.response.data : "An error occured while processing."
               this.modal.update("error", "Failed", msg, "", "")
             })
         },
@@ -166,15 +186,20 @@
             <div class="flex-shrink-0 flex items-center px-4">
               <img class="h-8 w-auto" src="/public/ava-logo.png" alt="Workflow" />
             </div>
-            <div class="pl-4 text-sm pb-7">Open Technology</div>
+            <div class="pl-[48px] text-sm pb-7">Community</div>
             <nav class="mt-5 px-2 space-y-1">
               {{ $page := .Header.Page}}
               {{ range $menu := .Header.Menu }}
-              <a href="{{ $menu.Url }}" {{ if eq $menu.Name $page  }}
-                class="bg-gray-100 text-gray-900 group flex items-center px-2 py-2 text-base font-medium rounded-md"
+              <a href="{{ $menu.Url }}" 
+                {{ if eq $menu.Name $page  }}
+                  class="bg-gray-100 text-gray-900 group flex items-center px-2 py-2 text-base font-medium rounded-md"
                 {{ else }}
-                class="text-gray-600 hover:bg-gray-50 hover:text-gray-900 group flex items-center px-2 py-2 text-base font-medium rounded-md"
-                {{ end }} {{ if $menu.External }} target="_blank" {{ end }}>
+                  class="text-gray-600 hover:bg-gray-50 hover:text-gray-900 group flex items-center px-2 py-2 text-base font-medium rounded-md"
+                {{ end }} 
+                
+                {{ if $menu.External }} 
+                  target="_blank" 
+                {{ end }}>
                 <img src="{{ $menu.IconPath }}" class="mr-4 h-6 w-6" />
                 {{ $menu.Name }}
               </a>
@@ -214,15 +239,15 @@
             <div class="flex items-center">
               <div>
                 {{ if .HasPhoto }}
-                <img src="data:image/png;base64,{{ .UserPhoto }}" alt="Blank"
-                  style="border-radius: 100%; height: 48px; width: 48px;" />
+                  <img src="data:image/png;base64,{{ .UserPhoto }}" alt="Blank"
+                    style="border-radius: 100%; height: 48px; width: 48px;" />
                 {{ else }}
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-gray-700" viewBox="0 0 20 20"
-                  fill="currentColor">
-                  <path fill-rule="evenodd"
-                    d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-6-3a2 2 0 11-4 0 2 2 0 014 0zm-2 4a5 5 0 00-4.546 2.916A5.986 5.986 0 0010 16a5.986 5.986 0 004.546-2.084A5 5 0 0010 11z"
-                    clip-rule="evenodd" />
-                </svg>
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-gray-700" viewBox="0 0 20 20"
+                    fill="currentColor">
+                    <path fill-rule="evenodd"
+                      d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-6-3a2 2 0 11-4 0 2 2 0 014 0zm-2 4a5 5 0 00-4.546 2.916A5.986 5.986 0 0010 16a5.986 5.986 0 004.546-2.084A5 5 0 0010 11z"
+                      clip-rule="evenodd" />
+                  </svg>
                 {{ end }}
               </div>
               <div class="ml-3">
@@ -250,19 +275,23 @@
         <div class="flex-1 flex flex-col pt-5 pb-4 overflow-y-auto">
           <div class="flex items-center flex-shrink-0 px-4">
             <a href="/">
-              <img class="h-8 w-auto" src="/public/ava-logo.png" alt="Avanade" />
+              <img class="h-8 w-auto" src="/public/ava-logo.png" alt="{{ .OrganizationName }}" />
             </a>
           </div>
-          <div class="pl-4 text-sm pb-7"><a href="***REMOVED***">Open Technology</a>
+          <div class="pl-[48px] text-sm pb-7"><a href="{{ .CommunitySite }}" target="_blank">Community</a>
           </div>
           <nav class="mt-5 px-2 space-y-1">
             {{ $page := .Header.Page}}
             {{ range $menu := .Header.Menu }}
-            <a href="{{ $menu.Url }}" {{ if eq $menu.Name $page  }}
-              class="bg-gray-100 text-gray-900 group flex items-center px-2 py-2 text-base font-medium rounded-md"
+            <a href="{{ $menu.Url }}" 
+              {{ if eq $menu.Name $page  }}
+                class="bg-gray-100 text-gray-900 group flex items-center px-2 py-2 text-base font-medium rounded-md"
               {{ else }}
-              class="text-gray-600 hover:bg-gray-50 hover:text-gray-900 group flex items-center px-2 py-2 text-base font-medium rounded-md"
-              {{ end }} {{ if $menu.External }} target="_blank" {{ end }}>
+                class="text-gray-600 hover:bg-gray-50 hover:text-gray-900 group flex items-center px-2 py-2 text-base font-medium rounded-md"
+              {{ end }} 
+              {{ if $menu.External }} 
+                target="_blank" 
+              {{ end }}>
               <img src="{{ $menu.IconPath }}" class="mr-4 h-6 w-6" />
               {{ $menu.Name }}
             </a>
@@ -314,7 +343,7 @@
                 {{ .Profile.name }}
               </p>
               <p class="text-xs font-medium text-gray-500 group-hover:text-gray-700">
-                <a @click="isUserDomain()" class="cursor-pointer"> View Profile</a> | <a href="/logout/azure">Logout</a>
+                <a href="{{ .ProfileLink }}" target="_blank" class="cursor-pointer"> View Profile</a> | <a href="/logout/azure">Logout</a>
               </p>
             </div>
           </div>
@@ -337,9 +366,9 @@
           </div>
           <div>
             <div class="flex items-center flex-shrink-0 px-4">
-              <img class="h-8 w-auto" src="/public/ava-logo.png" alt="Avanade" />
+              <img class="h-8 w-auto" src="/public/ava-logo.png" alt="{{ .OrganizationName }}" />
             </div>
-            <div class="pl-4 text-sm pb-2">Open Technology</div>
+            <div class="pl-[48px] text-sm pb-2">Community</div>
           </div>
         </div>
       </div>
@@ -388,56 +417,55 @@
                   <a href="/logout/github" class="hover:underline">(Logout)</a>
                 </p>
               </div>
-              {{ if not .ProfileGH.IsEnterpriseMember}}
-              <template x-if="profileDomain == 'avanade.com'">
-                <div class="bg-yellow-50 p-4 mb-3">
-                  <div class="flex">
-                    <div class="flex-shrink-0">
-                      <svg class="h-5 w-5 text-yellow-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
-                        fill="currentColor" aria-hidden="true">
-                        <path fill-rule="evenodd"
-                          d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
-                          clip-rule="evenodd" />
-                      </svg>
-                    </div>
-                    <div class="ml-3 flex-1 md:flex md:justify-between">
-                      <p class="text-sm text-yellow-700">Your user account does not have a Visual Studio licence
-                        associated with it. You are able to log into GitHub, but to access GitHub Enterprise, you will
-                        need to request a Visual Studio licence.</p>
-                      <p class="mt-3 text-sm md:mt-0 md:ml-6">
-                        <a href="https://avanade.sharepoint.com/sites/VisualStudioSubscriptions"
-                          class="whitespace-nowrap font-medium text-yellow-700 hover:text-yellow-600">Avanade's Visual
-                          Studio request site<span aria-hidden="true">&rarr;</span></a>
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </template>
-              <template x-if="profileDomain == 'accenture.com'">
-                <div class="bg-yellow-50 p-4 mb-3">
-                  <div class="flex">
-                    <div class="flex-shrink-0">
-                      <svg class="h-5 w-5 text-yellow-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
-                        fill="currentColor" aria-hidden="true">
-                        <path fill-rule="evenodd"
-                          d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
-                          clip-rule="evenodd" />
-                      </svg>
-                    </div>
-                    <div class="ml-3 flex-1 md:flex md:justify-between">
-                      <p class="text-sm text-yellow-700">
-                        Your user account has not been granted access to Avanade's GitHub Enterprise licence. If you
-                        have a Visual Studio licence, then open an incognito or private browser window, and
-                        <a href="https://myaccess.microsoft.com/%40avanade.onmicrosoft.com#/access-packages/e9a49c54-74a8-4471-8aa8-00781df3e39c"
-                          class="whitespace-nowrap font-medium text-yellow-700 hover:text-yellow-600">click this
-                          link</a> to request access. Enter your @Accenture.com credentials to login and then click the Request Access button.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </template>
               {{ end }}
-              {{ if not .ProfileGH.IsValid}}
+              {{ if and (.ProfileGH.LoggedIn) (not .ProfileGH.IsEnterpriseMember) (.IsMemberAccount) }}
+              <div class="bg-yellow-50 p-4 mb-3">
+                <div class="flex">
+                  <div class="flex-shrink-0">
+                    <svg class="h-5 w-5 text-yellow-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
+                      fill="currentColor" aria-hidden="true">
+                      <path fill-rule="evenodd"
+                        d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                        clip-rule="evenodd" />
+                    </svg>
+                  </div>
+                  <div class="ml-3 flex-1 md:flex md:justify-between">
+                    <p class="text-sm text-yellow-700">Your user account does not have a Visual Studio licence
+                      associated with it. You are able to log into GitHub, but to access GitHub Enterprise, you will
+                      need to request a Visual Studio licence.</p>
+                    <p class="mt-3 text-sm md:mt-0 md:ml-6">
+                      <a href="{{ .RequestAccessLink }}"
+                        class="whitespace-nowrap font-medium text-yellow-700 hover:text-yellow-600">{{ .OrganizationName }}'s Visual
+                        Studio request site<span aria-hidden="true">&rarr;</span></a>
+                    </p>
+                  </div>
+                </div>
+              </div>
+              {{ end }}
+              {{ if and (.ProfileGH.LoggedIn) (not .ProfileGH.IsEnterpriseMember) (not .IsMemberAccount) }}
+              <div class="bg-yellow-50 p-4 mb-3">
+                <div class="flex">
+                  <div class="flex-shrink-0">
+                    <svg class="h-5 w-5 text-yellow-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
+                      fill="currentColor" aria-hidden="true">
+                      <path fill-rule="evenodd"
+                        d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                        clip-rule="evenodd" />
+                    </svg>
+                  </div>
+                  <div class="ml-3 flex-1 md:flex md:justify-between">
+                    <p class="text-sm text-yellow-700">
+                      Your user account has not been granted access to {{ .OrganizationName }}'s GitHub Enterprise licence. If you
+                      have a Visual Studio licence, then open an incognito or private browser window, and
+                      <a href="{{ .RequestAccessLink }}"
+                        class="whitespace-nowrap font-medium text-yellow-700 hover:text-yellow-600">click this
+                        link</a> to request access. Enter your @Accenture.com credentials to login and then click the Request Access button.
+                    </p>
+                  </div>
+                </div>
+              </div>
+              {{ end }}
+              {{ if and (.ProfileGH.LoggedIn) (not .ProfileGH.IsValid) }}
               <div class="bg-red-50 p-4 mb-3">
                 <div class="flex">
                   <div class="flex-shrink-0">
@@ -459,8 +487,8 @@
                   </div>
                 </div>
               </div>
-              {{ end}}
-              {{ else }}
+              {{ end }}
+              {{ if and (not .ProfileGH.LoggedIn) (not .IsGHAssociated)}}
               <div class="bg-blue-50 p-4 mb-3">
                 <div class="flex">
                   <div class="flex-shrink-0">
@@ -484,7 +512,27 @@
                 </div>
               </div>
               {{ end }}
-
+              {{ if and (not .ProfileGH.LoggedIn) (.IsGHAssociated) }}
+              <div class="bg-blue-50 p-4 mb-3"> 
+                <div class="flex">
+                  <div class="flex-shrink-0">
+                    <svg class="h-5 w-5 text-blue-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
+                      fill="currentColor" aria-hidden="true">
+                      <path fill-rule="evenodd"
+                        d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                        clip-rule="evenodd" />
+                    </svg>
+                  </div>
+                  <div class="ml-3 flex-1 md:flex md:justify-between">
+                    <p class="text-sm text-blue-700">Login your GitHub account to access all features of Community Portal.</p>
+                    <p class="mt-3 text-sm md:mt-0 md:ml-6">
+                      <a href="/authentication/github/inprogress"
+                        class="whitespace-nowrap font-medium text-blue-700 hover:text-blue-600">Login GitHub Account<span aria-hidden="true">&rarr;</span></a>
+                    </p>
+                  </div>
+                </div>
+              </div>
+              {{ end }}
               <div class="bg-white p-4 rounded-md">
                 {{ template "content" .Content}}
               </div>
@@ -495,41 +543,16 @@
       <footer class="bg-gray-200">
         <div class="max-w-7xl mx-auto py-2 px-4 overflow-hidden">
           <nav class="-mx-5 -my-2 flex flex-wrap justify-center text-sm" aria-label="Footer">
+            {{ range $footer := .Footers }}
             <div class="px-5 py-2 ">
-              <a href="***REMOVED***" class="text-gray-500 hover:text-gray-900">
-                Privacy Policy
+              <a href="{{ $footer.Url }}" class="text-gray-500 hover:text-gray-900" target="_blank">
+                {{ $footer.Text }}
               </a>
             </div>
-
-            <div class="px-5 py-2">
-              <a href="***REMOVED***" class="text-gray-500 hover:text-gray-900">
-                Terms of Use
-              </a>
-            </div>
-
-            <div class="px-5 py-2">
-              <a href="https://avanade.github.io/code-of-conduct/" class="text-gray-500 hover:text-gray-900">
-                Open Source Code of Conduct
-              </a>
-            </div>
-
-            <div class="px-5 py-2">
-              <a href="***REMOVED***"
-                class="text-gray-500 hover:text-gray-900">
-                Open Source Policy
-              </a>
-            </div>
-
-            <div class="px-5 py-2">
-              <a href="***REMOVED***"
-                class="text-gray-500 hover:text-gray-900 text-sm">
-                Trade Association Policy
-              </a>
-            </div>
-
+            {{ end }}
           </nav>
           <p class="mt-6 text-center text-gray-400 text-xs">
-            &copy; 2022 Avanade, Inc. All rights reserved.
+            &copy; 2024 {{ .OrganizationName }}, Inc. All rights reserved.
           </p>
         </div>
       </footer>
@@ -650,23 +673,7 @@
           Enabled: ''
         },
         externalLinksEnabled: [],
-        get profileDomain() {
-          var domain = this.profile.username.split('@')[1]
-          return domain
-        },
-        get profileUrl() {
-          return 'https://people.' + this.profileDomain
-        },
-        isUserDomain() {
-          if (this.profileDomain === 'avanade.com') {
-            window.location.href = '***REMOVED***'
-          } else {
-            window.location.href = '***REMOVED***'
-          }
-
-        },
         showClearBtn() {
-          console.log(this.searchBar)
           if (this.searchBar == '') {
             this.clearBtn = false
           } else {
@@ -691,7 +698,7 @@
           localStorage.clear()
         },
         getEnabledExternalLinks() {
-          let uri = '/api/externallinks/enabled'
+          let uri = '/api/external-links/enabled'
           let encoded = encodeURI(uri);
           fetch(encoded)
             .then(r => {

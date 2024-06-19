@@ -1,17 +1,24 @@
 package routes
 
 import (
+	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 	"os"
+	"strconv"
+	"strings"
 	"time"
 
+	"main/pkg/appinsights_wrapper"
 	"main/pkg/email"
+	ev "main/pkg/envvar"
 	db "main/pkg/ghmgmtdb"
 	ghAPI "main/pkg/github"
 	"main/pkg/msgraph"
 	"main/pkg/notification"
+
+	"github.com/microsoft/ApplicationInsights-Go/appinsights"
+	"github.com/microsoft/ApplicationInsights-Go/appinsights/contracts"
 )
 
 func CheckAvaInnerSource(w http.ResponseWriter, r *http.Request) {
@@ -26,174 +33,244 @@ func CheckAvaInnerSource(w http.ResponseWriter, r *http.Request) {
 }
 
 func CheckAvaOpenSource(w http.ResponseWriter, r *http.Request) {
+	logger := appinsights_wrapper.NewClient()
+	defer logger.EndOperation()
+
 	org := os.Getenv("GH_ORG_OPENSOURCE")
-	var outsideCollabsUsers []string
 	token := os.Getenv("GH_TOKEN")
 	repos, err := ghAPI.GetRepositoriesFromOrganization(org)
 	if err != nil {
-		log.Println(err.Error())
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	outsidecollabs := ghAPI.ListOutsideCollaborators(token, org)
-	for _, list := range outsidecollabs {
-		outsideCollabsUsers = append(outsideCollabsUsers, *list.Login)
+	orgOutsideCollaborators := ghAPI.ListOutsideCollaborators(token, org)
+
+	var orgOutsideCollaboratorUsernames []string
+
+	for _, orgOutsideCollaborator := range orgOutsideCollaborators {
+		orgOutsideCollaboratorUsernames = append(orgOutsideCollaboratorUsernames, *orgOutsideCollaborator.Login)
 	}
-	var repoOutsideCollabsList []string
-	for _, collab := range repos {
-		var repoCollabsUserNames []string
 
-		var adminmember []string
-		repoOutsideCollabsList = nil
+	for _, repo := range repos {
+		var repoCollabUsernames []string
+		var repoAdminUsernames []string
 
-		repoCollabs := ghAPI.RepositoriesListCollaborators(token, org, collab.Name, "", "direct")
-		for _, list := range repoCollabs {
+		repoCollaborators := ghAPI.RepositoriesListCollaborators(token, org, repo.Name, "", "direct")
+		for _, repoCollaborator := range repoCollaborators {
 
-			repoCollabsUserNames = append(repoCollabsUserNames, *list.Login)
-			if *list.RoleName == "admin" {
-				adminmember = append(adminmember, *list.Login)
-
+			repoCollabUsernames = append(repoCollabUsernames, *repoCollaborator.Login)
+			if *repoCollaborator.RoleName == "admin" {
+				repoAdminUsernames = append(repoAdminUsernames, *repoCollaborator.Login)
 			}
 		}
 
-		for _, list := range repoCollabsUserNames {
-			for _, outsidelist := range outsideCollabsUsers {
-				if list == outsidelist {
-					repoOutsideCollabsList = append(repoOutsideCollabsList, outsidelist)
+		var repoOutsideCollaboratorUsernames []string
+		for _, repoCollabUsername := range repoCollabUsernames {
+			for _, orgOutsideCollaboratorUsername := range orgOutsideCollaboratorUsernames {
+				if repoCollabUsername == orgOutsideCollaboratorUsername {
+					repoOutsideCollaboratorUsernames = append(repoOutsideCollaboratorUsernames, orgOutsideCollaboratorUsername)
 				}
 			}
 		}
-		if len(repoOutsideCollabsList) > 0 {
 
-			for _, admin := range adminmember {
-				email, err := db.UsersGetEmail(admin)
+		if len(repoOutsideCollaboratorUsernames) > 0 {
+			logger.TrackTrace(fmt.Sprintf("%s has %d outside collaborators", repo.Name, len(repoOutsideCollaboratorUsernames)), contracts.Information)
+
+			for _, repoAdminUsername := range repoAdminUsernames {
+				repoAdminEmail, err := db.UsersGetEmail(repoAdminUsername)
 				if err != nil {
-					log.Println(err.Error())
-					http.Error(w, err.Error(), http.StatusInternalServerError)
-					return
+					continue
 				}
-				EmailAdmin(admin, email, collab.Name, repoOutsideCollabsList)
+
+				if repoAdminEmail != "" {
+					emailAdmin(repoAdminUsername, repoAdminEmail, repo.Name, repoOutsideCollaboratorUsernames, logger)
+				}
 			}
 
 		}
-
 	}
 }
 
 func ClearOrgMembers(w http.ResponseWriter, r *http.Request) {
-	token := os.Getenv("GH_TOKEN")
+	go func() {
+		logger := appinsights_wrapper.NewClient()
+		defer logger.EndOperation()
 
-	// Remove GitHub users from innersource who are not employees
-	organization := os.Getenv("GH_ORG_INNERSOURCE")
-	emailSupport := os.Getenv("EMAIL_SUPPORT")
-	var convertedOutsideCollabsList []string
-	users := ghAPI.OrgListMembers(token, organization)
-	for _, list := range users {
-		email, err := db.UsersGetEmail(*list.Login)
+		token := os.Getenv("GH_TOKEN")
+
+		// Remove GitHub users from innersource who are not employees
+		innersourceOrgs := []string{os.Getenv("GH_ORG_INNERSOURCE")}
+
+		regOrgs, err := db.GetAllRegionalOrganizations()
 		if err != nil {
-			log.Println(err.Error())
+			logger.LogException(err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		if len(email) > 0 {
-			activeUser, err := msgraph.ActiveUsers(email)
+
+		for _, regOrg := range regOrgs {
+			innersourceOrgs = append(innersourceOrgs, regOrg["Name"].(string))
+		}
+
+		for _, innersourceOrg := range innersourceOrgs {
+			ClearOrgMembersInnersource(token, innersourceOrg, logger)
+		}
+
+		// Convert users who are not employees to an outside collaborator
+		var notFoundDB []string
+		var notFoundAD []string
+		var disabledAccountAD []string
+		var convertedOutsideCollabsList []string
+		organizationsOpen := os.Getenv("GH_ORG_OPENSOURCE")
+
+		usersOpenOrg, err := ghAPI.OrgListMembers(token, organizationsOpen, "all")
+		if err != nil {
+			logger.LogException(err)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		for _, user := range usersOpenOrg {
+			email, err := db.GetUserEmailByGithubId(fmt.Sprint(user.GetID()))
 			if err != nil {
-				log.Println(err.Error())
+				logger.LogException(err)
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
 			}
-			if activeUser == nil {
-				ghAPI.RemoveOrganizationsMember(token, organization, *list.Login)
-
+			if email != "" {
+				isUserExist, isAccountEnabled, err := msgraph.IsUserExist(email)
+				if err != nil {
+					logger.LogException(err)
+					continue
+				}
+				if !isUserExist {
+					notFoundAD = append(notFoundAD, fmt.Sprint(user.GetLogin(), " - ", email))
+					if ev.GetEnvVar("ENABLED_REMOVE_COLLABORATORS", "false") == "true" {
+						ghAPI.ConvertMemberToOutsideCollaborator(token, organizationsOpen, user.GetLogin()) // Convert user to outside collaborator
+					}
+					convertedOutsideCollabsList = append(convertedOutsideCollabsList, user.GetLogin())
+				}
+				if !isAccountEnabled {
+					disabledAccountAD = append(disabledAccountAD, fmt.Sprint(user.GetLogin(), " - ", email))
+					if ev.GetEnvVar("ENABLED_REMOVE_COLLABORATORS", "false") == "true" {
+						ghAPI.ConvertMemberToOutsideCollaborator(token, organizationsOpen, user.GetLogin()) // Convert user to outside collaborator
+					}
+					convertedOutsideCollabsList = append(convertedOutsideCollabsList, user.GetLogin())
+				}
+			} else {
+				notFoundDB = append(notFoundDB, user.GetLogin())
+				if ev.GetEnvVar("ENABLED_REMOVE_COLLABORATORS", "false") == "true" {
+					ghAPI.ConvertMemberToOutsideCollaborator(token, organizationsOpen, user.GetLogin()) // Convert user to outside collaborator
+				}
+				convertedOutsideCollabsList = append(convertedOutsideCollabsList, user.GetLogin())
 			}
-		} else {
-			ghAPI.RemoveOrganizationsMember(token, organization, *list.Login)
-
 		}
 
-	}
-
-	// Convert users who are not employees to an outside collaborator
-	organizationsOpen := os.Getenv("GH_ORG_OPENSOURCE")
-
-	usersOpenOrg := ghAPI.OrgListMembers(token, organizationsOpen)
-	for _, list := range usersOpenOrg {
-		email, err := db.UsersGetEmail(*list.Login)
-		if err != nil {
-			log.Println(err.Error())
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-		if len(email) > 0 {
-			activeUser, _ := msgraph.ActiveUsers(email)
-			if activeUser == nil {
-				ghAPI.ConvertMemberToOutsideCollaborator(token, organizationsOpen, *list.Login)
-				convertedOutsideCollabsList = append(convertedOutsideCollabsList, *list.Login)
+		if len(convertedOutsideCollabsList) > 0 {
+			emailSupport := os.Getenv("EMAIL_SUPPORT")
+			if ev.GetEnvVar("ENABLED_REMOVE_COLLABORATORS", "false") == "true" {
+				// to list of new outside collaborators to ospo
+				EmailAdminConvertToColaborator(emailSupport, convertedOutsideCollabsList, logger)
 			}
-		} else {
-			ghAPI.ConvertMemberToOutsideCollaborator(token, organizationsOpen, *list.Login)
-			convertedOutsideCollabsList = append(convertedOutsideCollabsList, *list.Login)
-		}
-	}
+			emailConvertedCollaboratorTC := appinsights.NewTraceTelemetry(fmt.Sprintf("SUPPORT EMAIL : %s", emailSupport), contracts.Information)
 
-	if len(convertedOutsideCollabsList) > 0 {
-		// to list of new outside collaborators to ospo
-		EmailAdminConvertToColaborator(emailSupport, convertedOutsideCollabsList)
+			convertedOutsideCollabsListJson, err := json.Marshal(convertedOutsideCollabsList)
+			if err != nil {
+				fmt.Println(err)
+				return
+			}
 
-		// to repo admins with converted users
-		repos, _ := ghAPI.GetRepositoriesFromOrganization(organizationsOpen)
-		for _, repo := range repos {
+			emailConvertedCollaboratorTC.Properties["ConvertedOutsideCollabsList"] = string(convertedOutsideCollabsListJson)
+			emailConvertedCollaboratorTC.Properties["NotFoundOnAD"] = strings.Join(notFoundAD, ",")
+			emailConvertedCollaboratorTC.Properties["NotFoundOnDB"] = strings.Join(notFoundDB, ",")
+			emailConvertedCollaboratorTC.Properties["DisabledADAccount"] = strings.Join(disabledAccountAD, ",")
+			logger.Track(emailConvertedCollaboratorTC)
 
-			repoAdmins := GetRepoCollaborators(organizationsOpen, repo.Name, "admin", "direct")
-			repoCollabs := GetRepoCollaborators(organizationsOpen, repo.Name, "", "direct")
-			var convertedInRepo []string
-			for _, convertedOutsideCollab := range convertedOutsideCollabsList {
-				for _, repoCollab := range repoCollabs {
-					if convertedOutsideCollab == *repoCollab.Login {
-						convertedInRepo = append(convertedInRepo, convertedOutsideCollab)
+			// to repo admins with converted users
+			repos, _ := ghAPI.GetRepositoriesFromOrganization(organizationsOpen)
+			for _, repo := range repos {
+
+				repoAdmins := GetRepoCollaborators(organizationsOpen, repo.Name, "admin", "direct")
+				repoCollabs := GetRepoCollaborators(organizationsOpen, repo.Name, "", "direct")
+				var convertedInRepo []string
+				for _, convertedOutsideCollab := range convertedOutsideCollabsList {
+					for _, repoCollab := range repoCollabs {
+						if convertedOutsideCollab == *repoCollab.Login {
+							convertedInRepo = append(convertedInRepo, convertedOutsideCollab)
+						}
+					}
+				}
+
+				if len(convertedInRepo) > 0 {
+					for _, collab := range repoAdmins {
+						collabEmail, _ := db.GetUserEmailByGithubId(fmt.Sprint(collab.GetID()))
+
+						if collabEmail != "" {
+							if ev.GetEnvVar("ENABLED_REMOVE_COLLABORATORS", "false") == "true" {
+								EmailRepoAdminConvertToColaborator(collabEmail, repo.Name, convertedInRepo, logger)
+							}
+							emailAdminConvertedCollaboratorTC := appinsights.NewTraceTelemetry(fmt.Sprintf("ADMIN EMAIL : %s", collabEmail), contracts.Information)
+
+							convertInRepoJson, err := json.Marshal(convertedInRepo)
+							if err != nil {
+								fmt.Println(err)
+								return
+							}
+
+							emailAdminConvertedCollaboratorTC.Properties["RepoName"] = repo.Name
+							emailAdminConvertedCollaboratorTC.Properties["ConvertedInRepo"] = string(convertInRepoJson)
+							logger.Track(emailAdminConvertedCollaboratorTC)
+						}
 					}
 				}
 			}
-
-			for _, collab := range repoAdmins {
-				collabEmail, _ := db.UsersGetEmail(*collab.Login)
-
-				if len(convertedInRepo) > 0 {
-					EmailRepoAdminConvertToColaborator(collabEmail, repo.Name, convertedInRepo)
-				}
-			}
-
 		}
-	}
+	}()
+
+	w.WriteHeader(http.StatusAccepted)
 }
 
 func RepoOwnerScan(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("REPOOWNERSSCAN TRIGGERED...")
-	organizationsOpen := [...]string{os.Getenv("GH_ORG_OPENSOURCE"), os.Getenv("GH_ORG_INNERSOURCE")}
+	logger := appinsights_wrapper.NewClient()
+	defer logger.EndOperation()
+
+	orgs := []string{os.Getenv("GH_ORG_OPENSOURCE"), os.Getenv("GH_ORG_INNERSOURCE")}
+
+	regOrgs, err := db.GetAllRegionalOrganizations()
+	if err != nil {
+		logger.LogException(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	for _, regOrg := range regOrgs {
+		orgs = append(orgs, regOrg["Name"].(string))
+	}
+
 	var repoOnwerDeficient []string
 	var email string
 	emailSupport := os.Getenv("EMAIL_SUPPORT")
-	for _, org := range organizationsOpen {
+	for _, org := range orgs {
 
 		repoOnwerDeficient = nil
 		repos, err := ghAPI.GetRepositoriesFromOrganization(org)
 		if err != nil {
-			log.Println(err.Error())
+			logger.LogException(err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 
 		for _, repo := range repos {
-			fmt.Println("Checking number of owners of " + repo.Name)
+			logger.TrackTrace("Checking number of owners of "+repo.Name, contracts.Information)
 			owners := GetRepoCollaborators(org, repo.Name, "admin", "direct")
 			if len(owners) < 2 {
-				fmt.Println(repo.Name + " has less than 2 owners")
+				logger.TrackTrace(repo.Name+" has less than 2 owners", contracts.Information)
 				repoOnwerDeficient = append(repoOnwerDeficient, repo.Name)
 				for _, owner := range owners {
 					email, err = db.UsersGetEmail(*owner.Login)
 					if err != nil {
-						log.Println(err.Error())
+						logger.LogException(err)
 						http.Error(w, err.Error(), http.StatusInternalServerError)
 						return
 					}
@@ -206,23 +283,25 @@ func RepoOwnerScan(w http.ResponseWriter, r *http.Request) {
 		}
 
 		if len(repoOnwerDeficient) > 0 {
-			EmailOspoOwnerDeficient(emailSupport, org, repoOnwerDeficient)
+			EmailOspoOwnerDeficient(emailSupport, org, repoOnwerDeficient, logger)
 		}
 	}
-	fmt.Println("REPOOWNERSSCAN SUCCESSFUL")
 }
 
 func ExpiringInvitation(w http.ResponseWriter, r *http.Request) {
+	logger := appinsights_wrapper.NewClient()
+	defer logger.EndOperation()
+
 	token := os.Getenv("GH_TOKEN")
 	innersourceName := os.Getenv("GH_ORG_INNERSOURCE")
 	opensourceName := os.Getenv("GH_ORG_OPENSOURCE")
 
-	sendNotification(token, innersourceName)
-	sendNotification(token, opensourceName)
+	sendNotification(token, innersourceName, logger)
+	sendNotification(token, opensourceName, logger)
 }
 
 // Send notifications to those who has pending org invitation that is about to expire tom.
-func sendNotification(token, org string) {
+func sendNotification(token, org string, logger *appinsights_wrapper.TelemetryClient) {
 	invitations := ghAPI.ListPendingOrgInvitations(token, org)
 	for _, v := range invitations {
 		expiresIn, _ := time.ParseDuration("144h")
@@ -230,7 +309,7 @@ func sendNotification(token, org string) {
 		if v.CreatedAt.Add(expiresIn).Before(time.Now()) {
 			user, err := db.GetUserByGitHubUsername(fmt.Sprint(v.GetLogin()))
 			if err != nil {
-				log.Println(err.Error())
+				logger.LogException(err)
 			}
 			messageBody := notification.OrganizationInvitationExpireMessageBody{
 				Recipients: []string{
@@ -242,154 +321,175 @@ func sendNotification(token, org string) {
 			}
 			err = messageBody.Send()
 			if err != nil {
-				log.Println(err.Error())
+				logger.LogException(err)
 			}
 		}
 	}
 }
 
 // Repo Collaborators Scan
-func EmailAdmin(admin string, adminemail string, reponame string, outisideCollab []string) {
+func emailAdmin(admin string, adminemail string, reponame string, outsideCollab []string, logger *appinsights_wrapper.TelemetryClient) {
 	e := time.Now()
 
 	link := "https://github.com/" + os.Getenv("GH_ORG_OPENSOURCE") + "/" + reponame
 	link = "<a href=\"" + link + "\">" + reponame + "</a>"
 	collabList := "</p> <table  >"
-	for _, collab := range outisideCollab {
+	for _, collab := range outsideCollab {
 		collabList = collabList + " <tr> <td>" + collab + " </td></tr>"
 	}
 	collabList = collabList + " </table  > <p>"
-	body := fmt.Sprintf("<p>Hello %s ,  </p>  \n<p>This is to inform you that your Github repository <b> %s </b> has %d outside collaborator/s. </p> %s  This email was sent to the admins of the repository.  </p> \n <p>OSPO</p>", admin, link, len(outisideCollab), collabList)
 
-	m := email.EmailMessage{
+	bodyTemplate := `
+		<html>
+			<head>
+				<style>
+					table,
+					th,
+					tr,
+					td {
+					border: 0;
+					border-collapse: collapse;
+					vertical-align: middle;
+					}
+
+					.thead {
+					padding: 15px;
+					}
+
+					.center-table {
+					text-align: -webkit-center;
+					}
+
+					.margin-auto {
+					margin: auto;
+					}
+
+					.border-top {
+					border-top: 1px rgb(204, 204, 204) solid;
+					border-collapse: separate;
+					}
+				</style>
+			</head>
+
+			<body>
+				<table style="width: 100%">
+					<tr>
+						<th class="center-table">
+							<table style="width: 100%; max-width: 700px;" class="margin-auto">
+								<tr style="background-color: #ff5800">
+									<td class="thead" style="width: 95px">
+									<img
+										src="data:image/png;base64,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" />
+									</td>
+									<td class="thead" style="
+										font-family: SegoeUI, sans-serif;
+										font-size: 14px;
+										color: white;
+										padding-bottom: 10px;
+										">
+									Community
+									</td>
+								</tr>
+							</table>
+						</th>
+					</tr>
+					<tr>
+						<td class="center-table" align="center">
+							<table style="width: 100%; max-width: 700px;" class="margin-auto">
+								<tr>
+									<td style="padding-top: 20px">
+										<p>Hello |Admin| ,  </p>
+										<p>This is to inform you that your Github repository <b> |Link| </b> has |NumberOfOutsideCollaborators| outside collaborator/s. </p>
+										|CollabList|
+										<p>This email was sent to the admins of the repository.  </p>
+										<p>OSPO</p>
+									</td>
+								</tr>
+							</table>
+						</td>
+					</tr>
+				</table>
+				<br>
+			</body>
+
+		</html>
+	`
+	replacer := strings.NewReplacer(
+		"|Admin|", admin,
+		"|Link|", link,
+		"|NumberOfOutsideCollaborators|", strconv.Itoa(len(outsideCollab)),
+		"|CollabList|", collabList,
+	)
+	body := replacer.Replace(bodyTemplate)
+
+	m := email.Message{
 		Subject: "GitHub Repo Collaborators Scan",
-		Body:    body,
-		To:      adminemail,
+		Body: email.Body{
+			Content: body,
+			Type:    email.HtmlMessageType,
+		},
+		ToRecipients: []email.Recipient{
+			{
+				Email: adminemail,
+			},
+		},
 	}
 
-	email.SendEmail(m)
-	fmt.Printf(" GitHub Repo Collaborators Scan on %s was sent.", e)
+	err := email.SendEmail(m, true)
+	if err != nil {
+		logger.LogException(err)
+		return
+	}
+	logger.TrackTrace(fmt.Sprintf(" GitHub Repo Collaborators Scan on %s was sent.", e), contracts.Information)
 }
 
-// Deleted repositories from index
-func EmailAdminDeletedProjects(to string, repos []string) {
-	repoList := "</p> <table  >"
-	for _, repo := range repos {
-		repoList = repoList + " <tr> <td>" + repo + " </td></tr>"
-	}
-	repoList = repoList + " </table  > <p>"
-
-	body := fmt.Sprintf("The following repositories were removed from the database as they no longer exist on %s and %s GitHub organizations: %s", os.Getenv("GH_ORG_INNERSOURCE"), os.Getenv("GH_ORG_OPENSOURCE"), repoList)
-
-	m := email.EmailMessage{
-		Subject: "List of Deleted Repo",
-		Body:    body,
-		To:      to,
-	}
-
-	email.SendEmail(m)
+type RemovedMember struct {
+	Id          int64  `json:"id"`
+	Username    string `json:"username"`
+	Information string `json:"information"`
 }
 
-// List of users converted into outside collaborators to Repo Owner
-func EmailAdminConvertToColaborator(to string, outisideCollab []string) {
-	e := time.Now()
-	var body string
-	collabList := "</p> <table  >"
-	for _, collab := range outisideCollab {
-		collabList = collabList + " <tr> <td>" + collab + " </td></tr>"
+func ClearOrgMembersInnersource(token, org string, logger *appinsights_wrapper.TelemetryClient) {
+	var notFoundDB []string
+	var notFoundAD []string
+	var disabledAccountAD []string
+
+	users, _ := ghAPI.OrgListMembers(token, org, "all")
+	for _, user := range users {
+		email, err := db.GetUserEmailByGithubId(fmt.Sprint(user.GetID()))
+		if err != nil {
+			logger.LogException(err)
+			continue
+		}
+		if email != "" {
+			isUserExist, isAccountEnabled, err := msgraph.IsUserExist(email)
+			if err != nil {
+				logger.LogException(err)
+				continue
+			}
+			if !isUserExist {
+				notFoundAD = append(notFoundAD, fmt.Sprint(user.GetLogin(), " - ", email))
+				if ev.GetEnvVar("ENABLED_REMOVE_COLLABORATORS", "false") == "true" {
+					ghAPI.RemoveOrganizationsMember(token, org, user.GetLogin()) // Remove user from organization
+				}
+			}
+			if !isAccountEnabled {
+				disabledAccountAD = append(disabledAccountAD, fmt.Sprint(user.GetLogin(), " - ", email))
+				if ev.GetEnvVar("ENABLED_REMOVE_COLLABORATORS", "false") == "true" {
+					ghAPI.RemoveOrganizationsMember(token, org, user.GetLogin()) // Remove user from organization
+				}
+			}
+		} else {
+			notFoundDB = append(notFoundDB, user.GetLogin())
+			if ev.GetEnvVar("ENABLED_REMOVE_COLLABORATORS", "false") == "true" {
+				ghAPI.RemoveOrganizationsMember(token, org, user.GetLogin()) // Remove user from organization
+			}
+		}
 	}
-	collabList = collabList + " </table  > <p>"
-	if len(outisideCollab) == 1 {
-		body = fmt.Sprintf("<p>Hello %s ,  </p>  \n<p>This is to inform you that %d GitHub user on %s was converted as an outside collaborator. </p> %s  ", to, len(outisideCollab), os.Getenv("GH_ORG_OPENSOURCE"), collabList)
-	} else {
+	removedMembersTC := appinsights.NewTraceTelemetry(fmt.Sprintf("INNERSOURCE ORG : %s", org), contracts.Information)
 
-		body = fmt.Sprintf("<p>Hello %s ,  </p>  \n<p>This is to inform you that %d GitHub user on %s was converted to an outside collaborator. </p> %s  ", to, len(outisideCollab), os.Getenv("GH_ORG_OPENSOURCE"), collabList)
-	}
-
-	m := email.EmailMessage{
-		Subject: "GitHub Organization Scan",
-		Body:    body,
-		To:      to,
-	}
-
-	email.SendEmail(m)
-	fmt.Printf("GitHub User was converted into an outside  on %s was sent.", e)
-}
-
-// List of users converted into outside collaborators to OSPO
-func EmailRepoAdminConvertToColaborator(to string, repoName string, outisideCollab []string) {
-	e := time.Now()
-	var body string
-	link := "https://github.com/" + os.Getenv("GH_ORG_OPENSOURCE") + "/" + repoName
-	link = "<a href=\"" + link + "\">" + repoName + "</a>"
-	collabList := "</p> <table  >"
-	for _, collab := range outisideCollab {
-		collabList = collabList + " <tr> <td>" + collab + " </td></tr>"
-	}
-
-	collabList = collabList + " </table  > <p>"
-	if len(outisideCollab) == 1 {
-		body = fmt.Sprintf("<p>Hello %s ,  </p>  \n<p>This is to inform you that <b> %d </b> GitHub user on your GitHub repo %s was converted to an outside collaborator. </p> %s This email was sent to the admins of the repository. </p> \n <p>OSPO</p>", to, len(outisideCollab), link, collabList)
-
-	} else {
-
-		body = fmt.Sprintf("<p>Hello %s ,  </p>  \n<p>This is to inform you that <b> %d </b> GitHub users on your GitHub repo %s were converted to outside collaborators. </p> %s This email was sent to the admins of the repository. </p> \n <p>OSPO</p>", to, len(outisideCollab), link, collabList)
-	}
-
-	m := email.EmailMessage{
-		Subject: "GitHub Organization Scan",
-		Body:    body,
-		To:      to,
-	}
-
-	email.SendEmail(m)
-	fmt.Printf("GitHub User was converted into an outside  on %s was sent.", e)
-}
-
-// List of repos with less than 2 owners to OSPO
-func EmailOspoOwnerDeficient(to string, org string, repoName []string) {
-	e := time.Now()
-	var body string
-	var link string
-
-	repoNameList := "</p> <table  >"
-	for _, repo := range repoName {
-		link = "https://github.com/" + org + "/" + repo + "/settings/access"
-		link = "<a href=\"" + link + "\">" + repo + "</a>"
-		repoNameList = repoNameList + " <tr> <td>" + link + " </td></tr>"
-	}
-
-	repoNameList = repoNameList + " </table  > <p>"
-	if len(repoName) == 1 {
-		body = fmt.Sprintf("<p>Hello %s ,  </p>  \n<p>This is to inform you that <b> %d </b> repository on %s needs to add a co-owner.</p> %s   </p>  ", to, len(repoName), org, repoNameList)
-
-	} else {
-		body = fmt.Sprintf("<p>Hello %s ,  </p>  \n<p>This is to inform you that <b> %d </b> repositories on %s need to add a co-owner.</p> %s   </p>  ", to, len(repoName), org, repoNameList)
-	}
-	m := email.EmailMessage{
-		Subject: "Repository Owners Scan",
-		Body:    body,
-		To:      to,
-	}
-
-	email.SendEmail(m)
-	fmt.Printf(" less than 2 owner    %s was sent.", e)
-}
-
-// List of repos with less than 2 owners to repo owner
-func EmailcoownerDeficient(to string, Org string, reponame string) {
-	var body string
-	var link string
-	link = "https://github.com/" + Org + "/" + reponame + "/settings/access"
-	link = "<a href=\"" + link + "\"> here </a>"
-
-	body = fmt.Sprintf("<p>Hello %s ,  </p>  \n<p>This is to inform you that you are the only admin on %s  GitHub repository. We recommend at least 2 admins on each repository. Click %s to add a co-owner.</p> \n <p>OSPO</p>", to, reponame, link)
-
-	m := email.EmailMessage{
-		Subject: "Repository Owners Scan",
-		Body:    body,
-		To:      to,
-	}
-
-	email.SendEmail(m)
+	removedMembersTC.Properties["NotFoundOnAD"] = strings.Join(notFoundAD, ",")
+	removedMembersTC.Properties["NotFoundOnDB"] = strings.Join(notFoundDB, ",")
+	removedMembersTC.Properties["DisabledADAccount"] = strings.Join(disabledAccountAD, ",")
+	logger.Track(removedMembersTC)
 }

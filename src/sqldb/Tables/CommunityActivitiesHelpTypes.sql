@@ -1,6 +1,6 @@
-CREATE TABLE [dbo].[CommunityActivitiesHelpTypes](
-	[Id] [int] NOT NULL PRIMARY KEY IDENTITY,
-	[CommunityActivityId] [int] NOT NULL,
-	[HelpTypeId] [int] NOT NULL,
-	[Details] [nchar](100) NOT NULL
+CREATE TABLE [dbo].[CommunityActivitiesHelpTypes] (
+	[Id] [INT] NOT NULL PRIMARY KEY IDENTITY,
+	[CommunityActivityId] [INT] NOT NULL,
+	[HelpTypeId] [INT] NOT NULL,
+	[Details] [NCHAR](100) NOT NULL
 )

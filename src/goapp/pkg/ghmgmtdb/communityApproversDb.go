@@ -1,38 +1,14 @@
 package ghmgmt
 
-func GetCommunityApprovers() ([]map[string]interface{}, error) {
-	db := ConnectDb()
-	defer db.Close()
-
-	result, err := db.ExecuteStoredProcedureWithResult("PR_CommunityApproversList_select", nil)
-	if err != nil {
-		return nil, err
-	}
-
-	return result, nil
-}
-
-func GetActiveCommunityApprovers() ([]map[string]interface{}, error) {
-	db := ConnectDb()
-	defer db.Close()
-
-	result, err := db.ExecuteStoredProcedureWithResult("PR_CommunityApproversList_SelectAllActive", nil)
-	if err != nil {
-		return nil, err
-	}
-
-	return result, nil
-}
-
-func GetCommunityApproversById(id string) ([]map[string]interface{}, error) {
+func GetCommunityApprovers(category string) ([]map[string]interface{}, error) {
 	db := ConnectDb()
 	defer db.Close()
 
 	param := map[string]interface{}{
-		"Id": id,
+		"GuidanceCategory": category,
 	}
 
-	result, err := db.ExecuteStoredProcedureWithResult("PR_CommunityApproversList_select_byId", param)
+	result, err := db.ExecuteStoredProcedureWithResult("usp_CommunityApprover_Select", param)
 	if err != nil {
 		return nil, err
 	}
@@ -40,19 +16,36 @@ func GetCommunityApproversById(id string) ([]map[string]interface{}, error) {
 	return result, nil
 }
 
-func UpdateCommunityApproversById(id int, disabled bool, approverUserPrincipalName, username string) (bool, error) {
+func GetActiveCommunityApprovers(category string) ([]map[string]interface{}, error) {
+	db := ConnectDb()
+	defer db.Close()
+
+	param := map[string]interface{}{
+		"GuidanceCategory": category,
+	}
+
+	result, err := db.ExecuteStoredProcedureWithResult("usp_CommunityApprover_Select_Active", param)
+	if err != nil {
+		return nil, err
+	}
+
+	return result, nil
+}
+
+func UpdateCommunityApproversById(id int, disabled bool, approverUserPrincipalName, username string, category string) (bool, error) {
 	db := ConnectDb()
 	defer db.Close()
 
 	param := map[string]interface{}{
 		"ApproverUserPrincipalName": approverUserPrincipalName,
-		"Disabled":                  disabled,
+		"IsDisabled":                disabled,
 		"CreatedBy":                 username,
 		"ModifiedBy":                username,
 		"Id":                        id,
+		"GuidanceCategory":          category,
 	}
 
-	_, err := db.ExecuteStoredProcedure("PR_CommunityApproversList_Insert", param)
+	_, err := db.ExecuteStoredProcedure("usp_CommunityApprover_Insert", param)
 	if err != nil {
 		return false, err
 	}

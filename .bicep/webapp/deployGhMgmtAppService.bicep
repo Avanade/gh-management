@@ -9,6 +9,8 @@ param imageName string
 param runDeployFrontDoor bool
 param frontDoorCustomDomain string
 
+param appinsightsRetentionDays int
+
 @allowed([
   'test'
   'uat'
@@ -37,7 +39,7 @@ param appServiceSettings object
 ])
 param sku string = 'P1v2'
 
-resource ghmgmtAppServicePlan 'Microsoft.Web/serverfarms@2020-06-01' = {
+resource ghmgmtAppServicePlan 'Microsoft.Web/serverfarms@2022-03-01' = {
   name: appServicePlanName
   location: location
   properties: {
@@ -51,16 +53,21 @@ resource ghmgmtAppServicePlan 'Microsoft.Web/serverfarms@2020-06-01' = {
 
 var appServiceName = '${projectName}-${activeEnv}'
 
+var appSettings = [for item in items(appServiceSettings): {
+  name: item.key
+  value: item.value
+}]
+
 resource ghmgmtAppService 'Microsoft.Web/sites@2022-03-01' = {
   name: appServiceName
   location: location
   properties: {
     serverFarmId: ghmgmtAppServicePlan.id
     siteConfig: {
-      appSettings: [for item in items(appServiceSettings): {
-        name: item.key
-        value: item.value
-      }]
+      appSettings: union([{
+        name: 'APPINSIGHTS_INSTRUMENTATIONKEY'
+        value: appInsights.properties.InstrumentationKey
+      }], appSettings)
       linuxFxVersion: 'DOCKER|${containerServer}/${imageName}'
     }
   }
@@ -112,6 +119,43 @@ resource ghmgmtAppServiceTags 'Microsoft.Resources/tags@2022-09-01' = {
     tags: {
       project: 'gh-management'
       env: activeEnv
+    }
+  }
+}
+
+var appInsightName = toLower('${projectName}-${activeEnv}-appinsights')
+var logAnalyticsName = toLower('${projectName}-${activeEnv}-loganalytics')
+
+resource appInsights 'Microsoft.Insights/components@2020-02-02' = {
+  name: appInsightName
+  location: location
+  kind: 'string'
+  tags: {
+    displayName: 'AppInsight'
+    ProjectName: projectName
+  }
+  properties: {
+    Application_Type: 'web'
+    WorkspaceResourceId: logAnalyticsWorkspace.id
+  }
+}
+
+resource logAnalyticsWorkspace 'Microsoft.OperationalInsights/workspaces@2020-08-01' = {
+  name: logAnalyticsName
+  location: location
+  tags: {
+    displayName: 'Log Analytics'
+    ProjectName: projectName
+  }
+  properties: {
+    sku: {
+      name: 'PerGB2018'
+    }
+    retentionInDays: appinsightsRetentionDays
+    features: {
+      searchVersion: 1
+      legacy: 0
+      enableLogAccessUsingOnlyResourcePermissions: true
     }
   }
 }

@@ -2,10 +2,13 @@ package githubAPI
 
 import (
 	"context"
+	"encoding/base64"
 	"fmt"
 	"log"
 	"os"
 	"strings"
+
+	db "main/pkg/ghmgmtdb"
 
 	"github.com/google/go-github/v50/github"
 	"golang.org/x/oauth2"
@@ -97,6 +100,27 @@ func GetRepository(repoName string, org string) (*github.Repository, error) {
 	return repo, nil
 }
 
+func GetRepositoryReadmeById(owner, repoName string) (string, error) {
+	client := CreateClient(os.Getenv("GH_TOKEN"))
+
+	readme, resp, err := client.Repositories.GetReadme(context.Background(), owner, repoName, nil)
+	if err != nil {
+		return "", err
+	}
+
+	if resp.StatusCode != 200 {
+		return "", fmt.Errorf("unexpected response status: %v", resp.Status)
+	}
+
+	// Decode the base64-encoded content of the README
+	decodedContent, err := base64.StdEncoding.DecodeString(*readme.Content)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return string(decodedContent), nil
+}
+
 func IsArchived(repoName string, org string) (bool, error) {
 	repo, err := GetRepository(repoName, org)
 	if err != nil {
@@ -108,10 +132,16 @@ func IsArchived(repoName string, org string) (bool, error) {
 
 func IsRepoExisting(repoName string) (bool, error) {
 	exists := false
-	organizations := []string{os.Getenv("GH_ORG_INNERSOURCE"), os.Getenv("GH_ORG_OPENSOURCE")}
+	orgs := []string{os.Getenv("GH_ORG_INNERSOURCE"), os.Getenv("GH_ORG_OPENSOURCE")}
 
-	for _, org := range organizations {
-		_, err := GetRepository(repoName, org)
+	regOrgs, _ := db.GetAllRegionalOrganizations()
+
+	for _, regOrg := range regOrgs {
+		orgs = append(orgs, regOrg["Name"].(string))
+	}
+
+	for _, org := range orgs {
+		repo, err := GetRepository(repoName, org)
 		if err != nil {
 			if strings.Contains(err.Error(), "Not Found") {
 				continue
@@ -119,7 +149,9 @@ func IsRepoExisting(repoName string) (bool, error) {
 				return false, err
 			}
 		} else {
-			exists = true
+			if *repo.GetOwner().Login == org {
+				exists = true
+			}
 		}
 	}
 
@@ -154,7 +186,7 @@ func GetRepositoriesFromOrganization(org string) ([]Repo, error) {
 			FullName:            repo.GetFullName(),
 			Name:                repo.GetName(),
 			Link:                repo.GetHTMLURL(),
-			Org:                 org,
+			Org:                 *repo.GetOwner().Login,
 			Description:         repo.GetDescription(),
 			Private:             repo.GetPrivate(),
 			Created:             repo.GetCreatedAt(),
@@ -169,16 +201,16 @@ func GetRepositoriesFromOrganization(org string) ([]Repo, error) {
 	return repoList, nil
 }
 
-func SetProjectVisibility(projectName string, visibility string, org string) error {
+func SetProjectVisibility(projectName string, visibility string, org string) (*github.Response, error) {
 	client := CreateClient(os.Getenv("GH_TOKEN"))
 	opt := &github.Repository{Visibility: github.String(visibility)}
 
-	_, _, err := client.Repositories.Edit(context.Background(), org, projectName, opt)
+	_, resp, err := client.Repositories.Edit(context.Background(), org, projectName, opt)
 	if err != nil {
-		return err
+		return resp, err
 
 	}
-	return nil
+	return resp, nil
 }
 
 func ArchiveProject(projectName string, archive bool, org string) error {
@@ -192,15 +224,15 @@ func ArchiveProject(projectName string, archive bool, org string) error {
 	return nil
 }
 
-func TransferRepository(repo string, owner string, newOwner string) (*github.Repository, error) {
+func TransferRepository(name string, owner string, newOwner string) (*github.Repository, error) {
 	client := CreateClient(os.Getenv("GH_TOKEN"))
 	opt := github.TransferRequest{NewOwner: newOwner}
 
-	resp, _, err := client.Repositories.Transfer(context.Background(), owner, repo, opt)
-	if err != nil {
+	repo, resp, err := client.Repositories.Transfer(context.Background(), owner, name, opt)
+	if resp.StatusCode != 202 {
 		return nil, err
 	}
-	return resp, nil
+	return repo, nil
 }
 
 func IsOrganizationMember(token, org, ghUser string) (bool, error) {
@@ -209,16 +241,30 @@ func IsOrganizationMember(token, org, ghUser string) (bool, error) {
 	return isOrgMember, err
 }
 
+func UserMembership(token, org, ghUser string) (*github.Membership, error) {
+	client := CreateClient(token)
+	membership, _, err := client.Organizations.GetOrgMembership(context.Background(), ghUser, org)
+	return membership, err
+}
+
 func OrganizationInvitation(token string, username string, org string) *github.Invitation {
 	client := CreateClient(token)
-	Email := ""
-	Role := "direct_member"
-	teamid := []int64{}
-	user, _, _ := client.Users.Get(context.Background(), username)
-	intid2 := user.ID
-	options := &github.CreateOrgInvitationOptions{InviteeID: intid2, Email: &Email, Role: &Role, TeamID: teamid}
+	REINSTATE_ROLE := "reinstate"
 
-	invite, _, _ := client.Organizations.CreateOrgInvitation(context.Background(), org, options)
+	teamid := []int64{}
+	email := ""
+	user, _, _ := client.Users.Get(context.Background(), username)
+	options := &github.CreateOrgInvitationOptions{InviteeID: user.ID, Email: &email, Role: &REINSTATE_ROLE, TeamID: teamid}
+
+	var invite *github.Invitation
+
+	invite, resp, _ := client.Organizations.CreateOrgInvitation(context.Background(), org, options)
+
+	if resp.StatusCode != 201 {
+		DIRECT_MEMBER_ROLE := "direct_member"
+		options.Role = &DIRECT_MEMBER_ROLE
+		invite, _, _ = client.Organizations.CreateOrgInvitation(context.Background(), org, options)
+	}
 
 	return invite
 }
@@ -325,10 +371,10 @@ func RepositoriesListCollaborators(token string, org string, repo string, role s
 	return collaborators
 }
 
-func OrgListMembers(token string, org string) []*github.User {
+func OrgListMembers(token string, org string, role string) ([]*github.User, error) {
 	client := CreateClient(token)
 
-	opts := &github.ListMembersOptions{ListOptions: github.ListOptions{PerPage: 30}}
+	opts := &github.ListMembersOptions{Role: role, ListOptions: github.ListOptions{PerPage: 30}}
 
 	var members []*github.User
 
@@ -336,7 +382,7 @@ func OrgListMembers(token string, org string) []*github.User {
 		listMembers, resp, err := client.Organizations.ListMembers(context.Background(), org, opts)
 		if err != nil {
 			log.Printf("ERROR : %s", err.Error())
-			return nil
+			return nil, err
 		}
 
 		members = append(members, listMembers...)
@@ -346,5 +392,68 @@ func OrgListMembers(token string, org string) []*github.User {
 		opts.Page = resp.NextPage
 	}
 
-	return members
+	return members, nil
+}
+
+func GetOrganizations(token string) ([]*github.Organization, error) {
+	client := CreateClient(token)
+	opts := &github.ListOptions{PerPage: 30}
+	var orgs []*github.Organization
+
+	for {
+		listOrgs, resp, err := client.Organizations.List(context.Background(), "", opts)
+		if err != nil {
+			log.Printf("ERROR : %s", err.Error())
+			return nil, err
+		}
+
+		orgs = append(orgs, listOrgs...)
+		if resp.NextPage == 0 {
+			break
+		}
+		opts.Page = resp.NextPage
+	}
+
+	return orgs, nil
+
+}
+
+func GetTeam(token string, org string, slug string) (*github.Team, error) {
+	client := CreateClient(token)
+
+	team, resp, err := client.Teams.GetTeamBySlug(context.Background(), org, slug)
+	if err != nil && resp.StatusCode != 404 {
+		log.Printf("ERROR : %s", err.Error())
+		return nil, err
+	}
+
+	return team, nil
+}
+
+func CreateTeam(token string, org string, teamName string) (*github.Team, error) {
+	client := CreateClient(token)
+	newTeam := github.NewTeam{
+		Name: teamName,
+	}
+
+	team, _, err := client.Teams.CreateTeam(context.Background(), org, newTeam)
+	if err != nil {
+		log.Printf("ERROR : %s", err.Error())
+		return nil, err
+	}
+
+	return team, nil
+}
+
+func AddMemberToTeam(token string, org string, slug string, user string, role string) (*github.Membership, error) {
+	client := CreateClient(token)
+	opts := &github.TeamAddTeamMembershipOptions{Role: role}
+
+	teamMembership, _, err := client.Teams.AddTeamMembershipBySlug(context.Background(), org, slug, user, opts)
+	if err != nil {
+		log.Printf("ERROR : %s", err.Error())
+		return nil, err
+	}
+
+	return teamMembership, nil
 }

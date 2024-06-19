@@ -3,27 +3,29 @@ package routes
 import (
 	"net/http"
 	"strconv"
-	"strings"
 
 	"main/pkg/template"
 
 	"github.com/gorilla/mux"
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 )
 
-func ListContributionAreas(w http.ResponseWriter, r *http.Request) {
+func ContributionAreasHandler(w http.ResponseWriter, r *http.Request) {
 	template.UseTemplate(&w, r, "admin/contributionareas/index", nil)
 }
 
-func ContributionAreasForm(w http.ResponseWriter, r *http.Request) {
+func ContributionAreasFormHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id, _ := strconv.Atoi(vars["id"])
 
 	action := vars["action"]
+	caser := cases.Title(language.Und, cases.NoLower)
 	template.UseTemplate(&w, r, "admin/contributionareas/form", struct {
 		Id     int
 		Action string
 	}{
 		Id:     id,
-		Action: strings.Title(action),
+		Action: caser.String(action),
 	})
 }

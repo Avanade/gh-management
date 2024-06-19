@@ -1,0 +1,781 @@
+{{ define "content" }}
+<div x-data="deeplink">
+    <div x-data="viewData({
+        id: '{{ .id }}',
+        isOwner: {{ .isOwner }},
+        isAdmin: {{ .isAdmin }},
+        isGHValid: {{ .profileGH.IsValid }},
+        isMember: {{ .isMember}},
+        orgName: '{{ .orgName }}'
+    })">
+        <div class="flex mb-3">
+            <div class="flex-grow font-bold self-center py-2">
+                <h4 class="text-lg" x-text="`${state.orgName}/${state.about.name}`">repository-name</h4>
+            </div>
+            <div class="flex-none" x-show="state.isGHValid">
+                <template x-if="state.isMember">
+                    <a 
+                        x-bind:href="state.about.link"
+                        target="_blank"
+                        class="flex items-center bg-[#FF5800] hover:bg-[#FF4300] text-white py-2 px-4 rounded">
+                        <span x-text="`Open in ${state.about.repositorySource}`"></span>
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="flex-shrink-0 w-5 h-5 ml-2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+                        </svg>
+                    </a>
+                </template>
+                <template x-if="!state.isMember">
+                    <a 
+                        x-bind:href="requestAccess()"
+                        target="_blank"
+                        class="flex items-center bg-[#FF5800] hover:bg-[#FF4300] text-white py-2 px-4 rounded">
+                        <span>Request Access</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="flex-shrink-0 w-5 h-5 ml-2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+                        </svg>
+                    </a>
+                </template>
+            </div>
+        </div>
+        <div class="flex flex-wrap">
+            <div class="border rounded-xl p-5 w-full order-last lg:order-first lg:w-2/3">
+                <nav class="flex space-x-4" aria-label="Tabs">
+                    <template x-if="state.about.repositorySource != 'AzureDevOps'">
+                        <div 
+                            class="px-3 py-2 font-medium text-sm rounded-md cursor-pointer"
+                            x-bind:class="isTabActive('readme') ? 'bg-[#fff2eb] text-[#FF5800]' : 'text-gray-500 hover:text-gray-700'"
+                            x-on:click="onSelectTab('readme')">
+                            Read Me
+                        </div>
+                    </template>
+                    <div class="px-3 py-2 font-medium text-sm rounded-md cursor-pointer"
+                        x-bind:class="isTabActive('collaborators') ? 'bg-[#fff2eb] text-[#FF5800]' : 'text-gray-500 hover:text-gray-700'"
+                        x-on:click="onSelectTab('collaborators')">
+                        Collaborators 
+                    </div>
+                    <template x-if="(state.isAdmin || state.isOwner) && state.isGHValid">
+                        <div
+                            x-show="state.about.repositorySource != 'AzureDevOps'" 
+                            class="px-3 py-2 font-medium text-sm rounded-md cursor-pointer"
+                            x-bind:class="isTabActive('approvalrequests') ? 'bg-[#fff2eb] text-[#FF5800]' : 'text-gray-500 hover:text-gray-700'"
+                            x-on:click="onSelectTab('approvalrequests')">
+                            Approval Requests 
+                        </div>
+                    </template>
+                </nav>
+                <!-- READ ME TAB -->
+                <template x-if="state.about.repositorySource != 'AzureDevOps'">
+                    <div x-show="isTabActive('readme')">
+                        <template x-if="state.isLoading">
+                            <svg role="status"
+                                class="w-8 h-8 text-gray-200 animate-spin dark:text-gray-600 fill-[#FF5800] m-auto my-5"
+                                viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path
+                                    d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z"
+                                    fill="currentColor" />
+                                <path
+                                    d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z"
+                                    fill="currentFill" />
+                            </svg>                    
+                        </template>
+                        <template x-if="state.readme == '' && !state.isLoading">
+                            <div class="text-center mt-5">
+                                <svg 
+                                    xmlns="http://www.w3.org/2000/svg" 
+                                    fill="none" 
+                                    viewBox="0 0 24 24" 
+                                    stroke-width="1.5" 
+                                    stroke="currentColor" 
+                                    class="mx-auto h-12 w-12 text-gray-400">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
+                                </svg>
+                                <h3 class="mt-2 text-sm font-semibold text-gray-900">No Content</h3>
+                                <p class="mt-1 text-sm text-gray-500">No readme file found on main branch</p>
+                            </div>
+                        </template>
+                        <template x-if="state.readme != '' && !state.isLoading">
+                            <div x-data="markdownEditor({
+                                disabledTab: true,
+                                defaultTab: 'preview',
+                                overflowPreview: 'auto'
+                            })" x-modelable="body" x-model="state.readme">
+                                <div x-html="template"></div>
+                            </div>
+                        </template>
+                    </div>
+                </template>
+                <!-- COLLABORATORS TAB -->
+                <div x-show="isTabActive('collaborators')" class="mt-3">
+                    <div class="relative mb-3">
+                        <div class="absolute inset-0 flex items-center" aria-hidden="true">
+                            <div class="w-full border-t border-gray-300"></div>
+                        </div>
+                        <div class="relative flex flex-row-reverse items-center justify-between">
+                            <template x-if="(state.isAdmin || state.isOwner) && state.isGHValid && state.about.repositorySource != 'AzureDevOps'">
+                                <button type="button"
+                                    x-on:click="collaboratorModal.onShow('add', state.id, '', '')"
+                                    class="inline-flex items-center gap-x-1.5 rounded-full bg-white px-3 py-1.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
+                                    <svg class="-ml-1 -mr-0.5 h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor"
+                                        aria-hidden="true">
+                                        <path
+                                        d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z" />
+                                    </svg>
+                                    <span>Add</span>
+                                </button>
+                            </template>
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto bg-gray-50">
+                        <div class="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
+                            <table class="min-w-full divide-y divide-gray-300">
+                                <thead>
+                                    <tr>
+                                        <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-0">
+                                            Name
+                                        </th>
+                                        <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                                            GitHub Username
+                                        </th>
+                                        <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                                            Email
+                                        </th>
+                                        <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                                            Permission
+                                        </th>
+                                        <th scope="col" class="relative py-3.5 pl-3 pr-4 sm:pr-0">
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-200">
+                                    <!-- SPINNER -->
+                                    <tr>
+                                        <td x-bind:colspan='5'>
+                                            <div class="flex items-center justify-center h-20"
+                                                x-show="state.isLoading">
+                                                <svg role="status"
+                                                    class="w-8 h-8 mr-2 text-gray-200 animate-spin dark:text-gray-600 fill-[#FF5800]"
+                                                    viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                    <path
+                                                        d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z"
+                                                        fill="currentColor" />
+                                                    <path
+                                                        d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z"
+                                                        fill="currentFill" />
+                                                </svg>
+                                            </div>
+                                            <!-- NO COLLABORATORS -->
+                                            <template x-if="!state.collaborators && !state.isLoading">
+                                                <div class="flex items-center justify-center h-20">
+                                                    No collaborators on this repository.
+                                                </div>
+                                            </template>
+                                        </td>
+                                    </tr>
+                                    <!-- LIST OF COLLABORATORS -->
+                                    <template x-if="state.collaborators && !state.isLoading">
+                                        <template x-for="item of state.collaborators">
+                                            <tr>
+                                                <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm text-gray-900 sm:pl-0"
+                                                    x-text="item.name===''? '-':item.name"></td>
+                                                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                                                    <span x-text="item.ghUsername"></span> <br> <span
+                                                        x-show="item.isOutsideCollaborator"
+                                                        class="text-xs font-light italic">Outside Collaborator</span>
+                                                </td>
+                                                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500"
+                                                    x-text="item.email===''? '-':item.email"></td>
+                                                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500"
+                                                    x-text="item.role"></td>
+                                                <template x-if="(state.isAdmin || state.isOwner) && state.isGHValid && state.about.repositorySource != 'AzureDevOps'">
+                                                    <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm sm:pr-0">
+                                                        <a class="text-indigo-600 hover:text-indigo-900 hover:cursor-pointer"
+                                                            x-on:click="collaboratorModal.onShow('edit', state.id, item.ghUsername, item.role)">
+                                                            Update
+                                                        </a> |
+                                                        <a class="text-indigo-600 hover:text-indigo-900 hover:cursor-pointer"
+                                                            x-on:click="collaboratorModal.removeCollaborator(state.id, state.orgName, state.about.name, item.ghUsername, item.role)">
+                                                            Remove
+                                                        </a>
+                                                    </td>
+                                                </template>
+                                            </tr>
+                                        </template>
+                                    </template>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <!-- APPROVAL REQUESTS -->
+                <template x-if="state.about.repositorySource != 'AzureDevOps' && (state.isAdmin || state.isOwner) && state.isGHValid">
+                    <div x-show="isTabActive('approvalrequests')" class="mt-3 px-3">
+                        <template x-if="state.isLoading">
+                            <svg role="status"
+                                class="w-8 h-8 text-gray-200 animate-spin dark:text-gray-600 fill-[#FF5800] m-auto my-5"
+                                viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path
+                                    d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z"
+                                    fill="currentColor" />
+                                <path
+                                    d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z"
+                                    fill="currentFill" />
+                            </svg>
+                        </template>
+                        <template x-if="!state.statuses && !state.isLoading">
+                            <div class="text-center mt-5">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                                    stroke="currentColor" class="mx-auto h-12 w-12 text-gray-400">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z" />
+                                </svg>
+                                <h3 class="mt-2 text-sm font-semibold text-gray-900">No Content</h3>
+                                <p class="mt-1 text-sm text-gray-500">No approval data found for this repository.</p>
+                            </div>
+                        </template>
+                        <template x-if="state.statuses && !state.isLoading">
+                            <template x-for="status in state.statuses">
+                                <div x-data="{ item : status }">
+                                    <div class="relative mb-3">
+                                        <div class="absolute inset-0 flex items-center" aria-hidden="true">
+                                            <div class="w-full border-t border-gray-300"></div>
+                                        </div>
+                                        <div class="relative flex items-center justify-between">
+                                            <p
+                                                class="inline-flex items-center bg-white pr-3 py-3 text-sm font-semibold text-gray-900">
+                                                <span x-data="{ created : new Date(item.created) }"
+                                                    x-text="created.toDateString()"></span>
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div class="mt-3 bg-gray-50 shadow overflow-hidden sm:rounded-md">
+                                        <ul role="list" class="divide-y divide-gray-200">
+                                            <template x-for="approvalRequest in item.approvalRequests">
+                                                <li>
+                                                    <div class="px-4 py-4 sm:px-6">
+                                                        <div class="flex items-center justify-between">
+                                                            <p class="text-sm font-medium text-gray-800 truncate"
+                                                                x-text="approvalRequest.ApprovalDescription"></p>
+                                                            <div class="ml-2 flex-shrink-0 flex">
+                                                                <p class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full"
+                                                                    x-bind:class="approvalRequest.RequestStatus === 'Approved' ? ' bg-green-100 text-green-800': approvalRequest.RequestStatus === 'Rejected' ? ' bg-red-100 text-red-800' : ' bg-gray-200 text-gray-800'"
+                                                                    x-text="approvalRequest.RequestStatus"></p>
+                                                            </div>
+                                                        </div>
+                                                        <div class="mt-2 sm:flex ">
+                                                            <div class="sm:flex w-1/2">
+                                                                <p class="flex items-center text-sm text-gray-500"
+                                                                    x-data="{ approver: 'Approver: ' + approvalRequest.Approvers}"
+                                                                    x-text="approver">
+                                                                </p>
+                                                            </div>
+                                                            <div
+                                                                class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
+                                                                <p x-show="approvalRequest.ApprovalDate">
+                                                                    Responded on
+                                                                    <time
+                                                                        x-data="{date: new Date(approvalRequest.ApprovalDate)}"
+                                                                        x-text="date.toLocaleString('en-US',{dateStyle: 'medium', timeStyle: 'short'})"></time>
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                        <div class="mt-2 sm:flex ">
+                                                            <div
+                                                                class="sm:flex w-1/2 mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
+                                                                <p x-show="approvalRequest.ApprovalRemarks"
+                                                                    x-data="{ remarks: 'Remarks: ' + approvalRequest.ApprovalRemarks }"
+                                                                    x-text="remarks"></p>
+                                                            </div>
+                                                            <div
+                                                                class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
+                                                                <p x-show="approvalRequest.RespondedBy"
+                                                                    x-data="{ respondedBy: 'Responded by: ' + approvalRequest.RespondedBy }"
+                                                                    x-text="respondedBy"></p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </li>
+                                            </template>
+                                        </ul>
+                                    </div>
+                            </template>
+                        </template>
+                    </div>
+                </template>
+            </div>
+            <div class="p-5 w-full lg:w-1/3">
+                <div class="bg-yellow-50 p-4 mb-3" x-show="!state.isGHValid">
+                    <div class="flex">
+                        <div class="ml-3 flex-1 md:flex md:justify-between">
+                            <p class="text-sm text-yellow-700">You'll need to login a GitHub account to view the files on
+                                the repository.</p>
+                        </div>
+                    </div>
+                </div>
+                <article class="text-wrap mb-3">
+                    <h3 class="text-gray-600 font-medium mb-2">About</h3>
+                    <p class="text-gray-500" x-text="state.about.description">
+                        Lorem ipsum is placeholder text commonly used in the graphic, print, and publishing industries for previewing layouts and visual mockups.
+                    </p>
+                </article>
+                <div class="flex items-center text-sm text-gray-500 mb-2" title="Repository Source">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                      stroke="#9CA3AF" class="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400">
+                      <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5" />
+                    </svg>
+                    <span x-text="state.about.repositorySource">GitHub</span>
+                </div>
+                <div class="flex items-center text-sm text-gray-500 mb-2" title="Visibility">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400"
+                        fill="none" viewBox="0 0 20 20" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M18 18l2-1v-2.5" />
+                    </svg>
+                    <span x-text="state.about.visibility">Private</span>
+                </div>
+                <div class="flex items-center text-sm text-gray-500 mb-5">
+                    <svg class="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                        <path fill-rule="evenodd"
+                        d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z"
+                        clip-rule="evenodd" />
+                    </svg>
+                    <span>
+                        Created on <time x-text="state.about.created">Feb 23, 2024, 7:28 PM</time>
+                    </span>
+                </div>
+                <div class="flex flex-wrap mt-2">
+                    <template x-if="state.about.topics">
+                        <template x-for="(topic) in state.about.topics">
+                            <a x-bind:href="'/search?search=' + topic">
+                                <div class="text-xs px-2 py-1 mr-2 mb-1 bg-sky-100 rounded-lg text-sky-800 items-center flex whitespace-nowrap"
+                                    x-text="topic">
+                                </div>
+                            </a>
+                        </template>
+                    </template>
+                </div>
+            </div>
+        </div>
+    
+        <template x-if="collaboratorModal.state.isShow">
+            <div class="relative z-10" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+                <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
+                <div class="fixed inset-0 z-10 overflow-y-auto">
+                    <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+                        <div
+                            class="relative transform rounded-lg bg-white px-4 pb-4 pt-5 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-sm sm:p-6">
+                            <div class="mt-1 sm:mt-2">
+                                <!-- TITLE -->
+                                <h3 class="text-base font-semibold leading-6 text-gray-900 mb-3" id="modal-title"
+                                    x-text="collaboratorModal.getTitle()">
+                                </h3>
+                                <div class="mt-2">
+                                    <form class="space-y-6" onsubmit="event.preventDefault()" autocomplete="off">
+                                        <!-- GITHUB USER -->
+                                        <div 
+                                            x-data="ghUsersComboBoxData({
+                                                isDisabled: collaboratorModal.state.action !== 'add'
+                                            })" 
+                                            x-modelable="state.selectedGithubUser" 
+                                            x-model="collaboratorModal.state.username">
+                                            <div x-html="template"></div>
+                                        </div>
+                                        
+                                        <!-- PERMISSION -->
+                                        <div x-data="combobox({
+                                            data : getPermissions(),
+                                            id : 'id',
+                                            text : 'text',
+                                            label : 'Permission',
+                                            displaySearch: false
+                                        })" x-modelable="selected" x-model="collaboratorModal.state.permission">
+                                            <div x-html="template"></div>
+                                        </div>
+                                    
+                                        <!-- FOOTER -->
+                                        <div class="mt-5 sm:mt-6">
+                                            <button 
+                                                type="submit" 
+                                                @click="(e) => { collaboratorModal.onSubmit(state.orgName, state.about.name) }" 
+                                                x-bind:disabled="!collaboratorModal.isValid()"
+                                                x-text="collaboratorModal.getButtonLabel()"
+                                                class="inline-flex justify-center rounded-md bg-[#FF5800] px-5 mr-2 py-2 text-sm font-semibold text-white shadow-sm  focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:bg-slate-300">
+                                            </button>
+                                            <button
+                                                @click="collaboratorModal.onHide()"
+                                                type="button"
+                                                class="inline-flex justify-center rounded-md bg-gray-200 px-3 py-2 text-sm font-semibold text-gray-700 shadow-sm  focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Cancel</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </template>
+    </div>
+</div>
+
+<script src="/public/components/deeplink.js"></script>
+<script src="/public/components/combobox.js"></script>
+<script src="/public/components/markdownEditor.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/marked@2.1.3/marked.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/emojione@3.1.2/lib/js/emojione.min.js"></script>
+<script type="text/javascript">
+    // ALPINE DATA
+    const viewData = ({
+        id = undefined,
+        isOwner = false,
+        isAdmin = false,
+        isGHValid = false,
+        isMember = false,
+        orgName = ""
+    }) => {
+        return {
+            state: {
+                id: 0,
+                isAdmin: false,
+                isGHValid: false,
+                isMember: false,
+                orgName: "",
+
+                readme: "",
+                about: {
+                    name: "",
+                    description: "",
+                    repositorySource: "",
+                    visibility: "",
+                    created: "",
+                    topics: []
+                },
+                collaborators: [],
+                statuses: [],
+
+                isLoading: false,
+                activeTab: "readme",
+            },
+            async init() {
+                this.onSetPopsetEventListener(this, this.onURLChangeCallback)
+
+                if(this.url.searchParams.get('tab')) {
+                    this.setActiveTab()
+                }
+
+                this.state.isLoading = true;
+
+                this.state.id = id;
+                this.state.isOwner = isOwner;
+                this.state.isAdmin = isAdmin;
+                this.state.isGHValid = isGHValid;
+                this.state.isMember = isMember;
+                this.state.orgName = orgName;
+
+                const repoDetails = await getRepositoryById(this.state.id)
+                const created = new Date(repoDetails.Created)
+                this.state.about = {
+                    name: repoDetails.Name,
+                    description: repoDetails.Description,
+                    repositorySource: repoDetails.RepositorySource,
+                    visibility: repoDetails.Visibility,
+                    created: created.toDateString(),
+                    link: repoDetails.TFSProjectReference,
+                    topics: repoDetails.RepoTopics
+                };
+                
+                if(this.state.about.repositorySource != 'AzureDevOps'){
+                    const readme = await getRepositoryReadme(this.state.orgName, this.state.about.name)
+                    this.state.readme = readme;
+                } else {
+                    this.state.activeTab = this.state.about.repositorySource == 'AzureDevOps' ? 'collaborators' : 'readme'
+                }
+
+                const collaborators = await getRepositoryCollaboratorsById(this.state.id)
+                
+                this.state.collaborators = collaborators
+                
+                if((this.state.isAdmin || this.state.isOwner) && this.state.isGHValid && this.state.about.repositorySource != 'AzureDevOps') {
+                    const statuses = await getRepositoryStatusById(this.state.id)
+
+                    const categorizedStatusByCreated = {};
+
+                    if(statuses != null) {
+                        statuses.forEach(item => {
+                            if (!categorizedStatusByCreated[item.Created]) {
+                                categorizedStatusByCreated[item.Created] = [];
+                            }
+                            categorizedStatusByCreated[item.Created].push(item);
+                        });
+
+                        this.state.statuses = Object.entries(categorizedStatusByCreated)
+                        .sort((a, b) => new Date(a[0]) - new Date(b[0]))
+                        .map(([created, approvalRequests]) => ({
+                            created,
+                            approvalRequests
+                        }));
+                    } else {
+                        this.state.statuses = null
+                    }
+                }
+
+                this.state.isLoading = false;
+            },
+            // FUNCTION
+            setActiveTab() {
+                this.state.activeTab = this.url.searchParams.get('tab') ?? 'readme'
+            },
+            isTabActive(tab) {
+                return this.state.activeTab == tab;
+            },
+            // EVENT HANDLER
+            onSelectTab(tab) {
+                this.state.activeTab = tab;
+
+                this.onSetParams([
+                    { name : 'tab', value : tab }
+                ])
+            },
+            onURLChangeCallback(e) {
+                e.setActiveTab()
+            },
+            requestAccess() {
+                return `/other-requests/organization-access?regionName=${this.state.orgName}`
+            },
+            collaboratorModal: collaboratorModalData()
+        }
+    }
+
+    const collaboratorModalData = () => {
+        return {
+            state: {
+                id: 0,
+                username: '',
+                permission: [],
+
+                action: "", // add | edit
+                isShow: false
+            },
+            getTitle() {
+                const titles = {
+                    add : "Add a collaborator",
+                    edit : "Update permission",
+                    remove : "Remove a collaborator"
+                }
+
+                return titles[this.state.action]
+            },
+            getButtonLabel() {
+                const titles = {
+                    add : "Add",
+                    edit : "Save",
+                    remove : "Confirm"
+                }
+
+                return titles[this.state.action]
+            },
+            isValid() {
+                if (
+                    this.state.username &&
+                    this.state.permission.length > 0
+                ) {
+                    return true
+                }
+                return false
+            },
+            onHide() {
+                this.state.isShow = false
+                this.state.action = 'add'
+                this.state.username = ''
+                this.state.permission = []
+            },
+            onShow(
+                action,
+                id = 0,
+                username = "",
+                permission = ""
+            ) {
+                this.state.id = id
+                this.state.action = action
+                this.state.username = username
+                this.state.permission = permission == '' ? [] : [{ id: permission, text: permission }]
+                this.state.isShow = true
+            },
+            removeCollaborator(id, orgName, repoName, user, permission) {
+                let url = `/api/repositories/${id}/collaborators/${user}/${permission}`
+                let f = () => {
+                Alpine.store('master').modal.show()
+                Alpine.store('master').deleteData(url, null, `Collaborator was successfully removed.`, "Close",
+                    `/repositories/view/${orgName}/${repoName}?tab=collaborators`)
+                }
+
+                let title = "Confirmation"
+                let message = `Remove ${user} from the repository?`
+                Alpine.store('master').confirmationModal.update(title, message, f)
+                Alpine.store('master').confirmationModal.show()
+            },
+            onSubmit(orgName, repoName) {
+                Alpine.store('master').modal.reset()
+                Alpine.store('master').modal.show()
+                Alpine.store('master').postData(`/api/repositories/${this.state.id}/collaborators/${this.state.username}/${this.state.permission[0].id}`, null,
+                "GitHub user has been invited to the repository.", "Close", `/repositories/view/${orgName}/${repoName}?tab=collaborators`)
+
+                this.onHide()
+            }
+        }
+    }
+
+    const ghUsersComboBoxData = ({
+        isDisabled = false
+    }) => {
+        return {
+            state: {
+                selectedGithubUser: '',
+
+                githubUsers: [],
+                isShowOptions: false,
+                isDisabled: false
+            },
+            async init() {
+                this.state.isDisabled = isDisabled;
+                this.state.githubUsers = await getGitHubUsers();
+            },
+            isShowItem(userPrincipalName, githubUser) {
+                return userPrincipalName.toLowerCase().includes(this.state.selectedGithubUser.toLowerCase()) || githubUser.toLowerCase()
+                .includes(this.state.selectedGithubUser.toLowerCase()) ? true : false
+            },
+            toggleOptionHandler() {
+                if(this.state.isDisabled) 
+                    return
+                
+                this.state.isShowOptions = !this.state.isShowOptions;
+            },
+            selectHandler(selected) {
+                this.state.selectedGithubUser = selected; 
+                this.toggleOptionHandler()
+            },
+            clearInputHandler() {
+                this.state.selectedGithubUser = ''
+            },
+            template: `<div>
+                        <label for="user" class="block text-sm font-medium text-gray-700">GitHub User</label>
+                        <div class="mt-2">
+                            <div>
+                                <div class="relative mt-1">
+                                    <input
+                                        x-on:click="toggleOptionHandler"
+                                        x-model="state.selectedGithubUser"
+                                        x-bind:readonly="state.isDisabled"
+
+                                        type="text"
+                                        class="mt-1 focus:ring-orange-500 focus:border-orange-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md border-2"
+                                        role="combobox" aria-controls="options" aria-expanded="false">
+
+                                    <button 
+                                        x-show="state.selectedGithubUser && !state.isDisabled" 
+
+                                        type="button"
+                                        class="absolute inset-y-0 right-0 flex items-center rounded-r-md px-2 focus:outline-none">
+                                        <svg 
+                                            x-on:click="clearInputHandler"
+
+                                            id="clearBtn" 
+                                            class="h-5 w-5 
+                                            text-gray-400"
+                                            xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+                                            <path d="M256 8C119 8 8 119 8 256s111 248 248 248 248-111 248-248S393 8 256 8zm0 448c-110.5 0-200-89.5-200-200S145.5 56 256 56s200 89.5 200 200-89.5 200-200 200zm101.8-262.2L295.6 256l62.2 62.2c4.7 4.7 4.7 12.3 0 17l-22.6 22.6c-4.7 4.7-12.3 4.7-17 0L256 295.6l-62.2 62.2c-4.7 4.7-12.3 4.7-17 0l-22.6-22.6c-4.7-4.7-4.7-12.3 0-17l62.2-62.2-62.2-62.2c-4.7-4.7-4.7-12.3 0-17l22.6-22.6c4.7-4.7 12.3-4.7 17 0l62.2 62.2 62.2-62.2c4.7-4.7 12.3-4.7 17 0l22.6 22.6c4.7 4.7 4.7 12.3 0 17z" />
+                                        </svg>
+                                    </button>
+
+                                    <ul x-show="state.isShowOptions"
+                                        id="options"
+                                        role="listbox"
+                                        class="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+                                        
+                                        <div class="italic text-sm text-gray-500 p-3">
+                                            Only users with associated GH account are displayed
+                                        </div>
+
+                                        <template x-for="ghUser in state.githubUsers">
+                                            <li x-on:click="selectHandler(ghUser.GitHubUser)"
+                                                x-show="isShowItem(ghUser.UserPrincipalName, ghUser.GitHubUser)"
+
+                                                id="option-0" 
+                                                role="option"
+                                                tabindex="-1"
+                                                class="relative cursor-default select-none py-2 pl-3 pr-9 text-gray-900 hover:bg-gray-50">
+                                                
+                                                <div class="flex">
+                                                    <span class="truncate" 
+                                                        x-text="ghUser.UserPrincipalName">
+                                                    </span>
+                                                    <span class="ml-2 truncate text-gray-500"
+                                                        x-text="ghUser.GitHubUser">
+                                                    </span>
+                                                </div>
+                                            </li>
+                                        </template>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>`
+        }
+    }
+
+
+    // FETCH DATA
+    async function getRepositoryById(id) {
+        const res = await fetch(
+            `/api/repositories/${id}`
+        )
+
+        const data = await res.json()
+        return data
+    }
+
+    async function getRepositoryReadme(orgName, repoName) {
+        const res = await fetch(
+            `/api/repositories/${orgName}/${repoName}/readme`
+        )
+
+        const data = await res.json()
+        return data
+    }
+
+    async function getRepositoryCollaboratorsById(id) {
+        const res = await fetch(
+            `/api/repositories/${id}/collaborators`
+        )
+
+        const data = await res.json()
+        return data
+    }
+
+    async function getRepositoryStatusById(id) {
+        const res = await fetch(
+            `/api/repositories/${id}/status`
+        )
+
+        const data = await res.json()
+        return data
+    }
+
+    async function getGitHubUsers() {
+        const res = await fetch(
+            `/api/users/with-github`
+        )
+
+        const data = await res.json()
+        return data
+    }
+
+    function getPermissions() {
+        const permissions = ['admin', 'pull', 'triage', 'push', 'maintain']
+
+        return permissions.map(e => {
+            return { id : e, text : e}
+        })
+    }
+</script>
+{{ end }}

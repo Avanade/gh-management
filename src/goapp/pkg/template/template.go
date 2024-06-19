@@ -7,15 +7,25 @@ import (
 	"net/http"
 	"os"
 	"strings"
+
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 )
 
 type PageData struct {
-	Header    interface{}
-	Profile   interface{}
-	ProfileGH interface{}
-	Content   interface{}
-	HasPhoto  bool
-	UserPhoto string
+	Header            interface{}
+	Profile           interface{}
+	ProfileGH         interface{}
+	Content           interface{}
+	IsGHAssociated    bool
+	HasPhoto          bool
+	UserPhoto         string
+	IsMemberAccount   bool // Flag to indicate if user a org member or guest
+	ProfileLink       string
+	RequestAccessLink string
+	CommunitySite     string
+	Footers           []Footer
+	OrganizationName  string
 }
 
 type Headers struct {
@@ -23,6 +33,11 @@ type Headers struct {
 	Title    string
 	LogoPath string
 	Page     string
+}
+
+type Footer struct {
+	Text string
+	Url  string
 }
 
 type Menu struct {
@@ -63,23 +78,55 @@ func UseTemplate(w *http.ResponseWriter, r *http.Request, page string, pageData 
 	var menu []Menu
 	menu = append(menu, Menu{Name: "Dashboard", Url: "/", IconPath: "/public/icons/dashboard.svg", External: false})
 	menu = append(menu, Menu{Name: "Repositories", Url: "/repositories", IconPath: "/public/icons/projects.svg", External: false})
-	menu = append(menu, Menu{Name: "Communities", Url: "/communities/list", IconPath: "/public/icons/communities.svg", External: false})
+	menu = append(menu, Menu{Name: "Communities", Url: "/communities", IconPath: "/public/icons/communities.svg", External: false})
 	menu = append(menu, Menu{Name: "Activities", Url: "/activities", IconPath: "/public/icons/activity.svg", External: false})
 	menu = append(menu, Menu{Name: "Guidance", Url: "/guidance", IconPath: "/public/icons/guidance.svg", External: false})
 	menu = append(menu, Menu{Name: "Approvals", Url: approvalSystemUrl, IconPath: "/public/icons/approvals.svg", External: true})
+	menu = append(menu, Menu{Name: "Other Requests", Url: "/other-requests", IconPath: "/public/icons/otherrequests.svg", External: false})
 	if isAdmin {
 		menu = append(menu, Menu{Name: "Admin", Url: "/admin", IconPath: "/public/icons/lock.svg", External: false})
 	}
 
 	masterPageData := Headers{Title: title, LogoPath: logoPath, Menu: menu, Page: GetUrlPath(r.URL.Path)}
 
+	var footers []Footer
+	footerString := os.Getenv("LINK_FOOTERS")
+	res := strings.Split(footerString, ";")
+	for _, footer := range res {
+		f := strings.Split(footer, ">")
+		footers = append(footers, Footer{f[0], f[1]})
+	}
+
 	data := PageData{
-		Header:    masterPageData,
-		Profile:   sessionaz.Values["profile"],
-		ProfileGH: sessiongh,
-		Content:   pageData,
-		HasPhoto:  hasPhoto,
-		UserPhoto: userPhoto}
+		Header:           masterPageData,
+		Profile:          sessionaz.Values["profile"],
+		ProfileGH:        sessiongh,
+		Content:          pageData,
+		HasPhoto:         hasPhoto,
+		UserPhoto:        userPhoto,
+		CommunitySite:    os.Getenv("LINK_COMMUNITY_SHAREPOINT_SITE"),
+		Footers:          footers,
+		OrganizationName: os.Getenv("ORGANIZATION_NAME"),
+	}
+
+	// Check user email to determine if user is member or guest
+	if data.Profile != nil {
+		username := data.Profile.(map[string]interface{})["preferred_username"].(string)
+		data.IsMemberAccount = strings.Contains(strings.ToLower(username), strings.ToLower(os.Getenv("ORGANIZATION_NAME")))
+
+		// Set profile link and request access link
+		if data.IsMemberAccount {
+			data.ProfileLink = os.Getenv("LINK_MEMBER_PROFILE")
+			data.RequestAccessLink = os.Getenv("LINK_MEMBER_REQUEST_ACCESS")
+		} else {
+			data.ProfileLink = os.Getenv("LINK_GUEST_PROFILE")
+			data.RequestAccessLink = os.Getenv("LINK_GUEST_REQUEST_ACCESS")
+		}
+	}
+
+	if sessionaz.Values["isGHAssociated"] != nil {
+		data.IsGHAssociated = sessionaz.Values["isGHAssociated"].(bool)
+	}
 
 	tmpl := template.Must(
 		template.ParseFiles("templates/master.html",
@@ -92,6 +139,7 @@ func GetUrlPath(path string) string {
 	if p[1] == "" {
 		return "Dashboard"
 	} else {
-		return strings.Title(p[1])
+		caser := cases.Title(language.Und, cases.NoLower)
+		return caser.String(p[1])
 	}
 }

@@ -6,6 +6,6 @@ import (
 	"main/pkg/template"
 )
 
-func ListCommunityMembers(w http.ResponseWriter, r *http.Request) {
+func CommunityMembersHandler(w http.ResponseWriter, r *http.Request) {
 	template.UseTemplate(&w, r, "admin/communitymembers", nil)
 }

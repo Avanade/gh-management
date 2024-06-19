@@ -21,8 +21,8 @@
         </div>
         <div class="pt-5">
             <div class="flex justify-end">
-                <a href="/admin/contributionarea" type="button"
-                    class="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">Back</a>
+                <button type="button" @click="onBack()"
+                    class="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">Back</button>
                 <button @click.prevent="onSubmitHandler"
                     class="ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 disabled:bg-orange-200"
                     x-bind:disabled="!isValid()" :class="action == 'View' ? 'hidden' : ''">Submit</button>
@@ -54,7 +54,7 @@
                 var modal = Alpine.store('master').modal
                 modal.update('loading', 'Loading', 'Please wait for a moment.', '', '')
 
-                const res = await fetch(`/api/contributionarea/${this.id}`)
+                const res = await fetch(`/api/contribution-areas/${this.id}`)
                 const data = await res.json()
 
                 this.form.name = data[0].Name;
@@ -68,6 +68,9 @@
                 }
                 return false
             },
+            onBack() {
+                window.history.back()
+            },
             onSubmitHandler() {
                 const data = {
                     id: this.id,
@@ -76,16 +79,16 @@
                 switch (this.action.toLowerCase()) {
                     case 'add':
                         Alpine.store('master').modal.show()
-                        Alpine.store('master').postData("/api/contributionarea", data,
+                        Alpine.store('master').postData("/api/contribution-areas", data,
                             "Contribution area has been added.", "Go to list of contribution areas",
-                            "/admin/contributionarea")
+                            "/admin/contributionareas")
                         break;
 
                     case 'edit':
                         Alpine.store('master').modal.show()
-                        Alpine.store('master').putData(`/api/contributionarea`, data,
+                        Alpine.store('master').putData(`/api/contribution-areas`, data,
                             "Contribution area has been saved.", "Go to list of Contribution areas",
-                            "/admin/contributionarea")
+                            "/admin/contributionareas")
                         break;
                 }
             }

@@ -1,0 +1,184 @@
+{{ define "content" }}
+
+
+<div id="pageTitle"> Guidance</div>
+<div x-data="data()" x-init="onload()">
+    <form onsubmit="event.preventDefault()" autocomplete="off">
+        <div class="flex flex flex-col md:flex-row ">
+            <div class="basis-1/2 md:base-full  md:flex-row mx-3">
+                <div class="flex flex-col  ">
+                    <div>
+                        <h3 class="text-lg font-medium leading-6 text-gray-900">Category</h3>
+                        <span class="pl-1 text-xs">(Please press Enter to insert Category)</span>
+                    </div>
+                    <div class="focus:ring-red-500 focus:border-red-500">
+                        <div id="NowBtn" x-data="combobox({
+                                ajax: getCategories,
+                                id : 'Id',
+                                text : 'Name',
+                                isInsertable : true,
+                         
+                             
+                            })" x-modelable="selected" x-model="form.names">
+                            <div x-html="template"></div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div>
+
+                </div>
+                <div>
+                    <h3 class="text-lg font-medium leading-6 text-gray-900"> <br> </h3>
+                </div>
+            </div>
+        </div>
+        <div class="flex flex flex-col md:flex-row  my-3 ">
+            <div class="basis-1/2 md:base-full  md:flex-row   mx-3">
+                <div class="flex flex-col ">
+                    <h3 class="text-lg font-medium leading-6 text-gray-900">Articles</h3>
+                </div>
+            </div>
+            <div class="basis-1/2">
+            </div>
+        </div>
+
+        <div class="flex flex flex-col md:flex-row  my-3 ">
+            <div class="basis-1/4 md:base-full  md:flex-row   mx-3 ">
+                <div class="flex flex-col pl-2">
+                    Name
+                </div>
+            </div>
+
+            <div class="basis-9/12 md:base-full  md:flex-row   mx-3  ">
+                <div> <input type="text" name="category" id="category" x-model="categoryArticle.name" maxlength="50"
+                        class="mt-1 focus:ring-orange-500 focus:border-orange-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md border-2">
+                </div>
+            </div>
+        </div>
+        <div class="flex flex flex-col md:flex-row  my-3 ">
+            <div class="basis-1/4 md:base-full  md:flex-row   mx-3 ">
+                <div class="flex flex-col pl-2">
+                    Url
+                </div>
+            </div>
+
+            <div class="basis-9/12 md:base-full  md:flex-row   mx-3  ">
+                <div> <input type="text" name="category" id="category" x-model="categoryArticle.url" maxlength="255"
+                        class="mt-1 focus:ring-orange-500 focus:border-orange-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md border-2">
+                    <p class="text-black-500">Please add http:// or https:// to the URL</p>
+                </div>
+            </div>
+        </div>
+        <div class="flex flex flex-col md:flex-row  my-3 ">
+            <div class="basis-1/4 md:base-full  md:flex-row   mx-3 ">
+                <div class="flex flex-col pl-2">
+                    Body
+                </div>
+            </div>
+
+            <div class="basis-9/12 md:base-full  md:flex-row   mx-3  ">
+                <div> <textarea type="text" name="category" id="category" x-model="categoryArticle.body"
+                        maxlength="2000"
+                        class="mt-1 focus:ring-orange-500 focus:border-orange-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md border-2">
+                                        </textarea>
+                </div>
+            </div>
+        </div>
+        <div>
+            <div align="right">
+                <button type="button" class="bg-orange-500  inline-flex justify-center py-2 px-4 rounded-md text-white"
+                    :class="!isValid ? 'bg-orange-100' : ''" x-bind:disabled="!isValid" @click="submit()">
+
+                    Add Articles
+
+                </button>
+                <span x-show="form.id">
+                    <button type="button" x-show="mode=='edit'"
+                        class="bg-orange-500  inline-flex justify-center py-2 px-4 rounded-md text-white"
+                        :class="!isValid ? 'bg-orange-100' : ''" x-bind:disabled="!isValid" @click="onload()">
+
+
+                        <span x-show="form.id">Cancel</span>
+
+                    </button>
+                </span>
+            </div>
+        </div>
+
+    </form>
+</div>
+
+<script src="/public/components/clsDropdown.js"></script>
+<script src="/public/components/combobox.js"></script>
+<script type="text/javascript">
+    function data() {
+        return {
+            mode: 'view',
+
+            form: {
+                id: '{{.Id}}',
+                name: '',
+                names: [],
+                categoryArticles: [],
+
+            },
+            categoryArticle: {
+
+                name: '',
+                url: '',
+                body: '',
+                categoryId: 0,
+            },
+            submit() {
+
+                if (this.form.names[0]["text"].toString() === '') {
+                    this.form.combobox;
+                    return
+                }
+
+                var modal = Alpine.store('master').modal
+                modal.update('loading', 'Saving', 'Please wait.', '', '')
+                if (!this.form.id) {
+                    this.form.id = 0
+
+                }
+
+                this.form.categoryArticles.push(this.categoryArticle)
+                this.form.name = this.form.names[0]["text"].toString()
+
+                postData = this.form;
+
+                Alpine.store('master').postData('/api/categories', postData, "Your category has been created.",
+                    "Go to category list", "/guidance")
+
+            },
+
+            get isValid() {
+                if (
+                    (this.form.names
+
+                    )) {
+                    return true
+                } else {
+                    return false
+                }
+            },
+            onload() {
+
+
+            }
+        }
+    }
+    async function getCategories() {
+
+        const res = await fetch('/api/categories')
+
+        const data = await res.json()
+        return data
+
+
+    }
+</script>
+{{ end }}

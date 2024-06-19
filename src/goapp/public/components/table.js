@@ -1,4 +1,13 @@
 const table = ({
+    setDefault = {
+      search : '',
+      filter : 10,
+      page : 0,
+      orderby : '',
+      ordertype : ''
+    },
+    initCallback,
+    stateChangeCallback,
     callback,
     onRowClick,
     data = '',
@@ -34,23 +43,27 @@ const table = ({
       isLoading : false,
 
       async init() {
+        this.filter = setDefault.filter
+        this.search = setDefault.search
+        this.page = setDefault.page
+        this.orderby = setDefault.orderby
+        this.ordertype = setDefault.ordertype
+
         this.columns = columns;
         await this.load();
+
+        if (initCallback != undefined) {
+          initCallback(this)
+        }
       },
-      async load() {
+      async initLoad() {
         this.isLoading = true;
         this.data = [];
         this.total = 0;
         this.showStart = 0;
         this.showEnd = 0;
 
-        this.res = await callback({
-          filter : this.filter,
-          page : this.page,
-          search : this.search,
-          orderby : this.orderby,
-          ordertype : this.ordertype
-        })
+        this.res = await callback(this)
 
         this.data = this.res[data]
         this.total = this.res[total]
@@ -60,7 +73,37 @@ const table = ({
         if (this.data == null || this.data.length == 0) return;
 
         this.showStart = this.data.length > 0 ? ((this.page * this.filter) + 1) : 0;
+        this.showEnd = (this.page * this.filter) + this.data.length;        
+      },
+      async load() {
+        this.isLoading = true;
+        this.data = [];
+        this.total = 0;
+        this.showStart = 0;
+        this.showEnd = 0;
+
+        this.res = await callback(this)
+
+        this.data = this.res[data]
+        this.total = this.res[total]
+
+        this.isLoading = false;
+
+        if(stateChangeCallback != undefined) {
+          stateChangeCallback(this)
+        }
+
+        if (this.data == null || this.data.length == 0) return;
+
+        this.showStart = this.data.length > 0 ? ((this.page * this.filter) + 1) : 0;
         this.showEnd = (this.page * this.filter) + this.data.length;
+      },
+      onSetState(search, filter, page, orderby, ordertype){
+        this.search = search
+        this.filter = filter
+        this.page = page
+        this.orderby = orderby
+        this.ordertype = ordertype
       },
       nextPageEnabled(){
         return this.page < Math.ceil(this.total/this.filter) - 1
@@ -206,4 +249,4 @@ const table = ({
                     </div>
                   </nav>`
     }
-  }
+}

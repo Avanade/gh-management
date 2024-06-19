@@ -3,6 +3,7 @@ package notification
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -45,6 +46,9 @@ const (
 	OrganizationInvitationExpireMessageType      MessageType = "InnerSource.OrganizationInvitationExpire"
 	RepositoryPublicApprovalProvidedMessageType  MessageType = "InnerSource.RepositoryPublicApprovalProvided"
 	ActivityAddedRequestForHelpMessageType       MessageType = "InnerSource.ActivityAddedRequestForHelp"
+	RequestForAnOrganizationMessageType          MessageType = "InnerSource.RequestForAnOrganization"
+	RequestForGitHubCopilotLicenseMessageType    MessageType = "InnerSource.RequestForGitHubCopilotLicense"
+	RequestForOrganizationAccessMessageType      MessageType = "InnerSource.RequestForOrganizationAccess"
 )
 
 type Contract struct {
@@ -104,6 +108,24 @@ type ActivityAddedRequestForHelpMessageBody struct {
 	Recipients   []string
 	ActivityLink string
 	UserName     string
+}
+
+type RequestForAnOrganizationMessageBody struct {
+	Recipients []string
+	UserName   string
+}
+
+type RequestForGitHubCopilotLicenseMessageBody struct {
+	Recipients []string
+	UserName   string
+}
+
+type RequestForOrganizationAccessMessageBody struct {
+	Recipients       []string
+	UserName         string
+	OrganizationName string
+	OrganizationLink string
+	ApprovalLink     string
 }
 
 func (messageBody RepositoryHasBeenCreatedMessageBody) Send() error {
@@ -225,6 +247,57 @@ func (messageBody ActivityAddedRequestForHelpMessageBody) Send() error {
 	return nil
 }
 
+func (messageBody RequestForAnOrganizationMessageBody) Send() error {
+	messageBody.Recipients = setRecipients(messageBody.Recipients)
+
+	contract := Contract{
+		RequestId:   uuid.New().String(),
+		MessageType: RequestForAnOrganizationMessageType,
+		MessageBody: messageBody,
+	}
+
+	err := sendNotification(contract)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (messageBody RequestForGitHubCopilotLicenseMessageBody) Send() error {
+	messageBody.Recipients = setRecipients(messageBody.Recipients)
+
+	contract := Contract{
+		RequestId:   uuid.New().String(),
+		MessageType: RequestForGitHubCopilotLicenseMessageType,
+		MessageBody: messageBody,
+	}
+
+	err := sendNotification(contract)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (messageBody RequestForOrganizationAccessMessageBody) Send() error {
+	messageBody.Recipients = setRecipients(messageBody.Recipients)
+
+	contract := Contract{
+		RequestId:   uuid.New().String(),
+		MessageType: RequestForOrganizationAccessMessageType,
+		MessageBody: messageBody,
+	}
+
+	err := sendNotification(contract)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func requestNewToken() (*Response, error) {
 	urlPath := fmt.Sprintf("https://login.microsoftonline.com/%s/oauth2/v2.0/token", os.Getenv("NOTIFICATION_TENANT_ID"))
 	client := &http.Client{
@@ -248,6 +321,9 @@ func requestNewToken() (*Response, error) {
 	res, err := client.Do(req)
 	if err != nil {
 		return nil, err
+	}
+	if res.StatusCode == http.StatusUnauthorized {
+		return nil, errors.New(res.Status)
 	}
 	defer res.Body.Close()
 
@@ -326,6 +402,10 @@ func sendNotification(c Contract) error {
 	if err != nil {
 		return err
 	}
+	if response.StatusCode == http.StatusUnauthorized {
+		return errors.New(response.Status)
+	}
+
 	defer response.Body.Close()
 
 	contractAfter, _ := json.Marshal(c)

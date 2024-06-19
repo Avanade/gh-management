@@ -19,7 +19,9 @@ const markdownEditor = ({
             this.caption = caption
             this.placeholder = placeholder
             this.overflowPreview = overflowPreview
-            this.$watch('body', e => this.markdown = window.marked(e))
+            this.$watch('body', e => {
+                this.markdown = emojione.shortnameToImage(window.marked(e));
+            })
         },
         template : `<div class="w-full">
                         <nav x-show="!disabledTab">
@@ -48,7 +50,7 @@ const markdownEditor = ({
                                         x-model="body"></textarea>
                                 </div>
                             </div>
-                            <div x-show="activeTab === 'preview'" class="w-full border border-gray-300 rounded-md p-3"
+                            <div x-show="activeTab === 'preview'" class="w-full rounded-md p-3"
                                 :class="{ 'overflow-y-auto h-44' : overflowPreview === 'scroll'}">
                                 <div x-html="markdown" class="preview prose max-w-none prose-img:rounded-md">
                                 </div>

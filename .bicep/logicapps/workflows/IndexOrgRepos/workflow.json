@@ -9,7 +9,7 @@
                         "type": "ManagedServiceIdentity"
                     },
                     "method": "GET",
-                    "uri": "@concat(parameters('GHMgmDomain'), '/api/clearorgrepos')"
+                    "uri": "@concat(parameters('GHMgmDomain'), '/utility/clear-org-repos')"
                 },
                 "runAfter": {
                     "HTTP__OWNER_CLEANUP": [
@@ -25,7 +25,7 @@
                         "type": "ManagedServiceIdentity"
                     },
                     "method": "GET",
-                    "uri": "@concat(parameters('GHMgmDomain'), '/api/indexorgrepos')"
+                    "uri": "@concat(parameters('GHMgmDomain'), '/utility/index-org-repos')"
                 },
                 "runAfter": {},
                 "trackedProperties": {},
@@ -38,7 +38,7 @@
                         "type": "ManagedServiceIdentity"
                     },
                     "method": "GET",
-                    "uri": "@concat(parameters('GHMgmDomain'), '/api/RepoOwnersCleanup')"
+                    "uri": "@concat(parameters('GHMgmDomain'), '/utility/repo-owner-cleanup')"
                 },
                 "runAfter": {
                     "HTTP_INDEX_ORG_REPO": [

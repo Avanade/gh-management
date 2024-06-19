@@ -19,21 +19,7 @@ func CommunitiesActivities_Select() interface{} {
 	db := ConnectDb()
 	defer db.Close()
 
-	result, _ := db.ExecuteStoredProcedureWithResult("PR_CommunityActivities_Select", nil)
-	return result
-}
-
-func CommunitiesActivities_Select_ByOffsetAndFilter(offset, filter int, search string) interface{} {
-	db := ConnectDb()
-	defer db.Close()
-
-	param := map[string]interface{}{
-		"Offset": offset,
-		"Filter": filter,
-		"Search": search,
-	}
-
-	result, _ := db.ExecuteStoredProcedureWithResult("PR_CommunityActivities_Select_ByOffsetAndFilter", param)
+	result, _ := db.ExecuteStoredProcedureWithResult("usp_CommunityActivity_Select", nil)
 	return result
 }
 
@@ -50,7 +36,7 @@ func CommunitiesActivities_Select_ByOffsetAndFilterAndCreatedBy(offset, filter i
 		"CreatedBy": createdBy,
 	}
 
-	result, _ := db.ExecuteStoredProcedureWithResult("PR_CommunityActivities_Select_ByOffsetAndFilterAndCreatedBy", param)
+	result, _ := db.ExecuteStoredProcedureWithResult("usp_CommunityActivity_Select_ByOptionAndCreatedBy", param)
 	return result
 }
 
@@ -67,7 +53,7 @@ func CommunitiesActivities_Insert(body Activity) (int, error) {
 		"ActivityTypeId": body.TypeId,
 	}
 
-	result, err := db.ExecuteStoredProcedureWithResult("PR_CommunityActivities_Insert", param)
+	result, err := db.ExecuteStoredProcedureWithResult("usp_CommunityActivity_Insert", param)
 	if err != nil {
 		return -1, err
 	}
@@ -82,7 +68,7 @@ func CommunitiesActivities_TotalCount() int {
 	db := ConnectDb()
 	defer db.Close()
 
-	result, _ := db.ExecuteStoredProcedureWithResult("PR_CommunityActivities_TotalCount", nil)
+	result, _ := db.ExecuteStoredProcedureWithResult("usp_CommunityActivity_TotalCount", nil)
 	total, err := strconv.Atoi(fmt.Sprint(result[0]["Total"]))
 	if err != nil {
 		return 0
@@ -99,7 +85,7 @@ func CommunitiesActivities_TotalCount_ByCreatedBy(createdBy, search string) int 
 		"Search":    search,
 	}
 
-	result, _ := db.ExecuteStoredProcedureWithResult("[PR_CommunityActivities_TotalCount_ByCreatedBy]", param)
+	result, _ := db.ExecuteStoredProcedureWithResult("usp_CommunityActivity_TotalCount_ByOptionAndCreatedBy", param)
 	total, err := strconv.Atoi(fmt.Sprint(result[0]["Total"]))
 	if err != nil {
 		return 0
@@ -115,7 +101,7 @@ func CommunitiesActivities_Select_ById(id int) (interface{}, error) {
 		"Id": id,
 	}
 
-	result, err := db.ExecuteStoredProcedureWithResult("PR_CommunityActivities_Select_ById", param)
+	result, err := db.ExecuteStoredProcedureWithResult("usp_CommunityActivity_Select_ById", param)
 	if err != nil {
 		return nil, err
 	}
@@ -133,7 +119,7 @@ func CommunityActivitiesHelpTypes_Insert(activityId int, helpTypeId int, details
 		"Details":            details,
 	}
 
-	result, err := db.ExecuteStoredProcedureWithResult("PR_CommunityActivitiesHelpTypes_Insert", param)
+	result, err := db.ExecuteStoredProcedureWithResult("usp_CommunityActivityHelpType_Insert", param)
 	if err != nil {
 		return -1, err
 	}
@@ -149,7 +135,7 @@ func ActivityTypes_Select() interface{} {
 	db := ConnectDb()
 	defer db.Close()
 
-	result, err := db.ExecuteStoredProcedureWithResult("PR_ActivityTypes_Select", nil)
+	result, err := db.ExecuteStoredProcedureWithResult("usp_ActivityType_Select", nil)
 	if err != nil {
 		return err
 	}
@@ -164,7 +150,7 @@ func ActivityTypes_Insert(name string) (int, error) {
 		"Name": name,
 	}
 
-	result, err := db.ExecuteStoredProcedureWithResult("PR_ActivityTypes_Insert", param)
+	result, err := db.ExecuteStoredProcedureWithResult("usp_ActivityType_Insert", param)
 	if err != nil {
 		return -1, err
 	}

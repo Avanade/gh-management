@@ -3,10 +3,10 @@ package routes
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 	"strconv"
 
+	"main/pkg/appinsights_wrapper"
 	db "main/pkg/ghmgmtdb"
 	"main/pkg/session"
 
@@ -37,6 +37,9 @@ type CategoryArticlesDto struct {
 }
 
 func CategoryAPIHandler(w http.ResponseWriter, r *http.Request) {
+	logger := appinsights_wrapper.NewClient()
+	defer logger.EndOperation()
+
 	sessionaz, _ := session.Store.Get(r, "auth-session")
 	iprofile := sessionaz.Values["profile"]
 	profile := iprofile.(map[string]interface{})
@@ -44,7 +47,7 @@ func CategoryAPIHandler(w http.ResponseWriter, r *http.Request) {
 	var body CategoryDto
 	err := json.NewDecoder(r.Body).Decode(&body)
 	if err != nil {
-		log.Println(err.Error())
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -59,14 +62,14 @@ func CategoryAPIHandler(w http.ResponseWriter, r *http.Request) {
 
 	result, err := db.CategoryInsert(param)
 	if err != nil {
-		log.Println(err.Error())
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	id, err := strconv.Atoi(fmt.Sprint(result[0]["Id"]))
 	if err != nil {
-		log.Println(err.Error())
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -86,7 +89,7 @@ func CategoryAPIHandler(w http.ResponseWriter, r *http.Request) {
 
 		_, err := db.CategoryArticlesInsert(categoryArticles)
 		if err != nil {
-			log.Println(err.Error())
+			logger.LogException(err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
@@ -94,11 +97,13 @@ func CategoryAPIHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func CategoryListAPIHandler(w http.ResponseWriter, r *http.Request) {
+	logger := appinsights_wrapper.NewClient()
+	defer logger.EndOperation()
 
 	// Get project list
 	communities, err := db.CategorySelect()
 	if err != nil {
-		log.Println(err.Error())
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -107,7 +112,7 @@ func CategoryListAPIHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	jsonResp, err := json.Marshal(communities)
 	if err != nil {
-		log.Println(err.Error())
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -115,7 +120,10 @@ func CategoryListAPIHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write(jsonResp)
 }
 
-func GetCategoryArticlesById(w http.ResponseWriter, r *http.Request) {
+func GetCategoryArticlesByCategoryId(w http.ResponseWriter, r *http.Request) {
+	logger := appinsights_wrapper.NewClient()
+	defer logger.EndOperation()
+
 	req := mux.Vars(r)
 	id := req["id"]
 
@@ -124,7 +132,7 @@ func GetCategoryArticlesById(w http.ResponseWriter, r *http.Request) {
 	params["Id"] = id
 	categoryArticles, err := db.CategoryArticlesselectById(params)
 	if err != nil {
-		log.Println(err.Error())
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -133,14 +141,17 @@ func GetCategoryArticlesById(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	jsonResp, err := json.Marshal(categoryArticles)
 	if err != nil {
-		log.Println(err.Error())
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	w.Write(jsonResp)
 }
 
-func GetCategoryArticlesByArticlesID(w http.ResponseWriter, r *http.Request) {
+func GetCategoryArticlesById(w http.ResponseWriter, r *http.Request) {
+	logger := appinsights_wrapper.NewClient()
+	defer logger.EndOperation()
+
 	req := mux.Vars(r)
 	id := req["id"]
 
@@ -150,7 +161,7 @@ func GetCategoryArticlesByArticlesID(w http.ResponseWriter, r *http.Request) {
 
 	categoryArticles, err := db.CategoryArticlesSelectByArticlesID(params)
 	if err != nil {
-		log.Println(err.Error())
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -159,7 +170,7 @@ func GetCategoryArticlesByArticlesID(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	jsonResp, err := json.Marshal(categoryArticles)
 	if err != nil {
-		log.Println(err.Error())
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -167,6 +178,9 @@ func GetCategoryArticlesByArticlesID(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetCategoryByID(w http.ResponseWriter, r *http.Request) {
+	logger := appinsights_wrapper.NewClient()
+	defer logger.EndOperation()
+
 	req := mux.Vars(r)
 	id := req["id"]
 
@@ -175,7 +189,7 @@ func GetCategoryByID(w http.ResponseWriter, r *http.Request) {
 	params["Id"] = id
 	category, err := db.CategorySelectById(params)
 	if err != nil {
-		log.Println(err.Error())
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -184,14 +198,17 @@ func GetCategoryByID(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	jsonResp, err := json.Marshal(category)
 	if err != nil {
-		log.Println(err.Error())
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	w.Write(jsonResp)
 }
 
-func CategoryArticlesUpdate(w http.ResponseWriter, r *http.Request) {
+func UpdateCategoryArticlesById(w http.ResponseWriter, r *http.Request) {
+	logger := appinsights_wrapper.NewClient()
+	defer logger.EndOperation()
+
 	sessionaz, _ := session.Store.Get(r, "auth-session")
 	iprofile := sessionaz.Values["profile"]
 	profile := iprofile.(map[string]interface{})
@@ -200,7 +217,7 @@ func CategoryArticlesUpdate(w http.ResponseWriter, r *http.Request) {
 
 	err := json.NewDecoder(r.Body).Decode(&body)
 	if err != nil {
-		log.Println(err.Error())
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -215,7 +232,7 @@ func CategoryArticlesUpdate(w http.ResponseWriter, r *http.Request) {
 
 	result, err := db.CategoryInsert(params)
 	if err != nil {
-		log.Println(err.Error())
+		logger.LogException(err)
 	}
 
 	id, _ := strconv.Atoi(fmt.Sprint(result[0]["Id"]))
@@ -231,13 +248,15 @@ func CategoryArticlesUpdate(w http.ResponseWriter, r *http.Request) {
 
 	err = db.CategoryArticlesUpdate(param)
 	if err != nil {
-		log.Println(err.Error())
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 }
 
 func CategoryUpdate(w http.ResponseWriter, r *http.Request) {
+	logger := appinsights_wrapper.NewClient()
+	defer logger.EndOperation()
 
 	sessionaz, _ := session.Store.Get(r, "auth-session")
 	iprofile := sessionaz.Values["profile"]
@@ -248,7 +267,7 @@ func CategoryUpdate(w http.ResponseWriter, r *http.Request) {
 
 	err := json.NewDecoder(r.Body).Decode(&body)
 	if err != nil {
-		log.Println(err.Error())
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -262,7 +281,7 @@ func CategoryUpdate(w http.ResponseWriter, r *http.Request) {
 
 	_, err = db.CategoryInsert(params)
 	if err != nil {
-		log.Println(err.Error())
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}

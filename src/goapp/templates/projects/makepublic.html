@@ -3,9 +3,18 @@
 
 <div id="pageTitle">Request</div>
 
-<div x-data="data()">
+<div x-data="message(
+    {{.isInnerSourceMember}},
+    {{.isOpenSourceMember}},
+    '{{.innersourceOrg}}',
+    '{{.opensourceOrg}}',
+    {{.isInvalidToken}}
+)">
+    <div x-html="template"></div>
+</div>
+<div x-data="data({{.isInnerSourceMember}},{{.isOpenSourceMember}})">
     <form onsubmit="event.preventDefault()" autocomplete="off">
-        <fieldset>
+        <fieldset x-bind:disabled="isFieldsetDisabled">
             <h3 class="text-lg font-medium leading-6 text-gray-900">Make Repository Public</h3>
             <p class="mt-1 text-sm text-gray-500">
                 Before a repository becomes public, it needs to undergo intellectual property, legal and security
@@ -14,7 +23,7 @@
             <div class="flex flex flex-col md:flex-row mt-7">
                 <div class="basis-1/2 md:base-full  md:flex-row mx-3 self-center">
                     <div class="flex flex-col pl-2 ml-3 mt-1 text-sm text-gray-900">
-                        Is this a new contribution with no prior code development? (i.e., no existing Avanade IP, no
+                        Is this a new contribution with no prior code development? (i.e., no existing {{ .OrganizationName }} IP, no
                         third-party/OSS code, etc.)
                     </div>
                 </div>
@@ -50,7 +59,7 @@
             <div class="flex flex flex-col md:flex-row my-3 mt-5">
                 <div class="basis-1/2 md:base-full md:flex-row mx-3 self-center">
                     <div class="flex flex-col pl-2 ml-3 mt-1 text-sm text-gray-900">
-                        Will Avanade use this contribution in client accounts and/or as part of an Avanade
+                        Will {{ .OrganizationName }} use this contribution in client accounts and/or as part of an {{ .OrganizationName }}
                         offerings/assets?
                     </div>
                 </div>
@@ -116,12 +125,18 @@
     </form>
 </div>
 
+<script src="/public/components/memberValidationMessage.js"></script>
 <script src="/public/components/combobox.js"></script>
 
 <script type="text/javascript">
-    function data() {
+    function data(
+        isInnersourceMember,
+        isOpensourceMember
+    ) {
         let path = window.location.pathname
         return {
+            isInnersourceMember: false,
+            isOpensourceMember: false,
             form: {
                 id: path.replace('/repositories/makepublic/', ''),
                 newcontribution: '',
@@ -131,11 +146,21 @@
                 osscontributionInformation: '',
                 sponsorOptions: [],
             },
+            isFieldsetDisabled() {
+                if (this.isInnersourceMember && this.isOpensourceMember) {
+                    return false
+                }
+                return true;
+            },
             submit() {
                 Alpine.store('master').modal.reset()
                 Alpine.store('master').modal.show()
-                Alpine.store('master').postData("/api/repositories/request/public", this.form,
+                Alpine.store('master').putData(`/api/repositories/${this.form.id}/public`, this.form,
                     "Your request has been submitted.", "Go to your repository list", "/repositories")
+            },
+            init() {
+                this.isInnersourceMember = isInnersourceMember
+                this.isOpensourceMember = isOpensourceMember
             },
             get isValid() {
                 if (this.form.sponsorOptions.length > 0) {
@@ -157,7 +182,7 @@
         }
     }
     async function getSponsorOptions() {
-        let uri = '/api/osscontributionsponsors/enabled'
+        let uri = '/api/oss-contribution-sponsors/enabled'
         let encoded = encodeURI(uri);
         const res = await fetch(encoded)
         const data = await res.json()

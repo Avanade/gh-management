@@ -2,10 +2,11 @@ package routes
 
 import (
 	"encoding/xml"
-	"log"
 	"net/http"
+	"os"
 	"strconv"
 
+	"main/pkg/appinsights_wrapper"
 	db "main/pkg/ghmgmtdb"
 
 	"github.com/gorilla/mux"
@@ -25,16 +26,19 @@ type ArrayOfSearchResultItem struct {
 }
 
 func LegacySearchHandler(w http.ResponseWriter, r *http.Request) {
+	logger := appinsights_wrapper.NewClient()
+	defer logger.EndOperation()
+
 	req := mux.Vars(r)
 	searchText := req["searchText"]
 
 	param := map[string]interface{}{
-		"searchText": searchText,
+		"Search": searchText,
 	}
 
 	result, err := db.LegacySearch(param)
 	if err != nil {
-		log.Println(err.Error())
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -53,7 +57,7 @@ func LegacySearchHandler(w http.ResponseWriter, r *http.Request) {
 	var finalResult ArrayOfSearchResultItem
 	finalResult.SearchResultItem = searchResult
 	finalResult.XMLNSI = "http://www.w3.org/2001/XMLSchema-instance"
-	finalResult.XMLNS = "***REMOVED***"
+	finalResult.XMLNS = os.Getenv("LINK_XML_SCHEMA")
 
 	// Wraps the response to Response struct
 	response, err := xml.MarshalIndent(finalResult, "", "  ")

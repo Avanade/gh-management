@@ -6,11 +6,11 @@
     <div x-show="isNoOnBoarding" class="text-[#FF5800] m-5 place-items-center">
         <span>No Onboarding Instructions</span>
         <br><br>
-        {{/* <span @click="window.location.href=`/community/${community.Id}`"
+        {{/* <span @click="window.location.href=`/communities/${community.Id}`"
               class="cursor-pointer">< Back</span> */}}
         <button type="button"
             class="bg-orange-500  inline-flex justify-center py-2 px-4 rounded-md text-white font-bold "
-            @click="window.location.href=`/community/${community.Id}`">
+            @click="window.location.href=`/communities/${community.Id}`">
             Back
         </button>
     </div>
@@ -107,6 +107,7 @@
 
 <script src="/public/components/markdownEditor.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/marked@2.1.3/marked.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/emojione@3.1.2/lib/js/emojione.min.js"></script>
 <script type="text/javascript">
     function data() {
         return {
@@ -150,7 +151,7 @@
             alreadyMember() {
                 var modal = Alpine.store('master').modal
                 modal.update('loading', 'Processing', 'Adding you to our database.', '', '')
-                fetch(`/api/community/onboarding/${this.community.Id}`, {
+                fetch(`/api/communities/${this.community.Id}/onboarding`, {
                         method: 'POST'
                     })
                     .then(() => {
@@ -164,7 +165,7 @@
             removeMember() {
                 var modal = Alpine.store('master').modal
                 modal.update('loading', 'Processing', 'Removing you from our database.', '', '')
-                fetch(`/api/community/onboarding/${this.community.Id}`, {
+                fetch(`/api/communities/${this.community.Id}/onboarding`, {
                         method: 'DELETE'
                     })
                     .then(() => {
@@ -179,7 +180,7 @@
                 var modal = Alpine.store('master').modal
                 this.community.loaded = false
                 modal.update('loading', 'Loading', 'Please wait', '', '')
-                fetch(`/api/community/onboarding/${this.community.Id}`).then(j => j.json()
+                fetch(`/api/communities/${this.community.Id}/onboarding`).then(j => j.json()
                         .then(data => {
                             if (!data.Community.Sponsors) data.Community.Sponsors = []
                             if (!data.Community.Communities) data.Community.Communities = []
@@ -201,7 +202,7 @@
                     })
             },
             getCommunity() {
-                fetch('/api/relatedcommunity/' + '{{.Id}}')
+                fetch('/api/communities/{{.Id}}/related-communities')
                     .then(r => {
                         r.json().then(body => {
                             if (body) {
@@ -241,5 +242,4 @@
         }
     }
 </script>
-
 {{ end }}

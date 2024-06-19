@@ -43,7 +43,7 @@
           </div>
         </div>
         <hr>
-        <p class="mt-2 text-sm text-gray-500">Search through Avanade’s existing open source and innersource
+        <p class="mt-2 text-sm text-gray-500">Search through {{ .OrganizationName }}’s existing open source and innersource
           repositories.</p>
       </div>
       <span class="pointer-events-none absolute top-6 right-6 text-gray-300 group-hover:text-gray-400"
@@ -75,7 +75,7 @@
             Request a repository
           </a>
         </h3>
-        <p class="mt-2 text-sm text-gray-500">Request a new repository in Avanade Innersource</p>
+        <p class="mt-2 text-sm text-gray-500">Request a new repository in {{ .OrganizationName }} Innersource</p>
       </div>
       <span class="pointer-events-none absolute top-6 right-6 text-gray-300 group-hover:text-gray-400"
         aria-hidden="true">
@@ -86,7 +86,7 @@
       </span>
     </div>
 
-    <div @click="searchACommunity()"
+    <div @click="requestOrgAccess()"
       class="relative group bg-white p-6 focus-within:ring-2 focus-within:ring-inset focus-within:ring-cyan-500">
       <div>
         <span class="rounded-lg inline-flex p-3 bg-sky-50 text-sky-700 ring-4 ring-white">
@@ -103,29 +103,10 @@
           <a href="#" class="focus:outline-none">
             <!-- Extend touch target to entire panel -->
             <span class="absolute inset-0" aria-hidden="true"></span>
-            Find a community
+            Organization Access
           </a>
         </h3>
-        <div class="w-full my-3">
-          <label for="search" class="sr-only">Search</label>
-          <div class="relative">
-            <div class="pointer-events-none absolute inset-y-0 left-0 pl-3 flex items-center">
-              <!-- Heroicon name: solid/search -->
-              <svg class="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
-                fill="currentColor" aria-hidden="true">
-                <path fill-rule="evenodd"
-                  d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
-                  clip-rule="evenodd" />
-              </svg>
-            </div>
-            <input id="search" @click.stop @keyup.enter="searchACommunity()" x-model="searchCommunity" name="search"
-              class="block w-full bg-white border border-gray-300 rounded-md py-2 pl-10 pr-3 text-sm placeholder-gray-500 focus:outline-none focus:text-gray-900 focus:placeholder-gray-400 focus:ring-1 focus:ring-rose-500 focus:border-rose-500 sm:text-sm"
-              placeholder="Search" type="search">
-          </div>
-        </div>
-        <hr>
-        <p class="mt-2 text-sm text-gray-500">Search through the external communities that Avanade is a member of, from
-          the Green Software Foundation, to CNCF.</p>
+        <p class="mt-2 text-sm text-gray-500">Request access to regional organization</p>
       </div>
       <span class="pointer-events-none absolute top-6 right-6 text-gray-300 group-hover:text-gray-400"
         aria-hidden="true">
@@ -140,22 +121,20 @@
       <div>
         <span class="rounded-lg inline-flex p-3 bg-yellow-50 text-yellow-700 ring-4 ring-white">
           <!-- Heroicon name: outline/cash -->
-          <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
-            stroke="currentColor" aria-hidden="true">
-            <path stroke-linecap="round" stroke-linejoin="round"
-              d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+          <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" width="29.54" height="24" viewBox="0 0 256 208">
+            <path fill="currentColor" d="M205.28 31.36c14.096 14.88 20.016 35.2 22.512 63.68c6.626 0 12.805 1.47 16.976 7.152l7.792 10.56A17.548 17.548 0 0 1 256 123.2v28.688c-.008 3.704-1.843 7.315-4.832 9.504C215.885 187.222 172.35 208 128 208c-49.066 0-98.19-28.273-123.168-46.608c-2.989-2.189-4.825-5.8-4.832-9.504V123.2c0-3.776 1.2-7.424 3.424-10.464l7.792-10.544c4.173-5.657 10.38-7.152 16.992-7.152c2.496-28.48 8.4-48.8 22.512-63.68C77.331 3.165 112.567.06 127.552 0H128c14.72 0 50.4 2.88 77.28 31.36m-77.264 47.376c-3.04 0-6.544.176-10.272.544c-1.312 4.896-3.248 9.312-6.08 12.128c-11.2 11.2-24.704 12.928-31.936 12.928c-6.802 0-13.927-1.42-19.744-5.088c-5.502 1.808-10.786 4.415-11.136 10.912c-.586 12.28-.637 24.55-.688 36.824c-.026 6.16-.05 12.322-.144 18.488c.024 3.579 2.182 6.903 5.44 8.384C79.936 185.92 104.976 192 128.016 192c23.008 0 48.048-6.08 74.512-18.144c3.258-1.48 5.415-4.805 5.44-8.384c.317-18.418.062-36.912-.816-55.312h.016c-.342-6.534-5.648-9.098-11.168-10.912c-5.82 3.652-12.927 5.088-19.728 5.088c-7.232 0-20.72-1.728-31.936-12.928c-2.832-2.816-4.768-7.232-6.08-12.128a106.26 106.26 0 0 0-10.24-.544m-26.941 43.93c5.748 0 10.408 4.66 10.408 10.409v19.183c0 5.749-4.66 10.409-10.408 10.409c-5.748 0-10.408-4.66-10.408-10.409v-19.183c0-5.748 4.66-10.408 10.408-10.408m53.333 0c5.749 0 10.409 4.66 10.409 10.409v19.183c0 5.749-4.66 10.409-10.409 10.409c-5.748 0-10.408-4.66-10.408-10.409v-19.183c0-5.748 4.66-10.408 10.408-10.408M81.44 28.32c-11.2 1.12-20.64 4.8-25.44 9.92c-10.4 11.36-8.16 40.16-2.24 46.24c4.32 4.32 12.48 7.2 21.28 7.2c6.72 0 19.52-1.44 30.08-12.16c4.64-4.48 7.52-15.68 7.2-27.04c-.32-9.12-2.88-16.64-6.72-19.84c-4.16-3.68-13.6-5.28-24.16-4.32m68.96 4.32c-3.84 3.2-6.4 10.72-6.72 19.84c-.32 11.36 2.56 22.56 7.2 27.04c10.56 10.72 23.36 12.16 30.08 12.16c8.8 0 16.96-2.88 21.28-7.2c5.92-6.08 8.16-34.88-2.24-46.24c-4.8-5.12-14.24-8.8-25.44-9.92c-10.56-.96-20 .64-24.16 4.32M128 56c-2.56 0-5.6.16-8.96.48c.32 1.76.48 3.68.64 5.76c0 1.44 0 2.88-.16 4.48c3.2-.32 5.92-.32 8.48-.32c2.56 0 5.28 0 8.48.32c-.16-1.6-.16-3.04-.16-4.48c.16-2.08.32-4 .64-5.76c-3.36-.32-6.4-.48-8.96-.48"/>
           </svg>
         </span>
       </div>
       <div class="mt-8">
         <h3 class="text-lg font-medium">
-          <a href="mailto:ospo@avanade.com" class="focus:outline-none">
+          <a href="/other-requests/github-copilot" class="focus:outline-none">
             <!-- Extend touch target to entire panel -->
             <span class="absolute inset-0" aria-hidden="true"></span>
-            Request Avanade to join a new community
+            Request a GitHub Copilot License
           </a>
         </h3>
-        <p class="mt-2 text-sm text-gray-500"></p>
+        <p class="mt-2 text-sm text-gray-500">Create a request for a GitHub Copilot license.</p>
       </div>
       <span class="pointer-events-none absolute top-6 right-6 text-gray-300 group-hover:text-gray-400"
         aria-hidden="true">
@@ -197,11 +176,11 @@
       </span>
     </div>
 
-    <div
+    <!-- <div
       class="rounded-bl-lg rounded-br-lg sm:rounded-bl-none relative group bg-white p-6 focus-within:ring-2 focus-within:ring-inset focus-within:ring-cyan-500">
       <div>
         <span class="rounded-lg inline-flex p-3 bg-indigo-50 text-indigo-700 ring-4 ring-white">
-          <!-- Heroicon name: outline/academic-cap -->
+
           <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
             stroke="currentColor" aria-hidden="true">
             <path d="M12 14l9-5-9-5-9 5 9 5z" />
@@ -214,14 +193,46 @@
       </div>
       <div class="mt-8">
         <h3 class="text-lg font-medium">
-          <a href="/communities/list" class="focus:outline-none">
-            <!-- Extend touch target to entire panel -->
+          <a href="/communities" class="focus:outline-none">
+
             <span class="absolute inset-0" aria-hidden="true"></span>
             Your communities
           </a>
         </h3>
         <p class="mt-2 text-sm text-gray-500">View all communities.</p>
       </div>
+      
+      <span class="pointer-events-none absolute top-6 right-6 text-gray-300 group-hover:text-gray-400"
+        aria-hidden="true">
+        <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+          <path
+            d="M20 4h1a1 1 0 00-1-1v1zm-1 12a1 1 0 102 0h-2zM8 3a1 1 0 000 2V3zM3.293 19.293a1 1 0 101.414 1.414l-1.414-1.414zM19 4v12h2V4h-2zm1-1H8v2h12V3zm-.707.293l-16 16 1.414 1.414 16-16-1.414-1.414z" />
+        </svg>
+      </span>
+    </div> -->
+
+    <div
+      class="rounded-bl-lg rounded-br-lg sm:rounded-bl-none relative group bg-white p-6 focus-within:ring-2 focus-within:ring-inset focus-within:ring-cyan-500">
+      <div>
+        <span class="rounded-lg inline-flex p-3 bg-indigo-50 text-indigo-700 ring-4 ring-white">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75M6.75 21v-3.375c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21M3 3h12m-.75 4.5H21m-3.75 3.75h.008v.008h-.008v-.008Zm0 3h.008v.008h-.008v-.008Zm0 3h.008v.008h-.008v-.008Z" />
+          </svg>
+          
+        </span>
+      </div>
+      <div class="mt-8">
+        <h3 class="text-lg font-medium">
+          <a href="/other-requests/organization" class="focus:outline-none">
+            <!-- Extend touch target to entire panel -->
+            <span class="absolute inset-0" aria-hidden="true"></span>
+            Request GitHub Enterprise Organization
+          </a>
+        </h3>
+        <p class="mt-2 text-sm text-gray-500">Request for an organization within the GitHub Enterprise for a client.</p>
+      </div>
+      
       <span class="pointer-events-none absolute top-6 right-6 text-gray-300 group-hover:text-gray-400"
         aria-hidden="true">
         <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
@@ -246,10 +257,9 @@
       searchAllRepositories() {
         window.location.href = '/repositories?view=all&search=' + this.search
       },
-      searchACommunity() {
-        window.location.href = '/communities/list?view=all&search=' + this.searchCommunity
-      },
-
+      requestOrgAccess() {
+        window.location.href = '/other-requests/organization-access'
+      }
     }
   }
 </script>

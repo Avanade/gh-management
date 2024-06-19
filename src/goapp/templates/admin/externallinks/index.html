@@ -51,8 +51,8 @@
                         </a>
                     </td>
                     <td class="whitespace-nowrap px-3 py-3.5 text-sm">
-                        <span x-bind:class="results.Enabled === true ? 'text-[#FF5800]' : 'text-gray-500' "
-                            x-text="results.Enabled ? 'Enabled': 'Disabled'"> </span>
+                        <span x-bind:class="results.IsEnabled === true ? 'text-[#FF5800]' : 'text-gray-500' "
+                            x-text="results.IsEnabled ? 'Enabled': 'Disabled'"> </span>
                     </td>
                     <td class="whitespace-nowrap px-3 py-3.5 text-sm flex">
                         <span @Click="onClickAction(results.Id, 'view')"
@@ -111,7 +111,7 @@
             showSpinner: true,
             externalLinks: [],
             getAllExternalLinks() {
-                let uri = '/api/externallinks/'
+                let uri = '/api/external-links'
                 let encoded = encodeURI(uri);
                 fetch(encoded)
                     .then(r => {
@@ -138,7 +138,7 @@
                     case 'delete':
                         let f = () => {
                             Alpine.store('master').modal.show()
-                            Alpine.store('master').putData(`/api/externallinks/delete/` + id, "",
+                            Alpine.store('master').deleteData(`/api/external-links/${id}`, "",
                                 "External Link has been deleted.", "Go to list of external links",
                                 "/admin/externallinks")
                         }

@@ -4,7 +4,7 @@ func SelectAllSponsors() ([]map[string]interface{}, error) {
 	db := ConnectDb()
 	defer db.Close()
 
-	sponsors, err := db.ExecuteStoredProcedureWithResult("PR_OSSContributionSponsors_SelectAll", nil)
+	sponsors, err := db.ExecuteStoredProcedureWithResult("usp_OSSContributionSponsor_Select", nil)
 	if err != nil {
 		return nil, err
 	}
@@ -15,7 +15,7 @@ func SelectSponsorsByIsArchived(params map[string]interface{}) ([]map[string]int
 	db := ConnectDb()
 	defer db.Close()
 
-	sponsors, err := db.ExecuteStoredProcedureWithResult("PR_OSSContributionSponsors_SelectByIsArchived", params)
+	sponsors, err := db.ExecuteStoredProcedureWithResult("usp_OSSContributionSponsor_Select_ByIsArchived", params)
 	if err != nil {
 		return nil, err
 	}
@@ -26,7 +26,7 @@ func InsertSponsor(params map[string]interface{}) ([]map[string]interface{}, err
 	db := ConnectDb()
 	defer db.Close()
 
-	sponsors, err := db.ExecuteStoredProcedureWithResult("PR_OSSContributionSponsors_Insert", params)
+	sponsors, err := db.ExecuteStoredProcedureWithResult("usp_OSSContributionSponsor_Insert", params)
 	if err != nil {
 		return nil, err
 	}
@@ -38,18 +38,7 @@ func UpdateSponsor(params map[string]interface{}) ([]map[string]interface{}, err
 	db := ConnectDb()
 	defer db.Close()
 
-	sponsors, err := db.ExecuteStoredProcedureWithResult("PR_OSSContributionSponsors_Update", params)
-	if err != nil {
-		return nil, err
-	}
-	return sponsors, nil
-}
-
-func SelectSponsorByName(params map[string]interface{}) ([]map[string]interface{}, error) {
-	db := ConnectDb()
-	defer db.Close()
-
-	sponsors, err := db.ExecuteStoredProcedureWithResult("PR_OSSContributionSponsors_SelectByName", params)
+	sponsors, err := db.ExecuteStoredProcedureWithResult("usp_OSSContributionSponsor_Update", params)
 	if err != nil {
 		return nil, err
 	}
