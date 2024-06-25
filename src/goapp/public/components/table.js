@@ -130,6 +130,8 @@ const table = ({
         this.load()
       },
       onSearchSubmit(e){
+        this.filter = 10;
+        this.page = 0;
         this.search = e.target.value;
         this.load();
       },
