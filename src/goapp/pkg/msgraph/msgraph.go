@@ -39,10 +39,12 @@ type ListUsersResponse struct {
 }
 
 type User struct {
-	Name           string   `json:"displayName"`
-	Email          string   `json:"mail"`
-	OtherMails     []string `json:"otherMails"`
-	AccountEnabled bool     `json:"accountEnabled"`
+	UserPrincipalName string   `json:"userPrincipalName"`
+	Name              string   `json:"displayName"`
+	Email             string   `json:"mail"`
+	OtherMails        []string `json:"otherMails"`
+	UserType          string   `json:"userType"`
+	AccountEnabled    bool     `json:"accountEnabled"`
 }
 
 type ADGroupsResponse struct {
@@ -116,7 +118,7 @@ func SearchUsers(search string) ([]User, error) {
 		return nil, errURL
 	}
 	query := URL.Query()
-	query.Set("$select", "displayName,otherMails,mail")
+	query.Set("$select", "displayName,otherMails,mail,userPrincipalName,userType")
 	query.Set("$search", fmt.Sprintf(`"displayName:%s" OR "mail:%s" OR "otherMails:%s"`, search, search, search))
 	URL.RawQuery = query.Encode()
 
@@ -141,12 +143,16 @@ func SearchUsers(search string) ([]User, error) {
 	// Remove users without email address
 	var users []User
 	for _, user := range listUsersResponse.Value {
-		if user.Email != "" || len(user.OtherMails) > 0 {
-			if user.Email == "" && len(user.OtherMails) > 0 {
-				user.Email = user.OtherMails[0]
+		if user.UserType == "Member" {
+			user.Email = user.UserPrincipalName
+		} else {
+			if user.Email != "" || len(user.OtherMails) > 0 {
+				if user.Email == "" && len(user.OtherMails) > 0 {
+					user.Email = user.OtherMails[0]
+				}
 			}
-			users = append(users, user)
 		}
+		users = append(users, user)
 	}
 
 	return users, nil
