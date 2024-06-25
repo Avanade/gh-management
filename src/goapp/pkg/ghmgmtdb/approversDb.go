@@ -3,6 +3,7 @@ package ghmgmt
 type Approver struct {
 	ApprovalTypeId int
 	ApproverEmail  string
+	ApproverName   string
 }
 
 func InsertApprover(approver Approver) error {
@@ -55,6 +56,7 @@ func GetApproversByApprovalTypeId(approvalTypeId int) ([]Approver, error) {
 		approver := Approver{
 			ApprovalTypeId: int(v["RepositoryApprovalTypeId"].(int64)),
 			ApproverEmail:  v["ApproverUserPrincipalName"].(string),
+			ApproverName:   v["ApproverName"].(string),
 		}
 
 		approvers = append(approvers, approver)
