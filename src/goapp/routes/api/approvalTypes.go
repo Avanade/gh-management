@@ -25,6 +25,7 @@ type ApprovalTypeDto struct {
 type ApproverDto struct {
 	ApprovalTypeId int    `json:"approvalTypeId"`
 	ApproverEmail  string `json:"approverEmail"`
+	ApproverName   string `json:"approverName"`
 }
 
 func GetApprovalTypes(w http.ResponseWriter, r *http.Request) {
@@ -154,6 +155,13 @@ func CreateApprovalType(w http.ResponseWriter, r *http.Request) {
 	}
 
 	for _, v := range approvalTypeDto.Approvers {
+		err = db.InsertUser(v.ApproverEmail, v.ApproverName, "", "", "")
+		if err != nil {
+			logger.LogException(err)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
 		err := db.InsertApprover(db.Approver{
 			ApprovalTypeId: id,
 			ApproverEmail:  v.ApproverEmail,
@@ -210,6 +218,13 @@ func EditApprovalTypeById(w http.ResponseWriter, r *http.Request) {
 	}
 
 	for _, v := range approvalTypeDto.Approvers {
+		err = db.InsertUser(v.ApproverEmail, v.ApproverName, "", "", "")
+		if err != nil {
+			logger.LogException(err)
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+
 		err := db.InsertApprover(db.Approver{
 			ApprovalTypeId: id,
 			ApproverEmail:  v.ApproverEmail,
@@ -284,6 +299,7 @@ func getApproversByApprovalTypeId(approvalTypeId int) (*[]ApproverDto, error) {
 		approverDto := ApproverDto{
 			ApprovalTypeId: v.ApprovalTypeId,
 			ApproverEmail:  v.ApproverEmail,
+			ApproverName:   v.ApproverName,
 		}
 
 		approversDto = append(approversDto, approverDto)

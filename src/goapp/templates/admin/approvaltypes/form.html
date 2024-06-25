@@ -26,7 +26,7 @@
                             searchTag: 'Start typing to query list of users',
                             searchPlaceholder: 'Input name or email',
                             id : 'mail',
-                            text : 'mail',
+                            text : 'displayName',
                             isMultiple : true,
                             isDisplayItem : true
 
@@ -125,7 +125,7 @@
                 this.form.approver = data.approvers.map((v) => {
                     return {
                         'id': v.approverEmail,
-                        'text': v.approverEmail    
+                        'text': v.approverName    
                     }
                 })
 
@@ -157,7 +157,8 @@
                     approverUserPrincipalName: this.form.approver[0].id,
                     approvers: this.form.approver.map(v => {
                         return {
-                            approverEmail: v.id
+                            approverEmail: v.id,
+                            approverName: v.text
                         }
                     }),
                     isActive: this.form.status == 'true'
