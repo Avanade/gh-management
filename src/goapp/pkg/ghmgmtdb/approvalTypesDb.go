@@ -133,11 +133,10 @@ func UpdateApprovalType(approvalType ApprovalType) (int, error) {
 	defer db.Close()
 
 	param := map[string]interface{}{
-		"Id":                        approvalType.Id,
-		"Name":                      approvalType.Name,
-		"ApproverUserPrincipalName": approvalType.ApproverUserPrincipalName,
-		"IsActive":                  approvalType.IsActive,
-		"ModifiedBy":                approvalType.CreatedBy,
+		"Id":         approvalType.Id,
+		"Name":       approvalType.Name,
+		"IsActive":   approvalType.IsActive,
+		"ModifiedBy": approvalType.CreatedBy,
 	}
 
 	result, err := db.ExecuteStoredProcedureWithResult("usp_RepositoryApprovalType_Update", param)
