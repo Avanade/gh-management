@@ -7,15 +7,14 @@ import (
 )
 
 type ApprovalType struct {
-	Id                        int
-	Name                      string
-	ApproverUserPrincipalName string
-	IsActive                  bool
-	IsArchived                bool
-	Created                   time.Time
-	CreatedBy                 string
-	Modified                  time.Time
-	ModifiedBy                string
+	Id         int
+	Name       string
+	IsActive   bool
+	IsArchived bool
+	Created    time.Time
+	CreatedBy  string
+	Modified   time.Time
+	ModifiedBy string
 }
 
 func GetAllActiveApprovers() interface{} {
@@ -87,11 +86,10 @@ func SelectApprovalTypeById(id int) (*ApprovalType, error) {
 	}
 
 	approvalType := ApprovalType{
-		Id:                        int(result[0]["Id"].(int64)),
-		Name:                      result[0]["Name"].(string),
-		ApproverUserPrincipalName: result[0]["ApproverUserPrincipalName"].(string),
-		IsActive:                  result[0]["IsActive"].(bool),
-		IsArchived:                result[0]["IsArchived"].(bool),
+		Id:         int(result[0]["Id"].(int64)),
+		Name:       result[0]["Name"].(string),
+		IsActive:   result[0]["IsActive"].(bool),
+		IsArchived: result[0]["IsArchived"].(bool),
 	}
 
 	if result[0]["Created"] != nil {
@@ -118,10 +116,9 @@ func InsertApprovalType(approvalType ApprovalType) (int, error) {
 	defer db.Close()
 
 	param := map[string]interface{}{
-		"Name":                      approvalType.Name,
-		"ApproverUserPrincipalName": approvalType.ApproverUserPrincipalName,
-		"IsActive":                  approvalType.IsActive,
-		"CreatedBy":                 approvalType.CreatedBy,
+		"Name":      approvalType.Name,
+		"IsActive":  approvalType.IsActive,
+		"CreatedBy": approvalType.CreatedBy,
 	}
 
 	result, err := db.ExecuteStoredProcedureWithResult("usp_RepositoryApprovalType_Insert", param)
@@ -155,11 +152,10 @@ func SetIsArchiveApprovalTypeById(approvalType ApprovalType) (int, bool, error) 
 	defer db.Close()
 
 	param := map[string]interface{}{
-		"Id":                        approvalType.Id,
-		"Name":                      approvalType.Name,
-		"ApproverUserPrincipalName": approvalType.ApproverUserPrincipalName,
-		"IsArchived":                approvalType.IsArchived,
-		"ModifiedBy":                approvalType.ModifiedBy,
+		"Id":         approvalType.Id,
+		"Name":       approvalType.Name,
+		"IsArchived": approvalType.IsArchived,
+		"ModifiedBy": approvalType.ModifiedBy,
 	}
 
 	result, err := db.ExecuteStoredProcedureWithResult("usp_RepositoryApprovalType_Update_IsArchived", param)

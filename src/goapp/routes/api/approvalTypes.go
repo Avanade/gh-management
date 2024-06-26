@@ -14,12 +14,11 @@ import (
 )
 
 type ApprovalTypeDto struct {
-	Id                        int           `json:"id"`
-	Name                      string        `json:"name"`
-	ApproverUserPrincipalName string        `json:"approverUserPrincipalName"`
-	Approvers                 []ApproverDto `json:"approvers"`
-	IsActive                  bool          `json:"isActive"`
-	IsArchived                bool          `json:"isArchived"`
+	Id         int           `json:"id"`
+	Name       string        `json:"name"`
+	Approvers  []ApproverDto `json:"approvers"`
+	IsActive   bool          `json:"isActive"`
+	IsArchived bool          `json:"isArchived"`
 }
 
 type ApproverDto struct {
@@ -64,11 +63,10 @@ func GetApprovalTypes(w http.ResponseWriter, r *http.Request) {
 	var approvalTypesDto []ApprovalTypeDto
 	for _, v := range data {
 		approvalTypeDto := ApprovalTypeDto{
-			Id:                        int(v["Id"].(int64)),
-			Name:                      v["Name"].(string),
-			ApproverUserPrincipalName: v["ApproverUserPrincipalName"].(string),
-			IsActive:                  v["IsActive"].(bool),
-			IsArchived:                v["IsArchived"].(bool),
+			Id:         int(v["Id"].(int64)),
+			Name:       v["Name"].(string),
+			IsActive:   v["IsActive"].(bool),
+			IsArchived: v["IsArchived"].(bool),
 		}
 
 		approversResult, err := getApproversByApprovalTypeId(approvalTypeDto.Id)
@@ -118,12 +116,11 @@ func GetApprovalTypeById(w http.ResponseWriter, r *http.Request) {
 	}
 
 	approvalTypeDto := ApprovalTypeDto{
-		Id:                        result.Id,
-		Name:                      result.Name,
-		ApproverUserPrincipalName: result.ApproverUserPrincipalName,
-		Approvers:                 *approversDto,
-		IsActive:                  result.IsActive,
-		IsArchived:                result.IsArchived,
+		Id:         result.Id,
+		Name:       result.Name,
+		Approvers:  *approversDto,
+		IsActive:   result.IsActive,
+		IsArchived: result.IsArchived,
 	}
 
 	w.Header().Set("Content-Type", "application/json")
@@ -143,10 +140,9 @@ func CreateApprovalType(w http.ResponseWriter, r *http.Request) {
 	var approvalTypeDto ApprovalTypeDto
 	json.NewDecoder(r.Body).Decode(&approvalTypeDto)
 	id, err := db.InsertApprovalType(db.ApprovalType{
-		Name:                      approvalTypeDto.Name,
-		ApproverUserPrincipalName: approvalTypeDto.ApproverUserPrincipalName,
-		IsActive:                  approvalTypeDto.IsActive,
-		CreatedBy:                 username,
+		Name:      approvalTypeDto.Name,
+		IsActive:  approvalTypeDto.IsActive,
+		CreatedBy: username,
 	})
 	if err != nil {
 		logger.LogException(err)
@@ -198,11 +194,10 @@ func EditApprovalTypeById(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	approvalTypeId, err := db.UpdateApprovalType(db.ApprovalType{
-		Id:                        id,
-		Name:                      approvalTypeDto.Name,
-		ApproverUserPrincipalName: approvalTypeDto.ApproverUserPrincipalName,
-		IsActive:                  approvalTypeDto.IsActive,
-		CreatedBy:                 username,
+		Id:        id,
+		Name:      approvalTypeDto.Name,
+		IsActive:  approvalTypeDto.IsActive,
+		CreatedBy: username,
 	})
 	if err != nil {
 		logger.LogException(err)
@@ -262,11 +257,10 @@ func SetIsArchivedApprovalTypeById(w http.ResponseWriter, r *http.Request) {
 	}
 
 	approvalTypeId, _, err := db.SetIsArchiveApprovalTypeById(db.ApprovalType{
-		Id:                        id,
-		Name:                      approvalTypeDto.Name,
-		ApproverUserPrincipalName: approvalTypeDto.ApproverUserPrincipalName,
-		IsArchived:                approvalTypeDto.IsArchived,
-		ModifiedBy:                username,
+		Id:         id,
+		Name:       approvalTypeDto.Name,
+		IsArchived: approvalTypeDto.IsArchived,
+		ModifiedBy: username,
 	})
 
 	if err != nil {

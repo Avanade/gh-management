@@ -4,7 +4,6 @@ BEGIN
 	SELECT
     [Id],
     [Name],
-    [ApproverUserPrincipalName],
     [IsArchived],
     [IsActive],
     [Created],
