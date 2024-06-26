@@ -33,15 +33,6 @@ on:
         description: Run deployment of AppServicePlan and AppService
         required: true
         default: true
-      frontdoor:
-        type: boolean
-        description: Run deployment of frontdoor
-        required: true
-        default: false
-      frontdoor_customdomain:
-        type: string
-        description: Add custom domain in frontdoor frontend endpoint
-        default: ''
 
 env:
   PROJECT_NAME: ava-gh-mgmt
@@ -261,6 +252,6 @@ jobs:
         subscriptionId: ${{ fromJSON(secrets.AZURE_CREDENTIALS)['subscriptionId'] }}
         resourceGroupName: ${{ secrets.AZURE_RG }}
         template: ./.bicep/webapp/deployGhMgmtAppService.bicep
-        parameters: ./.bicep/webapp/${{ github.event.inputs.selected_environment }}-parameters.json runDeployFrontDoor=${{github.event.inputs.frontdoor}} frontDoorCustomDomain=${{github.event.inputs.frontdoor_customdomain}}
+        parameters: ./.bicep/webapp/${{ github.event.inputs.selected_environment }}-parameters.json
         failOnStdErr: false
         scope: resourcegroup

@@ -6,9 +6,6 @@ param projectName string
 
 param imageName string
 
-param runDeployFrontDoor bool
-param frontDoorCustomDomain string
-
 param appinsightsRetentionDays int
 
 @allowed([
@@ -81,22 +78,6 @@ module sqlServerFirewalls '../sql/sqlServerFirewallRules.bicep' = {
     outboundIpAddresses: possibleOutboundIpAddressesList
     projectName: appServiceName
     sqlServerName: sqlServerName
-  }
-}
-
-var hostNameSslStates = filter(
-  ghmgmtAppService.properties.hostNameSslStates, e => e.sslState == 'SniEnabled'
-)
-
-var backendAddress = length(hostNameSslStates) > 0 ? first (hostNameSslStates)!.name : ghmgmtAppService.properties.defaultHostName
-
-module ghmgmtFrontDoor 'deployFrontDoor.bicep' = if(runDeployFrontDoor) {
-  name: 'frontdoor'
-  params: {
-    backendAddress: backendAddress
-    frontDoorName: '${projectName}fd-${activeEnv}'
-    customDomain: frontDoorCustomDomain
-    activeEnv: activeEnv
   }
 }
 
