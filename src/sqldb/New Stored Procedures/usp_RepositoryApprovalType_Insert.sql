@@ -1,6 +1,5 @@
 CREATE PROCEDURE [dbo].[usp_RepositoryApprovalType_Insert]
 	@Name [VARCHAR](50),
-	@ApproverUserPrincipalName [VARCHAR](100),
 	@IsActive [BIT],
 	@CreatedBy [VARCHAR](100)
 AS
@@ -13,13 +12,12 @@ BEGIN
 	IF NOT EXISTS (
 		SELECT [Id]
 		FROM [dbo].[RepositoryApprovalType]
-		WHERE [Name] = @Name AND [ApproverUserPrincipalName] = @ApproverUserPrincipalName AND [IsArchived] = 0
+		WHERE [Name] = @Name AND [IsArchived] = 0
 	)
 	BEGIN
 		INSERT INTO [dbo].[RepositoryApprovalType]
 		(
 			[Name],
-			[ApproverUserPrincipalName],
 			[IsActive],
 			[IsArchived],
 			[Created],
@@ -30,7 +28,6 @@ BEGIN
 		VALUES
 		(
 			@Name,
-			@ApproverUserPrincipalName,
 			@IsActive,
 			0,
 			GETDATE(),

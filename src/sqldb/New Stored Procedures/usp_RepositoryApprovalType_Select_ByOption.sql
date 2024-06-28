@@ -10,7 +10,6 @@ BEGIN
 	SELECT
 		[Id],
 		[Name],
-		[ApproverUserPrincipalName],
 		[IsArchived],
 		[IsActive],
 		[Created],
@@ -19,19 +18,16 @@ BEGIN
 		[ModifiedBy]
   	FROM [dbo].[RepositoryApprovalType]
 	WHERE
-		([Name] LIKE '%' + @Search + '%' OR
-		[ApproverUserPrincipalName] LIKE '%' + @Search + '%') AND [IsArchived] = @IsArchived
+		[Name] LIKE '%' + @Search + '%' AND [IsArchived] = @IsArchived
 	ORDER BY
 		CASE WHEN @OrderType = 'ASC' THEN
 			CASE @OrderBy
 				WHEN 'Name' THEN [Name]
-				WHEN 'ApproverUserPrincipalName' THEN [ApproverUserPrincipalName]
 			END
-		END,
+		END ASC,
 		CASE WHEN @OrderType = 'DESC' THEN
 			CASE @OrderBy
 				WHEN 'Name' THEN [Name]
-				WHEN 'ApproverUserPrincipalName' THEN [ApproverUserPrincipalName]
 			END
 		END DESC
 	OFFSET @Offset ROWS 

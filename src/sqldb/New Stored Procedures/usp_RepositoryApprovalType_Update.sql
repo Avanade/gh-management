@@ -1,7 +1,6 @@
 CREATE PROCEDURE [dbo].[usp_RepositoryApprovalType_Update]
 	@Id [INT],
 	@Name [VARCHAR](50),
-	@ApproverUserPrincipalName [VARCHAR](50),
 	@IsActive [BIT],
 	@ModifiedBy [VARCHAR](50)
 AS
@@ -14,8 +13,7 @@ BEGIN
 		FROM [dbo].[RepositoryApprovalType] 
 		WHERE 
 			[Id] != @Id AND
-			[Name] = @Name AND
-			[ApproverUserPrincipalName] = @ApproverUserPrincipalName AND 
+			[Name] = @Name AND 
 			[IsArchived] = 0
 	)
 	BEGIN
@@ -23,7 +21,6 @@ BEGIN
       		[dbo].[RepositoryApprovalType]
 		SET 
 			[Name] = @Name,
-			[ApproverUserPrincipalName] = @ApproverUserPrincipalName,
 			[IsActive] = @IsActive,
 			[Modified] = GETDATE(),
 			[ModifiedBy] = @ModifiedBy
