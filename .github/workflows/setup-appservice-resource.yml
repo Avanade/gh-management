@@ -96,6 +96,6 @@ jobs:
           subscriptionId: ${{ fromJSON(secrets.AZURE_CREDENTIALS)['subscriptionId'] }}
           resourceGroupName: ${{ secrets.AZURE_RG }}
           template: ./.bicep/webapp/deployGhMgmtAppService.bicep
-          parameters: ./.bicep/webapp/${{ github.event.inputs.selected_environment }}-parameters.json
+          parameters: ./.bicep/webapp/parameters.json
           failOnStdErr: false
           scope: resourcegroup
