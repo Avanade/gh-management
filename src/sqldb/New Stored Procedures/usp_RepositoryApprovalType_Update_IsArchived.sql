@@ -1,7 +1,6 @@
 CREATE PROCEDURE [dbo].[usp_RepositoryApprovalType_Update_IsArchived]
 	@Id [INT],
 	@Name [VARCHAR](50),
-	@ApproverUserPrincipalName [VARCHAR](50),
 	@IsArchived [BIT],
 	@ModifiedBy [VARCHAR](50)
 AS
@@ -16,7 +15,6 @@ BEGIN
 		WHERE
 			[Id] != @Id AND
 			[Name] = @Name AND
-			[ApproverUserPrincipalName] = @ApproverUserPrincipalName AND 
 			[IsArchived] = 0
   	)
 	BEGIN
