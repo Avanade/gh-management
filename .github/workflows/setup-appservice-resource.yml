@@ -79,6 +79,7 @@ jobs:
           parameters.appServiceSettings.value.EXEMPTION : ${{ vars.EXEMPTION }}
           parameters.appServiceSettings.value.ENABLED_REMOVE_COLLABORATORS : ${{ vars.ENABLED_REMOVE_COLLABORATORS }}
           parameters.appServiceSettings.value.ORGANIZATION_NAME : ${{ vars.ORGANIZATION_NAME }}
+          parameters.appServiceSettings.value.REGIONAL_ORG_PREFIX: ${{ vars.REGIONAL_ORG_PREFIX }}
           parameters.appServiceSettings.value.LINK_INNERSOURCE_GENERAL_LEGAL_GUIDELINES : ${{ vars.LINK_INNERSOURCE_GENERAL_LEGAL_GUIDELINES }}
           parameters.appServiceSettings.value.LINK_INNERSOURCE_GENERAL_GUIDELINES : ${{ vars.LINK_INNERSOURCE_GENERAL_GUIDELINES }}
           parameters.appServiceSettings.value.LINK_TOOL_APPROVAL_PROCESS : ${{ vars.LINK_TOOL_APPROVAL_PROCESS }}
