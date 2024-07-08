@@ -5,14 +5,8 @@ on:
   workflow_dispatch:
     inputs:
       selected_environment:
-        type: choice
+        type: environment
         description: SELECT ENVIRONMENT
-        required: true
-        default: test
-        options: 
-        - prod
-        - uat
-        - test
 
 jobs:
   build-and-push-image:
