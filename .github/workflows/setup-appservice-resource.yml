@@ -30,7 +30,7 @@ jobs:
           parameters.projectName.value : ${{ vars.PROJECT_NAME }}
           parameters.activeEnv.value : ${{ github.event.inputs.selected_environment }}
           parameters.sqlServerName.value : ${{ secrets.SERVER_NAME }}
-          parameters.containerServer.value : ${{ secrets.DOCKER_REGISTRY_SERVER_URL }}
+          parameters.containerServer.value : ${{ secrets.DOCKER_REGISTRY_SERVER }}
           parameters.appServiceSettings.value.APP_TITLE : ${{ vars.APP_TITLE }}
           parameters.appServiceSettings.value.APP_LOGO_PATH : ${{ vars.APP_LOGO_PATH }}
           parameters.appServiceSettings.value.WEBSITES_ENABLE_APP_SERVICE_STORAGE : ${{ vars.WEBSITES_ENABLE_APP_SERVICE_STORAGE }}
