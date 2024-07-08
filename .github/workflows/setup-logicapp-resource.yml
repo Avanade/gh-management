@@ -1,0 +1,101 @@
+name: Setup Logic App
+run-name: Setup Logic App [${{inputs.selected_environment}}]
+
+on:
+  workflow_dispatch:
+    inputs:
+      selected_environment:
+        type: environment
+        required: true
+
+jobs:
+  setup-logic-app-resource:
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.selected_environment }}
+    steps:
+      - uses: actions/checkout@v2
+        
+      - name: Login Azure
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+          enable-AzPSSession: true
+
+      - name: Setup Workflow Parameters
+        uses: microsoft/variable-substitution@v1 
+        with:
+          files: ./.bicep/logicapps/parameters.json
+        env:
+          parameters.env.value: ${{ vars.HOME_URL }}
+          parameters.appSettings.value.Workflows.CleanupOrganization.FlowState: ${{ vars.WORKFLOWS_CLEANUP_ORGANIZATION_FLOWSTATE }}
+          parameters.appSettings.value.Workflows.ExpiringInvitation.FlowState: ${{ vars.WORKFLOWS_EXPIRING_INVITATION_FLOWSTATE }}
+          parameters.appSettings.value.Workflows.IndexOrgRepos.FlowState: ${{ vars.WORKFLOWS_INDEX_ORG_REPOS_FLOWSTATE }}
+          parameters.appSettings.value.Workflows.InnersourceCheckOutsideCollaborators.FlowState: ${{ vars.WORKFLOWS_INNERSOURCE_CHECK_OUTSIDE_COLLABORATORS_FLOWSTATE }}
+          parameters.appSettings.value.Workflows.OpensourceCheckOutsideCollaborators.FlowState: ${{ vars.WORKFLOWS_OPENSOURCE_CHECK_OUTSIDE_COLLABORATORS_FLOWSTATE }}
+          parameters.appSettings.value.Workflows.RecurringApproval.FlowState: ${{ vars.WORKFLOWS_RECURRING_APPROVAL_FLOWSTATE }}
+          parameters.appSettings.value.Workflows.RepoOwnerScan.FlowState: ${{ vars.WORKFLOWS_REPO_OWNER_SCAN_FLOWSTATE }}
+
+      - name: Deploy Bicep File
+        uses: azure/arm-deploy@v1
+        id: deploy_main_bicep
+        with:
+          subscriptionId: ${{ fromJSON(secrets.AZURE_CREDENTIALS)['subscriptionId'] }}
+          resourceGroupName: ${{ secrets.AZURE_RESOURCE_GROUP }}
+          template: ./.bicep/logicapps/deployGhMgmtLogicApp.bicep
+          parameters: ./.bicep/logicapps/parameters.json env=${{ github.event.inputs.selected_environment }} laManageIdentityName=${{ secrets.LOGIC_APP_MANAGE_IDENTITY }}
+          failOnStdErr: false
+          scope: resourcegroup
+
+  deploy-logic-app-workflows:
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.selected_environment }}
+    steps:
+      - uses: actions/checkout@v2
+        
+      - name: Login Azure
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+          enable-AzPSSession: true
+
+      - name: Setup Workflow Parameters
+        uses: microsoft/variable-substitution@v1 
+        with:
+          files: ./.bicep/logicapps/workflows/parameters.json
+        env:
+          GHMgmDomain.value: ${{ vars.HOME_URL }}
+          ManagedIdentityName.value: ${{ secrets.LOGIC_APP_MANAGE_IDENTITY }}
+          ApprovalSystemDomain.value: ${{ vars.APPROVAL_SYSTEM_APP_URL }}
+            
+      - name: Upload Logic App Workflows
+        uses: azure/CLI@v1
+        with:
+          azcliversion: 2.44.1
+          inlineScript: |
+            chmod +x ./.bicep/logicapps/upload_workflows.sh
+            ./.bicep/logicapps/upload_workflows.sh ${{steps.deploy_main_bicep.outputs.accountName}} ${{steps.deploy_main_bicep.outputs.destination}} ./.bicep/logicapps/workflows
+        
+      - name: Deploy Connection Bicep File
+        uses: azure/arm-deploy@v1
+        id: deploy_connection_bicep
+        with:
+          subscriptionId: ${{ fromJSON(secrets.AZURE_CREDENTIALS)['subscriptionId'] }}
+          resourceGroupName: ${{ secrets.AZURE_RESOURCE_GROUP }}
+          template: ./.bicep/logicapps/connection.bicep
+          parameters: env=${{ github.event.inputs.selected_environment }} storageAccountName=${{steps.deploy_main_bicep.outputs.accountName}} logicAppName=${{steps.deploy_main_bicep.outputs.logicAppName}} laManageIdentityName=${{ secrets.LOGIC_APP_MANAGE_IDENTITY }}
+          failOnStdErr: false
+          scope: resourcegroup
+
+      - name: Deploy connection to storage file system
+        uses: azure/powershell@v1
+        with:
+          inlineScript: |
+            . ./.bicep/logicapps/deploy_connection.ps1
+            New-WorkflowConnection `
+              -ResourceGroup ${{secrets.AZURE_RESOURCE_GROUP}} `
+              -StorageAccount ${{steps.deploy_main_bicep.outputs.accountName}} `
+              -Api ${{steps.deploy_connection_bicep.outputs.api}} `
+              -Id ${{steps.deploy_connection_bicep.outputs.id}} `
+              -RuntimeUrl ${{steps.deploy_connection_bicep.outputs.connectionRuntimeUrl}} `
+              -FileShareName ${{steps.deploy_main_bicep.outputs.fileShare}}
+          azPSVersion: "latest"
