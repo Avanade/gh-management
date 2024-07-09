@@ -6,7 +6,7 @@ on:
     inputs:
       selected_environment:
         type: environment
-        required: true
+        description: Select environment
 
 jobs:
   setup-logic-app-resource:
@@ -19,7 +19,6 @@ jobs:
         uses: azure/login@v1
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
-          enable-AzPSSession: true
 
       - name: Setup Workflow Parameters
         uses: microsoft/variable-substitution@v1 
@@ -48,6 +47,7 @@ jobs:
 
   deploy-logic-app-workflows:
     runs-on: ubuntu-latest
+    needs: [setup-logic-app-resource]
     environment: ${{ github.event.inputs.selected_environment }}
     steps:
       - uses: actions/checkout@v2
@@ -56,7 +56,6 @@ jobs:
         uses: azure/login@v1
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
-          enable-AzPSSession: true
 
       - name: Setup Workflow Parameters
         uses: microsoft/variable-substitution@v1 
