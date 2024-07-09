@@ -46,7 +46,6 @@ jobs:
         uses: azure/login@v1
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
-          enable-AzPSSession: true
 
       - name: Deploy Bicep File
         uses: azure/arm-deploy@v1
