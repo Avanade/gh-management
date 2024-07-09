@@ -12,10 +12,10 @@ jobs:
   setup-logic-app-resource:
     runs-on: ubuntu-latest
     outputs:
-      accountName: ${{needs.setup-logic-app-resource.outputs.accountName}}
-      destination: ${{needs.setup-logic-app-resource.outputs.destination}}
-      logicAppName: ${{needs.setup-logic-app-resource.outputs.logicAppName}}
-      fileShare: ${{needs.setup-logic-app-resource.outputs.fileShare}}
+      accountName: ${{steps.deploy_main_bicep.outputs.accountName}}
+      destination: ${{steps.deploy_main_bicep.outputs.destination}}
+      logicAppName: ${{steps.deploy_main_bicep.outputs.logicAppName}}
+      fileShare: ${{steps.deploy_main_bicep.outputs.fileShare}}
     environment: ${{ github.event.inputs.selected_environment }}
     steps:
       - uses: actions/checkout@v2
