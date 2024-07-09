@@ -11,6 +11,11 @@ on:
 jobs:
   setup-logic-app-resource:
     runs-on: ubuntu-latest
+    outputs:
+      accountName: ${{needs.setup-logic-app-resource.outputs.accountName}}
+      destination: ${{needs.setup-logic-app-resource.outputs.destination}}
+      logicAppName: ${{needs.setup-logic-app-resource.outputs.logicAppName}}
+      fileShare: ${{needs.setup-logic-app-resource.outputs.fileShare}}
     environment: ${{ github.event.inputs.selected_environment }}
     steps:
       - uses: actions/checkout@v2
@@ -72,7 +77,7 @@ jobs:
           azcliversion: 2.44.1
           inlineScript: |
             chmod +x ./.bicep/logicapps/upload_workflows.sh
-            ./.bicep/logicapps/upload_workflows.sh ${{steps.deploy_main_bicep.outputs.accountName}} ${{steps.deploy_main_bicep.outputs.destination}} ./.bicep/logicapps/workflows
+            ./.bicep/logicapps/upload_workflows.sh ${{needs.setup-logic-app-resource.outputs.accountName}} ${{needs.setup-logic-app-resource.outputs.destination}} ./.bicep/logicapps/workflows
         
       - name: Deploy Connection Bicep File
         uses: azure/arm-deploy@v1
@@ -81,7 +86,7 @@ jobs:
           subscriptionId: ${{ fromJSON(secrets.AZURE_CREDENTIALS)['subscriptionId'] }}
           resourceGroupName: ${{ secrets.AZURE_RESOURCE_GROUP }}
           template: ./.bicep/logicapps/connection.bicep
-          parameters: env=${{ github.event.inputs.selected_environment }} storageAccountName=${{steps.deploy_main_bicep.outputs.accountName}} logicAppName=${{steps.deploy_main_bicep.outputs.logicAppName}} laManageIdentityName=${{ secrets.LOGIC_APP_MANAGE_IDENTITY }}
+          parameters: env=${{ github.event.inputs.selected_environment }} storageAccountName=${{needs.setup-logic-app-resource.outputs.accountName}} logicAppName=${{needs.setup-logic-app-resource.outputs.logicAppName}} laManageIdentityName=${{ secrets.LOGIC_APP_MANAGE_IDENTITY }}
           failOnStdErr: false
           scope: resourcegroup
 
@@ -92,9 +97,9 @@ jobs:
             . ./.bicep/logicapps/deploy_connection.ps1
             New-WorkflowConnection `
               -ResourceGroup ${{secrets.AZURE_RESOURCE_GROUP}} `
-              -StorageAccount ${{steps.deploy_main_bicep.outputs.accountName}} `
+              -StorageAccount ${{needs.setup-logic-app-resource.outputs.accountName}} `
               -Api ${{steps.deploy_connection_bicep.outputs.api}} `
               -Id ${{steps.deploy_connection_bicep.outputs.id}} `
               -RuntimeUrl ${{steps.deploy_connection_bicep.outputs.connectionRuntimeUrl}} `
-              -FileShareName ${{steps.deploy_main_bicep.outputs.fileShare}}
+              -FileShareName ${{needs.setup-logic-app-resource.outputs.fileShare}}
           azPSVersion: "latest"
