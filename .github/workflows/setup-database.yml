@@ -6,7 +6,7 @@ on:
     inputs:
       selected_environment:
         type: environment
-        required: true
+        description: Select environment
       block_data_loss:
         type: boolean
         description: Block on possible data loss

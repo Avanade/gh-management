@@ -6,7 +6,7 @@ on:
     inputs:
       selected_environment:
         type: environment
-        required: true
+        description: Select environment
 
 jobs:
   setup-appservice-resource:

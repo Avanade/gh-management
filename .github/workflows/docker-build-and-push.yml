@@ -6,7 +6,7 @@ on:
     inputs:
       selected_environment:
         type: environment
-        description: SELECT ENVIRONMENT
+        description: Select environment
 
 jobs:
   build-and-push-image:
