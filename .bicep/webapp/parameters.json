@@ -70,6 +70,7 @@
                 "ENABLED_REMOVE_COLLABORATORS": "",
 
                 "ORGANIZATION_NAME":"",
+                "REGIONAL_ORG_PREFIX": "",
                 
                 "LINK_INNERSOURCE_GENERAL_LEGAL_GUIDELINES":"",
                 "LINK_INNERSOURCE_GENERAL_GUIDELINES":"",
