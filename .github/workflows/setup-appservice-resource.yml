@@ -29,14 +29,14 @@ jobs:
           parameters.appServicePlanName.value : ${{ vars.APPSERVICE_PLAN_NAME }}
           parameters.projectName.value : ${{ vars.PROJECT_NAME }}
           parameters.activeEnv.value : ${{ github.event.inputs.selected_environment }}
-          parameters.sqlServerName.value : ${{ secrets.SERVER_NAME }}
-          parameters.containerServer.value : ${{ secrets.DOCKER_REGISTRY_SERVER }}
+          parameters.sqlServerName.value : ${{ secrets.DATABASE_SERVER_NAME }}
+          parameters.containerServer.value : ${{ secrets.CONTAINER_REGISTRY_SERVER }}
           parameters.appServiceSettings.value.APP_TITLE : ${{ vars.APP_TITLE }}
           parameters.appServiceSettings.value.APP_LOGO_PATH : ${{ vars.APP_LOGO_PATH }}
           parameters.appServiceSettings.value.WEBSITES_ENABLE_APP_SERVICE_STORAGE : ${{ vars.WEBSITES_ENABLE_APP_SERVICE_STORAGE }}
-          parameters.appServiceSettings.value.DOCKER_REGISTRY_SERVER_URL : ${{ secrets.DOCKER_REGISTRY_SERVER_URL }}
-          parameters.appServiceSettings.value.DOCKER_REGISTRY_SERVER_USERNAME : ${{ secrets.DOCKER_REGISTRY_SERVER_USERNAME }}
-          parameters.appServiceSettings.value.DOCKER_REGISTRY_SERVER_PASSWORD : ${{ secrets.DOCKER_REGISTRY_SERVER_PASSWORD }}
+          parameters.appServiceSettings.value.DOCKER_REGISTRY_SERVER_URL : ${{ secrets.CONTAINER_REGISTRY_SERVER_URL }}
+          parameters.appServiceSettings.value.DOCKER_REGISTRY_SERVER_USERNAME : ${{ secrets.CONTAINER_REGISTRY_SERVER_USERNAME }}
+          parameters.appServiceSettings.value.DOCKER_REGISTRY_SERVER_PASSWORD : ${{ secrets.CONTAINER_REGISTRY_SERVER_PASSWORD }}
           parameters.appServiceSettings.value.TENANT_ID : ${{ secrets.TENANT_ID }}
           parameters.appServiceSettings.value.CLIENT_ID : ${{ secrets.CLIENT_ID }}
           parameters.appServiceSettings.value.CLIENT_SECRET : ${{ secrets.CLIENT_SECRET }}
