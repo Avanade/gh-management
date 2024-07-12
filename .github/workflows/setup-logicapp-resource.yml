@@ -10,7 +10,7 @@ on:
 
 jobs:
   setup-logic-app-resource:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-18.04
     outputs:
       accountName: ${{steps.deploy_main_bicep.outputs.accountName}}
       destination: ${{steps.deploy_main_bicep.outputs.destination}}
