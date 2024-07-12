@@ -6,7 +6,7 @@ on:
     inputs:
       selected_environment:
         type: environment
-        required: true
+        description: Select environment
       block_data_loss:
         type: boolean
         description: Block on possible data loss
@@ -22,9 +22,9 @@ on:
 
 jobs:
   setup-server-and-database-resource:
+    if: ${{ github.event.inputs.deploy_database_resource == 'true' }}
     runs-on: ubuntu-latest
-    environment: ${{ github.event.inputs.deploy_database_resource }}
-    if: ${{ github.event.inputs.deploy_database_resource }}
+    environment: ${{ github.event.inputs.selected_environment }}
 
     steps:
 
@@ -39,16 +39,16 @@ jobs:
       uses: azure/arm-deploy@v1
       with:
         subscriptionId: ${{ fromJSON(secrets.AZURE_CREDENTIALS)['subscriptionId'] }}
-        resourceGroupName: ${{ secrets.AZURE_RG }}
+        resourceGroupName: ${{ secrets.AZURE_RESOURCE_GROUP }}
         template: ./.bicep/sql/deployGhMgmtSqlDatabase.bicep
-        parameters: activeEnv=${{github.event.inputs.selected_environment}} serverName=${{ secrets.SERVER_NAME }} administratorLogin=${{ secrets.SERVER_USERNAME }} administratorLoginPassword=${{ secrets.SERVER_PASSWORD }} databaseName=${{ vars.DATABASE_NAME }}
+        parameters: activeEnv=${{github.event.inputs.selected_environment}} serverName=${{ secrets.DATABASE_SERVER_NAME }} administratorLogin=${{ secrets.SERVER_USERNAME }} administratorLoginPassword=${{ secrets.SERVER_PASSWORD }} databaseName=${{ vars.DATABASE_NAME }}
         failOnStdErr: false
         scope: resourcegroup
 
   build-and-publish-database-project:
+    if: ${{ github.event.inputs.publish_database_project == 'true' }}
     runs-on: ubuntu-latest
-    environment: ${{ github.event.inputs.publish_database_project }}
-    if: ${{ github.event.inputs.deploy_database_resource }}
+    environment: ${{ github.event.inputs.selected_environment }}
 
     steps:
       
@@ -62,6 +62,6 @@ jobs:
     - uses: azure/sql-action@v1.3
       if: ${{ github.event.inputs.publish_database_project }}
       with:
-        connection-string: Server=${{ secrets.SERVER_NAME }}.database.windows.net;Initial Catalog=${{ vars.DATABASE_NAME }};Persist Security Info=False;User ID=${{ secrets.SERVER_USERNAME }};Password=${{ secrets.SERVER_PASSWORD }};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;
+        connection-string: Server=${{ secrets.DATABASE_SERVER_NAME }}.database.windows.net;Initial Catalog=${{ vars.DATABASE_NAME }};Persist Security Info=False;User ID=${{ secrets.SERVER_USERNAME }};Password=${{ secrets.SERVER_PASSWORD }};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;
         project-file: 'src/sqldb/sqldb.sqlproj'
         arguments: '/p:BlockOnPossibleDataLoss=${{github.event.inputs.block_data_loss}}'
