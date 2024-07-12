@@ -10,7 +10,7 @@ on:
 
 jobs:
   setup-logic-app-resource:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     outputs:
       accountName: ${{steps.deploy_main_bicep.outputs.accountName}}
       destination: ${{steps.deploy_main_bicep.outputs.destination}}
@@ -21,7 +21,7 @@ jobs:
       - uses: actions/checkout@v2
         
       - name: Login Azure
-        uses: azure/login@v1
+        uses: azure/login@v2
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
           enable-AzPSSession: true 
