@@ -2,7 +2,7 @@ package repository
 
 import "main/model"
 
-type ExternalLink interface {
+type ExternalLinkRepository interface {
 	GetAll() ([]model.ExternalLink, error)
 	GetByIsEnabled(isEnabled bool) ([]model.ExternalLink, error)
 	GetByID(id int64) (*model.ExternalLink, error)

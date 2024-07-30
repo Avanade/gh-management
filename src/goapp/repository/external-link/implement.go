@@ -11,7 +11,7 @@ type externalLinkRepository struct {
 	repository.Database
 }
 
-func NewExternalLinkRepository(db repository.Database) ExternalLink {
+func NewExternalLinkRepository(db repository.Database) ExternalLinkRepository {
 	return &externalLinkRepository{
 		Database: db,
 	}

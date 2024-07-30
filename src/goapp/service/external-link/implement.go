@@ -8,10 +8,10 @@ import (
 )
 
 type externalLinkService struct {
-	repositoryExternalLink repositoryExternalLink.ExternalLink
+	repositoryExternalLink repositoryExternalLink.ExternalLinkRepository
 }
 
-func NewExternalLinkService(repositoryExternalLink repositoryExternalLink.ExternalLink) ExternalLinkService {
+func NewExternalLinkService(repositoryExternalLink repositoryExternalLink.ExternalLinkRepository) ExternalLinkService {
 	return &externalLinkService{
 		repositoryExternalLink: repositoryExternalLink,
 	}
