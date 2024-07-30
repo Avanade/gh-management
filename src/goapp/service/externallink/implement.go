@@ -1,9 +1,9 @@
-package service
+package externallink
 
 import (
 	"errors"
 	"main/model"
-	repositoryExternalLink "main/repository/external-link"
+	repositoryExternalLink "main/repository/externallink"
 	"strconv"
 )
 

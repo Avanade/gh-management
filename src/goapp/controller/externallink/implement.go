@@ -1,10 +1,10 @@
-package controller
+package externallink
 
 import (
 	"encoding/json"
 	"errors"
 	"main/model"
-	service "main/service/external-link"
+	service "main/service/externallink"
 	"net/http"
 
 	"github.com/gorilla/mux"

@@ -2,11 +2,14 @@ package main
 
 import (
 	"main/config"
-	controllerExternalLink "main/controller/external-link"
-	router "main/http"
 	"main/repository"
-	repositoryExternalLink "main/repository/external-link"
-	serviceExternalLink "main/service/external-link"
+	"main/router"
+
+	controllerExternalLink "main/controller/externallink"
+
+	repositoryExternalLink "main/repository/externallink"
+
+	serviceExternalLink "main/service/externallink"
 )
 
 var (

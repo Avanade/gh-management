@@ -1,4 +1,4 @@
-package repository
+package externallink
 
 import (
 	"database/sql"

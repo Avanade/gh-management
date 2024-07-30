@@ -1,4 +1,4 @@
-package controller
+package externallink
 
 import "net/http"
 
