@@ -200,12 +200,12 @@ func setApiRoutes() {
 	httpRouter.GET("/api/approval-types/{id}", m.Chain(rtApi.GetApprovalTypeById, m.AzureAuth()))
 
 	//EXTERNAL LINKS API
-	httpRouter.GET("/api/external-links", m.Chain(rtApi.GetExternalLinks, m.AzureAuth(), m.IsUserAdmin()))
-	httpRouter.GET("/api/external-links/enabled", m.Chain(rtApi.GetExternalLinksEnabled, m.AzureAuth()))
-	httpRouter.GET("/api/external-links/{id}", m.Chain(rtApi.GetExternalLinkById, m.AzureAuth(), m.IsUserAdmin()))
-	httpRouter.POST("/api/external-links", m.Chain(rtApi.CreateExternalLinks, m.AzureAuth(), m.IsUserAdmin()))
-	httpRouter.PUT("/api/external-links/{id}", m.Chain(rtApi.UpdateExternalLinksById, m.AzureAuth(), m.IsUserAdmin()))
-	httpRouter.DELETE("/api/external-links/{id}", m.Chain(rtApi.DeleteExternalLinkById, m.AzureAuth(), m.IsUserAdmin()))
+	httpRouter.GET("/api/external-links", m.Chain(externalLinkController.GetExternalLinks, m.AzureAuth(), m.IsUserAdmin()))
+	httpRouter.GET("/api/external-links/enabled", m.Chain(externalLinkController.GetEnabledExternalLinks, m.AzureAuth()))
+	httpRouter.GET("/api/external-links/{id}", m.Chain(externalLinkController.GetExternalLinkById, m.AzureAuth(), m.IsUserAdmin()))
+	httpRouter.POST("/api/external-links", m.Chain(externalLinkController.CreateExternalLink, m.AzureAuth(), m.IsUserAdmin()))
+	httpRouter.PUT("/api/external-links/{id}", m.Chain(externalLinkController.UpdateExternalLinkById, m.AzureAuth(), m.IsUserAdmin()))
+	httpRouter.DELETE("/api/external-links/{id}", m.Chain(externalLinkController.RemoveExternalLinkById, m.AzureAuth(), m.IsUserAdmin()))
 
 	// OSS CONTRIBUTION SPONSORS API
 	httpRouter.GET("/api/oss-contribution-sponsors", m.Chain(rtApi.GetAllOssContributionSponsors, m.AzureAuth(), m.IsUserAdmin()))

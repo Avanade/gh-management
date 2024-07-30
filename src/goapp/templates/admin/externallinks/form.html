@@ -31,7 +31,7 @@
                         <label for="Name" class="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2"> Hyperlink
                         </label>
                         <div class="mt-1 sm:mt-0 sm:col-span-2">
-                            <input x-model="form.Hyperlink" type="text" name="Name" id="Name" autocomplete="off"
+                            <input x-model="form.hyperlink" type="text" name="Name" id="Name" autocomplete="off"
                                 class="block w-full shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm border-gray-300 rounded-md">
                             <span> </span>
                         </div>
@@ -40,7 +40,7 @@
                         <label for="Name" class="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2"> Link Name
                         </label>
                         <div class="mt-1 sm:mt-0 sm:col-span-2">
-                            <input x-model="form.LinkName" type="text" name="Name" id="Name" autocomplete="off"
+                            <input x-model="form.displayName" type="text" name="Name" id="Name" autocomplete="off"
                                 class="block w-full shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm border-gray-300 rounded-md">
                             <span> </span>
 
@@ -56,13 +56,13 @@
                             <div class="max-w-lg">
                                 <div class="mt-4 space-y-4">
                                     <div class="flex items-center">
-                                        <input x-model="form.Enabled" value="true" type="radio"
+                                        <input x-model="form.isEnabled" value="true" type="radio"
                                             class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300">
                                         <label for="active" class="ml-3 block text-sm font-medium text-gray-700"> Active
                                         </label>
                                     </div>
                                     <div class="flex items-center">
-                                        <input x-model="form.Enabled" value="false" type="radio"
+                                        <input x-model="form.isEnabled" value="false" type="radio"
                                             class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300">
                                         <label for="not_active" class="ml-3 block text-sm font-medium text-gray-700">
                                             Not Active </label>
@@ -103,11 +103,11 @@
             action: '',
             id: null,
             form: {
-                Id: '',
-                IconSVG: '',
-                Hyperlink: '',
-                LinkName: '',
-                Enabled: '',
+                id: '',
+                iconSVGPath: '',
+                hyperlink: '',
+                displayName: '',
+                isEnabled: true,
             },  
             showIcons: false,
             testing: [],
@@ -115,10 +115,10 @@
             async init() {
                 this.action = action
                 this.id = id.toString()
-                this.form.Id = id
+                this.form.id = id
 
                 if (this.action.toLowerCase() == 'add') {
-                    this.form.IconSVG = 'Select Icon'
+                    this.form.iconSVGPath = 'Select Icon'
                     return
                 }
 
@@ -131,17 +131,17 @@
                 modal.visible = false
 
                 const data = this.getExternalIcons();
-                this.testing = data.filter((v) => v.iconpath == externallinks[0].IconSVG).map((v) => {
+                this.testing = data.filter((v) => v.iconpath == externallinks.iconSVGPath).map((v) => {
                     return {
                         "id": v.id,
                         "text": v.name
                     }
                 });
 
-                this.form.IconSVG = externallinks[0].IconSVG
-                this.form.Hyperlink = externallinks[0].Hyperlink
-                this.form.LinkName = externallinks[0].LinkName
-                this.form.Enabled = externallinks[0].IsEnabled.toString()
+                this.form.iconSVGPath = externallinks.iconSVGPath
+                this.form.hyperlink = externallinks.hyperlink
+                this.form.displayName = externallinks.displayName
+                this.form.isEnabled = externallinks.isEnabled.toString()
             },
             getExternalIcons() {
                 let Externals = [{
@@ -199,7 +199,10 @@
             },
             onSubmitHandler() {
                 const data = this.getExternalIcons();
-                this.form.IconSVG = data.find((v) => v.id == this.testing[0].id).iconpath;
+                console.log(data)
+                console.log(this.testing)
+                this.form.iconSVGPath = data.find((v) => v.id == this.testing[0].id).iconpath;
+                this.form.isEnabled = this.form.isEnabled == 'true' ? true : false
                 switch (this.action.toLowerCase()) {
                     case 'add':
                         Alpine.store('master').modal.show()
