@@ -17,15 +17,15 @@ func NewExternalLinkRepository(db repository.Database) ExternalLinkRepository {
 	}
 }
 
-func (d *externalLinkRepository) GetAll() ([]model.ExternalLink, error) {
+func (r *externalLinkRepository) GetAll() ([]model.ExternalLink, error) {
 	var externalLinks []model.ExternalLink
-	rows, err := d.Query("[dbo].[usp_ExternalLink_Select]")
+	rows, err := r.Query("[dbo].[usp_ExternalLink_Select]")
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
-	mapRows, err := d.RowsToMap(rows)
+	mapRows, err := r.RowsToMap(rows)
 	if err != nil {
 		return nil, err
 	}
@@ -49,16 +49,16 @@ func (d *externalLinkRepository) GetAll() ([]model.ExternalLink, error) {
 	return externalLinks, nil
 }
 
-func (d *externalLinkRepository) GetByIsEnabled(isEnabled bool) ([]model.ExternalLink, error) {
+func (r *externalLinkRepository) GetByIsEnabled(isEnabled bool) ([]model.ExternalLink, error) {
 	var externalLinks []model.ExternalLink
-	rows, err := d.Query("[dbo].[usp_ExternalLink_Select_ByIsEnabled]",
+	rows, err := r.Query("[dbo].[usp_ExternalLink_Select_ByIsEnabled]",
 		sql.Named("IsEnabled", isEnabled))
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
-	mapRows, err := d.RowsToMap(rows)
+	mapRows, err := r.RowsToMap(rows)
 	if err != nil {
 		return nil, err
 	}
@@ -82,16 +82,16 @@ func (d *externalLinkRepository) GetByIsEnabled(isEnabled bool) ([]model.Externa
 	return externalLinks, nil
 }
 
-func (d *externalLinkRepository) GetByID(id int64) (*model.ExternalLink, error) {
+func (r *externalLinkRepository) GetByID(id int64) (*model.ExternalLink, error) {
 	var externalLink model.ExternalLink
-	rows, err := d.Query("[dbo].[usp_ExternalLink_Select_ById]",
+	rows, err := r.Query("[dbo].[usp_ExternalLink_Select_ById]",
 		sql.Named("Id", id))
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
-	mapRows, err := d.RowsToMap(rows)
+	mapRows, err := r.RowsToMap(rows)
 	if err != nil {
 		return nil, err
 	}
@@ -110,8 +110,8 @@ func (d *externalLinkRepository) GetByID(id int64) (*model.ExternalLink, error) 
 	return &externalLink, nil
 }
 
-func (d *externalLinkRepository) Create(externalLink *model.ExternalLink) (*model.ExternalLink, error) {
-	result, err := d.QueryRow("[dbo].[usp_ExternalLink_Insert]",
+func (r *externalLinkRepository) Create(externalLink *model.ExternalLink) (*model.ExternalLink, error) {
+	result, err := r.QueryRow("[dbo].[usp_ExternalLink_Insert]",
 		sql.Named("LinkName", externalLink.DisplayName),
 		sql.Named("IconSVG", externalLink.IconSVGPath),
 		sql.Named("Hyperlink", externalLink.Hyperlink),
@@ -131,8 +131,8 @@ func (d *externalLinkRepository) Create(externalLink *model.ExternalLink) (*mode
 	return externalLink, nil
 }
 
-func (d *externalLinkRepository) Update(id int64, externalLink *model.ExternalLink) (*model.ExternalLink, error) {
-	err := d.Execute("[dbo].[usp_ExternalLink_Update]",
+func (r *externalLinkRepository) Update(id int64, externalLink *model.ExternalLink) (*model.ExternalLink, error) {
+	err := r.Execute("[dbo].[usp_ExternalLink_Update]",
 		sql.Named("Id", id),
 		sql.Named("LinkName", externalLink.DisplayName),
 		sql.Named("IconSVG", externalLink.IconSVGPath),
@@ -145,8 +145,8 @@ func (d *externalLinkRepository) Update(id int64, externalLink *model.ExternalLi
 	return externalLink, nil
 }
 
-func (d *externalLinkRepository) Delete(id int64) error {
-	err := d.Execute("[dbo].[usp_ExternalLink_Delete]",
+func (r *externalLinkRepository) Delete(id int64) error {
+	err := r.Execute("[dbo].[usp_ExternalLink_Delete]",
 		sql.Named("Id", id))
 	if err != nil {
 		return err
