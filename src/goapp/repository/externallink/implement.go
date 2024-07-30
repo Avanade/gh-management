@@ -84,28 +84,26 @@ func (r *externalLinkRepository) GetByIsEnabled(isEnabled bool) ([]model.Externa
 
 func (r *externalLinkRepository) GetByID(id int64) (*model.ExternalLink, error) {
 	var externalLink model.ExternalLink
-	rows, err := r.Query("[dbo].[usp_ExternalLink_Select_ById]",
+	row, err := r.QueryRow("[dbo].[usp_ExternalLink_Select_ById]",
 		sql.Named("Id", id))
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
 
-	mapRows, err := r.RowsToMap(rows)
+	err = row.Scan(
+		&externalLink.ID,
+		&externalLink.IconSVGPath,
+		&externalLink.Hyperlink,
+		&externalLink.DisplayName,
+		&externalLink.IsEnabled,
+		&externalLink.Created,
+		&externalLink.CreatedBy,
+		&externalLink.Modified,
+		&externalLink.ModifiedBy,
+	)
 	if err != nil {
 		return nil, err
 	}
-
-	mapRow := mapRows[0]
-	externalLink.ID = mapRow["Id"].(int64)
-	externalLink.IconSVGPath = mapRow["IconSVG"].(string)
-	externalLink.Hyperlink = mapRow["Hyperlink"].(string)
-	externalLink.DisplayName = mapRow["LinkName"].(string)
-	externalLink.IsEnabled = mapRow["IsEnabled"].(bool)
-	externalLink.Created = mapRow["Created"].(time.Time)
-	externalLink.CreatedBy = mapRow["CreatedBy"].(string)
-	externalLink.Modified = mapRow["Modified"].(time.Time)
-	externalLink.ModifiedBy = mapRow["ModifiedBy"].(string)
 
 	return &externalLink, nil
 }
