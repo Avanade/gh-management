@@ -118,25 +118,28 @@ func (r *externalLinkRepository) Create(externalLink *model.ExternalLink) (*mode
 	if err != nil {
 		return nil, err
 	}
-	var id int64
-	var created time.Time
-	err = result.Scan(&id, &created)
+	err = result.Scan(
+		&externalLink.ID,
+		&externalLink.Created)
 	if err != nil {
 		return nil, err
 	}
-	externalLink.ID = id
-	externalLink.Created = created
 	return externalLink, nil
 }
 
 func (r *externalLinkRepository) Update(id int64, externalLink *model.ExternalLink) (*model.ExternalLink, error) {
-	err := r.Execute("[dbo].[usp_ExternalLink_Update]",
+	row, err := r.QueryRow("[dbo].[usp_ExternalLink_Update]",
 		sql.Named("Id", id),
 		sql.Named("LinkName", externalLink.DisplayName),
 		sql.Named("IconSVG", externalLink.IconSVGPath),
 		sql.Named("Hyperlink", externalLink.Hyperlink),
 		sql.Named("IsEnabled", externalLink.IsEnabled),
 		sql.Named("ModifiedBy", externalLink.ModifiedBy))
+	if err != nil {
+		return nil, err
+	}
+	err = row.Scan(
+		&externalLink.Modified)
 	if err != nil {
 		return nil, err
 	}

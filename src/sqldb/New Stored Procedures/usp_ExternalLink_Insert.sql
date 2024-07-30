@@ -17,8 +17,8 @@ BEGIN
     [ModifiedBy]
   )
   OUTPUT
-    INSERTED.Id,
-    INSERTED.Created
+    [INSERTED].[Id],
+    [INSERTED].[Created]
   VALUES (
     @IconSVG,
     @Hyperlink,
