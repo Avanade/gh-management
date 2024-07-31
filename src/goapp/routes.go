@@ -146,10 +146,10 @@ func setApiRoutes() {
 	httpRouter.GET("/api/community-approvers/active", rtApi.GetAllActiveCommunityApprovers)
 
 	// CONTRIBUTION AREAS API
-	httpRouter.POST("/api/contribution-areas", m.Chain(rtApi.CreateContributionAreas, m.AzureAuth(), m.GitHubAuth()))
-	httpRouter.GET("/api/contribution-areas", m.Chain(rtApi.GetContributionAreas, m.AzureAuth(), m.GitHubAuth()))
-	httpRouter.PUT("/api/contribution-areas", m.Chain(rtApi.UpdateContributionArea, m.AzureAuth(), m.GitHubAuth()))
-	httpRouter.GET("/api/contribution-areas/{id}", m.Chain(rtApi.GetContributionAreaById, m.AzureAuth(), m.GitHubAuth()))
+	httpRouter.POST("/api/contribution-areas", m.Chain(contributionAreaController.CreateContributionAreas, m.AzureAuth(), m.GitHubAuth()))
+	httpRouter.GET("/api/contribution-areas", m.Chain(contributionAreaController.GetContributionAreas, m.AzureAuth(), m.GitHubAuth()))
+	httpRouter.PUT("/api/contribution-areas/{id}", m.Chain(contributionAreaController.UpdateContributionArea, m.AzureAuth(), m.GitHubAuth()))
+	httpRouter.GET("/api/contribution-areas/{id}", m.Chain(contributionAreaController.GetContributionAreaById, m.AzureAuth(), m.GitHubAuth()))
 	httpRouter.GET("/api/activities/{id}/contribution-areas", m.Chain(rtApi.GetContributionAreasByActivityId, m.AzureAuth(), m.GitHubAuth()))
 
 	// CATEGORIES API
