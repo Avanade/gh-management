@@ -7,12 +7,15 @@ import (
 
 	repositoruContributionArea "main/repository/contributionarea"
 	repositoryExternalLink "main/repository/externallink"
+	repositoryOssContributionSponsor "main/repository/osscontributionsponsor"
 
 	serviceContributionArea "main/service/contributionarea"
 	serviceExternalLink "main/service/externallink"
+	serviceOssContributionSponsor "main/service/osscontributionsponsor"
 
 	controllerContributionArea "main/controller/contributionarea"
 	controllerExternalLink "main/controller/externallink"
+	controllerOssContributionSponsor "main/controller/osscontributionsponsor"
 )
 
 var (
@@ -26,6 +29,10 @@ var (
 	contributionAreaRepository repositoruContributionArea.ContributionAreaRepository = repositoruContributionArea.NewContributionAreaRepository(database)
 	contributionAreaService    serviceContributionArea.ContributionAreaService       = serviceContributionArea.NewContributionAreaService(contributionAreaRepository)
 	contributionAreaController controllerContributionArea.ContributionAreaController = controllerContributionArea.NewContributionAreaController(contributionAreaService)
+
+	ossContributionSponsorRepository repositoryOssContributionSponsor.OSSContributionSponsorRepository = repositoryOssContributionSponsor.NewOSSContributionSponsorRepository(database)
+	ossContributionSponsorService    serviceOssContributionSponsor.OssContributionSponsorService       = serviceOssContributionSponsor.NewOssContributionSponsorService(ossContributionSponsorRepository)
+	ossContributionSponsorController controllerOssContributionSponsor.OSSContributionSponsorController = controllerOssContributionSponsor.NewOssContributionSponsorController(ossContributionSponsorService)
 
 	httpRouter router.Router = router.NewMuxRouter()
 )

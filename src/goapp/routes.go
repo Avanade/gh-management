@@ -208,10 +208,10 @@ func setApiRoutes() {
 	httpRouter.DELETE("/api/external-links/{id}", m.Chain(externalLinkController.RemoveExternalLinkById, m.AzureAuth(), m.IsUserAdmin()))
 
 	// OSS CONTRIBUTION SPONSORS API
-	httpRouter.GET("/api/oss-contribution-sponsors", m.Chain(rtApi.GetAllOssContributionSponsors, m.AzureAuth(), m.IsUserAdmin()))
-	httpRouter.GET("/api/oss-contribution-sponsors/enabled", m.Chain(rtApi.GetAllEnabledOssContributionSponsors, m.AzureAuth()))
-	httpRouter.POST("/api/oss-contribution-sponsors", m.Chain(rtApi.AddSponsor, m.AzureAuth(), m.IsUserAdmin()))
-	httpRouter.PUT("/api/oss-contribution-sponsors/{id}", m.Chain(rtApi.UpdateSponsor, m.AzureAuth(), m.IsUserAdmin()))
+	httpRouter.GET("/api/oss-contribution-sponsors", m.Chain(ossContributionSponsorController.GetOssContributionSponsors, m.AzureAuth(), m.IsUserAdmin()))
+	httpRouter.GET("/api/oss-contribution-sponsors/enabled", m.Chain(ossContributionSponsorController.GetEnabledOssContributionSponsors, m.AzureAuth()))
+	httpRouter.POST("/api/oss-contribution-sponsors", m.Chain(ossContributionSponsorController.CreateOssContributionSponsor, m.AzureAuth(), m.IsUserAdmin()))
+	httpRouter.PUT("/api/oss-contribution-sponsors/{id}", m.Chain(ossContributionSponsorController.UpdateOssContributionSponsor, m.AzureAuth(), m.IsUserAdmin()))
 
 	// OTHER REQUESTS
 	httpRouter.POST("/api/github-organization", m.Chain(rtApi.AddOrganization, m.AzureAuth(), m.GitHubAuth()))

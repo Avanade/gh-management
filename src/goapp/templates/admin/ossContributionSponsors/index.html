@@ -37,10 +37,10 @@
             <template x-for="(sponsor, n) in sponsors" :key="n">
                 <tr class="hover:bg-gray-100">
                     <td class="whitespace-nowrap px-3 py-3.5 text-sm text-gray-500">
-                        <span x-text="sponsor.Name"> </span>
+                        <span x-text="sponsor.name"> </span>
                     </td>
                     <td class="whitespace-nowrap px-3 py-3.5 text-sm">
-                        <input type="checkbox" x-data="{ archived: sponsor.IsArchived ? true  : false }"
+                        <input type="checkbox" x-data="{ archived: sponsor.isArchived ? true  : false }"
                         x-model="archived" disabled>
                     </td>
                     <td class="whitespace-nowrap px-3 py-3.5 text-sm flex">
@@ -96,7 +96,7 @@
                 return
             },
             editSponsor(sponsor) {
-                window.location.href = `osscontributionsponsors/form?id=${sponsor.Id}&name=${sponsor.Name}&isArchived=${sponsor.IsArchived ? '1':'0'}`
+                window.location.href = `osscontributionsponsors/form?id=${sponsor.id}&name=${sponsor.name}&isArchived=${sponsor.isArchived ? '1':'0'}`
             },
         }
     }
