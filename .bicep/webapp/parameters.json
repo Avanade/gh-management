@@ -41,7 +41,6 @@
                 "EMAIL_CLIENT_SECRET" : "",
                 "EMAIL_USER_ID" : "",
                 
-                "HOME_URL":"",
                 "GH_CLIENT_ID":"",
                 "GH_CLIENT_SECRET":"",
                 "GH_TOKEN":"",
@@ -53,12 +52,12 @@
                 "GH_REPO_TEMPLATE":"",
                 "GH_REPO_TEMPLATE_NAME":"",
                 "APPROVAL_SYSTEM_APP_URL":"",
-                "APPROVAL_SYSTEM_APP_BaseURL":"",
                 "APPROVAL_SYSTEM_APP_ID":"",
                 "APPROVAL_SYSTEM_APP_MODULE_PROJECTS":"",
                 "APPROVAL_SYSTEM_APP_MODULE_COMMUNITY":"",
                 "APPROVAL_SYSTEM_APP_MODULE_ORGANIZATION":"",
                 "APPROVAL_SYSTEM_APP_MODULE_COPILOT":"",
+                "APPROVAL_SYSTEM_APP_MODULE_ORGACCESS":"",
                 
                 "GH_AZURE_AD_GROUP":"",
                 "GH_AZURE_AD_ADMIN_GROUP":"",
@@ -71,6 +70,7 @@
                 "ENABLED_REMOVE_COLLABORATORS": "",
 
                 "ORGANIZATION_NAME":"",
+                "REGIONAL_ORG_PREFIX": "",
                 
                 "LINK_INNERSOURCE_GENERAL_LEGAL_GUIDELINES":"",
                 "LINK_INNERSOURCE_GENERAL_GUIDELINES":"",
