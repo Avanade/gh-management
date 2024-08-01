@@ -8,6 +8,8 @@ BEGIN
     [Name],
     [IsArchived]
   )
+  OUTPUT
+    [INSERTED].[Id]
   VALUES
   ( 
     @Name,

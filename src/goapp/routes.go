@@ -146,10 +146,10 @@ func setApiRoutes() {
 	httpRouter.GET("/api/community-approvers/active", rtApi.GetAllActiveCommunityApprovers)
 
 	// CONTRIBUTION AREAS API
-	httpRouter.POST("/api/contribution-areas", m.Chain(rtApi.CreateContributionAreas, m.AzureAuth(), m.GitHubAuth()))
-	httpRouter.GET("/api/contribution-areas", m.Chain(rtApi.GetContributionAreas, m.AzureAuth(), m.GitHubAuth()))
-	httpRouter.PUT("/api/contribution-areas", m.Chain(rtApi.UpdateContributionArea, m.AzureAuth(), m.GitHubAuth()))
-	httpRouter.GET("/api/contribution-areas/{id}", m.Chain(rtApi.GetContributionAreaById, m.AzureAuth(), m.GitHubAuth()))
+	httpRouter.POST("/api/contribution-areas", m.Chain(contributionAreaController.CreateContributionAreas, m.AzureAuth(), m.GitHubAuth()))
+	httpRouter.GET("/api/contribution-areas", m.Chain(contributionAreaController.GetContributionAreas, m.AzureAuth(), m.GitHubAuth()))
+	httpRouter.PUT("/api/contribution-areas/{id}", m.Chain(contributionAreaController.UpdateContributionArea, m.AzureAuth(), m.GitHubAuth()))
+	httpRouter.GET("/api/contribution-areas/{id}", m.Chain(contributionAreaController.GetContributionAreaById, m.AzureAuth(), m.GitHubAuth()))
 	httpRouter.GET("/api/activities/{id}/contribution-areas", m.Chain(rtApi.GetContributionAreasByActivityId, m.AzureAuth(), m.GitHubAuth()))
 
 	// CATEGORIES API
@@ -200,18 +200,18 @@ func setApiRoutes() {
 	httpRouter.GET("/api/approval-types/{id}", m.Chain(rtApi.GetApprovalTypeById, m.AzureAuth()))
 
 	//EXTERNAL LINKS API
-	httpRouter.GET("/api/external-links", m.Chain(rtApi.GetExternalLinks, m.AzureAuth(), m.IsUserAdmin()))
-	httpRouter.GET("/api/external-links/enabled", m.Chain(rtApi.GetExternalLinksEnabled, m.AzureAuth()))
-	httpRouter.GET("/api/external-links/{id}", m.Chain(rtApi.GetExternalLinkById, m.AzureAuth(), m.IsUserAdmin()))
-	httpRouter.POST("/api/external-links", m.Chain(rtApi.CreateExternalLinks, m.AzureAuth(), m.IsUserAdmin()))
-	httpRouter.PUT("/api/external-links/{id}", m.Chain(rtApi.UpdateExternalLinksById, m.AzureAuth(), m.IsUserAdmin()))
-	httpRouter.DELETE("/api/external-links/{id}", m.Chain(rtApi.DeleteExternalLinkById, m.AzureAuth(), m.IsUserAdmin()))
+	httpRouter.GET("/api/external-links", m.Chain(externalLinkController.GetExternalLinks, m.AzureAuth(), m.IsUserAdmin()))
+	httpRouter.GET("/api/external-links/enabled", m.Chain(externalLinkController.GetEnabledExternalLinks, m.AzureAuth()))
+	httpRouter.GET("/api/external-links/{id}", m.Chain(externalLinkController.GetExternalLinkById, m.AzureAuth(), m.IsUserAdmin()))
+	httpRouter.POST("/api/external-links", m.Chain(externalLinkController.CreateExternalLink, m.AzureAuth(), m.IsUserAdmin()))
+	httpRouter.PUT("/api/external-links/{id}", m.Chain(externalLinkController.UpdateExternalLinkById, m.AzureAuth(), m.IsUserAdmin()))
+	httpRouter.DELETE("/api/external-links/{id}", m.Chain(externalLinkController.RemoveExternalLinkById, m.AzureAuth(), m.IsUserAdmin()))
 
 	// OSS CONTRIBUTION SPONSORS API
-	httpRouter.GET("/api/oss-contribution-sponsors", m.Chain(rtApi.GetAllOssContributionSponsors, m.AzureAuth(), m.IsUserAdmin()))
-	httpRouter.GET("/api/oss-contribution-sponsors/enabled", m.Chain(rtApi.GetAllEnabledOssContributionSponsors, m.AzureAuth()))
-	httpRouter.POST("/api/oss-contribution-sponsors", m.Chain(rtApi.AddSponsor, m.AzureAuth(), m.IsUserAdmin()))
-	httpRouter.PUT("/api/oss-contribution-sponsors/{id}", m.Chain(rtApi.UpdateSponsor, m.AzureAuth(), m.IsUserAdmin()))
+	httpRouter.GET("/api/oss-contribution-sponsors", m.Chain(ossContributionSponsorController.GetOssContributionSponsors, m.AzureAuth(), m.IsUserAdmin()))
+	httpRouter.GET("/api/oss-contribution-sponsors/enabled", m.Chain(ossContributionSponsorController.GetEnabledOssContributionSponsors, m.AzureAuth()))
+	httpRouter.POST("/api/oss-contribution-sponsors", m.Chain(ossContributionSponsorController.CreateOssContributionSponsor, m.AzureAuth(), m.IsUserAdmin()))
+	httpRouter.PUT("/api/oss-contribution-sponsors/{id}", m.Chain(ossContributionSponsorController.UpdateOssContributionSponsor, m.AzureAuth(), m.IsUserAdmin()))
 
 	// OTHER REQUESTS
 	httpRouter.POST("/api/github-organization", m.Chain(rtApi.AddOrganization, m.AzureAuth(), m.GitHubAuth()))
@@ -241,24 +241,24 @@ func setApiRoutes() {
 	httpRouter.GET("/api/users/{username}/approvals", m.Chain(rtApi.DownloadProjectApprovalsByUsername))
 
 	// LEGACY APIS
-	httpRouter.GET("/api/searchresult/{searchText}", m.Chain(rtApi.LegacySearchHandler, m.ManagedIdentityAuth()))
+	httpRouter.GET("/api/searchresult/{searchText}", m.Chain(rtApi.LegacySearchHandler, m.GuidAuth()))
 }
 
 func setUtilityRoutes() {
 	// UTILITIES
 
 	// API FOR LOGIC APP
-	httpRouter.GET("/utility/index-org-repos", m.Chain(rtApi.IndexOrgRepos, m.ManagedIdentityAuth()))
-	httpRouter.GET("/utility/clear-org-repos", m.Chain(rtApi.ClearOrgRepos, m.ManagedIdentityAuth()))
-	httpRouter.GET("/utility/check-ava-inner-source", m.Chain(rtApi.CheckAvaInnerSource, m.ManagedIdentityAuth()))
-	httpRouter.GET("/utility/check-ava-open-source", m.Chain(rtApi.CheckAvaOpenSource, m.ManagedIdentityAuth()))
-	httpRouter.GET("/utility/clear-org-members", m.Chain(rtApi.ClearOrgMembers, m.ManagedIdentityAuth()))
-	httpRouter.GET("/utility/repo-owner-scan", m.Chain(rtApi.RepoOwnerScan, m.ManagedIdentityAuth()))
-	httpRouter.GET("/utility/repo-owner-cleanup", m.Chain(rtApi.RepoOwnersCleanup, m.ManagedIdentityAuth()))
-	httpRouter.GET("/utility/recurring-approval", m.Chain(rtApi.RecurringApproval, m.ManagedIdentityAuth()))
-	httpRouter.GET("/utility/expiring-invitations", m.Chain(rtApi.ExpiringInvitation, m.ManagedIdentityAuth()))
-	httpRouter.GET("/utility/index-ad-groups", m.Chain(rtApi.IndexADGroups, m.ManagedIdentityAuth()))
-	httpRouter.GET("/utility/index-regional-organizations", m.Chain(rtApi.IndexRegionalOrganizations, m.ManagedIdentityAuth()))
+	httpRouter.GET("/utility/index-org-repos", m.Chain(rtApi.IndexOrgRepos, m.GuidAuth()))
+	httpRouter.GET("/utility/clear-org-repos", m.Chain(rtApi.ClearOrgRepos, m.GuidAuth()))
+	httpRouter.GET("/utility/check-ava-inner-source", m.Chain(rtApi.CheckAvaInnerSource, m.GuidAuth()))
+	httpRouter.GET("/utility/check-ava-open-source", m.Chain(rtApi.CheckAvaOpenSource, m.GuidAuth()))
+	httpRouter.GET("/utility/clear-org-members", m.Chain(rtApi.ClearOrgMembers, m.GuidAuth()))
+	httpRouter.GET("/utility/repo-owner-scan", m.Chain(rtApi.RepoOwnerScan, m.GuidAuth()))
+	httpRouter.GET("/utility/repo-owner-cleanup", m.Chain(rtApi.RepoOwnersCleanup, m.GuidAuth()))
+	httpRouter.GET("/utility/recurring-approval", m.Chain(rtApi.RecurringApproval, m.GuidAuth()))
+	httpRouter.GET("/utility/expiring-invitations", m.Chain(rtApi.ExpiringInvitation, m.GuidAuth()))
+	httpRouter.GET("/utility/index-ad-groups", m.Chain(rtApi.IndexADGroups, m.GuidAuth()))
+	httpRouter.GET("/utility/index-regional-organizations", m.Chain(rtApi.IndexRegionalOrganizations, m.GuidAuth()))
 }
 
 func serve() {

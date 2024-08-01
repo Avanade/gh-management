@@ -6,8 +6,7 @@ CREATE PROCEDURE [dbo].[usp_ExternalLink_Insert]
 	@CreatedBy [VARCHAR](100)
 AS
 BEGIN
-  INSERT INTO [dbo].[ExternalLink] 
-  ( 
+  INSERT INTO [dbo].[ExternalLink] ( 
     [IconSVG],
     [Hyperlink],
     [LinkName],
@@ -17,8 +16,10 @@ BEGIN
     [Modified],
     [ModifiedBy]
   )
-  VALUES 
-  ( 
+  OUTPUT
+    [INSERTED].[Id],
+    [INSERTED].[Created]
+  VALUES (
     @IconSVG,
     @Hyperlink,
     @LinkName,
@@ -27,5 +28,5 @@ BEGIN
     @CreatedBy,
     GETDATE(),
     @CreatedBy
-  )
+  );
 END

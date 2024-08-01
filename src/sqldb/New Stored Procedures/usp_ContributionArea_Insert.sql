@@ -11,13 +11,13 @@ BEGIN
     [Created],
     [CreatedBy]
   )
+  OUTPUT
+    [INSERTED].[Id],
+    [INSERTED].[Created]
   VALUES
   (
       @Name,
       GETDATE(),
       @CreatedBy
 	)
-
-  SET @Id = SCOPE_IDENTITY()
-  SELECT @Id AS [Id]
 END

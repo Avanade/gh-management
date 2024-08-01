@@ -38,24 +38,24 @@
             <template x-for="(results, n) in externalLinks" :key="n">
                 <tr class="hover:bg-gray-100">
                     <td class="whitespace-nowrap px-3 py-3.5 text-sm text-gray-500">
-                        <img x-bind:src="window.location.origin+results.IconSVG" class="mr-4 h-6 w-6"
-                            x-bind:title="results.IconSVG.substring(28)" />
+                        <img x-bind:src="window.location.origin+results.iconSVGPath" class="mr-4 h-6 w-6"
+                            x-bind:title="results.iconSVGPath.substring(28)" />
                     </td>
                     <td class="whitespace-nowrap px-3 py-3.5 text-sm text-gray-500">
-                        <span x-text="results.LinkName" title="Link Name"> </span>
+                        <span x-text="results.displayName" title="Link Name"> </span>
                     </td>
                     <td class="whitespace-nowrap px-3 py-3.5 text-sm text-gray-500">
-                        <a x-bind:href="results.Hyperlink" target="_blank" x-bind:title="results.Hyperlink"
+                        <a x-bind:href="results.hyperlink" target="_blank" x-bind:title="results.hyperlink"
                             class="cursor-pointer">
-                            <span x-html="results.Hyperlink" class="hover:shadow-md"></span>
+                            <span x-html="results.hyperlink" class="hover:shadow-md"></span>
                         </a>
                     </td>
                     <td class="whitespace-nowrap px-3 py-3.5 text-sm">
-                        <span x-bind:class="results.IsEnabled === true ? 'text-[#FF5800]' : 'text-gray-500' "
-                            x-text="results.IsEnabled ? 'Enabled': 'Disabled'"> </span>
+                        <span x-bind:class="results.isEnabled === true ? 'text-[#FF5800]' : 'text-gray-500' "
+                            x-text="results.isEnabled ? 'Enabled': 'Disabled'"> </span>
                     </td>
                     <td class="whitespace-nowrap px-3 py-3.5 text-sm flex">
-                        <span @Click="onClickAction(results.Id, 'view')"
+                        <span @Click="onClickAction(results.id, 'view')"
                             class="cursor-pointer py-1 text-left text-sm font-semibold text-gray-500" title="View">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                                 stroke="currentColor" class="w-5 h-5 text-blue-500 hover:shadow-md">
@@ -66,7 +66,7 @@
                                     d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
                             </svg>
                         </span>
-                        <span @Click="onClickAction(results.Id, 'edit')"
+                        <span @Click="onClickAction(results.id, 'edit')"
                             class="cursor-pointer py-1 text-left text-sm font-semibold text-gray-500 " title="Edit">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                                 stroke="currentColor" class="w-5 h-5 mx-3 text-orange-500 hover:shadow-md">
@@ -75,7 +75,7 @@
                                 </path>
                             </svg>
                         </span>
-                        <span @Click="onClickAction(results.Id, 'delete')"
+                        <span @Click="onClickAction(results.id, 'delete')"
                             class="cursor-pointer py-1 text-left text-sm font-semibold text-gray-500 " title="Delete">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                                 stroke="currentColor" class="w-5 h-5 text-red-500 hover:shadow-md">
