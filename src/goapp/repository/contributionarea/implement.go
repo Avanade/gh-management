@@ -33,8 +33,9 @@ func (r *contributionAreaRepository) GetAll() ([]model.ContributionArea, error) 
 		contributionArea.Created = v["Created"].(time.Time)
 		contributionArea.CreatedBy = v["CreatedBy"].(string)
 		contributionArea.Modified = v["Modified"].(time.Time)
-		contributionArea.ModifiedBy = v["ModifiedBy"].(string)
-
+		if v["ModifiedBy"] != nil {
+			contributionArea.ModifiedBy = v["ModifiedBy"].(string)
+		}
 		contributionAreas = append(contributionAreas, contributionArea)
 	}
 

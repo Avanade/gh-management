@@ -69,11 +69,26 @@ func (c *contributionAreaController) GetContributionAreaById(w http.ResponseWrit
 // GetContributionAreas implements ContributionAreaController.
 func (c *contributionAreaController) GetContributionAreas(w http.ResponseWriter, r *http.Request) {
 	params := r.URL.Query()
-	filter := params["filter"][0]
-	offset := params["offset"][0]
-	search := params["search"][0]
-	orderby := params["orderby"][0]
-	ordertype := params["ordertype"][0]
+	filter := ""
+	offset := ""
+	search := ""
+	orderby := ""
+	ordertype := ""
+	if params["filter"] != nil {
+		filter = params["filter"][0]
+	}
+	if params["offset"] != nil {
+		offset = params["offset"][0]
+	}
+	if params["search"] != nil {
+		search = params["search"][0]
+	}
+	if params["orderby"] != nil {
+		orderby = params["orderby"][0]
+	}
+	if params["ordertype"] != nil {
+		ordertype = params["ordertype"][0]
+	}
 	contributionAreas, total, err := c.contributionAreaService.Get(offset, filter, orderby, ordertype, search)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
