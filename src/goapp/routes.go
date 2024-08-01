@@ -241,24 +241,24 @@ func setApiRoutes() {
 	httpRouter.GET("/api/users/{username}/approvals", m.Chain(rtApi.DownloadProjectApprovalsByUsername))
 
 	// LEGACY APIS
-	httpRouter.GET("/api/searchresult/{searchText}", m.Chain(rtApi.LegacySearchHandler, m.ManagedIdentityAuth()))
+	httpRouter.GET("/api/searchresult/{searchText}", m.Chain(rtApi.LegacySearchHandler, m.GuidAuth()))
 }
 
 func setUtilityRoutes() {
 	// UTILITIES
 
 	// API FOR LOGIC APP
-	httpRouter.GET("/utility/index-org-repos", m.Chain(rtApi.IndexOrgRepos, m.ManagedIdentityAuth()))
-	httpRouter.GET("/utility/clear-org-repos", m.Chain(rtApi.ClearOrgRepos, m.ManagedIdentityAuth()))
-	httpRouter.GET("/utility/check-ava-inner-source", m.Chain(rtApi.CheckAvaInnerSource, m.ManagedIdentityAuth()))
-	httpRouter.GET("/utility/check-ava-open-source", m.Chain(rtApi.CheckAvaOpenSource, m.ManagedIdentityAuth()))
-	httpRouter.GET("/utility/clear-org-members", m.Chain(rtApi.ClearOrgMembers, m.ManagedIdentityAuth()))
-	httpRouter.GET("/utility/repo-owner-scan", m.Chain(rtApi.RepoOwnerScan, m.ManagedIdentityAuth()))
-	httpRouter.GET("/utility/repo-owner-cleanup", m.Chain(rtApi.RepoOwnersCleanup, m.ManagedIdentityAuth()))
-	httpRouter.GET("/utility/recurring-approval", m.Chain(rtApi.RecurringApproval, m.ManagedIdentityAuth()))
-	httpRouter.GET("/utility/expiring-invitations", m.Chain(rtApi.ExpiringInvitation, m.ManagedIdentityAuth()))
-	httpRouter.GET("/utility/index-ad-groups", m.Chain(rtApi.IndexADGroups, m.ManagedIdentityAuth()))
-	httpRouter.GET("/utility/index-regional-organizations", m.Chain(rtApi.IndexRegionalOrganizations, m.ManagedIdentityAuth()))
+	httpRouter.GET("/utility/index-org-repos", m.Chain(rtApi.IndexOrgRepos, m.GuidAuth()))
+	httpRouter.GET("/utility/clear-org-repos", m.Chain(rtApi.ClearOrgRepos, m.GuidAuth()))
+	httpRouter.GET("/utility/check-ava-inner-source", m.Chain(rtApi.CheckAvaInnerSource, m.GuidAuth()))
+	httpRouter.GET("/utility/check-ava-open-source", m.Chain(rtApi.CheckAvaOpenSource, m.GuidAuth()))
+	httpRouter.GET("/utility/clear-org-members", m.Chain(rtApi.ClearOrgMembers, m.GuidAuth()))
+	httpRouter.GET("/utility/repo-owner-scan", m.Chain(rtApi.RepoOwnerScan, m.GuidAuth()))
+	httpRouter.GET("/utility/repo-owner-cleanup", m.Chain(rtApi.RepoOwnersCleanup, m.GuidAuth()))
+	httpRouter.GET("/utility/recurring-approval", m.Chain(rtApi.RecurringApproval, m.GuidAuth()))
+	httpRouter.GET("/utility/expiring-invitations", m.Chain(rtApi.ExpiringInvitation, m.GuidAuth()))
+	httpRouter.GET("/utility/index-ad-groups", m.Chain(rtApi.IndexADGroups, m.GuidAuth()))
+	httpRouter.GET("/utility/index-regional-organizations", m.Chain(rtApi.IndexRegionalOrganizations, m.GuidAuth()))
 }
 
 func serve() {
