@@ -13,17 +13,17 @@ type ossContributionSponsorService struct {
 
 // Create implements OssContributionSponsorService.
 func (s *ossContributionSponsorService) Create(ossContributionSponsor *model.OSSContributionSponsor) (*model.OSSContributionSponsor, error) {
-	return s.repositoryOssContributionSponsor.Create(ossContributionSponsor)
+	return s.repositoryOssContributionSponsor.Insert(ossContributionSponsor)
 }
 
 // GetAll implements OssContributionSponsorService.
 func (s *ossContributionSponsorService) GetAll() ([]model.OSSContributionSponsor, error) {
-	return s.repositoryOssContributionSponsor.GetAll()
+	return s.repositoryOssContributionSponsor.Select()
 }
 
 // GetByIsArchived implements OssContributionSponsorService.
 func (s *ossContributionSponsorService) GetAllEnabled() ([]model.OSSContributionSponsor, error) {
-	return s.repositoryOssContributionSponsor.GetByIsArchived(false)
+	return s.repositoryOssContributionSponsor.SelectByIsArchived(false)
 }
 
 // Update implements OssContributionSponsorService.

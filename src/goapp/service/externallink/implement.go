@@ -18,11 +18,11 @@ func NewExternalLinkService(repositoryExternalLink repositoryExternalLink.Extern
 }
 
 func (s externalLinkService) GetAll() ([]model.ExternalLink, error) {
-	return s.repositoryExternalLink.GetAll()
+	return s.repositoryExternalLink.Select()
 }
 
 func (s externalLinkService) GetAllEnabled() ([]model.ExternalLink, error) {
-	return s.repositoryExternalLink.GetByIsEnabled(true)
+	return s.repositoryExternalLink.SelectByIsEnabled(true)
 }
 
 func (s externalLinkService) GetByID(id string) (*model.ExternalLink, error) {
@@ -30,11 +30,11 @@ func (s externalLinkService) GetByID(id string) (*model.ExternalLink, error) {
 	if err != nil {
 		return nil, err
 	}
-	return s.repositoryExternalLink.GetByID(parsedId)
+	return s.repositoryExternalLink.SelectByID(parsedId)
 }
 
 func (s externalLinkService) Create(externalLink *model.ExternalLink) (*model.ExternalLink, error) {
-	return s.repositoryExternalLink.Create(externalLink)
+	return s.repositoryExternalLink.Insert(externalLink)
 }
 
 func (s externalLinkService) Update(id string, externalLink *model.ExternalLink) (*model.ExternalLink, error) {

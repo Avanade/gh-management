@@ -3,10 +3,10 @@ package externallink
 import "main/model"
 
 type ExternalLinkRepository interface {
-	GetAll() ([]model.ExternalLink, error)
-	GetByIsEnabled(isEnabled bool) ([]model.ExternalLink, error)
-	GetByID(id int64) (*model.ExternalLink, error)
-	Create(externalLink *model.ExternalLink) (*model.ExternalLink, error)
+	Select() ([]model.ExternalLink, error)
+	SelectByIsEnabled(isEnabled bool) ([]model.ExternalLink, error)
+	SelectByID(id int64) (*model.ExternalLink, error)
+	Insert(externalLink *model.ExternalLink) (*model.ExternalLink, error)
 	Update(id int64, externalLink *model.ExternalLink) (*model.ExternalLink, error)
 	Delete(id int64) error
 }

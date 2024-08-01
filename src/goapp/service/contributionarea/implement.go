@@ -13,7 +13,7 @@ type contributionAreaService struct {
 
 // Create implements ContributionAreaService.
 func (s *contributionAreaService) Create(contributionArea *model.ContributionArea) (*model.ContributionArea, error) {
-	return s.repositoryContributionArea.Create(contributionArea)
+	return s.repositoryContributionArea.Insert(contributionArea)
 }
 
 // Get implements ContributionAreaService.
@@ -27,17 +27,17 @@ func (s *contributionAreaService) Get(offset, filter, orderby, ordertype, search
 		if err != nil {
 			return nil, 0, err
 		}
-		contributionAreas, err = s.repositoryContributionArea.GetByOption(offsetInt, filterInt, orderby, ordertype, search)
+		contributionAreas, err = s.repositoryContributionArea.SelectByOption(offsetInt, filterInt, orderby, ordertype, search)
 		if err != nil {
 			return nil, 0, err
 		}
 	} else {
-		contributionAreas, err = s.repositoryContributionArea.GetAll()
+		contributionAreas, err = s.repositoryContributionArea.Select()
 		if err != nil {
 			return nil, 0, err
 		}
 	}
-	total, err = s.repositoryContributionArea.GetTotal()
+	total, err = s.repositoryContributionArea.Total()
 	if err != nil {
 		return nil, 0, err
 	}
@@ -50,7 +50,7 @@ func (s *contributionAreaService) GetByID(id string) (*model.ContributionArea, e
 	if err != nil {
 		return nil, err
 	}
-	return s.repositoryContributionArea.GetByID(parseId)
+	return s.repositoryContributionArea.SelectById(parseId)
 }
 
 // Update implements ContributionAreaService.

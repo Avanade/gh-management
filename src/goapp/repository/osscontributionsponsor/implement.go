@@ -10,8 +10,8 @@ type ossContributionSponsorRepository struct {
 	repository.Database
 }
 
-// Create implements OSSContributionSponsorRepository.
-func (r *ossContributionSponsorRepository) Create(ossContributionSponsor *model.OSSContributionSponsor) (*model.OSSContributionSponsor, error) {
+// Insert implements OSSContributionSponsorRepository.
+func (r *ossContributionSponsorRepository) Insert(ossContributionSponsor *model.OSSContributionSponsor) (*model.OSSContributionSponsor, error) {
 	result, err := r.QueryRow("[dbo].[usp_OSSContributionSponsor_Insert]",
 		sql.Named("Name", ossContributionSponsor.Name),
 		sql.Named("IsArchived", ossContributionSponsor.IsArchived))
@@ -25,8 +25,8 @@ func (r *ossContributionSponsorRepository) Create(ossContributionSponsor *model.
 	return ossContributionSponsor, nil
 }
 
-// GetAll implements OSSContributionSponsorRepository.
-func (r *ossContributionSponsorRepository) GetAll() ([]model.OSSContributionSponsor, error) {
+// Select implements OSSContributionSponsorRepository.
+func (r *ossContributionSponsorRepository) Select() ([]model.OSSContributionSponsor, error) {
 	var ossContributionSponsors []model.OSSContributionSponsor
 	rows, err := r.Query("[dbo].[usp_OSSContributionSponsor_Select]")
 	if err != nil {
@@ -53,7 +53,7 @@ func (r *ossContributionSponsorRepository) GetAll() ([]model.OSSContributionSpon
 }
 
 // GetByID implements OSSContributionSponsorRepository.
-func (r *ossContributionSponsorRepository) GetByIsArchived(isArchived bool) ([]model.OSSContributionSponsor, error) {
+func (r *ossContributionSponsorRepository) SelectByIsArchived(isArchived bool) ([]model.OSSContributionSponsor, error) {
 	var ossContributionSponsors []model.OSSContributionSponsor
 	rows, err := r.Query("[dbo].[usp_OSSContributionSponsor_Select_ByIsArchived]",
 		sql.Named("IsArchived", isArchived))
