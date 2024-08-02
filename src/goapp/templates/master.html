@@ -219,12 +219,12 @@
               </div>
               <template x-for="(results, n) in externalLinksEnabled" :key="n">
                 <div class="w-full mt-4">
-                  <a x-bind:href="results.Hyperlink"
+                  <a x-bind:href="results.hyperlink"
                     class="text-gray-600 hover:bg-gray-50 hover:text-gray-900 group flex items-center px-2 py-2 text-base font-medium rounded-md"
                     target="_blank">
-                    <img x-bind:src="window.location.origin+results.IconSVG"
+                    <img x-bind:src="window.location.origin+results.iconSVGPath"
                       class="color text-gray-500 mr-4 h-6 w-6 " />
-                    <span x-text="results.LinkName"> </span>
+                    <span x-text="results.displayName"> </span>
                   </a>
                 </div>
               </template>
@@ -311,11 +311,11 @@
             </div>
             <template x-for="(results, n) in externalLinksEnabled" :key="n">
               <div class="w-full mt-4">
-                <a x-bind:href="results.Hyperlink"
+                <a x-bind:href="results.hyperlink"
                   class="text-gray-600 hover:bg-gray-50 hover:text-gray-900 group flex items-center px-2 py-2 text-base font-medium rounded-md"
                   target="_blank">
-                  <img x-bind:src="window.location.origin+results.IconSVG" class="color text-gray-500 mr-4 h-6 w-6 " />
-                  <span x-text="results.LinkName"> </span>
+                  <img x-bind:src="window.location.origin+results.iconSVGPath" class="color text-gray-500 mr-4 h-6 w-6 " />
+                  <span x-text="results.displayName"> </span>
                 </a>
               </div>
             </template>

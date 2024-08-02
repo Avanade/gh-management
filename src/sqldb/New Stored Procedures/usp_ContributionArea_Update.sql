@@ -11,5 +11,7 @@ BEGIN
     [Name] = @Name,
     [Modified] = GETDATE(),
     [ModifiedBy] =  @ModifiedBy
+  OUTPUT
+    [INSERTED].[Modified]
   WHERE [Id] = @Id
 END
