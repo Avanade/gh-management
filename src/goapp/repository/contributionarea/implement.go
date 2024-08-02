@@ -143,8 +143,8 @@ func (r *contributionAreaRepository) Update(id int64, contributionArea *model.Co
 }
 
 // Total implements ContributionAreaRepository.
-func (r *contributionAreaRepository) Total() (int, error) {
-	var total int
+func (r *contributionAreaRepository) Total() (int64, error) {
+	var total int64
 	row, err := r.QueryRow("[dbo].[usp_ContributionArea_TotalCount]")
 	if err != nil {
 		return 0, err

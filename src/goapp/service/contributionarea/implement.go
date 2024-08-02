@@ -17,7 +17,7 @@ func (s *contributionAreaService) Create(contributionArea *model.ContributionAre
 }
 
 // Get implements ContributionAreaService.
-func (s *contributionAreaService) Get(offset, filter, orderby, ordertype, search string) (contributionAreas []model.ContributionArea, total int, err error) {
+func (s *contributionAreaService) Get(offset, filter, orderby, ordertype, search string) (contributionAreas []model.ContributionArea, total int64, err error) {
 	if search != "" || (offset != "" && filter != "") {
 		filterInt, err := strconv.Atoi(filter)
 		if err != nil {
