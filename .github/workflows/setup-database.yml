@@ -62,6 +62,6 @@ jobs:
     - uses: azure/sql-action@v1.3
       if: ${{ github.event.inputs.publish_database_project }}
       with:
-        connection-string: Server=tcp:${{ secrets.DATABASE_SERVER_NAME }}.database.windows.net,1433;Initial Catalog=${{ vars.DATABASE_NAME }};Persist Security Info=False;User ID=${{ secrets.DATABASE_SERVER_USERNAME }};Password=${{ secrets.DATABASE_SERVER_PASSWORD }};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;
+        connection-string: Server=${{ secrets.DATABASE_SERVER_NAME }}.database.windows.net;Initial Catalog=${{ vars.DATABASE_NAME }};Persist Security Info=False;User ID=${{ secrets.DATABASE_SERVER_USERNAME }};Password=${{ secrets.DATABASE_SERVER_PASSWORD }};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;
         project-file: 'src/sqldb/sqldb.sqlproj'
         arguments: '/p:BlockOnPossibleDataLoss=${{github.event.inputs.block_data_loss}}'
