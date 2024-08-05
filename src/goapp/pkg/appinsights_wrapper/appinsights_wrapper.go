@@ -2,7 +2,6 @@ package appinsights_wrapper
 
 import (
 	"fmt"
-	"log"
 	"runtime"
 	"time"
 
@@ -22,10 +21,10 @@ func Init(instrumentationKey string) {
 	TelemetryConfiguration = appinsights.NewTelemetryConfiguration(instrumentationKey)
 
 	/*turn on diagnostics to help troubleshoot problems with telemetry submission. */
-	appinsights.NewDiagnosticsMessageListener(func(msg string) error {
-		log.Printf("[%s] %s\n", time.Now().Format(time.UnixDate), msg)
-		return nil
-	})
+	// appinsights.NewDiagnosticsMessageListener(func(msg string) error {
+	// 	log.Printf("[%s] %s\n", time.Now().Format(time.UnixDate), msg)
+	// 	return nil
+	// })
 }
 
 func NewClient() *TelemetryClient {

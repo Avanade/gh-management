@@ -18,6 +18,9 @@ BEGIN
     [Created],
     [CreatedBy]
     )
+  OUTPUT
+    [INSERTED].[Id],
+    [INSERTED].[Created]
   VALUES
     (
       @CommunityId,

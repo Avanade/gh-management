@@ -5,14 +5,17 @@ import (
 	"main/repository"
 	"main/router"
 
+	repositoryActivity "main/repository/activity"
 	repositoruContributionArea "main/repository/contributionarea"
 	repositoryExternalLink "main/repository/externallink"
 	repositoryOssContributionSponsor "main/repository/osscontributionsponsor"
 
+	serviceActivity "main/service/activity"
 	serviceContributionArea "main/service/contributionarea"
 	serviceExternalLink "main/service/externallink"
 	serviceOssContributionSponsor "main/service/osscontributionsponsor"
 
+	controllerActivity "main/controller/activity"
 	controllerContributionArea "main/controller/contributionarea"
 	controllerExternalLink "main/controller/externallink"
 	controllerOssContributionSponsor "main/controller/osscontributionsponsor"
@@ -33,6 +36,10 @@ var (
 	ossContributionSponsorRepository repositoryOssContributionSponsor.OSSContributionSponsorRepository = repositoryOssContributionSponsor.NewOSSContributionSponsorRepository(database)
 	ossContributionSponsorService    serviceOssContributionSponsor.OssContributionSponsorService       = serviceOssContributionSponsor.NewOssContributionSponsorService(ossContributionSponsorRepository)
 	ossContributionSponsorController controllerOssContributionSponsor.OSSContributionSponsorController = controllerOssContributionSponsor.NewOssContributionSponsorController(ossContributionSponsorService)
+
+	activityRepository repositoryActivity.ActivityRepository = repositoryActivity.NewActivityRepository(database)
+	activityService    serviceActivity.ActivityService       = serviceActivity.NewActivityService(activityRepository)
+	activityController controllerActivity.ActivityController = controllerActivity.NewActivityController(activityService)
 
 	httpRouter router.Router = router.NewMuxRouter()
 )

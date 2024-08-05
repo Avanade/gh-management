@@ -120,8 +120,8 @@ func setApiRoutes() {
 
 	// ACTIVITY API
 	httpRouter.POST("/api/activities", m.Chain(rtApi.CreateActivity, m.AzureAuth(), m.GitHubAuth()))
-	httpRouter.GET("/api/activities", m.Chain(rtApi.GetActivities, m.AzureAuth(), m.GitHubAuth()))
-	httpRouter.GET("/api/activities/{id}", m.Chain(rtApi.GetActivityById, m.AzureAuth(), m.GitHubAuth()))
+	httpRouter.GET("/api/activities", m.Chain(activityController.GetActivities, m.AzureAuth(), m.GitHubAuth()))
+	httpRouter.GET("/api/activities/{id}", m.Chain(activityController.GetActivityById, m.AzureAuth(), m.GitHubAuth()))
 
 	// COMMUNITIES API
 	httpRouter.GET("/api/communities", m.Chain(rtApi.GetCommunities, m.AzureAuth()))
