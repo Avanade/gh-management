@@ -1,4 +1,4 @@
-CREATE PROCEDURE [dbo].[usp_ExternalLink_Insert]
+ALTER PROCEDURE [dbo].[usp_ExternalLink_Insert]
 	@IconSVG [VARCHAR](100),
 	@Hyperlink [VARCHAR](100),
 	@LinkName [VARCHAR](100),
