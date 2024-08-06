@@ -116,7 +116,7 @@ func setApiRoutes() {
 	// APIS
 
 	// ACTIVITY TYPES API
-	httpRouter.GET("/api/activity-types", m.Chain(rtApi.GetActivityTypes, m.AzureAuth(), m.GitHubAuth()))
+	httpRouter.GET("/api/activity-types", m.Chain(activityTypeController.GetActivityTypes, m.AzureAuth(), m.GitHubAuth()))
 
 	// ACTIVITY API
 	httpRouter.POST("/api/activities", m.Chain(rtApi.CreateActivity, m.AzureAuth(), m.GitHubAuth()))

@@ -6,16 +6,19 @@ import (
 	"main/router"
 
 	repositoryActivity "main/repository/activity"
+	repositroyActivityType "main/repository/activitytype"
 	repositoruContributionArea "main/repository/contributionarea"
 	repositoryExternalLink "main/repository/externallink"
 	repositoryOssContributionSponsor "main/repository/osscontributionsponsor"
 
 	serviceActivity "main/service/activity"
+	serviceActivityType "main/service/activitytype"
 	serviceContributionArea "main/service/contributionarea"
 	serviceExternalLink "main/service/externallink"
 	serviceOssContributionSponsor "main/service/osscontributionsponsor"
 
 	controllerActivity "main/controller/activity"
+	controllerActivityType "main/controller/activitytype"
 	controllerContributionArea "main/controller/contributionarea"
 	controllerExternalLink "main/controller/externallink"
 	controllerOssContributionSponsor "main/controller/osscontributionsponsor"
@@ -36,6 +39,10 @@ var (
 	ossContributionSponsorRepository repositoryOssContributionSponsor.OSSContributionSponsorRepository = repositoryOssContributionSponsor.NewOSSContributionSponsorRepository(database)
 	ossContributionSponsorService    serviceOssContributionSponsor.OssContributionSponsorService       = serviceOssContributionSponsor.NewOssContributionSponsorService(ossContributionSponsorRepository)
 	ossContributionSponsorController controllerOssContributionSponsor.OSSContributionSponsorController = controllerOssContributionSponsor.NewOssContributionSponsorController(ossContributionSponsorService)
+
+	activityTypeRepository repositroyActivityType.ActivityTypeRepository = repositroyActivityType.NewActivityTypeRepository(database)
+	activityTypeService    serviceActivityType.ActivityTypeService       = serviceActivityType.NewActivityTypeService(activityTypeRepository)
+	activityTypeController controllerActivityType.ActivityTypeController = controllerActivityType.NewActivityTypeController(activityTypeService)
 
 	activityRepository repositoryActivity.ActivityRepository = repositoryActivity.NewActivityRepository(database)
 	activityService    serviceActivity.ActivityService       = serviceActivity.NewActivityService(activityRepository)
