@@ -1,4 +1,4 @@
-CREATE PROCEDURE [dbo].[usp_ExternalLink_Insert]
+ALTER PROCEDURE [dbo].[usp_ExternalLink_Insert]
 	@IconSVG [VARCHAR](100),
 	@Hyperlink [VARCHAR](100),
 	@LinkName [VARCHAR](100),
@@ -12,9 +12,7 @@ BEGIN
     [LinkName],
     [IsEnabled],
     [Created],
-    [CreatedBy],
-    [Modified],
-    [ModifiedBy]
+    [CreatedBy]
   )
   OUTPUT
     [INSERTED].[Id],
@@ -24,8 +22,6 @@ BEGIN
     @Hyperlink,
     @LinkName,
     @IsEnabled,
-    GETDATE(),
-    @CreatedBy,
     GETDATE(),
     @CreatedBy
   );
