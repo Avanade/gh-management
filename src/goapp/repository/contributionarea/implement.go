@@ -32,7 +32,9 @@ func (r *contributionAreaRepository) GetAll() ([]model.ContributionArea, error) 
 		contributionArea.Name = v["Name"].(string)
 		contributionArea.Created = v["Created"].(time.Time)
 		contributionArea.CreatedBy = v["CreatedBy"].(string)
-		contributionArea.Modified = v["Modified"].(time.Time)
+		if v["Modified"] != nil {
+			contributionArea.Modified = v["Modified"].(time.Time)
+		}
 		if v["ModifiedBy"] != nil {
 			contributionArea.ModifiedBy = v["ModifiedBy"].(string)
 		}
@@ -68,7 +70,9 @@ func (r *contributionAreaRepository) GetByOption(offset int, filter int, orderby
 		contributionArea.Name = v["Name"].(string)
 		contributionArea.Created = v["Created"].(time.Time)
 		contributionArea.CreatedBy = v["CreatedBy"].(string)
-		contributionArea.Modified = v["Modified"].(time.Time)
+		if v["Modified"] != nil {
+			contributionArea.Modified = v["Modified"].(time.Time)
+		}
 		if v["ModifiedBy"] != nil {
 			contributionArea.ModifiedBy = v["ModifiedBy"].(string)
 		}
@@ -87,6 +91,7 @@ func (r *contributionAreaRepository) GetByID(id int64) (*model.ContributionArea,
 		return nil, err
 	}
 
+	var modified sql.NullTime
 	var modifiedBy sql.NullString
 
 	err = row.Scan(
@@ -94,13 +99,16 @@ func (r *contributionAreaRepository) GetByID(id int64) (*model.ContributionArea,
 		&contributionArea.Name,
 		&contributionArea.Created,
 		&contributionArea.CreatedBy,
-		&contributionArea.Modified,
+		&modified,
 		&modifiedBy,
 	)
 	if err != nil {
 		return nil, err
 	}
 
+	if modified.Valid {
+		contributionArea.Modified = modified.Time
+	}
 	if modifiedBy.Valid {
 		contributionArea.ModifiedBy = modifiedBy.String
 	}
