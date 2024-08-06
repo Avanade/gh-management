@@ -3,7 +3,9 @@ package externallink
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"main/model"
+	"main/pkg/session"
 	service "main/service/externallink"
 	"net/http"
 
@@ -82,6 +84,13 @@ func (c *externalLinkController) CreateExternalLink(w http.ResponseWriter, r *ht
 		return
 	}
 
+	// temporary
+	sessionaz, _ := session.Store.Get(r, "auth-session")
+	iprofile := sessionaz.Values["profile"]
+	profile := iprofile.(map[string]interface{})
+	username := fmt.Sprint(profile["preferred_username"])
+	externalLink.CreatedBy = username
+
 	result, err := c.externalLinkService.Create(&externalLink)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -145,6 +154,13 @@ func (c *externalLinkController) UpdateExternalLinkById(w http.ResponseWriter, r
 		json.NewEncoder(w).Encode(errors.New(err.Error()))
 		return
 	}
+
+	// temporary
+	sessionaz, _ := session.Store.Get(r, "auth-session")
+	iprofile := sessionaz.Values["profile"]
+	profile := iprofile.(map[string]interface{})
+	username := fmt.Sprint(profile["preferred_username"])
+	externalLink.ModifiedBy = username
 
 	id := params["id"]
 	newExternalLink, err := c.externalLinkService.Update(id, &externalLink)

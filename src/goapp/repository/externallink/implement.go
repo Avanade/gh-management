@@ -40,8 +40,12 @@ func (r *externalLinkRepository) Select() ([]model.ExternalLink, error) {
 		externalLink.IsEnabled = v["IsEnabled"].(bool)
 		externalLink.Created = v["Created"].(time.Time)
 		externalLink.CreatedBy = v["CreatedBy"].(string)
-		externalLink.Modified = v["Modified"].(time.Time)
-		externalLink.ModifiedBy = v["ModifiedBy"].(string)
+		if v["Modified"] != nil {
+			externalLink.Modified = v["Modified"].(time.Time)
+		}
+		if v["ModifiedBy"] != nil {
+			externalLink.ModifiedBy = v["ModifiedBy"].(string)
+		}
 
 		externalLinks = append(externalLinks, externalLink)
 	}
@@ -73,8 +77,12 @@ func (r *externalLinkRepository) SelectByIsEnabled(isEnabled bool) ([]model.Exte
 		externalLink.IsEnabled = mapRow["IsEnabled"].(bool)
 		externalLink.Created = mapRow["Created"].(time.Time)
 		externalLink.CreatedBy = mapRow["CreatedBy"].(string)
-		externalLink.Modified = mapRow["Modified"].(time.Time)
-		externalLink.ModifiedBy = mapRow["ModifiedBy"].(string)
+		if mapRow["Modified"] != nil {
+			externalLink.Modified = mapRow["Modified"].(time.Time)
+		}
+		if mapRow["ModifiedBy"] != nil {
+			externalLink.ModifiedBy = mapRow["ModifiedBy"].(string)
+		}
 
 		externalLinks = append(externalLinks, externalLink)
 	}
@@ -90,6 +98,9 @@ func (r *externalLinkRepository) SelectByID(id int64) (*model.ExternalLink, erro
 		return nil, err
 	}
 
+	var modified sql.NullTime
+	var modifiedBy sql.NullString
+
 	err = row.Scan(
 		&externalLink.ID,
 		&externalLink.IconSVGPath,
@@ -98,11 +109,19 @@ func (r *externalLinkRepository) SelectByID(id int64) (*model.ExternalLink, erro
 		&externalLink.IsEnabled,
 		&externalLink.Created,
 		&externalLink.CreatedBy,
-		&externalLink.Modified,
-		&externalLink.ModifiedBy,
+		&modified,
+		&modifiedBy,
 	)
 	if err != nil {
 		return nil, err
+	}
+
+	if modified.Valid {
+		externalLink.Modified = modified.Time
+	}
+
+	if modifiedBy.Valid {
+		externalLink.ModifiedBy = modifiedBy.String
 	}
 
 	return &externalLink, nil
