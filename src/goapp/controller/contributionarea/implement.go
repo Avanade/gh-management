@@ -3,7 +3,9 @@ package contributionarea
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"main/model"
+	"main/pkg/session"
 	service "main/service/contributionarea"
 	"net/http"
 
@@ -30,6 +32,13 @@ func (c *contributionAreaController) CreateContributionAreas(w http.ResponseWrit
 		json.NewEncoder(w).Encode(errors.New(err.Error()))
 		return
 	}
+
+	// temporary
+	sessionaz, _ := session.Store.Get(r, "auth-session")
+	iprofile := sessionaz.Values["profile"]
+	profile := iprofile.(map[string]interface{})
+	username := fmt.Sprint(profile["preferred_username"])
+	contributionArea.CreatedBy = username
 
 	result, err := c.contributionAreaService.Create(&contributionArea)
 	if err != nil {
@@ -132,6 +141,13 @@ func (c *contributionAreaController) UpdateContributionArea(w http.ResponseWrite
 		json.NewEncoder(w).Encode(errors.New(err.Error()))
 		return
 	}
+
+	// temporary
+	sessionaz, _ := session.Store.Get(r, "auth-session")
+	iprofile := sessionaz.Values["profile"]
+	profile := iprofile.(map[string]interface{})
+	username := fmt.Sprint(profile["preferred_username"])
+	contributionArea.ModifiedBy = username
 
 	id := params["id"]
 	newContributionArea, err := c.contributionAreaService.Update(id, &contributionArea)

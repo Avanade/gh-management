@@ -3,6 +3,6 @@ CREATE TABLE [dbo].[ContributionArea] (
   [Name] [VARCHAR](100) NOT NULL,
   [Created] [DATETIME] NOT NULL DEFAULT GETDATE(),
   [CreatedBy] [VARCHAR](100) NULL,
-  [Modified] [DATETIME] NOT NULL DEFAULT GETDATE(),
+  [Modified] [DATETIME] NULL,
   [ModifiedBy] [VARCHAR](100) NULL
 )
