@@ -3,20 +3,24 @@ package contributionarea
 import (
 	"errors"
 	"main/model"
-	repositoryContributionArea "main/repository/contributionarea"
+	"main/repository"
 	"strconv"
 )
 
 type contributionAreaService struct {
-	repositoryContributionArea repositoryContributionArea.ContributionAreaRepository
+	Repository *repository.Repository
 }
 
-// Create implements ContributionAreaService.
+func NewContributionAreaService(repo *repository.Repository) ContributionAreaService {
+	return &contributionAreaService{
+		Repository: repo,
+	}
+}
+
 func (s *contributionAreaService) Create(contributionArea *model.ContributionArea) (*model.ContributionArea, error) {
-	return s.repositoryContributionArea.Insert(contributionArea)
+	return s.Repository.ContributionArea.Insert(contributionArea)
 }
 
-// Get implements ContributionAreaService.
 func (s *contributionAreaService) Get(offset, filter, orderby, ordertype, search string) (contributionAreas []model.ContributionArea, total int64, err error) {
 	if search != "" || (offset != "" && filter != "") {
 		filterInt, err := strconv.Atoi(filter)
@@ -27,42 +31,39 @@ func (s *contributionAreaService) Get(offset, filter, orderby, ordertype, search
 		if err != nil {
 			return nil, 0, err
 		}
-		contributionAreas, err = s.repositoryContributionArea.SelectByOption(offsetInt, filterInt, orderby, ordertype, search)
+		contributionAreas, err = s.Repository.ContributionArea.SelectByOption(offsetInt, filterInt, orderby, ordertype, search)
 		if err != nil {
 			return nil, 0, err
 		}
 	} else {
-		contributionAreas, err = s.repositoryContributionArea.Select()
+		contributionAreas, err = s.Repository.ContributionArea.Select()
 		if err != nil {
 			return nil, 0, err
 		}
 	}
-	total, err = s.repositoryContributionArea.Total()
+	total, err = s.Repository.ContributionArea.Total()
 	if err != nil {
 		return nil, 0, err
 	}
 	return contributionAreas, total, nil
 }
 
-// GetByID implements ContributionAreaService.
 func (s *contributionAreaService) GetByID(id string) (*model.ContributionArea, error) {
 	parseId, err := strconv.ParseInt(id, 10, 64)
 	if err != nil {
 		return nil, err
 	}
-	return s.repositoryContributionArea.SelectById(parseId)
+	return s.Repository.ContributionArea.SelectById(parseId)
 }
 
-// Update implements ContributionAreaService.
 func (s *contributionAreaService) Update(id string, contributionArea *model.ContributionArea) (*model.ContributionArea, error) {
 	parsedId, err := strconv.ParseInt(id, 10, 64)
 	if err != nil {
 		return nil, err
 	}
-	return s.repositoryContributionArea.Update(parsedId, contributionArea)
+	return s.Repository.ContributionArea.Update(parsedId, contributionArea)
 }
 
-// Validate implements ContributionAreaService.
 func (s *contributionAreaService) Validate(contributionArea *model.ContributionArea) error {
 	if contributionArea == nil {
 		return errors.New("contribution area is empty")
@@ -71,8 +72,4 @@ func (s *contributionAreaService) Validate(contributionArea *model.ContributionA
 		return errors.New("name is required")
 	}
 	return nil
-}
-
-func NewContributionAreaService(repositoryContributionArea repositoryContributionArea.ContributionAreaRepository) ContributionAreaService {
-	return &contributionAreaService{repositoryContributionArea}
 }

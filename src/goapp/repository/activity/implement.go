@@ -2,16 +2,19 @@ package activity
 
 import (
 	"database/sql"
+	db "main/infrastructure/database"
 	"main/model"
-	"main/repository"
 	"time"
 )
 
 type activityRepository struct {
-	repository.Database
+	db.Database
 }
 
-// Insert implements ActivityRepository.
+func NewActivityRepository(db db.Database) ActivityRepository {
+	return &activityRepository{db}
+}
+
 func (r *activityRepository) Insert(activity *model.Activity) (*model.Activity, error) {
 	result, err := r.QueryRow("[dbo].[usp_CommunityActivity_Insert]",
 		sql.Named("CommunityId", activity.CommunityId),
@@ -32,7 +35,6 @@ func (r *activityRepository) Insert(activity *model.Activity) (*model.Activity, 
 	return activity, nil
 }
 
-// Select implements ActivityRepository.
 func (r *activityRepository) Select() ([]model.Activity, error) {
 	var activities []model.Activity
 	row, err := r.Query("[dbo].[usp_CommunityActivity_Select]")
@@ -50,66 +52,37 @@ func (r *activityRepository) Select() ([]model.Activity, error) {
 		var activity model.Activity
 
 		activity.ID = v["Id"].(int64)
-		activity.CommunityId = v["CommunityId"].(int64)
 		activity.Name = v["Name"].(string)
-		activity.ActivityTypeId = v["ActivityTypeId"].(int64)
 		activity.Url = v["Url"].(string)
 		activity.Date = v["Date"].(time.Time)
 		activity.Created = v["Created"].(time.Time)
 		activity.CreatedBy = v["CreatedBy"].(string)
+		if v["Modified"] != nil {
+			activity.Modified = v["Modified"].(time.Time)
+		}
 		activity.Modified = v["Modified"].(time.Time)
 		if v["ModifiedBy"] != nil {
 			activity.ModifiedBy = v["ModifiedBy"].(string)
 		}
+
+		activity.CommunityId = v["CommunityId"].(int64)
+		activity.Community = model.Community{
+			ID:   v["CommunityId"].(int64),
+			Name: v["CommunityName"].(string),
+		}
+
+		activity.ActivityTypeId = v["ActivityTypeId"].(int64)
+		activity.ActivityType = model.ActivityType{
+			ID:   v["ActivityTypeId"].(int64),
+			Name: v["ActivityTypeName"].(string),
+		}
+
 		activities = append(activities, activity)
 	}
 
 	return activities, nil
 }
 
-// SelectById implements ActivityRepository.
-func (r *activityRepository) SelectById(id int64) (*model.Activity, error) {
-	var activity model.Activity
-	row, err := r.QueryRow("[dbo].[usp_CommunityActivity_Select_ById]",
-		sql.Named("Id", id))
-	if err != nil {
-		return nil, err
-	}
-
-	var modifiedBy sql.NullString
-	var url sql.NullString
-
-	err = row.Scan(
-		&activity.ID,
-		&activity.Name,
-		&activity.CommunityId,
-		&activity.CommunityName,
-		&activity.ActivityTypeId,
-		&activity.ActivityTypeName,
-		&activity.PrimaryContributionAreaId,
-		&activity.PrimaryContributionAreaName,
-		&url,
-		&activity.Date,
-		&activity.Created,
-		&activity.CreatedBy,
-		&activity.Modified,
-		&modifiedBy,
-	)
-	if err != nil {
-		return nil, err
-	}
-
-	if url.Valid {
-		activity.Url = url.String
-	}
-	if modifiedBy.Valid {
-		activity.ModifiedBy = modifiedBy.String
-	}
-
-	return &activity, nil
-}
-
-// SelectByOptions implements ActivityRepository.
 func (r *activityRepository) SelectByOptions(offset int64, filter int64, orderBy string, orderType string, search string, createdBy string) ([]model.Activity, error) {
 	var activities []model.Activity
 	rows, err := r.Query("[dbo].[usp_CommunityActivity_Select_ByOptionAndCreatedBy]",
@@ -133,24 +106,80 @@ func (r *activityRepository) SelectByOptions(offset int64, filter int64, orderBy
 		var activity model.Activity
 
 		activity.ID = v["Id"].(int64)
-		activity.CommunityId = v["CommunityId"].(int64)
 		activity.Name = v["Name"].(string)
-		activity.ActivityTypeId = v["ActivityTypeId"].(int64)
 		activity.Url = v["Url"].(string)
 		activity.Date = v["Date"].(time.Time)
 		activity.Created = v["Created"].(time.Time)
 		activity.CreatedBy = v["CreatedBy"].(string)
-		activity.Modified = v["Modified"].(time.Time)
+		if v["Modified"] != nil {
+			activity.Modified = v["Modified"].(time.Time)
+		}
 		if v["ModifiedBy"] != nil {
 			activity.ModifiedBy = v["ModifiedBy"].(string)
 		}
+
+		activity.CommunityId = v["CommunityId"].(int64)
+		activity.Community = model.Community{
+			ID:   v["CommunityId"].(int64),
+			Name: v["CommunityName"].(string),
+		}
+
+		activity.ActivityTypeId = v["ActivityTypeId"].(int64)
+		activity.ActivityType = model.ActivityType{
+			ID:   v["ActivityTypeId"].(int64),
+			Name: v["ActivityTypeName"].(string),
+		}
+
 		activities = append(activities, activity)
 	}
 
 	return activities, nil
 }
 
-// Total implements ActivityRepository.
+func (r *activityRepository) SelectById(id int64) (*model.Activity, error) {
+	var activity model.Activity
+	rows, err := r.Query("[dbo].[usp_CommunityActivity_Select_ById]",
+		sql.Named("Id", id))
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	mapRows, err := r.RowsToMap(rows)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, v := range mapRows {
+		activity.ID = v["Id"].(int64)
+		activity.Name = v["Name"].(string)
+		activity.Url = v["Url"].(string)
+		activity.Date = v["Date"].(time.Time)
+		activity.Created = v["Created"].(time.Time)
+		activity.CreatedBy = v["CreatedBy"].(string)
+		if v["Modified"] != nil {
+			activity.Modified = v["Modified"].(time.Time)
+		}
+		if v["ModifiedBy"] != nil {
+			activity.ModifiedBy = v["ModifiedBy"].(string)
+		}
+
+		activity.CommunityId = v["CommunityId"].(int64)
+		activity.Community = model.Community{
+			ID:   v["CommunityId"].(int64),
+			Name: v["CommunityName"].(string),
+		}
+
+		activity.ActivityTypeId = v["ActivityTypeId"].(int64)
+		activity.ActivityType = model.ActivityType{
+			ID:   v["ActivityTypeId"].(int64),
+			Name: v["ActivityTypeName"].(string),
+		}
+	}
+
+	return &activity, nil
+}
+
 func (r *activityRepository) Total() (int64, error) {
 	var total int64
 	row, err := r.QueryRow("[dbo].[usp_CommunityActivity_TotalCount]")
@@ -164,7 +193,6 @@ func (r *activityRepository) Total() (int64, error) {
 	return total, nil
 }
 
-// TotalByOptions implements ActivityRepository.
 func (r *activityRepository) TotalByOptions(search string, createdBy string) (int64, error) {
 	var total int64
 	row, err := r.QueryRow("[dbo].[usp_CommunityActivity_TotalCount_ByOptionAndCreatedBy]",
@@ -178,8 +206,4 @@ func (r *activityRepository) TotalByOptions(search string, createdBy string) (in
 		return 0, err
 	}
 	return total, nil
-}
-
-func NewActivityRepository(db repository.Database) ActivityRepository {
-	return &activityRepository{db}
 }

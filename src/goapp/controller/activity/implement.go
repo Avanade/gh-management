@@ -2,7 +2,9 @@ package activity
 
 import (
 	"errors"
+	"fmt"
 	"main/model"
+	"main/pkg/session"
 	serviceActivity "main/service/activity"
 	"net/http"
 
@@ -30,6 +32,13 @@ func (c *activityController) CreateActivity(w http.ResponseWriter, r *http.Reque
 		json.NewEncoder(w).Encode(errors.New(err.Error()))
 		return
 	}
+
+	// temporary
+	sessionaz, _ := session.Store.Get(r, "auth-session")
+	iprofile := sessionaz.Values["profile"]
+	profile := iprofile.(map[string]interface{})
+	username := fmt.Sprint(profile["preferred_username"])
+	activity.CreatedBy = username
 
 	result, err := c.activityService.Create(&activity)
 	if err != nil {
@@ -65,7 +74,15 @@ func (c *activityController) GetActivities(w http.ResponseWriter, r *http.Reques
 		ordertype = params["ordertype"][0]
 	}
 	w.Header().Set("Content-Type", "application/json")
-	activities, total, err := c.activityService.Get(offset, filter, orderby, ordertype, search)
+
+	// temporary
+	sessionaz, _ := session.Store.Get(r, "auth-session")
+	iprofile := sessionaz.Values["profile"]
+	profile := iprofile.(map[string]interface{})
+	username := fmt.Sprint(profile["preferred_username"])
+	createdBy := username
+
+	activities, total, err := c.activityService.Get(offset, filter, orderby, ordertype, search, createdBy)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(err.Error())

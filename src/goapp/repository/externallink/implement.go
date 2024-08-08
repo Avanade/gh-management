@@ -2,18 +2,18 @@ package externallink
 
 import (
 	"database/sql"
+	db "main/infrastructure/database"
 	"main/model"
-	"main/repository"
 	"time"
 )
 
 type externalLinkRepository struct {
-	repository.Database
+	db.Database
 }
 
-func NewExternalLinkRepository(db repository.Database) ExternalLinkRepository {
+func NewExternalLinkRepository(database db.Database) ExternalLinkRepository {
 	return &externalLinkRepository{
-		Database: db,
+		Database: database,
 	}
 }
 

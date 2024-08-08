@@ -4,7 +4,7 @@ import (
 	"main/model"
 )
 
-type OSSContributionSponsorRepository interface {
+type OssContributionSponsorRepository interface {
 	Select() ([]model.OSSContributionSponsor, error)
 	SelectByIsArchived(isArchived bool) ([]model.OSSContributionSponsor, error)
 	Insert(ossContributionSponsor *model.OSSContributionSponsor) (*model.OSSContributionSponsor, error)

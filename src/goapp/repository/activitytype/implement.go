@@ -2,15 +2,15 @@ package activitytype
 
 import (
 	"database/sql"
+	db "main/infrastructure/database"
 	"main/model"
-	"main/repository"
 )
 
 type activityTypeRepository struct {
-	repository.Database
+	db.Database
 }
 
-func NewActivityTypeRepository(db repository.Database) ActivityTypeRepository {
+func NewActivityTypeRepository(db db.Database) ActivityTypeRepository {
 	return &activityTypeRepository{db}
 }
 

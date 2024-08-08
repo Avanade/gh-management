@@ -2,17 +2,17 @@ package activitytype
 
 import (
 	"main/model"
-	repositoryActivityType "main/repository/activitytype"
+	"main/repository"
 )
 
 type activityTypeService struct {
-	activityTypeRepository repositoryActivityType.ActivityTypeRepository
+	Repository *repository.Repository
 }
 
-func NewActivityTypeService(activityTypeRepository repositoryActivityType.ActivityTypeRepository) ActivityTypeService {
-	return &activityTypeService{activityTypeRepository}
+func NewActivityTypeService(repo *repository.Repository) ActivityTypeService {
+	return &activityTypeService{Repository: repo}
 }
 
 func (s *activityTypeService) Get() ([]model.ActivityType, error) {
-	return s.activityTypeRepository.Select()
+	return s.Repository.ActivityType.Select()
 }
