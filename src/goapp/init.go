@@ -2,16 +2,11 @@ package main
 
 import (
 	"main/config"
+	c "main/controller"
 	"main/infrastructure/database"
 	r "main/repository"
 	"main/router"
 	s "main/service"
-
-	controllerActivity "main/controller/activity"
-	controllerActivityType "main/controller/activitytype"
-	controllerContributionArea "main/controller/contributionarea"
-	controllerExternalLink "main/controller/externallink"
-	controllerOssContributionSponsor "main/controller/osscontributionsponsor"
 )
 
 var (
@@ -35,11 +30,12 @@ var (
 		s.NewExternalLinkService(repo),
 		s.NewOssContributionSponsorService(repo))
 
-	externalLinkController           controllerExternalLink.ExternalLinkController                     = controllerExternalLink.NewExternalLinkController(serv)
-	contributionAreaController       controllerContributionArea.ContributionAreaController             = controllerContributionArea.NewContributionAreaController(serv)
-	ossContributionSponsorController controllerOssContributionSponsor.OSSContributionSponsorController = controllerOssContributionSponsor.NewOssContributionSponsorController(serv)
-	activityTypeController           controllerActivityType.ActivityTypeController                     = controllerActivityType.NewActivityTypeController(serv)
-	activityController               controllerActivity.ActivityController                             = controllerActivity.NewActivityController(serv)
+	cont = c.NewController(
+		c.NewActivityController(serv),
+		c.NewActivityTypeController(serv),
+		c.NewContributionAreaController(serv),
+		c.NewExternalLinkController(serv),
+		c.NewOssContributionSponsorController(serv))
 
 	httpRouter router.Router = router.NewMuxRouter()
 )
