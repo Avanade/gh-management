@@ -11,22 +11,22 @@ type activityRepository struct {
 	db.Database
 }
 
-func NewActivityRepository(db db.Database) ActivityRepository {
-	return &activityRepository{db}
+func NewActivityRepository(database db.Database) ActivityRepository {
+	return &activityRepository{database}
 }
 
 func (r *activityRepository) Insert(activity *model.Activity) (*model.Activity, error) {
-	result, err := r.QueryRow("[dbo].[usp_CommunityActivity_Insert]",
+	row, err := r.QueryRow("[dbo].[usp_CommunityActivity_Insert]",
 		sql.Named("CommunityId", activity.CommunityId),
 		sql.Named("Name", activity.Name),
 		sql.Named("ActivityTypeId", activity.ActivityTypeId),
 		sql.Named("Url", activity.Url),
-		sql.Named("Date", activity.Date),
+		sql.Named("Date", activity.Date.Format("2006-01-02")),
 		sql.Named("CreatedBy", activity.CreatedBy))
 	if err != nil {
 		return nil, err
 	}
-	err = result.Scan(
+	err = row.Scan(
 		&activity.ID,
 		&activity.Created)
 	if err != nil {

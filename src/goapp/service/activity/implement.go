@@ -8,7 +8,7 @@ import (
 )
 
 type activityService struct {
-	Repository *repository.Repository
+	*repository.Repository
 }
 
 func NewActivityService(repo *repository.Repository) ActivityService {

@@ -4,6 +4,7 @@ import (
 	"main/infrastructure/database"
 	rActivity "main/repository/activity"
 	rActivityContributionArea "main/repository/activitycontributionarea"
+	rActivityHelp "main/repository/activityhelp"
 	rActivityType "main/repository/activitytype"
 	rContributionArea "main/repository/contributionarea"
 	rExternalLink "main/repository/externallink"
@@ -13,6 +14,7 @@ import (
 type Repository struct {
 	Activity                 rActivity.ActivityRepository
 	ActivityContributionArea rActivityContributionArea.ActivityContributionAreaRepository
+	ActivityHelp             rActivityHelp.ActivityHelpRepository
 	ActivityType             rActivityType.ActivityTypeRepository
 	ContributionArea         rContributionArea.ContributionAreaRepository
 	ExternalLink             rExternalLink.ExternalLinkRepository
@@ -64,5 +66,11 @@ func NewExternalLink(db database.Database) RepositoryOptionFunc {
 func NewOssContributionSponsor(db database.Database) RepositoryOptionFunc {
 	return func(r *Repository) {
 		r.OssContributionSponsor = rOssContributionSponsor.NewOSSContributionSponsorRepository(db)
+	}
+}
+
+func NewActivityHelp(db database.Database) RepositoryOptionFunc {
+	return func(r *Repository) {
+		r.ActivityHelp = rActivityHelp.NewActivityHelpRepository(db)
 	}
 }

@@ -1,5 +1,5 @@
 CREATE PROCEDURE [dbo].[usp_CommunityActivityHelpType_Insert]
-  @ActivityActivityId [INT],
+  @ActivityId [INT],
   @HelpTypeId [INT],
   @Details [VARCHAR](100)
 AS
@@ -12,9 +12,11 @@ BEGIN
     [HelpTypeId],
     [Details]
   )
+  OUTPUT
+    [INSERTED].[Id]
   VALUES
   (
-    @ActivityActivityId,
+    @ActivityId,
     @HelpTypeId,
     @Details
   )

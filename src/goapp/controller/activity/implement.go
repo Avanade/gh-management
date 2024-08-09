@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"main/model"
 	"main/pkg/session"
-	serviceActivity "main/service/activity"
+	"main/service"
 	"net/http"
 
 	"github.com/goccy/go-json"
@@ -13,24 +13,43 @@ import (
 )
 
 type activityController struct {
-	activityService serviceActivity.ActivityService
+	*service.Service
 }
 
 // CreateActivity implements ActivityController.
 func (c *activityController) CreateActivity(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	var activity model.Activity
-	err := json.NewDecoder(r.Body).Decode(&activity)
+	var requestBody CreateActivityRequest
+	err := json.NewDecoder(r.Body).Decode(&requestBody)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(errors.New("error unmarshalling data"))
 		return
 	}
-	err = c.activityService.Validate(&activity)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(errors.New(err.Error()))
-		return
+
+	activity := model.Activity{
+		Name:           requestBody.Name,
+		Date:           requestBody.Date,
+		Url:            requestBody.Url,
+		CommunityId:    requestBody.CommunityId,
+		ActivityTypeId: requestBody.Type.ID,
+	}
+
+	activity.ActivityType = model.ActivityType{
+		ID:   requestBody.Type.ID,
+		Name: requestBody.Type.Name,
+	}
+
+	for _, contributionArea := range requestBody.ContributionAreas {
+		activity.ActivityContributionAreas = append(activity.ActivityContributionAreas, model.ActivityContributionArea{
+			ActivityId:         activity.ID,
+			ContributionAreaId: contributionArea.ID,
+			IsPrimary:          contributionArea.IsPrimary,
+			ContributionArea: model.ContributionArea{
+				ID:   contributionArea.ID,
+				Name: contributionArea.Name,
+			},
+		})
 	}
 
 	// temporary
@@ -40,12 +59,23 @@ func (c *activityController) CreateActivity(w http.ResponseWriter, r *http.Reque
 	username := fmt.Sprint(profile["preferred_username"])
 	activity.CreatedBy = username
 
-	result, err := c.activityService.Create(&activity)
+	err = c.Service.Activity.Validate(&activity)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(errors.New(err.Error()))
+		return
+	}
+
+	result, err := c.Service.Activity.Create(&activity)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(errors.New("error saving the activity"))
 		return
 	}
+
+	if requestBody.Help != nil {
+	}
+
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(result)
 }
@@ -82,14 +112,14 @@ func (c *activityController) GetActivities(w http.ResponseWriter, r *http.Reques
 	username := fmt.Sprint(profile["preferred_username"])
 	createdBy := username
 
-	activities, total, err := c.activityService.Get(offset, filter, orderby, ordertype, search, createdBy)
+	activities, total, err := c.Service.Activity.Get(offset, filter, orderby, ordertype, search, createdBy)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(err.Error())
 		return
 	}
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(GetResponseDto{
+	json.NewEncoder(w).Encode(GetActivitiesResponse{
 		Data:  activities,
 		Total: total,
 	})
@@ -110,7 +140,7 @@ func (c *activityController) GetActivityById(w http.ResponseWriter, r *http.Requ
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	activity, err := c.activityService.GetById(string(params["id"]))
+	activity, err := c.Service.Activity.GetById(string(params["id"]))
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(err.Error())
@@ -120,8 +150,8 @@ func (c *activityController) GetActivityById(w http.ResponseWriter, r *http.Requ
 	json.NewEncoder(w).Encode(activity)
 }
 
-func NewActivityController(activityService serviceActivity.ActivityService) ActivityController {
+func NewActivityController(serv *service.Service) ActivityController {
 	return &activityController{
-		activityService: activityService,
+		Service: serv,
 	}
 }

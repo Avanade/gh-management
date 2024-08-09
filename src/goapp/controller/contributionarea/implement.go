@@ -6,14 +6,14 @@ import (
 	"fmt"
 	"main/model"
 	"main/pkg/session"
-	service "main/service/contributionarea"
+	"main/service"
 	"net/http"
 
 	"github.com/gorilla/mux"
 )
 
 type contributionAreaController struct {
-	contributionAreaService service.ContributionAreaService
+	*service.Service
 }
 
 // CreateContributionAreas implements ContributionAreaController.
@@ -26,7 +26,7 @@ func (c *contributionAreaController) CreateContributionAreas(w http.ResponseWrit
 		json.NewEncoder(w).Encode(errors.New("error unmarshalling data"))
 		return
 	}
-	err = c.contributionAreaService.Validate(&contributionArea)
+	err = c.Service.ContributionArea.Validate(&contributionArea)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(errors.New(err.Error()))
@@ -40,7 +40,7 @@ func (c *contributionAreaController) CreateContributionAreas(w http.ResponseWrit
 	username := fmt.Sprint(profile["preferred_username"])
 	contributionArea.CreatedBy = username
 
-	result, err := c.contributionAreaService.Create(&contributionArea)
+	result, err := c.Service.ContributionArea.Create(&contributionArea)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(errors.New("error saving the external link"))
@@ -65,7 +65,7 @@ func (c *contributionAreaController) GetContributionAreaById(w http.ResponseWrit
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	contributionArea, err := c.contributionAreaService.GetByID(string(params["id"]))
+	contributionArea, err := c.Service.ContributionArea.GetByID(string(params["id"]))
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(err.Error())
@@ -98,7 +98,7 @@ func (c *contributionAreaController) GetContributionAreas(w http.ResponseWriter,
 	if params["ordertype"] != nil {
 		ordertype = params["ordertype"][0]
 	}
-	contributionAreas, total, err := c.contributionAreaService.Get(offset, filter, orderby, ordertype, search)
+	contributionAreas, total, err := c.Service.ContributionArea.Get(offset, filter, orderby, ordertype, search)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(err.Error())
@@ -135,7 +135,7 @@ func (c *contributionAreaController) UpdateContributionArea(w http.ResponseWrite
 		json.NewEncoder(w).Encode(errors.New("error unmarshalling data"))
 		return
 	}
-	err = c.contributionAreaService.Validate(&contributionArea)
+	err = c.Service.ContributionArea.Validate(&contributionArea)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(errors.New(err.Error()))
@@ -150,7 +150,7 @@ func (c *contributionAreaController) UpdateContributionArea(w http.ResponseWrite
 	contributionArea.ModifiedBy = username
 
 	id := params["id"]
-	newContributionArea, err := c.contributionAreaService.Update(id, &contributionArea)
+	newContributionArea, err := c.Service.ContributionArea.Update(id, &contributionArea)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(errors.New("error saving the external link"))
@@ -160,8 +160,8 @@ func (c *contributionAreaController) UpdateContributionArea(w http.ResponseWrite
 	json.NewEncoder(w).Encode(newContributionArea)
 }
 
-func NewContributionAreaController(contributionAreaService service.ContributionAreaService) ContributionAreaController {
+func NewContributionAreaController(serv *service.Service) ContributionAreaController {
 	return &contributionAreaController{
-		contributionAreaService: contributionAreaService,
+		Service: serv,
 	}
 }

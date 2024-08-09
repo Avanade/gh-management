@@ -2,21 +2,23 @@ package activitytype
 
 import (
 	"encoding/json"
-	serviceActivityType "main/service/activitytype"
+	"main/service"
 	"net/http"
 )
 
 type activityTypeController struct {
-	activityTypeService serviceActivityType.ActivityTypeService
+	*service.Service
 }
 
-func NewActivityTypeController(activityTypeService serviceActivityType.ActivityTypeService) ActivityTypeController {
-	return &activityTypeController{activityTypeService}
+func NewActivityTypeController(serv *service.Service) ActivityTypeController {
+	return &activityTypeController{
+		Service: serv,
+	}
 }
 
 func (c *activityTypeController) GetActivityTypes(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	activityTypes, err := c.activityTypeService.Get()
+	activityTypes, err := c.Service.ActivityType.Get()
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(err.Error())
