@@ -55,7 +55,9 @@ BEGIN
         [Name] LIKE '%' + [SS].[value] + '%' OR
         [RO].[UserPrincipalName] LIKE '%' + [SS].[value] + '%' OR
         [RT].[Topic] LIKE '%' + [SS].[value] + '%'
-      )
+      ) 
+      WHERE
+        [P].[VisibilityId] != 1
     ) AS [Repository]
     GROUP BY [Name], [CreatedBy], [RepositorySource], [Id]
   )

@@ -11,7 +11,8 @@ BEGIN
 		[dbo].[Repository]
 	WHERE	
 		[Name] LIKE '%' + @Search + '%' AND
-    [RepositorySource] != 'GitHub'
+    [RepositorySource] != 'GitHub' AND
+    [VisibilityId] != 1
   
   UNION
 
@@ -24,7 +25,8 @@ BEGIN
     [dbo].[Repository]
   WHERE	
     [Name] LIKE '%' + @Search + '%' AND
-    [RepositorySource] = 'GitHub'
+    [RepositorySource] = 'GitHub' AND
+    [VisibilityId] != 1
 
   ORDER BY [Name]
 END
