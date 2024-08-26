@@ -22,5 +22,6 @@ BEGIN
   FROM 
     [dbo].[Repository]
   WHERE
-    [AssetCode] = @AssetCode
+    [AssetCode] = @AssetCode AND
+    [VisibilityId] != 1
 END
