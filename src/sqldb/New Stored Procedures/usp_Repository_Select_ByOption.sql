@@ -26,7 +26,9 @@ BEGIN
       LEFT JOIN [dbo].[Visibility] AS [V] ON [R].[VisibilityId] = [V].[Id]
       LEFT JOIN [dbo].[RepositoryTopic] AS [RT] ON [RT].[RepositoryId] = [R].[Id]
       INNER JOIN STRING_SPLIT(@Search, ' ') AS [SS] ON ([R].[Name] LIKE '%' + [SS].[value] + '%' OR [RT].[Topic] LIKE '%' + [SS].[value] + '%')
-      WHERE 
+      WHERE
+          [R].[VisibilityId] != 1
+        AND
           @FilterType = 0
         OR
           ([RT].[Topic] IN (SELECT VALUE FROM STRING_SPLIT(@Filter, ',')) AND @FilterType = 1)
