@@ -217,6 +217,7 @@ func setApiRoutes() {
 	httpRouter.POST("/api/github-organization", m.Chain(rtApi.AddOrganization, m.AzureAuth(), m.GitHubAuth()))
 	httpRouter.GET("/api/github-organization", m.Chain(rtApi.GetAllOrganizationRequest, m.AzureAuth(), m.GitHubAuth()))
 	httpRouter.GET("/api/github-organization/region", m.Chain(rtApi.GetAllRegionalOrganizations, m.AzureAuth(), m.GitHubAuth()))
+	httpRouter.GET("/api/github-organization/region/name", m.Chain(rtApi.GetAllRegionalOrganizationsName))
 	httpRouter.GET("/api/github-organization/{id}/status", m.Chain(rtApi.GetOrganizationApprovalRequests, m.AzureAuth(), m.GitHubAuth()))
 
 	httpRouter.POST("/api/github-copilot", m.Chain(rtApi.AddGitHubCopilot, m.AzureAuth(), m.GitHubAuth()))

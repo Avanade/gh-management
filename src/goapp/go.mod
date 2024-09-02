@@ -40,6 +40,7 @@ require (
 	github.com/lestrrat-go/jwx v1.2.29
 	github.com/microsoft/ApplicationInsights-Go v0.4.4
 	github.com/pquerna/cachecontrol v0.1.0 // indirect
+	github.com/rs/cors v1.11.1
 	github.com/thedatashed/xlsxreader v1.2.5
 	golang.org/x/crypto v0.21.0 // indirect
 	golang.org/x/net v0.23.0 // indirect
