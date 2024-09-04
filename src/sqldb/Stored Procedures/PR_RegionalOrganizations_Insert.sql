@@ -1,32 +1,34 @@
 CREATE PROCEDURE [dbo].[PR_RegionalOrganizations_Insert]
 (
-			@Id INT,
-            @Name VARCHAR(100)
+    @Id INT,
+    @Name VARCHAR(100),
+    @IsCleanUpMembersEnabled BIT,
+    @IsIndexRepoEnabled BIT,
+    @IsCopilotRequestEnabled BIT,
+    @IsAccessRequestEnabled BIT,
+    @IsEnabled BIT        
 )
 AS
 BEGIN
-	-- SET NOCOUNT ON added to prevent extra result sets from
-	-- interfering with SELECT statements.
-	SET NOCOUNT ON;
-
-    -- Insert statements for procedure here
-	IF NOT EXISTS (SELECT Name FROM RegionalOrganizations WHERE Id = @Id)
-        BEGIN
-            INSERT INTO [dbo].[RegionalOrganizations]
-                (
-                    [Id],
-                    [Name]
-                )
-            VALUES
-                (
-                    @Id,
-                    @Name
-                )
-        END
-    ELSE
-        BEGIN
-            UPDATE [dbo].[RegionalOrganizations] 
-            SET [Name] = @Name
-            WHERE [Id] = @Id
-        END
+	SET NOCOUNT ON
+    INSERT INTO [dbo].[RegionalOrganizations]
+    (
+        [Id],
+        [Name],
+        [IsCleanUpMembersEnabled],
+        [IsIndexRepoEnabled],
+        [IsCopilotRequestEnabled],
+        [IsAccessRequestEnabled],
+        [IsEnabled]
+    )
+    VALUES
+    (
+        @Id,
+        @Name,
+        @IsCleanUpMembersEnabled,
+        @IsIndexRepoEnabled,
+        @IsCopilotRequestEnabled,
+        @IsAccessRequestEnabled,
+        @IsEnabled
+    )
 END
