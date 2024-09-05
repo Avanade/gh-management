@@ -1,15 +1,16 @@
 CREATE PROCEDURE [dbo].[usp_RegionalOrganization_Insert]
   @Id INT,
   @Name VARCHAR(100),
-  @IsCleanUpMembersEnabled BIT,
-  @IsIndexRepoEnabled BIT,
-  @IsCopilotRequestEnabled BIT,
-  @IsAccessRequestEnabled BIT,
-  @IsEnabled BIT
+  @IsCleanUpMembersEnabled BIT = 1,
+  @IsIndexRepoEnabled BIT = 1,
+  @IsCopilotRequestEnabled BIT = 1,
+  @IsAccessRequestEnabled BIT = 1,
+  @IsEnabled BIT = 1,
+  @CreatedBy VARCHAR(100)
 AS
 BEGIN
 	SET NOCOUNT ON
-  INSERT INTO [dbo].[RegionalOrganizations]
+  INSERT INTO [dbo].[RegionalOrganization]
   (
       [Id],
       [Name],
@@ -17,7 +18,8 @@ BEGIN
       [IsIndexRepoEnabled],
       [IsCopilotRequestEnabled],
       [IsAccessRequestEnabled],
-      [IsEnabled]
+      [IsEnabled],
+      [CreatedBy]
   )
   VALUES
   (
@@ -27,6 +29,7 @@ BEGIN
       @IsIndexRepoEnabled,
       @IsCopilotRequestEnabled,
       @IsAccessRequestEnabled,
-      @IsEnabled
+      @IsEnabled,
+      @CreatedBy
   )
 END

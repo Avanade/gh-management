@@ -5,7 +5,8 @@ CREATE PROCEDURE [dbo].[usp_RegionalOrganization_Update]
   @IsIndexRepoEnabled BIT,
   @IsCopilotRequestEnabled BIT,
   @IsAccessRequestEnabled BIT,
-  @IsEnabled BIT
+  @IsEnabled BIT,
+  @ModifiedBy VARCHAR(100)
 AS
 BEGIN
 	SET NOCOUNT ON
@@ -16,7 +17,9 @@ BEGIN
     [IsIndexRepoEnabled] = @IsIndexRepoEnabled,
     [IsCopilotRequestEnabled] = @IsCopilotRequestEnabled,
     [IsAccessRequestEnabled] = @IsAccessRequestEnabled,
-    [IsEnabled] = @IsEnabled
+    [IsEnabled] = @IsEnabled,
+    [ModifiedBy] = @ModifiedBy,
+    [Modified] = GETDATE()
   WHERE
     [Id] = @Id
 END

@@ -9,9 +9,13 @@ BEGIN
     [IsIndexRepoEnabled],
     [IsCopilotRequestEnabled],
     [IsAccessRequestEnabled],
-    [IsEnabled]
+    [IsEnabled],
+    [Created],
+    [CreatedBy],
+    [Modified],
+    [ModifiedBy]
   FROM 
-    [dbo].[RegionalOrganizations] 
+    [dbo].[RegionalOrganization] 
   WHERE 
     [Id] = @Id
 END

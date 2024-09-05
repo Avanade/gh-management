@@ -28,11 +28,6 @@ type User struct {
 	GithubUsername    string
 }
 
-type RegionalOrganization struct {
-	Id   int64
-	Name string
-}
-
 func InsertOrganizationAccess(userPrincipalName string, organizationId int64) (id int64, err error) {
 	db := ConnectDb()
 	defer db.Close()

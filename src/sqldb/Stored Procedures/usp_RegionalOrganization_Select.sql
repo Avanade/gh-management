@@ -1,11 +1,4 @@
 CREATE PROCEDURE [dbo].[usp_RegionalOrganization_Select]
-  @Id INT,
-  @Name VARCHAR(100),
-  @IsCleanUpMembersEnabled BIT,
-  @IsIndexRepoEnabled BIT,
-  @IsCopilotRequestEnabled BIT,
-  @IsAccessRequestEnabled BIT,
-  @IsEnabled BIT
 AS
 BEGIN
     SELECT
@@ -15,7 +8,11 @@ BEGIN
       [IsIndexRepoEnabled],
       [IsCopilotRequestEnabled],
       [IsAccessRequestEnabled],
-      [IsEnabled]
+      [IsEnabled],
+      [Created],
+      [CreatedBy],
+      [Modified],
+      [ModifiedBy]
     FROM 
       [dbo].[RegionalOrganization] 
 END
