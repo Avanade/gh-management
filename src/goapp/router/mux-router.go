@@ -8,6 +8,7 @@ import (
 	rtPages "main/routes/pages"
 
 	"github.com/gorilla/mux"
+	"github.com/rs/cors"
 	"github.com/unrolled/secure"
 )
 
@@ -57,8 +58,16 @@ func (*muxRouter) SERVE(port string) {
 		secureOptions.CustomFrameOptionsValue = fmt.Sprint("ALLOW-FROM ", os.Getenv("FRAME_EMBEDDOR"))
 	}
 
+	defaultCors := cors.New(cors.Options{
+		AllowedOrigins:   []string{os.Getenv("APPROVAL_SYSTEM_APP_URL")},
+		AllowCredentials: true,
+		AllowedHeaders:   []string{"Content-Type", "Authorization"},
+		Debug:            os.Getenv("IS_DEVELOPMENT") == "true",
+	}).Handler
+
 	secureMiddleware := secure.New(secureOptions)
 	muxDispatcher.Use(
+		defaultCors,
 		secureMiddleware.Handler,
 		commonHeadersMiddleware,
 	)
