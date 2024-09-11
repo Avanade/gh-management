@@ -19,11 +19,20 @@ type RegionalOrganization struct {
 	Modified                time.Time
 }
 
-func SelectRegionalOrganization() ([]RegionalOrganization, error) {
+type NullBool struct {
+	Value bool
+}
+
+func SelectRegionalOrganization(isEnabled *NullBool) ([]RegionalOrganization, error) {
 	db := ConnectDb()
 	defer db.Close()
 
-	result, err := db.ExecuteStoredProcedureWithResult("usp_RegionalOrganization_Select", nil)
+	param := make(map[string]interface{})
+	if isEnabled != nil {
+		param["IsEnabled"] = isEnabled.Value
+	}
+
+	result, err := db.ExecuteStoredProcedureWithResult("usp_RegionalOrganization_Select", param)
 	if err != nil {
 		return nil, err
 	}
@@ -55,7 +64,7 @@ func SelectRegionalOrganization() ([]RegionalOrganization, error) {
 	return regionalOrganizations, nil
 }
 
-func SelectRegionalOrganizationByOption(offset, filter int64, search, orderBy, orderType string) (regionalOrganizations []RegionalOrganization, total int64, err error) {
+func SelectRegionalOrganizationByOption(offset, filter int64, search, orderBy, orderType string, isEnabled *NullBool) (regionalOrganizations []RegionalOrganization, total int64, err error) {
 	db := ConnectDb()
 	defer db.Close()
 
@@ -65,6 +74,10 @@ func SelectRegionalOrganizationByOption(offset, filter int64, search, orderBy, o
 		"Search":    search,
 		"OrderBy":   orderBy,
 		"OrderType": orderType,
+	}
+
+	if isEnabled != nil {
+		param["IsEnabled"] = isEnabled.Value
 	}
 
 	result, err := db.ExecuteStoredProcedureWithResult("usp_RegionalOrganization_Select_ByOption", param)
@@ -196,14 +209,12 @@ func InsertRegionalOrganization(organization RegionalOrganization) (int64, error
 		"CreatedBy":               organization.CreatedBy,
 	}
 
-	result, err := db.ExecuteStoredProcedureWithResult("usp_RegionalOrganization_Insert", param)
+	_, err = db.ExecuteStoredProcedureWithResult("usp_RegionalOrganization_Insert", param)
 	if err != nil {
 		return 0, err
 	}
 
-	id := result[0]["Id"].(int64)
-
-	return id, nil
+	return organization.Id, nil
 }
 
 func ValidateRegionalOrganization(organization RegionalOrganization) error {

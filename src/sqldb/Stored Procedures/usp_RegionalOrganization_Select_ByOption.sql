@@ -3,7 +3,8 @@ CREATE PROCEDURE [dbo].[usp_RegionalOrganization_Select_ByOption]
 	@Filter [INT] = 10,
 	@Search [VARCHAR](50) = '',
 	@OrderBy [VARCHAR](50) = 'Date',
-	@OrderType [VARCHAR](5) = 'ASC'
+	@OrderType [VARCHAR](5) = 'ASC',
+  @IsEnabled [BIT] = NULL
 AS
 BEGIN
     SELECT
@@ -23,6 +24,13 @@ BEGIN
       [dbo].[RegionalOrganization] AS [RO]
     INNER JOIN 
       STRING_SPLIT(@Search, ' ') AS [SS] ON ([RO].[Name] LIKE '%'+[SS].[value]+'%')
+    WHERE
+      @IsEnabled IS NULL 
+      OR
+      (
+        @IsEnabled IS NOT NULL AND
+        IsEnabled = @IsEnabled
+      )
     GROUP BY
       [Id],
       [Name],

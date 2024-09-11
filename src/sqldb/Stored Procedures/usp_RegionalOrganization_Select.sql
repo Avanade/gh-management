@@ -1,4 +1,5 @@
 CREATE PROCEDURE [dbo].[usp_RegionalOrganization_Select]
+  @IsEnabled [BIT] = NULL -- NULL = ALL | 1 = ENABLED | 0 = DISABLED
 AS
 BEGIN
     SELECT
@@ -14,5 +15,12 @@ BEGIN
       [Modified],
       [ModifiedBy]
     FROM 
-      [dbo].[RegionalOrganization] 
+      [dbo].[RegionalOrganization]
+    WHERE
+      @IsEnabled IS NULL 
+      OR
+      (
+        @IsEnabled IS NOT NULL AND
+        IsEnabled = @IsEnabled
+      )
 END

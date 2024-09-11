@@ -217,6 +217,7 @@ func setApiRoutes() {
 	httpRouter.PUT("/api/oss-contribution-sponsors/{id}", m.Chain(ossContributionSponsorController.UpdateOssContributionSponsor, m.AzureAuth(), m.IsUserAdmin()))
 
 	// REGIONAL ORGANIZATIONS API
+	httpRouter.GET("/api/enterprise-organizations", m.Chain(rtApi.GetEnterpriseOrganizations, m.AzureAuth()))
 	httpRouter.GET("/api/regional-organizations", m.Chain(rtApi.GetRegionalOrganizationByOption))
 	httpRouter.GET("/api/regional-organizations/{id}", m.Chain(rtApi.GetRegionalOrganizationById))
 	httpRouter.POST("/api/regional-organizations", m.Chain(rtApi.InsertRegionalOrganization))

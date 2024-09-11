@@ -157,7 +157,7 @@ const table = ({
         this.columns.forEach(col => {
           for (const key in data) {
             if(key === col.value){
-              html = html.concat(`<td class="whitespace-nowrap py-4 px-3 text-sm text-gray-500">${col.render != undefined ? col.render(data[key]) : data[key]}</td>`)
+              html = html.concat(`<td class="whitespace-nowrap py-4 px-3 text-sm text-gray-500">${col.render != undefined ? col.render(data[key], data) : data[key]}</td>`)
             }
           }
         });

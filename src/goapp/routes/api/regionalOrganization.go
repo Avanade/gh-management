@@ -2,9 +2,13 @@ package routes
 
 import (
 	"encoding/json"
+	"fmt"
 	"main/pkg/appinsights_wrapper"
 	db "main/pkg/ghmgmtdb"
+	ghAPI "main/pkg/github"
+	"main/pkg/session"
 	"net/http"
+	"os"
 	"strconv"
 	"time"
 
@@ -25,11 +29,56 @@ type RegionalOrganizationDto struct {
 	Modified                time.Time `json:"modified"`
 }
 
+type EnterpriseOrganization struct {
+	Id   int64  `json:"id"`
+	Name string `json:"name"`
+}
+
+func GetEnterpriseOrganizations(w http.ResponseWriter, r *http.Request) {
+	logger := appinsights_wrapper.NewClient()
+	defer logger.EndOperation()
+
+	token := os.Getenv("GH_TOKEN")
+	enterpriseOrgs, err := ghAPI.GetOrganizations(token)
+	if err != nil {
+		logger.LogException(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	isEnabled := db.NullBool{Value: true}
+	regionalOrganizations, err := db.SelectRegionalOrganization(&isEnabled)
+	if err != nil {
+		logger.LogException(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	filteredEnterpriseOrgs := make([]EnterpriseOrganization, 0)
+	for _, enterpriseOrg := range enterpriseOrgs {
+		exists := false
+		for _, regionalOrganization := range regionalOrganizations {
+			if regionalOrganization.Id == enterpriseOrg.GetID() {
+				exists = true
+				break
+			}
+		}
+		if !exists {
+			filteredEnterpriseOrgs = append(filteredEnterpriseOrgs, EnterpriseOrganization{Id: enterpriseOrg.GetID(), Name: enterpriseOrg.GetLogin()})
+		}
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(filteredEnterpriseOrgs)
+}
+
 func GetRegionalOrganizations(w http.ResponseWriter, r *http.Request) {
 	logger := appinsights_wrapper.NewClient()
 	defer logger.EndOperation()
 
-	regionalOrganizations, err := db.SelectRegionalOrganization()
+	isEnabled := db.NullBool{Value: true}
+	regionalOrganizations, err := db.SelectRegionalOrganization(&isEnabled)
 	if err != nil {
 		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -56,8 +105,9 @@ func GetRegionalOrganizationByOption(w http.ResponseWriter, r *http.Request) {
 	search := query.Get("search")
 	orderBy := query.Get("orderBy")
 	orderType := query.Get("orderType")
+	isEnabled := db.NullBool{Value: true}
 
-	regionalOrganizations, total, err := db.SelectRegionalOrganizationByOption(offset, filter, search, orderBy, orderType)
+	regionalOrganizations, total, err := db.SelectRegionalOrganizationByOption(offset, filter, search, orderBy, orderType, &isEnabled)
 	if err != nil {
 		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -117,6 +167,11 @@ func InsertRegionalOrganization(w http.ResponseWriter, r *http.Request) {
 	logger := appinsights_wrapper.NewClient()
 	defer logger.EndOperation()
 
+	sessionaz, _ := session.Store.Get(r, "auth-session")
+	iprofile := sessionaz.Values["profile"]
+	profile := iprofile.(map[string]interface{})
+	username := fmt.Sprint(profile["preferred_username"])
+
 	var regionalOrganizationDto RegionalOrganizationDto
 	err := json.NewDecoder(r.Body).Decode(&regionalOrganizationDto)
 	if err != nil {
@@ -132,7 +187,8 @@ func InsertRegionalOrganization(w http.ResponseWriter, r *http.Request) {
 		IsIndexRepoEnabled:      regionalOrganizationDto.IsIndexRepoEnabled,
 		IsCopilotRequestEnabled: regionalOrganizationDto.IsCopilotRequestEnabled,
 		IsAccessRequestEnabled:  regionalOrganizationDto.IsAccessRequestEnabled,
-		IsEnabled:               regionalOrganizationDto.IsEnabled,
+		IsEnabled:               true,
+		CreatedBy:               username,
 	}
 
 	_, err = db.InsertRegionalOrganization(regionalOrganization)
@@ -142,13 +198,18 @@ func InsertRegionalOrganization(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.WriteHeader(http.StatusCreated)
+	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(regionalOrganizationDto)
 }
 
 func UpdateRegionalOrganization(w http.ResponseWriter, r *http.Request) {
 	logger := appinsights_wrapper.NewClient()
 	defer logger.EndOperation()
+
+	sessionaz, _ := session.Store.Get(r, "auth-session")
+	iprofile := sessionaz.Values["profile"]
+	profile := iprofile.(map[string]interface{})
+	username := fmt.Sprint(profile["preferred_username"])
 
 	req := mux.Vars(r)
 	id, err := strconv.ParseInt(req["id"], 10, 64)
@@ -174,6 +235,7 @@ func UpdateRegionalOrganization(w http.ResponseWriter, r *http.Request) {
 		IsCopilotRequestEnabled: regionalOrganizationDto.IsCopilotRequestEnabled,
 		IsAccessRequestEnabled:  regionalOrganizationDto.IsAccessRequestEnabled,
 		IsEnabled:               regionalOrganizationDto.IsEnabled,
+		ModifiedBy:              username,
 	}
 
 	err = db.UpdateRegionalOrganization(regionalOrganization)
