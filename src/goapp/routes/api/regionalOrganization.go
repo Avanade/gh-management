@@ -38,8 +38,9 @@ func GetEnterpriseOrganizations(w http.ResponseWriter, r *http.Request) {
 	logger := appinsights_wrapper.NewClient()
 	defer logger.EndOperation()
 
-	token := os.Getenv("GH_TOKEN")
-	enterpriseOrgs, err := ghAPI.GetOrganizations(token)
+	token := os.Getenv("GH_ENTERPRISE_TOKEN")
+	enterprise := os.Getenv("GH_ENTERPRISE_NAME")
+	enterpriseOrgs, err := ghAPI.GetOrganizationsWithinEnterprise(enterprise, token)
 	if err != nil {
 		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -58,13 +59,13 @@ func GetEnterpriseOrganizations(w http.ResponseWriter, r *http.Request) {
 	for _, enterpriseOrg := range enterpriseOrgs {
 		exists := false
 		for _, regionalOrganization := range regionalOrganizations {
-			if regionalOrganization.Id == enterpriseOrg.GetID() {
+			if regionalOrganization.Id == enterpriseOrg.ID {
 				exists = true
 				break
 			}
 		}
 		if !exists {
-			filteredEnterpriseOrgs = append(filteredEnterpriseOrgs, EnterpriseOrganization{Id: enterpriseOrg.GetID(), Name: enterpriseOrg.GetLogin()})
+			filteredEnterpriseOrgs = append(filteredEnterpriseOrgs, EnterpriseOrganization{Id: enterpriseOrg.ID, Name: enterpriseOrg.Login})
 		}
 	}
 
