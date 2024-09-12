@@ -17,6 +17,7 @@ import (
 
 	"main/pkg/appinsights_wrapper"
 	"main/pkg/email"
+	ev "main/pkg/envvar"
 	db "main/pkg/ghmgmtdb"
 	ghAPI "main/pkg/github"
 	"main/pkg/notification"
@@ -24,6 +25,7 @@ import (
 
 	"github.com/google/go-github/v50/github"
 	"github.com/gorilla/mux"
+	"github.com/microsoft/ApplicationInsights-Go/appinsights"
 	"github.com/microsoft/ApplicationInsights-Go/appinsights/contracts"
 )
 
@@ -906,7 +908,8 @@ func IndexOrgRepos(w http.ResponseWriter, r *http.Request) {
 
 	orgs := []string{os.Getenv("GH_ORG_INNERSOURCE"), os.Getenv("GH_ORG_OPENSOURCE")}
 
-	regOrgs, err := db.GetAllRegionalOrganizations()
+	isEnabled := db.NullBool{Value: true}
+	regOrgs, err := db.SelectRegionalOrganization(&isEnabled)
 	if err != nil {
 		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -914,7 +917,26 @@ func IndexOrgRepos(w http.ResponseWriter, r *http.Request) {
 	}
 
 	for _, regOrg := range regOrgs {
-		orgs = append(orgs, regOrg["Name"].(string))
+		if !regOrg.IsIndexRepoEnabled {
+			continue
+		}
+		orgs = append(orgs, regOrg.Name)
+	}
+
+	// Temporarily log Organization
+	if len(regOrgs) > 0 {
+		utilIndexOrgRepos := appinsights.NewTraceTelemetry("util repo owner scan", contracts.Information)
+		regOrgsJson, err := json.Marshal(regOrgs)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		utilIndexOrgRepos.Properties["Orgs"] = string(regOrgsJson)
+		logger.Track(utilIndexOrgRepos)
+
+		if ev.GetEnvVar("ENABLED_INDEX_ORG_REPO", "false") != "true" {
+			return
+		}
 	}
 
 	for _, org := range orgs {
@@ -952,6 +974,10 @@ func IndexOrgRepos(w http.ResponseWriter, r *http.Request) {
 func ClearOrgRepos(w http.ResponseWriter, r *http.Request) {
 	logger := appinsights_wrapper.NewClient()
 	defer logger.EndOperation()
+
+	if ev.GetEnvVar("ENABLED_INDEX_ORG_REPO", "false") != "true" {
+		return
+	}
 
 	projects, err := db.ProjectsByRepositorySource("GitHub")
 	if err != nil {
@@ -1151,6 +1177,10 @@ func RemoveCollaborator(w http.ResponseWriter, r *http.Request) {
 func RepoOwnersCleanup(w http.ResponseWriter, r *http.Request) {
 	logger := appinsights_wrapper.NewClient()
 	defer logger.EndOperation()
+
+	if ev.GetEnvVar("ENABLED_INDEX_ORG_REPO", "false") != "true" {
+		return
+	}
 
 	logger.TrackTrace("REPO OWNERS CLEANUP TRIGGERED", contracts.Information)
 	token := os.Getenv("GH_TOKEN")

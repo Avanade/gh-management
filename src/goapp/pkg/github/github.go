@@ -134,10 +134,14 @@ func IsRepoExisting(repoName string) (bool, error) {
 	exists := false
 	orgs := []string{os.Getenv("GH_ORG_INNERSOURCE"), os.Getenv("GH_ORG_OPENSOURCE")}
 
-	regOrgs, _ := db.GetAllRegionalOrganizations()
+	isEnabled := db.NullBool{Value: true}
+	regOrgs, _ := db.SelectRegionalOrganization(&isEnabled)
 
 	for _, regOrg := range regOrgs {
-		orgs = append(orgs, regOrg["Name"].(string))
+		if !regOrg.IsIndexRepoEnabled {
+			continue
+		}
+		orgs = append(orgs, regOrg.Name)
 	}
 
 	for _, org := range orgs {

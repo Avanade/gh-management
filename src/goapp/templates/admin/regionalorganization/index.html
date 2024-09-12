@@ -291,7 +291,7 @@
                 console.log('Remove Submit')
                 Alpine.store('master').modal.show()
                 Alpine.store('master').putData(`/api/regional-organizations/${regionOrgId}`, data,
-                    "Oh No!", "Close", "/admin/regional-organization")
+                    "Regional Organization has been removed.", "Close", "/admin/regional-organization")
             },
             addSubmit() {
                 console.log('Add Submit')
@@ -308,7 +308,7 @@
 
                 Alpine.store('master').modal.show()
                 Alpine.store('master').postData(`/api/regional-organizations`, data,
-                    "Oh Yea!", "Close", "/admin/regional-organization")
+                    "Regional Organization has been added.", "Close", "/admin/regional-organization")
             },
             editSubmit() {
                 console.log('Update Submit')
@@ -327,7 +327,7 @@
                 console.log('Remove Submit')
                 Alpine.store('master').modal.show()
                 Alpine.store('master').putData(`/api/regional-organizations/${regionOrgId}`, data,
-                    "Oh Yea!", "Close", "/admin/regional-organization")
+                    "Regional Organization has been saved.", "Close", "/admin/regional-organization")
             },
             onCancel() {
               this.form.selectedRegionalOrganization = defaultForm.selectedRegionalOrganization

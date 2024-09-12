@@ -56,18 +56,6 @@ func GetRegionalOrganizationById(id int) ([]map[string]interface{}, error) {
 	return result, nil
 }
 
-func GetAllRegionalOrganizations() ([]map[string]interface{}, error) {
-	db := ConnectDb()
-	defer db.Close()
-
-	result, err := db.ExecuteStoredProcedureWithResult("usp_RegionalOrganization_Select", nil)
-	if err != nil {
-		return nil, err
-	}
-
-	return result, nil
-}
-
 func OrganizationUpdateApprovalStatus(id int64, status int) {
 	db := ConnectDb()
 	defer db.Close()
