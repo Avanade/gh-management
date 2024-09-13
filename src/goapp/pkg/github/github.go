@@ -1,16 +1,14 @@
 package githubAPI
 
 import (
-	"bytes"
 	"context"
 	"encoding/base64"
-	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"log"
-	"net/http"
 	"os"
 	"strings"
+
+	"github.com/shurcooL/githubv4"
 
 	db "main/pkg/ghmgmtdb"
 
@@ -467,66 +465,36 @@ func AddMemberToTeam(token string, org string, slug string, user string, role st
 }
 
 type Organization struct {
-	ID    int64  `json:"databaseId"`
-	Login string `json:"login"`
+	DatabaseId githubv4.Int
+	Login      githubv4.String
 }
 
-type ResponseData struct {
-	Data struct {
-		Enterprise struct {
-			Organizations struct {
-				Nodes []Organization `json:"nodes"`
-			} `json:"organizations"`
-		} `json:"enterprise"`
-	} `json:"data"`
+type Enterprise struct {
+	Organizations struct {
+		Nodes []Organization
+	} `graphql:"organizations(first: 100)"`
+}
+
+type QueryResult struct {
+	Enterprise Enterprise `graphql:"enterprise(slug: $enterprise)"`
 }
 
 func GetOrganizationsWithinEnterprise(enterprise string, token string) ([]Organization, error) {
-	query := `query($enterprise: String!) {
-        enterprise(slug: $enterprise) {
-            organizations(first: 100) {
-                nodes {
-					databaseId
-					login
-                }
-            }
-        }
-    }`
+	src := oauth2.StaticTokenSource(
+		&oauth2.Token{AccessToken: token},
+	)
+	httpClient := oauth2.NewClient(context.Background(), src)
 
-	body := map[string]interface{}{
-		"query":     query,
-		"variables": map[string]string{"enterprise": enterprise},
+	client := githubv4.NewClient(httpClient)
+
+	var queryResult QueryResult
+	variables := map[string]interface{}{
+		"enterprise": githubv4.String(enterprise),
 	}
-
-	bodyBytes, err := json.Marshal(body)
+	err := client.Query(context.Background(), &queryResult, variables)
 	if err != nil {
 		return nil, err
 	}
 
-	req, err := http.NewRequest("POST", "https://api.github.com/graphql", bytes.NewBuffer(bodyBytes))
-	if err != nil {
-		return nil, err
-	}
-
-	req.Header.Set("Authorization", "Bearer "+token)
-	req.Header.Set("Content-Type", "application/json")
-
-	resp, err := http.DefaultClient.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	respBytes, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return nil, err
-	}
-
-	var responseData ResponseData
-	err = json.Unmarshal(respBytes, &responseData)
-	if err != nil {
-		return nil, err
-	}
-
-	return responseData.Data.Enterprise.Organizations.Nodes, nil
+	return queryResult.Enterprise.Organizations.Nodes, nil
 }

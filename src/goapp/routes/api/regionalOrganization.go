@@ -59,13 +59,13 @@ func GetEnterpriseOrganizations(w http.ResponseWriter, r *http.Request) {
 	for _, enterpriseOrg := range enterpriseOrgs {
 		exists := false
 		for _, regionalOrganization := range regionalOrganizations {
-			if regionalOrganization.Id == enterpriseOrg.ID {
+			if regionalOrganization.Id == int64(enterpriseOrg.DatabaseId) {
 				exists = true
 				break
 			}
 		}
 		if !exists {
-			filteredEnterpriseOrgs = append(filteredEnterpriseOrgs, EnterpriseOrganization{Id: enterpriseOrg.ID, Name: enterpriseOrg.Login})
+			filteredEnterpriseOrgs = append(filteredEnterpriseOrgs, EnterpriseOrganization{Id: int64(enterpriseOrg.DatabaseId), Name: string(enterpriseOrg.Login)})
 		}
 	}
 
