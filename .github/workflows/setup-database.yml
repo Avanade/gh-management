@@ -7,6 +7,7 @@ on:
       selected_environment:
         type: environment
         description: Select environment
+        default: test
       block_data_loss:
         type: boolean
         description: Block on possible data loss
