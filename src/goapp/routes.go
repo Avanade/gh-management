@@ -53,6 +53,9 @@ func setPageRoutes() {
 	httpRouter.GET("/other-requests/github-copilot", m.Chain(rtOtherRequests.RequestGitHubCopilot, m.AzureAuth(), m.GitHubAuth()))
 	httpRouter.GET("/other-requests/organization-access", m.Chain(rtOtherRequests.RequestOrganizationAccess, m.AzureAuth(), m.GitHubAuth()))
 
+	// REGIONAL ORGANIZATION
+	httpRouter.GET("/admin/regional-organization", m.Chain(rtAdmin.RegionalOrganizationHandler, m.AzureAuth(), m.IsUserAdmin()))
+
 	// AUTHENTICATION
 	httpRouter.GET("/loginredirect", rtPages.LoginRedirectHandler)
 	httpRouter.GET("/gitredirect", rtPages.GitRedirectHandler)
@@ -212,6 +215,13 @@ func setApiRoutes() {
 	httpRouter.GET("/api/oss-contribution-sponsors/enabled", m.Chain(ossContributionSponsorController.GetEnabledOssContributionSponsors, m.AzureAuth()))
 	httpRouter.POST("/api/oss-contribution-sponsors", m.Chain(ossContributionSponsorController.CreateOssContributionSponsor, m.AzureAuth(), m.IsUserAdmin()))
 	httpRouter.PUT("/api/oss-contribution-sponsors/{id}", m.Chain(ossContributionSponsorController.UpdateOssContributionSponsor, m.AzureAuth(), m.IsUserAdmin()))
+
+	// REGIONAL ORGANIZATIONS API
+	httpRouter.GET("/api/enterprise-organizations", m.Chain(rtApi.GetEnterpriseOrganizations, m.AzureAuth()))
+	httpRouter.GET("/api/regional-organizations", m.Chain(rtApi.GetRegionalOrganizationByOption))
+	httpRouter.GET("/api/regional-organizations/{id}", m.Chain(rtApi.GetRegionalOrganizationById))
+	httpRouter.POST("/api/regional-organizations", m.Chain(rtApi.InsertRegionalOrganization))
+	httpRouter.PUT("/api/regional-organizations/{id}", m.Chain(rtApi.UpdateRegionalOrganization))
 
 	// OTHER REQUESTS
 	httpRouter.POST("/api/github-organization", m.Chain(rtApi.AddOrganization, m.AzureAuth(), m.GitHubAuth()))

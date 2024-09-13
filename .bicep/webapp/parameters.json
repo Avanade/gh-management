@@ -45,6 +45,8 @@
                 "GH_CLIENT_SECRET":"",
                 "GH_TOKEN":"",
                 "GH_APP_LINK":"",
+                "GH_ENTERPRISE_TOKEN":"",
+                "GH_ENTERPRISE_NAME":"",
                 "GHMGMTDB_CONNECTION_STRING":"",
                 
                 "GH_ORG_INNERSOURCE":"",
