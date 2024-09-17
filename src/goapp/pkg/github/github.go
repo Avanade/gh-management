@@ -8,6 +8,8 @@ import (
 	"os"
 	"strings"
 
+	"github.com/shurcooL/githubv4"
+
 	db "main/pkg/ghmgmtdb"
 
 	"github.com/google/go-github/v50/github"
@@ -134,10 +136,14 @@ func IsRepoExisting(repoName string) (bool, error) {
 	exists := false
 	orgs := []string{os.Getenv("GH_ORG_INNERSOURCE"), os.Getenv("GH_ORG_OPENSOURCE")}
 
-	regOrgs, _ := db.GetAllRegionalOrganizations()
+	isEnabled := db.NullBool{Value: true}
+	regOrgs, _ := db.SelectRegionalOrganization(&isEnabled)
 
 	for _, regOrg := range regOrgs {
-		orgs = append(orgs, regOrg["Name"].(string))
+		if !regOrg.IsIndexRepoEnabled {
+			continue
+		}
+		orgs = append(orgs, regOrg.Name)
 	}
 
 	for _, org := range orgs {
@@ -456,4 +462,39 @@ func AddMemberToTeam(token string, org string, slug string, user string, role st
 	}
 
 	return teamMembership, nil
+}
+
+type Organization struct {
+	DatabaseId githubv4.Int
+	Login      githubv4.String
+}
+
+type Enterprise struct {
+	Organizations struct {
+		Nodes []Organization
+	} `graphql:"organizations(first: 100)"`
+}
+
+type QueryResult struct {
+	Enterprise Enterprise `graphql:"enterprise(slug: $enterprise)"`
+}
+
+func GetOrganizationsWithinEnterprise(enterprise string, token string) ([]Organization, error) {
+	src := oauth2.StaticTokenSource(
+		&oauth2.Token{AccessToken: token},
+	)
+	httpClient := oauth2.NewClient(context.Background(), src)
+
+	client := githubv4.NewClient(httpClient)
+
+	var queryResult QueryResult
+	variables := map[string]interface{}{
+		"enterprise": githubv4.String(enterprise),
+	}
+	err := client.Query(context.Background(), &queryResult, variables)
+	if err != nil {
+		return nil, err
+	}
+
+	return queryResult.Enterprise.Organizations.Nodes, nil
 }

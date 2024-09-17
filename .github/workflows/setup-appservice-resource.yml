@@ -7,6 +7,7 @@ on:
       selected_environment:
         type: environment
         description: Select environment
+        default: test
 
 jobs:
   setup-appservice-resource:
@@ -58,6 +59,8 @@ jobs:
           parameters.appServiceSettings.value.GH_CLIENT_ID : ${{ secrets.GH_CLIENT_ID }}
           parameters.appServiceSettings.value.GH_CLIENT_SECRET : ${{ secrets.GH_CLIENT_SECRET }}
           parameters.appServiceSettings.value.GH_TOKEN : ${{ secrets.GH_TOKEN }}
+          parameters.appServiceSettings.value.GH_ENTERPRISE_TOKEN : ${{ secrets.GH_ENTERPRISE_TOKEN }}
+          parameters.appServiceSettings.value.GH_ENTERPRISE_NAME : ${{ secrets.GH_ENTERPRISE_NAME }}
           parameters.appServiceSettings.value.GH_APP_LINK : ${{ vars.GH_APP_LINK }}
           parameters.appServiceSettings.value.GHMGMTDB_CONNECTION_STRING : ${{ secrets.GHMGMTDB_CONNECTION_STRING}}
           parameters.appServiceSettings.value.GH_ORG_INNERSOURCE : ${{ vars.GH_ORG_INNERSOURCE }}

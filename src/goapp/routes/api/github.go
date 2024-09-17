@@ -103,7 +103,8 @@ func ClearOrgMembers(w http.ResponseWriter, r *http.Request) {
 		// Remove GitHub users from innersource who are not employees
 		innersourceOrgs := []string{os.Getenv("GH_ORG_INNERSOURCE")}
 
-		regOrgs, err := db.GetAllRegionalOrganizations()
+		isEnabled := db.NullBool{Value: true}
+		regOrgs, err := db.SelectRegionalOrganization(&isEnabled)
 		if err != nil {
 			logger.LogException(err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -111,11 +112,21 @@ func ClearOrgMembers(w http.ResponseWriter, r *http.Request) {
 		}
 
 		for _, regOrg := range regOrgs {
-			innersourceOrgs = append(innersourceOrgs, regOrg["Name"].(string))
+			if !regOrg.IsCleanUpMembersEnabled {
+				continue
+			}
+			innersourceOrgs = append(innersourceOrgs, regOrg.Name)
 		}
 
 		for _, innersourceOrg := range innersourceOrgs {
 			ClearOrgMembersInnersource(token, innersourceOrg, logger)
+		}
+
+		// Temporarily log Organization
+		if len(innersourceOrgs) > 0 {
+			utilClearOrgMembers := appinsights.NewTraceTelemetry("util clear org members", contracts.Information)
+			utilClearOrgMembers.Properties["Orgs"] = strings.Join(innersourceOrgs, ",")
+			logger.Track(utilClearOrgMembers)
 		}
 
 		// Convert users who are not employees to an outside collaborator
@@ -237,7 +248,8 @@ func RepoOwnerScan(w http.ResponseWriter, r *http.Request) {
 
 	orgs := []string{os.Getenv("GH_ORG_OPENSOURCE"), os.Getenv("GH_ORG_INNERSOURCE")}
 
-	regOrgs, err := db.GetAllRegionalOrganizations()
+	isEnabled := db.NullBool{Value: true}
+	regOrgs, err := db.SelectRegionalOrganization(&isEnabled)
 	if err != nil {
 		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -245,7 +257,26 @@ func RepoOwnerScan(w http.ResponseWriter, r *http.Request) {
 	}
 
 	for _, regOrg := range regOrgs {
-		orgs = append(orgs, regOrg["Name"].(string))
+		if !regOrg.IsIndexRepoEnabled {
+			continue
+		}
+		orgs = append(orgs, regOrg.Name)
+	}
+
+	// Temporarily log Organization
+	if len(regOrgs) > 0 {
+		utilRepoOwnerScan := appinsights.NewTraceTelemetry("util repo owner scan", contracts.Information)
+		regOrgsJson, err := json.Marshal(regOrgs)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		utilRepoOwnerScan.Properties["Orgs"] = string(regOrgsJson)
+		logger.Track(utilRepoOwnerScan)
+
+		if ev.GetEnvVar("ENABLED_REPO_OWNER_SCAN", "false") != "true" {
+			return
+		}
 	}
 
 	var repoOnwerDeficient []string
