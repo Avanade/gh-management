@@ -16,18 +16,18 @@ func NewActivityHelpService(repo *repository.Repository) ActivityHelpService {
 	}
 }
 
-func (s *activityHelpService) Insert(activityId, helpTypeId int, details string) (*model.ActivityHelp, error) {
-	return s.Repository.ActivityHelp.Insert(activityId, helpTypeId, details)
+func (s *activityHelpService) Create(activityHelp *model.ActivityHelp) (*model.ActivityHelp, error) {
+	return s.Repository.ActivityHelp.Insert(int(activityHelp.ActivityId), int(activityHelp.HelpTypeId), activityHelp.Details)
 }
 
-func (s *activityHelpService) Validate(activityId, helpTypeId int, details string) error {
-	if activityId == 0 {
+func (s *activityHelpService) Validate(activityHelp *model.ActivityHelp) error {
+	if activityHelp.ActivityId == 0 {
 		return errors.New("no activity id provided")
 	}
-	if helpTypeId == 0 {
+	if activityHelp.HelpTypeId == 0 {
 		return errors.New("help type is required")
 	}
-	if details == "" {
+	if activityHelp.Details == "" {
 		return errors.New("details is required")
 	}
 	return nil

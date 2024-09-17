@@ -45,8 +45,8 @@
                     <div class="sm:col-span-3">
                         <div x-data="combobox({
                                         ajax: getTypes,
-                                        id : 'Id',
-                                        text : 'Name',
+                                        id : 'id',
+                                        text : 'name',
                                         label : 'Type*',
                                         isInsertable : true,
                                         searchTag : 'If the activity type is not on the list, type it in the box and press enter.',
@@ -173,7 +173,7 @@
             toggleShowOption: 'false',
             form: {
                 community: [],
-                date: new Date().toISOString().split('T')[0],
+                date: new Date(),
                 activity_name: '',
                 type: [],
                 url: '',
@@ -242,9 +242,10 @@
             },
             onSubmit(e) {
                 e.preventDefault();
+                const date = new Date(this.form.date)
                 const data = {
                     'communityid': this.form.community[0].id,
-                    'date': this.form.date,
+                    'date': date.toISOString(),
                     'name': this.form.activity_name,
                     'type': this.form.type.map(e => {
                         return {
@@ -252,22 +253,23 @@
                             name: e.text
                         }
                     })[0],
-                    'url': this.form.url,
-
-                    'primarycontributionarea': this.form.primary_contribution_area.map(e => {
-                        return {
-                            id: e.id,
-                            name: e.text
-                        }
-                    })[0],
-                    'additionalcontributionareas': this.form.additional_contribution_areas.map(e => {
-                        return {
-                            id: e.id,
-                            name: e.text
-                        }
-                    })
+                    'url': this.form.url
                 }
-
+                const primaryContributionArea = this.form.primary_contribution_area.map(e => {
+                    return {
+                        id: e.id,
+                        name: e.text,
+                        isPrimary: true
+                    }
+                })
+                const additionalContributionAreas = this.form.additional_contribution_areas.map(e => {
+                    return {
+                        id: e.id,
+                        name: e.text,
+                        isPrimary: false
+                    }
+                })
+                data.contributionAreas = primaryContributionArea.concat(additionalContributionAreas)
                 if (this.toggleShowOption === 'true') {
                     data.help = this.form.help.map(e => {
                         return {

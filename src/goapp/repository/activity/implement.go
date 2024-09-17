@@ -130,6 +130,27 @@ func (r *activityRepository) SelectByOptions(offset int64, filter int64, orderBy
 			Name: v["ActivityTypeName"].(string),
 		}
 
+		activity.ActivityContributionAreas = append(activity.ActivityContributionAreas, model.ActivityContributionArea{
+			ID:                 v["ActivityContributionAreaId"].(int64),
+			ActivityId:         v["Id"].(int64),
+			ContributionAreaId: v["PrimaryContributionAreaId"].(int64),
+			IsPrimary:          true,
+			ContributionArea: model.ContributionArea{
+				ID:        v["PrimaryContributionAreaId"].(int64),
+				Name:      v["PrimaryContributionAreaName"].(string),
+				Created:   v["PrimaryContributionCreated"].(time.Time),
+				CreatedBy: v["PrimaryContributionCreatedBy"].(string),
+			},
+		})
+
+		if v["PrimaryContributionModified"] != nil {
+			activity.ActivityContributionAreas[0].ContributionArea.Modified = v["PrimaryContributionModified"].(time.Time)
+		}
+
+		if v["PrimaryContributionModifiedBy"] != nil {
+			activity.ActivityContributionAreas[0].ContributionArea.ModifiedBy = v["PrimaryContributionModifiedBy"].(string)
+		}
+
 		activities = append(activities, activity)
 	}
 

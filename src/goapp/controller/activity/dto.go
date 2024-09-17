@@ -20,7 +20,7 @@ type CreateActivityRequest struct {
 		IsPrimary bool   `json:"isPrimary"`
 	} `json:"contributionAreas"`
 	Help *struct {
-		Id      int64  `json:"id"`
+		ID      int64  `json:"id"`
 		Name    string `json:"name"`
 		Details string `json:"details"`
 	} `json:"help"`

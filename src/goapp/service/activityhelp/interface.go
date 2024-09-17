@@ -3,6 +3,6 @@ package activityhelp
 import "main/model"
 
 type ActivityHelpService interface {
-	Validate(activityId, helpTypeId int, details string) error
-	Insert(activityId, helpTypeId int, details string) (*model.ActivityHelp, error)
+	Validate(activityHelp *model.ActivityHelp) error
+	Create(activityHelp *model.ActivityHelp) (*model.ActivityHelp, error)
 }

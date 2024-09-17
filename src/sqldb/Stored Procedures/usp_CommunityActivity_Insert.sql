@@ -31,6 +31,4 @@ BEGIN
       GETDATE(),
       @CreatedBy
     )
-  SET @Id = SCOPE_IDENTITY()
-  SELECT @Id AS [Id]
 END

@@ -74,6 +74,37 @@ func (c *activityController) CreateActivity(w http.ResponseWriter, r *http.Reque
 	}
 
 	if requestBody.Help != nil {
+		help := model.ActivityHelp{
+			ActivityId: result.ID,
+			HelpTypeId: requestBody.Help.ID,
+			Details:    requestBody.Help.Details,
+		}
+		_, err := c.Service.ActivityHelp.Create(&help)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			json.NewEncoder(w).Encode(errors.New("error saving the help"))
+			return
+		}
+
+		// send email
+		// emailSender, err := c.Service.Email.Connect()
+		// if err != nil {
+		// 	w.WriteHeader(http.StatusInternalServerError)
+		// 	json.NewEncoder(w).Encode(err)
+		// 	return
+		// }
+		// to := []string{"TO"}
+		// cc := []string{"CC"}
+		// subject := "Subject"
+		// body := "Body"
+		// contentType := c.Email.Connect().Html
+		// isSaveToSetItem := false
+		// emailSender.SendEmail(to, cc, subject, body, contentType, isSaveToSetItem)
+		// if err != nil {
+		// 	w.WriteHeader(http.StatusInternalServerError)
+		// 	json.NewEncoder(w).Encode(err)
+		// 	return
+		// }
 	}
 
 	w.WriteHeader(http.StatusOK)
@@ -154,4 +185,8 @@ func NewActivityController(serv *service.Service) ActivityController {
 	return &activityController{
 		Service: serv,
 	}
+}
+
+func buildActivityHelpEmail(activity *model.Activity, help *model.ActivityHelp) string {
+	return fmt.Sprintf("Activity: %s\n\nHelp: %s\n\nDetails: %s\n\n", activity.Name, help.HelpTypeId, help.Details)
 }
