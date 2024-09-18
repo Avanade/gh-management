@@ -15,7 +15,7 @@ func NewActivityTypeRepository(db db.Database) ActivityTypeRepository {
 }
 
 func (r *activityTypeRepository) Insert(activityType *model.ActivityType) (*model.ActivityType, error) {
-	result, err := r.QueryRow("[dbo].[usp_ActivityType_Select]",
+	result, err := r.QueryRow("[dbo].[usp_ActivityType_Insert]",
 		sql.Named("Name", activityType.Name))
 	if err != nil {
 		return nil, err

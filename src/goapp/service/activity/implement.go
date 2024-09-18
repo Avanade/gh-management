@@ -102,8 +102,5 @@ func (s *activityService) Validate(activity *model.Activity) error {
 	if activity.Name == "" {
 		return errors.New("name is required")
 	}
-	if activity.ActivityTypeId == 0 {
-		return errors.New("activity type id is required")
-	}
 	return nil
 }

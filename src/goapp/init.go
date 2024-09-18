@@ -26,6 +26,7 @@ var (
 		s.NewActivityService(repo),
 		s.NewActivityTypeService(repo),
 		s.NewContributionAreaService(repo),
+		s.NewActivityHelpService(repo),
 		s.NewEmailService(conf),
 		s.NewExternalLinkService(repo),
 		s.NewOssContributionSponsorService(repo))
