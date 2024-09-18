@@ -192,35 +192,42 @@
                 modal.update('loading', 'Loading', 'Please wait for a moment.', '', '')
 
                 const data = await getActivityById(this.id)
-                const additionalContributionAreas = await getAdditionalContributionAreasByActivityId(this.id);
+                const contributionAreas = await getAdditionalContributionAreasByActivityId(this.id);
 
-                const date = new Date(data.Date)
+                const date = new Date(data.date)
 
                 this.form = {
                     community: [{
-                        id: data.CommunityId,
-                        text: data.CommunityName
+                        id: data.community.id,
+                        text: data.community.name
                     }],
                     date: `${date.getFullYear()}-${("0" + date.getMonth()).slice(-2)}-${("0" + date.getDate()).slice(-2)}`,
-                    activity_name: data.Name,
+                    activity_name: data.name,
                     type: [{
-                        id: data.ActivityTypeId,
-                        text: data.TypeName
+                        id: data.type.id,
+                        text: data.type.name
                     }],
-                    url: data.Url,
-                    primary_contribution_area: [{
-                        id: data.PrimaryContributionAreaId,
-                        text: data.PrimaryContributionAreaName
-                    }],
-                    additional_contribution_areas: additionalContributionAreas.map(i => {
+                    url: data.url,
+                    primary_contribution_area: contributionAreas
+                    .filter(i => i.IsPrimary)
+                    .map(i => {
                         return {
                             id: i.ContributionAreaId,
-                            text: i.Name
+                            text: i.ContributionAreaName
+                        }
+                    }),
+                    additional_contribution_areas: contributionAreas
+                    .filter(i => !i.IsPrimary)
+                    .map(i => {
+                        return {
+                            id: i.ContributionAreaId,
+                            text: i.ContributionAreaName
                         }
                     })
                 }
 
                 modal.visible = false;
+                console.log(this.form)
             },
             isValid() {
                 if (

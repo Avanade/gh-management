@@ -86,7 +86,7 @@
 <script src="/public/components/table.js"></script>
 <script type="text/javascript">
   async function onRowClickHandler(data) {
-    window.location = `/activities/view/${data.Id}`;
+    window.location = `/activities/view/${data.id}`;
   }
   async function getActivities(e) {
     const offset = e.filter * e.page;
