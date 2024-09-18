@@ -16,8 +16,8 @@ func NewActivityHelpService(repo *repository.Repository) ActivityHelpService {
 	}
 }
 
-func (s *activityHelpService) Create(activityHelp *model.ActivityHelp) (*model.ActivityHelp, error) {
-	return s.Repository.ActivityHelp.Insert(int(activityHelp.ActivityId), int(activityHelp.HelpTypeId), activityHelp.Details)
+func (s *activityHelpService) Create(activityHelp *model.ActivityHelp) error {
+	return s.Repository.ActivityHelp.Insert(activityHelp.ActivityId, activityHelp.HelpTypeId, activityHelp.Details)
 }
 
 func (s *activityHelpService) Validate(activityHelp *model.ActivityHelp) error {

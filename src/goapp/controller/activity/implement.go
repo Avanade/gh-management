@@ -76,8 +76,12 @@ func (c *activityController) CreateActivity(w http.ResponseWriter, r *http.Reque
 			ActivityId: result.ID,
 			HelpTypeId: requestBody.Help.ID,
 			Details:    requestBody.Help.Details,
+			HelpType: model.HelpType{
+				ID:   requestBody.Help.ID,
+				Name: requestBody.Help.Name,
+			},
 		}
-		_, err := c.Service.ActivityHelp.Create(&help)
+		err := c.Service.ActivityHelp.Create(&help)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			json.NewEncoder(w).Encode(errors.New("error saving the help"))

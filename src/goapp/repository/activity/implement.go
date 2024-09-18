@@ -60,7 +60,6 @@ func (r *activityRepository) Select() ([]model.Activity, error) {
 		if v["Modified"] != nil {
 			activity.Modified = v["Modified"].(time.Time)
 		}
-		activity.Modified = v["Modified"].(time.Time)
 		if v["ModifiedBy"] != nil {
 			activity.ModifiedBy = v["ModifiedBy"].(string)
 		}
