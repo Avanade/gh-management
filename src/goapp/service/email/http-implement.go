@@ -67,7 +67,6 @@ func (s *httpEmailService) Connect() (EmailSender, error) {
 	if !s.IsEnabled {
 		return nil, fmt.Errorf("email service is not enabled")
 	}
-	// OAuth2 configuration
 	conf := &clientcredentials.Config{
 		ClientID:     s.ClientID,
 		ClientSecret: s.ClientSecret,
@@ -75,7 +74,6 @@ func (s *httpEmailService) Connect() (EmailSender, error) {
 		Scopes:       []string{"https://graph.microsoft.com/.default"},
 	}
 
-	// Get the token
 	token, err := conf.Token(context.Background())
 	if err != nil {
 		return nil, err
@@ -135,7 +133,6 @@ func (es *httpEmailSender) send(sendMailRequest SendMailRequest) error {
 	if err != nil {
 		return fmt.Errorf("error marshalling JSON: %v", err)
 	}
-	// Use a different API endpoint based on your requirements
 	apiEndpoint := fmt.Sprintf("https://graph.microsoft.com/v1.0/users/%s/sendMail", es.UserId)
 	req, err := http.NewRequest("POST", apiEndpoint, bytes.NewBuffer(requestBody))
 	if err != nil {
@@ -153,7 +150,6 @@ func (es *httpEmailSender) send(sendMailRequest SendMailRequest) error {
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusAccepted {
-		// Print the response body for additional details
 		responseBody, _ := io.ReadAll(resp.Body)
 		fmt.Println("Response Body:", string(responseBody))
 		return fmt.Errorf("unexpected response status: %v", resp.Status)

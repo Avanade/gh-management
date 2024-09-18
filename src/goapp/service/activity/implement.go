@@ -18,7 +18,6 @@ func NewActivityService(repo *repository.Repository) ActivityService {
 }
 
 func (s *activityService) Create(activity *model.Activity) (*model.Activity, error) {
-	// Check if activity type exists
 	if activity.ActivityType.ID == 0 {
 		activityType, err := s.Repository.ActivityType.Insert(&activity.ActivityType)
 		if err != nil {
@@ -31,13 +30,11 @@ func (s *activityService) Create(activity *model.Activity) (*model.Activity, err
 		}
 	}
 
-	// Insert Activity
 	activity, err := s.Repository.Activity.Insert(activity)
 	if err != nil {
 		return nil, err
 	}
 
-	// Insert primary and additional contribution areas
 	for _, contributionArea := range activity.ActivityContributionAreas {
 		contributionArea.ActivityId = activity.ID
 		_, err := s.Repository.ActivityContributionArea.Insert(&contributionArea)

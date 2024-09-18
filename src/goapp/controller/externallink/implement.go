@@ -16,7 +16,6 @@ type externalLinkController struct {
 	*service.Service
 }
 
-// GetEnabledExternalLinks implements ExternalLinkController.
 func (c *externalLinkController) GetEnabledExternalLinks(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	externalLinks, err := c.Service.ExternalLink.GetAllEnabled()
@@ -29,7 +28,6 @@ func (c *externalLinkController) GetEnabledExternalLinks(w http.ResponseWriter, 
 	json.NewEncoder(w).Encode(externalLinks)
 }
 
-// GetExternalLinkById implements ExternalLinkController.
 func (c *externalLinkController) GetExternalLinkById(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	if len(params) == 0 {
@@ -54,7 +52,6 @@ func (c *externalLinkController) GetExternalLinkById(w http.ResponseWriter, r *h
 	json.NewEncoder(w).Encode(externalLinks)
 }
 
-// GetExternalLinks implements ExternalLinkController.
 func (c *externalLinkController) GetExternalLinks(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	externalLinks, err := c.Service.ExternalLink.GetAll()
@@ -67,7 +64,6 @@ func (c *externalLinkController) GetExternalLinks(w http.ResponseWriter, r *http
 	json.NewEncoder(w).Encode(externalLinks)
 }
 
-// CreateExternalLink implements ExternalLinkController.
 func (c *externalLinkController) CreateExternalLink(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	var externalLink model.ExternalLink
@@ -84,7 +80,6 @@ func (c *externalLinkController) CreateExternalLink(w http.ResponseWriter, r *ht
 		return
 	}
 
-	// temporary
 	sessionaz, _ := session.Store.Get(r, "auth-session")
 	iprofile := sessionaz.Values["profile"]
 	profile := iprofile.(map[string]interface{})
@@ -101,7 +96,6 @@ func (c *externalLinkController) CreateExternalLink(w http.ResponseWriter, r *ht
 	json.NewEncoder(w).Encode(result)
 }
 
-// RemoveExternalLinkById implements ExternalLinkController.
 func (c *externalLinkController) RemoveExternalLinkById(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	if len(params) == 0 {
@@ -126,7 +120,6 @@ func (c *externalLinkController) RemoveExternalLinkById(w http.ResponseWriter, r
 	w.WriteHeader(http.StatusOK)
 }
 
-// UpdateExternalLinkById implements ExternalLinkController.
 func (c *externalLinkController) UpdateExternalLinkById(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	if len(params) == 0 {
@@ -155,7 +148,6 @@ func (c *externalLinkController) UpdateExternalLinkById(w http.ResponseWriter, r
 		return
 	}
 
-	// temporary
 	sessionaz, _ := session.Store.Get(r, "auth-session")
 	iprofile := sessionaz.Values["profile"]
 	profile := iprofile.(map[string]interface{})

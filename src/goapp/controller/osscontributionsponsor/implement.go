@@ -14,7 +14,6 @@ type ossContributionSponsorController struct {
 	*service.Service
 }
 
-// CreateOssContributionSponsor implements OSSContributionSponsorController.
 func (c *ossContributionSponsorController) CreateOssContributionSponsor(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	var ossContributionSponsor model.OSSContributionSponsor
@@ -41,7 +40,6 @@ func (c *ossContributionSponsorController) CreateOssContributionSponsor(w http.R
 	json.NewEncoder(w).Encode(result)
 }
 
-// GetOssContributionSponsors implements OSSContributionSponsorController.
 func (c *ossContributionSponsorController) GetOssContributionSponsors(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	ossContributionSponsor, err := c.Service.OssContributionSponsor.GetAll()
@@ -54,7 +52,6 @@ func (c *ossContributionSponsorController) GetOssContributionSponsors(w http.Res
 	json.NewEncoder(w).Encode(ossContributionSponsor)
 }
 
-// GetEnabledOssContributionSponsors implements OSSContributionSponsorController.
 func (c *ossContributionSponsorController) GetEnabledOssContributionSponsors(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	ossContributionSponsor, err := c.Service.OssContributionSponsor.GetAllEnabled()
@@ -67,7 +64,6 @@ func (c *ossContributionSponsorController) GetEnabledOssContributionSponsors(w h
 	json.NewEncoder(w).Encode(ossContributionSponsor)
 }
 
-// UpdateOssContributionSponsor implements OSSContributionSponsorController.
 func (c *ossContributionSponsorController) UpdateOssContributionSponsor(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	if len(params) == 0 {

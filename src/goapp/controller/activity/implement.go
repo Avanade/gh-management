@@ -16,7 +16,6 @@ type activityController struct {
 	*service.Service
 }
 
-// CreateActivity implements ActivityController.
 func (c *activityController) CreateActivity(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	var requestBody CreateActivityRequest
@@ -52,7 +51,6 @@ func (c *activityController) CreateActivity(w http.ResponseWriter, r *http.Reque
 		})
 	}
 
-	// temporary
 	sessionaz, _ := session.Store.Get(r, "auth-session")
 	iprofile := sessionaz.Values["profile"]
 	profile := iprofile.(map[string]interface{})
@@ -85,33 +83,12 @@ func (c *activityController) CreateActivity(w http.ResponseWriter, r *http.Reque
 			json.NewEncoder(w).Encode(errors.New("error saving the help"))
 			return
 		}
-
-		// send email
-		// emailSender, err := c.Service.Email.Connect()
-		// if err != nil {
-		// 	w.WriteHeader(http.StatusInternalServerError)
-		// 	json.NewEncoder(w).Encode(err)
-		// 	return
-		// }
-		// to := []string{"TO"}
-		// cc := []string{"CC"}
-		// subject := "Subject"
-		// body := "Body"
-		// contentType := c.Email.Connect().Html
-		// isSaveToSetItem := false
-		// emailSender.SendEmail(to, cc, subject, body, contentType, isSaveToSetItem)
-		// if err != nil {
-		// 	w.WriteHeader(http.StatusInternalServerError)
-		// 	json.NewEncoder(w).Encode(err)
-		// 	return
-		// }
 	}
 
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(result)
 }
 
-// GetActivities implements ActivityController.
 func (c *activityController) GetActivities(w http.ResponseWriter, r *http.Request) {
 	params := r.URL.Query()
 	filter := ""
@@ -136,7 +113,6 @@ func (c *activityController) GetActivities(w http.ResponseWriter, r *http.Reques
 	}
 	w.Header().Set("Content-Type", "application/json")
 
-	// temporary
 	sessionaz, _ := session.Store.Get(r, "auth-session")
 	iprofile := sessionaz.Values["profile"]
 	profile := iprofile.(map[string]interface{})
@@ -156,7 +132,6 @@ func (c *activityController) GetActivities(w http.ResponseWriter, r *http.Reques
 	})
 }
 
-// GetActivityById implements ActivityController.
 func (c *activityController) GetActivityById(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	if len(params) == 0 {
@@ -185,8 +160,4 @@ func NewActivityController(serv *service.Service) ActivityController {
 	return &activityController{
 		Service: serv,
 	}
-}
-
-func buildActivityHelpEmail(activity *model.Activity, help *model.ActivityHelp) string {
-	return fmt.Sprintf("Activity: %s\n\nHelp: %s\n\nDetails: %s\n\n", activity.Name, help.HelpTypeId, help.Details)
 }

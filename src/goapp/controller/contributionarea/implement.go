@@ -16,7 +16,6 @@ type contributionAreaController struct {
 	*service.Service
 }
 
-// CreateContributionAreas implements ContributionAreaController.
 func (c *contributionAreaController) CreateContributionAreas(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	var contributionArea model.ContributionArea
@@ -33,7 +32,6 @@ func (c *contributionAreaController) CreateContributionAreas(w http.ResponseWrit
 		return
 	}
 
-	// temporary
 	sessionaz, _ := session.Store.Get(r, "auth-session")
 	iprofile := sessionaz.Values["profile"]
 	profile := iprofile.(map[string]interface{})
@@ -50,7 +48,6 @@ func (c *contributionAreaController) CreateContributionAreas(w http.ResponseWrit
 	json.NewEncoder(w).Encode(result)
 }
 
-// GetContributionAreaById implements ContributionAreaController.
 func (c *contributionAreaController) GetContributionAreaById(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	if len(params) == 0 {
@@ -75,7 +72,6 @@ func (c *contributionAreaController) GetContributionAreaById(w http.ResponseWrit
 	json.NewEncoder(w).Encode(contributionArea)
 }
 
-// GetContributionAreas implements ContributionAreaController.
 func (c *contributionAreaController) GetContributionAreas(w http.ResponseWriter, r *http.Request) {
 	params := r.URL.Query()
 	filter := ""
@@ -113,7 +109,6 @@ func (c *contributionAreaController) GetContributionAreas(w http.ResponseWriter,
 	)
 }
 
-// UpdateContributionArea implements ContributionAreaController.
 func (c *contributionAreaController) UpdateContributionArea(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	if len(params) == 0 {
@@ -142,7 +137,6 @@ func (c *contributionAreaController) UpdateContributionArea(w http.ResponseWrite
 		return
 	}
 
-	// temporary
 	sessionaz, _ := session.Store.Get(r, "auth-session")
 	iprofile := sessionaz.Values["profile"]
 	profile := iprofile.(map[string]interface{})
