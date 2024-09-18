@@ -10,5 +10,5 @@ CREATE TABLE [dbo].[CommunityActivity] (
     [Modified] [DATETIME] NULL,
     [ModifiedBy] [VARCHAR](100) NULL,
     CONSTRAINT [FK_CommunityActivity_Community] FOREIGN KEY ([CommunityId]) REFERENCES [dbo].[Community]([Id]),
-    CONSTRAINT [FK_CommunityActivity_ActivityType] FOREIGN KEY ([ActivityTypeId]) REFERENCES [dbo].[ActivityType]([Id])
+    CONSTRAINT [FK_CommunityActivity_ActivityType] FOREIGN KEY ([ActivityTypeId]) REFERENCES [dbo].[ActivityType]([Id]),
 )

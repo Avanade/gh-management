@@ -4,23 +4,16 @@ CREATE PROCEDURE [dbo].[usp_CommunityActivityHelpType_Insert]
   @Details [VARCHAR](100)
 AS
 BEGIN
-  DECLARE @Id AS [INT]
-
-  INSERT INTO [dbo].[CommunityActivityHelpType]
+  INSERT INTO [dbo].[ActivityHelp]
   (
-    [CommunityActivityId],
+    [ActivityId],
     [HelpTypeId],
     [Details]
   )
-  OUTPUT
-    [INSERTED].[Id]
   VALUES
   (
     @ActivityId,
     @HelpTypeId,
     @Details
   )
-
-  SET @Id = SCOPE_IDENTITY()
-  SELECT @Id [Id]
 END
