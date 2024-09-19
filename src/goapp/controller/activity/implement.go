@@ -87,6 +87,34 @@ func (c *activityController) CreateActivity(w http.ResponseWriter, r *http.Reque
 			json.NewEncoder(w).Encode(errors.New("error saving the help"))
 			return
 		}
+
+		email, err := c.Email.Connect()
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			json.NewEncoder(w).Encode(errors.New("error connecting to email"))
+			return
+		}
+
+		domain := r.Host
+
+		scheme := "http"
+		if r.TLS != nil {
+			scheme = "https"
+		}
+
+		activityHelpEmail := model.ActivityHelpEmail{
+			RequestorName: profile["name"].(string),
+			ActivityLink:  fmt.Sprintf("%s://%s/activities/view/%v", scheme, domain, result.ID),
+			Details:       help.Details,
+			HelpType:      help.HelpType.Name,
+		}
+
+		err = email.SendActivityHelpEmail(&activityHelpEmail)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			json.NewEncoder(w).Encode(errors.New("error sending email"))
+			return
+		}
 	}
 
 	w.WriteHeader(http.StatusOK)

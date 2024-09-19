@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"main/config"
+	"main/model"
 	"net/http"
 
 	"golang.org/x/oauth2"
@@ -85,6 +86,10 @@ func (s *httpEmailService) Connect() (EmailSender, error) {
 type httpEmailSender struct {
 	*oauth2.Token
 	UserId string
+}
+
+func (es *httpEmailSender) SendActivityHelpEmail(activityHelpEmail *model.ActivityHelpEmail) error {
+	panic("unimplemented")
 }
 
 func (es *httpEmailSender) SendEmail(to, cc []string, subject, content string, contentType ContentType, isSaveToSetItem bool) error {

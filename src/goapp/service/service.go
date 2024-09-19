@@ -60,7 +60,7 @@ func NewContributionAreaService(repo *repository.Repository) ServiceOptionFunc {
 
 func NewEmailService(conf config.ConfigManager) ServiceOptionFunc {
 	return func(s *Service) {
-		s.Email = sEmail.NewHttpEmailService(conf)
+		s.Email = sEmail.NewSdkEmailService(conf)
 	}
 }
 
