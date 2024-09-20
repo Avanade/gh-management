@@ -9,13 +9,9 @@ const (
 	Text
 )
 
-type EmailSender interface {
+type EmailService interface {
 	SendEmail(to, cc []string, subject, content string, contentType ContentType, isSaveToSetItem bool) error
 	CustomEmailSender
-}
-
-type EmailService interface {
-	Connect() (EmailSender, error)
 }
 
 type CustomEmailSender interface {

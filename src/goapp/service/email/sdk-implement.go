@@ -32,29 +32,7 @@ func NewSdkEmailService(config config.ConfigManager) EmailService {
 	}
 }
 
-func (s *sdkEmailService) Connect() (EmailSender, error) {
-	cred, _ := azidentity.NewClientSecretCredential(
-		s.TenantID,
-		s.ClientID,
-		s.ClientSecret,
-		nil,
-	)
-
-	graphClient, _ := msgraphsdk.NewGraphServiceClientWithCredentials(
-		cred, []string{"https://graph.microsoft.com/.default"})
-
-	return &sdkEmailSender{
-		GraphServiceClient: graphClient,
-		UserId:             s.UserId,
-	}, nil
-}
-
-type sdkEmailSender struct {
-	*msgraphsdk.GraphServiceClient
-	UserId string
-}
-
-func (es *sdkEmailSender) SendActivityHelpEmail(activityHelpEmail *model.ActivityHelpEmail) error {
+func (s *sdkEmailService) SendActivityHelpEmail(activityHelpEmail *model.ActivityHelpEmail) error {
 	if os.Getenv("EMAIL_SUPPORT") == "" {
 		return fmt.Errorf("EMAIL_SUPPORT is not set")
 	}
@@ -90,7 +68,7 @@ func (es *sdkEmailSender) SendActivityHelpEmail(activityHelpEmail *model.Activit
 		"|Details|", activityHelpEmail.Details,
 	)
 
-	htmlBody := buildHtmlBody(bodyTemplate, replacer)
+	htmlBody := s.buildHtmlBody(bodyTemplate, replacer)
 
 	subject := fmt.Sprintf("%s - Request for Help", activityHelpEmail.HelpType)
 
@@ -98,14 +76,14 @@ func (es *sdkEmailSender) SendActivityHelpEmail(activityHelpEmail *model.Activit
 		os.Getenv("EMAIL_SUPPORT"),
 	}
 
-	err := es.SendEmail(to, nil, subject, htmlBody, Html, true)
+	err := s.SendEmail(to, nil, subject, htmlBody, Html, true)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (es *sdkEmailSender) SendEmail(to, cc []string, subject, content string, contentType ContentType, isSaveToSentItem bool) error {
+func (s *sdkEmailService) SendEmail(to, cc []string, subject, content string, contentType ContentType, isSaveToSentItem bool) error {
 	requestBody := graphusers.NewItemSendMailPostRequestBody()
 	message := graphmodels.NewMessage()
 	message.SetSubject(&subject)
@@ -143,11 +121,34 @@ func (es *sdkEmailSender) SendEmail(to, cc []string, subject, content string, co
 	requestBody.SetMessage(message)
 	requestBody.SetSaveToSentItems(&isSaveToSentItem)
 
-	return es.GraphServiceClient.Users().ByUserId(es.UserId).SendMail().Post(context.Background(), requestBody, nil)
+	graphServiceClient, err := s.connectGraphServiceClient()
+	if err != nil {
+		return err
+	}
+
+	return graphServiceClient.Users().ByUserId(s.UserId).SendMail().Post(context.Background(), requestBody, nil)
 }
 
-// Email Template
-func headStyle() string {
+func (s *sdkEmailService) connectGraphServiceClient() (*msgraphsdk.GraphServiceClient, error) {
+	cred, _ := azidentity.NewClientSecretCredential(
+		s.TenantID,
+		s.ClientID,
+		s.ClientSecret,
+		nil,
+	)
+
+	graphClient, err := msgraphsdk.NewGraphServiceClientWithCredentials(
+		cred, []string{"https://graph.microsoft.com/.default"},
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return graphClient, nil
+}
+
+func (s *sdkEmailService) headStyle() string {
 	return `<head>
 				<style>
 					table, th, tr, td {
@@ -172,7 +173,7 @@ func headStyle() string {
 			</head>`
 }
 
-func header() string {
+func (s *sdkEmailService) header() string {
 	return `<tr>
                 <th class="center-table">
                     <table style="width: 100%; max-width: 700px;" class="margin-auto">
@@ -189,13 +190,13 @@ func header() string {
             </tr>`
 }
 
-func buildHtmlBody(bodyTemplate string, replacer *strings.Replacer) string {
+func (s *sdkEmailService) buildHtmlBody(bodyTemplate string, replacer *strings.Replacer) string {
 	replacedBodyTemplate := replacer.Replace(bodyTemplate)
 	htmlBody := `<html>`
-	htmlBody += headStyle()
+	htmlBody += s.headStyle()
 	htmlBody += `<body>`
 	htmlBody += `<table style="width: 100%">`
-	htmlBody += header()
+	htmlBody += s.header()
 	htmlBody += replacedBodyTemplate
 	htmlBody += `</table>`
 	htmlBody += `</body>`

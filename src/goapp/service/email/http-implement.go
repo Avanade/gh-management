@@ -64,35 +64,11 @@ func NewHttpEmailService(config config.ConfigManager) EmailService {
 	}
 }
 
-func (s *httpEmailService) Connect() (EmailSender, error) {
-	if !s.IsEnabled {
-		return nil, fmt.Errorf("email service is not enabled")
-	}
-	conf := &clientcredentials.Config{
-		ClientID:     s.ClientID,
-		ClientSecret: s.ClientSecret,
-		TokenURL:     fmt.Sprintf("https://login.microsoftonline.com/%s/oauth2/v2.0/token", s.TenantID),
-		Scopes:       []string{"https://graph.microsoft.com/.default"},
-	}
-
-	token, err := conf.Token(context.Background())
-	if err != nil {
-		return nil, err
-	}
-
-	return &httpEmailSender{Token: token, UserId: s.UserId}, nil
-}
-
-type httpEmailSender struct {
-	*oauth2.Token
-	UserId string
-}
-
-func (es *httpEmailSender) SendActivityHelpEmail(activityHelpEmail *model.ActivityHelpEmail) error {
+func (es *httpEmailService) SendActivityHelpEmail(activityHelpEmail *model.ActivityHelpEmail) error {
 	panic("unimplemented")
 }
 
-func (es *httpEmailSender) SendEmail(to, cc []string, subject, content string, contentType ContentType, isSaveToSetItem bool) error {
+func (es *httpEmailService) SendEmail(to, cc []string, subject, content string, contentType ContentType, isSaveToSetItem bool) error {
 	saveToSetItem := "false"
 	if isSaveToSetItem {
 		saveToSetItem = "true"
@@ -133,7 +109,26 @@ func (es *httpEmailSender) SendEmail(to, cc []string, subject, content string, c
 	return es.send(sendMailRequest)
 }
 
-func (es *httpEmailSender) send(sendMailRequest SendMailRequest) error {
+func (s *httpEmailService) getToken() (*oauth2.Token, error) {
+	if !s.IsEnabled {
+		return nil, fmt.Errorf("email service is not enabled")
+	}
+	conf := &clientcredentials.Config{
+		ClientID:     s.ClientID,
+		ClientSecret: s.ClientSecret,
+		TokenURL:     fmt.Sprintf("https://login.microsoftonline.com/%s/oauth2/v2.0/token", s.TenantID),
+		Scopes:       []string{"https://graph.microsoft.com/.default"},
+	}
+
+	token, err := conf.Token(context.Background())
+	if err != nil {
+		return nil, err
+	}
+
+	return token, nil
+}
+
+func (es *httpEmailService) send(sendMailRequest SendMailRequest) error {
 	requestBody, err := json.Marshal(sendMailRequest)
 	if err != nil {
 		return fmt.Errorf("error marshalling JSON: %v", err)
@@ -144,7 +139,12 @@ func (es *httpEmailSender) send(sendMailRequest SendMailRequest) error {
 		return fmt.Errorf("error creating HTTP request: %v", err)
 	}
 
-	req.Header.Set("Authorization", "Bearer "+es.AccessToken)
+	token, err := es.getToken()
+	if err != nil {
+		return fmt.Errorf("error getting token: %v", err)
+	}
+
+	req.Header.Set("Authorization", "Bearer "+token.AccessToken)
 	req.Header.Set("Content-Type", "application/json")
 
 	client := &http.Client{}
