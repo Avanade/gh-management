@@ -2,6 +2,7 @@ package appinsights_wrapper
 
 import (
 	"fmt"
+	"log"
 	"runtime"
 	"time"
 
@@ -21,10 +22,10 @@ func Init(instrumentationKey string) {
 	TelemetryConfiguration = appinsights.NewTelemetryConfiguration(instrumentationKey)
 
 	/*turn on diagnostics to help troubleshoot problems with telemetry submission. */
-	// appinsights.NewDiagnosticsMessageListener(func(msg string) error {
-	// 	log.Printf("[%s] %s\n", time.Now().Format(time.UnixDate), msg)
-	// 	return nil
-	// })
+	appinsights.NewDiagnosticsMessageListener(func(msg string) error {
+		log.Printf("[%s] %s\n", time.Now().Format(time.UnixDate), msg)
+		return nil
+	})
 }
 
 func NewClient() *TelemetryClient {
@@ -39,7 +40,7 @@ func NewClient() *TelemetryClient {
 	}
 	telemetryClient.Context().Tags.Operation().SetId(newUUID().String())
 	telemetryClient.Context().Tags.Operation().SetName(funcName)
-	// fmt.Printf("\nSTART OPERATION | ID:%s\n", telemetryClient.Context().Tags.Operation().GetId())
+	fmt.Printf("\nSTART OPERATION | ID:%s\n", telemetryClient.Context().Tags.Operation().GetId())
 	telemetryClient.TrackEvent(fmt.Sprintf("START %s", funcName))
 
 	return telemetryClient
@@ -52,7 +53,7 @@ func (tc *TelemetryClient) EndOperation() {
 		funcName = runtime.FuncForPC(pc).Name()
 	}
 	tc.TrackEvent(fmt.Sprintf("END %s", funcName))
-	// fmt.Printf("\nEND OPERATION | ID:%s\n", tc.Context().Tags.Operation().GetId())
+	fmt.Printf("\nEND OPERATION | ID:%s\n", tc.Context().Tags.Operation().GetId())
 	for k := range tc.Context().Tags.Operation() {
 		delete(tc.Context().Tags.Operation(), k)
 	}
