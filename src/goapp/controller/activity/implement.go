@@ -16,6 +16,12 @@ type activityController struct {
 	*service.Service
 }
 
+func NewActivityController(serv *service.Service) ActivityController {
+	return &activityController{
+		Service: serv,
+	}
+}
+
 func (c *activityController) CreateActivity(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	var requestBody CreateActivityRequest
@@ -88,13 +94,6 @@ func (c *activityController) CreateActivity(w http.ResponseWriter, r *http.Reque
 			return
 		}
 
-		email, err := c.Email.Connect()
-		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			json.NewEncoder(w).Encode(errors.New("error connecting to email"))
-			return
-		}
-
 		domain := r.Host
 
 		scheme := "http"
@@ -109,7 +108,7 @@ func (c *activityController) CreateActivity(w http.ResponseWriter, r *http.Reque
 			HelpType:      help.HelpType.Name,
 		}
 
-		err = email.SendActivityHelpEmail(&activityHelpEmail)
+		err = c.Service.Email.SendActivityHelpEmail(&activityHelpEmail)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			json.NewEncoder(w).Encode(errors.New("error sending email"))
@@ -186,10 +185,4 @@ func (c *activityController) GetActivityById(w http.ResponseWriter, r *http.Requ
 	}
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(activity)
-}
-
-func NewActivityController(serv *service.Service) ActivityController {
-	return &activityController{
-		Service: serv,
-	}
 }

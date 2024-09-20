@@ -14,6 +14,12 @@ type ossContributionSponsorController struct {
 	*service.Service
 }
 
+func NewOssContributionSponsorController(serv *service.Service) OSSContributionSponsorController {
+	return &ossContributionSponsorController{
+		Service: serv,
+	}
+}
+
 func (c *ossContributionSponsorController) CreateOssContributionSponsor(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	var ossContributionSponsor model.OSSContributionSponsor
@@ -100,10 +106,4 @@ func (c *ossContributionSponsorController) UpdateOssContributionSponsor(w http.R
 	}
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(newOssContributionSponsor)
-}
-
-func NewOssContributionSponsorController(serv *service.Service) OSSContributionSponsorController {
-	return &ossContributionSponsorController{
-		Service: serv,
-	}
 }

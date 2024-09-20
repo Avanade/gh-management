@@ -16,6 +16,12 @@ type contributionAreaController struct {
 	*service.Service
 }
 
+func NewContributionAreaController(serv *service.Service) ContributionAreaController {
+	return &contributionAreaController{
+		Service: serv,
+	}
+}
+
 func (c *contributionAreaController) CreateContributionAreas(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	var contributionArea model.ContributionArea
@@ -152,10 +158,4 @@ func (c *contributionAreaController) UpdateContributionArea(w http.ResponseWrite
 	}
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(newContributionArea)
-}
-
-func NewContributionAreaController(serv *service.Service) ContributionAreaController {
-	return &contributionAreaController{
-		Service: serv,
-	}
 }

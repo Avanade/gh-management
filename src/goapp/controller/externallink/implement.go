@@ -16,6 +16,12 @@ type externalLinkController struct {
 	*service.Service
 }
 
+func NewExternalLinkController(serv *service.Service) ExternalLinkController {
+	return &externalLinkController{
+		Service: serv,
+	}
+}
+
 func (c *externalLinkController) GetEnabledExternalLinks(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	externalLinks, err := c.Service.ExternalLink.GetAllEnabled()
@@ -163,10 +169,4 @@ func (c *externalLinkController) UpdateExternalLinkById(w http.ResponseWriter, r
 	}
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(newExternalLink)
-}
-
-func NewExternalLinkController(serv *service.Service) ExternalLinkController {
-	return &externalLinkController{
-		Service: serv,
-	}
 }
