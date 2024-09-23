@@ -27,7 +27,7 @@
             columns : [
               { 
                 name : 'Date', 
-                value : 'Date',
+                value : 'date',
                 render : value => { return new Date(value).toLocaleDateString(); },
                 sort : {
                   orderby : 'Date',
@@ -36,7 +36,7 @@
               },
               { 
                 name : 'Activity', 
-                value : 'Name',
+                value : 'name',
                 sort : {
                   orderby : 'Activity',
                   ordertype : 'ASC'
@@ -44,7 +44,8 @@
               },
               { 
                 name : 'Community/Repository', 
-                value : 'CommunityName',
+                value : 'community',
+                render : value => { return value.name },
                 sort : {
                   orderby : 'Community',
                   ordertype : 'Community'
@@ -52,7 +53,8 @@
               },
               { 
                 name : 'Type', 
-                value : 'TypeName',
+                value : 'type',
+                render : value => { return value.name },
                 sort : {
                   orderby : 'Type',
                   ordertype : 'ASC'
@@ -60,11 +62,17 @@
               },
               { 
                 name : 'Primary Contribution Area', 
-                value : 'PrimaryContributionAreaName',
+                value : 'activityContributionAreas',
+                render : value => {
+                  if (value == null) {
+                    return 'NOT FOUND'
+                  }
+                  return value[0].contributionArea.name
+                },
                 sort : {
                   orderby : 'PrimaryContributionArea',
                   ordertype : 'ASC'
-              }
+                }
               }
             ]
           })">
@@ -78,7 +86,7 @@
 <script src="/public/components/table.js"></script>
 <script type="text/javascript">
   async function onRowClickHandler(data) {
-    window.location = `/activities/view/${data.Id}`;
+    window.location = `/activities/view/${data.id}`;
   }
   async function getActivities(e) {
     const offset = e.filter * e.page;

@@ -2,22 +2,22 @@ package externallink
 
 import (
 	"database/sql"
+	db "main/infrastructure/database"
 	"main/model"
-	"main/repository"
 	"time"
 )
 
 type externalLinkRepository struct {
-	repository.Database
+	db.Database
 }
 
-func NewExternalLinkRepository(db repository.Database) ExternalLinkRepository {
+func NewExternalLinkRepository(database db.Database) ExternalLinkRepository {
 	return &externalLinkRepository{
-		Database: db,
+		Database: database,
 	}
 }
 
-func (r *externalLinkRepository) GetAll() ([]model.ExternalLink, error) {
+func (r *externalLinkRepository) Select() ([]model.ExternalLink, error) {
 	var externalLinks []model.ExternalLink
 	rows, err := r.Query("[dbo].[usp_ExternalLink_Select]")
 	if err != nil {
@@ -53,7 +53,7 @@ func (r *externalLinkRepository) GetAll() ([]model.ExternalLink, error) {
 	return externalLinks, nil
 }
 
-func (r *externalLinkRepository) GetByIsEnabled(isEnabled bool) ([]model.ExternalLink, error) {
+func (r *externalLinkRepository) SelectByIsEnabled(isEnabled bool) ([]model.ExternalLink, error) {
 	var externalLinks []model.ExternalLink
 	rows, err := r.Query("[dbo].[usp_ExternalLink_Select_ByIsEnabled]",
 		sql.Named("IsEnabled", isEnabled))
@@ -90,7 +90,7 @@ func (r *externalLinkRepository) GetByIsEnabled(isEnabled bool) ([]model.Externa
 	return externalLinks, nil
 }
 
-func (r *externalLinkRepository) GetByID(id int64) (*model.ExternalLink, error) {
+func (r *externalLinkRepository) SelectByID(id int64) (*model.ExternalLink, error) {
 	var externalLink model.ExternalLink
 	row, err := r.QueryRow("[dbo].[usp_ExternalLink_Select_ById]",
 		sql.Named("Id", id))
@@ -127,7 +127,7 @@ func (r *externalLinkRepository) GetByID(id int64) (*model.ExternalLink, error) 
 	return &externalLink, nil
 }
 
-func (r *externalLinkRepository) Create(externalLink *model.ExternalLink) (*model.ExternalLink, error) {
+func (r *externalLinkRepository) Insert(externalLink *model.ExternalLink) (*model.ExternalLink, error) {
 	result, err := r.QueryRow("[dbo].[usp_ExternalLink_Insert]",
 		sql.Named("LinkName", externalLink.DisplayName),
 		sql.Named("IconSVG", externalLink.IconSVGPath),

@@ -2,17 +2,20 @@ package contributionarea
 
 import (
 	"database/sql"
+	db "main/infrastructure/database"
 	"main/model"
-	"main/repository"
 	"time"
 )
 
 type contributionAreaRepository struct {
-	repository.Database
+	db.Database
 }
 
-// GetAll implements ContributionAreaRepository.
-func (r *contributionAreaRepository) GetAll() ([]model.ContributionArea, error) {
+func NewContributionAreaRepository(database db.Database) ContributionAreaRepository {
+	return &contributionAreaRepository{database}
+}
+
+func (r *contributionAreaRepository) Select() ([]model.ContributionArea, error) {
 	var contributionAreas []model.ContributionArea
 	rows, err := r.Query("[dbo].[usp_ContributionArea_Select]")
 	if err != nil {
@@ -44,8 +47,7 @@ func (r *contributionAreaRepository) GetAll() ([]model.ContributionArea, error) 
 	return contributionAreas, nil
 }
 
-// GetByOption implements ContributionAreaRepository.
-func (r *contributionAreaRepository) GetByOption(offset int, filter int, orderby string, ordertype string, search string) ([]model.ContributionArea, error) {
+func (r *contributionAreaRepository) SelectByOption(offset int, filter int, orderby string, ordertype string, search string) ([]model.ContributionArea, error) {
 	var contributionAreas []model.ContributionArea
 	rows, err := r.Query("[dbo].[usp_ContributionArea_Select_ByOption]",
 		sql.Named("Offset", offset),
@@ -82,8 +84,7 @@ func (r *contributionAreaRepository) GetByOption(offset int, filter int, orderby
 	return contributionAreas, nil
 }
 
-// GetByID implements ContributionAreaRepository.
-func (r *contributionAreaRepository) GetByID(id int64) (*model.ContributionArea, error) {
+func (r *contributionAreaRepository) SelectById(id int64) (*model.ContributionArea, error) {
 	var contributionArea model.ContributionArea
 	row, err := r.QueryRow("[dbo].[usp_ContributionArea_Select_ById]",
 		sql.Named("Id", id))
@@ -116,8 +117,7 @@ func (r *contributionAreaRepository) GetByID(id int64) (*model.ContributionArea,
 	return &contributionArea, nil
 }
 
-// Create implements ContributionAreaRepository.
-func (r *contributionAreaRepository) Create(contributionArea *model.ContributionArea) (*model.ContributionArea, error) {
+func (r *contributionAreaRepository) Insert(contributionArea *model.ContributionArea) (*model.ContributionArea, error) {
 	result, err := r.QueryRow("[dbo].[usp_ContributionArea_Insert]",
 		sql.Named("Name", contributionArea.Name),
 		sql.Named("CreatedBy", contributionArea.CreatedBy))
@@ -133,7 +133,6 @@ func (r *contributionAreaRepository) Create(contributionArea *model.Contribution
 	return contributionArea, nil
 }
 
-// Update implements ContributionAreaRepository.
 func (r *contributionAreaRepository) Update(id int64, contributionArea *model.ContributionArea) (*model.ContributionArea, error) {
 	row, err := r.QueryRow("[dbo].[usp_ContributionArea_Update]",
 		sql.Named("Id", id),
@@ -150,9 +149,8 @@ func (r *contributionAreaRepository) Update(id int64, contributionArea *model.Co
 	return contributionArea, nil
 }
 
-// GetTotal implements ContributionAreaRepository.
-func (r *contributionAreaRepository) GetTotal() (int, error) {
-	var total int
+func (r *contributionAreaRepository) Total() (int64, error) {
+	var total int64
 	row, err := r.QueryRow("[dbo].[usp_ContributionArea_TotalCount]")
 	if err != nil {
 		return 0, err
@@ -162,8 +160,4 @@ func (r *contributionAreaRepository) GetTotal() (int, error) {
 		return 0, err
 	}
 	return total, nil
-}
-
-func NewContributionAreaRepository(database repository.Database) ContributionAreaRepository {
-	return &contributionAreaRepository{database}
 }

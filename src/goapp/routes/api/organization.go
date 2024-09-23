@@ -315,7 +315,7 @@ func GetAllRegionalOrganizations(w http.ResponseWriter, r *http.Request) {
 	logger := appinsights_wrapper.NewClient()
 	defer logger.EndOperation()
 
-	regOrgs, err := db.GetAllRegionalOrganizations()
+	regOrgs, err := db.SelectRegionalOrganization(nil)
 	if err != nil {
 		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -337,7 +337,7 @@ func GetAllRegionalOrganizationsName(w http.ResponseWriter, r *http.Request) {
 	logger := appinsights_wrapper.NewClient()
 	defer logger.EndOperation()
 
-	regOrgs, err := db.GetAllRegionalOrganizations()
+	regOrgs, err := db.SelectRegionalOrganization(nil)
 	if err != nil {
 		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -347,7 +347,7 @@ func GetAllRegionalOrganizationsName(w http.ResponseWriter, r *http.Request) {
 	var orgNames []string
 
 	for _, org := range regOrgs {
-		orgNames = append(orgNames, org["Name"].(string))
+		orgNames = append(orgNames, org.Name)
 	}
 
 	w.WriteHeader(http.StatusOK)

@@ -1,0 +1,429 @@
+{{ define "content" }}
+<div id="pageTitle">
+    Admin Tools
+</div>
+<div x-data="RegionalOrganizationForm()">
+  <div class="px-4 sm:px-6 lg:px-8">
+    <div class="sm:flex sm:items-center">
+        <div class="sm:flex-auto">
+            <h1 class="text-xl font-semibold text-gray-900">Regional Organizations</h1>
+        </div>
+        <div class="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
+            <button @click="setState(state, 'add')" type="button"
+                class="inline-flex items-center justify-center rounded-md border border-transparent bg-orange-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 sm:w-auto">
+                Add Regional Organization
+            </button>
+        </div>
+    </div>
+    <div class="mt-8 flex flex-col">
+        <div class="-my-2 -mx-4 overflow-x-auto sm:-mx-6 lg:-mx-8">
+            <div class="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
+                <div x-data="table({
+                    callback : getRegionalOrganizations,
+                    data : 'data',
+                    total : 'total',
+                    columns : [
+                        { 
+                            name : 'Name', 
+                            value : 'name',
+                            sort : {
+                                orderby : 'Name',
+                                ordertype : 'ASC'
+                            }
+                        },
+                        { 
+                            name : 'Action', 
+                            value : 'id', 
+                            render : (value, data) => renderAction(value, data)
+                        }
+                    ]
+                    })">
+                    <div x-html="template"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div x-show="state.isShow" class="relative z-10" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+    <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity opacity-100"></div>
+  
+    <div class="fixed inset-0 z-10 overflow-y-auto">
+      <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+        <div class="relative transform overflow-hidden rounded-lg bg-white px-4 pb-4 pt-5 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg sm:p-6 opacity-100 translate-y-0 sm:scale-100">
+          
+          <div class="mt-1 sm:mt-2">
+            <h3 class="text-base font-semibold leading-6 text-gray-900" id="modal-title" x-text="state.title"></h3>
+            <div class="mt-2">
+              <form class="space-y-6" onsubmit="event.preventDefault()" autocomplete="off" >
+                <fieldset name="form" x-bind:disabled="state.isFormDisabled">
+                  <fieldset x-bind:disabled="state.isRegionalOrganizationDisabled">
+                    <div class="space-y-8 divide-y divide-gray-200 sm:space-y-5">
+                        <div class="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-t sm:border-gray-200 sm:pt-5">
+                            <label for="EcattId" class="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2"> Regional Organization </label>
+                            <div class="mt-1 sm:mt-0 sm:col-span-2">
+                                <div x-data="combobox({
+                                    ajax: getEnterpriseOrganization,
+                                    id : 'id',
+                                    text : 'name'
+                                })" x-modelable="selected" x-model="form.selectedRegionalOrganization">
+                                    <div x-html="template"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                  </fieldset>
+                  <div class="space-y-5">
+                    <div class="relative flex items-start">
+                      <div class="flex h-6 items-center">
+                        <input 
+                          x-model="form.isCleanUpMembersEnabled"
+                          id="iscleanupmembersenabled" 
+                          aria-describedby="iscleanupmembersenabled-description" 
+                          name="iscleanupmembersenabled" 
+                          type="checkbox" 
+                          class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600">
+                      </div>
+                      <div class="ml-3 text-sm leading-6">
+                        <label for="iscleanupmembersenabled" class="font-medium text-gray-900">Members Cleanup</label>
+                        <p id="iscleanupmembersenabled" class="text-gray-500"> Weekly cleanup to remove users who had left {{ .OrganizationName }} or had not associated their GitHub account in Community Portal.</p>
+                      </div>
+                    </div>
+                    <div class="relative flex items-start">
+                      <div class="flex h-6 items-center">
+                        <input 
+                          x-model="form.isIndexRepoEnabled"
+                          id="repositoryindexing" 
+                          aria-describedby="repositoryindexing-description" 
+                          name="repositoryindexing" 
+                          type="checkbox" 
+                          class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600">
+                      </div>
+                      <div class="ml-3 text-sm leading-6">
+                        <label for="repositoryindexing" class="font-medium text-gray-900">Repository Indexing</label>
+                        <p id="repositoryindexing-description" class="text-gray-500"> Index repositories to appear on Innersource repository search.</p>
+                      </div>
+                    </div>
+                    <div class="relative flex items-start">
+                      <div class="flex h-6 items-center">
+                        <input
+                          x-model="form.isCopilotRequestEnabled" 
+                          id="copilotrequest" 
+                          aria-describedby="copilotrequest-description" 
+                          name="copilotrequest" 
+                          type="checkbox" 
+                          class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600">
+                      </div>
+                      <div class="ml-3 text-sm leading-6">
+                        <label for="copilotrequest" class="font-medium text-gray-900">Copilot Request</label>
+                        <p id="copilotrequest-description" class="text-gray-500"> Allow users to request for Copilot seat in this organization</p>
+                      </div>
+                    </div>
+                    <div class="relative flex items-start">
+                      <div class="flex h-6 items-center">
+                        <input 
+                          x-model="form.isAccessRequestEnabled"
+                          id="accessrequest" 
+                          aria-describedby="accessrequest-description" 
+                          name="accessrequest" 
+                          type="checkbox" 
+                          class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600">
+                      </div>
+                      <div class="ml-3 text-sm leading-6">
+                        <label for="accessrequest" class="font-medium text-gray-900">Access Request</label>
+                        <p id="accessrequest-description" class="text-gray-500">Allow users to request for access to this organization</p>
+                      </div>
+                    </div>
+                  </div>
+                </fieldset>
+              </form>
+              <div class="mt-5 sm:mt-6">
+                <template x-if="isSubmitVisible()">
+                  <button 
+                    x-text="state.submitText"
+                    @click="onSubmit()"
+                    type="submit" 
+                    class="inline-flex justify-center rounded-md bg-[#FF5800] px-5 mr-2 py-2 text-sm font-semibold text-white shadow-sm  focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:bg-slate-300">
+                    Submit
+                  </button>
+                </template>
+                <button
+                  x-text="state.cancelText"
+                  @click="onCancel()"
+                  type="button"
+                  class="inline-flex justify-center rounded-md bg-gray-200 px-3 py-2 text-sm font-semibold text-gray-700 shadow-sm  focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+</div>
+</div>
+
+<script src="/public/components/table.js"></script>
+<script src="/public/components/combobox.js"></script>
+<script>
+     function RegionalOrganizationForm() {
+        const defaultForm = {
+            selectedRegionalOrganization: [{
+                id: 0,
+                text: ''
+            }],
+            isCleanUpMembersEnabled: false,
+            isIndexRepoEnabled: false,
+            isCopilotRequestEnabled: false,
+            isAccessRequestEnabled: false,
+            isEnabled: false,
+        }
+        const defaultState = {
+          action: '', // add, edit, remove, view
+          title: '',
+          submitVisibility: 'show', // show or hidden
+          submitText: 'Submit',
+          submitClass: 'bg-green-500 text-white',
+          cancelText: 'Close',
+          cancelClass: 'bg-red-500 text-white',
+          isRegionalOrganizationDisabled: false,
+          isFormDisabled: false,
+          isShow: false
+        }
+        return {
+            form: {
+              selectedRegionalOrganization: defaultForm.selectedRegionalOrganization,
+              isCleanUpMembersEnabled: defaultForm.isCleanUpMembersEnabled,
+              isIndexRepoEnabled: defaultForm.isIndexRepoEnabled,
+              isCopilotRequestEnablesd: defaultForm.isCopilotRequestEnabled,
+              isAccessRequestEnabled: defaultForm.isAccessRequestEnabled,
+              isEnabled: defaultForm.isEnabled,
+            },
+            state: {
+              action: defaultState.action,
+              title: defaultState.title,
+              submitVisibility: defaultState.submitVisibility,
+              submitText: defaultState.submitText,
+              submitClass: defaultState.submitClass,
+              cancelText: defaultState.cancelText,
+              cancelClass: defaultState.cancelClass,
+              isRegionalOrganizationDisabled: defaultState.isRegionalOrganizationDisabled,
+              isFormDisabled: defaultState.isFormDisabled,
+              isShow: defaultState.isShow
+            },
+            isSubmitVisible() {
+              if (this.state.submitVisibility == 'show')
+                return true
+
+              if(this.state.submitVisibility == 'hidden')
+                return false
+            },
+            setState: (state, action) => {
+              state.action = action
+              switch (action) {
+                case 'add':
+                  state.title = 'Add Regional Organization'
+                  state.submitVisibility = 'show'
+                  state.submitText = 'Submit'
+                  state.submitClass = 'bg-green-500 text-white'
+                  state.cancelText = 'Close'
+                  state.cancelClass = 'bg-red-500 text-white'
+                  state.isRegionalOrganizationDisabled = false
+                  state.isFormDisabled = false
+                  state.isShow = true
+                  break;
+                case 'view':
+                  state.title = 'View Regional Organization'
+                  state.submitVisibility = 'hidden'
+                  state.cancelText = 'Close'
+                  state.cancelClass = 'bg-red-500 text-white'
+                  state.isFormDisabled = true
+                  state.isShow = true
+                  break;
+                case 'edit':
+                  state.title = 'Edit Regional Organization'
+                  state.submitVisibility = 'show'
+                  state.submitText = 'Save'
+                  state.submitClass = 'bg-orange-500 text-white'
+                  state.cancelText = 'Cancel'
+                  state.cancelClass = 'bg-red-500 text-white'
+                  state.isRegionalOrganizationDisabled = true
+                  state.isFormDisabled = false
+                  state.isShow = true
+                  break;
+                case 'remove':
+                  state.title = 'Remove Regional Organization'
+                  state.submitVisibility = 'show'
+                  state.submitText = 'Confirm'
+                  state.submitClass = 'bg-red-500 text-white'
+                  state.cancelText = 'Cancel'
+                  state.cancelClass = 'bg-gray-500 text-white'
+                  state.isFormDisabled = true
+                  state.isShow = true
+                  break;
+              }
+            },
+            onSubmit() {
+              switch (this.state.action) {
+                case 'add':
+                  this.addSubmit()
+                  break
+                case 'edit':
+                  this.editSubmit()
+                  break
+                case 'remove':
+                  this.removeSubmit()
+                  break
+              }
+            },
+            removeSubmit() {
+                const regionOrgId = this.form.selectedRegionalOrganization[0].id
+
+                const data = {
+                    id: regionOrgId,
+                    name: this.form.selectedRegionalOrganization[0].text,
+                    isCleanUpMembersEnabled: this.form.isCleanUpMembersEnabled,
+                    isIndexRepoEnabled: this.form.isIndexRepoEnabled,
+                    isCopilotRequestEnabled: this.form.isCopilotRequestEnabled,
+                    isAccessRequestEnabled: this.form.isAccessRequestEnabled,
+                    isEnabled: false
+                }
+
+                console.log('Remove Submit')
+                Alpine.store('master').modal.show()
+                Alpine.store('master').putData(`/api/regional-organizations/${regionOrgId}`, data,
+                    "Regional Organization has been removed.", "Close", "/admin/regional-organization")
+            },
+            addSubmit() {
+                console.log('Add Submit')
+
+                const data = {
+                  id: this.form.selectedRegionalOrganization[0].id,
+                  name: this.form.selectedRegionalOrganization[0].text,
+                  isCleanUpMembersEnabled: this.form.isCleanUpMembersEnabled,
+                  isIndexRepoEnabled: this.form.isIndexRepoEnabled,
+                  isCopilotRequestEnabled: this.form.isCopilotRequestEnabled,
+                  isAccessRequestEnabled: this.form.isAccessRequestEnabled,
+                  isEnabled: true
+                }
+
+                Alpine.store('master').modal.show()
+                Alpine.store('master').postData(`/api/regional-organizations`, data,
+                    "Regional Organization has been added.", "Close", "/admin/regional-organization")
+            },
+            editSubmit() {
+                console.log('Update Submit')
+                const regionOrgId = this.form.selectedRegionalOrganization[0].id
+
+                const data = {
+                    id: regionOrgId,
+                    name: this.form.selectedRegionalOrganization[0].text,
+                    isCleanUpMembersEnabled: this.form.isCleanUpMembersEnabled,
+                    isIndexRepoEnabled: this.form.isIndexRepoEnabled,
+                    isCopilotRequestEnabled: this.form.isCopilotRequestEnabled,
+                    isAccessRequestEnabled: this.form.isAccessRequestEnabled,
+                    isEnabled: this.form.isEnabled
+                }
+
+                console.log('Remove Submit')
+                Alpine.store('master').modal.show()
+                Alpine.store('master').putData(`/api/regional-organizations/${regionOrgId}`, data,
+                    "Regional Organization has been saved.", "Close", "/admin/regional-organization")
+            },
+            onCancel() {
+              this.form.selectedRegionalOrganization = defaultForm.selectedRegionalOrganization
+              this.form.isCleanUpMembersEnabled = defaultForm.isCleanUpMembersEnabled
+              this.form.isIndexRepoEnabled = defaultForm.isIndexRepoEnabled
+              this.form.isCopilotRequestEnabled = defaultForm.isCopilotRequestEnabled
+              this.form.isAccessRequestEnabled = defaultForm.isAccessRequestEnabled
+              this.form.isEnabled = defaultForm.isEnabled
+              
+              this.state.action = defaultState.action
+              this.state.title = defaultState.title
+              this.state.submitVisibility = defaultState.submitVisibility
+              this.state.submitText = defaultState.submitText
+              this.state.submitClass = defaultState.submitClass
+              this.state.cancelText = defaultState.cancelText
+              this.state.cancelClass = defaultState.cancelClass
+              this.state.isFormDisabled = defaultState.isFormDisabled
+              this.state.isShow = defaultState.isShow
+            },
+            renderAction(value, data) {
+                console.log('DATA', data)
+                return `
+                  <button @click="() => {
+                    form.selectedRegionalOrganization = [{
+                      id: ${data.id},
+                      text: '${data.name}'
+                    }]
+                    form.isCleanUpMembersEnabled = ${data.isCleanUpMembersEnabled}
+                    form.isIndexRepoEnabled = ${data.isIndexRepoEnabled}
+                    form.isCopilotRequestEnabled = ${data.isCopilotRequestEnabled}
+                    form.isAccessRequestEnabled = ${data.isAccessRequestEnabled}
+                    form.isEnabled = ${data.isEnabled}
+                    
+                    setState(state, 'view')
+                  }">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 p-1 text-blue-500">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" />
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                    </svg>
+                  </button>
+                  <button @click="() => {
+                    form.selectedRegionalOrganization = [{
+                      id: ${data.id},
+                      text: '${data.name}'
+                    }]
+                    form.isCleanUpMembersEnabled = ${data.isCleanUpMembersEnabled}
+                    form.isIndexRepoEnabled = ${data.isIndexRepoEnabled}
+                    form.isCopilotRequestEnabled = ${data.isCopilotRequestEnabled}
+                    form.isAccessRequestEnabled = ${data.isAccessRequestEnabled}
+                    form.isEnabled = ${data.isEnabled}
+                    
+                    setState(state, 'edit')
+                  }">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 p-1 text-orange-500">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
+                    </svg>
+                  </button>
+                  <button @click="() => {
+                    form.selectedRegionalOrganization = [{
+                      id: ${data.id},
+                      text: '${data.name}'
+                    }]
+                    form.isCleanUpMembersEnabled = ${data.isCleanUpMembersEnabled}
+                    form.isIndexRepoEnabled = ${data.isIndexRepoEnabled}
+                    form.isCopilotRequestEnabled = ${data.isCopilotRequestEnabled}
+                    form.isAccessRequestEnabled = ${data.isAccessRequestEnabled}
+                    form.isEnabled = ${data.isEnabled}
+                    
+                    setState(state, 'remove')
+                  }">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 p-1 text-red-500">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+                    </svg>
+                  </button>
+                `
+            }
+        }
+    }
+    async function getRegionalOrganizations(e) {
+        const offset = e.filter * e.page;
+        const search = encodeURIComponent(e.search)
+        const searchParam = search ? `&search=${search}` : ''
+        const filterParam = e.filter ? `filter=${e.filter}` : ''
+        const offsetParam = offset ? `&offset=${offset}` : ''
+        const res = await fetch(
+          `/api/regional-organizations?${filterParam}${offsetParam}${searchParam}`
+        )
+        const data = await res.json()
+        return data
+    }
+
+    async function getEnterpriseOrganization(e) {
+        const res = await fetch(`/api/enterprise-organizations`)
+        const data = await res.json()
+        console.log(data)
+        return data
+    }
+</script>
+{{ end }}

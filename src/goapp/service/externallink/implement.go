@@ -3,26 +3,26 @@ package externallink
 import (
 	"errors"
 	"main/model"
-	repositoryExternalLink "main/repository/externallink"
+	"main/repository"
 	"strconv"
 )
 
 type externalLinkService struct {
-	repositoryExternalLink repositoryExternalLink.ExternalLinkRepository
+	Repository *repository.Repository
 }
 
-func NewExternalLinkService(repositoryExternalLink repositoryExternalLink.ExternalLinkRepository) ExternalLinkService {
+func NewExternalLinkService(repo *repository.Repository) ExternalLinkService {
 	return &externalLinkService{
-		repositoryExternalLink: repositoryExternalLink,
+		Repository: repo,
 	}
 }
 
 func (s externalLinkService) GetAll() ([]model.ExternalLink, error) {
-	return s.repositoryExternalLink.GetAll()
+	return s.Repository.ExternalLink.Select()
 }
 
 func (s externalLinkService) GetAllEnabled() ([]model.ExternalLink, error) {
-	return s.repositoryExternalLink.GetByIsEnabled(true)
+	return s.Repository.ExternalLink.SelectByIsEnabled(true)
 }
 
 func (s externalLinkService) GetByID(id string) (*model.ExternalLink, error) {
@@ -30,11 +30,11 @@ func (s externalLinkService) GetByID(id string) (*model.ExternalLink, error) {
 	if err != nil {
 		return nil, err
 	}
-	return s.repositoryExternalLink.GetByID(parsedId)
+	return s.Repository.ExternalLink.SelectByID(parsedId)
 }
 
 func (s externalLinkService) Create(externalLink *model.ExternalLink) (*model.ExternalLink, error) {
-	return s.repositoryExternalLink.Create(externalLink)
+	return s.Repository.ExternalLink.Insert(externalLink)
 }
 
 func (s externalLinkService) Update(id string, externalLink *model.ExternalLink) (*model.ExternalLink, error) {
@@ -42,7 +42,7 @@ func (s externalLinkService) Update(id string, externalLink *model.ExternalLink)
 	if err != nil {
 		return nil, err
 	}
-	return s.repositoryExternalLink.Update(parsedId, externalLink)
+	return s.Repository.ExternalLink.Update(parsedId, externalLink)
 }
 
 func (s externalLinkService) Delete(id string) error {
@@ -50,7 +50,7 @@ func (s externalLinkService) Delete(id string) error {
 	if err != nil {
 		return err
 	}
-	return s.repositoryExternalLink.Delete(parsedId)
+	return s.Repository.ExternalLink.Delete(parsedId)
 }
 
 func (s externalLinkService) Validate(externalLink *model.ExternalLink) error {
