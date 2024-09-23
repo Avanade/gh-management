@@ -2,37 +2,41 @@ package main
 
 import (
 	"main/config"
-	"main/repository"
+	c "main/controller"
+	"main/infrastructure/database"
+	r "main/repository"
 	"main/router"
-
-	repositoruContributionArea "main/repository/contributionarea"
-	repositoryExternalLink "main/repository/externallink"
-	repositoryOssContributionSponsor "main/repository/osscontributionsponsor"
-
-	serviceContributionArea "main/service/contributionarea"
-	serviceExternalLink "main/service/externallink"
-	serviceOssContributionSponsor "main/service/osscontributionsponsor"
-
-	controllerContributionArea "main/controller/contributionarea"
-	controllerExternalLink "main/controller/externallink"
-	controllerOssContributionSponsor "main/controller/osscontributionsponsor"
+	s "main/service"
 )
 
 var (
-	configManager config.ConfigManager = config.NewEnvConfigManager()
-	database      repository.Database  = repository.NewDatabase(configManager)
+	conf config.ConfigManager = config.NewEnvConfigManager()
+	db   database.Database    = database.NewDatabase(conf)
 
-	externalLinkRepository repositoryExternalLink.ExternalLinkRepository = repositoryExternalLink.NewExternalLinkRepository(database)
-	externalLinkService    serviceExternalLink.ExternalLinkService       = serviceExternalLink.NewExternalLinkService(externalLinkRepository)
-	externalLinkController controllerExternalLink.ExternalLinkController = controllerExternalLink.NewExternalLinkController(externalLinkService)
+	repo = r.NewRepository(
+		r.NewActivity(db),
+		r.NewActivityContributionArea(db),
+		r.NewActivityHelp(db),
+		r.NewActivityType(db),
+		r.NewContributionArea(db),
+		r.NewExternalLink(db),
+		r.NewOssContributionSponsor(db))
 
-	contributionAreaRepository repositoruContributionArea.ContributionAreaRepository = repositoruContributionArea.NewContributionAreaRepository(database)
-	contributionAreaService    serviceContributionArea.ContributionAreaService       = serviceContributionArea.NewContributionAreaService(contributionAreaRepository)
-	contributionAreaController controllerContributionArea.ContributionAreaController = controllerContributionArea.NewContributionAreaController(contributionAreaService)
+	serv = s.NewService(
+		s.NewActivityService(repo),
+		s.NewActivityTypeService(repo),
+		s.NewContributionAreaService(repo),
+		s.NewActivityHelpService(repo),
+		s.NewEmailService(conf),
+		s.NewExternalLinkService(repo),
+		s.NewOssContributionSponsorService(repo))
 
-	ossContributionSponsorRepository repositoryOssContributionSponsor.OSSContributionSponsorRepository = repositoryOssContributionSponsor.NewOSSContributionSponsorRepository(database)
-	ossContributionSponsorService    serviceOssContributionSponsor.OssContributionSponsorService       = serviceOssContributionSponsor.NewOssContributionSponsorService(ossContributionSponsorRepository)
-	ossContributionSponsorController controllerOssContributionSponsor.OSSContributionSponsorController = controllerOssContributionSponsor.NewOssContributionSponsorController(ossContributionSponsorService)
+	cont = c.NewController(
+		c.NewActivityController(serv),
+		c.NewActivityTypeController(serv),
+		c.NewContributionAreaController(serv),
+		c.NewExternalLinkController(serv),
+		c.NewOssContributionSponsorController(serv))
 
 	httpRouter router.Router = router.NewMuxRouter()
 )

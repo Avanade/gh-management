@@ -7,8 +7,8 @@ CREATE TABLE [dbo].[CommunityActivity] (
     [Url] [VARCHAR](255) NULL,
     [Created] [DATETIME] NOT NULL DEFAULT GETDATE(),
     [CreatedBy] [VARCHAR](100) NULL,
-    [Modified] [DATETIME] NOT NULL DEFAULT GETDATE(),
+    [Modified] [DATETIME] NULL,
     [ModifiedBy] [VARCHAR](100) NULL,
     CONSTRAINT [FK_CommunityActivity_Community] FOREIGN KEY ([CommunityId]) REFERENCES [dbo].[Community]([Id]),
-    CONSTRAINT [FK_CommunityActivity_ActivityType] FOREIGN KEY ([ActivityTypeId]) REFERENCES [dbo].[ActivityType]([Id])
+    CONSTRAINT [FK_CommunityActivity_ActivityType] FOREIGN KEY ([ActivityTypeId]) REFERENCES [dbo].[ActivityType]([Id]),
 )

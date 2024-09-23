@@ -3,48 +3,43 @@ package osscontributionsponsor
 import (
 	"errors"
 	"main/model"
-	repositoryOssContributionSponsor "main/repository/osscontributionsponsor"
+	"main/repository"
 	"strconv"
 )
 
 type ossContributionSponsorService struct {
-	repositoryOssContributionSponsor repositoryOssContributionSponsor.OSSContributionSponsorRepository
+	Repository *repository.Repository
 }
 
-// Create implements OssContributionSponsorService.
+func NewOssContributionSponsorService(repo *repository.Repository) OssContributionSponsorService {
+	return &ossContributionSponsorService{
+		Repository: repo,
+	}
+}
+
 func (s *ossContributionSponsorService) Create(ossContributionSponsor *model.OSSContributionSponsor) (*model.OSSContributionSponsor, error) {
-	return s.repositoryOssContributionSponsor.Create(ossContributionSponsor)
+	return s.Repository.OssContributionSponsor.Insert(ossContributionSponsor)
 }
 
-// GetAll implements OssContributionSponsorService.
 func (s *ossContributionSponsorService) GetAll() ([]model.OSSContributionSponsor, error) {
-	return s.repositoryOssContributionSponsor.GetAll()
+	return s.Repository.OssContributionSponsor.Select()
 }
 
-// GetByIsArchived implements OssContributionSponsorService.
 func (s *ossContributionSponsorService) GetAllEnabled() ([]model.OSSContributionSponsor, error) {
-	return s.repositoryOssContributionSponsor.GetByIsArchived(false)
+	return s.Repository.OssContributionSponsor.SelectByIsArchived(false)
 }
 
-// Update implements OssContributionSponsorService.
 func (s *ossContributionSponsorService) Update(id string, ossContributionSponsor *model.OSSContributionSponsor) (*model.OSSContributionSponsor, error) {
 	parseId, err := strconv.ParseInt(id, 10, 64)
 	if err != nil {
 		return nil, err
 	}
-	return s.repositoryOssContributionSponsor.Update(parseId, ossContributionSponsor)
+	return s.Repository.OssContributionSponsor.Update(parseId, ossContributionSponsor)
 }
 
-// Validate implements OssContributionSponsorService.
 func (s *ossContributionSponsorService) Validate(ossContributionSponsor *model.OSSContributionSponsor) error {
 	if ossContributionSponsor.Name == "" {
 		return errors.New("name is required")
 	}
 	return nil
-}
-
-func NewOssContributionSponsorService(repositoryOssContributionSponsor repositoryOssContributionSponsor.OSSContributionSponsorRepository) OssContributionSponsorService {
-	return &ossContributionSponsorService{
-		repositoryOssContributionSponsor: repositoryOssContributionSponsor,
-	}
 }

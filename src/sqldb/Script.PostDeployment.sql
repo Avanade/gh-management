@@ -1,5 +1,3 @@
--- This file contains SQL statements that will be executed after the build script.
-
 /* INITIAL DATA FOR APPROVAL STATUS */
 SET IDENTITY_INSERT ApprovalStatus ON 
     IF NOT EXISTS (SELECT [Id] FROM [dbo].[ApprovalStatus] WHERE [Id] = 1)
@@ -27,3 +25,13 @@ SET IDENTITY_INSERT Visibility ON
     IF NOT EXISTS (SELECT [Id] FROM [dbo].[Visibility] WHERE [Id] = 3)
         INSERT INTO [dbo].[Visibility] ([Id], [Name]) VALUES (3, 'Public')
 SET IDENTITY_INSERT Visibility OFF
+
+/* INITIAL DATA FOR HELP TYPE */
+SET IDENTITY_INSERT HelpType ON 
+    IF NOT EXISTS (SELECT [Id] FROM [dbo].[HelpType] WHERE [Id] = 1)
+        INSERT INTO [dbo].[HelpType] ([Id], [Name]) VALUES (1, 'Sales Opportunity') 
+    IF NOT EXISTS (SELECT [Id] FROM [dbo].[HelpType] WHERE [Id] = 2)
+        INSERT INTO [dbo].[HelpType] ([Id], [Name]) VALUES (2, 'Marketing Opportunity') 
+    IF NOT EXISTS (SELECT [Id] FROM [dbo].[HelpType] WHERE [Id] = 3)
+        INSERT INTO [dbo].[HelpType] ([Id], [Name]) VALUES (3, 'Other')
+SET IDENTITY_INSERT HelpType OFF

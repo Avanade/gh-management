@@ -4,17 +4,22 @@ import (
 	"encoding/json"
 	"errors"
 	"main/model"
-	serviceOssContributionSponsor "main/service/osscontributionsponsor"
+	"main/service"
 	"net/http"
 
 	"github.com/gorilla/mux"
 )
 
 type ossContributionSponsorController struct {
-	serviceOssContributionSponsor.OssContributionSponsorService
+	*service.Service
 }
 
-// CreateOssContributionSponsor implements OSSContributionSponsorController.
+func NewOssContributionSponsorController(serv *service.Service) OSSContributionSponsorController {
+	return &ossContributionSponsorController{
+		Service: serv,
+	}
+}
+
 func (c *ossContributionSponsorController) CreateOssContributionSponsor(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	var ossContributionSponsor model.OSSContributionSponsor
@@ -24,14 +29,14 @@ func (c *ossContributionSponsorController) CreateOssContributionSponsor(w http.R
 		json.NewEncoder(w).Encode(errors.New("error unmarshalling data"))
 		return
 	}
-	err = c.OssContributionSponsorService.Validate(&ossContributionSponsor)
+	err = c.Service.OssContributionSponsor.Validate(&ossContributionSponsor)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(err.Error())
 		return
 	}
 
-	result, err := c.OssContributionSponsorService.Create(&ossContributionSponsor)
+	result, err := c.Service.OssContributionSponsor.Create(&ossContributionSponsor)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(errors.New("error saving the oss contribution sponsor"))
@@ -41,10 +46,9 @@ func (c *ossContributionSponsorController) CreateOssContributionSponsor(w http.R
 	json.NewEncoder(w).Encode(result)
 }
 
-// GetOssContributionSponsors implements OSSContributionSponsorController.
 func (c *ossContributionSponsorController) GetOssContributionSponsors(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	ossContributionSponsor, err := c.OssContributionSponsorService.GetAll()
+	ossContributionSponsor, err := c.Service.OssContributionSponsor.GetAll()
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(err.Error())
@@ -54,10 +58,9 @@ func (c *ossContributionSponsorController) GetOssContributionSponsors(w http.Res
 	json.NewEncoder(w).Encode(ossContributionSponsor)
 }
 
-// GetEnabledOssContributionSponsors implements OSSContributionSponsorController.
 func (c *ossContributionSponsorController) GetEnabledOssContributionSponsors(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	ossContributionSponsor, err := c.OssContributionSponsorService.GetAllEnabled()
+	ossContributionSponsor, err := c.Service.OssContributionSponsor.GetAllEnabled()
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(err.Error())
@@ -67,7 +70,6 @@ func (c *ossContributionSponsorController) GetEnabledOssContributionSponsors(w h
 	json.NewEncoder(w).Encode(ossContributionSponsor)
 }
 
-// UpdateOssContributionSponsor implements OSSContributionSponsorController.
 func (c *ossContributionSponsorController) UpdateOssContributionSponsor(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	if len(params) == 0 {
@@ -88,7 +90,7 @@ func (c *ossContributionSponsorController) UpdateOssContributionSponsor(w http.R
 		json.NewEncoder(w).Encode(errors.New("error unmarshalling data"))
 		return
 	}
-	err = c.OssContributionSponsorService.Validate(&ossContributionSponsor)
+	err = c.Service.OssContributionSponsor.Validate(&ossContributionSponsor)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(errors.New(err.Error()))
@@ -96,7 +98,7 @@ func (c *ossContributionSponsorController) UpdateOssContributionSponsor(w http.R
 	}
 
 	id := params["id"]
-	newOssContributionSponsor, err := c.OssContributionSponsorService.Update(id, &ossContributionSponsor)
+	newOssContributionSponsor, err := c.Service.OssContributionSponsor.Update(id, &ossContributionSponsor)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(errors.New("error saving the oss contribution sponsor"))
@@ -104,10 +106,4 @@ func (c *ossContributionSponsorController) UpdateOssContributionSponsor(w http.R
 	}
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(newOssContributionSponsor)
-}
-
-func NewOssContributionSponsorController(serviceOssContributionSponsor serviceOssContributionSponsor.OssContributionSponsorService) OSSContributionSponsorController {
-	return &ossContributionSponsorController{
-		OssContributionSponsorService: serviceOssContributionSponsor,
-	}
 }

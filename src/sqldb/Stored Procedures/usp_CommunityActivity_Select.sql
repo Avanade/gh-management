@@ -8,7 +8,7 @@ BEGIN
     [CommunityId],
     [C].[Name] AS [CommunityName],
     [ActivityTypeId],
-    [A].[Name] AS [TypeName],
+    [A].[Name] AS [ActivityTypeName],
     [CAR].[Id] AS [PrimaryContributionAreaId],
     [CAR].[Name] AS [PrimaryContributionAreaName],
     [C].[Url],

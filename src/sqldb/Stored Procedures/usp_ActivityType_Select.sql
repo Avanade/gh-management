@@ -5,10 +5,6 @@ BEGIN
 
     SELECT
         [Id],
-        [Name],
-        [Created],
-        [CreatedBy],
-        [Modified],
-        [ModifiedBy]
+        [Name]
     FROM [dbo].[ActivityType]
 END

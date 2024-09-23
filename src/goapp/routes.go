@@ -119,12 +119,12 @@ func setApiRoutes() {
 	// APIS
 
 	// ACTIVITY TYPES API
-	httpRouter.GET("/api/activity-types", m.Chain(rtApi.GetActivityTypes, m.AzureAuth(), m.GitHubAuth()))
+	httpRouter.GET("/api/activity-types", m.Chain(cont.ActivityType.GetActivityTypes, m.AzureAuth(), m.GitHubAuth()))
 
 	// ACTIVITY API
-	httpRouter.POST("/api/activities", m.Chain(rtApi.CreateActivity, m.AzureAuth(), m.GitHubAuth()))
-	httpRouter.GET("/api/activities", m.Chain(rtApi.GetActivities, m.AzureAuth(), m.GitHubAuth()))
-	httpRouter.GET("/api/activities/{id}", m.Chain(rtApi.GetActivityById, m.AzureAuth(), m.GitHubAuth()))
+	httpRouter.POST("/api/activities", m.Chain(cont.Activity.CreateActivity, m.AzureAuth(), m.GitHubAuth()))
+	httpRouter.GET("/api/activities", m.Chain(cont.Activity.GetActivities, m.AzureAuth(), m.GitHubAuth()))
+	httpRouter.GET("/api/activities/{id}", m.Chain(cont.Activity.GetActivityById, m.AzureAuth(), m.GitHubAuth()))
 
 	// COMMUNITIES API
 	httpRouter.GET("/api/communities", m.Chain(rtApi.GetCommunities, m.AzureAuth()))
@@ -149,10 +149,10 @@ func setApiRoutes() {
 	httpRouter.GET("/api/community-approvers/active", rtApi.GetAllActiveCommunityApprovers)
 
 	// CONTRIBUTION AREAS API
-	httpRouter.POST("/api/contribution-areas", m.Chain(contributionAreaController.CreateContributionAreas, m.AzureAuth(), m.GitHubAuth()))
-	httpRouter.GET("/api/contribution-areas", m.Chain(contributionAreaController.GetContributionAreas, m.AzureAuth(), m.GitHubAuth()))
-	httpRouter.PUT("/api/contribution-areas/{id}", m.Chain(contributionAreaController.UpdateContributionArea, m.AzureAuth(), m.GitHubAuth()))
-	httpRouter.GET("/api/contribution-areas/{id}", m.Chain(contributionAreaController.GetContributionAreaById, m.AzureAuth(), m.GitHubAuth()))
+	httpRouter.POST("/api/contribution-areas", m.Chain(cont.ContributionArea.CreateContributionAreas, m.AzureAuth(), m.GitHubAuth()))
+	httpRouter.GET("/api/contribution-areas", m.Chain(cont.ContributionArea.GetContributionAreas, m.AzureAuth(), m.GitHubAuth()))
+	httpRouter.PUT("/api/contribution-areas/{id}", m.Chain(cont.ContributionArea.UpdateContributionArea, m.AzureAuth(), m.GitHubAuth()))
+	httpRouter.GET("/api/contribution-areas/{id}", m.Chain(cont.ContributionArea.GetContributionAreaById, m.AzureAuth(), m.GitHubAuth()))
 	httpRouter.GET("/api/activities/{id}/contribution-areas", m.Chain(rtApi.GetContributionAreasByActivityId, m.AzureAuth(), m.GitHubAuth()))
 
 	// CATEGORIES API
@@ -203,18 +203,18 @@ func setApiRoutes() {
 	httpRouter.GET("/api/approval-types/{id}", m.Chain(rtApi.GetApprovalTypeById, m.AzureAuth()))
 
 	//EXTERNAL LINKS API
-	httpRouter.GET("/api/external-links", m.Chain(externalLinkController.GetExternalLinks, m.AzureAuth(), m.IsUserAdmin()))
-	httpRouter.GET("/api/external-links/enabled", m.Chain(externalLinkController.GetEnabledExternalLinks, m.AzureAuth()))
-	httpRouter.GET("/api/external-links/{id}", m.Chain(externalLinkController.GetExternalLinkById, m.AzureAuth(), m.IsUserAdmin()))
-	httpRouter.POST("/api/external-links", m.Chain(externalLinkController.CreateExternalLink, m.AzureAuth(), m.IsUserAdmin()))
-	httpRouter.PUT("/api/external-links/{id}", m.Chain(externalLinkController.UpdateExternalLinkById, m.AzureAuth(), m.IsUserAdmin()))
-	httpRouter.DELETE("/api/external-links/{id}", m.Chain(externalLinkController.RemoveExternalLinkById, m.AzureAuth(), m.IsUserAdmin()))
+	httpRouter.GET("/api/external-links", m.Chain(cont.ExternalLink.GetExternalLinks, m.AzureAuth(), m.IsUserAdmin()))
+	httpRouter.GET("/api/external-links/enabled", m.Chain(cont.ExternalLink.GetEnabledExternalLinks, m.AzureAuth()))
+	httpRouter.GET("/api/external-links/{id}", m.Chain(cont.ExternalLink.GetExternalLinkById, m.AzureAuth(), m.IsUserAdmin()))
+	httpRouter.POST("/api/external-links", m.Chain(cont.ExternalLink.CreateExternalLink, m.AzureAuth(), m.IsUserAdmin()))
+	httpRouter.PUT("/api/external-links/{id}", m.Chain(cont.ExternalLink.UpdateExternalLinkById, m.AzureAuth(), m.IsUserAdmin()))
+	httpRouter.DELETE("/api/external-links/{id}", m.Chain(cont.ExternalLink.RemoveExternalLinkById, m.AzureAuth(), m.IsUserAdmin()))
 
 	// OSS CONTRIBUTION SPONSORS API
-	httpRouter.GET("/api/oss-contribution-sponsors", m.Chain(ossContributionSponsorController.GetOssContributionSponsors, m.AzureAuth(), m.IsUserAdmin()))
-	httpRouter.GET("/api/oss-contribution-sponsors/enabled", m.Chain(ossContributionSponsorController.GetEnabledOssContributionSponsors, m.AzureAuth()))
-	httpRouter.POST("/api/oss-contribution-sponsors", m.Chain(ossContributionSponsorController.CreateOssContributionSponsor, m.AzureAuth(), m.IsUserAdmin()))
-	httpRouter.PUT("/api/oss-contribution-sponsors/{id}", m.Chain(ossContributionSponsorController.UpdateOssContributionSponsor, m.AzureAuth(), m.IsUserAdmin()))
+	httpRouter.GET("/api/oss-contribution-sponsors", m.Chain(cont.OssContributionSponsor.GetOssContributionSponsors, m.AzureAuth(), m.IsUserAdmin()))
+	httpRouter.GET("/api/oss-contribution-sponsors/enabled", m.Chain(cont.OssContributionSponsor.GetEnabledOssContributionSponsors, m.AzureAuth()))
+	httpRouter.POST("/api/oss-contribution-sponsors", m.Chain(cont.OssContributionSponsor.CreateOssContributionSponsor, m.AzureAuth(), m.IsUserAdmin()))
+	httpRouter.PUT("/api/oss-contribution-sponsors/{id}", m.Chain(cont.OssContributionSponsor.UpdateOssContributionSponsor, m.AzureAuth(), m.IsUserAdmin()))
 
 	// REGIONAL ORGANIZATIONS API
 	httpRouter.GET("/api/enterprise-organizations", m.Chain(rtApi.GetEnterpriseOrganizations, m.AzureAuth()))
