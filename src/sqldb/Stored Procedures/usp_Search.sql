@@ -29,7 +29,10 @@ BEGIN
   (
     SELECT
       'Repositories' AS [Source],
-      [Name],
+      CONCAT (
+        [Organization], '/',
+        [Name]
+      ),
       CONCAT (
         [Description], '|', (
           SELECT STRING_AGG([Topic], ',')
@@ -43,6 +46,7 @@ BEGIN
       SELECT
         [Name],
         [Description],
+        [Organization],
         [Id]
       FROM [dbo].[Repository] AS [P]
       LEFT JOIN [dbo].[RepositoryTopic] AS [RT] ON [RT].[RepositoryId] = [P].[Id]
@@ -53,7 +57,7 @@ BEGIN
       WHERE
         [P].[VisibilityId] != 1
     ) AS [Repository]
-    GROUP BY [Name], [Description], [Id]
+    GROUP BY [Name], [Description], [Organization], [Id]
   )
   UNION
   (
