@@ -18,6 +18,7 @@ import (
 type RegionalOrganizationDto struct {
 	Id                      int64     `json:"id"`
 	Name                    string    `json:"name"`
+	IsRegionalOrganization  bool      `json:"isRegionalOrganization"`
 	IsCleanUpMembersEnabled bool      `json:"isCleanUpMembersEnabled"`
 	IsIndexRepoEnabled      bool      `json:"isIndexRepoEnabled"`
 	IsCopilotRequestEnabled bool      `json:"isCopilotRequestEnabled"`
@@ -120,6 +121,7 @@ func GetRegionalOrganizationByOption(w http.ResponseWriter, r *http.Request) {
 		regionalOrganizationDto := RegionalOrganizationDto{
 			Id:                      regionalOrganization.Id,
 			Name:                    regionalOrganization.Name,
+			IsRegionalOrganization:  regionalOrganization.IsRegionalOrganization,
 			IsCleanUpMembersEnabled: regionalOrganization.IsCleanUpMembersEnabled,
 			IsIndexRepoEnabled:      regionalOrganization.IsIndexRepoEnabled,
 			IsCopilotRequestEnabled: regionalOrganization.IsCopilotRequestEnabled,
@@ -184,6 +186,7 @@ func InsertRegionalOrganization(w http.ResponseWriter, r *http.Request) {
 	regionalOrganization := db.RegionalOrganization{
 		Id:                      regionalOrganizationDto.Id,
 		Name:                    regionalOrganizationDto.Name,
+		IsRegionalOrganization:  regionalOrganizationDto.IsRegionalOrganization,
 		IsCleanUpMembersEnabled: regionalOrganizationDto.IsCleanUpMembersEnabled,
 		IsIndexRepoEnabled:      regionalOrganizationDto.IsIndexRepoEnabled,
 		IsCopilotRequestEnabled: regionalOrganizationDto.IsCopilotRequestEnabled,

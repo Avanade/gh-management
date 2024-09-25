@@ -1,6 +1,7 @@
 CREATE PROCEDURE [dbo].[usp_RegionalOrganization_Insert]
   @Id INT,
   @Name VARCHAR(100),
+  @IsRegionalOrganization BIT = 1,
   @IsCleanUpMembersEnabled BIT = 1,
   @IsIndexRepoEnabled BIT = 1,
   @IsCopilotRequestEnabled BIT = 1,
@@ -13,7 +14,7 @@ BEGIN
   IF EXISTS (SELECT * FROM [dbo].[RegionalOrganization] WHERE [Id] = @Id)
   BEGIN
     EXEC [dbo].[usp_RegionalOrganization_Update] 
-      @Id, @Name, @IsCleanUpMembersEnabled, 
+      @Id, @Name, @IsRegionalOrganization, @IsCleanUpMembersEnabled, 
       @IsIndexRepoEnabled, @IsCopilotRequestEnabled, 
       @IsAccessRequestEnabled, 1, @CreatedBy
   END
@@ -23,6 +24,7 @@ BEGIN
     (
         [Id],
         [Name],
+        [IsRegionalOrganization],
         [IsCleanUpMembersEnabled],
         [IsIndexRepoEnabled],
         [IsCopilotRequestEnabled],
@@ -34,6 +36,7 @@ BEGIN
     (
         @Id,
         @Name,
+        @IsRegionalOrganization,
         @IsCleanUpMembersEnabled,
         @IsIndexRepoEnabled,
         @IsCopilotRequestEnabled,

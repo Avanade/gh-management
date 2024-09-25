@@ -8,6 +8,7 @@ import (
 type RegionalOrganization struct {
 	Id                      int64
 	Name                    string
+	IsRegionalOrganization  bool
 	IsCleanUpMembersEnabled bool
 	IsIndexRepoEnabled      bool
 	IsCopilotRequestEnabled bool
@@ -42,6 +43,7 @@ func SelectRegionalOrganization(isEnabled *NullBool) ([]RegionalOrganization, er
 		organization := RegionalOrganization{
 			Id:                      row["Id"].(int64),
 			Name:                    row["Name"].(string),
+			IsRegionalOrganization:  row["IsRegionalOrganization"].(bool),
 			IsCleanUpMembersEnabled: row["IsCleanUpMembersEnabled"].(bool),
 			IsIndexRepoEnabled:      row["IsIndexRepoEnabled"].(bool),
 			IsCopilotRequestEnabled: row["IsCopilotRequestEnabled"].(bool),
@@ -89,6 +91,7 @@ func SelectRegionalOrganizationByOption(offset, filter int64, search, orderBy, o
 		organization := RegionalOrganization{
 			Id:                      row["Id"].(int64),
 			Name:                    row["Name"].(string),
+			IsRegionalOrganization:  row["IsRegionalOrganization"].(bool),
 			IsCleanUpMembersEnabled: row["IsCleanUpMembersEnabled"].(bool),
 			IsIndexRepoEnabled:      row["IsIndexRepoEnabled"].(bool),
 			IsCopilotRequestEnabled: row["IsCopilotRequestEnabled"].(bool),
@@ -141,6 +144,7 @@ func SelectRegionalOrganizationById(id int64) (*RegionalOrganization, error) {
 	organization := RegionalOrganization{
 		Id:                      row["Id"].(int64),
 		Name:                    row["Name"].(string),
+		IsRegionalOrganization:  row["IsRegionalOrganization"].(bool),
 		IsCleanUpMembersEnabled: row["IsCleanUpMembersEnabled"].(bool),
 		IsIndexRepoEnabled:      row["IsIndexRepoEnabled"].(bool),
 		IsCopilotRequestEnabled: row["IsCopilotRequestEnabled"].(bool),
@@ -173,6 +177,7 @@ func UpdateRegionalOrganization(organization RegionalOrganization) error {
 	param := map[string]interface{}{
 		"Id":                      organization.Id,
 		"Name":                    organization.Name,
+		"IsRegionalOrganization":  organization.IsRegionalOrganization,
 		"IsCleanUpMembersEnabled": organization.IsCleanUpMembersEnabled,
 		"IsIndexRepoEnabled":      organization.IsIndexRepoEnabled,
 		"IsCopilotRequestEnabled": organization.IsCopilotRequestEnabled,
@@ -201,6 +206,7 @@ func InsertRegionalOrganization(organization RegionalOrganization) (int64, error
 	param := map[string]interface{}{
 		"Id":                      organization.Id,
 		"Name":                    organization.Name,
+		"IsRegionalOrganization":  organization.IsRegionalOrganization,
 		"IsCleanUpMembersEnabled": organization.IsCleanUpMembersEnabled,
 		"IsIndexRepoEnabled":      organization.IsIndexRepoEnabled,
 		"IsCopilotRequestEnabled": organization.IsCopilotRequestEnabled,
