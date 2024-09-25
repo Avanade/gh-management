@@ -76,6 +76,21 @@
                     <div class="relative flex items-start">
                       <div class="flex h-6 items-center">
                         <input 
+                          x-model="form.isRegionalOrganization"
+                          id="isregionalorganization" 
+                          aria-describedby="isregionalorganization-description" 
+                          name="isregionalorganization" 
+                          type="checkbox" 
+                          class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600">
+                      </div>
+                      <div class="ml-3 text-sm leading-6">
+                        <label for="isregionalorganization" class="font-medium text-gray-900">Is Regional Organization</label>
+                        <p id="isregionalorganization" class="text-gray-500">This is regional organization</p>
+                      </div>
+                    </div>
+                    <div class="relative flex items-start">
+                      <div class="flex h-6 items-center">
+                        <input 
                           x-model="form.isCleanUpMembersEnabled"
                           id="iscleanupmembersenabled" 
                           aria-describedby="iscleanupmembersenabled-description" 
@@ -171,6 +186,7 @@
                 id: 0,
                 text: ''
             }],
+            isRegionalOrganization: false,
             isCleanUpMembersEnabled: false,
             isIndexRepoEnabled: false,
             isCopilotRequestEnabled: false,
@@ -192,6 +208,7 @@
         return {
             form: {
               selectedRegionalOrganization: defaultForm.selectedRegionalOrganization,
+              isRegionalOrganization: defaultForm.isRegionalOrganization,
               isCleanUpMembersEnabled: defaultForm.isCleanUpMembersEnabled,
               isIndexRepoEnabled: defaultForm.isIndexRepoEnabled,
               isCopilotRequestEnablesd: defaultForm.isCopilotRequestEnabled,
@@ -281,6 +298,7 @@
                 const data = {
                     id: regionOrgId,
                     name: this.form.selectedRegionalOrganization[0].text,
+                    isRegionalOrganization: this.form.isRegionalOrganization,
                     isCleanUpMembersEnabled: this.form.isCleanUpMembersEnabled,
                     isIndexRepoEnabled: this.form.isIndexRepoEnabled,
                     isCopilotRequestEnabled: this.form.isCopilotRequestEnabled,
@@ -299,6 +317,7 @@
                 const data = {
                   id: this.form.selectedRegionalOrganization[0].id,
                   name: this.form.selectedRegionalOrganization[0].text,
+                  isRegionalOrganization: this.form.isRegionalOrganization,
                   isCleanUpMembersEnabled: this.form.isCleanUpMembersEnabled,
                   isIndexRepoEnabled: this.form.isIndexRepoEnabled,
                   isCopilotRequestEnabled: this.form.isCopilotRequestEnabled,
@@ -317,6 +336,7 @@
                 const data = {
                     id: regionOrgId,
                     name: this.form.selectedRegionalOrganization[0].text,
+                    isRegionalOrganization: this.form.isRegionalOrganization,
                     isCleanUpMembersEnabled: this.form.isCleanUpMembersEnabled,
                     isIndexRepoEnabled: this.form.isIndexRepoEnabled,
                     isCopilotRequestEnabled: this.form.isCopilotRequestEnabled,
@@ -331,6 +351,7 @@
             },
             onCancel() {
               this.form.selectedRegionalOrganization = defaultForm.selectedRegionalOrganization
+              this.form.isRegionalOrganization = defaultForm.isRegionalOrganization
               this.form.isCleanUpMembersEnabled = defaultForm.isCleanUpMembersEnabled
               this.form.isIndexRepoEnabled = defaultForm.isIndexRepoEnabled
               this.form.isCopilotRequestEnabled = defaultForm.isCopilotRequestEnabled
@@ -355,6 +376,7 @@
                       id: ${data.id},
                       text: '${data.name}'
                     }]
+                    form.isRegionalOrganization = ${data.isRegionalOrganization}
                     form.isCleanUpMembersEnabled = ${data.isCleanUpMembersEnabled}
                     form.isIndexRepoEnabled = ${data.isIndexRepoEnabled}
                     form.isCopilotRequestEnabled = ${data.isCopilotRequestEnabled}
@@ -373,6 +395,7 @@
                       id: ${data.id},
                       text: '${data.name}'
                     }]
+                    form.isRegionalOrganization = ${data.isRegionalOrganization}
                     form.isCleanUpMembersEnabled = ${data.isCleanUpMembersEnabled}
                     form.isIndexRepoEnabled = ${data.isIndexRepoEnabled}
                     form.isCopilotRequestEnabled = ${data.isCopilotRequestEnabled}
@@ -390,6 +413,7 @@
                       id: ${data.id},
                       text: '${data.name}'
                     }]
+                    form.isRegionalOrganization = ${data.isRegionalOrganization}
                     form.isCleanUpMembersEnabled = ${data.isCleanUpMembersEnabled}
                     form.isIndexRepoEnabled = ${data.isIndexRepoEnabled}
                     form.isCopilotRequestEnabled = ${data.isCopilotRequestEnabled}
