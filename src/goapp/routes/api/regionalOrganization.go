@@ -234,6 +234,7 @@ func UpdateRegionalOrganization(w http.ResponseWriter, r *http.Request) {
 	regionalOrganization := db.RegionalOrganization{
 		Id:                      id,
 		Name:                    regionalOrganizationDto.Name,
+		IsRegionalOrganization:  regionalOrganizationDto.IsRegionalOrganization,
 		IsCleanUpMembersEnabled: regionalOrganizationDto.IsCleanUpMembersEnabled,
 		IsIndexRepoEnabled:      regionalOrganizationDto.IsIndexRepoEnabled,
 		IsCopilotRequestEnabled: regionalOrganizationDto.IsCopilotRequestEnabled,
