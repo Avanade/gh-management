@@ -53,9 +53,6 @@ func setPageRoutes() {
 	httpRouter.GET("/other-requests/github-copilot", m.Chain(rtOtherRequests.RequestGitHubCopilot, m.AzureAuth(), m.GitHubAuth()))
 	httpRouter.GET("/other-requests/organization-access", m.Chain(rtOtherRequests.RequestOrganizationAccess, m.AzureAuth(), m.GitHubAuth()))
 
-	// REGIONAL ORGANIZATION
-	httpRouter.GET("/admin/regional-organization", m.Chain(rtAdmin.RegionalOrganizationHandler, m.AzureAuth(), m.IsUserAdmin()))
-
 	// AUTHENTICATION
 	httpRouter.GET("/loginredirect", rtPages.LoginRedirectHandler)
 	httpRouter.GET("/gitredirect", rtPages.GitRedirectHandler)
@@ -113,6 +110,9 @@ func setAdminPageRoutes() {
 	// OSS CONTRIBUTION SPONSORS ADMIN
 	httpRouter.GET("/admin/osscontributionsponsors", m.Chain(rtAdmin.OssContributionSponsorsHandler, m.AzureAuth(), m.IsUserAdmin()))
 	httpRouter.GET("/admin/osscontributionsponsors/form", m.Chain(rtAdmin.OssContributionSponsorsFormHandler, m.AzureAuth(), m.IsUserAdmin()))
+
+	//MANAGE ORGANIZATIONS
+	httpRouter.GET("/admin/manage-organization", m.Chain(rtAdmin.RegionalOrganizationHandler, m.AzureAuth(), m.IsUserAdmin()))
 }
 
 func setApiRoutes() {
