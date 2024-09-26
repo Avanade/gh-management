@@ -6,12 +6,12 @@
   <div class="px-4 sm:px-6 lg:px-8">
     <div class="sm:flex sm:items-center">
         <div class="sm:flex-auto">
-            <h1 class="text-xl font-semibold text-gray-900">Regional Organizations</h1>
+            <h1 class="text-xl font-semibold text-gray-900">Manage Organizations</h1>
         </div>
         <div class="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
             <button @click="setState(state, 'add')" type="button"
                 class="inline-flex items-center justify-center rounded-md border border-transparent bg-orange-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 sm:w-auto">
-                Add Regional Organization
+                Add Organization
             </button>
         </div>
     </div>
@@ -59,7 +59,7 @@
                   <fieldset x-bind:disabled="state.isRegionalOrganizationDisabled">
                     <div class="space-y-8 divide-y divide-gray-200 sm:space-y-5">
                         <div class="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-t sm:border-gray-200 sm:pt-5">
-                            <label for="EcattId" class="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2"> Regional Organization </label>
+                            <label for="EcattId" class="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2"> Organization </label>
                             <div class="mt-1 sm:mt-0 sm:col-span-2">
                                 <div x-data="combobox({
                                     ajax: getEnterpriseOrganization,
@@ -221,7 +221,7 @@
               state.action = action
               switch (action) {
                 case 'add':
-                  state.title = 'Add Regional Organization'
+                  state.title = 'Add Organization'
                   state.submitVisibility = 'show'
                   state.submitText = 'Submit'
                   state.submitClass = 'bg-green-500 text-white'
@@ -232,7 +232,7 @@
                   state.isShow = true
                   break;
                 case 'view':
-                  state.title = 'View Regional Organization'
+                  state.title = 'View Organization'
                   state.submitVisibility = 'hidden'
                   state.cancelText = 'Close'
                   state.cancelClass = 'bg-red-500 text-white'
@@ -240,7 +240,7 @@
                   state.isShow = true
                   break;
                 case 'edit':
-                  state.title = 'Edit Regional Organization'
+                  state.title = 'Edit Organization'
                   state.submitVisibility = 'show'
                   state.submitText = 'Save'
                   state.submitClass = 'bg-orange-500 text-white'
@@ -251,7 +251,7 @@
                   state.isShow = true
                   break;
                 case 'remove':
-                  state.title = 'Remove Regional Organization'
+                  state.title = 'Remove Organization'
                   state.submitVisibility = 'show'
                   state.submitText = 'Confirm'
                   state.submitClass = 'bg-red-500 text-white'
@@ -291,7 +291,7 @@
                 console.log('Remove Submit')
                 Alpine.store('master').modal.show()
                 Alpine.store('master').putData(`/api/regional-organizations/${regionOrgId}`, data,
-                    "Regional Organization has been removed.", "Close", "/admin/regional-organization")
+                    "Organization has been removed.", "Close", "/admin/manage-organizations")
             },
             addSubmit() {
                 console.log('Add Submit')
@@ -308,7 +308,7 @@
 
                 Alpine.store('master').modal.show()
                 Alpine.store('master').postData(`/api/regional-organizations`, data,
-                    "Regional Organization has been added.", "Close", "/admin/regional-organization")
+                    "Organization has been added.", "Close", "/admin/manage-organizations")
             },
             editSubmit() {
                 console.log('Update Submit')
@@ -327,7 +327,7 @@
                 console.log('Remove Submit')
                 Alpine.store('master').modal.show()
                 Alpine.store('master').putData(`/api/regional-organizations/${regionOrgId}`, data,
-                    "Regional Organization has been saved.", "Close", "/admin/regional-organization")
+                    "Organization has been saved.", "Close", "/admin/manage-organizations")
             },
             onCancel() {
               this.form.selectedRegionalOrganization = defaultForm.selectedRegionalOrganization
