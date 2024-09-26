@@ -5,7 +5,6 @@ BEGIN
     SELECT
       [Id],
       [Name],
-      [IsCleanUpMembersEnabled],
       [IsIndexRepoEnabled],
       [IsCopilotRequestEnabled],
       [IsAccessRequestEnabled],

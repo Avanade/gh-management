@@ -112,9 +112,6 @@ func ClearOrgMembers(w http.ResponseWriter, r *http.Request) {
 		}
 
 		for _, regOrg := range regOrgs {
-			if !regOrg.IsCleanUpMembersEnabled {
-				continue
-			}
 			innersourceOrgs = append(innersourceOrgs, regOrg.Name)
 		}
 

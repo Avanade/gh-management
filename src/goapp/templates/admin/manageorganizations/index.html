@@ -76,21 +76,6 @@
                     <div class="relative flex items-start">
                       <div class="flex h-6 items-center">
                         <input 
-                          x-model="form.isCleanUpMembersEnabled"
-                          id="iscleanupmembersenabled" 
-                          aria-describedby="iscleanupmembersenabled-description" 
-                          name="iscleanupmembersenabled" 
-                          type="checkbox" 
-                          class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600">
-                      </div>
-                      <div class="ml-3 text-sm leading-6">
-                        <label for="iscleanupmembersenabled" class="font-medium text-gray-900">Members Cleanup</label>
-                        <p id="iscleanupmembersenabled" class="text-gray-500"> Weekly cleanup to remove users who had left {{ .OrganizationName }} or had not associated their GitHub account in Community Portal.</p>
-                      </div>
-                    </div>
-                    <div class="relative flex items-start">
-                      <div class="flex h-6 items-center">
-                        <input 
                           x-model="form.isIndexRepoEnabled"
                           id="repositoryindexing" 
                           aria-describedby="repositoryindexing-description" 
@@ -171,7 +156,6 @@
                 id: 0,
                 text: ''
             }],
-            isCleanUpMembersEnabled: false,
             isIndexRepoEnabled: false,
             isCopilotRequestEnabled: false,
             isAccessRequestEnabled: false,
@@ -192,7 +176,6 @@
         return {
             form: {
               selectedRegionalOrganization: defaultForm.selectedRegionalOrganization,
-              isCleanUpMembersEnabled: defaultForm.isCleanUpMembersEnabled,
               isIndexRepoEnabled: defaultForm.isIndexRepoEnabled,
               isCopilotRequestEnablesd: defaultForm.isCopilotRequestEnabled,
               isAccessRequestEnabled: defaultForm.isAccessRequestEnabled,
@@ -281,7 +264,6 @@
                 const data = {
                     id: regionOrgId,
                     name: this.form.selectedRegionalOrganization[0].text,
-                    isCleanUpMembersEnabled: this.form.isCleanUpMembersEnabled,
                     isIndexRepoEnabled: this.form.isIndexRepoEnabled,
                     isCopilotRequestEnabled: this.form.isCopilotRequestEnabled,
                     isAccessRequestEnabled: this.form.isAccessRequestEnabled,
@@ -299,7 +281,6 @@
                 const data = {
                   id: this.form.selectedRegionalOrganization[0].id,
                   name: this.form.selectedRegionalOrganization[0].text,
-                  isCleanUpMembersEnabled: this.form.isCleanUpMembersEnabled,
                   isIndexRepoEnabled: this.form.isIndexRepoEnabled,
                   isCopilotRequestEnabled: this.form.isCopilotRequestEnabled,
                   isAccessRequestEnabled: this.form.isAccessRequestEnabled,
@@ -317,7 +298,6 @@
                 const data = {
                     id: regionOrgId,
                     name: this.form.selectedRegionalOrganization[0].text,
-                    isCleanUpMembersEnabled: this.form.isCleanUpMembersEnabled,
                     isIndexRepoEnabled: this.form.isIndexRepoEnabled,
                     isCopilotRequestEnabled: this.form.isCopilotRequestEnabled,
                     isAccessRequestEnabled: this.form.isAccessRequestEnabled,
@@ -331,7 +311,6 @@
             },
             onCancel() {
               this.form.selectedRegionalOrganization = defaultForm.selectedRegionalOrganization
-              this.form.isCleanUpMembersEnabled = defaultForm.isCleanUpMembersEnabled
               this.form.isIndexRepoEnabled = defaultForm.isIndexRepoEnabled
               this.form.isCopilotRequestEnabled = defaultForm.isCopilotRequestEnabled
               this.form.isAccessRequestEnabled = defaultForm.isAccessRequestEnabled
@@ -355,7 +334,6 @@
                       id: ${data.id},
                       text: '${data.name}'
                     }]
-                    form.isCleanUpMembersEnabled = ${data.isCleanUpMembersEnabled}
                     form.isIndexRepoEnabled = ${data.isIndexRepoEnabled}
                     form.isCopilotRequestEnabled = ${data.isCopilotRequestEnabled}
                     form.isAccessRequestEnabled = ${data.isAccessRequestEnabled}
@@ -373,7 +351,6 @@
                       id: ${data.id},
                       text: '${data.name}'
                     }]
-                    form.isCleanUpMembersEnabled = ${data.isCleanUpMembersEnabled}
                     form.isIndexRepoEnabled = ${data.isIndexRepoEnabled}
                     form.isCopilotRequestEnabled = ${data.isCopilotRequestEnabled}
                     form.isAccessRequestEnabled = ${data.isAccessRequestEnabled}
@@ -390,7 +367,6 @@
                       id: ${data.id},
                       text: '${data.name}'
                     }]
-                    form.isCleanUpMembersEnabled = ${data.isCleanUpMembersEnabled}
                     form.isIndexRepoEnabled = ${data.isIndexRepoEnabled}
                     form.isCopilotRequestEnabled = ${data.isCopilotRequestEnabled}
                     form.isAccessRequestEnabled = ${data.isAccessRequestEnabled}
