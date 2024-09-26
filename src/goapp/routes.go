@@ -270,6 +270,7 @@ func setUtilityRoutes() {
 	httpRouter.GET("/utility/expiring-invitations", m.Chain(rtApi.ExpiringInvitation, m.GuidAuth()))
 	httpRouter.GET("/utility/index-ad-groups", m.Chain(rtApi.IndexADGroups, m.GuidAuth()))
 	httpRouter.GET("/utility/index-regional-organizations", m.Chain(rtApi.IndexRegionalOrganizations, m.GuidAuth()))
+	httpRouter.GET("/utility/scan-community-organizations", m.Chain(rtApi.ScanCommunityOrganizations, m.GuidAuth()))
 }
 
 func serve() {

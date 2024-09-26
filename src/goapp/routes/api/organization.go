@@ -2,6 +2,7 @@ package routes
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"os"
@@ -464,6 +465,54 @@ func IndexRegionalOrganizations(w http.ResponseWriter, r *http.Request) {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
 			}
+		}
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Header().Set("Content-Type", "application/json")
+}
+
+func ScanCommunityOrganizations(w http.ResponseWriter, r *http.Request) {
+	logger := appinsights_wrapper.NewClient()
+	defer logger.EndOperation()
+
+	orgs := []string{os.Getenv("GH_ORG_INNERSOURCE"), os.Getenv("GH_ORG_OPENSOURCE")}
+
+	isEnabled := db.NullBool{Value: true}
+	regOrgs, err := db.SelectRegionalOrganization(&isEnabled)
+	if err != nil {
+		logger.LogException(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	for _, regOrg := range regOrgs {
+		if !regOrg.IsRegionalOrganization {
+			continue
+		}
+		orgs = append(orgs, regOrg.Name)
+	}
+
+	for _, org := range orgs {
+		token := os.Getenv("GH_TOKEN")
+		users, _ := ghAPI.OrgListMembers(token, org, "all")
+		for _, user := range users {
+			// Notify users who are not yet associated their account with community portal
+
+			// Check if user GitHub ID is already in the database
+			email, err := db.GetUserEmailByGithubId(fmt.Sprint(user.GetID()))
+			if err != nil {
+				fmt.Println(errors.New("Error getting user email by GitHub ID"))
+				continue
+			}
+			// If not then send an email/notification to the user
+			if email != "" {
+				fmt.Println("ORG : ", org, " | User : ", user.GetLogin(), " | Email : ", email)
+				continue
+			}
+
+			// Send email / Create new Custom Email to remind user to associate their account with community portal
+			fmt.Println("ORG : ", org, " | User : ", user.GetLogin(), " | NO EMAIL FOUND ")
 		}
 	}
 
