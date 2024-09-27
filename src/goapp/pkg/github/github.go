@@ -471,8 +471,12 @@ type Organization struct {
 
 type Enterprise struct {
 	Organizations struct {
-		Nodes []Organization
-	} `graphql:"organizations(first: 100)"`
+		Nodes    []Organization
+		PageInfo struct {
+			EndCursor   githubv4.String
+			HasNextPage bool
+		}
+	} `graphql:"organizations(first: 100, after: $cursor)"`
 }
 
 type QueryResult struct {
@@ -487,14 +491,28 @@ func GetOrganizationsWithinEnterprise(enterprise string, token string) ([]Organi
 
 	client := githubv4.NewClient(httpClient)
 
-	var queryResult QueryResult
-	variables := map[string]interface{}{
-		"enterprise": githubv4.String(enterprise),
-	}
-	err := client.Query(context.Background(), &queryResult, variables)
-	if err != nil {
-		return nil, err
+	var organizations []Organization
+	var cursor *githubv4.String
+
+	for {
+		var queryResult QueryResult
+		variables := map[string]interface{}{
+			"enterprise": githubv4.String(enterprise),
+			"cursor":     cursor,
+		}
+		err := client.Query(context.Background(), &queryResult, variables)
+		if err != nil {
+			return nil, err
+		}
+
+		organizations = append(organizations, queryResult.Enterprise.Organizations.Nodes...)
+
+		if !queryResult.Enterprise.Organizations.PageInfo.HasNextPage {
+			break
+		}
+
+		cursor = &queryResult.Enterprise.Organizations.PageInfo.EndCursor
 	}
 
-	return queryResult.Enterprise.Organizations.Nodes, nil
+	return organizations, nil
 }
