@@ -39,7 +39,7 @@ func GetEnterpriseOrganizations(w http.ResponseWriter, r *http.Request) {
 
 	token := os.Getenv("GH_ENTERPRISE_TOKEN")
 	enterprise := os.Getenv("GH_ENTERPRISE_NAME")
-	enterpriseOrgs, err := ghAPI.GetOrganizationsWithinEnterprise(enterprise, token)
+	result, err := ghAPI.GetOrganizationsWithinEnterprise(enterprise, token)
 	if err != nil {
 		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -55,7 +55,7 @@ func GetEnterpriseOrganizations(w http.ResponseWriter, r *http.Request) {
 	}
 
 	filteredEnterpriseOrgs := make([]EnterpriseOrganization, 0)
-	for _, enterpriseOrg := range enterpriseOrgs {
+	for _, enterpriseOrg := range result.Organizations {
 		exists := false
 		for _, regionalOrganization := range regionalOrganizations {
 			if regionalOrganization.Id == int64(enterpriseOrg.DatabaseId) {

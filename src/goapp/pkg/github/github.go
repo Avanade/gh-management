@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/shurcooL/githubv4"
 
@@ -464,26 +465,7 @@ func AddMemberToTeam(token string, org string, slug string, user string, role st
 	return teamMembership, nil
 }
 
-type Organization struct {
-	DatabaseId githubv4.Int
-	Login      githubv4.String
-}
-
-type Enterprise struct {
-	Organizations struct {
-		Nodes    []Organization
-		PageInfo struct {
-			EndCursor   githubv4.String
-			HasNextPage bool
-		}
-	} `graphql:"organizations(first: 100, after: $cursor)"`
-}
-
-type QueryResult struct {
-	Enterprise Enterprise `graphql:"enterprise(slug: $enterprise)"`
-}
-
-func GetOrganizationsWithinEnterprise(enterprise string, token string) ([]Organization, error) {
+func GetOrganizationsWithinEnterprise(enterprise string, token string) (*GetOrganizationsWithinEnterpriseResult, error) {
 	src := oauth2.StaticTokenSource(
 		&oauth2.Token{AccessToken: token},
 	)
@@ -491,11 +473,11 @@ func GetOrganizationsWithinEnterprise(enterprise string, token string) ([]Organi
 
 	client := githubv4.NewClient(httpClient)
 
-	var organizations []Organization
+	var result GetOrganizationsWithinEnterpriseResult
 	var cursor *githubv4.String
 
 	for {
-		var queryResult QueryResult
+		var queryResult GetOrganizationsWithinEnterpriseQuery
 		variables := map[string]interface{}{
 			"enterprise": githubv4.String(enterprise),
 			"cursor":     cursor,
@@ -505,14 +487,137 @@ func GetOrganizationsWithinEnterprise(enterprise string, token string) ([]Organi
 			return nil, err
 		}
 
-		organizations = append(organizations, queryResult.Enterprise.Organizations.Nodes...)
+		for _, org := range queryResult.Enterprise.Organization.Nodes {
+			result.Organizations = append(result.Organizations, Organization{
+				Login:      string(org.Login),
+				DatabaseId: int64(org.DatabaseId),
+			})
+		}
 
-		if !queryResult.Enterprise.Organizations.PageInfo.HasNextPage {
+		if !queryResult.Enterprise.Organization.PageInfo.HasNextPage {
 			break
 		}
 
-		cursor = &queryResult.Enterprise.Organizations.PageInfo.EndCursor
+		cursor = &queryResult.Enterprise.Organization.PageInfo.EndCursor
 	}
 
-	return organizations, nil
+	return &result, nil
+}
+
+func GetMembersByEnterprise(enterprise string, token string) (*GetMembersByEnterpriseResult, error) {
+	src := oauth2.StaticTokenSource(
+		&oauth2.Token{AccessToken: token},
+	)
+	httpClient := oauth2.NewClient(context.Background(), src)
+
+	client := githubv4.NewClient(httpClient)
+
+	var result GetMembersByEnterpriseResult
+	var cursor *githubv4.String
+
+	start := time.Now()
+	for {
+		var queryResult GetMembersByEnterpriseQuery
+		variables := map[string]interface{}{
+			"enterprise": githubv4.String(enterprise),
+			"cursor":     cursor,
+		}
+		err := client.Query(context.Background(), &queryResult, variables)
+		if err != nil {
+			return nil, err
+		}
+
+		for _, node := range queryResult.Enterprise.OwnerInfo.SamlIdentityProvider.ExternalIdentities.Nodes {
+			user := node.User
+			member := Member{
+				Login:           string(user.Login),
+				DatabaseId:      int64(user.DatabaseId),
+				EnterpriseEmail: string(node.SamlIdentity.Username),
+			}
+
+			for _, org := range node.User.Organizations.Nodes {
+				member.Organizations = append(member.Organizations, Organization{
+					Login:      string(org.Login),
+					DatabaseId: int64(org.DatabaseId),
+				})
+			}
+
+			result.Members = append(result.Members, member)
+		}
+
+		if !queryResult.Enterprise.OwnerInfo.SamlIdentityProvider.ExternalIdentities.PageInfo.HasNextPage {
+			break
+		}
+
+		cursor = &queryResult.Enterprise.OwnerInfo.SamlIdentityProvider.ExternalIdentities.PageInfo.EndCursor
+	}
+
+	fmt.Printf("Time taken to fetch enterprise members : %v\n", time.Since(start))
+	return &result, nil
+}
+
+// Query structs
+type GetOrganizationsWithinEnterpriseQuery struct {
+	Enterprise struct {
+		Organization struct {
+			Nodes []struct {
+				Login      githubv4.String
+				DatabaseId githubv4.Int
+			}
+			PageInfo PageInfo
+		} `graphql:"organizations(first: 100, after: $cursor)"`
+	} `graphql:"enterprise(slug: $enterprise)"`
+}
+
+type GetMembersByEnterpriseQuery struct {
+	Enterprise struct {
+		OwnerInfo struct {
+			SamlIdentityProvider struct {
+				ExternalIdentities struct {
+					Nodes []struct {
+						SamlIdentity struct {
+							Username githubv4.String
+						}
+						User struct {
+							DatabaseId    githubv4.Int
+							Login         githubv4.String
+							Organizations struct {
+								Nodes []struct {
+									Login      githubv4.String
+									DatabaseId githubv4.Int
+								}
+							} `graphql:"organizations(first: 100)"`
+						}
+					}
+					PageInfo PageInfo
+				} `graphql:"externalIdentities(first: 100, after: $cursor)"`
+			} `graphql:"samlIdentityProvider"`
+		} `graphql:"ownerInfo"`
+	} `graphql:"enterprise(slug: $enterprise)"`
+}
+
+type PageInfo struct {
+	EndCursor   githubv4.String
+	HasNextPage bool
+}
+
+// Result structs
+type GetOrganizationsWithinEnterpriseResult struct {
+	Organizations []Organization
+}
+
+type GetMembersByEnterpriseResult struct {
+	Members []Member
+}
+
+type Member struct {
+	Login           string
+	DatabaseId      int64
+	EnterpriseEmail string
+	Organizations   []Organization
+}
+
+type Organization struct {
+	Login      string
+	DatabaseId int64
 }
