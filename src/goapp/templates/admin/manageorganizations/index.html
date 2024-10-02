@@ -6,12 +6,12 @@
   <div class="px-4 sm:px-6 lg:px-8">
     <div class="sm:flex sm:items-center">
         <div class="sm:flex-auto">
-            <h1 class="text-xl font-semibold text-gray-900">Regional Organizations</h1>
+            <h1 class="text-xl font-semibold text-gray-900">Manage Organizations</h1>
         </div>
         <div class="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
             <button @click="setState(state, 'add')" type="button"
                 class="inline-flex items-center justify-center rounded-md border border-transparent bg-orange-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 sm:w-auto">
-                Add Regional Organization
+                Add Organization
             </button>
         </div>
     </div>
@@ -59,7 +59,7 @@
                   <fieldset x-bind:disabled="state.isRegionalOrganizationDisabled">
                     <div class="space-y-8 divide-y divide-gray-200 sm:space-y-5">
                         <div class="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-t sm:border-gray-200 sm:pt-5">
-                            <label for="EcattId" class="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2"> Regional Organization </label>
+                            <label for="EcattId" class="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2"> Organization </label>
                             <div class="mt-1 sm:mt-0 sm:col-span-2">
                                 <div x-data="combobox({
                                     ajax: getEnterpriseOrganization,
@@ -72,22 +72,7 @@
                         </div>
                     </div>
                   </fieldset>
-                  <div class="space-y-5">
-                    <div class="relative flex items-start">
-                      <div class="flex h-6 items-center">
-                        <input 
-                          x-model="form.isCleanUpMembersEnabled"
-                          id="iscleanupmembersenabled" 
-                          aria-describedby="iscleanupmembersenabled-description" 
-                          name="iscleanupmembersenabled" 
-                          type="checkbox" 
-                          class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600">
-                      </div>
-                      <div class="ml-3 text-sm leading-6">
-                        <label for="iscleanupmembersenabled" class="font-medium text-gray-900">Members Cleanup</label>
-                        <p id="iscleanupmembersenabled" class="text-gray-500"> Weekly cleanup to remove users who had left {{ .OrganizationName }} or had not associated their GitHub account in Community Portal.</p>
-                      </div>
-                    </div>
+                  <div class="space-y-5 mt-5">
                     <div class="relative flex items-start">
                       <div class="flex h-6 items-center">
                         <input 
@@ -136,6 +121,23 @@
                   </div>
                 </fieldset>
               </form>
+              <template x-if="state.action == 'add'">
+                <div class="bg-red-50 p-4 my-3">
+                  <div class="flex">
+                    <div class="flex-shrink-0">
+                      <svg class="h-5 w-5 text-red-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
+                        fill="currentColor" aria-hidden="true">
+                        <path fill-rule="evenodd"
+                          d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                          clip-rule="evenodd" />
+                      </svg>
+                    </div>
+                    <div class="ml-3 flex-1 md:flex md:justify-between">
+                      <p class="text-sm text-red-700">Adding this will include the organization to a weekly members cleanup where users with inactive account in active directory will be removed.</p>
+                    </div>
+                  </div>
+                </div>
+              </template>
               <div class="mt-5 sm:mt-6">
                 <template x-if="isSubmitVisible()">
                   <button 
@@ -171,7 +173,6 @@
                 id: 0,
                 text: ''
             }],
-            isCleanUpMembersEnabled: false,
             isIndexRepoEnabled: false,
             isCopilotRequestEnabled: false,
             isAccessRequestEnabled: false,
@@ -192,7 +193,6 @@
         return {
             form: {
               selectedRegionalOrganization: defaultForm.selectedRegionalOrganization,
-              isCleanUpMembersEnabled: defaultForm.isCleanUpMembersEnabled,
               isIndexRepoEnabled: defaultForm.isIndexRepoEnabled,
               isCopilotRequestEnablesd: defaultForm.isCopilotRequestEnabled,
               isAccessRequestEnabled: defaultForm.isAccessRequestEnabled,
@@ -221,7 +221,7 @@
               state.action = action
               switch (action) {
                 case 'add':
-                  state.title = 'Add Regional Organization'
+                  state.title = 'Add Organization'
                   state.submitVisibility = 'show'
                   state.submitText = 'Submit'
                   state.submitClass = 'bg-green-500 text-white'
@@ -232,7 +232,7 @@
                   state.isShow = true
                   break;
                 case 'view':
-                  state.title = 'View Regional Organization'
+                  state.title = 'View Organization'
                   state.submitVisibility = 'hidden'
                   state.cancelText = 'Close'
                   state.cancelClass = 'bg-red-500 text-white'
@@ -240,7 +240,7 @@
                   state.isShow = true
                   break;
                 case 'edit':
-                  state.title = 'Edit Regional Organization'
+                  state.title = 'Edit Organization'
                   state.submitVisibility = 'show'
                   state.submitText = 'Save'
                   state.submitClass = 'bg-orange-500 text-white'
@@ -251,7 +251,7 @@
                   state.isShow = true
                   break;
                 case 'remove':
-                  state.title = 'Remove Regional Organization'
+                  state.title = 'Remove Organization'
                   state.submitVisibility = 'show'
                   state.submitText = 'Confirm'
                   state.submitClass = 'bg-red-500 text-white'
@@ -281,7 +281,6 @@
                 const data = {
                     id: regionOrgId,
                     name: this.form.selectedRegionalOrganization[0].text,
-                    isCleanUpMembersEnabled: this.form.isCleanUpMembersEnabled,
                     isIndexRepoEnabled: this.form.isIndexRepoEnabled,
                     isCopilotRequestEnabled: this.form.isCopilotRequestEnabled,
                     isAccessRequestEnabled: this.form.isAccessRequestEnabled,
@@ -291,7 +290,7 @@
                 console.log('Remove Submit')
                 Alpine.store('master').modal.show()
                 Alpine.store('master').putData(`/api/regional-organizations/${regionOrgId}`, data,
-                    "Regional Organization has been removed.", "Close", "/admin/regional-organization")
+                    "Organization has been removed.", "Close", "/admin/manage-organizations")
             },
             addSubmit() {
                 console.log('Add Submit')
@@ -299,7 +298,6 @@
                 const data = {
                   id: this.form.selectedRegionalOrganization[0].id,
                   name: this.form.selectedRegionalOrganization[0].text,
-                  isCleanUpMembersEnabled: this.form.isCleanUpMembersEnabled,
                   isIndexRepoEnabled: this.form.isIndexRepoEnabled,
                   isCopilotRequestEnabled: this.form.isCopilotRequestEnabled,
                   isAccessRequestEnabled: this.form.isAccessRequestEnabled,
@@ -308,7 +306,7 @@
 
                 Alpine.store('master').modal.show()
                 Alpine.store('master').postData(`/api/regional-organizations`, data,
-                    "Regional Organization has been added.", "Close", "/admin/regional-organization")
+                    "Organization has been added.", "Close", "/admin/manage-organizations")
             },
             editSubmit() {
                 console.log('Update Submit')
@@ -317,7 +315,6 @@
                 const data = {
                     id: regionOrgId,
                     name: this.form.selectedRegionalOrganization[0].text,
-                    isCleanUpMembersEnabled: this.form.isCleanUpMembersEnabled,
                     isIndexRepoEnabled: this.form.isIndexRepoEnabled,
                     isCopilotRequestEnabled: this.form.isCopilotRequestEnabled,
                     isAccessRequestEnabled: this.form.isAccessRequestEnabled,
@@ -327,11 +324,10 @@
                 console.log('Remove Submit')
                 Alpine.store('master').modal.show()
                 Alpine.store('master').putData(`/api/regional-organizations/${regionOrgId}`, data,
-                    "Regional Organization has been saved.", "Close", "/admin/regional-organization")
+                    "Organization has been saved.", "Close", "/admin/manage-organizations")
             },
             onCancel() {
               this.form.selectedRegionalOrganization = defaultForm.selectedRegionalOrganization
-              this.form.isCleanUpMembersEnabled = defaultForm.isCleanUpMembersEnabled
               this.form.isIndexRepoEnabled = defaultForm.isIndexRepoEnabled
               this.form.isCopilotRequestEnabled = defaultForm.isCopilotRequestEnabled
               this.form.isAccessRequestEnabled = defaultForm.isAccessRequestEnabled
@@ -355,7 +351,6 @@
                       id: ${data.id},
                       text: '${data.name}'
                     }]
-                    form.isCleanUpMembersEnabled = ${data.isCleanUpMembersEnabled}
                     form.isIndexRepoEnabled = ${data.isIndexRepoEnabled}
                     form.isCopilotRequestEnabled = ${data.isCopilotRequestEnabled}
                     form.isAccessRequestEnabled = ${data.isAccessRequestEnabled}
@@ -373,7 +368,6 @@
                       id: ${data.id},
                       text: '${data.name}'
                     }]
-                    form.isCleanUpMembersEnabled = ${data.isCleanUpMembersEnabled}
                     form.isIndexRepoEnabled = ${data.isIndexRepoEnabled}
                     form.isCopilotRequestEnabled = ${data.isCopilotRequestEnabled}
                     form.isAccessRequestEnabled = ${data.isAccessRequestEnabled}
@@ -390,7 +384,6 @@
                       id: ${data.id},
                       text: '${data.name}'
                     }]
-                    form.isCleanUpMembersEnabled = ${data.isCleanUpMembersEnabled}
                     form.isIndexRepoEnabled = ${data.isIndexRepoEnabled}
                     form.isCopilotRequestEnabled = ${data.isCopilotRequestEnabled}
                     form.isAccessRequestEnabled = ${data.isAccessRequestEnabled}
