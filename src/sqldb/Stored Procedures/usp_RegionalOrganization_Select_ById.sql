@@ -6,7 +6,6 @@ BEGIN
     [Id],
     [Name],
     [IsRegionalOrganization],
-    [IsCleanUpMembersEnabled],
     [IsIndexRepoEnabled],
     [IsCopilotRequestEnabled],
     [IsAccessRequestEnabled],

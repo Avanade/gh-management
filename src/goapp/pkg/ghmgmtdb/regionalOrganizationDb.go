@@ -9,7 +9,6 @@ type RegionalOrganization struct {
 	Id                      int64
 	Name                    string
 	IsRegionalOrganization  bool
-	IsCleanUpMembersEnabled bool
 	IsIndexRepoEnabled      bool
 	IsCopilotRequestEnabled bool
 	IsAccessRequestEnabled  bool
@@ -44,7 +43,6 @@ func SelectRegionalOrganization(isEnabled *NullBool) ([]RegionalOrganization, er
 			Id:                      row["Id"].(int64),
 			Name:                    row["Name"].(string),
 			IsRegionalOrganization:  row["IsRegionalOrganization"].(bool),
-			IsCleanUpMembersEnabled: row["IsCleanUpMembersEnabled"].(bool),
 			IsIndexRepoEnabled:      row["IsIndexRepoEnabled"].(bool),
 			IsCopilotRequestEnabled: row["IsCopilotRequestEnabled"].(bool),
 			IsAccessRequestEnabled:  row["IsAccessRequestEnabled"].(bool),
@@ -92,7 +90,6 @@ func SelectRegionalOrganizationByOption(offset, filter int64, search, orderBy, o
 			Id:                      row["Id"].(int64),
 			Name:                    row["Name"].(string),
 			IsRegionalOrganization:  row["IsRegionalOrganization"].(bool),
-			IsCleanUpMembersEnabled: row["IsCleanUpMembersEnabled"].(bool),
 			IsIndexRepoEnabled:      row["IsIndexRepoEnabled"].(bool),
 			IsCopilotRequestEnabled: row["IsCopilotRequestEnabled"].(bool),
 			IsAccessRequestEnabled:  row["IsAccessRequestEnabled"].(bool),
@@ -145,7 +142,6 @@ func SelectRegionalOrganizationById(id int64) (*RegionalOrganization, error) {
 		Id:                      row["Id"].(int64),
 		Name:                    row["Name"].(string),
 		IsRegionalOrganization:  row["IsRegionalOrganization"].(bool),
-		IsCleanUpMembersEnabled: row["IsCleanUpMembersEnabled"].(bool),
 		IsIndexRepoEnabled:      row["IsIndexRepoEnabled"].(bool),
 		IsCopilotRequestEnabled: row["IsCopilotRequestEnabled"].(bool),
 		IsAccessRequestEnabled:  row["IsAccessRequestEnabled"].(bool),
@@ -178,7 +174,6 @@ func UpdateRegionalOrganization(organization RegionalOrganization) error {
 		"Id":                      organization.Id,
 		"Name":                    organization.Name,
 		"IsRegionalOrganization":  organization.IsRegionalOrganization,
-		"IsCleanUpMembersEnabled": organization.IsCleanUpMembersEnabled,
 		"IsIndexRepoEnabled":      organization.IsIndexRepoEnabled,
 		"IsCopilotRequestEnabled": organization.IsCopilotRequestEnabled,
 		"IsAccessRequestEnabled":  organization.IsAccessRequestEnabled,
@@ -207,7 +202,6 @@ func InsertRegionalOrganization(organization RegionalOrganization) (int64, error
 		"Id":                      organization.Id,
 		"Name":                    organization.Name,
 		"IsRegionalOrganization":  organization.IsRegionalOrganization,
-		"IsCleanUpMembersEnabled": organization.IsCleanUpMembersEnabled,
 		"IsIndexRepoEnabled":      organization.IsIndexRepoEnabled,
 		"IsCopilotRequestEnabled": organization.IsCopilotRequestEnabled,
 		"IsAccessRequestEnabled":  organization.IsAccessRequestEnabled,

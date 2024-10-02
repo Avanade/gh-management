@@ -111,8 +111,8 @@ func setAdminPageRoutes() {
 	httpRouter.GET("/admin/osscontributionsponsors", m.Chain(rtAdmin.OssContributionSponsorsHandler, m.AzureAuth(), m.IsUserAdmin()))
 	httpRouter.GET("/admin/osscontributionsponsors/form", m.Chain(rtAdmin.OssContributionSponsorsFormHandler, m.AzureAuth(), m.IsUserAdmin()))
 
-	//MANAGE ORGANIZATIONS
-	httpRouter.GET("/admin/manage-organization", m.Chain(rtAdmin.RegionalOrganizationHandler, m.AzureAuth(), m.IsUserAdmin()))
+	// MANAGE ORGANIZATIONS
+	httpRouter.GET("/admin/manage-organizations", m.Chain(rtAdmin.RegionalOrganizationHandler, m.AzureAuth(), m.IsUserAdmin()))
 }
 
 func setApiRoutes() {
