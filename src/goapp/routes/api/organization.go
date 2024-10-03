@@ -2,7 +2,6 @@ package routes
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"net/http"
 	"os"
@@ -12,6 +11,7 @@ import (
 	"main/pkg/appinsights_wrapper"
 	db "main/pkg/ghmgmtdb"
 	ghAPI "main/pkg/github"
+	"main/pkg/msgraph"
 	"main/pkg/notification"
 	"main/pkg/session"
 
@@ -472,47 +472,103 @@ func IndexRegionalOrganizations(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 }
 
+type Member struct {
+	Id       int64
+	Username string
+	Email    string
+}
+
 func ScanCommunityOrganizations(w http.ResponseWriter, r *http.Request) {
 	logger := appinsights_wrapper.NewClient()
 	defer logger.EndOperation()
 
-	orgs := []string{os.Getenv("GH_ORG_INNERSOURCE"), os.Getenv("GH_ORG_OPENSOURCE")}
-
+	// Get all community organizations
+	communityOrgs := []string{os.Getenv("GH_ORG_OPENSOURCE"), os.Getenv("GH_ORG_INNERSOURCE")}
 	isEnabled := db.NullBool{Value: true}
-	regOrgs, err := db.SelectRegionalOrganization(&isEnabled)
+	regionalOrgs, err := db.SelectRegionalOrganization(&isEnabled)
+	if err != nil {
+		logger.LogException(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	for _, regionalOrg := range regionalOrgs {
+		if !regionalOrg.IsRegionalOrganization {
+			continue
+		}
+		communityOrgs = append(communityOrgs, regionalOrg.Name)
+	}
+
+	// Fetch all enterprise members with organizations
+	enterpriseToken := os.Getenv("GH_ENTERPRISE_TOKEN")
+	enterpriseName := os.Getenv("GH_ENTERPRISE_NAME")
+	enterpriseMembers, err := ghAPI.GetMembersByEnterprise(enterpriseName, enterpriseToken)
 	if err != nil {
 		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	for _, regOrg := range regOrgs {
-		if !regOrg.IsRegionalOrganization {
-			continue
-		}
-		orgs = append(orgs, regOrg.Name)
+	// Fetch all members of the Active Directory
+	adMembers, err := msgraph.GetAllUsers()
+	if err != nil {
+		logger.LogException(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 
-	for _, org := range orgs {
+	// Filter enterprise members that are in AD
+	var enterpriseMembersInAD []Member
+	for _, adMember := range adMembers {
+		for _, enterpriseMember := range enterpriseMembers.Members {
+			if enterpriseMember.EnterpriseEmail == adMember.Email {
+				enterpriseMembersInAD = append(enterpriseMembersInAD, Member{Id: enterpriseMember.DatabaseId, Username: enterpriseMember.Login, Email: enterpriseMember.EnterpriseEmail})
+				break
+			}
+		}
+	}
+
+	// Filter enterprise members that are in AD if they are in the community organizations
+	var communityMembers []Member
+	for _, communityOrg := range communityOrgs {
 		token := os.Getenv("GH_TOKEN")
-		users, _ := ghAPI.OrgListMembers(token, org, "all")
-		for _, user := range users {
-			// Notify users who are not yet associated their account with community portal
+		// Fetch all members of the community organization
+		members, err := ghAPI.OrgListMembers(token, communityOrg, "all")
+		if err != nil {
+			logger.LogException(err)
+			continue
+		}
 
-			// Check if user GitHub ID is already in the database
-			email, err := db.GetUserEmailByGithubId(fmt.Sprint(user.GetID()))
-			if err != nil {
-				fmt.Println(errors.New("Error getting user email by GitHub ID"))
-				continue
+		for _, member := range members {
+			for _, enterpriseMemberInAD := range enterpriseMembersInAD {
+				if member.GetLogin() == enterpriseMemberInAD.Username {
+					// Check if exist in communityMembers
+					var exist bool
+					for _, communityMember := range communityMembers {
+						if communityMember.Username == enterpriseMemberInAD.Username {
+							exist = true
+							break
+						}
+					}
+					if !exist {
+						communityMembers = append(communityMembers, Member{Id: enterpriseMemberInAD.Id, Username: enterpriseMemberInAD.Username, Email: enterpriseMemberInAD.Email})
+						break
+					}
+				}
 			}
-			// If not then send an email/notification to the user
-			if email != "" {
-				fmt.Println("ORG : ", org, " | User : ", user.GetLogin(), " | Email : ", email)
-				continue
-			}
+		}
+	}
 
-			// Send email / Create new Custom Email to remind user to associate their account with community portal
-			fmt.Println("ORG : ", org, " | User : ", user.GetLogin(), " | NO EMAIL FOUND ")
+	for _, communityMember := range communityMembers {
+		// Check if the member associated their account with the community
+		email, err := db.GetUserEmailByGithubId(fmt.Sprint(communityMember.Id))
+		if err != nil {
+			logger.LogException(err)
+			continue
+		}
+
+		if email == "" {
+			// Notify the user to associate their account with the community
+			logger.LogTrace(fmt.Sprint(communityMember.Id, " ", communityMember.Username, " ", communityMember.Email), contracts.Information)
 		}
 	}
 
