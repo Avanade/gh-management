@@ -7,6 +7,7 @@
         },
         "appSettings": {
             "value": {
+                "Workflows.CommunityOrganizationsScan.FlowState": "Disabled",
                 "Workflows.CleanupOrganization.FlowState" : "Disabled",
                 "Workflows.ExpiringInvitation.FlowState": "Disabled",
                 "Workflows.IndexOrgRepos.FlowState": "Disabled",
