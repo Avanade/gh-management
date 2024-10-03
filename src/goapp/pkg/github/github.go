@@ -513,14 +513,14 @@ func GetMembersByEnterprise(enterprise string, token string) (*GetMembersByEnter
 	client := githubv4.NewClient(httpClient)
 
 	var result GetMembersByEnterpriseResult
-	var cursor *githubv4.String
+	var after *githubv4.String
 
 	start := time.Now()
 	for {
 		var queryResult GetMembersByEnterpriseQuery
 		variables := map[string]interface{}{
 			"enterprise": githubv4.String(enterprise),
-			"cursor":     cursor,
+			"after":      after,
 		}
 		err := client.Query(context.Background(), &queryResult, variables)
 		if err != nil {
@@ -535,13 +535,6 @@ func GetMembersByEnterprise(enterprise string, token string) (*GetMembersByEnter
 				EnterpriseEmail: string(node.SamlIdentity.Username),
 			}
 
-			for _, org := range node.User.Organizations.Nodes {
-				member.Organizations = append(member.Organizations, Organization{
-					Login:      string(org.Login),
-					DatabaseId: int64(org.DatabaseId),
-				})
-			}
-
 			result.Members = append(result.Members, member)
 		}
 
@@ -549,10 +542,49 @@ func GetMembersByEnterprise(enterprise string, token string) (*GetMembersByEnter
 			break
 		}
 
-		cursor = &queryResult.Enterprise.OwnerInfo.SamlIdentityProvider.ExternalIdentities.PageInfo.EndCursor
+		after = &queryResult.Enterprise.OwnerInfo.SamlIdentityProvider.ExternalIdentities.PageInfo.EndCursor
 	}
 
 	fmt.Printf("Time taken to fetch enterprise members : %v\n", time.Since(start))
+	return &result, nil
+}
+
+func GetMembersByOrganization(org string, token string) (*GetMembersByOrganizationResult, error) {
+	src := oauth2.StaticTokenSource(
+		&oauth2.Token{AccessToken: os.Getenv("GITHUB_TOKEN")},
+	)
+	httpClient := oauth2.NewClient(context.Background(), src)
+	client := githubv4.NewClient(httpClient)
+
+	var query GetMembersByOrganizationQuery
+	var after *githubv4.String
+
+	variables := map[string]interface{}{
+		"login": githubv4.String(org),
+		"after": after,
+	}
+
+	var result GetMembersByOrganizationResult
+
+	for {
+		err := client.Query(context.Background(), &query, variables)
+		if err != nil {
+			return nil, err
+		}
+
+		for _, member := range query.Organization.MembersWithRole.Nodes {
+			result.Members = append(result.Members, Member{
+				Login:      string(member.Login),
+				DatabaseId: int64(member.DatabaseId),
+			})
+		}
+
+		if !query.Organization.MembersWithRole.PageInfo.HasNextPage {
+			break
+		}
+		variables["after"] = githubv4.NewString(query.Organization.MembersWithRole.PageInfo.EndCursor)
+	}
+
 	return &result, nil
 }
 
@@ -579,21 +611,30 @@ type GetMembersByEnterpriseQuery struct {
 							Username githubv4.String
 						}
 						User struct {
-							DatabaseId    githubv4.Int
-							Login         githubv4.String
-							Organizations struct {
-								Nodes []struct {
-									Login      githubv4.String
-									DatabaseId githubv4.Int
-								}
-							} `graphql:"organizations(first: 100)"`
+							DatabaseId githubv4.Int
+							Login      githubv4.String
 						}
 					}
 					PageInfo PageInfo
-				} `graphql:"externalIdentities(first: 100, after: $cursor)"`
+				} `graphql:"externalIdentities(first: 100, after: $after)"`
 			} `graphql:"samlIdentityProvider"`
 		} `graphql:"ownerInfo"`
 	} `graphql:"enterprise(slug: $enterprise)"`
+}
+
+type GetMembersByOrganizationQuery struct {
+	Organization struct {
+		MembersWithRole struct {
+			Nodes []struct {
+				DatabaseId githubv4.Int
+				Login      githubv4.String
+			}
+			PageInfo struct {
+				EndCursor   githubv4.String
+				HasNextPage bool
+			}
+		} `graphql:"membersWithRole(first: 100, after: $after)"`
+	} `graphql:"organization(login: $login)"`
 }
 
 type PageInfo struct {
@@ -610,11 +651,14 @@ type GetMembersByEnterpriseResult struct {
 	Members []Member
 }
 
+type GetMembersByOrganizationResult struct {
+	Members []Member
+}
+
 type Member struct {
 	Login           string
 	DatabaseId      int64
 	EnterpriseEmail string
-	Organizations   []Organization
 }
 
 type Organization struct {
