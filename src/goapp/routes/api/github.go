@@ -439,35 +439,15 @@ func ProcessCleanupEnterpriseOrgs(enterpriseMembers *ghAPI.GetMembersByEnterpris
 		enterpriseOrgs = append(enterpriseOrgs, regOrg.Name)
 	}
 
-	// *****   FILTER MEMBERS AND THEIR ORGANIZATIONS   *****
-	var membersWithCommunityOrgs []MemberWithCommunityOrgs
-	for _, enterpriseMember := range enterpriseMembers.Members {
-		// Check if the user has organization in the community
-		var memberCommunityOrgs []string
-		for _, enterpriseOrg := range enterpriseOrgs {
-			for _, enterpriseMemberOrg := range enterpriseMember.Organizations {
-				if enterpriseMemberOrg.Login == enterpriseOrg {
-					memberCommunityOrgs = append(memberCommunityOrgs, enterpriseMemberOrg.Login)
-				}
-			}
-		}
-		if len(memberCommunityOrgs) > 0 {
-			membersWithCommunityOrgs = append(membersWithCommunityOrgs, MemberWithCommunityOrgs{
-				Id:       enterpriseMember.DatabaseId,
-				Username: enterpriseMember.Login,
-				Email:    enterpriseMember.EnterpriseEmail,
-				Orgs:     memberCommunityOrgs,
-			})
-		}
-	}
-	// ***** END FILTER MEMBERS AND THEIR ORGANIZATIONS *****
-
 	// Filter enterprise members that are in AD
-	var enterpriseMembersInAD []MemberWithCommunityOrgs
+	var enterpriseMembersInAD []ghAPI.Member
 	for _, adMember := range adMembers {
-		for _, memberWithCommunityOrgs := range membersWithCommunityOrgs {
-			if memberWithCommunityOrgs.Email == adMember.Email {
-				enterpriseMembersInAD = append(enterpriseMembersInAD, memberWithCommunityOrgs)
+		for _, enterpriseMember := range enterpriseMembers.Members {
+			if enterpriseMember.EnterpriseEmail == adMember.Email {
+				enterpriseMembersInAD = append(enterpriseMembersInAD, ghAPI.Member{
+					Login:      enterpriseMember.Login,
+					DatabaseId: enterpriseMember.DatabaseId,
+				})
 				break
 			}
 		}
@@ -476,17 +456,17 @@ func ProcessCleanupEnterpriseOrgs(enterpriseMembers *ghAPI.GetMembersByEnterpris
 	// Cleanup each enterprise org
 	for _, enterpriseOrg := range enterpriseOrgs {
 		// Fetch members of the enterprise org
-		enterpriseMembers, err := ghAPI.OrgListMembers(os.Getenv("GH_TOKEN"), enterpriseOrg, "all")
+		enterpriseOrgMembers, err := ghAPI.OrgListMembers(os.Getenv("GH_TOKEN"), enterpriseOrg, "all")
 		if err != nil {
 			return err
 		}
 
 		removedMembers := []RemovedMember{}
 
-		for _, enterpriseMember := range enterpriseMembers {
+		for _, enterpriseOrgMember := range enterpriseOrgMembers {
 			var isExistInAD bool
 			for _, enterpriseMemberInAD := range enterpriseMembersInAD {
-				if enterpriseMember.GetLogin() == enterpriseMemberInAD.Username {
+				if enterpriseOrgMember.GetLogin() == enterpriseMemberInAD.Login {
 					isExistInAD = true
 					break
 				}
@@ -494,13 +474,13 @@ func ProcessCleanupEnterpriseOrgs(enterpriseMembers *ghAPI.GetMembersByEnterpris
 			if !isExistInAD {
 				// Remove member from the organization
 				removedMembers = append(removedMembers, RemovedMember{
-					Id:       enterpriseMember.GetID(),
-					Username: enterpriseMember.GetLogin(),
+					Id:       enterpriseOrgMember.GetID(),
+					Username: enterpriseOrgMember.GetLogin(),
 				})
 
 				if ev.GetEnvVar("ENABLED_REMOVE_COLLABORATORS", "false") == "true" {
 					token := os.Getenv("GH_TOKEN")
-					ghAPI.RemoveOrganizationsMember(token, enterpriseOrg, enterpriseMember.GetLogin())
+					ghAPI.RemoveOrganizationsMember(token, enterpriseOrg, enterpriseOrgMember.GetLogin())
 				}
 			}
 		}
