@@ -11,6 +11,7 @@ import (
 	"main/pkg/appinsights_wrapper"
 	db "main/pkg/ghmgmtdb"
 	ghAPI "main/pkg/github"
+	"main/pkg/msgraph"
 	"main/pkg/notification"
 	"main/pkg/session"
 
@@ -315,7 +316,7 @@ func GetAllRegionalOrganizations(w http.ResponseWriter, r *http.Request) {
 	logger := appinsights_wrapper.NewClient()
 	defer logger.EndOperation()
 
-	regOrgs, err := db.GetAllRegionalOrganizations()
+	regOrgs, err := db.SelectRegionalOrganization(nil)
 	if err != nil {
 		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -325,6 +326,34 @@ func GetAllRegionalOrganizations(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	w.Header().Set("Content-Type", "application/json")
 	jsonResp, err := json.Marshal(regOrgs)
+	if err != nil {
+		logger.LogException(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.Write(jsonResp)
+}
+
+func GetAllRegionalOrganizationsName(w http.ResponseWriter, r *http.Request) {
+	logger := appinsights_wrapper.NewClient()
+	defer logger.EndOperation()
+
+	regOrgs, err := db.SelectRegionalOrganization(nil)
+	if err != nil {
+		logger.LogException(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	var orgNames []string
+
+	for _, org := range regOrgs {
+		orgNames = append(orgNames, org.Name)
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Header().Set("Content-Type", "application/json")
+	jsonResp, err := json.Marshal(orgNames)
 	if err != nil {
 		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -436,6 +465,110 @@ func IndexRegionalOrganizations(w http.ResponseWriter, r *http.Request) {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
 			}
+		}
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Header().Set("Content-Type", "application/json")
+}
+
+type Member struct {
+	Id       int64
+	Username string
+	Email    string
+}
+
+func ScanCommunityOrganizations(w http.ResponseWriter, r *http.Request) {
+	logger := appinsights_wrapper.NewClient()
+	defer logger.EndOperation()
+
+	// Get all community organizations
+	communityOrgs := []string{os.Getenv("GH_ORG_OPENSOURCE"), os.Getenv("GH_ORG_INNERSOURCE")}
+	isEnabled := db.NullBool{Value: true}
+	regionalOrgs, err := db.SelectRegionalOrganization(&isEnabled)
+	if err != nil {
+		logger.LogException(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	for _, regionalOrg := range regionalOrgs {
+		if !regionalOrg.IsRegionalOrganization {
+			continue
+		}
+		communityOrgs = append(communityOrgs, regionalOrg.Name)
+	}
+
+	// Fetch all enterprise members with organizations
+	enterpriseToken := os.Getenv("GH_ENTERPRISE_TOKEN")
+	enterpriseName := os.Getenv("GH_ENTERPRISE_NAME")
+	enterpriseMembers, err := ghAPI.GetMembersByEnterprise(enterpriseName, enterpriseToken)
+	if err != nil {
+		logger.LogException(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Fetch all members of the Active Directory
+	adMembers, err := msgraph.GetAllUsers()
+	if err != nil {
+		logger.LogException(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Filter enterprise members that are in AD
+	var enterpriseMembersInAD []Member
+	for _, adMember := range adMembers {
+		for _, enterpriseMember := range enterpriseMembers.Members {
+			if enterpriseMember.EnterpriseEmail == adMember.Email {
+				enterpriseMembersInAD = append(enterpriseMembersInAD, Member{Id: enterpriseMember.DatabaseId, Username: enterpriseMember.Login, Email: enterpriseMember.EnterpriseEmail})
+				break
+			}
+		}
+	}
+
+	// Filter enterprise members that are in AD if they are in the community organizations
+	var communityMembers []Member
+	for _, communityOrg := range communityOrgs {
+		token := os.Getenv("GH_TOKEN")
+		// Fetch all members of the community organization
+		members, err := ghAPI.OrgListMembers(token, communityOrg, "all")
+		if err != nil {
+			logger.LogException(err)
+			continue
+		}
+
+		for _, member := range members {
+			for _, enterpriseMemberInAD := range enterpriseMembersInAD {
+				if member.GetLogin() == enterpriseMemberInAD.Username {
+					// Check if exist in communityMembers
+					var exist bool
+					for _, communityMember := range communityMembers {
+						if communityMember.Username == enterpriseMemberInAD.Username {
+							exist = true
+							break
+						}
+					}
+					if !exist {
+						communityMembers = append(communityMembers, Member{Id: enterpriseMemberInAD.Id, Username: enterpriseMemberInAD.Username, Email: enterpriseMemberInAD.Email})
+						break
+					}
+				}
+			}
+		}
+	}
+
+	for _, communityMember := range communityMembers {
+		// Check if the member associated their account with the community
+		email, err := db.GetUserEmailByGithubId(fmt.Sprint(communityMember.Id))
+		if err != nil {
+			logger.LogException(err)
+			continue
+		}
+
+		if email == "" {
+			// Notify the user to associate their account with the community
+			logger.LogTrace(fmt.Sprint(communityMember.Id, " ", communityMember.Username, " ", communityMember.Email), contracts.Information)
 		}
 	}
 

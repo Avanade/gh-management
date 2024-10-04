@@ -94,140 +94,45 @@ func CheckAvaOpenSource(w http.ResponseWriter, r *http.Request) {
 }
 
 func ClearOrgMembers(w http.ResponseWriter, r *http.Request) {
-	go func() {
-		logger := appinsights_wrapper.NewClient()
-		defer logger.EndOperation()
+	logger := appinsights_wrapper.NewClient()
+	defer logger.EndOperation()
 
-		token := os.Getenv("GH_TOKEN")
+	start := time.Now()
+	// FETCH ENTERPRISE
+	enterpriseToken := os.Getenv("GH_ENTERPRISE_TOKEN")
+	enterpriseName := os.Getenv("GH_ENTERPRISE_NAME")
+	enterpriseMembers, err := ghAPI.GetMembersByEnterprise(enterpriseName, enterpriseToken)
+	if err != nil {
+		logger.LogException(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 
-		// Remove GitHub users from innersource who are not employees
-		innersourceOrgs := []string{os.Getenv("GH_ORG_INNERSOURCE")}
+	// FETCH ACTIVE DIRECTORY MEMBERS
+	activeDirectoryMembers, err := msgraph.GetAllUsers()
+	if err != nil {
+		logger.LogException(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 
-		regOrgs, err := db.GetAllRegionalOrganizations()
-		if err != nil {
-			logger.LogException(err)
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
+	// PROCESS INNERSOURCE & REGIONAL ORGS
+	err = ProcessCleanupEnterpriseOrgs(enterpriseMembers, activeDirectoryMembers, logger)
+	if err != nil {
+		logger.LogException(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 
-		for _, regOrg := range regOrgs {
-			innersourceOrgs = append(innersourceOrgs, regOrg["Name"].(string))
-		}
+	// PROCESS OPENSOURCE ORG
+	err = ProcessCleanupOpensourceOrg(enterpriseMembers, activeDirectoryMembers, logger)
+	if err != nil {
+		logger.LogException(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 
-		for _, innersourceOrg := range innersourceOrgs {
-			ClearOrgMembersInnersource(token, innersourceOrg, logger)
-		}
-
-		// Convert users who are not employees to an outside collaborator
-		var notFoundDB []string
-		var notFoundAD []string
-		var disabledAccountAD []string
-		var convertedOutsideCollabsList []string
-		organizationsOpen := os.Getenv("GH_ORG_OPENSOURCE")
-
-		usersOpenOrg, err := ghAPI.OrgListMembers(token, organizationsOpen, "all")
-		if err != nil {
-			logger.LogException(err)
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-		for _, user := range usersOpenOrg {
-			email, err := db.GetUserEmailByGithubId(fmt.Sprint(user.GetID()))
-			if err != nil {
-				logger.LogException(err)
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return
-			}
-			if email != "" {
-				isUserExist, isAccountEnabled, err := msgraph.IsUserExist(email)
-				if err != nil {
-					logger.LogException(err)
-					continue
-				}
-				if !isUserExist {
-					notFoundAD = append(notFoundAD, fmt.Sprint(user.GetLogin(), " - ", email))
-					if ev.GetEnvVar("ENABLED_REMOVE_COLLABORATORS", "false") == "true" {
-						ghAPI.ConvertMemberToOutsideCollaborator(token, organizationsOpen, user.GetLogin()) // Convert user to outside collaborator
-					}
-					convertedOutsideCollabsList = append(convertedOutsideCollabsList, user.GetLogin())
-				}
-				if !isAccountEnabled {
-					disabledAccountAD = append(disabledAccountAD, fmt.Sprint(user.GetLogin(), " - ", email))
-					if ev.GetEnvVar("ENABLED_REMOVE_COLLABORATORS", "false") == "true" {
-						ghAPI.ConvertMemberToOutsideCollaborator(token, organizationsOpen, user.GetLogin()) // Convert user to outside collaborator
-					}
-					convertedOutsideCollabsList = append(convertedOutsideCollabsList, user.GetLogin())
-				}
-			} else {
-				notFoundDB = append(notFoundDB, user.GetLogin())
-				if ev.GetEnvVar("ENABLED_REMOVE_COLLABORATORS", "false") == "true" {
-					ghAPI.ConvertMemberToOutsideCollaborator(token, organizationsOpen, user.GetLogin()) // Convert user to outside collaborator
-				}
-				convertedOutsideCollabsList = append(convertedOutsideCollabsList, user.GetLogin())
-			}
-		}
-
-		if len(convertedOutsideCollabsList) > 0 {
-			emailSupport := os.Getenv("EMAIL_SUPPORT")
-			if ev.GetEnvVar("ENABLED_REMOVE_COLLABORATORS", "false") == "true" {
-				// to list of new outside collaborators to ospo
-				EmailAdminConvertToColaborator(emailSupport, convertedOutsideCollabsList, logger)
-			}
-			emailConvertedCollaboratorTC := appinsights.NewTraceTelemetry(fmt.Sprintf("SUPPORT EMAIL : %s", emailSupport), contracts.Information)
-
-			convertedOutsideCollabsListJson, err := json.Marshal(convertedOutsideCollabsList)
-			if err != nil {
-				fmt.Println(err)
-				return
-			}
-
-			emailConvertedCollaboratorTC.Properties["ConvertedOutsideCollabsList"] = string(convertedOutsideCollabsListJson)
-			emailConvertedCollaboratorTC.Properties["NotFoundOnAD"] = strings.Join(notFoundAD, ",")
-			emailConvertedCollaboratorTC.Properties["NotFoundOnDB"] = strings.Join(notFoundDB, ",")
-			emailConvertedCollaboratorTC.Properties["DisabledADAccount"] = strings.Join(disabledAccountAD, ",")
-			logger.Track(emailConvertedCollaboratorTC)
-
-			// to repo admins with converted users
-			repos, _ := ghAPI.GetRepositoriesFromOrganization(organizationsOpen)
-			for _, repo := range repos {
-
-				repoAdmins := GetRepoCollaborators(organizationsOpen, repo.Name, "admin", "direct")
-				repoCollabs := GetRepoCollaborators(organizationsOpen, repo.Name, "", "direct")
-				var convertedInRepo []string
-				for _, convertedOutsideCollab := range convertedOutsideCollabsList {
-					for _, repoCollab := range repoCollabs {
-						if convertedOutsideCollab == *repoCollab.Login {
-							convertedInRepo = append(convertedInRepo, convertedOutsideCollab)
-						}
-					}
-				}
-
-				if len(convertedInRepo) > 0 {
-					for _, collab := range repoAdmins {
-						collabEmail, _ := db.GetUserEmailByGithubId(fmt.Sprint(collab.GetID()))
-
-						if collabEmail != "" {
-							if ev.GetEnvVar("ENABLED_REMOVE_COLLABORATORS", "false") == "true" {
-								EmailRepoAdminConvertToColaborator(collabEmail, repo.Name, convertedInRepo, logger)
-							}
-							emailAdminConvertedCollaboratorTC := appinsights.NewTraceTelemetry(fmt.Sprintf("ADMIN EMAIL : %s", collabEmail), contracts.Information)
-
-							convertInRepoJson, err := json.Marshal(convertedInRepo)
-							if err != nil {
-								fmt.Println(err)
-								return
-							}
-
-							emailAdminConvertedCollaboratorTC.Properties["RepoName"] = repo.Name
-							emailAdminConvertedCollaboratorTC.Properties["ConvertedInRepo"] = string(convertInRepoJson)
-							logger.Track(emailAdminConvertedCollaboratorTC)
-						}
-					}
-				}
-			}
-		}
-	}()
-
+	fmt.Println("Time elapsed: ", time.Since(start))
 	w.WriteHeader(http.StatusAccepted)
 }
 
@@ -237,7 +142,8 @@ func RepoOwnerScan(w http.ResponseWriter, r *http.Request) {
 
 	orgs := []string{os.Getenv("GH_ORG_OPENSOURCE"), os.Getenv("GH_ORG_INNERSOURCE")}
 
-	regOrgs, err := db.GetAllRegionalOrganizations()
+	isEnabled := db.NullBool{Value: true}
+	regOrgs, err := db.SelectRegionalOrganization(&isEnabled)
 	if err != nil {
 		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -245,7 +151,26 @@ func RepoOwnerScan(w http.ResponseWriter, r *http.Request) {
 	}
 
 	for _, regOrg := range regOrgs {
-		orgs = append(orgs, regOrg["Name"].(string))
+		if !regOrg.IsIndexRepoEnabled {
+			continue
+		}
+		orgs = append(orgs, regOrg.Name)
+	}
+
+	// Temporarily log Organization
+	if len(regOrgs) > 0 {
+		utilRepoOwnerScan := appinsights.NewTraceTelemetry("util repo owner scan", contracts.Information)
+		regOrgsJson, err := json.Marshal(regOrgs)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		utilRepoOwnerScan.Properties["Orgs"] = string(regOrgsJson)
+		logger.Track(utilRepoOwnerScan)
+
+		if ev.GetEnvVar("ENABLED_REPO_OWNER_SCAN", "false") != "true" {
+			return
+		}
 	}
 
 	var repoOnwerDeficient []string
@@ -444,9 +369,8 @@ func emailAdmin(admin string, adminemail string, reponame string, outsideCollab 
 }
 
 type RemovedMember struct {
-	Id          int64  `json:"id"`
-	Username    string `json:"username"`
-	Information string `json:"information"`
+	Id       int64
+	Username string
 }
 
 func ClearOrgMembersInnersource(token, org string, logger *appinsights_wrapper.TelemetryClient) {
@@ -492,4 +416,140 @@ func ClearOrgMembersInnersource(token, org string, logger *appinsights_wrapper.T
 	removedMembersTC.Properties["NotFoundOnDB"] = strings.Join(notFoundDB, ",")
 	removedMembersTC.Properties["DisabledADAccount"] = strings.Join(disabledAccountAD, ",")
 	logger.Track(removedMembersTC)
+}
+
+type MemberWithCommunityOrgs struct {
+	Id       int64
+	Username string
+	Email    string
+	Orgs     []string
+}
+
+// Process Innsersource & Regional Orgs
+func ProcessCleanupEnterpriseOrgs(enterpriseMembers *ghAPI.GetMembersByEnterpriseResult, adMembers []msgraph.User, logger *appinsights_wrapper.TelemetryClient) error {
+	removedMemberTC := appinsights.NewTraceTelemetry("Cleanup Enterprise Orgs (Innersource & Regional Orgs)", contracts.Information)
+	// Fetch enterprise orgs
+	enterpriseOrgs := []string{os.Getenv("GH_ORG_INNERSOURCE")}
+	isEnabled := db.NullBool{Value: true}
+	regOrgs, err := db.SelectRegionalOrganization(&isEnabled)
+	if err != nil {
+		return err
+	}
+	for _, regOrg := range regOrgs {
+		enterpriseOrgs = append(enterpriseOrgs, regOrg.Name)
+	}
+
+	// Filter enterprise members that are in AD
+	var enterpriseMembersInAD []ghAPI.Member
+	for _, adMember := range adMembers {
+		for _, enterpriseMember := range enterpriseMembers.Members {
+			if enterpriseMember.EnterpriseEmail == adMember.Email {
+				enterpriseMembersInAD = append(enterpriseMembersInAD, ghAPI.Member{
+					Login:      enterpriseMember.Login,
+					DatabaseId: enterpriseMember.DatabaseId,
+				})
+				break
+			}
+		}
+	}
+
+	// Cleanup each enterprise org
+	for _, enterpriseOrg := range enterpriseOrgs {
+		// Fetch members of the enterprise org
+		enterpriseOrgMembers, err := ghAPI.OrgListMembers(os.Getenv("GH_TOKEN"), enterpriseOrg, "all")
+		if err != nil {
+			return err
+		}
+
+		removedMembers := []RemovedMember{}
+
+		for _, enterpriseOrgMember := range enterpriseOrgMembers {
+			var isExistInAD bool
+			for _, enterpriseMemberInAD := range enterpriseMembersInAD {
+				if enterpriseOrgMember.GetLogin() == enterpriseMemberInAD.Login {
+					isExistInAD = true
+					break
+				}
+			}
+			if !isExistInAD {
+				// Remove member from the organization
+				removedMembers = append(removedMembers, RemovedMember{
+					Id:       enterpriseOrgMember.GetID(),
+					Username: enterpriseOrgMember.GetLogin(),
+				})
+
+				if ev.GetEnvVar("ENABLED_REMOVE_COLLABORATORS", "false") == "true" {
+					token := os.Getenv("GH_TOKEN")
+					ghAPI.RemoveOrganizationsMember(token, enterpriseOrg, enterpriseOrgMember.GetLogin())
+				}
+			}
+		}
+		removedMembersJson, err := json.Marshal(removedMembers)
+		if err != nil {
+			return err
+		}
+		removedMemberTC.Properties[enterpriseOrg] = string(removedMembersJson)
+	}
+
+	// Log removed members
+	logger.Track(removedMemberTC)
+	return nil
+}
+
+// ***** Convert members to outside collaborators if not exist in AD *****
+func ProcessCleanupOpensourceOrg(enterpriseMembers *ghAPI.GetMembersByEnterpriseResult, adMembers []msgraph.User, logger *appinsights_wrapper.TelemetryClient) error {
+	convertedToOutsideCollaboratorsTC := appinsights.NewTraceTelemetry("Cleanup Opensource Orgs", contracts.Information)
+	opensourceOrg := os.Getenv("GH_ORG_OPENSOURCE")
+
+	// Filter enterprise members that are in AD
+	var enterpriseMembersInAD []ghAPI.Member
+	for _, adMember := range adMembers {
+		for _, enterpriseMember := range enterpriseMembers.Members {
+			if enterpriseMember.EnterpriseEmail == adMember.Email {
+				enterpriseMembersInAD = append(enterpriseMembersInAD, enterpriseMember)
+				break
+			}
+		}
+	}
+	if len(enterpriseMembersInAD) == 0 {
+		return nil
+	}
+
+	// Fetch opensource members
+	opensourceMembers, err := ghAPI.OrgListMembers(os.Getenv("GH_TOKEN"), opensourceOrg, "all")
+	if err != nil {
+		return err
+	}
+
+	removedMembers := []RemovedMember{}
+	for _, opensourceMember := range opensourceMembers {
+		var isExistInAD bool
+		for _, enterpriseMember := range enterpriseMembersInAD {
+			if opensourceMember.GetLogin() == enterpriseMember.Login {
+				isExistInAD = true
+				break
+			}
+		}
+		if !isExistInAD {
+			// Convert member to outside collaborator
+			removedMembers = append(removedMembers, RemovedMember{
+				Id:       opensourceMember.GetID(),
+				Username: opensourceMember.GetLogin(),
+			})
+			if ev.GetEnvVar("ENABLED_REMOVE_COLLABORATORS", "false") == "true" {
+				token := os.Getenv("GH_TOKEN")
+				ghAPI.ConvertMemberToOutsideCollaborator(token, opensourceOrg, opensourceMember.GetLogin())
+			}
+		}
+	}
+
+	removedMembersJson, err := json.Marshal(removedMembers)
+	if err != nil {
+		return err
+	}
+	convertedToOutsideCollaboratorsTC.Properties[opensourceOrg] = string(removedMembersJson)
+
+	// Log converted to outside collaborators
+	logger.Track(convertedToOutsideCollaboratorsTC)
+	return nil
 }

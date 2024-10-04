@@ -147,7 +147,7 @@
             <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
               <span x-text="results.Name"></span>
             </td>
-            <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+            <td class="px-3 py-4 text-sm text-gray-500">
               <div x-html="displayDescription(results.Source, results.Description)"> </div>
             </td>
           </tr>
@@ -303,11 +303,13 @@
         return `
           <p class="mb-1">${descriptionList[0]}</p>
           <template x-if="topics.length != 1">
+            <div class="flex flex-wrap">
             <template x-for="topic in topics">
-              <a x-bind:href="'/search?search=' + topic">
-                <span class="text-xs mr-1 px-2 py-1 bg-sky-100 rounded-lg text-sky-800 items-center" x-text="topic"></span>
+              <a x-bind:href="'/search?search=' + topic" class="mr-1 mb-2">
+                <span class="text-xs px-2 py-1 bg-sky-100 rounded-lg text-sky-800 items-center" x-text="topic"></span>
               </a>
             </template>
+            </div>
           </template>
         `
       },

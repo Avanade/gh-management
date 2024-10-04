@@ -39,7 +39,7 @@
 
         return {
             action: '',
-            id: null,
+            id: 0,
             form: {
                 name: '',
                 approver: [],
@@ -57,8 +57,8 @@
                 const res = await fetch(`/api/contribution-areas/${this.id}`)
                 const data = await res.json()
 
-                this.form.name = data[0].Name;
-                this.id = data[0].Id
+                this.form.name = data.name;
+                this.id = data.id
 
                 modal.visible = false;
             },
@@ -73,7 +73,7 @@
             },
             onSubmitHandler() {
                 const data = {
-                    id: this.id,
+                    id: parseInt(this.id),
                     name: this.form.name,
                 }
                 switch (this.action.toLowerCase()) {
@@ -86,7 +86,7 @@
 
                     case 'edit':
                         Alpine.store('master').modal.show()
-                        Alpine.store('master').putData(`/api/contribution-areas`, data,
+                        Alpine.store('master').putData(`/api/contribution-areas/${data.id}`, data,
                             "Contribution area has been saved.", "Go to list of Contribution areas",
                             "/admin/contributionareas")
                         break;

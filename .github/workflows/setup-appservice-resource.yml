@@ -1,0 +1,105 @@
+name: Setup App Service Resource
+run-name: Setup App Service Resource [${{inputs.selected_environment}}]
+
+on:
+  workflow_dispatch:
+    inputs:
+      selected_environment:
+        type: environment
+        description: Select environment
+        default: test
+
+jobs:
+  setup-appservice-resource:
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.selected_environment }}
+    steps:
+
+      - uses: actions/checkout@v2
+
+      - uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: SUBSTITUTE VARIABLES
+        uses: microsoft/variable-substitution@v1 
+        with:
+          files: ./.bicep/webapp/parameters.json
+        env:
+          parameters.imageName.value : ${{ vars.APPSERVICE_NAME }}
+          parameters.appServicePlanName.value : ${{ vars.APPSERVICE_PLAN_NAME }}
+          parameters.projectName.value : ${{ vars.PROJECT_NAME }}
+          parameters.activeEnv.value : ${{ github.event.inputs.selected_environment }}
+          parameters.sqlServerName.value : ${{ secrets.DATABASE_SERVER_NAME }}
+          parameters.containerServer.value : ${{ secrets.CONTAINER_REGISTRY_SERVER }}
+          parameters.appServiceSettings.value.APP_TITLE : ${{ vars.APP_TITLE }}
+          parameters.appServiceSettings.value.APP_LOGO_PATH : ${{ vars.APP_LOGO_PATH }}
+          parameters.appServiceSettings.value.WEBSITES_ENABLE_APP_SERVICE_STORAGE : ${{ vars.WEBSITES_ENABLE_APP_SERVICE_STORAGE }}
+          parameters.appServiceSettings.value.DOCKER_REGISTRY_SERVER_URL : ${{ secrets.CONTAINER_REGISTRY_SERVER_URL }}
+          parameters.appServiceSettings.value.DOCKER_REGISTRY_SERVER_USERNAME : ${{ secrets.CONTAINER_REGISTRY_SERVER_USERNAME }}
+          parameters.appServiceSettings.value.DOCKER_REGISTRY_SERVER_PASSWORD : ${{ secrets.CONTAINER_REGISTRY_SERVER_PASSWORD }}
+          parameters.appServiceSettings.value.TENANT_ID : ${{ secrets.TENANT_ID }}
+          parameters.appServiceSettings.value.CLIENT_ID : ${{ secrets.CLIENT_ID }}
+          parameters.appServiceSettings.value.CLIENT_SECRET : ${{ secrets.CLIENT_SECRET }}
+          parameters.appServiceSettings.value.NOTIFICATION_TENANT_ID : ${{ secrets.NOTIFICATION_TENANT_ID }}
+          parameters.appServiceSettings.value.NOTIFICATION_CLIENT_ID : ${{ secrets.NOTIFICATION_CLIENT_ID }}
+          parameters.appServiceSettings.value.NOTIFICATION_CLIENT_SECRET : ${{ secrets.NOTIFICATION_CLIENT_SECRET }}
+          parameters.appServiceSettings.value.NOTIFICATION_SCOPE : ${{ secrets.NOTIFICATION_SCOPE }}
+          parameters.appServiceSettings.value.NOTIFICATION_ENDPOINT : ${{ secrets.NOTIFICATION_ENDPOINT }}
+          parameters.appServiceSettings.value.NOTIFICATION_RECIPIENT : ${{ vars.NOTIFICATION_RECIPIENT }}
+          parameters.appServiceSettings.value.NOTIFICATION_ENABLED : ${{ vars.NOTIFICATION_ENABLED }}
+          parameters.appServiceSettings.value.NOTIFICATION_EMAIL_SUPPORT : ${{ vars.NOTIFICATION_EMAIL_SUPPORT }}
+          parameters.appServiceSettings.value.EMAIL_SUMMARY_REPORT : ${{ vars.EMAIL_SUMMARY_REPORT }}
+          parameters.appServiceSettings.value.EMAIL_SUPPORT : ${{ vars.EMAIL_SUPPORT }}
+          parameters.appServiceSettings.value.EMAIL_ENABLED : ${{ vars.EMAIL_ENABLED }}
+          parameters.appServiceSettings.value.EMAIL_TENANT_ID : ${{ secrets.EMAIL_TENANT_ID }}
+          parameters.appServiceSettings.value.EMAIL_CLIENT_ID : ${{ secrets.EMAIL_CLIENT_ID }}
+          parameters.appServiceSettings.value.EMAIL_CLIENT_SECRET : ${{ secrets.EMAIL_CLIENT_SECRET }}
+          parameters.appServiceSettings.value.EMAIL_USER_ID : ${{ secrets.EMAIL_USER_ID }}
+          parameters.appServiceSettings.value.GH_CLIENT_ID : ${{ secrets.GH_CLIENT_ID }}
+          parameters.appServiceSettings.value.GH_CLIENT_SECRET : ${{ secrets.GH_CLIENT_SECRET }}
+          parameters.appServiceSettings.value.GH_TOKEN : ${{ secrets.GH_TOKEN }}
+          parameters.appServiceSettings.value.GH_ENTERPRISE_TOKEN : ${{ secrets.GH_ENTERPRISE_TOKEN }}
+          parameters.appServiceSettings.value.GH_ENTERPRISE_NAME : ${{ secrets.GH_ENTERPRISE_NAME }}
+          parameters.appServiceSettings.value.GH_APP_LINK : ${{ vars.GH_APP_LINK }}
+          parameters.appServiceSettings.value.GHMGMTDB_CONNECTION_STRING : ${{ secrets.GHMGMTDB_CONNECTION_STRING}}
+          parameters.appServiceSettings.value.GH_ORG_INNERSOURCE : ${{ vars.GH_ORG_INNERSOURCE }}
+          parameters.appServiceSettings.value.GH_ORG_OPENSOURCE : ${{ vars.GH_ORG_OPENSOURCE }}
+          parameters.appServiceSettings.value.GH_REPO_TEMPLATE : ${{ vars.GH_REPO_TEMPLATE }}
+          parameters.appServiceSettings.value.GH_REPO_TEMPLATE_NAME : ${{ vars.GH_REPO_TEMPLATE_NAME }}
+          parameters.appServiceSettings.value.APPROVAL_SYSTEM_APP_URL : ${{ vars.APPROVAL_SYSTEM_APP_URL }}
+          parameters.appServiceSettings.value.APPROVAL_SYSTEM_APP_ID : ${{ vars.APPROVAL_SYSTEM_APP_ID }}
+          parameters.appServiceSettings.value.APPROVAL_SYSTEM_APP_MODULE_PROJECTS : ${{ vars.APPROVAL_SYSTEM_APP_MODULE_PROJECTS }}
+          parameters.appServiceSettings.value.APPROVAL_SYSTEM_APP_MODULE_COMMUNITY : ${{ vars.APPROVAL_SYSTEM_APP_MODULE_COMMUNITY }}
+          parameters.appServiceSettings.value.APPROVAL_SYSTEM_APP_MODULE_ORGANIZATION : ${{ vars.APPROVAL_SYSTEM_APP_MODULE_ORGANIZATION }}
+          parameters.appServiceSettings.value.APPROVAL_SYSTEM_APP_MODULE_COPILOT : ${{ vars.APPROVAL_SYSTEM_APP_MODULE_COPILOT }}
+          parameters.appServiceSettings.value.APPROVAL_SYSTEM_APP_MODULE_ORGACCESS : ${{ vars.APPROVAL_SYSTEM_APP_MODULE_ORGACCESS }}
+          parameters.appServiceSettings.value.GH_AZURE_AD_GROUP : ${{ vars.GH_AZURE_AD_GROUP }}
+          parameters.appServiceSettings.value.GH_AZURE_AD_ADMIN_GROUP : ${{ vars.GH_AZURE_AD_ADMIN_GROUP }}
+          parameters.appServiceSettings.value.SUMMARY_REPORT_TRIGGER : ${{ vars.SUMMARY_REPORT_TRIGGER }}
+          parameters.appServiceSettings.value.CONTENT_SECURITY_POLICY : ${{ vars.CONTENT_SECURITY_POLICY }}
+          parameters.appServiceSettings.value.COPILOT_GROUP_SLUG : ${{ vars.COPILOT_GROUP_SLUG }}
+          parameters.appServiceSettings.value.EXEMPTION : ${{ vars.EXEMPTION }}
+          parameters.appServiceSettings.value.ENABLED_REMOVE_COLLABORATORS : ${{ vars.ENABLED_REMOVE_COLLABORATORS }}
+          parameters.appServiceSettings.value.ORGANIZATION_NAME : ${{ vars.ORGANIZATION_NAME }}
+          parameters.appServiceSettings.value.REGIONAL_ORG_PREFIX: ${{ vars.REGIONAL_ORG_PREFIX }}
+          parameters.appServiceSettings.value.LINK_INNERSOURCE_GENERAL_LEGAL_GUIDELINES : ${{ vars.LINK_INNERSOURCE_GENERAL_LEGAL_GUIDELINES }}
+          parameters.appServiceSettings.value.LINK_INNERSOURCE_GENERAL_GUIDELINES : ${{ vars.LINK_INNERSOURCE_GENERAL_GUIDELINES }}
+          parameters.appServiceSettings.value.LINK_TOOL_APPROVAL_PROCESS : ${{ vars.LINK_TOOL_APPROVAL_PROCESS }}
+          parameters.appServiceSettings.value.LINK_XML_SCHEMA : ${{ vars.LINK_XML_SCHEMA }}
+          parameters.appServiceSettings.value.LINK_MEMBER_REQUEST_ACCESS : ${{ vars.LINK_MEMBER_REQUEST_ACCESS }}
+          parameters.appServiceSettings.value.LINK_GUEST_REQUEST_ACCESS : ${{ vars.LINK_GUEST_REQUEST_ACCESS }}
+          parameters.appServiceSettings.value.LINK_MEMBER_PROFILE : ${{ vars.LINK_MEMBER_PROFILE }}
+          parameters.appServiceSettings.value.LINK_GUEST_PROFILE : ${{ vars.LINK_GUEST_PROFILE }}
+          parameters.appServiceSettings.value.LINK_COMMUNITY_SHAREPOINT_SITE : ${{ vars.LINK_COMMUNITY_SHAREPOINT_SITE }}
+          parameters.appServiceSettings.value.LINK_FOOTERS : ${{ vars.LINK_FOOTERS }}
+
+      - name: Deploy App Service Plan and Web App
+        uses: azure/arm-deploy@v1
+        with:
+          subscriptionId: ${{ fromJSON(secrets.AZURE_CREDENTIALS)['subscriptionId'] }}
+          resourceGroupName: ${{ secrets.AZURE_RG }}
+          template: ./.bicep/webapp/deployGhMgmtAppService.bicep
+          parameters: ./.bicep/webapp/parameters.json
+          failOnStdErr: false
+          scope: resourcegroup
