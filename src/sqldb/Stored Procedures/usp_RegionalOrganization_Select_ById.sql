@@ -5,6 +5,7 @@ BEGIN
   SELECT
     [Id],
     [Name],
+    [IsRegionalOrganization],
     [IsIndexRepoEnabled],
     [IsCopilotRequestEnabled],
     [IsAccessRequestEnabled],

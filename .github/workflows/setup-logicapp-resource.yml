@@ -33,6 +33,7 @@ jobs:
           files: ./.bicep/logicapps/parameters.json
         env:
           parameters.env.value: ${{ vars.HOME_URL }}
+          parameters.appsettings.value.Workflows.CommunityOrganizationsScan.FlowState: ${{ vars.WORKFLOWS_COMMUNITY_ORGANIZATIONS_SCAN_FLOWSTATE }}
           parameters.appSettings.value.Workflows.CleanupOrganization.FlowState: ${{ vars.WORKFLOWS_CLEANUP_ORGANIZATION_FLOWSTATE }}
           parameters.appSettings.value.Workflows.ExpiringInvitation.FlowState: ${{ vars.WORKFLOWS_EXPIRING_INVITATION_FLOWSTATE }}
           parameters.appSettings.value.Workflows.IndexOrgRepos.FlowState: ${{ vars.WORKFLOWS_INDEX_ORG_REPOS_FLOWSTATE }}

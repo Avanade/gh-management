@@ -10,6 +10,7 @@ BEGIN
     SELECT
       [Id],
       [Name],
+      [IsRegionalOrganization],
       [IsIndexRepoEnabled],
       [IsCopilotRequestEnabled],
       [IsAccessRequestEnabled],
@@ -33,6 +34,7 @@ BEGIN
     GROUP BY
       [Id],
       [Name],
+      [IsRegionalOrganization],
       [IsIndexRepoEnabled],
       [IsCopilotRequestEnabled],
       [IsAccessRequestEnabled],
