@@ -18,6 +18,7 @@ import (
 type RegionalOrganizationDto struct {
 	Id                      int64     `json:"id"`
 	Name                    string    `json:"name"`
+	IsRegionalOrganization  bool      `json:"isRegionalOrganization"`
 	IsIndexRepoEnabled      bool      `json:"isIndexRepoEnabled"`
 	IsCopilotRequestEnabled bool      `json:"isCopilotRequestEnabled"`
 	IsAccessRequestEnabled  bool      `json:"isAccessRequestEnabled"`
@@ -119,6 +120,7 @@ func GetRegionalOrganizationByOption(w http.ResponseWriter, r *http.Request) {
 		regionalOrganizationDto := RegionalOrganizationDto{
 			Id:                      regionalOrganization.Id,
 			Name:                    regionalOrganization.Name,
+			IsRegionalOrganization:  regionalOrganization.IsRegionalOrganization,
 			IsIndexRepoEnabled:      regionalOrganization.IsIndexRepoEnabled,
 			IsCopilotRequestEnabled: regionalOrganization.IsCopilotRequestEnabled,
 			IsAccessRequestEnabled:  regionalOrganization.IsAccessRequestEnabled,
@@ -182,6 +184,7 @@ func InsertRegionalOrganization(w http.ResponseWriter, r *http.Request) {
 	regionalOrganization := db.RegionalOrganization{
 		Id:                      regionalOrganizationDto.Id,
 		Name:                    regionalOrganizationDto.Name,
+		IsRegionalOrganization:  regionalOrganizationDto.IsRegionalOrganization,
 		IsIndexRepoEnabled:      regionalOrganizationDto.IsIndexRepoEnabled,
 		IsCopilotRequestEnabled: regionalOrganizationDto.IsCopilotRequestEnabled,
 		IsAccessRequestEnabled:  regionalOrganizationDto.IsAccessRequestEnabled,
@@ -228,6 +231,7 @@ func UpdateRegionalOrganization(w http.ResponseWriter, r *http.Request) {
 	regionalOrganization := db.RegionalOrganization{
 		Id:                      id,
 		Name:                    regionalOrganizationDto.Name,
+		IsRegionalOrganization:  regionalOrganizationDto.IsRegionalOrganization,
 		IsIndexRepoEnabled:      regionalOrganizationDto.IsIndexRepoEnabled,
 		IsCopilotRequestEnabled: regionalOrganizationDto.IsCopilotRequestEnabled,
 		IsAccessRequestEnabled:  regionalOrganizationDto.IsAccessRequestEnabled,

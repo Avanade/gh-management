@@ -549,45 +549,6 @@ func GetMembersByEnterprise(enterprise string, token string) (*GetMembersByEnter
 	return &result, nil
 }
 
-func GetMembersByOrganization(org string, token string) (*GetMembersByOrganizationResult, error) {
-	src := oauth2.StaticTokenSource(
-		&oauth2.Token{AccessToken: os.Getenv("GITHUB_TOKEN")},
-	)
-	httpClient := oauth2.NewClient(context.Background(), src)
-	client := githubv4.NewClient(httpClient)
-
-	var query GetMembersByOrganizationQuery
-	var after *githubv4.String
-
-	variables := map[string]interface{}{
-		"login": githubv4.String(org),
-		"after": after,
-	}
-
-	var result GetMembersByOrganizationResult
-
-	for {
-		err := client.Query(context.Background(), &query, variables)
-		if err != nil {
-			return nil, err
-		}
-
-		for _, member := range query.Organization.MembersWithRole.Nodes {
-			result.Members = append(result.Members, Member{
-				Login:      string(member.Login),
-				DatabaseId: int64(member.DatabaseId),
-			})
-		}
-
-		if !query.Organization.MembersWithRole.PageInfo.HasNextPage {
-			break
-		}
-		variables["after"] = githubv4.NewString(query.Organization.MembersWithRole.PageInfo.EndCursor)
-	}
-
-	return &result, nil
-}
-
 // Query structs
 type GetOrganizationsWithinEnterpriseQuery struct {
 	Enterprise struct {
@@ -622,21 +583,6 @@ type GetMembersByEnterpriseQuery struct {
 	} `graphql:"enterprise(slug: $enterprise)"`
 }
 
-type GetMembersByOrganizationQuery struct {
-	Organization struct {
-		MembersWithRole struct {
-			Nodes []struct {
-				DatabaseId githubv4.Int
-				Login      githubv4.String
-			}
-			PageInfo struct {
-				EndCursor   githubv4.String
-				HasNextPage bool
-			}
-		} `graphql:"membersWithRole(first: 100, after: $after)"`
-	} `graphql:"organization(login: $login)"`
-}
-
 type PageInfo struct {
 	EndCursor   githubv4.String
 	HasNextPage bool
@@ -648,10 +594,6 @@ type GetOrganizationsWithinEnterpriseResult struct {
 }
 
 type GetMembersByEnterpriseResult struct {
-	Members []Member
-}
-
-type GetMembersByOrganizationResult struct {
 	Members []Member
 }
 

@@ -8,6 +8,7 @@ import (
 type RegionalOrganization struct {
 	Id                      int64
 	Name                    string
+	IsRegionalOrganization  bool
 	IsIndexRepoEnabled      bool
 	IsCopilotRequestEnabled bool
 	IsAccessRequestEnabled  bool
@@ -41,6 +42,7 @@ func SelectRegionalOrganization(isEnabled *NullBool) ([]RegionalOrganization, er
 		organization := RegionalOrganization{
 			Id:                      row["Id"].(int64),
 			Name:                    row["Name"].(string),
+			IsRegionalOrganization:  row["IsRegionalOrganization"].(bool),
 			IsIndexRepoEnabled:      row["IsIndexRepoEnabled"].(bool),
 			IsCopilotRequestEnabled: row["IsCopilotRequestEnabled"].(bool),
 			IsAccessRequestEnabled:  row["IsAccessRequestEnabled"].(bool),
@@ -87,6 +89,7 @@ func SelectRegionalOrganizationByOption(offset, filter int64, search, orderBy, o
 		organization := RegionalOrganization{
 			Id:                      row["Id"].(int64),
 			Name:                    row["Name"].(string),
+			IsRegionalOrganization:  row["IsRegionalOrganization"].(bool),
 			IsIndexRepoEnabled:      row["IsIndexRepoEnabled"].(bool),
 			IsCopilotRequestEnabled: row["IsCopilotRequestEnabled"].(bool),
 			IsAccessRequestEnabled:  row["IsAccessRequestEnabled"].(bool),
@@ -138,6 +141,7 @@ func SelectRegionalOrganizationById(id int64) (*RegionalOrganization, error) {
 	organization := RegionalOrganization{
 		Id:                      row["Id"].(int64),
 		Name:                    row["Name"].(string),
+		IsRegionalOrganization:  row["IsRegionalOrganization"].(bool),
 		IsIndexRepoEnabled:      row["IsIndexRepoEnabled"].(bool),
 		IsCopilotRequestEnabled: row["IsCopilotRequestEnabled"].(bool),
 		IsAccessRequestEnabled:  row["IsAccessRequestEnabled"].(bool),
@@ -169,6 +173,7 @@ func UpdateRegionalOrganization(organization RegionalOrganization) error {
 	param := map[string]interface{}{
 		"Id":                      organization.Id,
 		"Name":                    organization.Name,
+		"IsRegionalOrganization":  organization.IsRegionalOrganization,
 		"IsIndexRepoEnabled":      organization.IsIndexRepoEnabled,
 		"IsCopilotRequestEnabled": organization.IsCopilotRequestEnabled,
 		"IsAccessRequestEnabled":  organization.IsAccessRequestEnabled,
@@ -196,6 +201,7 @@ func InsertRegionalOrganization(organization RegionalOrganization) (int64, error
 	param := map[string]interface{}{
 		"Id":                      organization.Id,
 		"Name":                    organization.Name,
+		"IsRegionalOrganization":  organization.IsRegionalOrganization,
 		"IsIndexRepoEnabled":      organization.IsIndexRepoEnabled,
 		"IsCopilotRequestEnabled": organization.IsCopilotRequestEnabled,
 		"IsAccessRequestEnabled":  organization.IsAccessRequestEnabled,

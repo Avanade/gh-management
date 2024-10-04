@@ -76,6 +76,21 @@
                     <div class="relative flex items-start">
                       <div class="flex h-6 items-center">
                         <input 
+                          x-model="form.isRegionalOrganization"
+                          id="isregionalorganization" 
+                          aria-describedby="isregionalorganization-description" 
+                          name="isregionalorganization" 
+                          type="checkbox" 
+                          class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600">
+                      </div>
+                      <div class="ml-3 text-sm leading-6">
+                        <label for="isregionalorganization" class="font-medium text-gray-900">Is Regional Organization</label>
+                        <p id="isregionalorganization" class="text-gray-500">This is regional organization</p>
+                      </div>
+                    </div>
+                    <div class="relative flex items-start">
+                      <div class="flex h-6 items-center">
+                        <input 
                           x-model="form.isIndexRepoEnabled"
                           id="repositoryindexing" 
                           aria-describedby="repositoryindexing-description" 
@@ -173,6 +188,7 @@
                 id: 0,
                 text: ''
             }],
+            isRegionalOrganization: false,
             isIndexRepoEnabled: false,
             isCopilotRequestEnabled: false,
             isAccessRequestEnabled: false,
@@ -193,6 +209,7 @@
         return {
             form: {
               selectedRegionalOrganization: defaultForm.selectedRegionalOrganization,
+              isRegionalOrganization: defaultForm.isRegionalOrganization,
               isIndexRepoEnabled: defaultForm.isIndexRepoEnabled,
               isCopilotRequestEnablesd: defaultForm.isCopilotRequestEnabled,
               isAccessRequestEnabled: defaultForm.isAccessRequestEnabled,
@@ -281,6 +298,7 @@
                 const data = {
                     id: regionOrgId,
                     name: this.form.selectedRegionalOrganization[0].text,
+                    isRegionalOrganization: this.form.isRegionalOrganization,
                     isIndexRepoEnabled: this.form.isIndexRepoEnabled,
                     isCopilotRequestEnabled: this.form.isCopilotRequestEnabled,
                     isAccessRequestEnabled: this.form.isAccessRequestEnabled,
@@ -298,6 +316,7 @@
                 const data = {
                   id: this.form.selectedRegionalOrganization[0].id,
                   name: this.form.selectedRegionalOrganization[0].text,
+                  isRegionalOrganization: this.form.isRegionalOrganization,
                   isIndexRepoEnabled: this.form.isIndexRepoEnabled,
                   isCopilotRequestEnabled: this.form.isCopilotRequestEnabled,
                   isAccessRequestEnabled: this.form.isAccessRequestEnabled,
@@ -315,6 +334,7 @@
                 const data = {
                     id: regionOrgId,
                     name: this.form.selectedRegionalOrganization[0].text,
+                    isRegionalOrganization: this.form.isRegionalOrganization,
                     isIndexRepoEnabled: this.form.isIndexRepoEnabled,
                     isCopilotRequestEnabled: this.form.isCopilotRequestEnabled,
                     isAccessRequestEnabled: this.form.isAccessRequestEnabled,
@@ -328,6 +348,7 @@
             },
             onCancel() {
               this.form.selectedRegionalOrganization = defaultForm.selectedRegionalOrganization
+              this.form.isRegionalOrganization = defaultForm.isRegionalOrganization
               this.form.isIndexRepoEnabled = defaultForm.isIndexRepoEnabled
               this.form.isCopilotRequestEnabled = defaultForm.isCopilotRequestEnabled
               this.form.isAccessRequestEnabled = defaultForm.isAccessRequestEnabled
@@ -351,6 +372,7 @@
                       id: ${data.id},
                       text: '${data.name}'
                     }]
+                    form.isRegionalOrganization = ${data.isRegionalOrganization}
                     form.isIndexRepoEnabled = ${data.isIndexRepoEnabled}
                     form.isCopilotRequestEnabled = ${data.isCopilotRequestEnabled}
                     form.isAccessRequestEnabled = ${data.isAccessRequestEnabled}
@@ -368,6 +390,7 @@
                       id: ${data.id},
                       text: '${data.name}'
                     }]
+                    form.isRegionalOrganization = ${data.isRegionalOrganization}
                     form.isIndexRepoEnabled = ${data.isIndexRepoEnabled}
                     form.isCopilotRequestEnabled = ${data.isCopilotRequestEnabled}
                     form.isAccessRequestEnabled = ${data.isAccessRequestEnabled}
@@ -384,6 +407,7 @@
                       id: ${data.id},
                       text: '${data.name}'
                     }]
+                    form.isRegionalOrganization = ${data.isRegionalOrganization}
                     form.isIndexRepoEnabled = ${data.isIndexRepoEnabled}
                     form.isCopilotRequestEnabled = ${data.isCopilotRequestEnabled}
                     form.isAccessRequestEnabled = ${data.isAccessRequestEnabled}
