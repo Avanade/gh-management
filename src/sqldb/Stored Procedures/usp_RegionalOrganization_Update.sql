@@ -1,7 +1,7 @@
 CREATE PROCEDURE [dbo].[usp_RegionalOrganization_Update]
   @Id INT,
   @Name VARCHAR(100),
-  @IsCleanUpMembersEnabled BIT,
+  @IsRegionalOrganization BIT,
   @IsIndexRepoEnabled BIT,
   @IsCopilotRequestEnabled BIT,
   @IsAccessRequestEnabled BIT,
@@ -13,7 +13,7 @@ BEGIN
   UPDATE
     [dbo].[RegionalOrganization]
   SET
-    [IsCleanUpMembersEnabled] = @IsCleanUpMembersEnabled,
+    [IsRegionalOrganization] = @IsRegionalOrganization,
     [IsIndexRepoEnabled] = @IsIndexRepoEnabled,
     [IsCopilotRequestEnabled] = @IsCopilotRequestEnabled,
     [IsAccessRequestEnabled] = @IsAccessRequestEnabled,

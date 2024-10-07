@@ -18,7 +18,7 @@ import (
 type RegionalOrganizationDto struct {
 	Id                      int64     `json:"id"`
 	Name                    string    `json:"name"`
-	IsCleanUpMembersEnabled bool      `json:"isCleanUpMembersEnabled"`
+	IsRegionalOrganization  bool      `json:"isRegionalOrganization"`
 	IsIndexRepoEnabled      bool      `json:"isIndexRepoEnabled"`
 	IsCopilotRequestEnabled bool      `json:"isCopilotRequestEnabled"`
 	IsAccessRequestEnabled  bool      `json:"isAccessRequestEnabled"`
@@ -40,7 +40,7 @@ func GetEnterpriseOrganizations(w http.ResponseWriter, r *http.Request) {
 
 	token := os.Getenv("GH_ENTERPRISE_TOKEN")
 	enterprise := os.Getenv("GH_ENTERPRISE_NAME")
-	enterpriseOrgs, err := ghAPI.GetOrganizationsWithinEnterprise(enterprise, token)
+	result, err := ghAPI.GetOrganizationsWithinEnterprise(enterprise, token)
 	if err != nil {
 		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -56,7 +56,7 @@ func GetEnterpriseOrganizations(w http.ResponseWriter, r *http.Request) {
 	}
 
 	filteredEnterpriseOrgs := make([]EnterpriseOrganization, 0)
-	for _, enterpriseOrg := range enterpriseOrgs {
+	for _, enterpriseOrg := range result.Organizations {
 		exists := false
 		for _, regionalOrganization := range regionalOrganizations {
 			if regionalOrganization.Id == int64(enterpriseOrg.DatabaseId) {
@@ -120,7 +120,7 @@ func GetRegionalOrganizationByOption(w http.ResponseWriter, r *http.Request) {
 		regionalOrganizationDto := RegionalOrganizationDto{
 			Id:                      regionalOrganization.Id,
 			Name:                    regionalOrganization.Name,
-			IsCleanUpMembersEnabled: regionalOrganization.IsCleanUpMembersEnabled,
+			IsRegionalOrganization:  regionalOrganization.IsRegionalOrganization,
 			IsIndexRepoEnabled:      regionalOrganization.IsIndexRepoEnabled,
 			IsCopilotRequestEnabled: regionalOrganization.IsCopilotRequestEnabled,
 			IsAccessRequestEnabled:  regionalOrganization.IsAccessRequestEnabled,
@@ -184,7 +184,7 @@ func InsertRegionalOrganization(w http.ResponseWriter, r *http.Request) {
 	regionalOrganization := db.RegionalOrganization{
 		Id:                      regionalOrganizationDto.Id,
 		Name:                    regionalOrganizationDto.Name,
-		IsCleanUpMembersEnabled: regionalOrganizationDto.IsCleanUpMembersEnabled,
+		IsRegionalOrganization:  regionalOrganizationDto.IsRegionalOrganization,
 		IsIndexRepoEnabled:      regionalOrganizationDto.IsIndexRepoEnabled,
 		IsCopilotRequestEnabled: regionalOrganizationDto.IsCopilotRequestEnabled,
 		IsAccessRequestEnabled:  regionalOrganizationDto.IsAccessRequestEnabled,
@@ -231,7 +231,7 @@ func UpdateRegionalOrganization(w http.ResponseWriter, r *http.Request) {
 	regionalOrganization := db.RegionalOrganization{
 		Id:                      id,
 		Name:                    regionalOrganizationDto.Name,
-		IsCleanUpMembersEnabled: regionalOrganizationDto.IsCleanUpMembersEnabled,
+		IsRegionalOrganization:  regionalOrganizationDto.IsRegionalOrganization,
 		IsIndexRepoEnabled:      regionalOrganizationDto.IsIndexRepoEnabled,
 		IsCopilotRequestEnabled: regionalOrganizationDto.IsCopilotRequestEnabled,
 		IsAccessRequestEnabled:  regionalOrganizationDto.IsAccessRequestEnabled,

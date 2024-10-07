@@ -10,7 +10,7 @@ BEGIN
     SELECT
       [Id],
       [Name],
-      [IsCleanUpMembersEnabled],
+      [IsRegionalOrganization],
       [IsIndexRepoEnabled],
       [IsCopilotRequestEnabled],
       [IsAccessRequestEnabled],
@@ -34,7 +34,7 @@ BEGIN
     GROUP BY
       [Id],
       [Name],
-      [IsCleanUpMembersEnabled],
+      [IsRegionalOrganization],
       [IsIndexRepoEnabled],
       [IsCopilotRequestEnabled],
       [IsAccessRequestEnabled],

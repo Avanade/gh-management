@@ -11,5 +11,5 @@ func RegionalOrganizationHandler(w http.ResponseWriter, r *http.Request) {
 	data := map[string]interface{}{
 		"OrganizationName": os.Getenv("ORGANIZATION_NAME"),
 	}
-	template.UseTemplate(&w, r, "admin/regionalorganization/index", data)
+	template.UseTemplate(&w, r, "admin/manageorganizations/index", data)
 }

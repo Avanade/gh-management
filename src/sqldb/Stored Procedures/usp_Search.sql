@@ -29,12 +29,12 @@ BEGIN
   (
     SELECT
       'Repositories' AS [Source],
-      [Name],
       CONCAT (
-        CASE WHEN [CreatedBy] IS NULL 
-        THEN [RepositorySource]
-        ELSE [RepositorySource] + ' - ' + [CreatedBy]
-        END, '|', (
+        [Organization], '/',
+        [Name]
+      ),
+      CONCAT (
+        [Description], '|', (
           SELECT STRING_AGG([Topic], ',')
           FROM [dbo].[RepositoryTopic]
           WHERE [RepositoryId] = [Id]
@@ -45,21 +45,19 @@ BEGIN
     FROM (
       SELECT
         [Name],
-        [RepositorySource],
-        [CreatedBy],
+        [Description],
+        [Organization],
         [Id]
       FROM [dbo].[Repository] AS [P]
-      LEFT JOIN [dbo].[RepositoryOwner] AS [RO] ON [RO].[RepositoryId] = [P].[Id]
       LEFT JOIN [dbo].[RepositoryTopic] AS [RT] ON [RT].[RepositoryId] = [P].[Id]
       JOIN STRING_SPLIT(@Search, ' ') AS [SS] ON (	
         [Name] LIKE '%' + [SS].[value] + '%' OR
-        [RO].[UserPrincipalName] LIKE '%' + [SS].[value] + '%' OR
         [RT].[Topic] LIKE '%' + [SS].[value] + '%'
       ) 
       WHERE
         [P].[VisibilityId] != 1
     ) AS [Repository]
-    GROUP BY [Name], [CreatedBy], [RepositorySource], [Id]
+    GROUP BY [Name], [Description], [Organization], [Id]
   )
   UNION
   (

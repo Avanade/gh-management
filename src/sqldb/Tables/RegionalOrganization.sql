@@ -1,7 +1,7 @@
 CREATE TABLE [dbo].[RegionalOrganization] (
     [Id] [INT] NOT NULL PRIMARY KEY,
     [Name] [VARCHAR](50) NOT NULL,
-    [IsCleanUpMembersEnabled] [BIT] NOT NULL DEFAULT 1,
+    [IsRegionalOrganization] [BIT] NOT NULL DEFAULT 1,
     [IsIndexRepoEnabled] [BIT] NOT NULL DEFAULT 1,
     [IsCopilotRequestEnabled] [BIT] NOT NULL DEFAULT 1,
     [IsAccessRequestEnabled] [BIT] NOT NULL DEFAULT 1,
