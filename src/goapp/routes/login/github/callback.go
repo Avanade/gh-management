@@ -168,6 +168,14 @@ func GithubForceSaveHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	session.Values["ghIsValid"] = result["IsValid"].(bool)
 
+	enterprise := os.Getenv("GH_ENTERPRISE_NAME")
+	token := os.Getenv("GH_ENTERPRISE_TOKEN")
+	err = ghAPI.RemoveEnterpriseMember(enterprise, ghUser, token)
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 	CheckMembership(userPrincipalName, ghUser)
 
 	session.Options = &sessions.Options{

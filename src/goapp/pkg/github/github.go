@@ -549,6 +549,33 @@ func GetMembersByEnterprise(enterprise string, token string) (*GetMembersByEnter
 	return &result, nil
 }
 
+// RemoveEnterpriseMember removes a member from the enterprise.
+func RemoveEnterpriseMember(enterprise string, username string, token string) error {
+	src := oauth2.StaticTokenSource(
+		&oauth2.Token{AccessToken: token},
+	)
+	httpClient := oauth2.NewClient(context.Background(), src)
+
+	client := githubv4.NewClient(httpClient)
+	var mutation struct {
+		RemoveEnterpriseMember struct {
+			ClientMutationID githubv4.String
+		} `graphql:"removeEnterpriseMember(input: $input)"`
+	}
+
+	input := githubv4.RemoveEnterpriseMemberInput{
+		EnterpriseID: githubv4.ID(enterprise),
+		UserID:       githubv4.String(username),
+	}
+
+	err := client.Mutate(context.Background(), &mutation, input, nil)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 // Query structs
 type GetOrganizationsWithinEnterpriseQuery struct {
 	Enterprise struct {
