@@ -1710,6 +1710,7 @@ func getHttpPostResponseStatus(url string, data interface{}, ch chan *http.Respo
 	}
 	res, err := http.Post(url, "application/json; charset=utf-8", bytes.NewBuffer(jsonReq))
 	if err != nil {
+		logger.LogException(err)
 		ch <- nil
 	}
 	ch <- res
