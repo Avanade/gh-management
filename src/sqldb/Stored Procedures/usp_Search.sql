@@ -74,7 +74,7 @@ BEGIN
         [C].[Name] LIKE '%' + [SS].[value] + '%' OR
         [Description] LIKE '%' + [SS].[value] + '%'
       )
-    WHERE [C].[ApprovalStatusId] = 5 AND [C].[CreatedBy] = @UserPrincipalName
+    WHERE [C].[ApprovalStatusId] = 5 OR [C].[CreatedBy] = @UserPrincipalName
     GROUP BY [C].[Name], [C].[Description], [C].[Id]
   )
   ORDER BY [Score] DESC
