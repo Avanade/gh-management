@@ -17,6 +17,16 @@ func LoginRedirectHandler(w http.ResponseWriter, r *http.Request) {
 	data := map[string]interface{}{
 		"redirect": redirect,
 	}
+
+	c := http.Cookie{
+		Name:   "auth-session",
+		MaxAge: -1}
+	http.SetCookie(w, &c)
+	cgh := http.Cookie{
+		Name:   "gh-auth-session",
+		MaxAge: -1}
+	http.SetCookie(w, &cgh)
+
 	tmpl := template.Must(template.ParseFiles("templates/loginredirect.html"))
 	tmpl.Execute(w, data)
 }
@@ -27,6 +37,7 @@ func AuthenticationSuccessfulHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func AuthenticationInProgressHandler(w http.ResponseWriter, r *http.Request) {
+
 	tmpl := template.Must(template.ParseFiles("templates/authenticationinprogress.html"))
 	tmpl.Execute(w, nil)
 }
