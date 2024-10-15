@@ -37,7 +37,6 @@ func AuthenticationSuccessfulHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func AuthenticationInProgressHandler(w http.ResponseWriter, r *http.Request) {
-
 	tmpl := template.Must(template.ParseFiles("templates/authenticationinprogress.html"))
 	tmpl.Execute(w, nil)
 }
