@@ -130,7 +130,6 @@ const table = ({
         this.load()
       },
       onSearchSubmit(e){
-        this.filter = 10;
         this.page = 0;
         this.search = e.target.value;
         this.load();
@@ -214,6 +213,7 @@ const table = ({
                             x-bind:colspan='columns.length'>
                             <p class="text-center my-5">NO RESULT FOUND</p>
                           </td>
+                        </tr>
                         <tr x-show='isLoading' x-transition>
                           <td x-bind:colspan='columns.length'>
                             <svg 
