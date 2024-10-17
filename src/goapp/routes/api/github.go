@@ -429,16 +429,21 @@ type MemberWithCommunityOrgs struct {
 func ProcessCleanupEnterpriseOrgs(enterpriseMembers *ghAPI.GetMembersByEnterpriseResult, adMembers []msgraph.User, logger *appinsights_wrapper.TelemetryClient) error {
 	removedMemberTC := appinsights.NewTraceTelemetry("Cleanup Enterprise Orgs (Innersource & Regional Orgs)", contracts.Information)
 	// Fetch enterprise orgs
+
+	logger.LogTrace(fmt.Sprint("Enterprise Members Length : ", len(enterpriseMembers.Members)), contracts.Information)
+	logger.LogTrace(fmt.Sprint("AD Members Length : ", len(adMembers)), contracts.Information)
+
 	enterpriseOrgs := []string{os.Getenv("GH_ORG_INNERSOURCE")}
 	isEnabled := db.NullBool{Value: true}
 	regOrgs, err := db.SelectRegionalOrganization(&isEnabled)
 	if err != nil {
+		logger.LogException(err)
 		return err
 	}
+	logger.LogTrace(fmt.Sprint("[PCEO]Fetched regional organizations. regOrgs.Length : ", len(regOrgs)), contracts.Information)
 	for _, regOrg := range regOrgs {
 		enterpriseOrgs = append(enterpriseOrgs, regOrg.Name)
 	}
-
 	// Filter enterprise members that are in AD
 	var enterpriseMembersInAD []ghAPI.Member
 	for _, adMember := range adMembers {
@@ -452,7 +457,7 @@ func ProcessCleanupEnterpriseOrgs(enterpriseMembers *ghAPI.GetMembersByEnterpris
 			}
 		}
 	}
-
+	logger.LogTrace(fmt.Sprint("[PCEO]Filtered enterprise members that are in AD. enterpriseMembersInAD.Length : ", len(enterpriseMembersInAD)), contracts.Information)
 	// Cleanup each enterprise org
 	for _, enterpriseOrg := range enterpriseOrgs {
 		// Fetch members of the enterprise org
@@ -490,6 +495,7 @@ func ProcessCleanupEnterpriseOrgs(enterpriseMembers *ghAPI.GetMembersByEnterpris
 		}
 		removedMemberTC.Properties[enterpriseOrg] = string(removedMembersJson)
 	}
+	logger.LogTrace("[PCEO]Cleanup each enterprise org", contracts.Information)
 
 	// Log removed members
 	logger.Track(removedMemberTC)
@@ -543,13 +549,28 @@ func ProcessCleanupOpensourceOrg(enterpriseMembers *ghAPI.GetMembersByEnterprise
 		}
 	}
 
-	removedMembersJson, err := json.Marshal(removedMembers)
-	if err != nil {
-		return err
+	chunks := splitIntoChunks(removedMembers, 50)
+	for chunkIndex, chunk := range chunks {
+		removedMembersJson, err := json.Marshal(chunk)
+		if err != nil {
+			return err
+		}
+		convertedToOutsideCollaboratorsTC.Properties[fmt.Sprint(opensourceOrg, chunkIndex)] = string(removedMembersJson)
 	}
-	convertedToOutsideCollaboratorsTC.Properties[opensourceOrg] = string(removedMembersJson)
 
 	// Log converted to outside collaborators
 	logger.Track(convertedToOutsideCollaboratorsTC)
 	return nil
+}
+
+func splitIntoChunks(members []RemovedMember, chunkSize int) [][]RemovedMember {
+	var chunks [][]RemovedMember
+	for i := 0; i < len(members); i += chunkSize {
+		end := i + chunkSize
+		if end > len(members) {
+			end = len(members)
+		}
+		chunks = append(chunks, members[i:end])
+	}
+	return chunks
 }

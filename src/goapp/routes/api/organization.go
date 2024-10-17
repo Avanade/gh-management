@@ -16,6 +16,7 @@ import (
 	"main/pkg/session"
 
 	"github.com/gorilla/mux"
+	"github.com/microsoft/ApplicationInsights-Go/appinsights"
 	"github.com/microsoft/ApplicationInsights-Go/appinsights/contracts"
 )
 
@@ -491,12 +492,14 @@ func ScanCommunityOrganizations(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+	logger.LogTrace(fmt.Sprint("Fetched regional organizations.  regionalOrgs.Lenght : ", len(regionalOrgs)), contracts.Information)
 	for _, regionalOrg := range regionalOrgs {
 		if !regionalOrg.IsRegionalOrganization {
 			continue
 		}
 		communityOrgs = append(communityOrgs, regionalOrg.Name)
 	}
+	logger.LogTrace(fmt.Sprint("Filtered community organizations. communityOrgs.Lenght : ", len(communityOrgs)), contracts.Information)
 
 	// Fetch all enterprise members with organizations
 	enterpriseToken := os.Getenv("GH_ENTERPRISE_TOKEN")
@@ -507,6 +510,7 @@ func ScanCommunityOrganizations(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+	logger.LogTrace(fmt.Sprint("Fetched enterprise members. enterpriseMembers.Length : ", len(enterpriseMembers.Members)), contracts.Information)
 
 	// Fetch all members of the Active Directory
 	adMembers, err := msgraph.GetAllUsers()
@@ -515,6 +519,7 @@ func ScanCommunityOrganizations(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+	logger.LogTrace(fmt.Sprint("Fetched Active Directory members. adMembers.Length : ", len(adMembers)), contracts.Information)
 
 	// Filter enterprise members that are in AD
 	var enterpriseMembersInAD []Member
@@ -526,6 +531,7 @@ func ScanCommunityOrganizations(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 	}
+	logger.LogTrace(fmt.Sprint("Filtered enterprise members that are in AD. enterpriseMembersInAD.Length : ", len(enterpriseMembersInAD)), contracts.Information)
 
 	// Filter enterprise members that are in AD if they are in the community organizations
 	var communityMembers []Member
@@ -557,7 +563,9 @@ func ScanCommunityOrganizations(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 	}
+	logger.LogTrace(fmt.Sprint("Filtered enterprise members that are in AD if they are in the community organizations. communityMembers.Length : ", len(communityMembers)), contracts.Information)
 
+	var notifiedUsers []string
 	for _, communityMember := range communityMembers {
 		// Check if the member associated their account with the community
 		email, err := db.GetUserEmailByGithubId(fmt.Sprint(communityMember.Id))
@@ -569,8 +577,18 @@ func ScanCommunityOrganizations(w http.ResponseWriter, r *http.Request) {
 		if email == "" {
 			// Notify the user to associate their account with the community
 			logger.LogTrace(fmt.Sprint(communityMember.Id, " ", communityMember.Username, " ", communityMember.Email), contracts.Information)
+			notifiedUsers = append(notifiedUsers, communityMember.Email)
 		}
 	}
+
+	notifiedUsersChunks := splitStringArray(notifiedUsers, 50)
+
+	notifiedUsersTC := appinsights.NewTraceTelemetry("Notified Users", contracts.Information)
+	for indexNotifiedUsersChunk, notifiedUsersChunk := range notifiedUsersChunks {
+		notifiedUsersTC.Properties[fmt.Sprint("NotifiedUsers", indexNotifiedUsersChunk)] = strings.Join(notifiedUsersChunk, ",")
+	}
+	logger.Track(notifiedUsersTC)
+	logger.LogTrace(fmt.Sprint("Notified users. notifiedUsers.Length : ", len(notifiedUsers)), contracts.Information)
 
 	w.WriteHeader(http.StatusOK)
 	w.Header().Set("Content-Type", "application/json")
@@ -591,4 +609,16 @@ func ReprocessCommunityApprovalRequestNewOrganizations() {
 			logger.LogTrace("ID:"+strconv.FormatInt(item.Id, 10)+" "+err.Error(), contracts.Error)
 		}
 	}
+}
+
+func splitStringArray(arr []string, chunkSize int) [][]string {
+	var chunks [][]string
+	for i := 0; i < len(arr); i += chunkSize {
+		end := i + chunkSize
+		if end > len(arr) {
+			end = len(arr)
+		}
+		chunks = append(chunks, arr[i:end])
+	}
+	return chunks
 }
