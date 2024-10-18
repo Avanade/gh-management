@@ -25,7 +25,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	session, err := session.Store.Get(r, "auth-session")
 	if err != nil {
 		log.Println(err.Error())
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		http.Redirect(w, r, "/loginredirect", http.StatusTemporaryRedirect)
 		return
 	}
 
