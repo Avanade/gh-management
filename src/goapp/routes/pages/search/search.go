@@ -8,8 +8,6 @@ import (
 	db "main/pkg/ghmgmtdb"
 	"main/pkg/session"
 	"main/pkg/template"
-
-	"github.com/gorilla/mux"
 )
 
 func SearchHandler(w http.ResponseWriter, r *http.Request) {
@@ -18,17 +16,19 @@ func SearchHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetSearchResults(w http.ResponseWriter, r *http.Request) {
-	req := mux.Vars(r)
+	params := r.URL.Query()
 
-	searchText := r.URL.Query().Get("search")
-	offSet := req["offSet"]
-	rowCount := req["rowCount"]
+	search := params.Get("search")
+	offset := params.Get("offset")
+	filter := params.Get("filter")
+	selectedSourceType := params.Get("selectedSourceType")
+
 	sessionaz, _ := session.Store.Get(r, "auth-session")
 	iprofile := sessionaz.Values["profile"]
 	profile := iprofile.(map[string]interface{})
 	username := profile["preferred_username"].(string)
 
-	searchResults, err := db.SearchCommunitiesProjectsUsers(searchText, offSet, rowCount, username)
+	data, total, err := db.SearchCommunitiesProjectsUsers(search, offset, filter, selectedSourceType, username)
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -37,7 +37,13 @@ func GetSearchResults(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusOK)
 	w.Header().Set("Content-Type", "application/json")
-	jsonResp, err := json.Marshal(searchResults)
+	jsonResp, err := json.Marshal(struct {
+		Data  []map[string]interface{} `json:"data"`
+		Total int                      `json:"total"`
+	}{
+		Data:  data,
+		Total: total,
+	})
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)

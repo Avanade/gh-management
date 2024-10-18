@@ -13,8 +13,14 @@ BEGIN
   IF EXISTS (SELECT * FROM [dbo].[RegionalOrganization] WHERE [Id] = @Id)
   BEGIN
     EXEC [dbo].[usp_RegionalOrganization_Update] 
-      @Id, @Name, @IsRegionalOrganization,
-      @IsAccessRequestEnabled, 1, @CreatedBy
+      @Id,  
+      @Name, 
+      @IsRegionalOrganization,
+      @IsIndexRepoEnabled, 
+      @IsCopilotRequestEnabled, 
+      @IsAccessRequestEnabled,
+      @IsEnabled,
+      @CreatedBy
   END
   ELSE
   BEGIN

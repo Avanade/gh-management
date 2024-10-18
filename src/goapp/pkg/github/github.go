@@ -549,6 +549,41 @@ func GetMembersByEnterprise(enterprise string, token string) (*GetMembersByEnter
 	return &result, nil
 }
 
+func GetRepositoryProjects(owner string, name string, token string) (*GetRepositoryProjectsResult, error) {
+	src := oauth2.StaticTokenSource(
+		&oauth2.Token{AccessToken: token},
+	)
+	httpClient := oauth2.NewClient(context.Background(), src)
+
+	client := githubv4.NewClient(httpClient)
+
+	var result GetRepositoryProjectsResult
+	var queryResult GetRepositoryProjectsQuery
+
+	variables := map[string]interface{}{
+		"owner": githubv4.String(owner),
+		"name":  githubv4.String(name),
+	}
+	err := client.Query(context.Background(), &queryResult, variables)
+	if err != nil {
+		return nil, err
+	}
+
+	result.ProjectUrl = string(queryResult.Repository.ProjectsUrl)
+
+	for _, project := range queryResult.Repository.ProjectsV2.Nodes {
+		result.Projects = append(result.Projects, Project{
+			Databaseid: int64(project.DatabaseId),
+			Url:        string(project.Url),
+			Title:      string(project.Title),
+			CreatedAt:  project.CreatedAt.Time,
+			UpdatedAt:  project.UpdatedAt.Time,
+		})
+	}
+
+	return &result, nil
+}
+
 // Query structs
 type GetOrganizationsWithinEnterpriseQuery struct {
 	Enterprise struct {
@@ -583,6 +618,22 @@ type GetMembersByEnterpriseQuery struct {
 	} `graphql:"enterprise(slug: $enterprise)"`
 }
 
+type GetRepositoryProjectsQuery struct {
+	Repository struct {
+		ProjectsUrl githubv4.String
+		ProjectsV2  struct {
+			Nodes []struct {
+				DatabaseId githubv4.Int
+				Title      githubv4.String
+				Id         githubv4.ID
+				Url        githubv4.String
+				CreatedAt  githubv4.DateTime
+				UpdatedAt  githubv4.DateTime
+			}
+		} `graphql:"projectsV2(first: 100)"`
+	} `graphql:"repository(owner: $owner, name: $name)"`
+}
+
 type PageInfo struct {
 	EndCursor   githubv4.String
 	HasNextPage bool
@@ -597,6 +648,12 @@ type GetMembersByEnterpriseResult struct {
 	Members []Member
 }
 
+type GetRepositoryProjectsResult struct {
+	ProjectUrl string
+	Projects   []Project
+}
+
+// Structs
 type Member struct {
 	Login           string
 	DatabaseId      int64
@@ -606,4 +663,12 @@ type Member struct {
 type Organization struct {
 	Login      string
 	DatabaseId int64
+}
+
+type Project struct {
+	Databaseid int64
+	Url        string
+	Title      string
+	CreatedAt  time.Time
+	UpdatedAt  time.Time
 }

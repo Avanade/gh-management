@@ -79,7 +79,6 @@ func setPageRoutes() {
 	httpRouter.GET("/Home/AssetRequestCreation", rtApi.RedirectAssetRequest)
 	httpRouter.GET("/Home/AssetRequestCreation/", rtApi.RedirectAssetRequest)
 	httpRouter.GET("/Home/Tool/{assetCode}", m.Chain(rtPages.ToolHandler, m.AzureAuth()))
-	httpRouter.GET("/search/{offSet}/{rowCount}", m.Chain(rtSearch.GetSearchResults, m.AzureAuth(), m.GitHubAuth()))
 }
 
 func setAdminPageRoutes() {
@@ -253,6 +252,9 @@ func setApiRoutes() {
 
 	// LEGACY APIS
 	httpRouter.GET("/api/searchresult/{searchText}", m.Chain(rtApi.LegacySearchHandler, m.GuidAuth()))
+
+	// SEARCH API
+	httpRouter.GET("/api/search", m.Chain(rtSearch.GetSearchResults, m.AzureAuth()))
 }
 
 func setUtilityRoutes() {

@@ -107,3 +107,59 @@ func (db *DB) ExecuteStoredProcedureWithResult(procedure string, params map[stri
 
 	return results, nil
 }
+
+func (db *DB) ExecuteStoredProcedureWithResultTotal(procedure string, params map[string]interface{}) ([]map[string]interface{}, int, error) {
+	var args []interface{}
+
+	ctx := context.Background()
+
+	for i, v := range params {
+		args = append(args, sql.Named(i, v))
+	}
+
+	rows, err := db.QueryContext(ctx, procedure, args...)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	defer rows.Close()
+
+	columns, err := rows.Columns()
+	if err != nil {
+		return nil, 0, err
+	}
+
+	var results []map[string]interface{}
+
+	for rows.Next() {
+		values := make([]interface{}, len(columns))
+		pointers := make([]interface{}, len(columns))
+		for i, _ := range values {
+			pointers[i] = &values[i]
+		}
+		err := rows.Scan(pointers...)
+		if err != nil {
+			return nil, 0, err
+		}
+		result := make(map[string]interface{})
+		for i, val := range values {
+			result[columns[i]] = val
+		}
+		results = append(results, result)
+	}
+
+	var totalCount int
+
+	// Fetch the total count
+	if rows.NextResultSet() {
+		if rows.Next() {
+			err := rows.Scan(&totalCount)
+			if err != nil {
+				log.Fatal("Error scanning total count: ", err.Error())
+			}
+			fmt.Printf("Total Count: %d\n", totalCount)
+		}
+	}
+
+	return results, totalCount, nil
+}

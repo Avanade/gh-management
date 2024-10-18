@@ -15,23 +15,27 @@ func ConnectDb() *sql.DB {
 	return db
 }
 
-func SearchCommunitiesProjectsUsers(searchText, offSet, rowCount, username string) ([]map[string]interface{}, error) {
+func SearchCommunitiesProjectsUsers(searchText, offSet, filter, selectedSourceType, username string) ([]map[string]interface{}, int, error) {
 	db := ConnectDb()
 	defer db.Close()
 
 	params := map[string]interface{}{
 		"Search":            searchText,
 		"OffSet":            offSet,
-		"RowCount":          rowCount,
+		"Filter":            filter,
 		"UserPrincipalName": username,
 	}
 
-	result, err := db.ExecuteStoredProcedureWithResult("usp_Search", params)
-	if err != nil {
-		return nil, err
+	if selectedSourceType != "" {
+		params["SelectedSourceType"] = selectedSourceType
 	}
 
-	return result, err
+	result, total, err := db.ExecuteStoredProcedureWithResultTotal("usp_Search", params)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	return result, total, err
 }
 
 func UpdateProjectApprovalApproverResponse(itemId, remarks, responseDate, respondedBy string, approvalStatusId int) (bool, error) {

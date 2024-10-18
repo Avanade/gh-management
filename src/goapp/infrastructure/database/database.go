@@ -5,47 +5,41 @@ import (
 	"database/sql"
 	"fmt"
 	"main/config"
+	"time"
 
 	_ "github.com/microsoft/go-mssqldb"
 )
 
 type Database struct {
-	connString string
-	db         *sql.DB
+	db *sql.DB
 }
 
 func NewDatabase(config config.ConfigManager) Database {
-	fmt.Println("ConnectDb New")
 	connectionString := config.GetDatabaseConnectionString()
-	return Database{
-		connString: connectionString,
-	}
-}
-
-func (d *Database) Connect() error {
-	conn, err := sql.Open("sqlserver", d.connString)
+	conn, err := sql.Open("sqlserver", connectionString)
 	if err != nil {
-		return err
+		fmt.Println(err.Error())
+		return Database{db: nil}
 	}
 
-	d.db = conn
-	return nil
-}
+	conn.SetMaxOpenConns(15)
+	conn.SetMaxIdleConns(15)
+	conn.SetConnMaxLifetime(5 * time.Minute)
 
-func (d *Database) Disconnect() error {
-	if d.db != nil {
-		return d.db.Close()
+	err = conn.Ping()
+	if err != nil {
+		fmt.Println(err.Error())
+		return Database{db: nil}
 	}
-	return nil
+
+	fmt.Println("Database connection established and configured.")
+
+	return Database{
+		db: conn,
+	}
 }
 
 func (d *Database) Query(query string, args ...any) (*sql.Rows, error) {
-	err := d.Connect()
-	if err != nil {
-		return nil, err
-	}
-	defer d.Disconnect()
-
 	ctx := context.Background()
 	rows, err := d.db.QueryContext(ctx, query, args...)
 	if err != nil {
@@ -55,29 +49,18 @@ func (d *Database) Query(query string, args ...any) (*sql.Rows, error) {
 }
 
 func (d *Database) QueryRow(query string, args ...any) (*sql.Row, error) {
-	err := d.Connect()
-	if err != nil {
-		return nil, err
-	}
-	defer d.Disconnect()
-
 	ctx := context.Background()
 	row := d.db.QueryRowContext(ctx, query, args...)
 	if row == nil {
-		err = fmt.Errorf("QueryRowContext return nil")
+		err := fmt.Errorf("QueryRowContext return nil")
+		return nil, err
 	}
-	return row, err
+	return row, nil
 }
 
 func (d *Database) Execute(query string, args ...any) error {
-	err := d.Connect()
-	if err != nil {
-		return err
-	}
-	defer d.Disconnect()
-
 	ctx := context.Background()
-	_, err = d.db.ExecContext(ctx, query, args...)
+	_, err := d.db.ExecContext(ctx, query, args...)
 	if err != nil {
 		return err
 	}

@@ -35,27 +35,37 @@ type RepositoryListDto struct {
 }
 
 type RepoDto struct {
-	Id                     int      `json:"Id"`
-	Name                   string   `json:"Name"`
-	AssetCode              string   `json:"AssetCode"`
-	Organization           string   `json:"Organization"`
-	Description            string   `json:"Description"`
-	IsArchived             bool     `json:"IsArchived"`
-	Created                string   `json:"Created"`
-	RepositorySource       string   `json:"RepositorySource"`
-	TFSProjectReference    string   `json:"TFSProjectReference"`
-	Visibility             string   `json:"Visibility"`
-	ApprovalStatus         bool     `json:"ApprovalStatus"`
-	ApprovalStatusId       int      `json:"ApprovalStatusId"`
-	TotalPendingRequest    int      `json:"TotalPendingRequest"`
-	CoOwner                string   `json:"CoOwner"`
-	ConfirmAvaIP           bool     `json:"ConfirmAvaIP"`
-	ConfirmEnabledSecurity bool     `json:"ConfirmEnabledSecurity"`
-	ECATTID                int      `json:"ECATTID"`
-	CreatedBy              string   `json:"CreatedBy"`
-	Modified               string   `json:"Modified"`
-	ModifiedBy             string   `json:"ModifiedBy"`
-	Topics                 []string `json:"RepoTopics"`
+	Id                     int          `json:"Id"`
+	Name                   string       `json:"Name"`
+	AssetCode              string       `json:"AssetCode"`
+	Organization           string       `json:"Organization"`
+	Description            string       `json:"Description"`
+	IsArchived             bool         `json:"IsArchived"`
+	Created                string       `json:"Created"`
+	RepositorySource       string       `json:"RepositorySource"`
+	TFSProjectReference    string       `json:"TFSProjectReference"`
+	Visibility             string       `json:"Visibility"`
+	ApprovalStatus         bool         `json:"ApprovalStatus"`
+	ApprovalStatusId       int          `json:"ApprovalStatusId"`
+	TotalPendingRequest    int          `json:"TotalPendingRequest"`
+	CoOwner                string       `json:"CoOwner"`
+	ConfirmAvaIP           bool         `json:"ConfirmAvaIP"`
+	ConfirmEnabledSecurity bool         `json:"ConfirmEnabledSecurity"`
+	ECATTID                int          `json:"ECATTID"`
+	CreatedBy              string       `json:"CreatedBy"`
+	Modified               string       `json:"Modified"`
+	ModifiedBy             string       `json:"ModifiedBy"`
+	Topics                 []string     `json:"RepoTopics"`
+	ProjectUrl             string       `json:"ProjectUrl"`
+	Projects               []ProjectDto `json:"Projects"`
+}
+
+type ProjectDto struct {
+	Id        int64     `json:"Id"`
+	Title     string    `json:"Name"`
+	Url       string    `json:"Url"`
+	CreatedAt time.Time `json:"CreatedAt"`
+	UpdatedAt time.Time `json:"UpdatedAt"`
 }
 
 type CollaboratorDto struct {
@@ -716,6 +726,23 @@ func GetRepositoriesById(w http.ResponseWriter, r *http.Request) {
 
 	if data[0]["Topics"] != nil {
 		repo[0].Topics = strings.Split(data[0]["Topics"].(string), ",")
+	}
+
+	result, err := ghAPI.GetRepositoryProjects(repo[0].Organization, repo[0].Name, os.Getenv("GH_TOKEN"))
+	if err != nil {
+		logger.LogException(err)
+	}
+
+	repo[0].ProjectUrl = result.ProjectUrl
+	repo[0].Projects = make([]ProjectDto, 0)
+	for _, project := range result.Projects {
+		repo[0].Projects = append(repo[0].Projects, ProjectDto{
+			Id:        project.Databaseid,
+			Title:     project.Title,
+			Url:       project.Url,
+			CreatedAt: project.CreatedAt,
+			UpdatedAt: project.UpdatedAt,
+		})
 	}
 
 	w.Header().Set("Content-Type", "application/json")
