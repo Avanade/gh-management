@@ -56,6 +56,7 @@ func setPageRoutes() {
 	// AUTHENTICATION
 	httpRouter.GET("/loginredirect", rtPages.LoginRedirectHandler)
 	httpRouter.GET("/gitredirect", rtPages.GitRedirectHandler)
+	httpRouter.GET("/clearcookies", rtAzure.ClearCookies)
 
 	// AZURE
 	httpRouter.GET("/login/azure", rtAzure.LoginHandler)
