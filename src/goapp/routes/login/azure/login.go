@@ -21,11 +21,10 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	state := base64.StdEncoding.EncodeToString(b)
-
 	session, err := session.Store.Get(r, "auth-session")
 	if err != nil {
 		log.Println(err.Error())
-		http.Redirect(w, r, "/loginredirect", http.StatusTemporaryRedirect)
+		http.Redirect(w, r, "/clearcookies", http.StatusTemporaryRedirect)
 		return
 	}
 
@@ -45,4 +44,17 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	http.Redirect(w, r, authenticator.Config.AuthCodeURL(state), http.StatusTemporaryRedirect)
+}
+
+func ClearCookies(w http.ResponseWriter, r *http.Request) {
+	c := http.Cookie{
+		Name:   "auth-session",
+		MaxAge: -1}
+	http.SetCookie(w, &c)
+	cgh := http.Cookie{
+		Name:   "gh-auth-session",
+		MaxAge: -1}
+	http.SetCookie(w, &cgh)
+
+	http.Redirect(w, r, "/login/azure", http.StatusTemporaryRedirect)
 }
