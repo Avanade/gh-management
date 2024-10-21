@@ -34,8 +34,9 @@ type TokenResponse struct {
 }
 
 type ListUsersResponse struct {
-	DataContext string `json:"@odata.context"`
-	Value       []User `json:"value"`
+	DataContext  string `json:"@odata.context"`
+	DataNextLink string `json:"@odata.nextLink"`
+	Value        []User `json:"value"`
 }
 
 type User struct {
@@ -641,4 +642,62 @@ func HasGitHubAccess(objectId string) (bool, error) {
 		}
 	}
 	return false, nil
+}
+
+func GetUsersByGroupId(groupId string) ([]User, error) {
+	accessToken, err := GetToken()
+	if err != nil {
+		return nil, err
+	}
+
+	client := &http.Client{}
+	urlPath := fmt.Sprintf(`https://graph.microsoft.com/v1.0/groups/%s/members`, groupId)
+	URL, errURL := url.Parse(urlPath)
+	if errURL != nil {
+		return nil, errURL
+	}
+
+	query := URL.Query()
+	query.Set("$select", "displayName,otherMails,mail,userPrincipalName,userType")
+	URL.RawQuery = query.Encode()
+
+	var users []User
+	for {
+		req, err := http.NewRequest("GET", URL.String(), nil)
+		if err != nil {
+			return nil, err
+		}
+		req.Header.Add("Authorization", "Bearer "+accessToken)
+		req.Header.Add("ConsistencyLevel", "eventual")
+
+		response, err := client.Do(req)
+		if err != nil {
+			return nil, err
+		}
+		defer response.Body.Close()
+
+		var listUsersResponse ListUsersResponse
+		err = json.NewDecoder(response.Body).Decode(&listUsersResponse)
+		if err != nil {
+			return nil, err
+		}
+
+		// Append users to the list
+		for _, user := range listUsersResponse.Value {
+			if user.Email != "" || len(user.OtherMails) > 0 {
+				users = append(users, user)
+			}
+		}
+
+		// Check if there is a next page
+		if listUsersResponse.DataNextLink == "" {
+			break
+		}
+		URL, err = url.Parse(listUsersResponse.DataNextLink)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return users, nil
 }
