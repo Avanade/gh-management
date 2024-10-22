@@ -7,6 +7,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"main/pkg/appinsights_wrapper"
@@ -107,17 +108,10 @@ func ClearOrgMembers(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-
-	// FETCH ACTIVE DIRECTORY MEMBERS
-	activeDirectoryMembers, err := msgraph.GetAllUsers()
-	if err != nil {
-		logger.LogException(err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
+	logger.LogTrace(fmt.Sprintf("Fetched %d enterprise members", len(enterpriseMembers.Members)), contracts.Information)
 
 	// PROCESS INNERSOURCE & REGIONAL ORGS
-	err = ProcessCleanupEnterpriseOrgs(enterpriseMembers, activeDirectoryMembers, logger)
+	err = ProcessCleanupEnterpriseOrgs(enterpriseMembers, logger)
 	if err != nil {
 		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -125,7 +119,7 @@ func ClearOrgMembers(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// PROCESS OPENSOURCE ORG
-	err = ProcessCleanupOpensourceOrg(enterpriseMembers, activeDirectoryMembers, logger)
+	err = ProcessCleanupOpensourceOrg(enterpriseMembers, logger)
 	if err != nil {
 		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -426,13 +420,10 @@ type MemberWithCommunityOrgs struct {
 }
 
 // Process Innsersource & Regional Orgs
-func ProcessCleanupEnterpriseOrgs(enterpriseMembers *ghAPI.GetMembersByEnterpriseResult, adMembers []msgraph.User, logger *appinsights_wrapper.TelemetryClient) error {
-	removedMemberTC := appinsights.NewTraceTelemetry("Cleanup Enterprise Orgs (Innersource & Regional Orgs)", contracts.Information)
+func ProcessCleanupEnterpriseOrgs(enterpriseMembers *ghAPI.GetMembersByEnterpriseResult, logger *appinsights_wrapper.TelemetryClient) error {
+	removeMemberTC := appinsights.NewTraceTelemetry("Cleanup Enterprise Orgs (Innersource & Regional Orgs)", contracts.Information)
+
 	// Fetch enterprise orgs
-
-	logger.LogTrace(fmt.Sprint("Enterprise Members Length : ", len(enterpriseMembers.Members)), contracts.Information)
-	logger.LogTrace(fmt.Sprint("AD Members Length : ", len(adMembers)), contracts.Information)
-
 	enterpriseOrgs := []string{os.Getenv("GH_ORG_INNERSOURCE")}
 	isEnabled := db.NullBool{Value: true}
 	regOrgs, err := db.SelectRegionalOrganization(&isEnabled)
@@ -440,137 +431,163 @@ func ProcessCleanupEnterpriseOrgs(enterpriseMembers *ghAPI.GetMembersByEnterpris
 		logger.LogException(err)
 		return err
 	}
-	logger.LogTrace(fmt.Sprint("[PCEO]Fetched regional organizations. regOrgs.Length : ", len(regOrgs)), contracts.Information)
+	removeMemberTC.Properties["1st Step"] = fmt.Sprint("Fetched regional organizations. regOrgs.Length : ", len(regOrgs))
+
 	for _, regOrg := range regOrgs {
 		enterpriseOrgs = append(enterpriseOrgs, regOrg.Name)
 	}
-	// Filter enterprise members that are in AD
-	var enterpriseMembersInAD []ghAPI.Member
-	for _, adMember := range adMembers {
-		for _, enterpriseMember := range enterpriseMembers.Members {
-			if enterpriseMember.EnterpriseEmail == adMember.Email {
-				enterpriseMembersInAD = append(enterpriseMembersInAD, ghAPI.Member{
-					Login:      enterpriseMember.Login,
-					DatabaseId: enterpriseMember.DatabaseId,
-				})
-				break
-			}
-		}
-	}
-	logger.LogTrace(fmt.Sprint("[PCEO]Filtered enterprise members that are in AD. enterpriseMembersInAD.Length : ", len(enterpriseMembersInAD)), contracts.Information)
-	// Cleanup each enterprise org
+	removeMemberTC.Properties["2nd Step"] = fmt.Sprint("Filter enterprise organizations. enterpriseOrgs.Length : ", len(enterpriseOrgs))
+
+	// Filter enterprise members if they are in the community organizations
+	var communityMembers []Member
+	communityMembersSet := make(map[string]struct{})
+
+	var wgFCM sync.WaitGroup
+	var muFCM sync.Mutex
+	concurrencyLimitFCM := make(chan struct{}, 50) // Limit to 50 concurrent goroutines
+
 	for _, enterpriseOrg := range enterpriseOrgs {
-		// Fetch members of the enterprise org
-		enterpriseOrgMembers, err := ghAPI.OrgListMembers(os.Getenv("GH_TOKEN"), enterpriseOrg, "all")
-		if err != nil {
-			return err
-		}
+		wgFCM.Add(1)
+		concurrencyLimitFCM <- struct{}{} // Acquire a slot
 
-		removedMembers := []RemovedMember{}
+		go func(enterpriseOrg string) {
+			defer wgFCM.Done()
+			defer func() { <-concurrencyLimitFCM }() // Release the slot
 
-		for _, enterpriseOrgMember := range enterpriseOrgMembers {
-			var isExistInAD bool
-			for _, enterpriseMemberInAD := range enterpriseMembersInAD {
-				if enterpriseOrgMember.GetLogin() == enterpriseMemberInAD.Login {
-					isExistInAD = true
-					break
+			token := os.Getenv("GH_TOKEN")
+			// Fetch all members of the community organization
+			members, err := ghAPI.OrgListMembers(token, enterpriseOrg, "all")
+			if err != nil {
+				logger.LogException(err)
+				return
+			}
+
+			for _, member := range members {
+				for _, enterpriseMember := range enterpriseMembers.Members {
+					if member.GetLogin() == enterpriseMember.Login {
+						// Check if exist in communityMembers
+						if _, exists := communityMembersSet[enterpriseMember.Login]; !exists {
+							muFCM.Lock()
+							communityMembers = append(communityMembers, Member{
+								Id:       enterpriseMember.DatabaseId,
+								Username: enterpriseMember.Login,
+								Email:    enterpriseMember.EnterpriseEmail})
+							muFCM.Unlock()
+							communityMembersSet[member.GetLogin()] = struct{}{}
+							break
+						}
+					}
 				}
 			}
-			if !isExistInAD {
-				// Remove member from the organization
-				removedMembers = append(removedMembers, RemovedMember{
-					Id:       enterpriseOrgMember.GetID(),
-					Username: enterpriseOrgMember.GetLogin(),
-				})
+		}(enterpriseOrg)
+	}
+	wgFCM.Wait()
+	removeMemberTC.Properties["3rd Step"] = fmt.Sprint("Filter github enterprise members if they are a member of any community organizations. communityMembers.Length : ", len(communityMembers))
 
+	// Remove members that are not in the active directory
+	var removeMembers []string
+	var wgRAD sync.WaitGroup
+	var muRAD sync.Mutex
+	concurrencyLimitRAD := make(chan struct{}, 50) // Limit to 50 concurrent goroutines
+	for _, member := range communityMembers {
+		wgRAD.Add(1)
+		concurrencyLimitRAD <- struct{}{} // Acquire a slot
+
+		go func(member Member) {
+			defer wgRAD.Done()
+			defer func() { <-concurrencyLimitRAD }() // Release the slot
+
+			isUserExist, isAccountEnabled, err := msgraph.IsUserExist(member.Email)
+			if err != nil {
+				logger.LogException(err)
+				return
+			}
+			if !isUserExist || !isAccountEnabled {
+				muRAD.Lock()
+				removeMembers = append(removeMembers, member.Username)
+				muRAD.Unlock()
 				if ev.GetEnvVar("ENABLED_REMOVE_COLLABORATORS", "false") == "true" {
 					token := os.Getenv("GH_TOKEN")
-					ghAPI.RemoveOrganizationsMember(token, enterpriseOrg, enterpriseOrgMember.GetLogin())
+					enterprise := os.Getenv("GH_ENTERPRISE_NAME")
+					err := ghAPI.RemoveEnterpriseMember(token, enterprise, member.Username)
+					if err != nil {
+						logger.LogException(err)
+					}
 				}
 			}
-		}
-		removedMembersJson, err := json.Marshal(removedMembers)
-		if err != nil {
-			return err
-		}
-		removedMemberTC.Properties[enterpriseOrg] = string(removedMembersJson)
+		}(member)
 	}
-	logger.LogTrace("[PCEO]Cleanup each enterprise org", contracts.Information)
+	wgRAD.Wait()
+
+	removeMemberChunks := splitStringArray(removeMembers, 50)
+	for indexRemoveMembersChunk, removeMembersChunk := range removeMemberChunks {
+		removeMemberTC.Properties[fmt.Sprint("RemovedMembers_", indexRemoveMembersChunk)] = strings.Join(removeMembersChunk, ",")
+	}
 
 	// Log removed members
-	logger.Track(removedMemberTC)
+	logger.Track(removeMemberTC)
 	return nil
 }
 
 // ***** Convert members to outside collaborators if not exist in AD *****
-func ProcessCleanupOpensourceOrg(enterpriseMembers *ghAPI.GetMembersByEnterpriseResult, adMembers []msgraph.User, logger *appinsights_wrapper.TelemetryClient) error {
+func ProcessCleanupOpensourceOrg(enterpriseMembers *ghAPI.GetMembersByEnterpriseResult, logger *appinsights_wrapper.TelemetryClient) error {
 	convertedToOutsideCollaboratorsTC := appinsights.NewTraceTelemetry("Cleanup Opensource Orgs", contracts.Information)
 	opensourceOrg := os.Getenv("GH_ORG_OPENSOURCE")
-
-	// Filter enterprise members that are in AD
-	var enterpriseMembersInAD []ghAPI.Member
-	for _, adMember := range adMembers {
-		for _, enterpriseMember := range enterpriseMembers.Members {
-			if enterpriseMember.EnterpriseEmail == adMember.Email {
-				enterpriseMembersInAD = append(enterpriseMembersInAD, enterpriseMember)
-				break
-			}
-		}
-	}
-	if len(enterpriseMembersInAD) == 0 {
-		return nil
-	}
 
 	// Fetch opensource members
 	opensourceMembers, err := ghAPI.OrgListMembers(os.Getenv("GH_TOKEN"), opensourceOrg, "all")
 	if err != nil {
 		return err
 	}
+	convertedToOutsideCollaboratorsTC.Properties["1st Step"] = fmt.Sprint("Fetched opensource members. opensourceMembers.Length : ", len(opensourceMembers))
 
-	removedMembers := []RemovedMember{}
-	for _, opensourceMember := range opensourceMembers {
-		var isExistInAD bool
-		for _, enterpriseMember := range enterpriseMembersInAD {
-			if opensourceMember.GetLogin() == enterpriseMember.Login {
-				isExistInAD = true
-				break
-			}
-		}
-		if !isExistInAD {
-			// Convert member to outside collaborator
-			removedMembers = append(removedMembers, RemovedMember{
-				Id:       opensourceMember.GetID(),
-				Username: opensourceMember.GetLogin(),
-			})
-			if ev.GetEnvVar("ENABLED_REMOVE_COLLABORATORS", "false") == "true" {
-				token := os.Getenv("GH_TOKEN")
-				ghAPI.ConvertMemberToOutsideCollaborator(token, opensourceOrg, opensourceMember.GetLogin())
+	// Filter opensource members if they are in the opensource organization
+	var openSourceMembers []Member
+	for _, member := range opensourceMembers {
+		for _, enterpriseMember := range enterpriseMembers.Members {
+			if member.GetLogin() == enterpriseMember.Login {
+				openSourceMembers = append(openSourceMembers, Member{Id: enterpriseMember.DatabaseId, Username: enterpriseMember.Login, Email: enterpriseMember.EnterpriseEmail})
 			}
 		}
 	}
+	convertedToOutsideCollaboratorsTC.Properties["2nd Step"] = fmt.Sprint("Filter opensource members if they are a member of the opensource organization. openSourceMembers.Length : ", len(openSourceMembers))
 
-	chunks := splitIntoChunks(removedMembers, 50)
-	for chunkIndex, chunk := range chunks {
-		removedMembersJson, err := json.Marshal(chunk)
-		if err != nil {
-			return err
-		}
-		convertedToOutsideCollaboratorsTC.Properties[fmt.Sprint(opensourceOrg, chunkIndex)] = string(removedMembersJson)
+	// Remove members that are not in the active directory
+	var removeMembers []string
+	var wgRAD sync.WaitGroup
+	var muRAD sync.Mutex
+	concurrencyLimitRAD := make(chan struct{}, 50) // Limit to 50 concurrent goroutines
+	for _, member := range openSourceMembers {
+		wgRAD.Add(1)
+		concurrencyLimitRAD <- struct{}{} // Acquire a slot
+
+		go func(member Member) {
+			defer wgRAD.Done()
+			defer func() { <-concurrencyLimitRAD }() // Release the slot
+
+			isUserExist, isAccountEnabled, err := msgraph.IsUserExist(member.Email)
+			if err != nil {
+				logger.LogException(err)
+				return
+			}
+			if !isUserExist || !isAccountEnabled {
+				muRAD.Lock()
+				removeMembers = append(removeMembers, member.Username)
+				muRAD.Unlock()
+				if ev.GetEnvVar("ENABLED_REMOVE_COLLABORATORS", "false") == "true" {
+					token := os.Getenv("GH_TOKEN")
+					ghAPI.ConvertMemberToOutsideCollaborator(token, opensourceOrg, member.Username)
+				}
+			}
+		}(member)
 	}
+	wgRAD.Wait()
+	convertedToOutsideCollaboratorsTC.Properties["3rd Step"] = fmt.Sprint("Convert members to outside collaborators if not exist in AD. removeMembers.Length : ", len(removeMembers))
 
-	// Log converted to outside collaborators
+	removeMember := splitStringArray(removeMembers, 50)
+	for indexRemoveMembersChunk, removeMembersChunk := range removeMember {
+		convertedToOutsideCollaboratorsTC.Properties[fmt.Sprint("RemovedUsers_OSO", indexRemoveMembersChunk)] = strings.Join(removeMembersChunk, ",")
+	}
 	logger.Track(convertedToOutsideCollaboratorsTC)
 	return nil
-}
-
-func splitIntoChunks(members []RemovedMember, chunkSize int) [][]RemovedMember {
-	var chunks [][]RemovedMember
-	for i := 0; i < len(members); i += chunkSize {
-		end := i + chunkSize
-		if end > len(members) {
-			end = len(members)
-		}
-		chunks = append(chunks, members[i:end])
-	}
-	return chunks
 }

@@ -465,6 +465,29 @@ func AddMemberToTeam(token string, org string, slug string, user string, role st
 	return teamMembership, nil
 }
 
+func RemoveEnterpriseMember(token string, enterpriseId string, userId string) error {
+	src := oauth2.StaticTokenSource(
+		&oauth2.Token{AccessToken: token},
+	)
+	httpClient := oauth2.NewClient(context.Background(), src)
+	client := githubv4.NewClient(httpClient)
+
+	var mutation githubv4.RemoveEnterpriseMemberInput
+
+	variables := map[string]interface{}{
+		"enterpriseId": githubv4.ID(enterpriseId),
+		"userId":       githubv4.ID(userId),
+	}
+
+	err := client.Mutate(context.Background(), &mutation, variables, nil)
+	if err != nil {
+		return err
+	}
+
+	log.Printf("User %s removed from enterprise %s", userId, enterpriseId)
+	return nil
+}
+
 func GetOrganizationsWithinEnterprise(enterprise string, token string) (*GetOrganizationsWithinEnterpriseResult, error) {
 	src := oauth2.StaticTokenSource(
 		&oauth2.Token{AccessToken: token},
