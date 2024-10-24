@@ -469,9 +469,10 @@ func ProcessCleanupEnterpriseOrgs(enterpriseMembers *ghAPI.GetMembersByEnterpris
 						if _, exists := communityMembersSet[enterpriseMember.Login]; !exists {
 							muFCM.Lock()
 							communityMembers = append(communityMembers, Member{
-								Id:       enterpriseMember.DatabaseId,
-								Username: enterpriseMember.Login,
-								Email:    enterpriseMember.EnterpriseEmail})
+								NodeId:     enterpriseMember.Id,
+								DatabaseId: enterpriseMember.DatabaseId,
+								Username:   enterpriseMember.Login,
+								Email:      enterpriseMember.EnterpriseEmail})
 							muFCM.Unlock()
 							communityMembersSet[member.GetLogin()] = struct{}{}
 							break
@@ -508,8 +509,8 @@ func ProcessCleanupEnterpriseOrgs(enterpriseMembers *ghAPI.GetMembersByEnterpris
 				muRAD.Unlock()
 				if ev.GetEnvVar("ENABLED_REMOVE_COLLABORATORS", "false") == "true" {
 					token := os.Getenv("GH_TOKEN")
-					enterprise := os.Getenv("GH_ENTERPRISE_NAME")
-					err := ghAPI.RemoveEnterpriseMember(token, enterprise, member.Username)
+					enterpriseId := os.Getenv("GH_ENTERPRISE_ID")
+					err := ghAPI.RemoveEnterpriseMember(token, enterpriseId, member.NodeId)
 					if err != nil {
 						logger.LogException(err)
 					}
@@ -546,7 +547,7 @@ func ProcessCleanupOpensourceOrg(enterpriseMembers *ghAPI.GetMembersByEnterprise
 	for _, member := range opensourceMembers {
 		for _, enterpriseMember := range enterpriseMembers.Members {
 			if member.GetLogin() == enterpriseMember.Login {
-				openSourceMembers = append(openSourceMembers, Member{Id: enterpriseMember.DatabaseId, Username: enterpriseMember.Login, Email: enterpriseMember.EnterpriseEmail})
+				openSourceMembers = append(openSourceMembers, Member{NodeId: enterpriseMember.Id, DatabaseId: enterpriseMember.DatabaseId, Username: enterpriseMember.Login, Email: enterpriseMember.EnterpriseEmail})
 			}
 		}
 	}

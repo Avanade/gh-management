@@ -47,6 +47,7 @@
                 "GH_APP_LINK":"",
                 "GH_ENTERPRISE_TOKEN":"",
                 "GH_ENTERPRISE_NAME":"",
+                "GH_ENTERPRISE_ID":"",
                 "GHMGMTDB_CONNECTION_STRING":"",
                 
                 "GH_ORG_INNERSOURCE":"",

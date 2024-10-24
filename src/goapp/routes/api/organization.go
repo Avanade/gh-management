@@ -474,9 +474,10 @@ func IndexRegionalOrganizations(w http.ResponseWriter, r *http.Request) {
 }
 
 type Member struct {
-	Id       int64
-	Username string
-	Email    string
+	NodeId     string
+	DatabaseId int64
+	Username   string
+	Email      string
 }
 
 func ScanCommunityOrganizations(w http.ResponseWriter, r *http.Request) {
@@ -529,7 +530,7 @@ func ScanCommunityOrganizations(w http.ResponseWriter, r *http.Request) {
 				if member.GetLogin() == ghEnterpriseMember.Login {
 					// Check if exist in communityMembers
 					if _, exists := communityMembersSet[ghEnterpriseMember.Login]; !exists {
-						communityMembers = append(communityMembers, Member{Id: ghEnterpriseMember.DatabaseId, Username: ghEnterpriseMember.Login, Email: ghEnterpriseMember.EnterpriseEmail})
+						communityMembers = append(communityMembers, Member{DatabaseId: ghEnterpriseMember.DatabaseId, Username: ghEnterpriseMember.Login, Email: ghEnterpriseMember.EnterpriseEmail})
 						communityMembersSet[ghEnterpriseMember.Login] = struct{}{}
 						break
 					}
@@ -542,7 +543,7 @@ func ScanCommunityOrganizations(w http.ResponseWriter, r *http.Request) {
 	var notifiedUsers []string
 	// Notify all members that are not in community portal database
 	for _, communityMember := range communityMembers {
-		email, err := db.GetUserEmailByGithubId(fmt.Sprint(communityMember.Id))
+		email, err := db.GetUserEmailByGithubId(fmt.Sprint(communityMember.DatabaseId))
 		if err != nil {
 			logger.LogException(err)
 			continue

@@ -5,6 +5,7 @@ import (
 	"encoding/base64"
 	"fmt"
 	"log"
+	"net/http"
 	"os"
 	"strings"
 	"time"
@@ -527,12 +528,21 @@ func GetOrganizationsWithinEnterprise(enterprise string, token string) (*GetOrga
 	return &result, nil
 }
 
+type CustomTransport struct {
+	Transport http.RoundTripper
+}
+
+func (t *CustomTransport) RoundTrip(req *http.Request) (*http.Response, error) {
+	req.Header.Add("X-GitHub-Next-Global-ID", "1")
+	return t.Transport.RoundTrip(req)
+}
+
 func GetMembersByEnterprise(enterprise string, token string) (*GetMembersByEnterpriseResult, error) {
 	src := oauth2.StaticTokenSource(
 		&oauth2.Token{AccessToken: token},
 	)
 	httpClient := oauth2.NewClient(context.Background(), src)
-
+	httpClient.Transport = &CustomTransport{Transport: http.DefaultTransport}
 	client := githubv4.NewClient(httpClient)
 
 	var result GetMembersByEnterpriseResult
@@ -553,6 +563,7 @@ func GetMembersByEnterprise(enterprise string, token string) (*GetMembersByEnter
 		for _, node := range queryResult.Enterprise.OwnerInfo.SamlIdentityProvider.ExternalIdentities.Nodes {
 			user := node.User
 			member := Member{
+				Id:              user.Id.(string),
 				Login:           string(user.Login),
 				DatabaseId:      int64(user.DatabaseId),
 				EnterpriseEmail: string(node.SamlIdentity.Username),
@@ -630,6 +641,7 @@ type GetMembersByEnterpriseQuery struct {
 							Username githubv4.String
 						}
 						User struct {
+							Id         githubv4.ID
 							DatabaseId githubv4.Int
 							Login      githubv4.String
 						}
@@ -678,6 +690,7 @@ type GetRepositoryProjectsResult struct {
 
 // Structs
 type Member struct {
+	Id              string
 	Login           string
 	DatabaseId      int64
 	EnterpriseEmail string
