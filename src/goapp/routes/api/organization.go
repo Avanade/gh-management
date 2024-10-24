@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"main/pkg/appinsights_wrapper"
+	ev "main/pkg/envvar"
 	db "main/pkg/ghmgmtdb"
 	ghAPI "main/pkg/github"
 	"main/pkg/notification"
@@ -473,9 +474,10 @@ func IndexRegionalOrganizations(w http.ResponseWriter, r *http.Request) {
 }
 
 type Member struct {
-	Id       int64
-	Username string
-	Email    string
+	NodeId     string
+	DatabaseId int64
+	Username   string
+	Email      string
 }
 
 func ScanCommunityOrganizations(w http.ResponseWriter, r *http.Request) {
@@ -528,7 +530,7 @@ func ScanCommunityOrganizations(w http.ResponseWriter, r *http.Request) {
 				if member.GetLogin() == ghEnterpriseMember.Login {
 					// Check if exist in communityMembers
 					if _, exists := communityMembersSet[ghEnterpriseMember.Login]; !exists {
-						communityMembers = append(communityMembers, Member{Id: ghEnterpriseMember.DatabaseId, Username: ghEnterpriseMember.Login, Email: ghEnterpriseMember.EnterpriseEmail})
+						communityMembers = append(communityMembers, Member{DatabaseId: ghEnterpriseMember.DatabaseId, Username: ghEnterpriseMember.Login, Email: ghEnterpriseMember.EnterpriseEmail})
 						communityMembersSet[ghEnterpriseMember.Login] = struct{}{}
 						break
 					}
@@ -541,15 +543,24 @@ func ScanCommunityOrganizations(w http.ResponseWriter, r *http.Request) {
 	var notifiedUsers []string
 	// Notify all members that are not in community portal database
 	for _, communityMember := range communityMembers {
-		email, err := db.GetUserEmailByGithubId(fmt.Sprint(communityMember.Id))
+		email, err := db.GetUserEmailByGithubId(fmt.Sprint(communityMember.DatabaseId))
 		if err != nil {
 			logger.LogException(err)
 			continue
 		}
 
 		if email == "" {
-			// Notify the user to associate their account with the community
-			// logger.LogTrace(fmt.Sprint(communityMemberInAD.Id, " ", communityMemberInAD.Username, " ", communityMemberInAD.Email), contracts.Information)
+			if ev.GetEnvVar("ENABLED_REMOVE_COLLABORATORS", "false") == "true" {
+				// Notify the user to associate their account with the community
+				messageBody := notification.AssociateGithubAccountReminderMessageBody{
+					Recipients:          []string{communityMember.Email},
+					CommunityPortalLink: os.Getenv("HOME_URL"),
+				}
+				err = messageBody.Send()
+				if err != nil {
+					logger.LogException(err)
+				}
+			}
 			notifiedUsers = append(notifiedUsers, communityMember.Email)
 		}
 	}
