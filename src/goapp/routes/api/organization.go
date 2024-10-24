@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"main/pkg/appinsights_wrapper"
+	ev "main/pkg/envvar"
 	db "main/pkg/ghmgmtdb"
 	ghAPI "main/pkg/github"
 	"main/pkg/notification"
@@ -548,8 +549,17 @@ func ScanCommunityOrganizations(w http.ResponseWriter, r *http.Request) {
 		}
 
 		if email == "" {
-			// Notify the user to associate their account with the community
-			// logger.LogTrace(fmt.Sprint(communityMemberInAD.Id, " ", communityMemberInAD.Username, " ", communityMemberInAD.Email), contracts.Information)
+			if ev.GetEnvVar("ENABLED_REMOVE_COLLABORATORS", "false") == "true" {
+				// Notify the user to associate their account with the community
+				messageBody := notification.AssociateGithubAccountReminderMessageBody{
+					Recipients:          []string{communityMember.Email},
+					CommunityPortalLink: os.Getenv("HOME_URL"),
+				}
+				err = messageBody.Send()
+				if err != nil {
+					logger.LogException(err)
+				}
+			}
 			notifiedUsers = append(notifiedUsers, communityMember.Email)
 		}
 	}
