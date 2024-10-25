@@ -16,6 +16,7 @@ import (
 	"time"
 
 	"main/pkg/appinsights_wrapper"
+	"main/pkg/authentication"
 	"main/pkg/email"
 	ev "main/pkg/envvar"
 	db "main/pkg/ghmgmtdb"
@@ -1703,6 +1704,7 @@ func ApprovalSystemRequest(data db.ProjectApprovalApprovers, logger *appinsights
 		go getHttpPostResponseStatus(url, postParams, ch, logger)
 		r := <-ch
 		if r != nil {
+			defer r.Body.Close()
 			var res ProjectApprovalSystemPostResponseDto
 			err := json.NewDecoder(r.Body).Decode(&res)
 			if err != nil {
@@ -1735,12 +1737,33 @@ func getHttpPostResponseStatus(url string, data interface{}, ch chan *http.Respo
 		logger.LogException(err)
 		ch <- nil
 	}
-	res, err := http.Post(url, "application/json; charset=utf-8", bytes.NewBuffer(jsonReq))
+	token, err := authentication.GenerateToken()
 	if err != nil {
 		logger.LogException(err)
 		ch <- nil
 	}
-	ch <- res
+
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonReq))
+	if err != nil {
+		ch <- nil
+	}
+
+	req.Header.Add("Authorization", "Bearer "+token)
+	req.Header.Add("Content-Type", "application/json")
+
+	client := &http.Client{
+		Timeout: time.Second * 10,
+	}
+
+	response, err := client.Do(req)
+	if err != nil {
+		ch <- nil
+	}
+	if response.StatusCode == http.StatusUnauthorized {
+		ch <- nil
+	}
+
+	ch <- response
 }
 
 func ReprocessRequestApproval() {
