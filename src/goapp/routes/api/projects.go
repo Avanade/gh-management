@@ -1752,7 +1752,7 @@ func getHttpPostResponseStatus(url string, data interface{}, ch chan *http.Respo
 	req.Header.Add("Content-Type", "application/json")
 
 	client := &http.Client{
-		Timeout: time.Second * 10,
+		Timeout: time.Second * 60,
 	}
 
 	response, err := client.Do(req)

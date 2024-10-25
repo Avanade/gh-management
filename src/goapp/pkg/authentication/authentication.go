@@ -105,7 +105,7 @@ func GenerateToken() (string, error) {
 
 	data := url.Values{}
 	data.Set("client_id", os.Getenv("CLIENT_ID"))
-	data.Set("scope", "https://graph.microsoft.com/.default")
+	data.Set("scope", os.Getenv("SCOPE"))
 	data.Set("client_secret", os.Getenv("CLIENT_SECRET"))
 	data.Set("grant_type", "client_credentials")
 	encodedData := data.Encode()
