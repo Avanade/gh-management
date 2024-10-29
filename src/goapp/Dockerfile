@@ -1,4 +1,4 @@
-FROM golang:1-buster
+FROM golang:1.23.3-bookworm
 
 # Set the Current Working Directory inside the container
 WORKDIR /goapp
