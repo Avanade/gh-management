@@ -10,9 +10,11 @@ import (
 	"os"
 	"time"
 
+	"main/pkg/appinsights_wrapper"
 	auth "main/pkg/authentication"
 
 	"github.com/gorilla/sessions"
+	"github.com/microsoft/ApplicationInsights-Go/appinsights/contracts"
 	"golang.org/x/oauth2"
 )
 
@@ -44,10 +46,14 @@ func InitializeSession() {
 }
 
 func IsAuthenticated(w http.ResponseWriter, r *http.Request) bool {
+	logger := appinsights_wrapper.NewClient()
+	defer logger.EndOperation()
+
 	// Check session if there is saved user profile
 	url := fmt.Sprintf("/loginredirect?redirect=%v", r.URL)
 	session, err := Store.Get(r, "auth-session")
 	if err != nil {
+		logger.LogException(err)
 		c := http.Cookie{
 			Name:   "auth-session",
 			MaxAge: -1}
@@ -57,11 +63,12 @@ func IsAuthenticated(w http.ResponseWriter, r *http.Request) bool {
 			MaxAge: -1}
 		http.SetCookie(w, &cgh)
 		http.Redirect(w, r, url, http.StatusTemporaryRedirect)
+		logger.LogTrace("No auth-session found", contracts.Information)
 		return false
 	}
-
+	logger.LogTrace("Checking if user is authenticated", contracts.Information)
 	if _, ok := session.Values["profile"]; !ok {
-
+		logger.LogTrace("User is not authenticated", contracts.Information)
 		// Asks user to login if there is no saved user profile
 		http.Redirect(w, r, url, http.StatusTemporaryRedirect)
 		return false
@@ -71,6 +78,7 @@ func IsAuthenticated(w http.ResponseWriter, r *http.Request) bool {
 		authenticator, err := auth.NewAuthenticator(r.Host)
 
 		if err != nil {
+			logger.LogException(err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return false
 		}
@@ -81,6 +89,7 @@ func IsAuthenticated(w http.ResponseWriter, r *http.Request) bool {
 		today := time.Now().UTC()
 
 		if today.After(expiry) {
+			logger.LogTrace("Access token is expired", contracts.Information)
 			// Attempt to refresh token if access token is already expired
 			ts := authenticator.Config.TokenSource(context.Background(), &oauth2.Token{RefreshToken: refreshToken, Expiry: expiry})
 			newToken, err := ts.Token()
@@ -94,7 +103,7 @@ func IsAuthenticated(w http.ResponseWriter, r *http.Request) bool {
 
 					fmt.Println(details.Error, details.ErrorDescription)
 				}
-
+				logger.LogException(err)
 				// Log out the user if the attempt to refresh the token failed
 				http.Redirect(w, r, "/logout/azure", http.StatusTemporaryRedirect)
 				return false
@@ -116,11 +125,13 @@ func IsAuthenticated(w http.ResponseWriter, r *http.Request) bool {
 					SameSite: http.SameSiteNoneMode,
 				}
 				err = session.Save(r, w)
-
 				if err != nil {
+					logger.LogException(err)
 					http.Error(w, err.Error(), http.StatusInternalServerError)
 					return false
 				}
+				logger.LogTrace("Token refreshed", contracts.Information)
+				logger.LogTrace(fmt.Sprint("State: ", session.Values["state"]), contracts.Information)
 			}
 		}
 		return true

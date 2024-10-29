@@ -39,7 +39,7 @@ func (*muxRouter) DELETE(uri string, f func(resp http.ResponseWriter, req *http.
 }
 
 func (mr *muxRouter) NOTFOUND(f func(resp http.ResponseWriter, req *http.Request)) {
-	mr.NotFoundHandler = http.HandlerFunc(f)
+	muxDispatcher.NotFoundHandler = http.HandlerFunc(f)
 }
 
 func (mr *muxRouter) SERVE(port string) {
@@ -76,10 +76,6 @@ func (mr *muxRouter) SERVE(port string) {
 		commonHeadersMiddleware,
 	)
 	http.Handle("/", muxDispatcher)
-
-	if mr.NotFoundHandler != nil {
-		muxDispatcher.NotFoundHandler = mr.NotFoundHandler
-	}
 
 	muxDispatcher.PathPrefix("/public/").Handler(http.StripPrefix("/public/", http.FileServer(http.Dir("./public/"))))
 

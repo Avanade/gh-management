@@ -8,6 +8,7 @@ import (
 
 	"github.com/coreos/go-oidc"
 	"github.com/gorilla/sessions"
+	"github.com/microsoft/ApplicationInsights-Go/appinsights/contracts"
 
 	"main/pkg/appinsights_wrapper"
 	auth "main/pkg/authentication"
@@ -28,6 +29,7 @@ func CallbackHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if r.URL.Query().Get("state") != session.Values["state"] {
+		logger.LogTrace(fmt.Sprint(r.URL.Query().Get("state"), session.Values["state"]), contracts.Information)
 		logger.LogException(fmt.Errorf("invalid state parameter"))
 		http.Redirect(w, r, "/authentication/azure/failed", http.StatusSeeOther)
 		return
