@@ -52,8 +52,10 @@ func UseTemplate(w *http.ResponseWriter, r *http.Request, page string, pageData 
 
 	sessionaz, err := session.Store.Get(r, "auth-session")
 	if err != nil {
-		http.Error(*w, err.Error(), http.StatusInternalServerError)
-		return err
+		url := fmt.Sprintf("/loginredirect?redirect=%v", r.URL)
+		http.Redirect(*w, r, url, http.StatusTemporaryRedirect)
+		// http.Error(*w, err.Error(), http.StatusInternalServerError)
+		return nil
 	}
 
 	sessiongh, err := session.GetGitHubUserData(*w, r)

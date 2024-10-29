@@ -48,7 +48,6 @@ func InitializeSession() {
 func IsAuthenticated(w http.ResponseWriter, r *http.Request) bool {
 	logger := appinsights_wrapper.NewClient()
 	defer logger.EndOperation()
-
 	// Check session if there is saved user profile
 	url := fmt.Sprintf("/loginredirect?redirect=%v", r.URL)
 	session, err := Store.Get(r, "auth-session")

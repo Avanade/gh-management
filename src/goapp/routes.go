@@ -17,7 +17,7 @@ import (
 )
 
 func setPageRoutes() {
-	httpRouter.NOTFOUND(m.Chain(rtPages.NotFoundHandler, m.AzureAuth()))
+	httpRouter.NOTFOUND(rtPages.NotFoundHandler)
 
 	httpRouter.GET("/", m.Chain(rtPages.HomeHandler, m.AzureAuth()))
 	httpRouter.GET("/error/ghlogin", m.Chain(rtPages.GHLoginRequire, m.AzureAuth()))

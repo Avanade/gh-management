@@ -41,7 +41,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	logger.LogTrace(fmt.Sprint("Session saved. State: ", session.Values["state"]), contracts.Information)
+
 	authenticator, err := auth.NewAuthenticator(r.Host)
 	if err != nil {
 		logger.LogException(err)
