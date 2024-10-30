@@ -7,5 +7,6 @@ type Router interface {
 	POST(uri string, f func(resp http.ResponseWriter, req *http.Request))
 	PUT(uri string, f func(resp http.ResponseWriter, req *http.Request))
 	DELETE(uri string, f func(resp http.ResponseWriter, req *http.Request))
+	NOTFOUND(f func(resp http.ResponseWriter, req *http.Request))
 	SERVE(port string)
 }
