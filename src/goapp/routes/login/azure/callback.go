@@ -8,9 +8,7 @@ import (
 
 	"github.com/coreos/go-oidc"
 	"github.com/gorilla/sessions"
-	"github.com/microsoft/ApplicationInsights-Go/appinsights/contracts"
 
-	"main/pkg/appinsights_wrapper"
 	auth "main/pkg/authentication"
 	db "main/pkg/ghmgmtdb"
 	"main/pkg/msgraph"
@@ -18,19 +16,14 @@ import (
 )
 
 func CallbackHandler(w http.ResponseWriter, r *http.Request) {
-	logger := appinsights_wrapper.NewClient()
-	defer logger.EndOperation()
 	// Check session
 	session, err := session.Store.Get(r, "auth-session")
 	if err != nil {
-		logger.LogException(err)
 		http.Redirect(w, r, "/authentication/azure/failed", http.StatusSeeOther)
 		return
 	}
 
 	if r.URL.Query().Get("state") != session.Values["state"] {
-		logger.LogTrace(fmt.Sprint(r.URL.Query().Get("state"), session.Values["state"]), contracts.Information)
-		logger.LogException(fmt.Errorf("invalid state parameter"))
 		http.Redirect(w, r, "/authentication/azure/failed", http.StatusSeeOther)
 		return
 	}
@@ -38,21 +31,18 @@ func CallbackHandler(w http.ResponseWriter, r *http.Request) {
 	//Retrieve token
 	authenticator, err := auth.NewAuthenticator(r.Host)
 	if err != nil {
-		logger.LogException(err)
 		http.Redirect(w, r, "/authentication/azure/failed", http.StatusSeeOther)
 		return
 	}
 
 	token, err := authenticator.Config.Exchange(context.TODO(), r.URL.Query().Get("code"))
 	if err != nil {
-		logger.LogException(fmt.Errorf("no token found: %v", err))
 		http.Redirect(w, r, "/authentication/azure/failed", http.StatusSeeOther)
 		return
 	}
 
 	rawIDToken, ok := token.Extra("id_token").(string)
 	if !ok {
-		logger.LogException(fmt.Errorf("no id_token field in oauth2 token"))
 		http.Redirect(w, r, "/authentication/azure/failed", http.StatusSeeOther)
 		return
 	}
@@ -64,7 +54,6 @@ func CallbackHandler(w http.ResponseWriter, r *http.Request) {
 	idToken, err := authenticator.Provider.Verifier(oidcConfig).Verify(context.TODO(), rawIDToken)
 
 	if err != nil {
-		logger.LogException(fmt.Errorf("failed to verify ID Token: %v", err))
 		http.Redirect(w, r, "/authentication/azure/failed", http.StatusSeeOther)
 		return
 	}
@@ -72,7 +61,6 @@ func CallbackHandler(w http.ResponseWriter, r *http.Request) {
 	// Get the userInfo
 	var profile map[string]interface{}
 	if err := idToken.Claims(&profile); err != nil {
-		logger.LogException(err)
 		http.Redirect(w, r, "/authentication/azure/failed", http.StatusSeeOther)
 		return
 	}
@@ -88,7 +76,6 @@ func CallbackHandler(w http.ResponseWriter, r *http.Request) {
 	session.Values["isUserAdmin"] = isAdmin
 	hasPhoto, userPhoto, err := msgraph.GetUserPhoto(fmt.Sprintf("%s", profile["oid"]))
 	if err != nil {
-		logger.LogException(err)
 		http.Redirect(w, r, "/authentication/azure/failed", http.StatusSeeOther)
 		return
 	}
@@ -106,7 +93,6 @@ func CallbackHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	err = session.Save(r, w)
 	if err != nil {
-		logger.LogException(err)
 		http.Redirect(w, r, "/authentication/azure/failed", http.StatusSeeOther)
 		return
 	}
@@ -115,7 +101,6 @@ func CallbackHandler(w http.ResponseWriter, r *http.Request) {
 	name := fmt.Sprint(profile["name"])
 	err = db.InsertUser(userPrincipalName, name, "", "", "")
 	if err != nil {
-		logger.LogException(err)
 		http.Redirect(w, r, "/authentication/azure/failed", http.StatusSeeOther)
 		return
 	}
