@@ -35,6 +35,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	logger.LogTrace("Storing state in session", contracts.Information)
 	session.Values["state"] = state
+	session.Options.MaxAge = 2592000
 	err = session.Save(r, w)
 	if err != nil {
 		logger.LogException(err)
