@@ -51,8 +51,9 @@ type Menu struct {
 func UseTemplate(w *http.ResponseWriter, r *http.Request, page string, pageData interface{}) error {
 
 	sessionaz, err := session.Store.Get(r, "auth-session")
-	if err != nil {
-		http.Error(*w, err.Error(), http.StatusInternalServerError)
+	if err != nil || sessionaz.Values["state"] == nil {
+		url := fmt.Sprintf("/loginredirect?redirect=%v", r.URL)
+		http.Redirect(*w, r, url, http.StatusTemporaryRedirect)
 		return err
 	}
 
