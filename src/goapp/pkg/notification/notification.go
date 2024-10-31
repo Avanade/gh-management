@@ -324,7 +324,7 @@ func (messageBody AssociateGithubAccountReminderMessageBody) Send() error {
 func requestNewToken() (*Response, error) {
 	urlPath := fmt.Sprintf("https://login.microsoftonline.com/%s/oauth2/v2.0/token", os.Getenv("NOTIFICATION_TENANT_ID"))
 	client := &http.Client{
-		Timeout: time.Second * 10,
+		Timeout: time.Second * 90,
 	}
 
 	data := url.Values{}
@@ -403,7 +403,7 @@ func sendNotification(c Contract) error {
 	}
 
 	client := &http.Client{
-		Timeout: time.Second * 10,
+		Timeout: time.Second * 90,
 	}
 
 	postBody, _ := json.Marshal(c)

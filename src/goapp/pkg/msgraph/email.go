@@ -43,7 +43,7 @@ func GetEmailToken() (string, error) {
 
 	urlPath := fmt.Sprintf("https://login.microsoftonline.com/%s/oauth2/v2.0/token", os.Getenv("EMAIL_TENANT_ID"))
 	client := &http.Client{
-		Timeout: time.Second * 10,
+		Timeout: time.Second * 90,
 	}
 
 	data := url.Values{}
