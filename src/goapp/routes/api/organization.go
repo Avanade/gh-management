@@ -9,9 +9,9 @@ import (
 	"strings"
 
 	"main/pkg/appinsights_wrapper"
+	ev "main/pkg/envvar"
 	db "main/pkg/ghmgmtdb"
 	ghAPI "main/pkg/github"
-	"main/pkg/msgraph"
 	"main/pkg/notification"
 	"main/pkg/session"
 
@@ -474,16 +474,17 @@ func IndexRegionalOrganizations(w http.ResponseWriter, r *http.Request) {
 }
 
 type Member struct {
-	Id       int64
-	Username string
-	Email    string
+	NodeId     string
+	DatabaseId int64
+	Username   string
+	Email      string
 }
 
 func ScanCommunityOrganizations(w http.ResponseWriter, r *http.Request) {
 	logger := appinsights_wrapper.NewClient()
 	defer logger.EndOperation()
 
-	// Get all community organizations
+	// Fetch all community organizations (opensource, innersource, regional)
 	communityOrgs := []string{os.Getenv("GH_ORG_OPENSOURCE"), os.Getenv("GH_ORG_INNERSOURCE")}
 	isEnabled := db.NullBool{Value: true}
 	regionalOrgs, err := db.SelectRegionalOrganization(&isEnabled)
@@ -492,49 +493,29 @@ func ScanCommunityOrganizations(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	logger.LogTrace(fmt.Sprint("Fetched regional organizations.  regionalOrgs.Lenght : ", len(regionalOrgs)), contracts.Information)
+	logger.LogTrace(fmt.Sprint("Fetched regional organizations.  regionalOrgs.Length : ", len(regionalOrgs)), contracts.Information)
 	for _, regionalOrg := range regionalOrgs {
 		if !regionalOrg.IsRegionalOrganization {
 			continue
 		}
 		communityOrgs = append(communityOrgs, regionalOrg.Name)
 	}
-	logger.LogTrace(fmt.Sprint("Filtered community organizations. communityOrgs.Lenght : ", len(communityOrgs)), contracts.Information)
+	logger.LogTrace(fmt.Sprint("Filter community organizations. communityOrgs.Length : ", len(communityOrgs)), contracts.Information)
 
-	// Fetch all enterprise members with organizations
+	// Fetch all enterprise members
 	enterpriseToken := os.Getenv("GH_ENTERPRISE_TOKEN")
 	enterpriseName := os.Getenv("GH_ENTERPRISE_NAME")
-	enterpriseMembers, err := ghAPI.GetMembersByEnterprise(enterpriseName, enterpriseToken)
+	ghEnterpriseMembers, err := ghAPI.GetMembersByEnterprise(enterpriseName, enterpriseToken)
 	if err != nil {
 		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	logger.LogTrace(fmt.Sprint("Fetched enterprise members. enterpriseMembers.Length : ", len(enterpriseMembers.Members)), contracts.Information)
+	logger.LogTrace(fmt.Sprint("Fetched enterprise members. enterpriseMembers.Length : ", len(ghEnterpriseMembers.Members)), contracts.Information)
 
-	// Fetch all members of the Active Directory
-	adMembers, err := msgraph.GetAllUsers()
-	if err != nil {
-		logger.LogException(err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	logger.LogTrace(fmt.Sprint("Fetched Active Directory members. adMembers.Length : ", len(adMembers)), contracts.Information)
-
-	// Filter enterprise members that are in AD
-	var enterpriseMembersInAD []Member
-	for _, adMember := range adMembers {
-		for _, enterpriseMember := range enterpriseMembers.Members {
-			if enterpriseMember.EnterpriseEmail == adMember.Email {
-				enterpriseMembersInAD = append(enterpriseMembersInAD, Member{Id: enterpriseMember.DatabaseId, Username: enterpriseMember.Login, Email: enterpriseMember.EnterpriseEmail})
-				break
-			}
-		}
-	}
-	logger.LogTrace(fmt.Sprint("Filtered enterprise members that are in AD. enterpriseMembersInAD.Length : ", len(enterpriseMembersInAD)), contracts.Information)
-
-	// Filter enterprise members that are in AD if they are in the community organizations
+	// Filter enterprise members if they are in the community organizations
 	var communityMembers []Member
+	communityMembersSet := make(map[string]struct{})
 	for _, communityOrg := range communityOrgs {
 		token := os.Getenv("GH_TOKEN")
 		// Fetch all members of the community organization
@@ -545,38 +526,41 @@ func ScanCommunityOrganizations(w http.ResponseWriter, r *http.Request) {
 		}
 
 		for _, member := range members {
-			for _, enterpriseMemberInAD := range enterpriseMembersInAD {
-				if member.GetLogin() == enterpriseMemberInAD.Username {
+			for _, ghEnterpriseMember := range ghEnterpriseMembers.Members {
+				if member.GetLogin() == ghEnterpriseMember.Login {
 					// Check if exist in communityMembers
-					var exist bool
-					for _, communityMember := range communityMembers {
-						if communityMember.Username == enterpriseMemberInAD.Username {
-							exist = true
-							break
-						}
-					}
-					if !exist {
-						communityMembers = append(communityMembers, Member{Id: enterpriseMemberInAD.Id, Username: enterpriseMemberInAD.Username, Email: enterpriseMemberInAD.Email})
+					if _, exists := communityMembersSet[ghEnterpriseMember.Login]; !exists {
+						communityMembers = append(communityMembers, Member{DatabaseId: ghEnterpriseMember.DatabaseId, Username: ghEnterpriseMember.Login, Email: ghEnterpriseMember.EnterpriseEmail})
+						communityMembersSet[ghEnterpriseMember.Login] = struct{}{}
 						break
 					}
 				}
 			}
 		}
 	}
-	logger.LogTrace(fmt.Sprint("Filtered enterprise members that are in AD if they are in the community organizations. communityMembers.Length : ", len(communityMembers)), contracts.Information)
+	logger.LogTrace(fmt.Sprint("Filter github enterprise members if they are a member of any community organizations. communityMembers.Length : ", len(communityMembers)), contracts.Information)
 
 	var notifiedUsers []string
+	// Notify all members that are not in community portal database
 	for _, communityMember := range communityMembers {
-		// Check if the member associated their account with the community
-		email, err := db.GetUserEmailByGithubId(fmt.Sprint(communityMember.Id))
+		email, err := db.GetUserEmailByGithubId(fmt.Sprint(communityMember.DatabaseId))
 		if err != nil {
 			logger.LogException(err)
 			continue
 		}
 
 		if email == "" {
-			// Notify the user to associate their account with the community
-			logger.LogTrace(fmt.Sprint(communityMember.Id, " ", communityMember.Username, " ", communityMember.Email), contracts.Information)
+			if ev.GetEnvVar("ENABLED_REMOVE_COLLABORATORS", "false") == "true" {
+				// Notify the user to associate their account with the community
+				messageBody := notification.AssociateGithubAccountReminderMessageBody{
+					Recipients:          []string{communityMember.Email},
+					CommunityPortalLink: os.Getenv("HOME_URL"),
+				}
+				err = messageBody.Send()
+				if err != nil {
+					logger.LogException(err)
+				}
+			}
 			notifiedUsers = append(notifiedUsers, communityMember.Email)
 		}
 	}

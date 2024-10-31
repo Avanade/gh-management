@@ -49,6 +49,7 @@ const (
 	RequestForAnOrganizationMessageType          MessageType = "InnerSource.RequestForAnOrganization"
 	RequestForGitHubCopilotLicenseMessageType    MessageType = "InnerSource.RequestForGitHubCopilotLicense"
 	RequestForOrganizationAccessMessageType      MessageType = "InnerSource.RequestForOrganizationAccess"
+	AssociateGithubAccountReminderMessageType    MessageType = "InnerSource.AssociateGithubAccountReminder"
 )
 
 type Contract struct {
@@ -126,6 +127,11 @@ type RequestForOrganizationAccessMessageBody struct {
 	OrganizationName string
 	OrganizationLink string
 	ApprovalLink     string
+}
+
+type AssociateGithubAccountReminderMessageBody struct {
+	Recipients          []string
+	CommunityPortalLink string
 }
 
 func (messageBody RepositoryHasBeenCreatedMessageBody) Send() error {
@@ -287,6 +293,23 @@ func (messageBody RequestForOrganizationAccessMessageBody) Send() error {
 	contract := Contract{
 		RequestId:   uuid.New().String(),
 		MessageType: RequestForOrganizationAccessMessageType,
+		MessageBody: messageBody,
+	}
+
+	err := sendNotification(contract)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (messageBody AssociateGithubAccountReminderMessageBody) Send() error {
+	messageBody.Recipients = setRecipients(messageBody.Recipients)
+
+	contract := Contract{
+		RequestId:   uuid.New().String(),
+		MessageType: AssociateGithubAccountReminderMessageType,
 		MessageBody: messageBody,
 	}
 

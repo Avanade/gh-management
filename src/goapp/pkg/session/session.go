@@ -59,9 +59,7 @@ func IsAuthenticated(w http.ResponseWriter, r *http.Request) bool {
 		http.Redirect(w, r, url, http.StatusTemporaryRedirect)
 		return false
 	}
-
 	if _, ok := session.Values["profile"]; !ok {
-
 		// Asks user to login if there is no saved user profile
 		http.Redirect(w, r, url, http.StatusTemporaryRedirect)
 		return false
@@ -94,7 +92,6 @@ func IsAuthenticated(w http.ResponseWriter, r *http.Request) bool {
 
 					fmt.Println(details.Error, details.ErrorDescription)
 				}
-
 				// Log out the user if the attempt to refresh the token failed
 				http.Redirect(w, r, "/logout/azure", http.StatusTemporaryRedirect)
 				return false
@@ -116,7 +113,6 @@ func IsAuthenticated(w http.ResponseWriter, r *http.Request) bool {
 					SameSite: http.SameSiteNoneMode,
 				}
 				err = session.Save(r, w)
-
 				if err != nil {
 					http.Error(w, err.Error(), http.StatusInternalServerError)
 					return false

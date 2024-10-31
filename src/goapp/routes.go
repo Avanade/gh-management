@@ -17,6 +17,8 @@ import (
 )
 
 func setPageRoutes() {
+	httpRouter.NOTFOUND(m.Chain(rtPages.NotFoundHandler, m.AzureAuth()))
+
 	httpRouter.GET("/", m.Chain(rtPages.HomeHandler, m.AzureAuth()))
 	httpRouter.GET("/error/ghlogin", m.Chain(rtPages.GHLoginRequire, m.AzureAuth()))
 
@@ -144,9 +146,9 @@ func setApiRoutes() {
 	httpRouter.GET("/api/communities/{id}/related-communities", m.Chain(rtApi.GetRelatedCommunitiesByCommunityId, m.AzureAuth()))
 
 	// COMMUNITY APPROVERS API
-	httpRouter.POST("/api/community-approvers", rtApi.SubmitCommunityApprover)
-	httpRouter.GET("/api/community-approvers", rtApi.GetCommunityApproversList)
-	httpRouter.GET("/api/community-approvers/active", rtApi.GetAllActiveCommunityApprovers)
+	httpRouter.POST("/api/community-approvers", m.Chain(rtApi.SubmitCommunityApprover, m.AzureAuth(), m.GitHubAuth()))
+	httpRouter.GET("/api/community-approvers", m.Chain(rtApi.GetCommunityApproversList, m.AzureAuth(), m.GitHubAuth()))
+	httpRouter.GET("/api/community-approvers/active", m.Chain(rtApi.GetAllActiveCommunityApprovers, m.AzureAuth(), m.GitHubAuth()))
 
 	// CONTRIBUTION AREAS API
 	httpRouter.POST("/api/contribution-areas", m.Chain(cont.ContributionArea.CreateContributionAreas, m.AzureAuth(), m.GitHubAuth()))
@@ -218,10 +220,10 @@ func setApiRoutes() {
 
 	// REGIONAL ORGANIZATIONS API
 	httpRouter.GET("/api/enterprise-organizations", m.Chain(rtApi.GetEnterpriseOrganizations, m.AzureAuth()))
-	httpRouter.GET("/api/regional-organizations", m.Chain(rtApi.GetRegionalOrganizationByOption))
-	httpRouter.GET("/api/regional-organizations/{id}", m.Chain(rtApi.GetRegionalOrganizationById))
-	httpRouter.POST("/api/regional-organizations", m.Chain(rtApi.InsertRegionalOrganization))
-	httpRouter.PUT("/api/regional-organizations/{id}", m.Chain(rtApi.UpdateRegionalOrganization))
+	httpRouter.GET("/api/regional-organizations", m.Chain(rtApi.GetRegionalOrganizationByOption, m.AzureAuth()))
+	httpRouter.GET("/api/regional-organizations/{id}", m.Chain(rtApi.GetRegionalOrganizationById, m.AzureAuth()))
+	httpRouter.POST("/api/regional-organizations", m.Chain(rtApi.InsertRegionalOrganization, m.AzureAuth()))
+	httpRouter.PUT("/api/regional-organizations/{id}", m.Chain(rtApi.UpdateRegionalOrganization, m.AzureAuth()))
 
 	// OTHER REQUESTS
 	httpRouter.POST("/api/github-organization", m.Chain(rtApi.AddOrganization, m.AzureAuth(), m.GitHubAuth()))
@@ -242,14 +244,14 @@ func setApiRoutes() {
 	httpRouter.GET("/api/github-organization-approvers/active", m.Chain(rtApi.GetAllActiveOrganizationApprovers, m.AzureAuth(), m.GitHubAuth()))
 
 	// APPROVALS API
-	httpRouter.POST("/api/approvals/community/callback", rtApi.UpdateApprovalStatusCommunity)
-	httpRouter.POST("/api/approvals/organization/callback", rtApi.UpdateApprovalStatusOrganization)
-	httpRouter.POST("/api/approvals/github-copilot/callback", rtApi.UpdateApprovalStatusCopilot)
-	httpRouter.POST("/api/approvals/organization-access/callback", rtApi.UpdateApprovalStatusOrganizationAccess)
-	httpRouter.POST("/api/approvals/community/reassign/callback", rtApi.UpdateCommunityApprovalReassignApprover)
-	httpRouter.POST("/api/approvals/project/callback", rtApi.UpdateApprovalStatusProjects)
-	httpRouter.POST("/api/approvals/project/reassign/callback", rtApi.UpdateApprovalReassignApprover)
-	httpRouter.GET("/api/users/{username}/approvals", m.Chain(rtApi.DownloadProjectApprovalsByUsername))
+	httpRouter.POST("/api/approvals/community/callback", m.Chain(rtApi.UpdateApprovalStatusCommunity, m.GuidAuth()))
+	httpRouter.POST("/api/approvals/organization/callback", m.Chain(rtApi.UpdateApprovalStatusOrganization, m.GuidAuth()))
+	httpRouter.POST("/api/approvals/github-copilot/callback", m.Chain(rtApi.UpdateApprovalStatusCopilot, m.GuidAuth()))
+	httpRouter.POST("/api/approvals/organization-access/callback", m.Chain(rtApi.UpdateApprovalStatusOrganizationAccess, m.GuidAuth()))
+	httpRouter.POST("/api/approvals/community/reassign/callback", m.Chain(rtApi.UpdateCommunityApprovalReassignApprover, m.GuidAuth()))
+	httpRouter.POST("/api/approvals/project/callback", m.Chain(rtApi.UpdateApprovalStatusProjects, m.GuidAuth()))
+	httpRouter.POST("/api/approvals/project/reassign/callback", m.Chain(rtApi.UpdateApprovalReassignApprover, m.GuidAuth()))
+	httpRouter.GET("/api/users/{username}/approvals", m.Chain(rtApi.DownloadProjectApprovalsByUsername, m.GuidAuth()))
 
 	// LEGACY APIS
 	httpRouter.GET("/api/searchresult/{searchText}", m.Chain(rtApi.LegacySearchHandler, m.GuidAuth()))

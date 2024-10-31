@@ -41,6 +41,7 @@ jobs:
           parameters.appServiceSettings.value.TENANT_ID : ${{ secrets.TENANT_ID }}
           parameters.appServiceSettings.value.CLIENT_ID : ${{ secrets.CLIENT_ID }}
           parameters.appServiceSettings.value.CLIENT_SECRET : ${{ secrets.CLIENT_SECRET }}
+          parameters.appServiceSettings.value.SCOPE : ${{ secrets.SCOPE }}
           parameters.appServiceSettings.value.NOTIFICATION_TENANT_ID : ${{ secrets.NOTIFICATION_TENANT_ID }}
           parameters.appServiceSettings.value.NOTIFICATION_CLIENT_ID : ${{ secrets.NOTIFICATION_CLIENT_ID }}
           parameters.appServiceSettings.value.NOTIFICATION_CLIENT_SECRET : ${{ secrets.NOTIFICATION_CLIENT_SECRET }}
@@ -61,6 +62,7 @@ jobs:
           parameters.appServiceSettings.value.GH_TOKEN : ${{ secrets.GH_TOKEN }}
           parameters.appServiceSettings.value.GH_ENTERPRISE_TOKEN : ${{ secrets.GH_ENTERPRISE_TOKEN }}
           parameters.appServiceSettings.value.GH_ENTERPRISE_NAME : ${{ secrets.GH_ENTERPRISE_NAME }}
+          parameters.appServiceSettings.value.GH_ENTERPRISE_ID : ${{ secrets.GH_ENTERPRISE_ID }}
           parameters.appServiceSettings.value.GH_APP_LINK : ${{ vars.GH_APP_LINK }}
           parameters.appServiceSettings.value.GHMGMTDB_CONNECTION_STRING : ${{ secrets.GHMGMTDB_CONNECTION_STRING}}
           parameters.appServiceSettings.value.GH_ORG_INNERSOURCE : ${{ vars.GH_ORG_INNERSOURCE }}

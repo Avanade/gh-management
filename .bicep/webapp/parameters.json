@@ -22,6 +22,7 @@
                 "TENANT_ID":"",
                 "CLIENT_ID":"",
                 "CLIENT_SECRET":"",
+                "SCOPE":"",
 
                 "NOTIFICATION_TENANT_ID":"",
                 "NOTIFICATION_CLIENT_ID":"",
@@ -47,6 +48,7 @@
                 "GH_APP_LINK":"",
                 "GH_ENTERPRISE_TOKEN":"",
                 "GH_ENTERPRISE_NAME":"",
+                "GH_ENTERPRISE_ID":"",
                 "GHMGMTDB_CONNECTION_STRING":"",
                 
                 "GH_ORG_INNERSOURCE":"",

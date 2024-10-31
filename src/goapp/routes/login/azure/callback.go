@@ -3,7 +3,6 @@ package routes
 import (
 	"context"
 	"fmt"
-	"log"
 	"net/http"
 	"os"
 
@@ -17,18 +16,14 @@ import (
 )
 
 func CallbackHandler(w http.ResponseWriter, r *http.Request) {
-
 	// Check session
 	session, err := session.Store.Get(r, "auth-session")
 	if err != nil {
-		log.Println(err.Error())
-		// http.Error(w, err.Error(), http.StatusInternalServerError)
 		http.Redirect(w, r, "/authentication/azure/failed", http.StatusSeeOther)
 		return
 	}
 
 	if r.URL.Query().Get("state") != session.Values["state"] {
-		// http.Error(w, "Invalid state parameter", http.StatusBadRequest)
 		http.Redirect(w, r, "/authentication/azure/failed", http.StatusSeeOther)
 		return
 	}
@@ -36,23 +31,18 @@ func CallbackHandler(w http.ResponseWriter, r *http.Request) {
 	//Retrieve token
 	authenticator, err := auth.NewAuthenticator(r.Host)
 	if err != nil {
-		log.Println(err.Error())
-		// http.Error(w, err.Error(), http.StatusInternalServerError)
 		http.Redirect(w, r, "/authentication/azure/failed", http.StatusSeeOther)
 		return
 	}
 
 	token, err := authenticator.Config.Exchange(context.TODO(), r.URL.Query().Get("code"))
 	if err != nil {
-		log.Printf("no token found: %v", err)
-		// w.WriteHeader(http.StatusUnauthorized)
 		http.Redirect(w, r, "/authentication/azure/failed", http.StatusSeeOther)
 		return
 	}
 
 	rawIDToken, ok := token.Extra("id_token").(string)
 	if !ok {
-		// http.Error(w, "No id_token field in oauth2 token.", http.StatusInternalServerError)
 		http.Redirect(w, r, "/authentication/azure/failed", http.StatusSeeOther)
 		return
 	}
@@ -64,7 +54,6 @@ func CallbackHandler(w http.ResponseWriter, r *http.Request) {
 	idToken, err := authenticator.Provider.Verifier(oidcConfig).Verify(context.TODO(), rawIDToken)
 
 	if err != nil {
-		// http.Error(w, "Failed to verify ID Token: "+err.Error(), http.StatusInternalServerError)
 		http.Redirect(w, r, "/authentication/azure/failed", http.StatusSeeOther)
 		return
 	}
@@ -72,8 +61,6 @@ func CallbackHandler(w http.ResponseWriter, r *http.Request) {
 	// Get the userInfo
 	var profile map[string]interface{}
 	if err := idToken.Claims(&profile); err != nil {
-		log.Println(err.Error())
-		// http.Error(w, err.Error(), http.StatusInternalServerError)
 		http.Redirect(w, r, "/authentication/azure/failed", http.StatusSeeOther)
 		return
 	}
@@ -89,8 +76,6 @@ func CallbackHandler(w http.ResponseWriter, r *http.Request) {
 	session.Values["isUserAdmin"] = isAdmin
 	hasPhoto, userPhoto, err := msgraph.GetUserPhoto(fmt.Sprintf("%s", profile["oid"]))
 	if err != nil {
-		log.Println(err.Error())
-		// http.Error(w, err.Error(), http.StatusInternalServerError)
 		http.Redirect(w, r, "/authentication/azure/failed", http.StatusSeeOther)
 		return
 	}
@@ -108,8 +93,6 @@ func CallbackHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	err = session.Save(r, w)
 	if err != nil {
-		log.Println(err.Error())
-		// http.Error(w, err.Error(), http.StatusInternalServerError)
 		http.Redirect(w, r, "/authentication/azure/failed", http.StatusSeeOther)
 		return
 	}
@@ -118,8 +101,6 @@ func CallbackHandler(w http.ResponseWriter, r *http.Request) {
 	name := fmt.Sprint(profile["name"])
 	err = db.InsertUser(userPrincipalName, name, "", "", "")
 	if err != nil {
-		log.Println(err.Error())
-		// http.Error(w, err.Error(), http.StatusInternalServerError)
 		http.Redirect(w, r, "/authentication/azure/failed", http.StatusSeeOther)
 		return
 	}
