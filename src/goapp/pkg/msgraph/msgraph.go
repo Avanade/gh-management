@@ -73,7 +73,7 @@ func GetAzGroupIdByName(groupName string) (string, error) {
 	}
 
 	client := &http.Client{
-		Timeout: time.Second * 10,
+		Timeout: time.Second * 90,
 	}
 
 	urlPath := fmt.Sprintf("https://graph.microsoft.com/v1.0/groups?$search=\"displayName:%s\"", groupName)
@@ -110,7 +110,7 @@ func SearchUsers(search string) ([]User, error) {
 	}
 
 	client := &http.Client{
-		Timeout: time.Second * 10,
+		Timeout: time.Second * 90,
 	}
 
 	urlPath := `https://graph.microsoft.com/v1.0/users`
@@ -166,7 +166,7 @@ func GetAllUsers() ([]User, error) {
 	}
 
 	client := &http.Client{
-		Timeout: time.Second * 10,
+		Timeout: time.Second * 90,
 	}
 
 	urlPath := "https://graph.microsoft.com/v1.0/users"
@@ -206,7 +206,7 @@ func IsDirectMember(user string) (bool, error) {
 	}
 
 	client := &http.Client{
-		Timeout: time.Second * 10,
+		Timeout: time.Second * 90,
 	}
 
 	urlPath := fmt.Sprintf("https://graph.microsoft.com/v1.0/users/%s", user)
@@ -242,7 +242,7 @@ func IsGithubEnterpriseMember(user string) (bool, error) {
 	}
 
 	client := &http.Client{
-		Timeout: time.Second * 10,
+		Timeout: time.Second * 90,
 	}
 
 	adGroups, err := db.ADGroup_SelectAll()
@@ -308,7 +308,7 @@ func IsUserAdmin(user string) (bool, error) {
 	}
 
 	client := &http.Client{
-		Timeout: time.Second * 10,
+		Timeout: time.Second * 90,
 	}
 
 	urlPath := fmt.Sprintf("https://graph.microsoft.com/v1.0/users/%s/checkMemberGroups", user)
@@ -365,7 +365,7 @@ func GetUserPhoto(user string) (bool, string, error) {
 	}
 
 	client := &http.Client{
-		Timeout: time.Second * 10,
+		Timeout: time.Second * 90,
 	}
 
 	urlPath := fmt.Sprintf("https://graph.microsoft.com/v1.0/users/%s/photos/64x64/$value", user)
@@ -423,7 +423,7 @@ func requestNewToken() (*TokenResponse, error) {
 
 	urlPath := fmt.Sprintf("https://login.microsoftonline.com/%s/oauth2/v2.0/token", os.Getenv("TENANT_ID"))
 	client := &http.Client{
-		Timeout: time.Second * 10,
+		Timeout: time.Second * 90,
 	}
 
 	data := url.Values{}
@@ -462,7 +462,7 @@ func IsUserExist(userPrincipalName string) (isMember bool, isAccountEnabled bool
 	}
 
 	client := &http.Client{
-		Timeout: time.Second * 10,
+		Timeout: time.Second * 90,
 	}
 
 	urlPath := `https://graph.microsoft.com/v1.0/users`
@@ -516,7 +516,7 @@ func GetTeamsMembers(ChannelId string, token string) ([]User, error) {
 		token = accessToken
 	}
 	client := &http.Client{
-		Timeout: time.Second * 10,
+		Timeout: time.Second * 90,
 	}
 
 	urlPath := fmt.Sprintf("https://graph.microsoft.com/v1.0/groups/%s/members", ChannelId)
@@ -555,7 +555,7 @@ func GetADGroups() ([]ADGroup, error) {
 	}
 
 	client := &http.Client{
-		Timeout: time.Second * 10,
+		Timeout: time.Second * 90,
 	}
 
 	urlPath := "https://graph.microsoft.com/v1.0/groups"
@@ -614,7 +614,7 @@ func HasGitHubAccess(objectId string) (bool, error) {
 	}
 
 	client := &http.Client{
-		Timeout: time.Second * 60,
+		Timeout: time.Second * 90,
 	}
 
 	urlPath := fmt.Sprintf("https://graph.microsoft.com/v1.0/groups/%s/appRoleAssignments", objectId)
