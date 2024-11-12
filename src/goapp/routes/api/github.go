@@ -505,7 +505,7 @@ func ProcessCleanupEnterpriseOrgs(enterpriseMembers *ghAPI.GetMembersByEnterpris
 			}
 			if !isUserExist || !isAccountEnabled {
 				muRAD.Lock()
-				removeMembers = append(removeMembers, member.Username)
+				removeMembers = append(removeMembers, fmt.Sprintln(member.Username, " - ", member.Email))
 				muRAD.Unlock()
 				if ev.GetEnvVar("ENABLED_REMOVE_COLLABORATORS", "false") == "true" {
 					token := os.Getenv("GH_TOKEN")
@@ -573,7 +573,7 @@ func ProcessCleanupOpensourceOrg(enterpriseMembers *ghAPI.GetMembersByEnterprise
 			}
 			if !isUserExist || !isAccountEnabled {
 				muRAD.Lock()
-				removeMembers = append(removeMembers, member.Username)
+				removeMembers = append(removeMembers, fmt.Sprintln(member.Username, " - ", member.Email))
 				muRAD.Unlock()
 				if ev.GetEnvVar("ENABLED_REMOVE_COLLABORATORS", "false") == "true" {
 					token := os.Getenv("GH_TOKEN")
