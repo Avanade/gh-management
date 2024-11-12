@@ -528,11 +528,11 @@ func GetOrganizationsWithinEnterprise(enterprise string, token string) (*GetOrga
 	return &result, nil
 }
 
-type CustomTransport struct {
+type customTransport struct {
 	Transport http.RoundTripper
 }
 
-func (t *CustomTransport) RoundTrip(req *http.Request) (*http.Response, error) {
+func (t *customTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 	req.Header.Add("X-GitHub-Next-Global-ID", "1")
 	return t.Transport.RoundTrip(req)
 }
@@ -542,7 +542,7 @@ func GetMembersByEnterprise(enterprise string, token string) (*GetMembersByEnter
 		&oauth2.Token{AccessToken: token},
 	)
 	httpClient := oauth2.NewClient(context.Background(), src)
-	httpClient.Transport = &CustomTransport{Transport: http.DefaultTransport}
+	httpClient.Transport = &customTransport{Transport: httpClient.Transport}
 	client := githubv4.NewClient(httpClient)
 
 	var result GetMembersByEnterpriseResult
@@ -562,14 +562,15 @@ func GetMembersByEnterprise(enterprise string, token string) (*GetMembersByEnter
 
 		for _, node := range queryResult.Enterprise.OwnerInfo.SamlIdentityProvider.ExternalIdentities.Nodes {
 			user := node.User
-			member := Member{
-				Id:              user.Id.(string),
-				Login:           string(user.Login),
-				DatabaseId:      int64(user.DatabaseId),
-				EnterpriseEmail: string(node.SamlIdentity.Username),
+			if user.Id != nil {
+				member := Member{
+					Id:              user.Id.(string),
+					Login:           string(user.Login),
+					DatabaseId:      int64(user.DatabaseId),
+					EnterpriseEmail: string(node.SamlIdentity.Username),
+				}
+				result.Members = append(result.Members, member)
 			}
-
-			result.Members = append(result.Members, member)
 		}
 
 		if !queryResult.Enterprise.OwnerInfo.SamlIdentityProvider.ExternalIdentities.PageInfo.HasNextPage {

@@ -25,6 +25,9 @@
                     "schedule": {
                         "weekDays": [
                             "Sunday"
+                        ],
+                        "hours": [
+                            "3"
                         ]
                     }
                 },
