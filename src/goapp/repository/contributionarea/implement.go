@@ -8,10 +8,10 @@ import (
 )
 
 type contributionAreaRepository struct {
-	db.Database
+	*db.Database
 }
 
-func NewContributionAreaRepository(database db.Database) ContributionAreaRepository {
+func NewContributionAreaRepository(database *db.Database) ContributionAreaRepository {
 	return &contributionAreaRepository{database}
 }
 

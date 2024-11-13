@@ -14,19 +14,23 @@ var (
 	db   database.Database    = database.NewDatabase(conf)
 
 	repo = r.NewRepository(
-		r.NewActivity(db),
-		r.NewActivityContributionArea(db),
-		r.NewActivityHelp(db),
-		r.NewActivityType(db),
-		r.NewContributionArea(db),
-		r.NewExternalLink(db),
-		r.NewOssContributionSponsor(db))
+		r.NewActivity(&db),
+		r.NewActivityContributionArea(&db),
+		r.NewActivityHelp(&db),
+		r.NewActivityType(&db),
+		r.NewApprovalType(&db),
+		r.NewApprover(&db),
+		r.NewContributionArea(&db),
+		r.NewExternalLink(&db),
+		r.NewOssContributionSponsor(&db))
 
 	serv = s.NewService(
 		s.NewActivityService(repo),
 		s.NewActivityTypeService(repo),
-		s.NewContributionAreaService(repo),
 		s.NewActivityHelpService(repo),
+		s.NewApprovalTypeService(repo),
+		s.NewApproverService(repo),
+		s.NewContributionAreaService(repo),
 		s.NewEmailService(conf),
 		s.NewExternalLinkService(repo),
 		s.NewOssContributionSponsorService(repo))
@@ -34,6 +38,7 @@ var (
 	cont = c.NewController(
 		c.NewActivityController(serv),
 		c.NewActivityTypeController(serv),
+		c.NewApprovalTypeController(serv),
 		c.NewContributionAreaController(serv),
 		c.NewExternalLinkController(serv),
 		c.NewOssContributionSponsorController(serv))

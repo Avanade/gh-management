@@ -6,6 +6,8 @@ import (
 	sActivity "main/service/activity"
 	sActivityHelp "main/service/activityhelp"
 	sActivityType "main/service/activitytype"
+	sApprovalType "main/service/approval-type"
+	sApprover "main/service/approver"
 	sContributionArea "main/service/contributionarea"
 	sEmail "main/service/email"
 	sExternalLink "main/service/externallink"
@@ -16,6 +18,8 @@ type Service struct {
 	Activity               sActivity.ActivityService
 	ActivityHelp           sActivityHelp.ActivityHelpService
 	ActivityType           sActivityType.ActivityTypeService
+	ApprovalType           sApprovalType.ApprovalTypeService
+	Approver               sApprover.ApproverService
 	ContributionArea       sContributionArea.ContributionAreaService
 	ExternalLink           sExternalLink.ExternalLinkService
 	OssContributionSponsor sOssContributionSponsor.OssContributionSponsorService
@@ -49,6 +53,18 @@ func NewActivityHelpService(repo *repository.Repository) ServiceOptionFunc {
 func NewActivityTypeService(repo *repository.Repository) ServiceOptionFunc {
 	return func(s *Service) {
 		s.ActivityType = sActivityType.NewActivityTypeService(repo)
+	}
+}
+
+func NewApprovalTypeService(repo *repository.Repository) ServiceOptionFunc {
+	return func(s *Service) {
+		s.ApprovalType = sApprovalType.NewApprovalTypeService(repo)
+	}
+}
+
+func NewApproverService(repo *repository.Repository) ServiceOptionFunc {
+	return func(s *Service) {
+		s.Approver = sApprover.NewApproverService(repo)
 	}
 }
 

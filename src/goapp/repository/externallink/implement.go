@@ -8,10 +8,10 @@ import (
 )
 
 type externalLinkRepository struct {
-	db.Database
+	*db.Database
 }
 
-func NewExternalLinkRepository(database db.Database) ExternalLinkRepository {
+func NewExternalLinkRepository(database *db.Database) ExternalLinkRepository {
 	return &externalLinkRepository{
 		Database: database,
 	}

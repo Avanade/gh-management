@@ -200,7 +200,7 @@ func setApiRoutes() {
 	httpRouter.POST("/api/approval-types", m.Chain(rtApi.CreateApprovalType, m.AzureAuth()))
 	httpRouter.PUT("/api/approval-types/{id}", m.Chain(rtApi.EditApprovalTypeById, m.AzureAuth()))
 	httpRouter.PUT("/api/approval-types/{id}/archived", m.Chain(rtApi.SetIsArchivedApprovalTypeById, m.AzureAuth()))
-	httpRouter.GET("/api/approval-types", m.Chain(rtApi.GetApprovalTypes, m.AzureAuth()))
+	httpRouter.GET("/api/approval-types", m.Chain(cont.ApprovalType.GetApprovalTypes, m.AzureAuth()))
 	httpRouter.GET("/api/approval-types/active", m.Chain(rtApi.GetActiveApprovalTypes, m.AzureAuth(), m.GitHubAuth()))
 	httpRouter.GET("/api/approval-types/{id}", m.Chain(rtApi.GetApprovalTypeById, m.AzureAuth()))
 

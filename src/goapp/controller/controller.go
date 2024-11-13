@@ -3,6 +3,7 @@ package controller
 import (
 	cActivity "main/controller/activity"
 	cActivityType "main/controller/activitytype"
+	cApprovalType "main/controller/approval-type"
 	cContributionArea "main/controller/contributionarea"
 	cExternalLink "main/controller/externallink"
 	cOssContributionSponsor "main/controller/osscontributionsponsor"
@@ -12,6 +13,7 @@ import (
 type Controller struct {
 	Activity               cActivity.ActivityController
 	ActivityType           cActivityType.ActivityTypeController
+	ApprovalType           cApprovalType.ApprovalTypeController
 	ContributionArea       cContributionArea.ContributionAreaController
 	ExternalLink           cExternalLink.ExternalLinkController
 	OssContributionSponsor cOssContributionSponsor.OSSContributionSponsorController
@@ -38,6 +40,12 @@ func NewActivityController(serv *service.Service) ControllerOptionFunc {
 func NewActivityTypeController(serv *service.Service) ControllerOptionFunc {
 	return func(c *Controller) {
 		c.ActivityType = cActivityType.NewActivityTypeController(serv)
+	}
+}
+
+func NewApprovalTypeController(serv *service.Service) ControllerOptionFunc {
+	return func(c *Controller) {
+		c.ApprovalType = cApprovalType.NewApprovalTypeController(serv)
 	}
 }
 
