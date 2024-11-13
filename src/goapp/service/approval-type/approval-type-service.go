@@ -36,3 +36,17 @@ func (s *approvalTypeService) Get(opt *model.FilterOptions) ([]model.ApprovalTyp
 
 	return approvalTypes, total, nil
 }
+
+func (s *approvalTypeService) GetById(id int) (*model.ApprovalType, error) {
+	data, err := s.Repository.ApprovalType.SelectById(id)
+	if err != nil {
+		return nil, err
+	}
+
+	data.Approvers, err = s.Repository.Approver.SelectByApprovalTypeId(data.Id)
+	if err != nil {
+		return nil, err
+	}
+
+	return data, nil
+}

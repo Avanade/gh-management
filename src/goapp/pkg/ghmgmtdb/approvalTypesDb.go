@@ -26,45 +26,6 @@ func GetAllActiveApprovers() interface{} {
 	return result
 }
 
-func SelectApprovalTypeById(id int) (*ApprovalType, error) {
-	db := ConnectDb()
-	defer db.Close()
-
-	param := map[string]interface{}{
-		"Id": id,
-	}
-
-	result, err := db.ExecuteStoredProcedureWithResult("usp_RepositoryApprovalType_Select_ById", param)
-	if err != nil {
-		return nil, err
-	}
-
-	approvalType := ApprovalType{
-		Id:         int(result[0]["Id"].(int64)),
-		Name:       result[0]["Name"].(string),
-		IsActive:   result[0]["IsActive"].(bool),
-		IsArchived: result[0]["IsArchived"].(bool),
-	}
-
-	if result[0]["Created"] != nil {
-		approvalType.Created = result[0]["Created"].(time.Time)
-	}
-
-	if result[0]["CreatedBy"] != nil {
-		approvalType.CreatedBy = result[0]["CreatedBy"].(string)
-	}
-
-	if result[0]["Modified"] != nil {
-		approvalType.Modified = result[0]["Modified"].(time.Time)
-	}
-
-	if result[0]["ModifiedBy"] != nil {
-		approvalType.ModifiedBy = result[0]["ModifiedBy"].(string)
-	}
-
-	return &approvalType, nil
-}
-
 func InsertApprovalType(approvalType ApprovalType) (int, error) {
 	db := ConnectDb()
 	defer db.Close()

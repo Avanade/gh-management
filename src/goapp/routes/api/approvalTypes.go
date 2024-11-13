@@ -27,40 +27,6 @@ type ApproverDto struct {
 	ApproverName   string `json:"approverName"`
 }
 
-func GetApprovalTypeById(w http.ResponseWriter, r *http.Request) {
-	logger := appinsights_wrapper.NewClient()
-	defer logger.EndOperation()
-
-	vars := mux.Vars(r)
-	id, _ := strconv.Atoi(vars["id"])
-
-	result, err := db.SelectApprovalTypeById(id)
-	if err != nil {
-		logger.LogException(err)
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-
-	approversDto, err := getApproversByApprovalTypeId(result.Id)
-	if err != nil {
-		logger.LogException(err)
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-
-	approvalTypeDto := ApprovalTypeDto{
-		Id:         result.Id,
-		Name:       result.Name,
-		Approvers:  *approversDto,
-		IsActive:   result.IsActive,
-		IsArchived: result.IsArchived,
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(approvalTypeDto)
-}
-
 func CreateApprovalType(w http.ResponseWriter, r *http.Request) {
 	logger := appinsights_wrapper.NewClient()
 	defer logger.EndOperation()
