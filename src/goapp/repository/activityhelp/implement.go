@@ -6,10 +6,10 @@ import (
 )
 
 type activityHelpRepository struct {
-	db.Database
+	*db.Database
 }
 
-func NewActivityHelpRepository(database db.Database) ActivityHelpRepository {
+func NewActivityHelpRepository(database *db.Database) ActivityHelpRepository {
 	return &activityHelpRepository{database}
 }
 

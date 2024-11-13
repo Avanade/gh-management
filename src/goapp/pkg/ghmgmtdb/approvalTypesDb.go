@@ -1,8 +1,6 @@
 package ghmgmt
 
 import (
-	"fmt"
-	"strconv"
 	"time"
 )
 
@@ -26,50 +24,6 @@ func GetAllActiveApprovers() interface{} {
 		return err
 	}
 	return result
-}
-
-func SelectApprovalTypes() ([]map[string]interface{}, error) {
-	db := ConnectDb()
-	defer db.Close()
-
-	result, err := db.ExecuteStoredProcedureWithResult("usp_RepositoryApprovalType_Select", nil)
-	if err != nil {
-		return nil, err
-	}
-
-	return result, nil
-}
-
-func SelectApprovalTypesByFilter(offset, filter int, orderby, ordertype, search string) ([]map[string]interface{}, error) {
-	db := ConnectDb()
-	defer db.Close()
-
-	param := map[string]interface{}{
-		"Offset":    offset,
-		"Filter":    filter,
-		"Search":    search,
-		"OrderBy":   orderby,
-		"OrderType": ordertype,
-	}
-
-	result, err := db.ExecuteStoredProcedureWithResult("usp_RepositoryApprovalType_Select_ByOption", param)
-	if err != nil {
-		return nil, err
-	}
-
-	return result, nil
-}
-
-func SelectTotalApprovalTypes() int {
-	db := ConnectDb()
-	defer db.Close()
-
-	result, _ := db.ExecuteStoredProcedureWithResult("usp_RepositoryApprovalType_TotalCount", nil)
-	total, err := strconv.Atoi(fmt.Sprint(result[0]["Total"]))
-	if err != nil {
-		return 0
-	}
-	return total
 }
 
 func SelectApprovalTypeById(id int) (*ApprovalType, error) {

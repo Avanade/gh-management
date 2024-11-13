@@ -8,10 +8,10 @@ import (
 )
 
 type activityRepository struct {
-	db.Database
+	*db.Database
 }
 
-func NewActivityRepository(database db.Database) ActivityRepository {
+func NewActivityRepository(database *db.Database) ActivityRepository {
 	return &activityRepository{database}
 }
 

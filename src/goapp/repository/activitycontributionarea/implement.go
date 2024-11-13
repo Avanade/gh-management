@@ -7,10 +7,10 @@ import (
 )
 
 type activityContributionAreaRepository struct {
-	db.Database
+	*db.Database
 }
 
-func NewActivityContributionAreaRepository(database db.Database) ActivityContributionAreaRepository {
+func NewActivityContributionAreaRepository(database *db.Database) ActivityContributionAreaRepository {
 	return &activityContributionAreaRepository{database}
 }
 
