@@ -5,7 +5,7 @@ import (
 )
 
 type ApprovalTypeRepository interface {
-	GetAllApprovalTypes() ([]model.ApprovalType, error)
-	GetApprovalTypesByFilter(opt model.FilterOptions) ([]model.ApprovalType, error)
-	GetTotalApprovalTypes() (int64, error)
+	Select() ([]model.ApprovalType, error)
+	SelectByOption(opt model.FilterOptions) ([]model.ApprovalType, error)
+	Total() (int64, error)
 }

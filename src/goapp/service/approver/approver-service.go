@@ -13,6 +13,6 @@ func NewApproverService(repository *repository.Repository) ApproverService {
 	return &approverService{repository}
 }
 
-func (s *approverService) GetApproversByApprovalTypeId(approvalTypeId int) ([]model.Approver, error) {
-	return s.Repository.Approver.GetApproversByApprovalTypeId(approvalTypeId)
+func (s *approverService) Get(approvalTypeId int) ([]model.RepositoryApprover, error) {
+	return s.Repository.Approver.SelectByApprovalTypeId(approvalTypeId)
 }

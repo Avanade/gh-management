@@ -14,7 +14,7 @@ func NewApproverRepository(db *db.Database) ApproverRepository {
 	return &approverRepository{db}
 }
 
-func (r *approverRepository) GetApproversByApprovalTypeId(approvalTypeId int) ([]model.Approver, error) {
+func (r *approverRepository) SelectByApprovalTypeId(approvalTypeId int) ([]model.RepositoryApprover, error) {
 	rows, err := r.Query("usp_RepositoryApprover_Select_ByApprovalTypeId", sql.Named("RepositoryApprovalTypeId", approvalTypeId))
 	if err != nil {
 		return nil, err
@@ -26,9 +26,9 @@ func (r *approverRepository) GetApproversByApprovalTypeId(approvalTypeId int) ([
 		return nil, err
 	}
 
-	var result []model.Approver
+	var result []model.RepositoryApprover
 	for _, approver := range approvers {
-		result = append(result, model.Approver{
+		result = append(result, model.RepositoryApprover{
 			ApprovalTypeId: int(approver["RepositoryApprovalTypeId"].(int64)),
 			ApproverEmail:  approver["ApproverUserPrincipalName"].(string),
 			ApproverName:   approver["ApproverName"].(string),

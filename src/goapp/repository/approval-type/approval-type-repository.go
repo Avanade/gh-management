@@ -14,7 +14,7 @@ func NewApprovalTypeRepository(db *db.Database) ApprovalTypeRepository {
 	return &approvalTypeRepository{db}
 }
 
-func (r *approvalTypeRepository) GetAllApprovalTypes() ([]model.ApprovalType, error) {
+func (r *approvalTypeRepository) Select() ([]model.ApprovalType, error) {
 	rows, err := r.Query("usp_RepositoryApprovalType_Select")
 	if err != nil {
 		return nil, err
@@ -39,7 +39,7 @@ func (r *approvalTypeRepository) GetAllApprovalTypes() ([]model.ApprovalType, er
 	return result, nil
 }
 
-func (r *approvalTypeRepository) GetApprovalTypesByFilter(opt model.FilterOptions) ([]model.ApprovalType, error) {
+func (r *approvalTypeRepository) SelectByOption(opt model.FilterOptions) ([]model.ApprovalType, error) {
 	rows, err := r.Query("usp_RepositoryApprovalType_Select_ByOption",
 		sql.Named("Offset", opt.Offset),
 		sql.Named("Filter", opt.Filter),
@@ -70,7 +70,7 @@ func (r *approvalTypeRepository) GetApprovalTypesByFilter(opt model.FilterOption
 	return result, nil
 }
 
-func (r *approvalTypeRepository) GetTotalApprovalTypes() (int64, error) {
+func (r *approvalTypeRepository) Total() (int64, error) {
 	row, err := r.QueryRow("usp_RepositoryApprovalType_TotalCount")
 	if err != nil {
 		return 0, err

@@ -13,14 +13,26 @@ func NewApprovalTypeService(repository *repository.Repository) ApprovalTypeServi
 	return &approvalTypeService{repository}
 }
 
-func (s *approvalTypeService) GetApprovalTypes(opt *model.FilterOptions) ([]model.ApprovalType, error) {
+func (s *approvalTypeService) Get(opt *model.FilterOptions) ([]model.ApprovalType, int64, error) {
+	var approvalTypes []model.ApprovalType
 	if opt == nil {
-		return s.Repository.ApprovalType.GetAllApprovalTypes()
+		data, err := s.Repository.ApprovalType.Select()
+		if err != nil {
+			return nil, 0, err
+		}
+		approvalTypes = data
 	} else {
-		return s.Repository.ApprovalType.GetApprovalTypesByFilter(*opt)
+		data, err := s.Repository.ApprovalType.SelectByOption(*opt)
+		if err != nil {
+			return nil, 0, err
+		}
+		approvalTypes = data
 	}
-}
 
-func (s *approvalTypeService) GetTotalApprovalTypes() (int64, error) {
-	return s.Repository.ApprovalType.GetTotalApprovalTypes()
+	total, err := s.Repository.ApprovalType.Total()
+	if err != nil {
+		return nil, 0, err
+	}
+
+	return approvalTypes, total, nil
 }

@@ -5,6 +5,5 @@ import (
 )
 
 type ApprovalTypeService interface {
-	GetApprovalTypes(opt *model.FilterOptions) ([]model.ApprovalType, error)
-	GetTotalApprovalTypes() (int64, error)
+	Get(opt *model.FilterOptions) ([]model.ApprovalType, int64, error)
 }

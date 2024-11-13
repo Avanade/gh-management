@@ -5,5 +5,5 @@ import (
 )
 
 type ApproverService interface {
-	GetApproversByApprovalTypeId(approvalTypeId int) ([]model.Approver, error)
+	Get(approvalTypeId int) ([]model.RepositoryApprover, error)
 }

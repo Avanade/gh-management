@@ -23,6 +23,7 @@ func (c *approvalTypeController) GetApprovalTypes(w http.ResponseWriter, r *http
 
 	var approvalTypes []model.ApprovalType
 	var total int64
+	var err error
 
 	params := r.URL.Query()
 	if params.Has("offset") && params.Has("filter") {
@@ -35,26 +36,24 @@ func (c *approvalTypeController) GetApprovalTypes(w http.ResponseWriter, r *http
 			Orderby:   params.Get("orderby"),
 			Ordertype: params.Get("ordertype"),
 		}
-		data, err := c.ApprovalType.GetApprovalTypes(&opt)
+		approvalTypes, total, err = c.ApprovalType.Get(&opt)
 		if err != nil {
 			logger.TrackException(err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		approvalTypes = data
 
 	} else {
-		data, err := c.ApprovalType.GetApprovalTypes(nil)
+		approvalTypes, total, err = c.ApprovalType.Get(nil)
 		if err != nil {
 			logger.TrackException(err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		approvalTypes = data
 	}
 
 	for i, v := range approvalTypes {
-		approvers, err := c.Approver.GetApproversByApprovalTypeId(v.Id)
+		approvers, err := c.Approver.Get(v.Id)
 		if err != nil {
 			logger.TrackException(err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -62,13 +61,6 @@ func (c *approvalTypeController) GetApprovalTypes(w http.ResponseWriter, r *http
 		}
 
 		approvalTypes[i].Approvers = approvers
-	}
-
-	total, err := c.ApprovalType.GetTotalApprovalTypes()
-	if err != nil {
-		logger.TrackException(err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
