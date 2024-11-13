@@ -7,6 +7,8 @@ import (
 	"main/service"
 	"net/http"
 	"strconv"
+
+	"github.com/gorilla/mux"
 )
 
 type approvalTypeController struct {
@@ -15,6 +17,25 @@ type approvalTypeController struct {
 
 func NewApprovalTypeController(service *service.Service) ApprovalTypeController {
 	return &approvalTypeController{service}
+}
+
+func (c *approvalTypeController) GetApprovalTypeById(w http.ResponseWriter, r *http.Request) {
+	logger := appinsights_wrapper.NewClient()
+	defer logger.EndOperation()
+
+	vars := mux.Vars(r)
+	id, _ := strconv.Atoi(vars["id"])
+
+	approvalType, err := c.ApprovalType.GetById(id)
+	if err != nil {
+		logger.TrackException(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(approvalType)
 }
 
 func (c *approvalTypeController) GetApprovalTypes(w http.ResponseWriter, r *http.Request) {

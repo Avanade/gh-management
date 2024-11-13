@@ -39,6 +39,27 @@ func (r *approvalTypeRepository) Select() ([]model.ApprovalType, error) {
 	return result, nil
 }
 
+func (r *approvalTypeRepository) SelectById(id int) (*model.ApprovalType, error) {
+	row, err := r.QueryRow("usp_RepositoryApprovalType_Select_ById", sql.Named("Id", id))
+	if err != nil {
+		return nil, err
+	}
+
+	approvalType := model.ApprovalType{}
+	err = row.Scan(
+		&approvalType.Id,
+		&approvalType.Name,
+		&approvalType.IsArchived,
+		&approvalType.IsActive,
+		&approvalType.Created,
+		&approvalType.CreatedBy,
+		&approvalType.Modified,
+		&approvalType.ModifiedBy,
+	)
+
+	return &approvalType, err
+}
+
 func (r *approvalTypeRepository) SelectByOption(opt model.FilterOptions) ([]model.ApprovalType, error) {
 	rows, err := r.Query("usp_RepositoryApprovalType_Select_ByOption",
 		sql.Named("Offset", opt.Offset),
