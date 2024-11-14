@@ -219,6 +219,46 @@ func ExpiringInvitation(w http.ResponseWriter, r *http.Request) {
 	sendNotification(token, opensourceName, logger)
 }
 
+func DemoteOutsideCollaboratorAdmin(w http.ResponseWriter, r *http.Request) {
+	logger := appinsights_wrapper.NewClient()
+	defer logger.EndOperation()
+
+	org := os.Getenv("GH_ORG_OPENSOURCE")
+	token := os.Getenv("GH_TOKEN")
+
+	outsideCollaborators := ghAPI.ListOutsideCollaborators(token, org)
+
+	repositories, err := ghAPI.GetRepositoriesFromOrganization(org)
+	if err != nil {
+		logger.LogException(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	for _, outsideCollaborator := range outsideCollaborators {
+		for _, repository := range repositories {
+			permission, err := ghAPI.GetPermissionLevel(org, repository.Name, *outsideCollaborator.Login)
+			if err != nil {
+				logger.LogException(err)
+				continue
+			}
+
+			if permission == "admin" {
+				// Edit the permission of the outside collaborator to write
+				resp, err := ghAPI.AddCollaborator(org, repository.Name, outsideCollaborator.GetLogin(), "write")
+				if err != nil {
+					logger.LogException(err)
+					continue
+				}
+
+				if resp.StatusCode == 204 {
+					logger.TrackTrace(fmt.Sprintf("Demoted %s to write access in %s", *outsideCollaborator.Login, repository.Name), contracts.Information)
+				}
+			}
+		}
+	}
+}
+
 // Send notifications to those who has pending org invitation that is about to expire tom.
 func sendNotification(token, org string, logger *appinsights_wrapper.TelemetryClient) {
 	invitations := ghAPI.ListPendingOrgInvitations(token, org)
