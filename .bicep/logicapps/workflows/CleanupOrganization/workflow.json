@@ -14,6 +14,23 @@
         },
         "runAfter": {},
         "trackedProperties": {}
+      },
+      "HTTP_DEMOTE_ADMIN_OUTSIDE_COLLABORATORS": {
+        "inputs": {
+            "authentication": {
+                "identity": "@concat('/subscriptions/59d64684-e7c9-4397-8982-6b775a473b74/resourcegroups/OpenTech_GitHub_Mgmt/providers/Microsoft.ManagedIdentity/userAssignedIdentities/', parameters('ManagedIdentityName'))",
+                "type": "ManagedServiceIdentity"
+            },
+            "method": "GET",
+            "uri": "@concat(parameters('GHMgmDomain'), '/utility/demote-outside-collaborators-admin')"
+        },
+        "runAfter": {
+            "HTTP_ORG_CLEANUP": [
+                "SUCCEEDED"
+            ]
+        },
+        "trackedProperties": {},
+        "type": "Http"
       }
     },
     "contentVersion": "1.0.0.0",

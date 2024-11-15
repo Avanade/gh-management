@@ -104,6 +104,15 @@ func GetRepository(repoName string, org string) (*github.Repository, error) {
 	return repo, nil
 }
 
+func GetPermissionLevel(repoOwner string, repoName string, username string) (string, error) {
+	client := CreateClient(os.Getenv("GH_TOKEN"))
+	permission, _, err := client.Repositories.GetPermissionLevel(context.Background(), repoOwner, repoName, username)
+	if err != nil {
+		return "", err
+	}
+	return permission.GetPermission(), nil
+}
+
 func GetRepositoryReadmeById(owner, repoName string) (string, error) {
 	client := CreateClient(os.Getenv("GH_TOKEN"))
 

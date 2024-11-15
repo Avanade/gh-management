@@ -7,10 +7,10 @@ import (
 )
 
 type ossContributionSponsorRepository struct {
-	db.Database
+	*db.Database
 }
 
-func NewOSSContributionSponsorRepository(database db.Database) OssContributionSponsorRepository {
+func NewOSSContributionSponsorRepository(database *db.Database) OssContributionSponsorRepository {
 	return &ossContributionSponsorRepository{
 		Database: database,
 	}

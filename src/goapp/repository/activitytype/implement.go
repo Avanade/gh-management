@@ -7,10 +7,10 @@ import (
 )
 
 type activityTypeRepository struct {
-	db.Database
+	*db.Database
 }
 
-func NewActivityTypeRepository(db db.Database) ActivityTypeRepository {
+func NewActivityTypeRepository(db *db.Database) ActivityTypeRepository {
 	return &activityTypeRepository{db}
 }
 

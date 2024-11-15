@@ -200,9 +200,9 @@ func setApiRoutes() {
 	httpRouter.POST("/api/approval-types", m.Chain(rtApi.CreateApprovalType, m.AzureAuth()))
 	httpRouter.PUT("/api/approval-types/{id}", m.Chain(rtApi.EditApprovalTypeById, m.AzureAuth()))
 	httpRouter.PUT("/api/approval-types/{id}/archived", m.Chain(rtApi.SetIsArchivedApprovalTypeById, m.AzureAuth()))
-	httpRouter.GET("/api/approval-types", m.Chain(rtApi.GetApprovalTypes, m.AzureAuth()))
+	httpRouter.GET("/api/approval-types", m.Chain(cont.ApprovalType.GetApprovalTypes, m.AzureAuth()))
 	httpRouter.GET("/api/approval-types/active", m.Chain(rtApi.GetActiveApprovalTypes, m.AzureAuth(), m.GitHubAuth()))
-	httpRouter.GET("/api/approval-types/{id}", m.Chain(rtApi.GetApprovalTypeById, m.AzureAuth()))
+	httpRouter.GET("/api/approval-types/{id}", m.Chain(cont.ApprovalType.GetApprovalTypeById, m.AzureAuth()))
 
 	//EXTERNAL LINKS API
 	httpRouter.GET("/api/external-links", m.Chain(cont.ExternalLink.GetExternalLinks, m.AzureAuth(), m.IsUserAdmin()))
@@ -269,6 +269,7 @@ func setUtilityRoutes() {
 	httpRouter.GET("/utility/check-ava-inner-source", m.Chain(rtApi.CheckAvaInnerSource, m.GuidAuth()))
 	httpRouter.GET("/utility/check-ava-open-source", m.Chain(rtApi.CheckAvaOpenSource, m.GuidAuth()))
 	httpRouter.GET("/utility/clear-org-members", m.Chain(rtApi.ClearOrgMembers, m.GuidAuth()))
+	httpRouter.GET("/utility/demote-outside-collaborators-admin", m.Chain(rtApi.DemoteOutsideCollaboratorAdmin, m.GuidAuth()))
 	httpRouter.GET("/utility/repo-owner-scan", m.Chain(rtApi.RepoOwnerScan, m.GuidAuth()))
 	httpRouter.GET("/utility/repo-owner-cleanup", m.Chain(rtApi.RepoOwnersCleanup, m.GuidAuth()))
 	httpRouter.GET("/utility/recurring-approval", m.Chain(rtApi.RecurringApproval, m.GuidAuth()))
