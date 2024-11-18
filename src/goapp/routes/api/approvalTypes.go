@@ -27,51 +27,6 @@ type ApproverDto struct {
 	ApproverName   string `json:"approverName"`
 }
 
-func CreateApprovalType(w http.ResponseWriter, r *http.Request) {
-	logger := appinsights_wrapper.NewClient()
-	defer logger.EndOperation()
-
-	sessionaz, _ := session.Store.Get(r, "auth-session")
-	iprofile := sessionaz.Values["profile"]
-	profile := iprofile.(map[string]interface{})
-	username := fmt.Sprint(profile["preferred_username"])
-
-	var approvalTypeDto ApprovalTypeDto
-	json.NewDecoder(r.Body).Decode(&approvalTypeDto)
-	id, err := db.InsertApprovalType(db.ApprovalType{
-		Name:      approvalTypeDto.Name,
-		IsActive:  approvalTypeDto.IsActive,
-		CreatedBy: username,
-	})
-	if err != nil {
-		logger.LogException(err)
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-
-	for _, v := range approvalTypeDto.Approvers {
-		err = db.InsertUser(v.ApproverEmail, v.ApproverName, "", "", "")
-		if err != nil {
-			logger.LogException(err)
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-
-		err := db.InsertApprover(db.Approver{
-			ApprovalTypeId: id,
-			ApproverEmail:  v.ApproverEmail,
-		})
-		if err != nil {
-			logger.LogException(err)
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
-		}
-	}
-
-	approvalTypeDto.Id = id
-	json.NewEncoder(w).Encode(approvalTypeDto)
-}
-
 func EditApprovalTypeById(w http.ResponseWriter, r *http.Request) {
 	logger := appinsights_wrapper.NewClient()
 	defer logger.EndOperation()
