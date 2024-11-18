@@ -2,8 +2,10 @@ package approvaltype
 
 import (
 	"encoding/json"
+	"fmt"
 	"main/model"
 	"main/pkg/appinsights_wrapper"
+	"main/pkg/session"
 	"main/service"
 	"net/http"
 	"strconv"
@@ -17,6 +19,50 @@ type approvalTypeController struct {
 
 func NewApprovalTypeController(service *service.Service) ApprovalTypeController {
 	return &approvalTypeController{service}
+}
+
+func (c *approvalTypeController) CreateApprovalType(w http.ResponseWriter, r *http.Request) {
+	logger := appinsights_wrapper.NewClient()
+	defer logger.EndOperation()
+
+	sessionaz, _ := session.Store.Get(r, "auth-session")
+	iprofile := sessionaz.Values["profile"]
+	profile := iprofile.(map[string]interface{})
+	username := fmt.Sprint(profile["preferred_username"])
+
+	var approvalType model.ApprovalType
+	json.NewDecoder(r.Body).Decode(&approvalType)
+	approvalType.CreatedBy = username
+	id, err := c.ApprovalType.Insert(&approvalType)
+	if err != nil {
+		logger.TrackException(err)
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	for _, v := range approvalType.Approvers {
+		err = c.User.Create(&model.User{
+			UserPrincipalName: v.ApproverEmail,
+			Name:              v.ApproverName,
+			GivenName:         "",
+			Surname:           "",
+			JobTitle:          "",
+		})
+		if err != nil {
+			logger.TrackException(err)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		v.ApprovalTypeId = id
+		err := c.RepositoryApprover.Create(&v)
+		if err != nil {
+			logger.TrackException(err)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+	}
+	json.NewEncoder(w).Encode(id)
 }
 
 func (c *approvalTypeController) GetApprovalTypeById(w http.ResponseWriter, r *http.Request) {
@@ -74,7 +120,7 @@ func (c *approvalTypeController) GetApprovalTypes(w http.ResponseWriter, r *http
 	}
 
 	for i, v := range approvalTypes {
-		approvers, err := c.Approver.Get(v.Id)
+		approvers, err := c.RepositoryApprover.Get(v.Id)
 		if err != nil {
 			logger.TrackException(err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)

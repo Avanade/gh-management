@@ -197,7 +197,7 @@ func setApiRoutes() {
 	httpRouter.GET("/api/popular-topics", m.Chain(rtApi.GetPopularTopics, m.AzureAuth()))
 
 	//APPROVAL TYPES API
-	httpRouter.POST("/api/approval-types", m.Chain(rtApi.CreateApprovalType, m.AzureAuth()))
+	httpRouter.POST("/api/approval-types", m.Chain(cont.ApprovalType.CreateApprovalType, m.AzureAuth()))
 	httpRouter.PUT("/api/approval-types/{id}", m.Chain(rtApi.EditApprovalTypeById, m.AzureAuth()))
 	httpRouter.PUT("/api/approval-types/{id}/archived", m.Chain(rtApi.SetIsArchivedApprovalTypeById, m.AzureAuth()))
 	httpRouter.GET("/api/approval-types", m.Chain(cont.ApprovalType.GetApprovalTypes, m.AzureAuth()))

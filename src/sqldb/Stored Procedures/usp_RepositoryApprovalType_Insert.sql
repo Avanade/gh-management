@@ -38,5 +38,5 @@ BEGIN
 		SET @Id = SCOPE_IDENTITY()
 		SET @Status = 1
 	END
-	SELECT @Id AS [Id], @Status AS [Status]
+	SELECT @Id AS [Id]
 END

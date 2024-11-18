@@ -43,10 +43,18 @@ func (s *approvalTypeService) GetById(id int) (*model.ApprovalType, error) {
 		return nil, err
 	}
 
-	data.Approvers, err = s.Repository.Approver.SelectByApprovalTypeId(data.Id)
+	data.Approvers, err = s.Repository.RepositoryApprover.SelectByApprovalTypeId(data.Id)
 	if err != nil {
 		return nil, err
 	}
 
 	return data, nil
+}
+
+func (s *approvalTypeService) Insert(approvalType *model.ApprovalType) (int, error) {
+	id, err := s.Repository.ApprovalType.Insert(approvalType)
+	if err != nil {
+		return 0, err
+	}
+	return id, nil
 }

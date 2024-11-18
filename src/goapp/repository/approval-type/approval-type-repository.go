@@ -14,6 +14,25 @@ func NewApprovalTypeRepository(db *db.Database) ApprovalTypeRepository {
 	return &approvalTypeRepository{db}
 }
 
+func (r *approvalTypeRepository) Insert(approvalType *model.ApprovalType) (int, error) {
+	row, err := r.QueryRow("usp_RepositoryApprovalType_Insert",
+		sql.Named("Name", approvalType.Name),
+		sql.Named("IsActive", approvalType.IsActive),
+		sql.Named("CreatedBy", approvalType.CreatedBy),
+	)
+	if err != nil {
+		return 0, err
+	}
+
+	var id int
+	err = row.Scan(&id)
+	if err != nil {
+		return 0, err
+	}
+
+	return id, nil
+}
+
 func (r *approvalTypeRepository) Select() ([]model.ApprovalType, error) {
 	rows, err := r.Query("usp_RepositoryApprovalType_Select")
 	if err != nil {
