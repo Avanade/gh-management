@@ -482,14 +482,18 @@ func RemoveEnterpriseMember(token string, enterpriseId string, userId string) er
 	httpClient := oauth2.NewClient(context.Background(), src)
 	client := githubv4.NewClient(httpClient)
 
-	var mutation githubv4.RemoveEnterpriseMemberInput
-
-	variables := map[string]interface{}{
-		"enterpriseId": githubv4.ID(enterpriseId),
-		"userId":       githubv4.ID(userId),
+	var mutation struct {
+		RemoveEnterpriseMember struct {
+			ClientMutationId string
+		} `graphql:"removeEnterpriseMember(input: $input)"`
 	}
 
-	err := client.Mutate(context.Background(), &mutation, variables, nil)
+	input := githubv4.RemoveEnterpriseMemberInput{
+		EnterpriseID: githubv4.ID(enterpriseId),
+		UserID:       githubv4.ID(userId),
+	}
+
+	err := client.Mutate(context.Background(), &mutation, input, nil)
 	if err != nil {
 		return err
 	}
