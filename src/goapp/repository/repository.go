@@ -7,10 +7,11 @@ import (
 	rActivityHelp "main/repository/activityhelp"
 	rActivityType "main/repository/activitytype"
 	rApprovalType "main/repository/approval-type"
-	rApprover "main/repository/approver"
 	rContributionArea "main/repository/contributionarea"
 	rExternalLink "main/repository/externallink"
 	rOssContributionSponsor "main/repository/osscontributionsponsor"
+	rRepositoryApprover "main/repository/repository-approver"
+	rUser "main/repository/user"
 )
 
 type Repository struct {
@@ -19,10 +20,11 @@ type Repository struct {
 	ActivityHelp             rActivityHelp.ActivityHelpRepository
 	ActivityType             rActivityType.ActivityTypeRepository
 	ApprovalType             rApprovalType.ApprovalTypeRepository
-	Approver                 rApprover.ApproverRepository
 	ContributionArea         rContributionArea.ContributionAreaRepository
 	ExternalLink             rExternalLink.ExternalLinkRepository
 	OssContributionSponsor   rOssContributionSponsor.OssContributionSponsorRepository
+	RepositoryApprover       rRepositoryApprover.RepositoryApproverRepository
+	User                     rUser.UserRepository
 }
 
 type RepositoryOptionFunc func(*Repository)
@@ -63,7 +65,7 @@ func NewApprovalType(db *database.Database) RepositoryOptionFunc {
 
 func NewApprover(db *database.Database) RepositoryOptionFunc {
 	return func(r *Repository) {
-		r.Approver = rApprover.NewApproverRepository(db)
+		r.RepositoryApprover = rRepositoryApprover.NewRepostioryApproverRepository(db)
 	}
 }
 
@@ -88,5 +90,11 @@ func NewOssContributionSponsor(db *database.Database) RepositoryOptionFunc {
 func NewActivityHelp(db *database.Database) RepositoryOptionFunc {
 	return func(r *Repository) {
 		r.ActivityHelp = rActivityHelp.NewActivityHelpRepository(db)
+	}
+}
+
+func NewUser(db *database.Database) RepositoryOptionFunc {
+	return func(r *Repository) {
+		r.User = rUser.NewUserRepository(db)
 	}
 }

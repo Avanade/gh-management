@@ -22,7 +22,8 @@ var (
 		r.NewApprover(&db),
 		r.NewContributionArea(&db),
 		r.NewExternalLink(&db),
-		r.NewOssContributionSponsor(&db))
+		r.NewOssContributionSponsor(&db),
+		r.NewUser(&db))
 
 	serv = s.NewService(
 		s.NewActivityService(repo),
@@ -33,7 +34,8 @@ var (
 		s.NewContributionAreaService(repo),
 		s.NewEmailService(conf),
 		s.NewExternalLinkService(repo),
-		s.NewOssContributionSponsorService(repo))
+		s.NewOssContributionSponsorService(repo),
+		s.NewUserService(repo))
 
 	cont = c.NewController(
 		c.NewActivityController(serv),
