@@ -12,6 +12,7 @@ import (
 
 	auth "main/pkg/authentication"
 	"main/pkg/email"
+	ev "main/pkg/envvar"
 	db "main/pkg/ghmgmtdb"
 	ghAPI "main/pkg/github"
 	"main/pkg/msgraph"
@@ -159,6 +160,21 @@ func GithubForceSaveHandler(w http.ResponseWriter, r *http.Request) {
 	userPrincipalName := fmt.Sprintf("%s", azProfile["preferred_username"])
 	ghId := strconv.FormatFloat(p["id"].(float64), 'f', 0, 64)
 	ghUser := fmt.Sprintf("%s", p["login"])
+
+	if ev.GetEnvVar("ENABLED_REMOVE_ENTERPRISE_MEMBER", "false") == "true" {
+		user, err := ghAPI.GetUserByLogin(ghUser, os.Getenv("GH_TOKEN"))
+		if err != nil {
+			log.Println(err.Error())
+		}
+		enterpriseToken := os.Getenv("GH_ENTERPRISE_TOKEN")
+		enterpriseId := os.Getenv("GH_ENTERPRISE_ID")
+		err = ghAPI.RemoveEnterpriseMember(enterpriseToken, enterpriseId, user.Id)
+		if err != nil {
+			log.Println(err.Error())
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+	}
 
 	result, err := db.UpdateUserGithub(userPrincipalName, ghId, ghUser, 1)
 	if err != nil {
