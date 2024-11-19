@@ -185,7 +185,21 @@ func GithubForceSaveHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	http.Redirect(w, r, "/", http.StatusSeeOther)
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+
+	orgNames := struct {
+		InnerSourceOrgName string `json:"innersourceOrgName"`
+	}{
+		InnerSourceOrgName: os.Getenv("GH_ORG_INNERSOURCE"),
+	}
+
+	jsonResp, err := json.Marshal(orgNames)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	w.Write(jsonResp)
 }
 
 func CheckMembership(userPrincipalName, ghusername string) {
