@@ -7,6 +7,7 @@ CREATE PROCEDURE [dbo].[usp_Repository_Insert]
 	@ConfirmAvaIP [BIT] = 0,
 	@ConfirmEnabledSecurity [BIT] = 0,
 	@ConfirmNotClientProject [BIT] = 0,
+  @Created [DATETIME] = NULL,
 	@CreatedBy [VARCHAR](100) = NULL,
 	@Organization [VARCHAR](100),
 	@VisibilityId [INT] = 1,
@@ -18,6 +19,7 @@ CREATE PROCEDURE [dbo].[usp_Repository_Insert]
 AS
 BEGIN
   DECLARE @Id AS [INT]
+  SET @Created = ISNULL(@Created, GETDATE())
 
   INSERT INTO [dbo].[Repository]
   (
@@ -49,7 +51,7 @@ BEGIN
     @ConfirmAvaIP,
     @ConfirmEnabledSecurity,
     @ConfirmNotClientProject,
-    GETDATE(),
+    @Created,
     @CreatedBy,
     @Organization,
     GETDATE(),
