@@ -1,4 +1,4 @@
-package approver
+package repositoryApprover
 
 import (
 	"database/sql"
@@ -6,15 +6,22 @@ import (
 	"main/model"
 )
 
-type approverRepository struct {
+type repositoryApproverRepository struct {
 	*db.Database
 }
 
-func NewApproverRepository(db *db.Database) ApproverRepository {
-	return &approverRepository{db}
+func NewRepostioryApproverRepository(db *db.Database) RepositoryApproverRepository {
+	return &repositoryApproverRepository{db}
 }
 
-func (r *approverRepository) SelectByApprovalTypeId(approvalTypeId int) ([]model.RepositoryApprover, error) {
+func (r *repositoryApproverRepository) Insert(approver *model.RepositoryApprover) error {
+	err := r.Execute("usp_RepositoryApprover_Insert",
+		sql.Named("RepositoryApprovalTypeId", approver.ApprovalTypeId),
+		sql.Named("ApproverUserPrincipalName", approver.ApproverEmail))
+	return err
+}
+
+func (r *repositoryApproverRepository) SelectByApprovalTypeId(approvalTypeId int) ([]model.RepositoryApprover, error) {
 	rows, err := r.Query("usp_RepositoryApprover_Select_ByApprovalTypeId", sql.Named("RepositoryApprovalTypeId", approvalTypeId))
 	if err != nil {
 		return nil, err

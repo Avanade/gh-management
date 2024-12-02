@@ -72,6 +72,7 @@
                 "EXEMPTION": "",
 
                 "ENABLED_REMOVE_COLLABORATORS": "",
+                "ENABLED_REMOVE_ENTERPRISE_MEMBER": "",
 
                 "ORGANIZATION_NAME":"",
                 "REGIONAL_ORG_PREFIX": "",

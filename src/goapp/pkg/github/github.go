@@ -632,6 +632,39 @@ func GetRepositoryProjects(owner string, name string, token string) (*GetReposit
 	return &result, nil
 }
 
+func GetUserByLogin(login string, token string) (*GetUserByLoginResult, error) {
+	src := oauth2.StaticTokenSource(
+		&oauth2.Token{AccessToken: token},
+	)
+	httpClient := oauth2.NewClient(context.Background(), src)
+	httpClient.Transport = &customTransport{Transport: httpClient.Transport}
+
+	client := githubv4.NewClient(httpClient)
+
+	var result GetUserByLoginResult
+	var queryResult GetUserByLoginQuery
+
+	variables := map[string]interface{}{
+		"login": githubv4.String(login),
+	}
+	err := client.Query(context.Background(), &queryResult, variables)
+	if err != nil {
+		return nil, err
+	}
+
+	if queryResult.User.ID == nil {
+		return nil, fmt.Errorf("node ID of %s is not found", queryResult.User.Login)
+	}
+
+	result.User = User{
+		Id:         queryResult.User.ID.(string),
+		DatabaseId: int64(queryResult.User.DatabaseId),
+		Login:      string(queryResult.User.Login),
+	}
+
+	return &result, nil
+}
+
 // Query structs
 type GetOrganizationsWithinEnterpriseQuery struct {
 	Enterprise struct {
@@ -683,6 +716,14 @@ type GetRepositoryProjectsQuery struct {
 	} `graphql:"repository(owner: $owner, name: $name)"`
 }
 
+type GetUserByLoginQuery struct {
+	User struct {
+		ID         githubv4.ID
+		DatabaseId githubv4.Int
+		Login      githubv4.String
+	} `graphql:"user(login: $login)"`
+}
+
 type PageInfo struct {
 	EndCursor   githubv4.String
 	HasNextPage bool
@@ -700,6 +741,10 @@ type GetMembersByEnterpriseResult struct {
 type GetRepositoryProjectsResult struct {
 	ProjectUrl string
 	Projects   []Project
+}
+
+type GetUserByLoginResult struct {
+	User
 }
 
 // Structs
@@ -721,4 +766,10 @@ type Project struct {
 	Title      string
 	CreatedAt  time.Time
 	UpdatedAt  time.Time
+}
+
+type User struct {
+	Id         string
+	DatabaseId int64
+	Login      string
 }

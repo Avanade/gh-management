@@ -83,6 +83,7 @@ jobs:
           parameters.appServiceSettings.value.COPILOT_GROUP_SLUG : ${{ vars.COPILOT_GROUP_SLUG }}
           parameters.appServiceSettings.value.EXEMPTION : ${{ vars.EXEMPTION }}
           parameters.appServiceSettings.value.ENABLED_REMOVE_COLLABORATORS : ${{ vars.ENABLED_REMOVE_COLLABORATORS }}
+          parameters.appServiceSettings.value.ENABLED_REMOVE_ENTERPRISE_MEMBER : ${{ vars.ENABLED_REMOVE_ENTERPRISE_MEMBER }}
           parameters.appServiceSettings.value.ORGANIZATION_NAME : ${{ vars.ORGANIZATION_NAME }}
           parameters.appServiceSettings.value.REGIONAL_ORG_PREFIX: ${{ vars.REGIONAL_ORG_PREFIX }}
           parameters.appServiceSettings.value.LINK_INNERSOURCE_GENERAL_LEGAL_GUIDELINES : ${{ vars.LINK_INNERSOURCE_GENERAL_LEGAL_GUIDELINES }}
