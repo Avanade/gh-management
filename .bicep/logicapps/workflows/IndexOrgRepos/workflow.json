@@ -12,7 +12,7 @@
                     "uri": "@concat(parameters('GHMgmDomain'), '/utility/clear-org-repos')"
                 },
                 "runAfter": {
-                    "HTTP__OWNER_CLEANUP": [
+                    "DELAY_AFTER_OWNER_CLEANUP": [
                         "SUCCEEDED"
                     ]
                 },
@@ -41,11 +41,39 @@
                     "uri": "@concat(parameters('GHMgmDomain'), '/utility/repo-owner-cleanup')"
                 },
                 "runAfter": {
-                    "HTTP_INDEX_ORG_REPO": [
+                    "DELAY_AFTER_INDEX_ORG_REPO": [
                         "Succeeded"
                     ]
                 },
                 "type": "Http"
+            },
+            "DELAY_AFTER_OWNER_CLEANUP": {
+                "inputs": {
+                    "interval": {
+                        "count": 1,
+                        "unit": "Hour"
+                    }
+                },
+                "runAfter": {
+                    "HTTP__OWNER_CLEANUP": [
+                        "Succeeded"
+                    ]
+                },
+                "type": "Wait"
+            },
+            "DELAY_AFTER_INDEX_ORG_REPO": {
+                "inputs": {
+                    "interval": {
+                        "count": 1,
+                        "unit": "Hour"
+                    }
+                },
+                "runAfter": {
+                    "HTTP_INDEX_ORG_REPO": [
+                        "Succeeded"
+                    ]
+                },
+                "type": "Wait"
             }
         },
         "contentVersion": "1.0.0.0",
