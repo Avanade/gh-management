@@ -11,6 +11,8 @@
                 "Workflows.CleanupOrganization.FlowState" : "Disabled",
                 "Workflows.ExpiringInvitation.FlowState": "Disabled",
                 "Workflows.IndexOrgRepos.FlowState": "Disabled",
+                "Workflows.ClearOrgRepo.FlowState": "Disabled",
+                "Workflows.OwnerCleanup.FlowState": "Disabled",
                 "Workflows.InnersourceCheckOutsideCollaborators.FlowState": "Disabled",
                 "Workflows.OpensourceCheckOutsideCollaborators.FlowState": "Disabled",
                 "Workflows.RecurringApproval.FlowState": "Disabled",

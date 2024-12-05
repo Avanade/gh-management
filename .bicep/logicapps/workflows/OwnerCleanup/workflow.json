@@ -2,17 +2,16 @@
     "definition": {
         "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
         "actions": {
-            "HTTP_INDEX_ORG_REPO": {
+            "HTTP__OWNER_CLEANUP": {
                 "inputs": {
                     "authentication": {
                         "identity": "@concat('/subscriptions/59d64684-e7c9-4397-8982-6b775a473b74/resourcegroups/OpenTech_GitHub_Mgmt/providers/Microsoft.ManagedIdentity/userAssignedIdentities/', parameters('ManagedIdentityName'))",
                         "type": "ManagedServiceIdentity"
                     },
                     "method": "GET",
-                    "uri": "@concat(parameters('GHMgmDomain'), '/utility/index-org-repos')"
+                    "uri": "@concat(parameters('GHMgmDomain'), '/utility/repo-owner-cleanup')"
                 },
                 "runAfter": {},
-                "trackedProperties": {},
                 "type": "Http"
             }
         },
@@ -28,7 +27,7 @@
                             "Sunday"
                         ],
                         "hours": [
-                            "6"
+                            "8"
                         ]
                     }
                 },
