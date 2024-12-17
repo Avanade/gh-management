@@ -37,10 +37,14 @@ jobs:
           parameters.appSettings.value.Workflows.CleanupOrganization.FlowState: ${{ vars.WORKFLOWS_CLEANUP_ORGANIZATION_FLOWSTATE }}
           parameters.appSettings.value.Workflows.ExpiringInvitation.FlowState: ${{ vars.WORKFLOWS_EXPIRING_INVITATION_FLOWSTATE }}
           parameters.appSettings.value.Workflows.IndexOrgRepos.FlowState: ${{ vars.WORKFLOWS_INDEX_ORG_REPOS_FLOWSTATE }}
+          parameters.appSettings.value.Workflows.ClearOrgRepo.FlowState: ${{ vars.WORKFLOWS_CLEAR_ORG_REPO_FLOWSTATE }}
+          parameters.appSettings.value.Workflows.OwnerCleanup.FlowState: ${{ vars.WORKFLOWS_OWNER_CLEANUP_FLOWSTATE }}
           parameters.appSettings.value.Workflows.InnersourceCheckOutsideCollaborators.FlowState: ${{ vars.WORKFLOWS_INNERSOURCE_CHECK_OUTSIDE_COLLABORATORS_FLOWSTATE }}
           parameters.appSettings.value.Workflows.OpensourceCheckOutsideCollaborators.FlowState: ${{ vars.WORKFLOWS_OPENSOURCE_CHECK_OUTSIDE_COLLABORATORS_FLOWSTATE }}
           parameters.appSettings.value.Workflows.RecurringApproval.FlowState: ${{ vars.WORKFLOWS_RECURRING_APPROVAL_FLOWSTATE }}
           parameters.appSettings.value.Workflows.RepoOwnerScan.FlowState: ${{ vars.WORKFLOWS_REPO_OWNER_SCAN_FLOWSTATE }}
+          parameters.appSettings.value.Workflows.IndexADGroups.FlowState: ${{ vars.WORKFLOWS_INDEX_AD_GROUPS_FLOWSTATE }}
+          parameters.appSettings.value.Workflows.IndexRegionalOrganizations.FlowState: ${{ vars.WORKFLOWS_INDEX_REGIONAL_ORGANIZATIONS_FLOWSTATE }}
 
       - name: Deploy Bicep File
         uses: azure/arm-deploy@v1
