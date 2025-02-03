@@ -36,7 +36,7 @@ func (r *topicRepository) Delete(id int64) error {
 	return nil
 }
 
-func (r *topicRepository) GetPopularTopics(opt *model.FilterOptions) ([]model.Topic, error) {
+func (r *topicRepository) SelectByOption(opt *model.FilterOptions) ([]model.Topic, error) {
 	var topics []model.Topic
 	rows, err := r.Query("[dbo].[usp_RepositoryTopic_Select_PopularTopic]",
 		sql.Named("Offset", opt.Offset),

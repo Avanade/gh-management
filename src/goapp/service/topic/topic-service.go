@@ -22,7 +22,7 @@ func (s *topicService) Get(opt *model.FilterOptions) ([]model.Topic, error) {
 		return nil, errors.New("FilterOptions is nil")
 	}
 
-	data, err := s.Repository.Topic.GetPopularTopics(opt)
+	data, err := s.Repository.Topic.SelectByOption(opt)
 	if err != nil {
 		return nil, err
 	}
