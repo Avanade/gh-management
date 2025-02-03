@@ -12,6 +12,7 @@ import (
 	sExternalLink "main/service/externallink"
 	sOssContributionSponsor "main/service/osscontributionsponsor"
 	sRepositoryApprover "main/service/repository-approver"
+	sTopic "main/service/topic"
 	sUser "main/service/user"
 )
 
@@ -26,6 +27,7 @@ type Service struct {
 	OssContributionSponsor sOssContributionSponsor.OssContributionSponsorService
 	RepositoryApprover     sRepositoryApprover.RepositoryApproverService
 	User                   sUser.UserService
+	Topic                  sTopic.TopicService
 }
 
 type ServiceOptionFunc func(*Service)
@@ -97,5 +99,11 @@ func NewOssContributionSponsorService(repo *repository.Repository) ServiceOption
 func NewUserService(repo *repository.Repository) ServiceOptionFunc {
 	return func(s *Service) {
 		s.User = sUser.NewUserService(repo)
+	}
+}
+
+func NewTopicService(repo *repository.Repository) ServiceOptionFunc {
+	return func(s *Service) {
+		s.Topic = sTopic.NewTopicService(repo)
 	}
 }

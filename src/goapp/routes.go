@@ -194,7 +194,8 @@ func setApiRoutes() {
 	httpRouter.GET("/api/users/{search}/search", m.Chain(rtApi.SearchUserFromActiveDirectory, m.AzureAuth()))
 
 	// POPULAR TOPICS API
-	httpRouter.GET("/api/popular-topics", m.Chain(rtApi.GetPopularTopics, m.AzureAuth()))
+	// httpRouter.GET("/api/popular-topics", m.Chain(rtApi.GetPopularTopics, m.AzureAuth()))
+	httpRouter.GET("/api/popular-topics", m.Chain(cont.Topic.GetPopularTopics, m.AzureAuth()))
 
 	//APPROVAL TYPES API
 	httpRouter.POST("/api/approval-types", m.Chain(cont.ApprovalType.CreateApprovalType, m.AzureAuth()))

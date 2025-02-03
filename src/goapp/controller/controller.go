@@ -7,6 +7,7 @@ import (
 	cContributionArea "main/controller/contributionarea"
 	cExternalLink "main/controller/externallink"
 	cOssContributionSponsor "main/controller/osscontributionsponsor"
+	cTopic "main/controller/topic"
 	"main/service"
 )
 
@@ -17,6 +18,7 @@ type Controller struct {
 	ContributionArea       cContributionArea.ContributionAreaController
 	ExternalLink           cExternalLink.ExternalLinkController
 	OssContributionSponsor cOssContributionSponsor.OSSContributionSponsorController
+	Topic                  cTopic.TopicController
 }
 
 type ControllerOptionFunc func(*Controller)
@@ -64,5 +66,11 @@ func NewExternalLinkController(serv *service.Service) ControllerOptionFunc {
 func NewOssContributionSponsorController(serv *service.Service) ControllerOptionFunc {
 	return func(c *Controller) {
 		c.OssContributionSponsor = cOssContributionSponsor.NewOssContributionSponsorController(serv)
+	}
+}
+
+func NewTopicController(serv *service.Service) ControllerOptionFunc {
+	return func(c *Controller) {
+		c.Topic = cTopic.NewTopicController(serv)
 	}
 }
