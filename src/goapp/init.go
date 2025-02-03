@@ -23,7 +23,8 @@ var (
 		r.NewContributionArea(&db),
 		r.NewExternalLink(&db),
 		r.NewOssContributionSponsor(&db),
-		r.NewUser(&db))
+		r.NewUser(&db),
+		r.NewPopularTopic(&db))
 
 	serv = s.NewService(
 		s.NewActivityService(repo),
@@ -35,7 +36,8 @@ var (
 		s.NewEmailService(conf),
 		s.NewExternalLinkService(repo),
 		s.NewOssContributionSponsorService(repo),
-		s.NewUserService(repo))
+		s.NewUserService(repo),
+		s.NewTopicService(repo))
 
 	cont = c.NewController(
 		c.NewActivityController(serv),
@@ -43,7 +45,8 @@ var (
 		c.NewApprovalTypeController(serv),
 		c.NewContributionAreaController(serv),
 		c.NewExternalLinkController(serv),
-		c.NewOssContributionSponsorController(serv))
+		c.NewOssContributionSponsorController(serv),
+		c.NewTopicController(serv))
 
 	httpRouter router.Router = router.NewMuxRouter()
 )

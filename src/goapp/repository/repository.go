@@ -11,6 +11,7 @@ import (
 	rExternalLink "main/repository/externallink"
 	rOssContributionSponsor "main/repository/osscontributionsponsor"
 	rRepositoryApprover "main/repository/repository-approver"
+	rTopic "main/repository/topic"
 	rUser "main/repository/user"
 )
 
@@ -25,6 +26,7 @@ type Repository struct {
 	OssContributionSponsor   rOssContributionSponsor.OssContributionSponsorRepository
 	RepositoryApprover       rRepositoryApprover.RepositoryApproverRepository
 	User                     rUser.UserRepository
+	Topic                    rTopic.TopicRepository
 }
 
 type RepositoryOptionFunc func(*Repository)
@@ -96,5 +98,11 @@ func NewActivityHelp(db *database.Database) RepositoryOptionFunc {
 func NewUser(db *database.Database) RepositoryOptionFunc {
 	return func(r *Repository) {
 		r.User = rUser.NewUserRepository(db)
+	}
+}
+
+func NewPopularTopic(db *database.Database) RepositoryOptionFunc {
+	return func(r *Repository) {
+		r.Topic = rTopic.NewTopicRepository(db)
 	}
 }
