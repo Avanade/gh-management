@@ -205,6 +205,9 @@ func setApiRoutes() {
 	httpRouter.GET("/api/approval-types/active", m.Chain(rtApi.GetActiveApprovalTypes, m.AzureAuth(), m.GitHubAuth()))
 	httpRouter.GET("/api/approval-types/{id}", m.Chain(cont.ApprovalType.GetApprovalTypeById, m.AzureAuth()))
 
+	// REPOSITORY APPROVERS
+	httpRouter.GET("/api/repository-approvers/legal", m.Chain(cont.RepositoryApprover.GetLegalApprovers, m.GuidAuth()))
+
 	//EXTERNAL LINKS API
 	httpRouter.GET("/api/external-links", m.Chain(cont.ExternalLink.GetExternalLinks, m.AzureAuth(), m.IsUserAdmin()))
 	httpRouter.GET("/api/external-links/enabled", m.Chain(cont.ExternalLink.GetEnabledExternalLinks, m.AzureAuth()))

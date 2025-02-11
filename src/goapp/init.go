@@ -46,6 +46,7 @@ var (
 		c.NewContributionAreaController(serv),
 		c.NewExternalLinkController(serv),
 		c.NewOssContributionSponsorController(serv),
+		c.NewRepositoryApproverController(serv, conf),
 		c.NewTopicController(serv))
 
 	httpRouter router.Router = router.NewMuxRouter()
