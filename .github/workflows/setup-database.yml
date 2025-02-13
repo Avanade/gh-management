@@ -48,7 +48,7 @@ jobs:
 
   build-and-publish-database-project:
     if: ${{ github.event.inputs.publish_database_project == 'true' }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     environment: ${{ github.event.inputs.selected_environment }}
 
     steps:
