@@ -66,10 +66,10 @@ func (r *categoryRepository) Select() ([]model.Category, error) {
 	return categories, nil
 }
 
-func (r *categoryRepository) SelectById(categoryid int64) (*model.Category, error) {
+func (r *categoryRepository) SelectById(id int64) (*model.Category, error) {
 	var category model.Category
 
-	row, err := r.QueryRow("usp_GuidanceCategory_Select_ById", sql.Named("Id", categoryid))
+	row, err := r.QueryRow("usp_GuidanceCategory_Select_ById", sql.Named("Id", id))
 	if err != nil {
 		return nil, err
 	}
@@ -100,13 +100,12 @@ func (r *categoryRepository) SelectById(categoryid int64) (*model.Category, erro
 }
 
 func (r *categoryRepository) Update(category *model.Category) error {
-	row, err := r.QueryRow("[dbo].[usp_GuidanceCategory_Update]",
+	_, err := r.QueryRow("[dbo].[usp_GuidanceCategory_Update]",
 		sql.Named("Id", category.Id),
 		sql.Named("Name", category.Name),
 		sql.Named("CreatedBy", category.CreatedBy),
 		sql.Named("ModifiedBy", category.ModifiedBy))
 
-	err = row.Scan(&category)
 	if err != nil {
 		return err
 	}

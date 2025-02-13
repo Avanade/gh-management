@@ -119,7 +119,7 @@ func (r *articleRepository) SelectById(id int64) (*model.Article, error) {
 }
 
 func (r *articleRepository) Update(article *model.Article) error {
-	row, err := r.QueryRow("[dbo].[usp_GuidanceCategoryArticle_Update]",
+	_, err := r.QueryRow("[dbo].[usp_GuidanceCategoryArticle_Update]",
 		sql.Named("Id", article.Id),
 		sql.Named("Name", article.Name),
 		sql.Named("Url", article.Url),
@@ -128,10 +128,6 @@ func (r *articleRepository) Update(article *model.Article) error {
 		sql.Named("CreatedBy", article.CreatedBy),
 		sql.Named("ModifiedBy", article.ModifiedBy))
 
-	if err != nil {
-		return err
-	}
-	err = row.Scan(&article)
 	if err != nil {
 		return err
 	}

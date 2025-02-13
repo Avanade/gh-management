@@ -18,11 +18,11 @@ func (s *articleService) Insert(article *model.Article) (int64, error) {
 	if err != nil {
 		return 0, err
 	}
-	return id, err
+	return id, nil
 }
 
-func (s *articleService) GetByCategoryId(id int64) ([]model.Article, error) {
-	data, err := s.Repository.Article.SelectByCategoryId(id)
+func (s *articleService) GetByCategoryId(categoryId int64) ([]model.Article, error) {
+	data, err := s.Repository.Article.SelectByCategoryId(categoryId)
 	if err != nil {
 		return nil, err
 	}
@@ -41,5 +41,5 @@ func (s *articleService) Update(article *model.Article) error {
 	if err != nil {
 		return err
 	}
-	return err
+	return nil
 }

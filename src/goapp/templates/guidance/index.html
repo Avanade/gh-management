@@ -1,7 +1,7 @@
 {{ define "content" }}
 
 <div id="pageTitle">Guidance</div>
-<div x-data="guidanceData()" x-init="GetCategories()">
+<div x-data="guidanceData()">
   <div class="flex justify-between">
     <div>
       <p class="mt-2 text-sm text-gray-700">
@@ -61,7 +61,7 @@
             <div
               class="px-4 py-4 sm:px-6 hover:bg-gray-50 cursor-pointer"
               x-bind:class="category.showStatus? 'bg-gray-50':''"
-              @click="category.showStatus = !category.showStatus;GetArticlesByCategoryId(category.id, index) "
+              @click="category.showStatus = !category.showStatus;getArticlesByCategoryId(category.id, index) "
             >
               <div class="flex items-center justify-between right-0">
                 <p
@@ -306,14 +306,14 @@
   function guidanceData() {
     return {
       showSpinner: true,
-      CategoryList: [],
+      categories: [],
       view: "",
       search: "",
-      GetCategories() {
+      async init() {
         fetch("/api/categories")
           .then((r) => {
             r.json().then((body) => {
-              this.CategoryList = body;
+              this.categories = body;
               this.showSpinner = false;
             });
           })
@@ -323,22 +323,21 @@
       },
       get filteredCategory() {
         if (!this.search) {
-          return this.CategoryList;
+          return this.categories;
         } else {
-          return this.CategoryList.filter((p) =>
+          return this.categories.filter((p) =>
             p.Name.toLowerCase().includes(this.search.toLowerCase())
           );
         }
       },
-      GetArticlesByCategoryId(id, i) {
-        if (!this.CategoryList[i]["statusLoaded"]) {
-          this.CategoryList[i]["showSpinner"] = true;
+      getArticlesByCategoryId(id, i) {
+        if (!this.categories[i]["statusLoaded"]) {
+          this.categories[i]["showSpinner"] = true;
           fetch(`/api/categories/${id}/articles`).then((r) => {
             r.json().then((body) => {
-              this.CategoryList[i]["articles"] = body;
-              this.CategoryList[i]["statusLoaded"] = true;
-              this.CategoryList[i]["showSpinner"] = false;
-              console.log("This is the body:> ",body)
+              this.categories[i]["articles"] = body;
+              this.categories[i]["statusLoaded"] = true;
+              this.categories[i]["showSpinner"] = false;
             });
           });
         }

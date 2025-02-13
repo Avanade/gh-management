@@ -39,7 +39,7 @@ func (c *categoryController) GetCategories(w http.ResponseWriter, r *http.Reques
 	json.NewEncoder(w).Encode(categories)
 }
 
-func (c *categoryController) GetCategoriesById(w http.ResponseWriter, r *http.Request) {
+func (c *categoryController) GetCategoryById(w http.ResponseWriter, r *http.Request) {
 	logger := appinsights_wrapper.NewClient()
 	defer logger.EndOperation()
 
@@ -70,7 +70,7 @@ func (c *categoryController) GetCategoriesById(w http.ResponseWriter, r *http.Re
 	json.NewEncoder(w).Encode(category)
 }
 
-func (c *categoryController) CreateNewCategory(w http.ResponseWriter, r *http.Request) {
+func (c *categoryController) CreateCategory(w http.ResponseWriter, r *http.Request) {
 	logger := appinsights_wrapper.NewClient()
 	defer logger.EndOperation()
 
@@ -88,19 +88,16 @@ func (c *categoryController) CreateNewCategory(w http.ResponseWriter, r *http.Re
 	profile := iprofile.(map[string]interface{})
 	username := fmt.Sprint(profile["preferred_username"])
 
-	if categories.Id == 0 {
-		categories.CreatedBy = username
-		categories.ModifiedBy = username
-		result, err := c.Service.Category.Insert(&categories)
-		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			json.NewEncoder(w).Encode(errors.New("error saving a new Category"))
-			return
-		}
-		w.WriteHeader(http.StatusOK)
-		json.NewEncoder(w).Encode(result)
+	categories.CreatedBy = username
+	categories.ModifiedBy = username
+	result, err := c.Service.Category.Insert(&categories)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(errors.New("error saving a new Category"))
+		return
 	}
-
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(result)
 }
 
 func (c *categoryController) UpdateCategory(w http.ResponseWriter, r *http.Request) {
@@ -134,12 +131,11 @@ func (c *categoryController) UpdateCategory(w http.ResponseWriter, r *http.Reque
 	data.CreatedBy = username
 	data.ModifiedBy = username
 
-	updatedCategory := c.Service.Category.Update(&data)
+	err = c.Service.Category.Update(&data)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(errors.New("error updating the article"))
 		return
 	}
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(updatedCategory)
 }

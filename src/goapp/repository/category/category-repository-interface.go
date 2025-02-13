@@ -7,6 +7,6 @@ import (
 type CategoryRepository interface {
 	Insert(category *model.Category) (int64, error)
 	Select() ([]model.Category, error)
-	SelectById(categoryid int64) (*model.Category, error)
+	SelectById(id int64) (*model.Category, error)
 	Update(category *model.Category) error
 }

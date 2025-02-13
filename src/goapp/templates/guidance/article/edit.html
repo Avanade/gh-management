@@ -1,7 +1,7 @@
 {{ define "content" }}
 
 <div id="pageTitle">Guidance</div>
-<div x-data="data()" x-init="init()">
+<div x-data="data()">
   <form onsubmit="event.preventDefault()" autocomplete="off">
     <fieldset x-bind:disabled="mode=='view'">
       <div>
@@ -31,7 +31,7 @@
           <div class="basis-9/12 md:base-full md:flex-row mx-3">
             <div
               x-data="combobox({
-                                  ajax: GetCategories,
+                                  ajax: getCategories,
                                   id : 'id',
                                   text : 'name',
                                   isInsertable : true,
@@ -253,7 +253,7 @@
       },
     };
   }
-  async function GetCategories() {
+  async function getCategories() {
     const res = await fetch("/api/categories");
 
     const data = await res.json();

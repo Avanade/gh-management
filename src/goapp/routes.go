@@ -163,9 +163,9 @@ func setApiRoutes() {
 	// httpRouter.PUT("/api/categories/{id}", m.Chain(rtApi.CategoryUpdate, m.AzureAuth(), m.GitHubAuth()))
 	// httpRouter.GET("/api/categories/{id}", m.Chain(rtApi.GetCategoryByID, m.AzureAuth(), m.GitHubAuth()))
 	httpRouter.GET("/api/categories", m.Chain(cont.Category.GetCategories, m.AzureAuth(), m.GitHubAuth()))
-	httpRouter.GET("/api/categories/{id}", m.Chain(cont.Category.GetCategoriesById, m.AzureAuth(), m.GitHubAuth()))
+	httpRouter.GET("/api/categories/{id}", m.Chain(cont.Category.GetCategoryById, m.AzureAuth(), m.GitHubAuth()))
 	httpRouter.PUT("/api/categories/{id}", m.Chain(cont.Category.UpdateCategory, m.AzureAuth(), m.GitHubAuth()))
-	httpRouter.POST("/api/categories/", m.Chain(cont.Category.CreateNewCategory, m.AzureAuth(), m.GitHubAuth()))
+	httpRouter.POST("/api/categories", m.Chain(cont.Category.CreateCategory, m.AzureAuth(), m.GitHubAuth()))
 
 	// CATEGORY ARTICLES API/
 	// httpRouter.GET("/api/categories/{id}/articles", m.Chain(rtApi.GetCategoryArticlesByCategoryId, m.AzureAuth(), m.GitHubAuth()))
@@ -174,7 +174,7 @@ func setApiRoutes() {
 	httpRouter.GET("/api/categories/{id}/articles", m.Chain(cont.Article.GetArticlesByCategoryId, m.AzureAuth(), m.GitHubAuth()))
 	httpRouter.GET("/api/articles/{id}", m.Chain(cont.Article.GetArticleById, m.AzureAuth(), m.GitHubAuth()))
 	httpRouter.PUT("/api/articles/{id}", m.Chain(cont.Article.UpdateArticle, m.AzureAuth(), m.GitHubAuth()))
-	httpRouter.POST("/api/articles/{id}/articles", m.Chain(cont.Article.CreateNewArticle, m.AzureAuth(), m.GitHubAuth()))
+	httpRouter.POST("/api/articles/{id}/articles", m.Chain(cont.Article.CreateArticle, m.AzureAuth(), m.GitHubAuth()))
 	// REPOSITORIES API
 	httpRouter.GET("/api/repositories", m.Chain(rtApi.GetRepositories, m.AzureAuth()))
 	httpRouter.GET("/api/repositories/my", m.Chain(rtApi.GetMyRepositories, m.AzureAuth(), m.GitHubAuth()))

@@ -25,7 +25,7 @@
         <div class="basis-9/12 md:base-full md:flex-row mx-3">
           <div
             x-data="combobox({
-                                  ajax: GetCategories,
+                                  ajax: getCategories,
                                   id : 'id',
                                   text : 'name',
                                   isInsertable : true,
@@ -177,7 +177,7 @@
       },
     };
   }
-  async function GetCategories() {
+  async function getCategories() {
     const res = await fetch("/api/categories");
     const data = await res.json();
     return data;

@@ -135,17 +135,16 @@ func (c *articleController) UpdateArticle(w http.ResponseWriter, r *http.Request
 		CategoryId: data.Category.Id,
 	}
 
-	updatedArticle := c.Service.Article.Update(&article)
+	err = c.Service.Article.Update(&article)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(errors.New("error updating the article"))
 		return
 	}
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(updatedArticle)
 }
 
-func (c *articleController) CreateNewArticle(w http.ResponseWriter, r *http.Request) {
+func (c *articleController) CreateArticle(w http.ResponseWriter, r *http.Request) {
 	logger := appinsights_wrapper.NewClient()
 	defer logger.EndOperation()
 

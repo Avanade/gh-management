@@ -18,7 +18,7 @@ func (s *categoryService) Insert(category *model.Category) (int64, error) {
 	if err != nil {
 		return 0, err
 	}
-	return id, err
+	return id, nil
 }
 
 func (s *categoryService) GetAll() ([]model.Category, error) {
@@ -38,5 +38,5 @@ func (s *categoryService) Update(category *model.Category) error {
 	if err != nil {
 		return err
 	}
-	return err
+	return nil
 }
