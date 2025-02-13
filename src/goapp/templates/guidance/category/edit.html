@@ -125,10 +125,9 @@
           await fetch("/api/categories/" + "{{.Id}}")
             .then((r) => {
               r.json().then((body) => {
-                this.form.id = body[0]["Id"];
-                this.form.name = body[0]["Name"];
+                this.form.id = body.id;
+                this.form.name = body.name;
               });
-              console.log(this.form);
             })
             .catch((e) => {
               console.log(e);

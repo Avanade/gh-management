@@ -1,16 +1,15 @@
+ 
 {{ define "content" }}
-
 <div id="pageTitle">Guidance</div>
-<div x-data="data()" x-init="onload()">
+<div x-data="data()">
   <form onsubmit="event.preventDefault()" autocomplete="off">
     <div>
       <h3 class="text-lg leading-6 font-medium text-gray-900">New Article</h3>
       <p class="mt-1 max-w-2xl text-sm text-gray-500">
         Fill-out the form to add an article, information, or instruction for
-        InnerSource, Open Source, and connecting with communities at Avanade. ​
+        InnerSource, Open Source, and connecting with communities at Avanade. 
       </p>
     </div>
-
     <div class="max-w-screen-md">
       <div class="flex flex-col md:flex-row mt-5 my-3">
         <div
@@ -23,20 +22,17 @@
             Category
           </label>
         </div>
-
         <div class="basis-9/12 md:base-full md:flex-row mx-3">
           <div
-            id="NowBtn"
             x-data="combobox({
-                                  ajax: getCategories,
-                                  id : 'Id',
-                                  text : 'Name',
+                                  ajax: GetCategories,
+                                  id : 'id',
+                                  text : 'name',
                                   isInsertable : true,
-                           
-                               
+
                               })"
             x-modelable="selected"
-            x-model="form.names"
+            x-model="categoryArticle.category"
           >
             <div x-html="template"></div>
           </div>
@@ -54,7 +50,6 @@
             Name
           </label>
         </div>
-
         <div class="basis-9/12 md:base-full md:flex-row mx-3">
           <div>
             <input
@@ -68,7 +63,7 @@
           </div>
         </div>
       </div>
-      <div class="flex flex flex-col md:flex-row my-3">
+      <div class="flex flex-col md:flex-row my-3">
         <div class="basis-1/4 md:base-full md:flex-row mx-3 items-center flex">
           <label
             for="activity_name"
@@ -77,7 +72,6 @@
             URL
           </label>
         </div>
-
         <div class="basis-9/12 md:base-full md:flex-row mx-3">
           <div>
             <input
@@ -91,7 +85,7 @@
           </div>
         </div>
       </div>
-      <div class="flex flex flex-col md:flex-row my-3">
+      <div class="flex flex-col md:flex-row my-3">
         <div class="basis-1/4 md:base-full md:flex-row mx-3 items-center flex">
           <label
             for="activity_name"
@@ -100,7 +94,6 @@
             Body
           </label>
         </div>
-
         <div class="basis-9/12 md:base-full md:flex-row mx-3">
           <div>
             <textarea
@@ -136,63 +129,56 @@
     </div>
   </form>
 </div>
-
 <script src="/public/components/clsDropdown.js"></script>
 <script src="/public/components/combobox.js"></script>
 <script type="text/javascript">
   function data() {
     return {
-      form: {
-        id: "{{.Id}}",
-        name: "",
-        names: [],
-        categoryArticles: [],
-      },
       categoryArticle: {
         name: "",
         url: "",
         body: "",
-        categoryId: 0,
+        category: []
       },
       submit() {
-        if (this.form.names[0]["text"].toString() === "") {
-          this.form.combobox;
-          return;
+        let postData = {
+          // follow the dto/model format of the api
+          name: this.categoryArticle.name,
+          url: this.categoryArticle.url,
+          body: this.categoryArticle.body,
+          // Category
+          category: {
+            id: this.categoryArticle.category[0].id,
+            name: this.categoryArticle.category[0].text
+          }
         }
-
         var modal = Alpine.store("master").modal;
         modal.update("loading", "Saving", "Please wait.", "", "");
-        if (!this.form.id) {
-          this.form.id = 0;
+        if (!this.categoryArticle.id) {
+          this.categoryArticle.id = 0;
         }
-
-        this.form.categoryArticles.push(this.categoryArticle);
-        this.form.name = this.form.names[0]["text"].toString();
-
-        postData = this.form;
-
         Alpine.store("master").postData(
-          "/api/categories",
+          `/api/articles/${this.categoryArticle.id}/articles`,
           postData,
           "Your article has been added.",
           "Go to list of guidance",
           "/guidance"
         );
       },
-
       get isValid() {
-        if (this.form.names.length !== 0) {
+        if (
+          this.categoryArticle.name !== "" &&
+          this.categoryArticle.category.length !== 0
+        ) {
           return true;
         } else {
           return false;
         }
       },
-      onload() {},
     };
   }
-  async function getCategories() {
+  async function GetCategories() {
     const res = await fetch("/api/categories");
-
     const data = await res.json();
     return data;
   }

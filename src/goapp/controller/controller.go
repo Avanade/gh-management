@@ -4,6 +4,8 @@ import (
 	cActivity "main/controller/activity"
 	cActivityType "main/controller/activitytype"
 	cApprovalType "main/controller/approval-type"
+	cArticle "main/controller/article"
+	cCategory "main/controller/category"
 	cContributionArea "main/controller/contributionarea"
 	cExternalLink "main/controller/externallink"
 	cOssContributionSponsor "main/controller/osscontributionsponsor"
@@ -19,6 +21,8 @@ type Controller struct {
 	ExternalLink           cExternalLink.ExternalLinkController
 	OssContributionSponsor cOssContributionSponsor.OSSContributionSponsorController
 	Topic                  cTopic.TopicController
+	Category               cCategory.CategoryController
+	Article                cArticle.ArticleController
 }
 
 type ControllerOptionFunc func(*Controller)
@@ -72,5 +76,17 @@ func NewOssContributionSponsorController(serv *service.Service) ControllerOption
 func NewTopicController(serv *service.Service) ControllerOptionFunc {
 	return func(c *Controller) {
 		c.Topic = cTopic.NewTopicController(serv)
+	}
+}
+
+func NewCategoryController(serv *service.Service) ControllerOptionFunc {
+	return func(c *Controller) {
+		c.Category = cCategory.NewCategoryController(serv)
+	}
+}
+
+func NewArticleController(serv *service.Service) ControllerOptionFunc {
+	return func(c *Controller) {
+		c.Article = cArticle.NewArticleController(serv)
 	}
 }
