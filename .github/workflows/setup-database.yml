@@ -24,7 +24,7 @@ on:
 jobs:
   setup-server-and-database-resource:
     if: ${{ github.event.inputs.deploy_database_resource == 'true' }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     environment: ${{ github.event.inputs.selected_environment }}
 
     steps:
