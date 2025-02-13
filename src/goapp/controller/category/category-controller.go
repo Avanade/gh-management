@@ -27,7 +27,7 @@ func (c *categoryController) GetCategories(w http.ResponseWriter, r *http.Reques
 	logger := appinsights_wrapper.NewClient()
 	defer logger.EndOperation()
 
-	categories, err := c.Service.Category.GetAll()
+	categories, err := c.Service.Category.Get()
 	if err != nil {
 		logger.TrackException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)

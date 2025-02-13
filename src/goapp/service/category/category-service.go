@@ -21,7 +21,7 @@ func (s *categoryService) Insert(category *model.Category) (int64, error) {
 	return id, nil
 }
 
-func (s *categoryService) GetAll() ([]model.Category, error) {
+func (s *categoryService) Get() ([]model.Category, error) {
 	return s.Repository.Category.Select()
 }
 
