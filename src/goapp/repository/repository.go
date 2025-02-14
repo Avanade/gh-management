@@ -7,6 +7,8 @@ import (
 	rActivityHelp "main/repository/activityhelp"
 	rActivityType "main/repository/activitytype"
 	rApprovalType "main/repository/approval-type"
+	rArticle "main/repository/article"
+	rCategory "main/repository/category"
 	rContributionArea "main/repository/contributionarea"
 	rExternalLink "main/repository/externallink"
 	rOssContributionSponsor "main/repository/osscontributionsponsor"
@@ -27,6 +29,8 @@ type Repository struct {
 	RepositoryApprover       rRepositoryApprover.RepositoryApproverRepository
 	User                     rUser.UserRepository
 	Topic                    rTopic.TopicRepository
+	Category                 rCategory.CategoryRepository
+	Article                  rArticle.ArticleRepository
 }
 
 type RepositoryOptionFunc func(*Repository)
@@ -104,5 +108,17 @@ func NewUser(db *database.Database) RepositoryOptionFunc {
 func NewPopularTopic(db *database.Database) RepositoryOptionFunc {
 	return func(r *Repository) {
 		r.Topic = rTopic.NewTopicRepository(db)
+	}
+}
+
+func NewCategory(db *database.Database) RepositoryOptionFunc {
+	return func(r *Repository) {
+		r.Category = rCategory.NewCategoryRepository(db)
+	}
+}
+
+func NewArticle(db *database.Database) RepositoryOptionFunc {
+	return func(r *Repository) {
+		r.Article = rArticle.NewArticleRepository(db)
 	}
 }
