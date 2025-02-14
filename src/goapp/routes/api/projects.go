@@ -1825,41 +1825,6 @@ func AddCollaboratorToRequestedRepo(user string, repo string, repoId int64, logg
 	return resp, nil
 }
 
-func GetPopularTopics(w http.ResponseWriter, r *http.Request) {
-	logger := appinsights_wrapper.NewClient()
-	defer logger.EndOperation()
-
-	params := r.URL.Query()
-	offset, err := strconv.Atoi(params["offset"][0])
-	if err != nil {
-		logger.LogException(err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	rowCount, err := strconv.Atoi(params["rowCount"][0])
-	if err != nil {
-		logger.LogException(err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	result, err := db.GetPopularTopics(offset, rowCount)
-	if err != nil {
-		logger.LogException(err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	jsonResp, err := json.Marshal(result)
-	if err != nil {
-		logger.LogException(err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	w.WriteHeader(http.StatusOK)
-	w.Header().Set("Content-Type", "application/json")
-	w.Write(jsonResp)
-}
-
 func DownloadProjectApprovalsByUsername(w http.ResponseWriter, r *http.Request) {
 	logger := appinsights_wrapper.NewClient()
 	defer logger.EndOperation()

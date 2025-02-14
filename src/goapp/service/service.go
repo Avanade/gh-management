@@ -7,6 +7,8 @@ import (
 	sActivityHelp "main/service/activityhelp"
 	sActivityType "main/service/activitytype"
 	sApprovalType "main/service/approval-type"
+	sArticle "main/service/article"
+	sCategory "main/service/category"
 	sContributionArea "main/service/contributionarea"
 	sEmail "main/service/email"
 	sExternalLink "main/service/externallink"
@@ -28,6 +30,8 @@ type Service struct {
 	RepositoryApprover     sRepositoryApprover.RepositoryApproverService
 	User                   sUser.UserService
 	Topic                  sTopic.TopicService
+	Category               sCategory.CategoryService
+	Article                sArticle.ArticleService
 }
 
 type ServiceOptionFunc func(*Service)
@@ -105,5 +109,17 @@ func NewUserService(repo *repository.Repository) ServiceOptionFunc {
 func NewTopicService(repo *repository.Repository) ServiceOptionFunc {
 	return func(s *Service) {
 		s.Topic = sTopic.NewTopicService(repo)
+	}
+}
+
+func NewCategoryService(repo *repository.Repository) ServiceOptionFunc {
+	return func(s *Service) {
+		s.Category = sCategory.NewCategoryService(repo)
+	}
+}
+
+func NewArticleService(repo *repository.Repository) ServiceOptionFunc {
+	return func(s *Service) {
+		s.Article = sArticle.NewArticleService(repo)
 	}
 }

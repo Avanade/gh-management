@@ -1,7 +1,7 @@
 {{ define "content" }}
 
 <div id="pageTitle">Guidance</div>
-<div x-data="guidanceData()" x-init="getcategory()">
+<div x-data="guidanceData()">
   <div class="flex justify-between">
     <div>
       <p class="mt-2 text-sm text-gray-700">
@@ -61,12 +61,12 @@
             <div
               class="px-4 py-4 sm:px-6 hover:bg-gray-50 cursor-pointer"
               x-bind:class="category.showStatus? 'bg-gray-50':''"
-              @click="category.showStatus = !category.showStatus;getCategoryArticlesById(category.Id, index) "
+              @click="category.showStatus = !category.showStatus;getArticlesByCategoryId(category.id, index) "
             >
               <div class="flex items-center justify-between right-0">
                 <p
                   class="mt-3 text-lg font-medium text-indigo-600 truncate"
-                  x-text=" category.Name"
+                  x-text=" category.name"
                   title="Repository name"
                 ></p>
                 <div></div>
@@ -101,7 +101,7 @@
                         role="listbox"
                       >
                         <li
-                          @click="window.open('/guidance/categories/' + category.Id,'_self')"
+                          @click="window.open('/guidance/categories/' + category.id,'_self')"
                           class="hover:bg-[#fff2eb] relative cursor-pointer select-none py-2 pl-3 pr-9 text-gray-900"
                           id="option-0"
                           role="option"
@@ -168,7 +168,7 @@
                             <b>
                               <p
                                 class="flex items-center text-sm text-black-500"
-                                x-data="{ Name:  item.Name }"
+                                x-data="{ Name:  item.name }"
                                 x-text="Name"
                               ></p>
                             </b>
@@ -176,7 +176,7 @@
                           <div x-show="{{.IsAdmin}}">
                             <div
                               class="flex items-center text-sm text-gray-500 cursor-pointer"
-                              @click="openLink(item.Id)"
+                              @click="openLink(item.id)"
                               title="Update article"
                             >
                               <svg
@@ -200,8 +200,8 @@
                         <div class="mt-2 sm:flex">
                           <div class="flex items-center text-sm text-blue-500">
                             <p>
-                              <a x-data="{checkUrl(url){ return url.startsWith('http') || url == '' ? url : 'https://' + url }}" :href="checkUrl(item.Url)"
-                                ><span x-text="item.Url" ></span>
+                              <a x-data="{checkUrl(url){ return url.startsWith('http') || url == '' ? url : 'https://' + url }}" :href="checkUrl(item.url)"
+                                ><span x-text="item.url" ></span>
                               </a>
                             </p>
                           </div>
@@ -210,7 +210,7 @@
                         <div
                           class="pr-2 py-3 flex items-center text-sm text-black-500 min-w-full whitespace-pre-wrap"
                         >
-                          <p x-data="{ Body:  item.Body}" x-text="Body"></p>
+                          <p x-data="{ Body:  item.body}" x-text="Body"></p>
                         </div>
                       </div>
                     </li>
@@ -306,14 +306,14 @@
   function guidanceData() {
     return {
       showSpinner: true,
-      CategoryList: [],
+      categories: [],
       view: "",
       search: "",
-      getcategory() {
+      async init() {
         fetch("/api/categories")
           .then((r) => {
             r.json().then((body) => {
-              this.CategoryList = body;
+              this.categories = body;
               this.showSpinner = false;
             });
           })
@@ -323,21 +323,21 @@
       },
       get filteredCategory() {
         if (!this.search) {
-          return this.CategoryList;
+          return this.categories;
         } else {
-          return this.CategoryList.filter((p) =>
+          return this.categories.filter((p) =>
             p.Name.toLowerCase().includes(this.search.toLowerCase())
           );
         }
       },
-      getCategoryArticlesById(id, i) {
-        if (!this.CategoryList[i]["statusLoaded"]) {
-          this.CategoryList[i]["showSpinner"] = true;
+      getArticlesByCategoryId(id, i) {
+        if (!this.categories[i]["statusLoaded"]) {
+          this.categories[i]["showSpinner"] = true;
           fetch(`/api/categories/${id}/articles`).then((r) => {
             r.json().then((body) => {
-              this.CategoryList[i]["articles"] = body;
-              this.CategoryList[i]["statusLoaded"] = true;
-              this.CategoryList[i]["showSpinner"] = false;
+              this.categories[i]["articles"] = body;
+              this.categories[i]["statusLoaded"] = true;
+              this.categories[i]["showSpinner"] = false;
             });
           });
         }
