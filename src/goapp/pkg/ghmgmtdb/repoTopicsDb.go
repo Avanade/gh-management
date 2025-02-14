@@ -35,30 +35,3 @@ func InsertProjectTopics(projectId int, topic string) error {
 	}
 	return nil
 }
-
-func GetPopularTopics(offset, rowCount int) ([]PopularTopics, error) {
-
-	db := ConnectDb()
-	defer db.Close()
-
-	param := map[string]interface{}{
-		"Offset":   offset,
-		"RowCount": rowCount,
-	}
-	result, err := db.ExecuteStoredProcedureWithResult("usp_RepositoryTopic_Select_PopularTopic", param)
-	if err != nil {
-		return nil, err
-	}
-
-	popularTopics := make([]PopularTopics, 0)
-
-	for _, v := range result {
-		popularTopic := PopularTopics{
-			Topic: v["Topic"].(string),
-			Total: int(v["Total"].(int64)),
-		}
-		popularTopics = append(popularTopics, popularTopic)
-	}
-
-	return popularTopics, nil
-}
