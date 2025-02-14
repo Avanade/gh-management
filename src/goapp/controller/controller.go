@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"main/config"
 	cActivity "main/controller/activity"
 	cActivityType "main/controller/activitytype"
 	cApprovalType "main/controller/approval-type"
@@ -9,6 +10,7 @@ import (
 	cContributionArea "main/controller/contributionarea"
 	cExternalLink "main/controller/externallink"
 	cOssContributionSponsor "main/controller/osscontributionsponsor"
+	cRepositoryApprover "main/controller/repository-approver"
 	cTopic "main/controller/topic"
 	"main/service"
 )
@@ -20,6 +22,7 @@ type Controller struct {
 	ContributionArea       cContributionArea.ContributionAreaController
 	ExternalLink           cExternalLink.ExternalLinkController
 	OssContributionSponsor cOssContributionSponsor.OSSContributionSponsorController
+	RepositoryApprover     cRepositoryApprover.RepositoryApproverController
 	Topic                  cTopic.TopicController
 	Category               cCategory.CategoryController
 	Article                cArticle.ArticleController
@@ -70,6 +73,12 @@ func NewExternalLinkController(serv *service.Service) ControllerOptionFunc {
 func NewOssContributionSponsorController(serv *service.Service) ControllerOptionFunc {
 	return func(c *Controller) {
 		c.OssContributionSponsor = cOssContributionSponsor.NewOssContributionSponsorController(serv)
+	}
+}
+
+func NewRepositoryApproverController(serv *service.Service, conf config.ConfigManager) ControllerOptionFunc {
+	return func(c *Controller) {
+		c.RepositoryApprover = cRepositoryApprover.NewRepositoryApproverController(serv, conf)
 	}
 }
 

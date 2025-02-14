@@ -86,7 +86,8 @@
                 "LINK_MEMBER_PROFILE":"",
                 "LINK_GUEST_PROFILE":"",
                 "LINK_COMMUNITY_SHAREPOINT_SITE":"",
-                "LINK_FOOTERS":""
+                "LINK_FOOTERS":"",
+                "LEGAL_APPROVAL_TYPE_ID":""
             }
         }
     }

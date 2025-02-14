@@ -50,6 +50,7 @@ var (
 		c.NewContributionAreaController(serv),
 		c.NewExternalLinkController(serv),
 		c.NewOssContributionSponsorController(serv),
+		c.NewRepositoryApproverController(serv, conf),
 		c.NewTopicController(serv),
 		c.NewCategoryController(serv),
 		c.NewArticleController(serv))
