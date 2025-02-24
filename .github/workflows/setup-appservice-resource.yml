@@ -96,6 +96,7 @@ jobs:
           parameters.appServiceSettings.value.LINK_GUEST_PROFILE : ${{ vars.LINK_GUEST_PROFILE }}
           parameters.appServiceSettings.value.LINK_COMMUNITY_SHAREPOINT_SITE : ${{ vars.LINK_COMMUNITY_SHAREPOINT_SITE }}
           parameters.appServiceSettings.value.LINK_FOOTERS : ${{ vars.LINK_FOOTERS }}
+          parameters.appServiceSettings.value.LEGAL_APPROVAL_TYPE_ID : ${{ vars.LEGAL_APPROVAL_TYPE_ID }}
 
       - name: Deploy App Service Plan and Web App
         uses: azure/arm-deploy@v1

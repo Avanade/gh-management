@@ -3,6 +3,7 @@ package config
 import (
 	"log"
 	"os"
+	"strconv" // Add this import
 
 	"github.com/joho/godotenv"
 )
@@ -45,4 +46,12 @@ func (ecm *envConfigManager) GetIsEmailEnabled() bool {
 		return false
 	}
 	return true
+}
+
+func (ecm *envConfigManager) GetLegalApprovalTypeId() int {
+	value, err := strconv.Atoi(os.Getenv("LEGAL_APPROVAL_TYPE_ID"))
+	if err != nil {
+		return 0
+	}
+	return value
 }
