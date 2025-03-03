@@ -62,6 +62,7 @@
                 "APPROVAL_SYSTEM_APP_MODULE_ORGANIZATION":"",
                 "APPROVAL_SYSTEM_APP_MODULE_COPILOT":"",
                 "APPROVAL_SYSTEM_APP_MODULE_ORGACCESS":"",
+                "APPROVALREQUESTS_RETRY_FREQ":"",
                 
                 "GH_AZURE_AD_GROUP":"",
                 "GH_AZURE_AD_ADMIN_GROUP":"",
@@ -71,6 +72,7 @@
                 "COPILOT_GROUP_SLUG": "",
                 "EXEMPTION": "",
 
+                "ENABLED_INDEX_ORG_REPO": "",
                 "ENABLED_REMOVE_COLLABORATORS": "",
                 "ENABLED_REMOVE_ENTERPRISE_MEMBER": "",
 
@@ -87,7 +89,9 @@
                 "LINK_GUEST_PROFILE":"",
                 "LINK_COMMUNITY_SHAREPOINT_SITE":"",
                 "LINK_FOOTERS":"",
-                "LEGAL_APPROVAL_TYPE_ID":""
+                "LEGAL_APPROVAL_TYPE_ID":"",
+
+                "HOME_URL":""
             }
         }
     }
