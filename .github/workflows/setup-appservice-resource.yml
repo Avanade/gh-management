@@ -76,12 +76,14 @@ jobs:
           parameters.appServiceSettings.value.APPROVAL_SYSTEM_APP_MODULE_ORGANIZATION : ${{ vars.APPROVAL_SYSTEM_APP_MODULE_ORGANIZATION }}
           parameters.appServiceSettings.value.APPROVAL_SYSTEM_APP_MODULE_COPILOT : ${{ vars.APPROVAL_SYSTEM_APP_MODULE_COPILOT }}
           parameters.appServiceSettings.value.APPROVAL_SYSTEM_APP_MODULE_ORGACCESS : ${{ vars.APPROVAL_SYSTEM_APP_MODULE_ORGACCESS }}
+          parameters.appServiceSettings.value.APPROVALREQUESTS_RETRY_FREQ: ${{ vars.APPROVALREQUESTS_RETRY_FREQ }}
           parameters.appServiceSettings.value.GH_AZURE_AD_GROUP : ${{ vars.GH_AZURE_AD_GROUP }}
           parameters.appServiceSettings.value.GH_AZURE_AD_ADMIN_GROUP : ${{ vars.GH_AZURE_AD_ADMIN_GROUP }}
           parameters.appServiceSettings.value.SUMMARY_REPORT_TRIGGER : ${{ vars.SUMMARY_REPORT_TRIGGER }}
           parameters.appServiceSettings.value.CONTENT_SECURITY_POLICY : ${{ vars.CONTENT_SECURITY_POLICY }}
           parameters.appServiceSettings.value.COPILOT_GROUP_SLUG : ${{ vars.COPILOT_GROUP_SLUG }}
           parameters.appServiceSettings.value.EXEMPTION : ${{ vars.EXEMPTION }}
+          parameters.appServiceSettings.value.ENABLED_INDEX_ORG_REPO: ${{ vars.ENABLED_INDEX_ORG_REPO }}
           parameters.appServiceSettings.value.ENABLED_REMOVE_COLLABORATORS : ${{ vars.ENABLED_REMOVE_COLLABORATORS }}
           parameters.appServiceSettings.value.ENABLED_REMOVE_ENTERPRISE_MEMBER : ${{ vars.ENABLED_REMOVE_ENTERPRISE_MEMBER }}
           parameters.appServiceSettings.value.ORGANIZATION_NAME : ${{ vars.ORGANIZATION_NAME }}
@@ -97,6 +99,7 @@ jobs:
           parameters.appServiceSettings.value.LINK_COMMUNITY_SHAREPOINT_SITE : ${{ vars.LINK_COMMUNITY_SHAREPOINT_SITE }}
           parameters.appServiceSettings.value.LINK_FOOTERS : ${{ vars.LINK_FOOTERS }}
           parameters.appServiceSettings.value.LEGAL_APPROVAL_TYPE_ID : ${{ vars.LEGAL_APPROVAL_TYPE_ID }}
+          parameters.appServiceSettings.value.HOME_URL : ${{ vars.HOME_URL }}
 
       - name: Deploy App Service Plan and Web App
         uses: azure/arm-deploy@v1
