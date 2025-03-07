@@ -72,7 +72,7 @@ require (
 	github.com/rs/cors v1.11.1
 	github.com/thedatashed/xlsxreader v1.2.5
 	golang.org/x/crypto v0.31.0 // indirect
-	golang.org/x/net v0.27.0 // indirect
+	golang.org/x/net v0.33.0 // indirect
 	golang.org/x/oauth2 v0.6.0
 	golang.org/x/text v0.21.0
 	google.golang.org/appengine v1.6.7 // indirect
