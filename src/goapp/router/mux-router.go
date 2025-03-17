@@ -2,8 +2,10 @@ package router
 
 import (
 	"fmt"
+	"main/pkg/envvar"
 	"net/http"
 	"os"
+	"strings"
 
 	"github.com/gorilla/mux"
 	"github.com/rs/cors"
@@ -74,6 +76,7 @@ func (mr *muxRouter) SERVE(port string) {
 		defaultCors,
 		secureMiddleware.Handler,
 		commonHeadersMiddleware,
+		redirectMiddleware,
 	)
 	http.Handle("/", muxDispatcher)
 
@@ -94,6 +97,31 @@ func commonHeadersMiddleware(next http.Handler) http.Handler {
 		w.Header().Set("Cache-Control", "no-store")
 
 		// Call the next handler in the chain
+		next.ServeHTTP(w, r)
+	})
+}
+
+func redirectMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		domainsStr := envvar.GetEnvVar("CUSTOM_DOMAINS", "")
+		if domainsStr == "" {
+			next.ServeHTTP(w, r)
+			return
+		}
+
+		// Trims the spaces from the domain strin
+		domainsStr = strings.TrimSpace(domainsStr)
+
+		// Splits the domain string into an array of domains
+		domains := strings.Split(domainsStr, ",")
+
+		// Redirect if one of the domains is found in the request host
+		for _, domain := range domains {
+			if strings.Contains(r.Host, domain) {
+				http.Redirect(w, r, envvar.GetEnvVar("HOME_URL", "")+r.RequestURI, http.StatusMovedPermanently)
+			}
+		}
+
 		next.ServeHTTP(w, r)
 	})
 }

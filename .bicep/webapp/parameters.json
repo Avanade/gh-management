@@ -91,7 +91,8 @@
                 "LINK_FOOTERS":"",
                 "LEGAL_APPROVAL_TYPE_ID":"",
 
-                "HOME_URL":""
+                "HOME_URL":"",
+                "CUSTOM_DOMAINS":""
             }
         }
     }

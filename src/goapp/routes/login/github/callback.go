@@ -158,13 +158,24 @@ func GithubForceSaveHandler(w http.ResponseWriter, r *http.Request) {
 	// Save and Validate github account
 	azProfile := sessionaz.Values["profile"].(map[string]interface{})
 	userPrincipalName := fmt.Sprintf("%s", azProfile["preferred_username"])
-	ghId := strconv.FormatFloat(p["id"].(float64), 'f', 0, 64)
-	ghUser := fmt.Sprintf("%s", p["login"])
+	newGhId := strconv.FormatFloat(p["id"].(float64), 'f', 0, 64)
+	newGhUser := fmt.Sprintf("%s", p["login"])
 
 	if ev.GetEnvVar("ENABLED_REMOVE_ENTERPRISE_MEMBER", "false") == "true" {
-		user, err := ghAPI.GetUserByLogin(ghUser, os.Getenv("GH_TOKEN"))
+		// Get the current associated GitHub account
+		currentDbUser, err := db.GetUserByUserPrincipal(userPrincipalName)
 		if err != nil {
 			log.Println(err.Error())
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		// Get the user by GitHub ID
+		user, err := ghAPI.GetUserByLogin(currentDbUser[0]["GitHubUser"].(string), os.Getenv("GH_TOKEN"))
+		if err != nil {
+			log.Println(err.Error())
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
 		}
 		enterpriseToken := os.Getenv("GH_ENTERPRISE_TOKEN")
 		enterpriseId := os.Getenv("GH_ENTERPRISE_ID")
@@ -176,7 +187,7 @@ func GithubForceSaveHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	result, err := db.UpdateUserGithub(userPrincipalName, ghId, ghUser, 1)
+	result, err := db.UpdateUserGithub(userPrincipalName, newGhId, newGhUser, 1)
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -184,7 +195,7 @@ func GithubForceSaveHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	session.Values["ghIsValid"] = result["IsValid"].(bool)
 
-	CheckMembership(userPrincipalName, ghUser)
+	CheckMembership(userPrincipalName, newGhUser)
 
 	session.Options = &sessions.Options{
 		Path:     "/",
