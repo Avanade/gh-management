@@ -100,6 +100,7 @@ jobs:
           parameters.appServiceSettings.value.LINK_FOOTERS : ${{ vars.LINK_FOOTERS }}
           parameters.appServiceSettings.value.LEGAL_APPROVAL_TYPE_ID : ${{ vars.LEGAL_APPROVAL_TYPE_ID }}
           parameters.appServiceSettings.value.HOME_URL : ${{ vars.HOME_URL }}
+          parameters.appServiceSettings.value.CUSTOM_DOMAINS : ${{ vars.CUSTOM_DOMAINS }}
 
       - name: Deploy App Service Plan and Web App
         uses: azure/arm-deploy@v1
