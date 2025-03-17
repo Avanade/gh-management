@@ -1,6 +1,9 @@
 module main
 
-go 1.23
+go 1.23.0
+
+toolchain go1.23.2
+
 require (
 	github.com/coreos/go-oidc v2.2.1+incompatible
 	github.com/goccy/go-json v0.10.2
