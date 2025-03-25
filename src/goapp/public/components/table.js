@@ -130,7 +130,6 @@ const table = ({
         this.load()
       },
       onSearchSubmit(e){
-        this.filter = 10;
         this.page = 0;
         this.search = e.target.value;
         this.load();
@@ -157,7 +156,7 @@ const table = ({
         this.columns.forEach(col => {
           for (const key in data) {
             if(key === col.value){
-              html = html.concat(`<td class="whitespace-nowrap py-4 px-3 text-sm text-gray-500">${col.render != undefined ? col.render(data[key]) : data[key]}</td>`)
+              html = html.concat(`<td class="whitespace-nowrap py-4 px-3 text-sm text-gray-500">${col.render != undefined ? col.render(data[key], data) : data[key]}</td>`)
             }
           }
         });
@@ -214,6 +213,7 @@ const table = ({
                             x-bind:colspan='columns.length'>
                             <p class="text-center my-5">NO RESULT FOUND</p>
                           </td>
+                        </tr>
                         <tr x-show='isLoading' x-transition>
                           <td x-bind:colspan='columns.length'>
                             <svg 

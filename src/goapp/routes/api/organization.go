@@ -9,12 +9,14 @@ import (
 	"strings"
 
 	"main/pkg/appinsights_wrapper"
+	ev "main/pkg/envvar"
 	db "main/pkg/ghmgmtdb"
 	ghAPI "main/pkg/github"
 	"main/pkg/notification"
 	"main/pkg/session"
 
 	"github.com/gorilla/mux"
+	"github.com/microsoft/ApplicationInsights-Go/appinsights"
 	"github.com/microsoft/ApplicationInsights-Go/appinsights/contracts"
 )
 
@@ -315,7 +317,7 @@ func GetAllRegionalOrganizations(w http.ResponseWriter, r *http.Request) {
 	logger := appinsights_wrapper.NewClient()
 	defer logger.EndOperation()
 
-	regOrgs, err := db.GetAllRegionalOrganizations()
+	regOrgs, err := db.SelectRegionalOrganization(nil)
 	if err != nil {
 		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -325,6 +327,34 @@ func GetAllRegionalOrganizations(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	w.Header().Set("Content-Type", "application/json")
 	jsonResp, err := json.Marshal(regOrgs)
+	if err != nil {
+		logger.LogException(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.Write(jsonResp)
+}
+
+func GetAllRegionalOrganizationsName(w http.ResponseWriter, r *http.Request) {
+	logger := appinsights_wrapper.NewClient()
+	defer logger.EndOperation()
+
+	regOrgs, err := db.SelectRegionalOrganization(nil)
+	if err != nil {
+		logger.LogException(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	var orgNames []string
+
+	for _, org := range regOrgs {
+		orgNames = append(orgNames, org.Name)
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Header().Set("Content-Type", "application/json")
+	jsonResp, err := json.Marshal(orgNames)
 	if err != nil {
 		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -443,6 +473,111 @@ func IndexRegionalOrganizations(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 }
 
+type Member struct {
+	NodeId     string
+	DatabaseId int64
+	Username   string
+	Email      string
+}
+
+func ScanCommunityOrganizations(w http.ResponseWriter, r *http.Request) {
+	logger := appinsights_wrapper.NewClient()
+	defer logger.EndOperation()
+
+	// Fetch all community organizations (opensource, innersource, regional)
+	communityOrgs := []string{os.Getenv("GH_ORG_OPENSOURCE"), os.Getenv("GH_ORG_INNERSOURCE")}
+	isEnabled := db.NullBool{Value: true}
+	regionalOrgs, err := db.SelectRegionalOrganization(&isEnabled)
+	if err != nil {
+		logger.LogException(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	logger.LogTrace(fmt.Sprint("Fetched regional organizations.  regionalOrgs.Length : ", len(regionalOrgs)), contracts.Information)
+	for _, regionalOrg := range regionalOrgs {
+		if !regionalOrg.IsRegionalOrganization {
+			continue
+		}
+		communityOrgs = append(communityOrgs, regionalOrg.Name)
+	}
+	logger.LogTrace(fmt.Sprint("Filter community organizations. communityOrgs.Length : ", len(communityOrgs)), contracts.Information)
+
+	// Fetch all enterprise members
+	enterpriseToken := os.Getenv("GH_ENTERPRISE_TOKEN")
+	enterpriseName := os.Getenv("GH_ENTERPRISE_NAME")
+	ghEnterpriseMembers, err := ghAPI.GetMembersByEnterprise(enterpriseName, enterpriseToken)
+	if err != nil {
+		logger.LogException(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	logger.LogTrace(fmt.Sprint("Fetched enterprise members. enterpriseMembers.Length : ", len(ghEnterpriseMembers.Members)), contracts.Information)
+
+	// Filter enterprise members if they are in the community organizations
+	var communityMembers []Member
+	communityMembersSet := make(map[string]struct{})
+	for _, communityOrg := range communityOrgs {
+		token := os.Getenv("GH_TOKEN")
+		// Fetch all members of the community organization
+		members, err := ghAPI.OrgListMembers(token, communityOrg, "all")
+		if err != nil {
+			logger.LogException(err)
+			continue
+		}
+
+		for _, member := range members {
+			for _, ghEnterpriseMember := range ghEnterpriseMembers.Members {
+				if member.GetLogin() == ghEnterpriseMember.Login {
+					// Check if exist in communityMembers
+					if _, exists := communityMembersSet[ghEnterpriseMember.Login]; !exists {
+						communityMembers = append(communityMembers, Member{DatabaseId: ghEnterpriseMember.DatabaseId, Username: ghEnterpriseMember.Login, Email: ghEnterpriseMember.EnterpriseEmail})
+						communityMembersSet[ghEnterpriseMember.Login] = struct{}{}
+						break
+					}
+				}
+			}
+		}
+	}
+	logger.LogTrace(fmt.Sprint("Filter github enterprise members if they are a member of any community organizations. communityMembers.Length : ", len(communityMembers)), contracts.Information)
+
+	var notifiedUsers []string
+	// Notify all members that are not in community portal database
+	for _, communityMember := range communityMembers {
+		email, err := db.GetUserEmailByGithubId(fmt.Sprint(communityMember.DatabaseId))
+		if err != nil {
+			logger.LogException(err)
+			continue
+		}
+
+		if email == "" {
+			if ev.GetEnvVar("ENABLED_REMOVE_COLLABORATORS", "false") == "true" {
+				// Notify the user to associate their account with the community
+				messageBody := notification.AssociateGithubAccountReminderMessageBody{
+					Recipients:          []string{communityMember.Email},
+					CommunityPortalLink: os.Getenv("HOME_URL"),
+				}
+				err = messageBody.Send()
+				if err != nil {
+					logger.LogException(err)
+				}
+			}
+			notifiedUsers = append(notifiedUsers, communityMember.Email)
+		}
+	}
+
+	notifiedUsersChunks := splitStringArray(notifiedUsers, 50)
+
+	notifiedUsersTC := appinsights.NewTraceTelemetry("Notified Users", contracts.Information)
+	for indexNotifiedUsersChunk, notifiedUsersChunk := range notifiedUsersChunks {
+		notifiedUsersTC.Properties[fmt.Sprint("NotifiedUsers", indexNotifiedUsersChunk)] = strings.Join(notifiedUsersChunk, ",")
+	}
+	logger.Track(notifiedUsersTC)
+	logger.LogTrace(fmt.Sprint("Notified users. notifiedUsers.Length : ", len(notifiedUsers)), contracts.Information)
+
+	w.WriteHeader(http.StatusOK)
+	w.Header().Set("Content-Type", "application/json")
+}
+
 func ReprocessCommunityApprovalRequestNewOrganizations() {
 	logger := appinsights_wrapper.NewClient()
 	defer logger.EndOperation()
@@ -458,4 +593,16 @@ func ReprocessCommunityApprovalRequestNewOrganizations() {
 			logger.LogTrace("ID:"+strconv.FormatInt(item.Id, 10)+" "+err.Error(), contracts.Error)
 		}
 	}
+}
+
+func splitStringArray(arr []string, chunkSize int) [][]string {
+	var chunks [][]string
+	for i := 0; i < len(arr); i += chunkSize {
+		end := i + chunkSize
+		if end > len(arr) {
+			end = len(arr)
+		}
+		chunks = append(chunks, arr[i:end])
+	}
+	return chunks
 }

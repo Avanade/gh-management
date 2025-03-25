@@ -263,8 +263,8 @@
                 <div class="grow">
                   <div x-data="combobox({
                     ajax: getAllTopics,
-                    id : 'Topic',
-                    text : 'Topic',
+                    id : 'topic',
+                    text : 'topic',
                     displaySearch : true,
                     isMultiple: true,
                     searchPlaceholder: 'Search a topic',
@@ -547,7 +547,7 @@
         
           <div class="fixed inset-0 z-10 overflow-y-auto">
             <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
-              <div class="relative transform overflow-hidden rounded-lg bg-white px-4 pb-4 pt-5 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg sm:p-6 opacity-100 translate-y-0 sm:scale-100">
+              <div class="relative transform overflow-visible rounded-lg bg-white px-4 pb-4 pt-5 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg sm:p-6 opacity-100 translate-y-0 sm:scale-100">
                 
                 <div class="mt-1 sm:mt-2">
                   <h3 class="text-base font-semibold leading-6 text-gray-900" id="modal-title">TRANSFER TO REGIONAL ORG</h3>
@@ -679,9 +679,9 @@
           this.totalClickedExpand++
           this.popularTopics = await getPopularTopics(all)
           this.wordCloud = wordCloud("#WordCloudContainer")
-          const size = getSize(this.popularTopics[0].Total)
+          const size = getSize(this.popularTopics[0].total)
           this.wordCloud.update(this.popularTopics.map((v, i) => {
-            return { text: v.Topic, size: v.Total * size}
+            return { text: v.topic, size: v.total * size}
           }));
         }
         this.wordCloudButtonText = !this.isShowWordCloud ? 'Show more' : 'Show less'
@@ -694,8 +694,8 @@
                         <span class="font-bold mr-2 pl-1">Popular Topics</span>
                         <span>
                           <template x-for="(popularTopic, index) in topFivePopularTopics">
-                            <a x-bind:href="'/search?search=' + popularTopic.Topic">
-                              <span class="text-xs px-2 py-1 mr-2 bg-sky-100 rounded-lg text-sky-800 items-center" x-text="popularTopic.Topic">
+                            <a x-bind:href="'/search?search=' + popularTopic.topic">
+                              <span class="text-xs px-2 py-1 mr-2 bg-sky-100 rounded-lg text-sky-800 items-center" x-text="popularTopic.topic">
                               </span>
                             </a>
                           </template>

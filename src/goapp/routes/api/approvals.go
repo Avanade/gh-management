@@ -23,7 +23,6 @@ type ApprovalReAssignRequestBody struct {
 	Username            string `json:"Username"`
 	ApplicationId       string `json:"ApplicationId"`
 	ApplicationModuleId string `json:"ApplicationModuleId"`
-	ItemId              string `json:"itemId"`
 	ApproveText         string `json:"ApproveText"`
 	RejectText          string `json:"RejectText"`
 }
@@ -147,8 +146,8 @@ func UpdateApprovalReassignApprover(w http.ResponseWriter, r *http.Request) {
 			OSSContributionInformation: v["OSSContributionInformation"].(string),
 			RequestStatus:              v["RequestStatus"].(string),
 		}
-		data.ApproveUrl = fmt.Sprintf("%s/response/%s/%s/%s/1", os.Getenv("APPROVAL_SYSTEM_APP_URL"), req.ApplicationId, req.ApplicationModuleId, req.ItemId)
-		data.RejectUrl = fmt.Sprintf("%s/response/%s/%s/%s/0", os.Getenv("APPROVAL_SYSTEM_APP_URL"), req.ApplicationId, req.ApplicationModuleId, req.ItemId)
+		data.ApproveUrl = fmt.Sprintf("%s/response/%s/%s/%s/1", os.Getenv("APPROVAL_SYSTEM_APP_URL"), req.ApplicationId, req.ApplicationModuleId, req.Id)
+		data.RejectUrl = fmt.Sprintf("%s/response/%s/%s/%s/0", os.Getenv("APPROVAL_SYSTEM_APP_URL"), req.ApplicationId, req.ApplicationModuleId, req.Id)
 		data.ApproveText = req.ApproveText
 		data.RejectText = req.RejectText
 
@@ -202,8 +201,8 @@ func UpdateCommunityApprovalReassignApprover(w http.ResponseWriter, r *http.Requ
 			ApproverUserPrincipalName:  v["ApproverUserPrincipalName"].(string),
 			ApprovalDescription:        v["ApprovalDescription"].(string),
 		}
-		data.ApproveUrl = fmt.Sprintf("%s/response/%s/%s/%s/1", os.Getenv("APPROVAL_SYSTEM_APP_URL"), req.ApplicationId, req.ApplicationModuleId, req.ItemId)
-		data.RejectUrl = fmt.Sprintf("%s/response/%s/%s/%s/0", os.Getenv("APPROVAL_SYSTEM_APP_URL"), req.ApplicationId, req.ApplicationModuleId, req.ItemId)
+		data.ApproveUrl = fmt.Sprintf("%s/response/%s/%s/%s/1", os.Getenv("APPROVAL_SYSTEM_APP_URL"), req.ApplicationId, req.ApplicationModuleId, req.Id)
+		data.RejectUrl = fmt.Sprintf("%s/response/%s/%s/%s/0", os.Getenv("APPROVAL_SYSTEM_APP_URL"), req.ApplicationId, req.ApplicationModuleId, req.Id)
 		data.ApproveText = req.ApproveText
 		data.RejectText = req.RejectText
 

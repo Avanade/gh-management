@@ -3,13 +3,17 @@ package authentication
 import (
 	"context"
 	"crypto/rsa"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"log"
 	"main/pkg/envvar"
 	"net/http"
+	"net/url"
 	"os"
+	"strconv"
 	"strings"
+	"time"
 
 	oidc "github.com/coreos/go-oidc"
 	"github.com/golang-jwt/jwt"
@@ -90,4 +94,45 @@ func VerifyAccessToken(r *http.Request) (*jwt.Token, error) {
 	}
 
 	return token, nil
+}
+
+func GenerateToken() (string, error) {
+
+	urlPath := fmt.Sprintf("https://login.microsoftonline.com/%s/oauth2/v2.0/token", os.Getenv("TENANT_ID"))
+	client := &http.Client{
+		Timeout: time.Second * 90,
+	}
+
+	data := url.Values{}
+	data.Set("client_id", os.Getenv("CLIENT_ID"))
+	data.Set("scope", os.Getenv("SCOPE"))
+	data.Set("client_secret", os.Getenv("CLIENT_SECRET"))
+	data.Set("grant_type", "client_credentials")
+	encodedData := data.Encode()
+
+	req, err := http.NewRequest("POST", urlPath, strings.NewReader(encodedData))
+	if err != nil {
+		return "", err
+	}
+
+	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+	req.Header.Add("Content-Length", strconv.Itoa(len(data.Encode())))
+	response, err := client.Do(req)
+	if err != nil {
+		return "", err
+	}
+	defer response.Body.Close()
+
+	var token struct {
+		TokenType    string `json:"token_type"`
+		ExpiresIn    int    `json:"expires_in"`
+		ExtExpiresIn int    `json:"ext_expires_in"`
+		AccessToken  string `json:"access_token"`
+	}
+	err = json.NewDecoder(response.Body).Decode(&token)
+	if err != nil {
+		return "", err
+	}
+
+	return token.AccessToken, nil
 }

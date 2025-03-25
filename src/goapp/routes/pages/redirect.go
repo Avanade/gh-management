@@ -17,6 +17,7 @@ func LoginRedirectHandler(w http.ResponseWriter, r *http.Request) {
 	data := map[string]interface{}{
 		"redirect": redirect,
 	}
+
 	tmpl := template.Must(template.ParseFiles("templates/loginredirect.html"))
 	tmpl.Execute(w, data)
 }

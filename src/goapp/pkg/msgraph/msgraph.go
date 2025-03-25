@@ -34,8 +34,9 @@ type TokenResponse struct {
 }
 
 type ListUsersResponse struct {
-	DataContext string `json:"@odata.context"`
-	Value       []User `json:"value"`
+	DataContext  string `json:"@odata.context"`
+	DataNextLink string `json:"@odata.nextLink"`
+	Value        []User `json:"value"`
 }
 
 type User struct {
@@ -72,7 +73,7 @@ func GetAzGroupIdByName(groupName string) (string, error) {
 	}
 
 	client := &http.Client{
-		Timeout: time.Second * 10,
+		Timeout: time.Second * 90,
 	}
 
 	urlPath := fmt.Sprintf("https://graph.microsoft.com/v1.0/groups?$search=\"displayName:%s\"", groupName)
@@ -109,7 +110,7 @@ func SearchUsers(search string) ([]User, error) {
 	}
 
 	client := &http.Client{
-		Timeout: time.Second * 10,
+		Timeout: time.Second * 90,
 	}
 
 	urlPath := `https://graph.microsoft.com/v1.0/users`
@@ -165,7 +166,7 @@ func GetAllUsers() ([]User, error) {
 	}
 
 	client := &http.Client{
-		Timeout: time.Second * 10,
+		Timeout: time.Second * 90,
 	}
 
 	urlPath := "https://graph.microsoft.com/v1.0/users"
@@ -205,7 +206,7 @@ func IsDirectMember(user string) (bool, error) {
 	}
 
 	client := &http.Client{
-		Timeout: time.Second * 10,
+		Timeout: time.Second * 90,
 	}
 
 	urlPath := fmt.Sprintf("https://graph.microsoft.com/v1.0/users/%s", user)
@@ -241,7 +242,7 @@ func IsGithubEnterpriseMember(user string) (bool, error) {
 	}
 
 	client := &http.Client{
-		Timeout: time.Second * 10,
+		Timeout: time.Second * 90,
 	}
 
 	adGroups, err := db.ADGroup_SelectAll()
@@ -307,7 +308,7 @@ func IsUserAdmin(user string) (bool, error) {
 	}
 
 	client := &http.Client{
-		Timeout: time.Second * 10,
+		Timeout: time.Second * 90,
 	}
 
 	urlPath := fmt.Sprintf("https://graph.microsoft.com/v1.0/users/%s/checkMemberGroups", user)
@@ -364,7 +365,7 @@ func GetUserPhoto(user string) (bool, string, error) {
 	}
 
 	client := &http.Client{
-		Timeout: time.Second * 10,
+		Timeout: time.Second * 90,
 	}
 
 	urlPath := fmt.Sprintf("https://graph.microsoft.com/v1.0/users/%s/photos/64x64/$value", user)
@@ -422,7 +423,7 @@ func requestNewToken() (*TokenResponse, error) {
 
 	urlPath := fmt.Sprintf("https://login.microsoftonline.com/%s/oauth2/v2.0/token", os.Getenv("TENANT_ID"))
 	client := &http.Client{
-		Timeout: time.Second * 10,
+		Timeout: time.Second * 90,
 	}
 
 	data := url.Values{}
@@ -461,7 +462,7 @@ func IsUserExist(userPrincipalName string) (isMember bool, isAccountEnabled bool
 	}
 
 	client := &http.Client{
-		Timeout: time.Second * 10,
+		Timeout: time.Second * 90,
 	}
 
 	urlPath := `https://graph.microsoft.com/v1.0/users`
@@ -515,7 +516,7 @@ func GetTeamsMembers(ChannelId string, token string) ([]User, error) {
 		token = accessToken
 	}
 	client := &http.Client{
-		Timeout: time.Second * 10,
+		Timeout: time.Second * 90,
 	}
 
 	urlPath := fmt.Sprintf("https://graph.microsoft.com/v1.0/groups/%s/members", ChannelId)
@@ -554,7 +555,7 @@ func GetADGroups() ([]ADGroup, error) {
 	}
 
 	client := &http.Client{
-		Timeout: time.Second * 10,
+		Timeout: time.Second * 90,
 	}
 
 	urlPath := "https://graph.microsoft.com/v1.0/groups"
@@ -613,7 +614,7 @@ func HasGitHubAccess(objectId string) (bool, error) {
 	}
 
 	client := &http.Client{
-		Timeout: time.Second * 60,
+		Timeout: time.Second * 90,
 	}
 
 	urlPath := fmt.Sprintf("https://graph.microsoft.com/v1.0/groups/%s/appRoleAssignments", objectId)
@@ -641,4 +642,62 @@ func HasGitHubAccess(objectId string) (bool, error) {
 		}
 	}
 	return false, nil
+}
+
+func GetUsersByGroupId(groupId string) ([]User, error) {
+	accessToken, err := GetToken()
+	if err != nil {
+		return nil, err
+	}
+
+	client := &http.Client{}
+	urlPath := fmt.Sprintf(`https://graph.microsoft.com/v1.0/groups/%s/members`, groupId)
+	URL, errURL := url.Parse(urlPath)
+	if errURL != nil {
+		return nil, errURL
+	}
+
+	query := URL.Query()
+	query.Set("$select", "displayName,otherMails,mail,userPrincipalName,userType")
+	URL.RawQuery = query.Encode()
+
+	var users []User
+	for {
+		req, err := http.NewRequest("GET", URL.String(), nil)
+		if err != nil {
+			return nil, err
+		}
+		req.Header.Add("Authorization", "Bearer "+accessToken)
+		req.Header.Add("ConsistencyLevel", "eventual")
+
+		response, err := client.Do(req)
+		if err != nil {
+			return nil, err
+		}
+		defer response.Body.Close()
+
+		var listUsersResponse ListUsersResponse
+		err = json.NewDecoder(response.Body).Decode(&listUsersResponse)
+		if err != nil {
+			return nil, err
+		}
+
+		// Append users to the list
+		for _, user := range listUsersResponse.Value {
+			if user.Email != "" || len(user.OtherMails) > 0 {
+				users = append(users, user)
+			}
+		}
+
+		// Check if there is a next page
+		if listUsersResponse.DataNextLink == "" {
+			break
+		}
+		URL, err = url.Parse(listUsersResponse.DataNextLink)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return users, nil
 }

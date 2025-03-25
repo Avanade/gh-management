@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"log"
-	router "main/http"
 	"main/pkg/appinsights_wrapper"
 	ev "main/pkg/envvar"
 	"main/pkg/session"
@@ -14,10 +13,6 @@ import (
 	"time"
 
 	"github.com/joho/godotenv"
-)
-
-var (
-	httpRouter router.Router = router.NewMuxRouter()
 )
 
 func main() {

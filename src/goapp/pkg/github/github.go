@@ -5,8 +5,12 @@ import (
 	"encoding/base64"
 	"fmt"
 	"log"
+	"net/http"
 	"os"
 	"strings"
+	"time"
+
+	"github.com/shurcooL/githubv4"
 
 	db "main/pkg/ghmgmtdb"
 
@@ -100,6 +104,15 @@ func GetRepository(repoName string, org string) (*github.Repository, error) {
 	return repo, nil
 }
 
+func GetPermissionLevel(repoOwner string, repoName string, username string) (string, error) {
+	client := CreateClient(os.Getenv("GH_TOKEN"))
+	permission, _, err := client.Repositories.GetPermissionLevel(context.Background(), repoOwner, repoName, username)
+	if err != nil {
+		return "", err
+	}
+	return permission.GetPermission(), nil
+}
+
 func GetRepositoryReadmeById(owner, repoName string) (string, error) {
 	client := CreateClient(os.Getenv("GH_TOKEN"))
 
@@ -134,10 +147,14 @@ func IsRepoExisting(repoName string) (bool, error) {
 	exists := false
 	orgs := []string{os.Getenv("GH_ORG_INNERSOURCE"), os.Getenv("GH_ORG_OPENSOURCE")}
 
-	regOrgs, _ := db.GetAllRegionalOrganizations()
+	isEnabled := db.NullBool{Value: true}
+	regOrgs, _ := db.SelectRegionalOrganization(&isEnabled)
 
 	for _, regOrg := range regOrgs {
-		orgs = append(orgs, regOrg["Name"].(string))
+		if !regOrg.IsIndexRepoEnabled {
+			continue
+		}
+		orgs = append(orgs, regOrg.Name)
 	}
 
 	for _, org := range orgs {
@@ -456,4 +473,303 @@ func AddMemberToTeam(token string, org string, slug string, user string, role st
 	}
 
 	return teamMembership, nil
+}
+
+func RemoveEnterpriseMember(token string, enterpriseId string, userId string) error {
+	src := oauth2.StaticTokenSource(
+		&oauth2.Token{AccessToken: token},
+	)
+	httpClient := oauth2.NewClient(context.Background(), src)
+	client := githubv4.NewClient(httpClient)
+
+	var mutation struct {
+		RemoveEnterpriseMember struct {
+			ClientMutationId string
+		} `graphql:"removeEnterpriseMember(input: $input)"`
+	}
+
+	input := githubv4.RemoveEnterpriseMemberInput{
+		EnterpriseID: githubv4.ID(enterpriseId),
+		UserID:       githubv4.ID(userId),
+	}
+
+	err := client.Mutate(context.Background(), &mutation, input, nil)
+	if err != nil {
+		return err
+	}
+
+	log.Printf("User %s removed from enterprise %s", userId, enterpriseId)
+	return nil
+}
+
+func GetOrganizationsWithinEnterprise(enterprise string, token string) (*GetOrganizationsWithinEnterpriseResult, error) {
+	src := oauth2.StaticTokenSource(
+		&oauth2.Token{AccessToken: token},
+	)
+	httpClient := oauth2.NewClient(context.Background(), src)
+
+	client := githubv4.NewClient(httpClient)
+
+	var result GetOrganizationsWithinEnterpriseResult
+	var cursor *githubv4.String
+
+	for {
+		var queryResult GetOrganizationsWithinEnterpriseQuery
+		variables := map[string]interface{}{
+			"enterprise": githubv4.String(enterprise),
+			"cursor":     cursor,
+		}
+		err := client.Query(context.Background(), &queryResult, variables)
+		if err != nil {
+			return nil, err
+		}
+
+		for _, org := range queryResult.Enterprise.Organization.Nodes {
+			result.Organizations = append(result.Organizations, Organization{
+				Login:      string(org.Login),
+				DatabaseId: int64(org.DatabaseId),
+			})
+		}
+
+		if !queryResult.Enterprise.Organization.PageInfo.HasNextPage {
+			break
+		}
+
+		cursor = &queryResult.Enterprise.Organization.PageInfo.EndCursor
+	}
+
+	return &result, nil
+}
+
+type customTransport struct {
+	Transport http.RoundTripper
+}
+
+func (t *customTransport) RoundTrip(req *http.Request) (*http.Response, error) {
+	req.Header.Add("X-GitHub-Next-Global-ID", "1")
+	return t.Transport.RoundTrip(req)
+}
+
+func GetMembersByEnterprise(enterprise string, token string) (*GetMembersByEnterpriseResult, error) {
+	src := oauth2.StaticTokenSource(
+		&oauth2.Token{AccessToken: token},
+	)
+	httpClient := oauth2.NewClient(context.Background(), src)
+	httpClient.Transport = &customTransport{Transport: httpClient.Transport}
+	client := githubv4.NewClient(httpClient)
+
+	var result GetMembersByEnterpriseResult
+	var after *githubv4.String
+
+	start := time.Now()
+	for {
+		var queryResult GetMembersByEnterpriseQuery
+		variables := map[string]interface{}{
+			"enterprise": githubv4.String(enterprise),
+			"after":      after,
+		}
+		err := client.Query(context.Background(), &queryResult, variables)
+		if err != nil {
+			return nil, err
+		}
+
+		for _, node := range queryResult.Enterprise.OwnerInfo.SamlIdentityProvider.ExternalIdentities.Nodes {
+			user := node.User
+			if user.Id != nil {
+				member := Member{
+					Id:              user.Id.(string),
+					Login:           string(user.Login),
+					DatabaseId:      int64(user.DatabaseId),
+					EnterpriseEmail: string(node.SamlIdentity.Username),
+				}
+				result.Members = append(result.Members, member)
+			}
+		}
+
+		if !queryResult.Enterprise.OwnerInfo.SamlIdentityProvider.ExternalIdentities.PageInfo.HasNextPage {
+			break
+		}
+
+		after = &queryResult.Enterprise.OwnerInfo.SamlIdentityProvider.ExternalIdentities.PageInfo.EndCursor
+	}
+
+	fmt.Printf("Time taken to fetch enterprise members : %v\n", time.Since(start))
+	return &result, nil
+}
+
+func GetRepositoryProjects(owner string, name string, token string) (*GetRepositoryProjectsResult, error) {
+	src := oauth2.StaticTokenSource(
+		&oauth2.Token{AccessToken: token},
+	)
+	httpClient := oauth2.NewClient(context.Background(), src)
+
+	client := githubv4.NewClient(httpClient)
+
+	var result GetRepositoryProjectsResult
+	var queryResult GetRepositoryProjectsQuery
+
+	variables := map[string]interface{}{
+		"owner": githubv4.String(owner),
+		"name":  githubv4.String(name),
+	}
+	err := client.Query(context.Background(), &queryResult, variables)
+	if err != nil {
+		return nil, err
+	}
+
+	result.ProjectUrl = string(queryResult.Repository.ProjectsUrl)
+
+	for _, project := range queryResult.Repository.ProjectsV2.Nodes {
+		result.Projects = append(result.Projects, Project{
+			Databaseid: int64(project.DatabaseId),
+			Url:        string(project.Url),
+			Title:      string(project.Title),
+			CreatedAt:  project.CreatedAt.Time,
+			UpdatedAt:  project.UpdatedAt.Time,
+		})
+	}
+
+	return &result, nil
+}
+
+func GetUserByLogin(login string, token string) (*GetUserByLoginResult, error) {
+	src := oauth2.StaticTokenSource(
+		&oauth2.Token{AccessToken: token},
+	)
+	httpClient := oauth2.NewClient(context.Background(), src)
+	httpClient.Transport = &customTransport{Transport: httpClient.Transport}
+
+	client := githubv4.NewClient(httpClient)
+
+	var result GetUserByLoginResult
+	var queryResult GetUserByLoginQuery
+
+	variables := map[string]interface{}{
+		"login": githubv4.String(login),
+	}
+	err := client.Query(context.Background(), &queryResult, variables)
+	if err != nil {
+		return nil, err
+	}
+
+	if queryResult.User.ID == nil {
+		return nil, fmt.Errorf("node ID of %s is not found", queryResult.User.Login)
+	}
+
+	result.User = User{
+		Id:         queryResult.User.ID.(string),
+		DatabaseId: int64(queryResult.User.DatabaseId),
+		Login:      string(queryResult.User.Login),
+	}
+
+	return &result, nil
+}
+
+// Query structs
+type GetOrganizationsWithinEnterpriseQuery struct {
+	Enterprise struct {
+		Organization struct {
+			Nodes []struct {
+				Login      githubv4.String
+				DatabaseId githubv4.Int
+			}
+			PageInfo PageInfo
+		} `graphql:"organizations(first: 100, after: $cursor)"`
+	} `graphql:"enterprise(slug: $enterprise)"`
+}
+
+type GetMembersByEnterpriseQuery struct {
+	Enterprise struct {
+		OwnerInfo struct {
+			SamlIdentityProvider struct {
+				ExternalIdentities struct {
+					Nodes []struct {
+						SamlIdentity struct {
+							Username githubv4.String
+						}
+						User struct {
+							Id         githubv4.ID
+							DatabaseId githubv4.Int
+							Login      githubv4.String
+						}
+					}
+					PageInfo PageInfo
+				} `graphql:"externalIdentities(first: 100, after: $after)"`
+			} `graphql:"samlIdentityProvider"`
+		} `graphql:"ownerInfo"`
+	} `graphql:"enterprise(slug: $enterprise)"`
+}
+
+type GetRepositoryProjectsQuery struct {
+	Repository struct {
+		ProjectsUrl githubv4.String
+		ProjectsV2  struct {
+			Nodes []struct {
+				DatabaseId githubv4.Int
+				Title      githubv4.String
+				Id         githubv4.ID
+				Url        githubv4.String
+				CreatedAt  githubv4.DateTime
+				UpdatedAt  githubv4.DateTime
+			}
+		} `graphql:"projectsV2(first: 100)"`
+	} `graphql:"repository(owner: $owner, name: $name)"`
+}
+
+type GetUserByLoginQuery struct {
+	User struct {
+		ID         githubv4.ID
+		DatabaseId githubv4.Int
+		Login      githubv4.String
+	} `graphql:"user(login: $login)"`
+}
+
+type PageInfo struct {
+	EndCursor   githubv4.String
+	HasNextPage bool
+}
+
+// Result structs
+type GetOrganizationsWithinEnterpriseResult struct {
+	Organizations []Organization
+}
+
+type GetMembersByEnterpriseResult struct {
+	Members []Member
+}
+
+type GetRepositoryProjectsResult struct {
+	ProjectUrl string
+	Projects   []Project
+}
+
+type GetUserByLoginResult struct {
+	User
+}
+
+// Structs
+type Member struct {
+	Id              string
+	Login           string
+	DatabaseId      int64
+	EnterpriseEmail string
+}
+
+type Organization struct {
+	Login      string
+	DatabaseId int64
+}
+
+type Project struct {
+	Databaseid int64
+	Url        string
+	Title      string
+	CreatedAt  time.Time
+	UpdatedAt  time.Time
+}
+
+type User struct {
+	Id         string
+	DatabaseId int64
+	Login      string
 }

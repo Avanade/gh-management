@@ -1,0 +1,28 @@
+name: Docker Build & Push
+run-name: Docker Build & Push [${{inputs.selected_environment}}]
+
+on:
+  workflow_dispatch:
+    inputs:
+      selected_environment:
+        type: environment
+        description: Select environment
+        default: test
+
+jobs:
+  build-and-push-image:
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.selected_environment }}
+    defaults:
+      run:
+        working-directory: ./src/goapp
+    steps:
+      - uses: actions/checkout@v2
+      - uses: azure/docker-login@v1
+        with:
+          login-server: ${{ secrets.CONTAINER_REGISTRY_SERVER }}
+          username: ${{ secrets.CONTAINER_REGISTRY_SERVER_USERNAME }}
+          password: ${{ secrets.CONTAINER_REGISTRY_SERVER_PASSWORD }}
+      - run: |
+          docker build . -t ${{ secrets.CONTAINER_REGISTRY_SERVER }}/${{ vars.APPSERVICE_NAME }}:${{ github.sha }} -t ${{ secrets.CONTAINER_REGISTRY_SERVER }}/${{ vars.APPSERVICE_NAME }}:latest
+          docker push ${{ secrets.CONTAINER_REGISTRY_SERVER }}/${{ vars.APPSERVICE_NAME }}

@@ -16,7 +16,9 @@ import (
 	"time"
 
 	"main/pkg/appinsights_wrapper"
+	"main/pkg/authentication"
 	"main/pkg/email"
+	ev "main/pkg/envvar"
 	db "main/pkg/ghmgmtdb"
 	ghAPI "main/pkg/github"
 	"main/pkg/notification"
@@ -24,6 +26,7 @@ import (
 
 	"github.com/google/go-github/v50/github"
 	"github.com/gorilla/mux"
+	"github.com/microsoft/ApplicationInsights-Go/appinsights"
 	"github.com/microsoft/ApplicationInsights-Go/appinsights/contracts"
 )
 
@@ -33,27 +36,37 @@ type RepositoryListDto struct {
 }
 
 type RepoDto struct {
-	Id                     int      `json:"Id"`
-	Name                   string   `json:"Name"`
-	AssetCode              string   `json:"AssetCode"`
-	Organization           string   `json:"Organization"`
-	Description            string   `json:"Description"`
-	IsArchived             bool     `json:"IsArchived"`
-	Created                string   `json:"Created"`
-	RepositorySource       string   `json:"RepositorySource"`
-	TFSProjectReference    string   `json:"TFSProjectReference"`
-	Visibility             string   `json:"Visibility"`
-	ApprovalStatus         bool     `json:"ApprovalStatus"`
-	ApprovalStatusId       int      `json:"ApprovalStatusId"`
-	TotalPendingRequest    int      `json:"TotalPendingRequest"`
-	CoOwner                string   `json:"CoOwner"`
-	ConfirmAvaIP           bool     `json:"ConfirmAvaIP"`
-	ConfirmEnabledSecurity bool     `json:"ConfirmEnabledSecurity"`
-	ECATTID                int      `json:"ECATTID"`
-	CreatedBy              string   `json:"CreatedBy"`
-	Modified               string   `json:"Modified"`
-	ModifiedBy             string   `json:"ModifiedBy"`
-	Topics                 []string `json:"RepoTopics"`
+	Id                     int          `json:"Id"`
+	Name                   string       `json:"Name"`
+	AssetCode              string       `json:"AssetCode"`
+	Organization           string       `json:"Organization"`
+	Description            string       `json:"Description"`
+	IsArchived             bool         `json:"IsArchived"`
+	Created                string       `json:"Created"`
+	RepositorySource       string       `json:"RepositorySource"`
+	TFSProjectReference    string       `json:"TFSProjectReference"`
+	Visibility             string       `json:"Visibility"`
+	ApprovalStatus         bool         `json:"ApprovalStatus"`
+	ApprovalStatusId       int          `json:"ApprovalStatusId"`
+	TotalPendingRequest    int          `json:"TotalPendingRequest"`
+	CoOwner                string       `json:"CoOwner"`
+	ConfirmAvaIP           bool         `json:"ConfirmAvaIP"`
+	ConfirmEnabledSecurity bool         `json:"ConfirmEnabledSecurity"`
+	ECATTID                int          `json:"ECATTID"`
+	CreatedBy              string       `json:"CreatedBy"`
+	Modified               string       `json:"Modified"`
+	ModifiedBy             string       `json:"ModifiedBy"`
+	Topics                 []string     `json:"RepoTopics"`
+	ProjectUrl             string       `json:"ProjectUrl"`
+	Projects               []ProjectDto `json:"Projects"`
+}
+
+type ProjectDto struct {
+	Id        int64     `json:"Id"`
+	Title     string    `json:"Name"`
+	Url       string    `json:"Url"`
+	CreatedAt time.Time `json:"CreatedAt"`
+	UpdatedAt time.Time `json:"UpdatedAt"`
 }
 
 type CollaboratorDto struct {
@@ -716,6 +729,23 @@ func GetRepositoriesById(w http.ResponseWriter, r *http.Request) {
 		repo[0].Topics = strings.Split(data[0]["Topics"].(string), ",")
 	}
 
+	result, err := ghAPI.GetRepositoryProjects(repo[0].Organization, repo[0].Name, os.Getenv("GH_TOKEN"))
+	if err != nil {
+		logger.LogException(err)
+	}
+
+	repo[0].ProjectUrl = result.ProjectUrl
+	repo[0].Projects = make([]ProjectDto, 0)
+	for _, project := range result.Projects {
+		repo[0].Projects = append(repo[0].Projects, ProjectDto{
+			Id:        project.Databaseid,
+			Title:     project.Title,
+			Url:       project.Url,
+			CreatedAt: project.CreatedAt,
+			UpdatedAt: project.UpdatedAt,
+		})
+	}
+
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(repo[0])
@@ -906,7 +936,8 @@ func IndexOrgRepos(w http.ResponseWriter, r *http.Request) {
 
 	orgs := []string{os.Getenv("GH_ORG_INNERSOURCE"), os.Getenv("GH_ORG_OPENSOURCE")}
 
-	regOrgs, err := db.GetAllRegionalOrganizations()
+	isEnabled := db.NullBool{Value: true}
+	regOrgs, err := db.SelectRegionalOrganization(&isEnabled)
 	if err != nil {
 		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -914,7 +945,26 @@ func IndexOrgRepos(w http.ResponseWriter, r *http.Request) {
 	}
 
 	for _, regOrg := range regOrgs {
-		orgs = append(orgs, regOrg["Name"].(string))
+		if !regOrg.IsIndexRepoEnabled {
+			continue
+		}
+		orgs = append(orgs, regOrg.Name)
+	}
+
+	// Temporarily log Organization
+	if len(regOrgs) > 0 {
+		utilIndexOrgRepos := appinsights.NewTraceTelemetry("util repo owner scan", contracts.Information)
+		regOrgsJson, err := json.Marshal(regOrgs)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		utilIndexOrgRepos.Properties["Orgs"] = string(regOrgsJson)
+		logger.Track(utilIndexOrgRepos)
+
+		if ev.GetEnvVar("ENABLED_INDEX_ORG_REPO", "false") != "true" {
+			return
+		}
 	}
 
 	for _, org := range orgs {
@@ -952,6 +1002,10 @@ func IndexOrgRepos(w http.ResponseWriter, r *http.Request) {
 func ClearOrgRepos(w http.ResponseWriter, r *http.Request) {
 	logger := appinsights_wrapper.NewClient()
 	defer logger.EndOperation()
+
+	if ev.GetEnvVar("ENABLED_INDEX_ORG_REPO", "false") != "true" {
+		return
+	}
 
 	projects, err := db.ProjectsByRepositorySource("GitHub")
 	if err != nil {
@@ -1151,6 +1205,10 @@ func RemoveCollaborator(w http.ResponseWriter, r *http.Request) {
 func RepoOwnersCleanup(w http.ResponseWriter, r *http.Request) {
 	logger := appinsights_wrapper.NewClient()
 	defer logger.EndOperation()
+
+	if ev.GetEnvVar("ENABLED_INDEX_ORG_REPO", "false") != "true" {
+		return
+	}
 
 	logger.TrackTrace("REPO OWNERS CLEANUP TRIGGERED", contracts.Information)
 	token := os.Getenv("GH_TOKEN")
@@ -1646,6 +1704,7 @@ func ApprovalSystemRequest(data db.ProjectApprovalApprovers, logger *appinsights
 		go getHttpPostResponseStatus(url, postParams, ch, logger)
 		r := <-ch
 		if r != nil {
+			defer r.Body.Close()
 			var res ProjectApprovalSystemPostResponseDto
 			err := json.NewDecoder(r.Body).Decode(&res)
 			if err != nil {
@@ -1678,11 +1737,33 @@ func getHttpPostResponseStatus(url string, data interface{}, ch chan *http.Respo
 		logger.LogException(err)
 		ch <- nil
 	}
-	res, err := http.Post(url, "application/json; charset=utf-8", bytes.NewBuffer(jsonReq))
+	token, err := authentication.GenerateToken()
+	if err != nil {
+		logger.LogException(err)
+		ch <- nil
+	}
+
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonReq))
 	if err != nil {
 		ch <- nil
 	}
-	ch <- res
+
+	req.Header.Add("Authorization", "Bearer "+token)
+	req.Header.Add("Content-Type", "application/json")
+
+	client := &http.Client{
+		Timeout: time.Second * 90,
+	}
+
+	response, err := client.Do(req)
+	if err != nil {
+		ch <- nil
+	}
+	if response.StatusCode == http.StatusUnauthorized {
+		ch <- nil
+	}
+
+	ch <- response
 }
 
 func ReprocessRequestApproval() {
@@ -1742,41 +1823,6 @@ func AddCollaboratorToRequestedRepo(user string, repo string, repoId int64, logg
 		}
 	}
 	return resp, nil
-}
-
-func GetPopularTopics(w http.ResponseWriter, r *http.Request) {
-	logger := appinsights_wrapper.NewClient()
-	defer logger.EndOperation()
-
-	params := r.URL.Query()
-	offset, err := strconv.Atoi(params["offset"][0])
-	if err != nil {
-		logger.LogException(err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	rowCount, err := strconv.Atoi(params["rowCount"][0])
-	if err != nil {
-		logger.LogException(err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	result, err := db.GetPopularTopics(offset, rowCount)
-	if err != nil {
-		logger.LogException(err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	jsonResp, err := json.Marshal(result)
-	if err != nil {
-		logger.LogException(err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	w.WriteHeader(http.StatusOK)
-	w.Header().Set("Content-Type", "application/json")
-	w.Write(jsonResp)
 }
 
 func DownloadProjectApprovalsByUsername(w http.ResponseWriter, r *http.Request) {

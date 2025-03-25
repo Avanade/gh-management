@@ -22,6 +22,7 @@
                 "TENANT_ID":"",
                 "CLIENT_ID":"",
                 "CLIENT_SECRET":"",
+                "SCOPE":"",
 
                 "NOTIFICATION_TENANT_ID":"",
                 "NOTIFICATION_CLIENT_ID":"",
@@ -41,11 +42,13 @@
                 "EMAIL_CLIENT_SECRET" : "",
                 "EMAIL_USER_ID" : "",
                 
-                "HOME_URL":"",
                 "GH_CLIENT_ID":"",
                 "GH_CLIENT_SECRET":"",
                 "GH_TOKEN":"",
                 "GH_APP_LINK":"",
+                "GH_ENTERPRISE_TOKEN":"",
+                "GH_ENTERPRISE_NAME":"",
+                "GH_ENTERPRISE_ID":"",
                 "GHMGMTDB_CONNECTION_STRING":"",
                 
                 "GH_ORG_INNERSOURCE":"",
@@ -53,12 +56,13 @@
                 "GH_REPO_TEMPLATE":"",
                 "GH_REPO_TEMPLATE_NAME":"",
                 "APPROVAL_SYSTEM_APP_URL":"",
-                "APPROVAL_SYSTEM_APP_BaseURL":"",
                 "APPROVAL_SYSTEM_APP_ID":"",
                 "APPROVAL_SYSTEM_APP_MODULE_PROJECTS":"",
                 "APPROVAL_SYSTEM_APP_MODULE_COMMUNITY":"",
                 "APPROVAL_SYSTEM_APP_MODULE_ORGANIZATION":"",
                 "APPROVAL_SYSTEM_APP_MODULE_COPILOT":"",
+                "APPROVAL_SYSTEM_APP_MODULE_ORGACCESS":"",
+                "APPROVALREQUESTS_RETRY_FREQ":"",
                 
                 "GH_AZURE_AD_GROUP":"",
                 "GH_AZURE_AD_ADMIN_GROUP":"",
@@ -68,9 +72,12 @@
                 "COPILOT_GROUP_SLUG": "",
                 "EXEMPTION": "",
 
+                "ENABLED_INDEX_ORG_REPO": "",
                 "ENABLED_REMOVE_COLLABORATORS": "",
+                "ENABLED_REMOVE_ENTERPRISE_MEMBER": "",
 
                 "ORGANIZATION_NAME":"",
+                "REGIONAL_ORG_PREFIX": "",
                 
                 "LINK_INNERSOURCE_GENERAL_LEGAL_GUIDELINES":"",
                 "LINK_INNERSOURCE_GENERAL_GUIDELINES":"",
@@ -81,7 +88,11 @@
                 "LINK_MEMBER_PROFILE":"",
                 "LINK_GUEST_PROFILE":"",
                 "LINK_COMMUNITY_SHAREPOINT_SITE":"",
-                "LINK_FOOTERS":""
+                "LINK_FOOTERS":"",
+                "LEGAL_APPROVAL_TYPE_ID":"",
+
+                "HOME_URL":"",
+                "CUSTOM_DOMAINS":""
             }
         }
     }
