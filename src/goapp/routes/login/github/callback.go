@@ -182,11 +182,15 @@ func GithubForceSaveHandler(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			log.Println(err.Error())
 		}
+		isMembershipChecked := false
 
 		if orgs != nil && len(orgs.Organizations) > 0 {
 			for _, org := range orgs.Organizations {
 				if org.Login == os.Getenv("GH_ORG_OPENSOURCE") || org.Login == os.Getenv("GH_ORG_INNERSOURCE") {
-					CheckMembership(userPrincipalName, newGhUser)
+					if isMembershipChecked {
+						CheckMembership(userPrincipalName, newGhUser)
+						isMembershipChecked = true
+					}
 				} else {
 					invite := ghAPI.OrganizationInvitation(os.Getenv("GH_TOKEN"), newGhUser, org.Login)
 					if invite == nil {
