@@ -184,15 +184,7 @@ func GithubForceSaveHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		if orgs != nil && len(orgs.Organizations) > 0 {
-			allowedOrgs := make(map[string]bool)
-			allowedOrgs[os.Getenv("GH_ORG_OPENSOURCE")] = true
-			allowedOrgs[os.Getenv("GH_ORG_INNERSOURCE")] = true
-
 			for _, org := range orgs.Organizations {
-				if _, ok := allowedOrgs[org.Login]; !ok {
-					continue
-				}
-
 				if org.Login == os.Getenv("GH_ORG_OPENSOURCE") || org.Login == os.Getenv("GH_ORG_INNERSOURCE") {
 					CheckMembership(userPrincipalName, newGhUser)
 				} else {
@@ -237,8 +229,6 @@ func GithubForceSaveHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	session.Values["ghIsValid"] = result["IsValid"].(bool)
-
-	CheckMembership(userPrincipalName, newGhUser)
 
 	session.Options = &sessions.Options{
 		Path:     "/",

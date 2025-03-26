@@ -194,7 +194,7 @@ func GetCollaboratorRepositoriesFromOrganization(token, org, user string) ([]Rep
 		}
 
 		for _, collaborator := range collaborators {
-			// old account // new account
+
 			if user == *collaborator.Login {
 				collaboratorRepositories = append(collaboratorRepositories, repo)
 				break
