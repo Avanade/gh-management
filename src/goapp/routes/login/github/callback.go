@@ -182,12 +182,12 @@ func GithubForceSaveHandler(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			log.Println(err.Error())
 		}
-		isMembershipChecked := false
 
 		if orgs != nil && len(orgs.Organizations) > 0 {
+			isMembershipChecked := false
 			for _, org := range orgs.Organizations {
 				if org.Login == os.Getenv("GH_ORG_OPENSOURCE") || org.Login == os.Getenv("GH_ORG_INNERSOURCE") {
-					if isMembershipChecked {
+					if !isMembershipChecked {
 						CheckMembership(userPrincipalName, newGhUser)
 						isMembershipChecked = true
 					}
