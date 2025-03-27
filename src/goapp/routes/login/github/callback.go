@@ -177,6 +177,45 @@ func GithubForceSaveHandler(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
+
+		orgs, err := ghAPI.GetOrganizationsByGitHubName(user.Login, os.Getenv("GH_TOKEN"))
+		if err != nil {
+			log.Println(err.Error())
+		}
+
+		if orgs != nil && len(orgs.Organizations) > 0 {
+			isMembershipChecked := false
+			for _, org := range orgs.Organizations {
+				if org.Login == os.Getenv("GH_ORG_OPENSOURCE") || org.Login == os.Getenv("GH_ORG_INNERSOURCE") {
+					if !isMembershipChecked {
+						CheckMembership(userPrincipalName, newGhUser)
+						isMembershipChecked = true
+					}
+				} else {
+					invite := ghAPI.OrganizationInvitation(os.Getenv("GH_TOKEN"), newGhUser, org.Login)
+					if invite == nil {
+						log.Println("Error sending invitation to organization")
+					} else {
+						log.Println("Invitation sent to organization")
+					}
+				}
+				collaboratorRepos, err := ghAPI.GetCollaboratorRepositoriesFromOrganization(os.Getenv("GH_TOKEN"), org.Login, user.Login)
+				if err != nil {
+					log.Println("Error fetching collaborator repositories")
+				}
+				for _, colRepo := range collaboratorRepos {
+					permission, err := ghAPI.GetPermissionLevel(org.Login, colRepo.Name, user.Login)
+					if err != nil {
+						log.Println("Error fetching permission level:", err)
+						continue
+					}
+					ghAPI.AddCollaborator(colRepo.Org, colRepo.Name, newGhUser, permission)
+				}
+			}
+		} else {
+			log.Println("No organizations found for user:", user.Login)
+		}
+
 		enterpriseToken := os.Getenv("GH_ENTERPRISE_TOKEN")
 		enterpriseId := os.Getenv("GH_ENTERPRISE_ID")
 		err = ghAPI.RemoveEnterpriseMember(enterpriseToken, enterpriseId, user.Id)
@@ -194,8 +233,6 @@ func GithubForceSaveHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	session.Values["ghIsValid"] = result["IsValid"].(bool)
-
-	CheckMembership(userPrincipalName, newGhUser)
 
 	session.Options = &sessions.Options{
 		Path:     "/",
