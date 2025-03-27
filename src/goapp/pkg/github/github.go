@@ -111,7 +111,7 @@ func GetPermissionLevel(repoOwner string, repoName string, username string) (str
 	if err != nil {
 		return "", err
 	}
-	return permission.GetPermission(), nil
+	return permission.User.GetRoleName(), nil
 }
 
 func GetRepositoryReadmeById(owner, repoName string) (string, error) {
