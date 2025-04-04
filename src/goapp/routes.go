@@ -245,6 +245,7 @@ func setApiRoutes() {
 
 	httpRouter.GET("/api/ado-organization", m.Chain(cont.AdoOrganization.GetAdoOrganizationByUser, m.AzureAuth()))
 	httpRouter.POST("/api/ado-organization", m.Chain(cont.AdoOrganization.CreateAdoOrganizationRequest, m.AzureAuth()))
+	httpRouter.GET("/api/ado-organization/{id}/status", m.Chain(cont.AdoOrganization.GetAdoOrganizationApprovalRequests, m.AzureAuth(), m.GitHubAuth()))
 
 	//ORGANIZATION APPROVERS API
 	httpRouter.GET("/api/github-organization-approvers/active", m.Chain(rtApi.GetAllActiveOrganizationApprovers, m.AzureAuth(), m.GitHubAuth()))

@@ -533,7 +533,7 @@
           </div>
         </div>
         <div>
-          <!-- No Organizaton -->
+          <!-- No ADO Organizaton -->
           <div
             class="h-40"
             x-show="!showSpinner && (!adoOrganizationList || adoOrganizationList.length === 0)"
@@ -560,7 +560,7 @@
               </p>
             </div>
           </div>
-          <!-- Organization List -->
+          <!-- ADO Organization List -->
           <div x-show="!showSpinner && adoOrganizationList">
             <div
               class="my-5 flex rounded-md text-sm text-gray-600"
@@ -577,7 +577,7 @@
               <ul role="list" class="divide-y divide-gray-100">
                 <template x-for="(organization, index) in adoOrganizationList">
                   <li
-                    @click="GetOrganizationApprovalRequests(organization.Id, index); organization.showStatus = !organization.showStatus;"
+                    @click="ToggleAdoOrganizationApprovalRequest(organization);"
                   >
                     <div
                       class="px-4 py-4 sm:px-6 hover:bg-gray-50 cursor-pointer"
@@ -645,29 +645,29 @@
                             <div class="px-4 py-4 sm:px-6 bg-gray-50 shadow overflow-hidden">
       
                               <div class="flex items-center justify-between">
-                                <p class="text-sm font-medium text-gray-800 truncate" x-text="item.ApprovalDescription"></p>
+                                <p class="text-sm font-medium text-gray-800 truncate" x-text="item.approvalDescription"></p>
                                 <div class="ml-2 flex-shrink-0 flex">
                                   <p class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full"
-                                    x-bind:class="item.ApprovalStatus === 'Approved' ? ' bg-green-100 text-green-800': item.ApprovalStatus === 'Rejected' ? ' bg-red-100 text-red-800' : ' bg-gray-200 text-gray-800'"
-                                    x-text="item.ApprovalStatus"></p>
+                                    x-bind:class="item.approvalStatus === 'Approved' ? ' bg-green-100 text-green-800': item.approvalStatus === 'Rejected' ? ' bg-red-100 text-red-800' : ' bg-gray-200 text-gray-800'"
+                                    x-text="item.approvalStatus"></p>
                                 </div>
                               </div>
                               <div class="mt-2 sm:flex ">
                                 <div class="sm:flex w-1/2">
                                   <p class="flex items-center text-sm text-gray-500"
-                                    x-data="{ approver: 'Approver: ' + item.ApproverUserPrincipalName}" x-text="approver">
+                                    x-data="{ approver: 'Approver: ' + item.approverUserPrincipalName}" x-text="approver">
                                   </p>
                                 </div>
                                 <div class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0 w-1/2">
-                                  <p x-show="item.ApprovalDate">
+                                  <p x-show="item.approvalDate">
                                     Responded on
-                                    <time x-data="{date: new Date(item.ApprovalDate)}"
+                                    <time x-data="{date: new Date(item.approvalDate)}"
                                       x-text="date.toLocaleString('en-US',{dateStyle: 'medium', timeStyle: 'short'})"></time>
                                   </p>
                                 </div>
                               </div>
                               <div class="mt-2 sm:flex text-sm text-gray-500 sm:mt-0">
-                                <p x-show="item.ApprovalRemarks" x-data="{ remarks: 'Remarks: ' + item.ApprovalRemarks }"
+                                <p x-show="item.ApprovalRemarks" x-data="{ remarks: 'Remarks: ' + item.approvalRemarks }"
                                   x-text="remarks"></p>
                               </div>
                             </div>
@@ -856,6 +856,19 @@
         item.showStatus = !item.showStatus;
         if(!item.statusLoaded){
           fetch(`/api/organization-access/${item.Id}/status`).then((r) => {
+            r.json().then((body) => {
+              if (body && body.length > 0) {
+                item.statusLoaded=true
+                item.approvalStatus=body
+              }
+            });
+          });
+        }
+      },
+      ToggleAdoOrganizationApprovalRequest(item) {
+        item.showStatus = !item.showStatus;
+        if(!item.statusLoaded){
+          fetch(`/api/ado-organization/${item.id}/status`).then((r) => {
             r.json().then((body) => {
               if (body && body.length > 0) {
                 item.statusLoaded=true

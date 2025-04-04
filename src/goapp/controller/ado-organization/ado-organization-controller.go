@@ -11,8 +11,11 @@ import (
 	"main/pkg/session"
 	"main/service"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
+
+	"github.com/gorilla/mux"
 )
 
 type adoOrganizationController struct {
@@ -300,4 +303,26 @@ func (c *adoOrganizationController) GetAdoOrganizationByUser(w http.ResponseWrit
 	}
 
 	json.NewEncoder(w).Encode(adoOrgRequests)
+}
+
+func (c *adoOrganizationController) GetAdoOrganizationApprovalRequests(w http.ResponseWriter, r *http.Request) {
+	logger := appinsights_wrapper.NewClient()
+	defer logger.EndOperation()
+
+	req := mux.Vars(r)
+	id, err := strconv.ParseInt(req["id"], 10, 64)
+	if err != nil {
+		logger.LogException(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	adoOrgApprovalRequests, err := c.Service.AdoOrganizationApprovalRequest.SelectByAdoOrganizationId(id)
+	if err != nil {
+		logger.TrackException(err)
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	json.NewEncoder(w).Encode(adoOrgApprovalRequests)
 }
