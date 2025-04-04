@@ -11,7 +11,6 @@ import (
 	rtAdmin "main/routes/pages/admin"
 	rtCommunity "main/routes/pages/community"
 	rtGuidance "main/routes/pages/guidance"
-	rtOtherRequests "main/routes/pages/otherRequests"
 	rtProjects "main/routes/pages/project"
 	rtSearch "main/routes/pages/search"
 )
@@ -50,10 +49,11 @@ func setPageRoutes() {
 	httpRouter.GET("/communities/{id}/onboarding", m.Chain(rtCommunity.OnBoardingHandler, m.AzureAuth(), m.GitHubAuth()))
 
 	// OTHER REQUESTS PAGE
-	httpRouter.GET("/other-requests", m.Chain(rtOtherRequests.IndexHandler, m.AzureAuth(), m.GitHubAuth()))
-	httpRouter.GET("/other-requests/organization", m.Chain(rtOtherRequests.RequestNewOrganization, m.AzureAuth(), m.GitHubAuth()))
-	httpRouter.GET("/other-requests/github-copilot", m.Chain(rtOtherRequests.RequestGitHubCopilot, m.AzureAuth(), m.GitHubAuth()))
-	httpRouter.GET("/other-requests/organization-access", m.Chain(rtOtherRequests.RequestOrganizationAccess, m.AzureAuth(), m.GitHubAuth()))
+	httpRouter.GET("/other-requests", m.Chain(cont.OtherRequest.IndexHandler, m.AzureAuth(), m.GitHubAuth()))
+	httpRouter.GET("/other-requests/organization", m.Chain(cont.OtherRequest.RequestGitHubOrganization, m.AzureAuth(), m.GitHubAuth()))
+	httpRouter.GET("/other-requests/github-copilot", m.Chain(cont.OtherRequest.RequestGitHubCopilot, m.AzureAuth(), m.GitHubAuth()))
+	httpRouter.GET("/other-requests/organization-access", m.Chain(cont.OtherRequest.RequestGitHubOrganizationAccess, m.AzureAuth(), m.GitHubAuth()))
+	httpRouter.GET("/other-requests/ado-organization", m.Chain(cont.OtherRequest.RequestAdoOrganization, m.AzureAuth(), m.GitHubAuth()))
 
 	// AUTHENTICATION
 	httpRouter.GET("/loginredirect", rtPages.LoginRedirectHandler)
@@ -243,6 +243,9 @@ func setApiRoutes() {
 	httpRouter.GET("/api/organization-access/me", m.Chain(rtApi.GetMyOrganizationAccess, m.AzureAuth(), m.GitHubAuth()))
 	httpRouter.GET("/api/organization-access/{id}/status", m.Chain(rtApi.GetOrganizationAccessApprovalRequests, m.AzureAuth(), m.GitHubAuth()))
 
+	httpRouter.GET("/api/ado-organization", m.Chain(cont.AdoOrganization.GetAdoOrganizationByUser, m.AzureAuth()))
+	httpRouter.POST("/api/ado-organization", m.Chain(cont.AdoOrganization.CreateAdoOrganizationRequest, m.AzureAuth()))
+
 	//ORGANIZATION APPROVERS API
 	httpRouter.GET("/api/github-organization-approvers/active", m.Chain(rtApi.GetAllActiveOrganizationApprovers, m.AzureAuth(), m.GitHubAuth()))
 
@@ -251,6 +254,7 @@ func setApiRoutes() {
 	httpRouter.POST("/api/approvals/organization/callback", m.Chain(rtApi.UpdateApprovalStatusOrganization, m.GuidAuth()))
 	httpRouter.POST("/api/approvals/github-copilot/callback", m.Chain(rtApi.UpdateApprovalStatusCopilot, m.GuidAuth()))
 	httpRouter.POST("/api/approvals/organization-access/callback", m.Chain(rtApi.UpdateApprovalStatusOrganizationAccess, m.GuidAuth()))
+	httpRouter.POST("/api/approvals/ado-organization/callback", m.Chain(rtApi.UpdateApprovalStatusAdoOrganization, m.GuidAuth()))
 	httpRouter.POST("/api/approvals/community/reassign/callback", m.Chain(rtApi.UpdateCommunityApprovalReassignApprover, m.GuidAuth()))
 	httpRouter.POST("/api/approvals/project/callback", m.Chain(rtApi.UpdateApprovalStatusProjects, m.GuidAuth()))
 	httpRouter.POST("/api/approvals/project/reassign/callback", m.Chain(rtApi.UpdateApprovalReassignApprover, m.GuidAuth()))

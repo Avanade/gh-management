@@ -7,6 +7,9 @@ type Config struct {
 }
 
 type ConfigManager interface {
+	GetApprovalSystemAppId() string
+	GetApprovalSystemAppModuleAdoOrganization() string
+	GetApprovalSystemAppUrl() string
 	GetDatabaseConnectionString() string
 	GetEmailTenantID() string
 	GetEmailClientID() string

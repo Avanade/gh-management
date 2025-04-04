@@ -6,9 +6,13 @@ import (
 	sActivity "main/service/activity"
 	sActivityHelp "main/service/activityhelp"
 	sActivityType "main/service/activitytype"
+	sAdoOrganization "main/service/ado-organization"
+	sAdoOrganizationApprovalRequest "main/service/ado-organization-approval-request"
+	sApprovalRequest "main/service/approval-request"
 	sApprovalType "main/service/approval-type"
 	sArticle "main/service/article"
 	sCategory "main/service/category"
+	sCommunityApprover "main/service/community-approver"
 	sContributionArea "main/service/contributionarea"
 	sEmail "main/service/email"
 	sExternalLink "main/service/externallink"
@@ -19,19 +23,23 @@ import (
 )
 
 type Service struct {
-	Activity               sActivity.ActivityService
-	ActivityHelp           sActivityHelp.ActivityHelpService
-	ActivityType           sActivityType.ActivityTypeService
-	ApprovalType           sApprovalType.ApprovalTypeService
-	ContributionArea       sContributionArea.ContributionAreaService
-	Email                  sEmail.EmailService
-	ExternalLink           sExternalLink.ExternalLinkService
-	OssContributionSponsor sOssContributionSponsor.OssContributionSponsorService
-	RepositoryApprover     sRepositoryApprover.RepositoryApproverService
-	User                   sUser.UserService
-	Topic                  sTopic.TopicService
-	Category               sCategory.CategoryService
-	Article                sArticle.ArticleService
+	Activity                       sActivity.ActivityService
+	ActivityHelp                   sActivityHelp.ActivityHelpService
+	ActivityType                   sActivityType.ActivityTypeService
+	AdoOrganization                sAdoOrganization.AdoOrganizationService
+	AdoOrganizationApprovalRequest sAdoOrganizationApprovalRequest.AdoOrganizationApprovalRequestService
+	ApprovalRequest                sApprovalRequest.ApprovalRequestService
+	ApprovalType                   sApprovalType.ApprovalTypeService
+	CommunityApprover              sCommunityApprover.CommunityApproverService
+	ContributionArea               sContributionArea.ContributionAreaService
+	Email                          sEmail.EmailService
+	ExternalLink                   sExternalLink.ExternalLinkService
+	OssContributionSponsor         sOssContributionSponsor.OssContributionSponsorService
+	RepositoryApprover             sRepositoryApprover.RepositoryApproverService
+	User                           sUser.UserService
+	Topic                          sTopic.TopicService
+	Category                       sCategory.CategoryService
+	Article                        sArticle.ArticleService
 }
 
 type ServiceOptionFunc func(*Service)
@@ -64,6 +72,24 @@ func NewActivityTypeService(repo *repository.Repository) ServiceOptionFunc {
 	}
 }
 
+func NewAdoOrganizationService(repo *repository.Repository) ServiceOptionFunc {
+	return func(s *Service) {
+		s.AdoOrganization = sAdoOrganization.NewAdoOrganizationService(repo)
+	}
+}
+
+func NewAdoOrganizationApprovalRequestService(repo *repository.Repository) ServiceOptionFunc {
+	return func(s *Service) {
+		s.AdoOrganizationApprovalRequest = sAdoOrganizationApprovalRequest.NewAdoOrganizationApprovalRequestService(repo)
+	}
+}
+
+func NewApprovalRequestService(repo *repository.Repository) ServiceOptionFunc {
+	return func(s *Service) {
+		s.ApprovalRequest = sApprovalRequest.NewApprovalRequestService(repo)
+	}
+}
+
 func NewApprovalTypeService(repo *repository.Repository) ServiceOptionFunc {
 	return func(s *Service) {
 		s.ApprovalType = sApprovalType.NewApprovalTypeService(repo)
@@ -73,6 +99,12 @@ func NewApprovalTypeService(repo *repository.Repository) ServiceOptionFunc {
 func NewApproverService(repo *repository.Repository) ServiceOptionFunc {
 	return func(s *Service) {
 		s.RepositoryApprover = sRepositoryApprover.NewRepositoryApproverService(repo)
+	}
+}
+
+func NewCommunityApproverService(repo *repository.Repository) ServiceOptionFunc {
+	return func(s *Service) {
+		s.CommunityApprover = sCommunityApprover.NewCommunityApproverService(repo)
 	}
 }
 

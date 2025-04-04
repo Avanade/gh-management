@@ -1,0 +1,138 @@
+{{ define "content" }}
+
+
+<div id="pageTitle">Request</div>
+
+<div x-data="data()">
+    <form onsubmit="event.preventDefault()" autocomplete="off">
+        <fieldset>
+            <h3 class="text-lg font-medium leading-6 text-gray-900">New AzureDevOps Organization Request</h3>
+            
+            <div class="flex flex flex-col md:flex-row  my-3 mt-5">
+                <div class="basis-1/3 md:base-full md:flex-row mx-3 mt-2">
+                    <div class="flex flex-col pl-2 ml-3 mt-1 text-sm text-gray-900">
+                        Organization Name
+                    </div>
+                </div>
+                <div class="basis-2/3 md:base-full md:flex-row mx-3 self-center">
+                    <div class="ml-3">
+                        <div class="mt-1">
+                            <input type="text" maxlength="50" name="organizationName" id="organizationName"
+                                x-model="form.name"
+                                class="mt-1 block w-full shadow-sm text-sm border-gray-300 rounded-md text-gray-900 py-2 pl-3 pr-12">
+                            </input>
+                        </div>
+                        <div class="mt-0 text-xs text-gray-500">
+                            Symbols and whitespaces are not allowed except for dash. The name must start and end with an alphanumeric character.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex flex flex-col md:flex-row mt-5">
+                <div class="basis-1/3 md:base-full md:flex-row mx-3 mt-2">
+                    <div class="flex flex-col pl-2 ml-3 mt-1 text-sm text-gray-900">
+                        Purpose
+                    </div>
+                </div>
+                <div class="basis-2/3 md:base-full  md:flex-row mx-3 self-center">
+                    <div class="ml-3" x-data="combobox({
+                            ajax: getPurposeOptions,
+                            id : 'Id',
+                            text : 'Purpose',
+                            isInsertable : false,
+                            isDisplayItem : false,
+                            displaySearch: false,
+                        })" x-modelable="selected" x-model="form.purposeOptions">
+                        <div x-html="template"></div>
+                    </div>
+                    <div class="mt-0 text-xs text-gray-500 ml-3" x-show="getSelectedPurpose()===1">
+                        The ADO organization will be deleted after 30 days unless you extend.
+                    </div>
+                    <div class="mt-0 text-xs text-gray-500 ml-3" x-show="getSelectedPurpose()===4">
+                        For personal use, you can create an ADO organization in your own tenant. Click this link for the instructions.
+                    </div>
+                </div>
+            </div>
+        </fieldset>
+
+        <div class="flex mt-7 justify-end">
+            <div align="right">
+                <button type="submit" class="inline-flex justify-center py-2 px-4 rounded-md text-white"
+                    x-bind:class="!isValid ? 'bg-orange-100' : 'bg-orange-500'" x-bind:disabled="!isValid" @click="submit()">
+                    <span>Submit</span>
+                </button>
+            </div>
+            <div class="ml-3">
+                <button type="button" class="bg-orange-500  inline-flex justify-center py-2 px-4 rounded-md text-white"
+                    @click="goto('/other-requests?view=ado')">
+                    <span>Cancel</span>
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script src="/public/components/combobox.js"></script>
+
+<script type="text/javascript">
+    function data() {
+        return {
+            form: {
+                purposeOptions: [],
+                purpose: '',
+                name: '',
+            },
+            submit() {
+                Alpine.store('master').modal.reset()
+                Alpine.store('master').modal.show()
+                Alpine.store('master').postData(`/api/ado-organization`, this.form,
+                    "Your request has been submitted.", "Go back", "/other-requests?view=ado")
+            },
+            get isValid() {
+                if (this.form.purposeOptions.length > 0) {
+                    this.form.purpose = this.form.purposeOptions[0]["text"]
+                }
+                if (
+                    !!this.form.purpose &&
+                    !!this.form.name &&
+                    this.validateOrganizationName &&
+                    this.getSelectedPurpose() !== 4 ) {
+                    return true
+                } else {
+                    return false
+                }
+            },
+            getSelectedPurpose() {
+                if (this.form.purposeOptions.length > 0)
+                    return this.form.purposeOptions[0]["id"]
+                return 0
+            },
+            get validateOrganizationName() {
+                const regEx = /^[a-zA-Z0-9][a-zA-Z0-9-]{0,48}[a-zA-Z0-9]$/;
+                const matchValue = this.form.name.match(regEx);
+
+                if (matchValue == null)
+                    return false
+
+                return matchValue[0] === this.form.name;
+            },
+            goto(url) {
+                window.location.href = url
+            }
+        }
+    }
+    async function getPurposeOptions() {
+        let uri = '/api/github-organization/region'
+        let encoded = encodeURI(uri);
+        const res = await fetch(encoded)
+        const data = [
+            { Id: 1, Purpose: 'Temporary Use (e.g. testing, training etc.)'},
+            { Id: 2, Purpose: 'Internal Team Use'},
+            { Id: 3, Purpose: 'Client Use'},
+            { Id: 4, Purpose: 'Personal Use'}
+        ]
+        return data
+    }
+</script>
+{{ end }}

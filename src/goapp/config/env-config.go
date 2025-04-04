@@ -21,6 +21,18 @@ func NewEnvConfigManager() *envConfigManager {
 	return &envConfigManager{}
 }
 
+func (ecm *envConfigManager) GetApprovalSystemAppId() string {
+	return os.Getenv("APPROVAL_SYSTEM_APP_ID")
+}
+
+func (ecm *envConfigManager) GetApprovalSystemAppModuleAdoOrganization() string {
+	return os.Getenv("APPROVAL_SYSTEM_APP_MODULE_ADO_ORGANIZATION")
+}
+
+func (ecm *envConfigManager) GetApprovalSystemAppUrl() string {
+	return os.Getenv("APPROVAL_SYSTEM_APP_URL")
+}
+
 func (ecm *envConfigManager) GetDatabaseConnectionString() string {
 	return os.Getenv("GHMGMTDB_CONNECTION_STRING")
 }

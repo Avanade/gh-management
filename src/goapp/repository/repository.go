@@ -6,9 +6,13 @@ import (
 	rActivityContributionArea "main/repository/activitycontributionarea"
 	rActivityHelp "main/repository/activityhelp"
 	rActivityType "main/repository/activitytype"
+	rAdoOrganization "main/repository/ado-organization"
+	rAdoOrganizationApprovalRequest "main/repository/ado-organization-approval-request"
+	rApprovalRequest "main/repository/approval-request"
 	rApprovalType "main/repository/approval-type"
 	rArticle "main/repository/article"
 	rCategory "main/repository/category"
+	rCommunityApprover "main/repository/community-approver"
 	rContributionArea "main/repository/contributionarea"
 	rExternalLink "main/repository/externallink"
 	rOssContributionSponsor "main/repository/osscontributionsponsor"
@@ -18,19 +22,23 @@ import (
 )
 
 type Repository struct {
-	Activity                 rActivity.ActivityRepository
-	ActivityContributionArea rActivityContributionArea.ActivityContributionAreaRepository
-	ActivityHelp             rActivityHelp.ActivityHelpRepository
-	ActivityType             rActivityType.ActivityTypeRepository
-	ApprovalType             rApprovalType.ApprovalTypeRepository
-	ContributionArea         rContributionArea.ContributionAreaRepository
-	ExternalLink             rExternalLink.ExternalLinkRepository
-	OssContributionSponsor   rOssContributionSponsor.OssContributionSponsorRepository
-	RepositoryApprover       rRepositoryApprover.RepositoryApproverRepository
-	User                     rUser.UserRepository
-	Topic                    rTopic.TopicRepository
-	Category                 rCategory.CategoryRepository
-	Article                  rArticle.ArticleRepository
+	Activity                       rActivity.ActivityRepository
+	ActivityContributionArea       rActivityContributionArea.ActivityContributionAreaRepository
+	ActivityHelp                   rActivityHelp.ActivityHelpRepository
+	ActivityType                   rActivityType.ActivityTypeRepository
+	AdoOrganization                rAdoOrganization.AdoOrganizationRepository
+	AdoOrganizationApprovalRequest rAdoOrganizationApprovalRequest.AdoOrganizationApprovalRequestRepository
+	ApprovalRequest                rApprovalRequest.ApprovalRequestRepository
+	ApprovalType                   rApprovalType.ApprovalTypeRepository
+	CommunityApprover              rCommunityApprover.CommunityApproverRepository
+	ContributionArea               rContributionArea.ContributionAreaRepository
+	ExternalLink                   rExternalLink.ExternalLinkRepository
+	OssContributionSponsor         rOssContributionSponsor.OssContributionSponsorRepository
+	RepositoryApprover             rRepositoryApprover.RepositoryApproverRepository
+	User                           rUser.UserRepository
+	Topic                          rTopic.TopicRepository
+	Category                       rCategory.CategoryRepository
+	Article                        rArticle.ArticleRepository
 }
 
 type RepositoryOptionFunc func(*Repository)
@@ -63,6 +71,24 @@ func NewActivityType(db *database.Database) RepositoryOptionFunc {
 	}
 }
 
+func NewAdoOrganization(db *database.Database) RepositoryOptionFunc {
+	return func(r *Repository) {
+		r.AdoOrganization = rAdoOrganization.NewAdoOrganizationRepository(db)
+	}
+}
+
+func NewAdoOrganizationApprovalRequest(db *database.Database) RepositoryOptionFunc {
+	return func(r *Repository) {
+		r.AdoOrganizationApprovalRequest = rAdoOrganizationApprovalRequest.NewAdoOrganizationApprovalRequestRepository(db)
+	}
+}
+
+func NewApprovalRequest(db *database.Database) RepositoryOptionFunc {
+	return func(r *Repository) {
+		r.ApprovalRequest = rApprovalRequest.NewApprovalRequestRepository(db)
+	}
+}
+
 func NewApprovalType(db *database.Database) RepositoryOptionFunc {
 	return func(r *Repository) {
 		r.ApprovalType = rApprovalType.NewApprovalTypeRepository(db)
@@ -72,6 +98,12 @@ func NewApprovalType(db *database.Database) RepositoryOptionFunc {
 func NewApprover(db *database.Database) RepositoryOptionFunc {
 	return func(r *Repository) {
 		r.RepositoryApprover = rRepositoryApprover.NewRepostioryApproverRepository(db)
+	}
+}
+
+func NewCommunityApprover(db *database.Database) RepositoryOptionFunc {
+	return func(r *Repository) {
+		r.CommunityApprover = rCommunityApprover.NewCommunityApproverRepository(db)
 	}
 }
 

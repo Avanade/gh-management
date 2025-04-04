@@ -71,6 +71,7 @@ jobs:
           parameters.appServiceSettings.value.GH_REPO_TEMPLATE_NAME : ${{ vars.GH_REPO_TEMPLATE_NAME }}
           parameters.appServiceSettings.value.APPROVAL_SYSTEM_APP_URL : ${{ vars.APPROVAL_SYSTEM_APP_URL }}
           parameters.appServiceSettings.value.APPROVAL_SYSTEM_APP_ID : ${{ vars.APPROVAL_SYSTEM_APP_ID }}
+          parameters.appServiceSettings.value.APPROVAL_SYSTEM_APP_MODULE_ADO_ORGANIZATION : ${{ vars.APPROVAL_SYSTEM_APP_MODULE_ADO_ORGANIZATION }}
           parameters.appServiceSettings.value.APPROVAL_SYSTEM_APP_MODULE_PROJECTS : ${{ vars.APPROVAL_SYSTEM_APP_MODULE_PROJECTS }}
           parameters.appServiceSettings.value.APPROVAL_SYSTEM_APP_MODULE_COMMUNITY : ${{ vars.APPROVAL_SYSTEM_APP_MODULE_COMMUNITY }}
           parameters.appServiceSettings.value.APPROVAL_SYSTEM_APP_MODULE_ORGANIZATION : ${{ vars.APPROVAL_SYSTEM_APP_MODULE_ORGANIZATION }}

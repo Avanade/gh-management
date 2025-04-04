@@ -4,12 +4,14 @@ import (
 	"main/config"
 	cActivity "main/controller/activity"
 	cActivityType "main/controller/activitytype"
+	cAdoOrganization "main/controller/ado-organization"
 	cApprovalType "main/controller/approval-type"
 	cArticle "main/controller/article"
 	cCategory "main/controller/category"
 	cContributionArea "main/controller/contributionarea"
 	cExternalLink "main/controller/externallink"
 	cOssContributionSponsor "main/controller/osscontributionsponsor"
+	cOtherRequest "main/controller/other-request"
 	cRepositoryApprover "main/controller/repository-approver"
 	cTopic "main/controller/topic"
 	"main/service"
@@ -18,10 +20,12 @@ import (
 type Controller struct {
 	Activity               cActivity.ActivityController
 	ActivityType           cActivityType.ActivityTypeController
+	AdoOrganization        cAdoOrganization.AdoOrganizationController
 	ApprovalType           cApprovalType.ApprovalTypeController
 	ContributionArea       cContributionArea.ContributionAreaController
 	ExternalLink           cExternalLink.ExternalLinkController
 	OssContributionSponsor cOssContributionSponsor.OSSContributionSponsorController
+	OtherRequest           cOtherRequest.OtherRequestController
 	RepositoryApprover     cRepositoryApprover.RepositoryApproverController
 	Topic                  cTopic.TopicController
 	Category               cCategory.CategoryController
@@ -52,6 +56,12 @@ func NewActivityTypeController(serv *service.Service) ControllerOptionFunc {
 	}
 }
 
+func NewAdoOrganizationController(serv *service.Service, conf config.ConfigManager) ControllerOptionFunc {
+	return func(c *Controller) {
+		c.AdoOrganization = cAdoOrganization.NewAdoOrganizationController(serv, conf)
+	}
+}
+
 func NewApprovalTypeController(serv *service.Service) ControllerOptionFunc {
 	return func(c *Controller) {
 		c.ApprovalType = cApprovalType.NewApprovalTypeController(serv)
@@ -73,6 +83,12 @@ func NewExternalLinkController(serv *service.Service) ControllerOptionFunc {
 func NewOssContributionSponsorController(serv *service.Service) ControllerOptionFunc {
 	return func(c *Controller) {
 		c.OssContributionSponsor = cOssContributionSponsor.NewOssContributionSponsorController(serv)
+	}
+}
+
+func NewOtherRequestController() ControllerOptionFunc {
+	return func(c *Controller) {
+		c.OtherRequest = cOtherRequest.NewOtherRequestController()
 	}
 }
 
