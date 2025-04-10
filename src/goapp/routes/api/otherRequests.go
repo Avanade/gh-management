@@ -65,7 +65,6 @@ func AddGitHubCopilot(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if result != nil {
-		logger.LogException(err)
 		http.Error(w, "You have a pending request on this organization. Wait for response from the approvers. ", http.StatusBadRequest)
 		return
 	}
@@ -159,7 +158,6 @@ func CreateGitHubCopilotApprovalRequest(data db.GitHubCopilot, logger *appinsigh
 	url := os.Getenv("APPROVAL_SYSTEM_APP_URL")
 	if url != "" {
 		url = url + "/api/request"
-		ch := make(chan *http.Response)
 
 		bodyTemplate := `
 		<html>
@@ -298,8 +296,7 @@ func CreateGitHubCopilotApprovalRequest(data db.GitHubCopilot, logger *appinsigh
 			RequesterEmail:      data.Username,
 		}
 
-		go getHttpPostResponseStatus(url, postParams, ch, logger)
-		r := <-ch
+		r := getHttpPostResponseStatus(url, postParams, logger)
 		if r != nil {
 			var res CommunityApprovalSystemPostResponseDto
 			err := json.NewDecoder(r.Body).Decode(&res)
@@ -548,7 +545,6 @@ func CreateOrganizationAccessApprovalRequest(
 	url := os.Getenv("APPROVAL_SYSTEM_APP_URL")
 	if url != "" {
 		url = url + "/api/request"
-		ch := make(chan *http.Response)
 
 		bodyTemplate := `<html>
 							<head>
@@ -671,8 +667,7 @@ func CreateOrganizationAccessApprovalRequest(
 			RequesterEmail:      username,
 		}
 
-		go getHttpPostResponseStatus(url, postParams, ch, logger)
-		r := <-ch
+		r := getHttpPostResponseStatus(url, postParams, logger)
 		if r != nil {
 			var res CommunityApprovalSystemPostResponseDto
 			err := json.NewDecoder(r.Body).Decode(&res)

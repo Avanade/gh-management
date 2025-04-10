@@ -753,7 +753,6 @@ func ApprovalSystemRequestCommunity(data db.CommunityApproval, logger *appinsigh
 	url := os.Getenv("APPROVAL_SYSTEM_APP_URL")
 	if url != "" {
 		url = url + "/api/request"
-		ch := make(chan *http.Response)
 		// var res *http.Response
 
 		bodyTemplate := `
@@ -910,8 +909,7 @@ func ApprovalSystemRequestCommunity(data db.CommunityApproval, logger *appinsigh
 			RequesterEmail:      data.RequesterUserPrincipalName,
 		}
 
-		go getHttpPostResponseStatus(url, postParams, ch, logger)
-		r := <-ch
+		r := getHttpPostResponseStatus(url, postParams, logger)
 		if r != nil {
 			var res CommunityApprovalSystemPostResponseDto
 			err := json.NewDecoder(r.Body).Decode(&res)
