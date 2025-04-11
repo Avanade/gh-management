@@ -423,11 +423,9 @@ func RequestOrganizationAccess(w http.ResponseWriter, r *http.Request) {
 	if membership != nil {
 		switch membership.GetState() {
 		case "active":
-			logger.LogException(err)
 			http.Error(w, "The request cannot proceed because you are already a member of this organization.", http.StatusBadRequest)
 			return
 		case "pending":
-			logger.LogException(err)
 			http.Error(w, fmt.Sprint("The request cannot proceed because you have pending invitation from this organization, ", regionalOrg.Name), http.StatusBadRequest)
 			return
 		}
@@ -441,7 +439,6 @@ func RequestOrganizationAccess(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if hasPendingRequest {
-		logger.LogException(err)
 		http.Error(w, "The request cannot proceed because you have pending request.", http.StatusBadRequest)
 		return
 	}
