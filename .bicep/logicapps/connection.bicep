@@ -37,9 +37,14 @@ resource connection 'Microsoft.Web/connections@2016-06-01' = {
   }
 }
 
-// Create access policy for the connection
-// Type not in Bicep yet but works fine
-resource ConnectionPolicy 'Microsoft.Web/connections/accessPolicies@2016-06-01' = {
+// Reference the existing access policy
+resource existingConnectionPolicy 'Microsoft.Web/connections/accessPolicies@2016-06-01' existing = {
+  parent: connection
+  name: logicAppName
+}
+
+// Create access policy for the connection only if it doesn't already exist
+resource ConnectionPolicy 'Microsoft.Web/connections/accessPolicies@2016-06-01' = if(existingConnectionPolicy == null) {
   parent: connection
   name: logicAppName
   location: location
