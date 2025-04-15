@@ -181,8 +181,6 @@ func GithubForceSaveHandler(w http.ResponseWriter, r *http.Request) {
 		user, err := ghAPI.GetUserByLogin(currentDbUser[0]["GitHubUser"].(string), os.Getenv("GH_TOKEN"))
 		if err != nil {
 			logger.LogException(err)
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
 		}
 
 		orgs, err := ghAPI.GetOrganizationsByGitHubName(user.Login, os.Getenv("GH_TOKEN"))
@@ -190,21 +188,19 @@ func GithubForceSaveHandler(w http.ResponseWriter, r *http.Request) {
 			logger.LogException(err)
 		}
 
-		if orgs != nil && len(orgs.Organizations) > 0 {
-			isMembershipChecked := false
+		logger.LogTrace("Checking membership of user in opensource & innersource orgs", contracts.Information)
+		CheckMembership(userPrincipalName, newGhUser)
+
+		if orgs != nil && len(orgs.Organizations) > 0 && user != nil {
 			for _, org := range orgs.Organizations {
 				if org.Login == os.Getenv("GH_ORG_OPENSOURCE") || org.Login == os.Getenv("GH_ORG_INNERSOURCE") {
-					if !isMembershipChecked {
-						logger.LogTrace("Checking membership of user in opensource & innersource orgs", contracts.Information)
-						CheckMembership(userPrincipalName, newGhUser)
-						isMembershipChecked = true
-					}
+					logger.LogTrace(fmt.Sprintf("User %s is already invited to organization %s", user.Login, org.Login), contracts.Information)
 				} else {
 					invite := ghAPI.OrganizationInvitation(os.Getenv("GH_TOKEN"), newGhUser, org.Login)
 					if invite == nil {
-						logger.LogTrace("Error sending invitation to organization", contracts.Error)
+						logger.LogTrace(fmt.Sprintf("Error sending invitation to user from %s organization", org.Login), contracts.Error)
 					} else {
-						logger.LogTrace("Invitation sent to organization", contracts.Information)
+						logger.LogTrace(fmt.Sprintf("Invitation sent to user from %s organization", org.Login), contracts.Information)
 					}
 				}
 				collaboratorRepos, err := ghAPI.GetCollaboratorRepositoriesFromOrganization(os.Getenv("GH_TOKEN"), org.Login, user.Login)
@@ -224,17 +220,21 @@ func GithubForceSaveHandler(w http.ResponseWriter, r *http.Request) {
 					}
 				}
 			}
-		} else {
+		} else if user != nil {
 			logger.LogTrace(fmt.Sprintf("No organizations found for user: %s", user.Login), contracts.Information)
+		} else {
+			logger.LogTrace("User not found", contracts.Error)
 		}
 
-		enterpriseToken := os.Getenv("GH_ENTERPRISE_TOKEN")
-		enterpriseId := os.Getenv("GH_ENTERPRISE_ID")
-		err = ghAPI.RemoveEnterpriseMember(enterpriseToken, enterpriseId, user.Id)
-		if err != nil {
-			logger.LogException(err)
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
+		if user != nil {
+			enterpriseToken := os.Getenv("GH_ENTERPRISE_TOKEN")
+			enterpriseId := os.Getenv("GH_ENTERPRISE_ID")
+			err = ghAPI.RemoveEnterpriseMember(enterpriseToken, enterpriseId, user.Id)
+			if err != nil {
+				logger.LogException(err)
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
 		}
 	}
 
