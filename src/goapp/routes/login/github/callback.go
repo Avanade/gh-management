@@ -183,50 +183,48 @@ func GithubForceSaveHandler(w http.ResponseWriter, r *http.Request) {
 			logger.LogException(err)
 		}
 
-		orgs, err := ghAPI.GetOrganizationsByGitHubName(user.Login, os.Getenv("GH_TOKEN"))
-		if err != nil {
-			logger.LogException(err)
-		}
-
 		logger.LogTrace("Checking membership of user in opensource & innersource orgs", contracts.Information)
 		CheckMembership(userPrincipalName, newGhUser)
 
-		if orgs != nil && len(orgs.Organizations) > 0 && user != nil {
-			for _, org := range orgs.Organizations {
-				if org.Login == os.Getenv("GH_ORG_OPENSOURCE") || org.Login == os.Getenv("GH_ORG_INNERSOURCE") {
-					logger.LogTrace(fmt.Sprintf("User %s is already invited to organization %s", user.Login, org.Login), contracts.Information)
-				} else {
-					invite := ghAPI.OrganizationInvitation(os.Getenv("GH_TOKEN"), newGhUser, org.Login)
-					if invite == nil {
-						logger.LogTrace(fmt.Sprintf("Error sending invitation to user from %s organization", org.Login), contracts.Error)
-					} else {
-						logger.LogTrace(fmt.Sprintf("Invitation sent to user from %s organization", org.Login), contracts.Information)
-					}
-				}
-				collaboratorRepos, err := ghAPI.GetCollaboratorRepositoriesFromOrganization(os.Getenv("GH_TOKEN"), org.Login, user.Login)
-				if err != nil {
-					logger.LogException(err)
-				}
-				for _, colRepo := range collaboratorRepos {
-					permission, err := ghAPI.GetPermissionLevel(org.Login, colRepo.Name, user.Login)
-					if err != nil {
-						logger.LogException(err)
-						continue
-					}
-					_, err = ghAPI.AddCollaborator(colRepo.Org, colRepo.Name, newGhUser, permission)
-					if err != nil {
-						logger.LogException(err)
-						continue
-					}
-				}
-			}
-		} else if user != nil {
-			logger.LogTrace(fmt.Sprintf("No organizations found for user: %s", user.Login), contracts.Information)
-		} else {
-			logger.LogTrace("User not found", contracts.Error)
-		}
-
 		if user != nil {
+			orgs, err := ghAPI.GetOrganizationsByGitHubName(user.Login, os.Getenv("GH_TOKEN"))
+			if err != nil {
+				logger.LogException(err)
+			}
+
+			if orgs != nil && len(orgs.Organizations) > 0 {
+				for _, org := range orgs.Organizations {
+					if org.Login == os.Getenv("GH_ORG_OPENSOURCE") || org.Login == os.Getenv("GH_ORG_INNERSOURCE") {
+						logger.LogTrace(fmt.Sprintf("User %s is already invited to organization %s", user.Login, org.Login), contracts.Information)
+					} else {
+						invite := ghAPI.OrganizationInvitation(os.Getenv("GH_TOKEN"), newGhUser, org.Login)
+						if invite == nil {
+							logger.LogTrace(fmt.Sprintf("Error sending invitation to user from %s organization", org.Login), contracts.Error)
+						} else {
+							logger.LogTrace(fmt.Sprintf("Invitation sent to user from %s organization", org.Login), contracts.Information)
+						}
+					}
+					collaboratorRepos, err := ghAPI.GetCollaboratorRepositoriesFromOrganization(os.Getenv("GH_TOKEN"), org.Login, user.Login)
+					if err != nil {
+						logger.LogException(err)
+					}
+					for _, colRepo := range collaboratorRepos {
+						permission, err := ghAPI.GetPermissionLevel(org.Login, colRepo.Name, user.Login)
+						if err != nil {
+							logger.LogException(err)
+							continue
+						}
+						_, err = ghAPI.AddCollaborator(colRepo.Org, colRepo.Name, newGhUser, permission)
+						if err != nil {
+							logger.LogException(err)
+							continue
+						}
+					}
+				}
+			} else {
+				logger.LogTrace(fmt.Sprintf("No organizations found for user: %s", user.Login), contracts.Information)
+			}
+
 			enterpriseToken := os.Getenv("GH_ENTERPRISE_TOKEN")
 			enterpriseId := os.Getenv("GH_ENTERPRISE_ID")
 			err = ghAPI.RemoveEnterpriseMember(enterpriseToken, enterpriseId, user.Id)
@@ -235,6 +233,8 @@ func GithubForceSaveHandler(w http.ResponseWriter, r *http.Request) {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
 			}
+		} else {
+			logger.LogTrace(fmt.Sprintf("User %s not found in GitHub", currentDbUser[0]["GitHubUser"].(string)), contracts.Error)
 		}
 	}
 
