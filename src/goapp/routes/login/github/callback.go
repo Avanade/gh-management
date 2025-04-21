@@ -180,7 +180,7 @@ func GithubForceSaveHandler(w http.ResponseWriter, r *http.Request) {
 		// Get the user by GitHub ID
 		user, err := ghAPI.GetUserByLogin(currentDbUser[0]["GitHubUser"].(string), os.Getenv("GH_TOKEN"))
 		if err != nil {
-			logger.LogException(err)
+			logger.LogTrace(err.Error(), contracts.Error)
 		}
 
 		logger.LogTrace("Checking membership of user in opensource & innersource orgs", contracts.Information)
@@ -229,9 +229,7 @@ func GithubForceSaveHandler(w http.ResponseWriter, r *http.Request) {
 			enterpriseId := os.Getenv("GH_ENTERPRISE_ID")
 			err = ghAPI.RemoveEnterpriseMember(enterpriseToken, enterpriseId, user.Id)
 			if err != nil {
-				logger.LogException(err)
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return
+				logger.LogTrace(fmt.Sprintf("Error removing user %s from enterprise %s. Exception: %s", user.Login, enterpriseId, err.Error()), contracts.Error)
 			}
 		} else {
 			logger.LogTrace(fmt.Sprintf("User %s not found in GitHub", currentDbUser[0]["GitHubUser"].(string)), contracts.Error)
