@@ -471,6 +471,10 @@ func ProcessApprovalProjects(r *http.Request, module string) error {
 		approvalStatusId = REJECTED
 	}
 
+	// Format req.RespondedBy to UTC time to zulu time
+	req.ResponseDate = strings.ReplaceAll(req.ResponseDate, " +0000 UTC", "Z")
+	req.ResponseDate = strings.ReplaceAll(req.ResponseDate, " ", "T")
+
 	switch module {
 	case "projects":
 		_, err = db.UpdateProjectApprovalApproverResponse(req.ItemId, req.Remarks, req.ResponseDate, req.RespondedBy, approvalStatusId)

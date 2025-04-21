@@ -1505,7 +1505,6 @@ func ApprovalSystemRequest(data db.ProjectApprovalApprovers, logger *appinsights
 	url := os.Getenv("APPROVAL_SYSTEM_APP_URL")
 	if url != "" {
 		url = url + "/api/request"
-		ch := make(chan *http.Response)
 		// var res *http.Response
 
 		bodyTemplate := `
@@ -1701,8 +1700,7 @@ func ApprovalSystemRequest(data db.ProjectApprovalApprovers, logger *appinsights
 			RequesterEmail:      data.RequesterUserPrincipalName,
 		}
 
-		go getHttpPostResponseStatus(url, postParams, ch, logger)
-		r := <-ch
+		r := getHttpPostResponseStatus(url, postParams, logger)
 		if r != nil {
 			defer r.Body.Close()
 			var res ProjectApprovalSystemPostResponseDto
@@ -1731,21 +1729,21 @@ func ApprovalSystemRequest(data db.ProjectApprovalApprovers, logger *appinsights
 	return nil
 }
 
-func getHttpPostResponseStatus(url string, data interface{}, ch chan *http.Response, logger *appinsights_wrapper.TelemetryClient) {
+func getHttpPostResponseStatus(url string, data interface{}, logger *appinsights_wrapper.TelemetryClient) *http.Response {
 	jsonReq, err := json.Marshal(data)
 	if err != nil {
 		logger.LogException(err)
-		ch <- nil
+		return nil
 	}
 	token, err := authentication.GenerateToken()
 	if err != nil {
 		logger.LogException(err)
-		ch <- nil
+		return nil
 	}
 
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonReq))
 	if err != nil {
-		ch <- nil
+		return nil
 	}
 
 	req.Header.Add("Authorization", "Bearer "+token)
@@ -1757,13 +1755,13 @@ func getHttpPostResponseStatus(url string, data interface{}, ch chan *http.Respo
 
 	response, err := client.Do(req)
 	if err != nil {
-		ch <- nil
+		return nil
 	}
 	if response.StatusCode == http.StatusUnauthorized {
-		ch <- nil
+		return nil
 	}
 
-	ch <- response
+	return response
 }
 
 func ReprocessRequestApproval() {

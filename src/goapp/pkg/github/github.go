@@ -31,6 +31,7 @@ type Repo struct {
 	Visibility          string           `json:"visibility"`
 	TFSProjectReference string
 	Topics              []string
+	Role                string `json:"roleName"`
 }
 
 func CreateClient(token string) *github.Client {
@@ -110,7 +111,7 @@ func GetPermissionLevel(repoOwner string, repoName string, username string) (str
 	if err != nil {
 		return "", err
 	}
-	return permission.GetPermission(), nil
+	return permission.User.GetRoleName(), nil
 }
 
 func GetRepositoryReadmeById(owner, repoName string) (string, error) {
@@ -175,6 +176,38 @@ func IsRepoExisting(repoName string) (bool, error) {
 	return exists, nil
 }
 
+func GetCollaboratorRepositoriesFromOrganization(token, org, user string) ([]Repo, error) {
+	repos, err := GetRepositoriesFromOrganization(org)
+	if err != nil {
+		return nil, err
+	}
+
+	var collaboratorRepositories []Repo
+
+	for _, repo := range repos {
+
+		// Successfully fetches the collaborators of the repository
+		collaborators, err := GetRepositoryDirectCollaborators(token, org, repo.Name)
+		if err != nil {
+			log.Printf("Error checking if user %s is a collaborator for repository %s: %v", user, repo.Name, err)
+			continue
+		}
+
+		for _, collaborator := range collaborators {
+
+			if user == *collaborator.Login {
+				collaboratorRepositories = append(collaboratorRepositories, repo)
+				break
+			}
+		}
+
+		if len(collaborators) == 0 {
+			log.Printf("User %s is not a collaborator for repository %s in organization %s", user, repo.Name, org)
+		}
+	}
+	return collaboratorRepositories, nil
+}
+
 func GetRepositoriesFromOrganization(org string) ([]Repo, error) {
 	client := CreateClient(os.Getenv("GH_TOKEN"))
 	var allRepos []*github.Repository
@@ -211,6 +244,7 @@ func GetRepositoriesFromOrganization(org string) ([]Repo, error) {
 			Visibility:          repo.GetVisibility(),
 			TFSProjectReference: repo.GetHTMLURL(),
 			Topics:              repo.Topics,
+			Role:                repo.GetRoleName(),
 		}
 		repoList = append(repoList, r)
 	}
@@ -256,6 +290,23 @@ func IsOrganizationMember(token, org, ghUser string) (bool, error) {
 	client := CreateClient(token)
 	isOrgMember, _, err := client.Organizations.IsMember(context.Background(), org, ghUser)
 	return isOrgMember, err
+}
+
+func IsRepositoryCollaborator(token, owner, repo, ghUser string) (bool, error) {
+	client := CreateClient(token)
+	isRepoMember, _, err := client.Repositories.IsCollaborator(context.Background(), owner, repo, ghUser)
+	return isRepoMember, err
+}
+
+func GetRepositoryDirectCollaborators(token, owner, repo string) ([]*github.User, error) {
+	client := CreateClient(token)
+	opts := &github.ListCollaboratorsOptions{Affiliation: "direct"}
+	collaborators, ghResponse, _ := client.Repositories.ListCollaborators(context.Background(), owner, repo, opts)
+
+	if ghResponse.StatusCode != 200 {
+		return nil, fmt.Errorf("unexpected response status: %v", ghResponse.Status)
+	}
+	return collaborators, nil
 }
 
 func UserMembership(token, org, ghUser string) (*github.Membership, error) {
@@ -502,6 +553,59 @@ func RemoveEnterpriseMember(token string, enterpriseId string, userId string) er
 	return nil
 }
 
+func GetOrganizationsByGitHubName(username string, token string) (*GetOrganizationsByGithubNameResult, error) {
+	src := oauth2.StaticTokenSource(
+		&oauth2.Token{AccessToken: token},
+	)
+	httpClient := oauth2.NewClient(context.Background(), src)
+
+	client := githubv4.NewClient(httpClient)
+
+	var result GetOrganizationsByGithubNameResult
+	duplicatedOrgs := make(map[string]bool)
+
+	for {
+		var queryResult GetOrganizationsByGitHubNameQuery
+		variables := map[string]interface{}{
+			"login": githubv4.String(username),
+		}
+		err := client.Query(context.Background(), &queryResult, variables)
+		if err != nil {
+			return nil, err
+		}
+
+		if queryResult.User.Organizations.Edges == nil {
+			return nil, fmt.Errorf("no organizations found for user: %s", username)
+		}
+
+		for _, org := range queryResult.User.Organizations.Edges {
+			if duplicatedOrgs[string(org.Node.Login)] {
+				return &result, nil
+			}
+
+			duplicatedOrgs[string(org.Node.Login)] = true
+			result.Organizations = append(result.Organizations, Organization{
+				Login:      string(org.Node.Login),
+				DatabaseId: int64(org.Node.DatabaseId),
+			})
+		}
+
+		if len(queryResult.User.Organizations.Edges) == 0 {
+			break
+		}
+
+		isEnabled := db.NullBool{Value: true}
+		regOrgs, _ := db.SelectRegionalOrganization(&isEnabled)
+		orgs := []string{os.Getenv("GH_ORG_INNERSOURCE"), os.Getenv("GH_ORG_OPENSOURCE")}
+		for _, org := range regOrgs {
+			if org.IsRegionalOrganization {
+				orgs = append(orgs, org.Name)
+			}
+		}
+	}
+	return &result, nil
+}
+
 func GetOrganizationsWithinEnterprise(enterprise string, token string) (*GetOrganizationsWithinEnterpriseResult, error) {
 	src := oauth2.StaticTokenSource(
 		&oauth2.Token{AccessToken: token},
@@ -665,6 +769,19 @@ func GetUserByLogin(login string, token string) (*GetUserByLoginResult, error) {
 	return &result, nil
 }
 
+type GetOrganizationsByGitHubNameQuery struct {
+	User struct {
+		Organizations struct {
+			Edges []struct {
+				Node struct {
+					Login      githubv4.String
+					DatabaseId githubv4.Int
+				}
+			}
+		} `graphql:"organizations(first: 90)"`
+	} `graphql:"user(login: $login)"`
+}
+
 // Query structs
 type GetOrganizationsWithinEnterpriseQuery struct {
 	Enterprise struct {
@@ -730,6 +847,11 @@ type PageInfo struct {
 }
 
 // Result structs
+
+type GetOrganizationsByGithubNameResult struct {
+	Organizations []Organization
+}
+
 type GetOrganizationsWithinEnterpriseResult struct {
 	Organizations []Organization
 }

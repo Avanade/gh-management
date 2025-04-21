@@ -130,7 +130,6 @@ func CreateOrganizationApprovalRequest(data db.Organization, logger *appinsights
 	url := os.Getenv("APPROVAL_SYSTEM_APP_URL")
 	if url != "" {
 		url = url + "/api/request"
-		ch := make(chan *http.Response)
 
 		bodyTemplate := `
 		<html>
@@ -296,8 +295,7 @@ func CreateOrganizationApprovalRequest(data db.Organization, logger *appinsights
 			RequesterEmail:      data.Username,
 		}
 
-		go getHttpPostResponseStatus(url, postParams, ch, logger)
-		r := <-ch
+		r := getHttpPostResponseStatus(url, postParams, logger)
 		if r != nil {
 			var res CommunityApprovalSystemPostResponseDto
 			err := json.NewDecoder(r.Body).Decode(&res)

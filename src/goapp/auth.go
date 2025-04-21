@@ -35,14 +35,14 @@ func checkFailedApprovalRequests() {
 	// TIMER SERVICE
 	freq := ev.GetEnvVar("APPROVALREQUESTS_RETRY_FREQ", "15")
 	freqInt, _ := strconv.ParseInt(freq, 0, 64)
-	if freq > "0" {
+	if freqInt > 0 {
 		for range time.NewTicker(time.Duration(freqInt) * time.Minute).C {
-			go rtApi.ReprocessRequestApproval()
+			rtApi.ReprocessRequestApproval()
 
-			go rtApi.ReprocessCommunityApprovalRequestCommunities()
-			go rtApi.ReprocessCommunityApprovalRequestOrganizationAccess()
-			go rtApi.ReprocessCommunityApprovalRequestGitHubCoPilots()
-			go rtApi.ReprocessCommunityApprovalRequestNewOrganizations()
+			rtApi.ReprocessCommunityApprovalRequestCommunities()
+			rtApi.ReprocessCommunityApprovalRequestOrganizationAccess()
+			rtApi.ReprocessCommunityApprovalRequestGitHubCoPilots()
+			rtApi.ReprocessCommunityApprovalRequestNewOrganizations()
 		}
 	}
 }

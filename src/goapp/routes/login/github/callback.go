@@ -10,6 +10,7 @@ import (
 	"strings"
 	"time"
 
+	"main/pkg/appinsights_wrapper"
 	auth "main/pkg/authentication"
 	"main/pkg/email"
 	ev "main/pkg/envvar"
@@ -20,6 +21,7 @@ import (
 	"main/pkg/session"
 
 	"github.com/gorilla/sessions"
+	"github.com/microsoft/ApplicationInsights-Go/appinsights/contracts"
 	"golang.org/x/oauth2"
 )
 
@@ -131,16 +133,19 @@ func GithubCallbackHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func GithubForceSaveHandler(w http.ResponseWriter, r *http.Request) {
+	logger := appinsights_wrapper.NewClient()
+	defer logger.EndOperation()
+
 	sessionaz, err := session.Store.Get(r, "auth-session")
 	if err != nil {
-		log.Println(err.Error())
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	// Check session and state
 	session, err := session.Store.Get(r, "gh-auth-session")
 	if err != nil {
-		log.Println(err.Error())
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -150,7 +155,7 @@ func GithubForceSaveHandler(w http.ResponseWriter, r *http.Request) {
 	var p map[string]interface{}
 	err = json.Unmarshal([]byte(ghProfile), &p)
 	if err != nil {
-		log.Println(err.Error())
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -161,11 +166,13 @@ func GithubForceSaveHandler(w http.ResponseWriter, r *http.Request) {
 	newGhId := strconv.FormatFloat(p["id"].(float64), 'f', 0, 64)
 	newGhUser := fmt.Sprintf("%s", p["login"])
 
+	logger.LogTrace(fmt.Sprintf("User %s is trying to reassociate new GitHub account %s", userPrincipalName, newGhUser), contracts.Information)
+
 	if ev.GetEnvVar("ENABLED_REMOVE_ENTERPRISE_MEMBER", "false") == "true" {
 		// Get the current associated GitHub account
 		currentDbUser, err := db.GetUserByUserPrincipal(userPrincipalName)
 		if err != nil {
-			log.Println(err.Error())
+			logger.LogException(err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
@@ -173,29 +180,69 @@ func GithubForceSaveHandler(w http.ResponseWriter, r *http.Request) {
 		// Get the user by GitHub ID
 		user, err := ghAPI.GetUserByLogin(currentDbUser[0]["GitHubUser"].(string), os.Getenv("GH_TOKEN"))
 		if err != nil {
-			log.Println(err.Error())
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
+			logger.LogTrace(err.Error(), contracts.Error)
 		}
-		enterpriseToken := os.Getenv("GH_ENTERPRISE_TOKEN")
-		enterpriseId := os.Getenv("GH_ENTERPRISE_ID")
-		err = ghAPI.RemoveEnterpriseMember(enterpriseToken, enterpriseId, user.Id)
-		if err != nil {
-			log.Println(err.Error())
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
+
+		logger.LogTrace("Checking membership of user in opensource & innersource orgs", contracts.Information)
+		CheckMembership(userPrincipalName, newGhUser)
+
+		if user != nil {
+			orgs, err := ghAPI.GetOrganizationsByGitHubName(user.Login, os.Getenv("GH_TOKEN"))
+			if err != nil {
+				logger.LogException(err)
+			}
+
+			if orgs != nil && len(orgs.Organizations) > 0 {
+				for _, org := range orgs.Organizations {
+					if org.Login == os.Getenv("GH_ORG_OPENSOURCE") || org.Login == os.Getenv("GH_ORG_INNERSOURCE") {
+						logger.LogTrace(fmt.Sprintf("User %s is already invited to organization %s", user.Login, org.Login), contracts.Information)
+					} else {
+						invite := ghAPI.OrganizationInvitation(os.Getenv("GH_TOKEN"), newGhUser, org.Login)
+						if invite == nil {
+							logger.LogTrace(fmt.Sprintf("Error sending invitation to user from %s organization", org.Login), contracts.Error)
+						} else {
+							logger.LogTrace(fmt.Sprintf("Invitation sent to user from %s organization", org.Login), contracts.Information)
+						}
+					}
+					collaboratorRepos, err := ghAPI.GetCollaboratorRepositoriesFromOrganization(os.Getenv("GH_TOKEN"), org.Login, user.Login)
+					if err != nil {
+						logger.LogException(err)
+					}
+					for _, colRepo := range collaboratorRepos {
+						permission, err := ghAPI.GetPermissionLevel(org.Login, colRepo.Name, user.Login)
+						if err != nil {
+							logger.LogException(err)
+							continue
+						}
+						_, err = ghAPI.AddCollaborator(colRepo.Org, colRepo.Name, newGhUser, permission)
+						if err != nil {
+							logger.LogException(err)
+							continue
+						}
+					}
+				}
+			} else {
+				logger.LogTrace(fmt.Sprintf("No organizations found for user: %s", user.Login), contracts.Information)
+			}
+
+			enterpriseToken := os.Getenv("GH_ENTERPRISE_TOKEN")
+			enterpriseId := os.Getenv("GH_ENTERPRISE_ID")
+			err = ghAPI.RemoveEnterpriseMember(enterpriseToken, enterpriseId, user.Id)
+			if err != nil {
+				logger.LogTrace(fmt.Sprintf("Error removing user %s from enterprise %s. Exception: %s", user.Login, enterpriseId, err.Error()), contracts.Error)
+			}
+		} else {
+			logger.LogTrace(fmt.Sprintf("User %s not found in GitHub", currentDbUser[0]["GitHubUser"].(string)), contracts.Error)
 		}
 	}
 
 	result, err := db.UpdateUserGithub(userPrincipalName, newGhId, newGhUser, 1)
 	if err != nil {
-		log.Println(err.Error())
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	session.Values["ghIsValid"] = result["IsValid"].(bool)
-
-	CheckMembership(userPrincipalName, newGhUser)
 
 	session.Options = &sessions.Options{
 		Path:     "/",
@@ -207,7 +254,7 @@ func GithubForceSaveHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	err = session.Save(r, w)
 	if err != nil {
-		log.Println(err.Error())
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -223,6 +270,7 @@ func GithubForceSaveHandler(w http.ResponseWriter, r *http.Request) {
 
 	jsonResp, err := json.Marshal(orgNames)
 	if err != nil {
+		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
