@@ -64,6 +64,117 @@ func SelectRegionalOrganization(isEnabled *NullBool) ([]RegionalOrganization, er
 	return regionalOrganizations, nil
 }
 
+func SelectRegionalOrganizationIsAccessRequestEnabled(isEnabled *NullBool) ([]RegionalOrganization, error) {
+	db := ConnectDb()
+	defer db.Close()
+
+	param := make(map[string]interface{})
+	if isEnabled != nil {
+		param["IsEnabled"] = isEnabled.Value
+	}
+
+	result, err := db.ExecuteStoredProcedureWithResult("usp_RegionalOrganization_Select_IsAccessRequestEnabled", param)
+	if err != nil {
+		return nil, err
+	}
+
+	regionalOrganizations := make([]RegionalOrganization, 0)
+	for _, row := range result {
+		organization := RegionalOrganization{
+			Id:                      row["Id"].(int64),
+			Name:                    row["Name"].(string),
+			IsEnabled:               row["IsEnabled"].(bool),
+			Created:                 row["Created"].(time.Time),
+		}
+		if row["CreatedBy"] != nil {
+			organization.CreatedBy = row["CreatedBy"].(string)
+		}
+		if row["ModifiedBy"] != nil {
+			organization.ModifiedBy = row["ModifiedBy"].(string)
+		}
+		if row["Modified"] != nil {
+			organization.Modified = row["Modified"].(time.Time)
+		}
+		regionalOrganizations = append(regionalOrganizations, organization)
+	}
+
+	return regionalOrganizations, nil
+}
+
+func SelectRegionalOrganizationIsCopilotRequestEnabled(isEnabled *NullBool) ([]RegionalOrganization, error) {
+	db := ConnectDb()
+	defer db.Close()
+
+	param := make(map[string]interface{})
+	if isEnabled != nil {
+		param["IsEnabled"] = isEnabled.Value
+	}
+
+	result, err := db.ExecuteStoredProcedureWithResult("usp_RegionalOrganization_Select_IsCopilotRequestEnabled", param)
+	if err != nil {
+		return nil, err
+	}
+
+	regionalOrganizations := make([]RegionalOrganization, 0)
+	for _, row := range result {
+		organization := RegionalOrganization{
+			Id:                      row["Id"].(int64),
+			Name:                    row["Name"].(string),
+			IsEnabled:               row["IsEnabled"].(bool),
+			Created:                 row["Created"].(time.Time),
+		}
+		if row["CreatedBy"] != nil {
+			organization.CreatedBy = row["CreatedBy"].(string)
+		}
+		if row["ModifiedBy"] != nil {
+			organization.ModifiedBy = row["ModifiedBy"].(string)
+		}
+		if row["Modified"] != nil {
+			organization.Modified = row["Modified"].(time.Time)
+		}
+		regionalOrganizations = append(regionalOrganizations, organization)
+	}
+
+	return regionalOrganizations, nil
+}
+
+func SelectRegionalOrganizationIsRegionalOrganization(isEnabled *NullBool) ([]RegionalOrganization, error) {
+	db := ConnectDb()
+	defer db.Close()
+
+	param := make(map[string]interface{})
+	if isEnabled != nil {
+		param["IsEnabled"] = isEnabled.Value
+	}
+
+	result, err := db.ExecuteStoredProcedureWithResult("usp_RegionalOrganization_Select_IsRegionalOrganization", param)
+	if err != nil {
+		return nil, err
+	}
+
+	regionalOrganizations := make([]RegionalOrganization, 0)
+	for _, row := range result {
+		organization := RegionalOrganization{
+			Id:                      row["Id"].(int64),
+			Name:                    row["Name"].(string),
+			IsEnabled:               row["IsEnabled"].(bool),
+			Created:                 row["Created"].(time.Time),
+		}
+		if row["CreatedBy"] != nil {
+			organization.CreatedBy = row["CreatedBy"].(string)
+		}
+		if row["ModifiedBy"] != nil {
+			organization.ModifiedBy = row["ModifiedBy"].(string)
+		}
+		if row["Modified"] != nil {
+			organization.Modified = row["Modified"].(time.Time)
+		}
+		regionalOrganizations = append(regionalOrganizations, organization)
+	}
+
+	return regionalOrganizations, nil
+}
+
 func SelectRegionalOrganizationByOption(offset, filter int64, search, orderBy, orderType string, isEnabled *NullBool) (regionalOrganizations []RegionalOrganization, total int64, err error) {
 	db := ConnectDb()
 	defer db.Close()

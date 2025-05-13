@@ -315,11 +315,23 @@ func GetAllRegionalOrganizations(w http.ResponseWriter, r *http.Request) {
 	logger := appinsights_wrapper.NewClient()
 	defer logger.EndOperation()
 
-	regOrgs, err := db.SelectRegionalOrganization(nil)
-	if err != nil {
-		logger.LogException(err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+	regOrgs := []db.RegionalOrganization{}
+	var err error
+	isEnabled := db.NullBool{Value: true}
+
+	if params := r.URL.Query(); params.Has("requestType") {
+		requestType := params["requestType"][0]
+
+		switch requestType {
+		case "accessRequest":
+			regOrgs, err = db.SelectRegionalOrganizationIsAccessRequestEnabled(&isEnabled)
+		case "copilotRequest":
+			regOrgs, err = db.SelectRegionalOrganizationIsCopilotRequestEnabled(&isEnabled)
+		case "organization":
+			regOrgs, err = db.SelectRegionalOrganizationIsRegionalOrganization(&isEnabled)
+		}
+	} else {
+		regOrgs, err = db.SelectRegionalOrganization(&isEnabled)	
 	}
 
 	w.WriteHeader(http.StatusOK)

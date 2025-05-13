@@ -136,7 +136,7 @@
         }
     }
     async function getRegionOptions() {
-        let uri = '/api/github-organization/region'
+        let uri = '/api/github-organization/region?requestType=organization'
         let encoded = encodeURI(uri);
         const res = await fetch(encoded)
         const data = await res.json()
