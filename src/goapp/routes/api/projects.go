@@ -161,7 +161,6 @@ func CreateRepository(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	} else {
-		isEnterpriseOrg, err := ghAPI.IsEnterpriseOrg()
 		if err != nil {
 			logger.LogException(err)
 			HttpResponseError(w, http.StatusBadRequest, "There is a problem checking if the organization is enterprise or not.", logger)
@@ -184,13 +183,22 @@ func CreateRepository(w http.ResponseWriter, r *http.Request) {
 
 		innersource := os.Getenv("GH_ORG_INNERSOURCE")
 		body.Organization = innersource
-		if isEnterpriseOrg && body.Visibility == 2 {
+		if body.Visibility == 2 {
+			time.Sleep(10 * time.Second) // Wait for GitHub to initialize the repository
+			maxRetries := 3
+			
 			logger.LogTrace("Making the repository as internal...", contracts.Information)
-			_, err := ghAPI.SetProjectVisibility(repo.GetName(), "internal", innersource)
+			for i := 0; i < maxRetries; i++ {
+				_, err := ghAPI.SetProjectVisibility(repo.GetName(), "internal", innersource)
+				if err != nil {
+					break
+				}
+
+				logger.LogTrace(fmt.Sprintf("Retry %d: Failed to set visibility. Retrying...", i+1), contracts.Information)
+				time.Sleep(10 * time.Second)
+			}
 			if err != nil {
 				logger.LogException(err)
-				HttpResponseError(w, http.StatusInternalServerError, err.Error(), logger)
-				return
 			}
 		}
 

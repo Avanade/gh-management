@@ -90,7 +90,7 @@
 
     async function getRegionalOrganizations(e) {
         const res = await fetch(
-            `/api/github-organization/region`
+            `/api/github-organization/region?requestType=accessRequest`
         )
         const data = await res.json()
         return data
