@@ -572,11 +572,17 @@ func CheckAllRequests(id int64, host string) {
 		ValidateOrgMembers(owner, repo, newOwner, nil)
 		ghAPI.SetProjectVisibility(repo, "public", owner)
 		ghAPI.TransferRepository(repo, owner, newOwner)
-		time.Sleep(3 * time.Second)
 		db.UpdateProjectVisibilityId(id, PUBLIC)
 
-		repoResp, _ := ghAPI.GetRepository(repo, newOwner)
-		db.UpdateTFSProjectReferenceById(id, repoResp.GetHTMLURL(), *repoResp.GetOwner().Login)
+		// Create a loop that will wait for the repository to be transferred. If the get response is nil, wait for 3 seconds and try again.
+		for i := 0; i < 10; i++ {
+			time.Sleep(3 * time.Second)
+			repoResp, err := ghAPI.GetRepository(repo, newOwner)
+			if err == nil {
+				db.UpdateTFSProjectReferenceById(id, repoResp.GetHTMLURL(), *repoResp.GetOwner().Login)
+				break
+			}
+		}
 	}
 
 	// Check if all requests are responded by approvers.
