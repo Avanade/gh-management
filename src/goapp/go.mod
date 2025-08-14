@@ -65,7 +65,6 @@ require (
 
 require (
 	github.com/Azure/azure-sdk-for-go/sdk/azidentity v1.7.0
-	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/google/uuid v1.6.0
 	github.com/gorilla/sessions v1.2.1
 	github.com/lestrrat-go/jwx v1.2.29
@@ -75,9 +74,7 @@ require (
 	github.com/thedatashed/xlsxreader v1.2.5
 	golang.org/x/crypto v0.36.0 // indirect
 	golang.org/x/net v0.38.0 // indirect
-	golang.org/x/oauth2 v0.6.0
+	golang.org/x/oauth2 v0.27.0
 	golang.org/x/text v0.23.0
-	google.golang.org/appengine v1.6.7 // indirect
-	google.golang.org/protobuf v1.33.0 // indirect
 	gopkg.in/square/go-jose.v2 v2.6.0 // indirect
 )
