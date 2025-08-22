@@ -43,6 +43,7 @@ func checkFailedApprovalRequests() {
 			rtApi.ReprocessCommunityApprovalRequestOrganizationAccess()
 			rtApi.ReprocessCommunityApprovalRequestGitHubCoPilots()
 			rtApi.ReprocessCommunityApprovalRequestNewOrganizations()
+			rtApi.ReprocessCommunityApprovalRequestGHCPPremiumBudgetAllocation()
 		}
 	}
 }

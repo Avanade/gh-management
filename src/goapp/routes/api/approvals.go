@@ -217,6 +217,19 @@ func UpdateCommunityApprovalReassignApprover(w http.ResponseWriter, r *http.Requ
 	w.WriteHeader(http.StatusOK)
 }
 
+func UpdateApprovalStatusGitHubCopilotPremiumBudgetAllocation(w http.ResponseWriter, r *http.Request) {
+	logger := appinsights_wrapper.NewClient()
+	defer logger.EndOperation()
+
+	err := ProcessApprovalProjects(r, "ghcp-premium-budget-allocation")
+	if err != nil {
+		logger.LogException(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+}
+
 func SendReassignEmail(data db.ProjectApproval) error {
 
 	bodyTemplate := `
@@ -544,6 +557,11 @@ func ProcessApprovalProjects(r *http.Request, module string) error {
 				return err
 			}
 			ghAPI.OrganizationInvitation(os.Getenv("GH_TOKEN"), orgAccess.User.GithubUsername, orgAccess.Organization.Name)
+		}
+	case "ghcp-premium-budget-allocation":
+		_, err = db.UpdateApprovalApproverResponse(req.ItemId, req.Remarks, req.ResponseDate, approvalStatusId, req.RespondedBy)
+		if err != nil {
+			return err
 		}
 	}
 
