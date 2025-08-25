@@ -76,6 +76,7 @@ jobs:
           parameters.appServiceSettings.value.APPROVAL_SYSTEM_APP_MODULE_ORGANIZATION : ${{ vars.APPROVAL_SYSTEM_APP_MODULE_ORGANIZATION }}
           parameters.appServiceSettings.value.APPROVAL_SYSTEM_APP_MODULE_COPILOT : ${{ vars.APPROVAL_SYSTEM_APP_MODULE_COPILOT }}
           parameters.appServiceSettings.value.APPROVAL_SYSTEM_APP_MODULE_ORGACCESS : ${{ vars.APPROVAL_SYSTEM_APP_MODULE_ORGACCESS }}
+          parameters.appServiceSettings.value.APPROVAL_SYSTEM_APP_MODULE_PREMIUM_BUDGET_ALLOCATION : ${{ vars.APPROVAL_SYSTEM_APP_MODULE_PREMIUM_BUDGET_ALLOCATION }}
           parameters.appServiceSettings.value.APPROVALREQUESTS_RETRY_FREQ: ${{ vars.APPROVALREQUESTS_RETRY_FREQ }}
           parameters.appServiceSettings.value.GH_AZURE_AD_GROUP : ${{ vars.GH_AZURE_AD_GROUP }}
           parameters.appServiceSettings.value.GH_AZURE_AD_ADMIN_GROUP : ${{ vars.GH_AZURE_AD_ADMIN_GROUP }}

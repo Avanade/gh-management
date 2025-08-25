@@ -62,6 +62,7 @@
                 "APPROVAL_SYSTEM_APP_MODULE_ORGANIZATION":"",
                 "APPROVAL_SYSTEM_APP_MODULE_COPILOT":"",
                 "APPROVAL_SYSTEM_APP_MODULE_ORGACCESS":"",
+                "APPROVAL_SYSTEM_APP_MODULE_PREMIUM_BUDGET_ALLOCATION":"",
                 "APPROVALREQUESTS_RETRY_FREQ":"",
                 
                 "GH_AZURE_AD_GROUP":"",
