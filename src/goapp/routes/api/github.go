@@ -23,13 +23,11 @@ import (
 )
 
 func CheckAvaInnerSource(w http.ResponseWriter, r *http.Request) {
-
 	org := os.Getenv("GH_ORG_INNERSOURCE")
-	token := os.Getenv("GH_TOKEN")
 
-	collabs := ghAPI.ListOutsideCollaborators(token, org)
+	collabs := ghAPI.ListOutsideCollaborators(org)
 	for _, collab := range collabs {
-		ghAPI.RemoveOutsideCollaborator(token, org, *collab.Login)
+		ghAPI.RemoveOutsideCollaborator(org, *collab.Login)
 	}
 }
 
@@ -38,7 +36,6 @@ func CheckAvaOpenSource(w http.ResponseWriter, r *http.Request) {
 	defer logger.EndOperation()
 
 	org := os.Getenv("GH_ORG_OPENSOURCE")
-	token := os.Getenv("GH_TOKEN")
 	repos, err := ghAPI.GetRepositoriesFromOrganization(org)
 	if err != nil {
 		logger.LogException(err)
@@ -46,7 +43,7 @@ func CheckAvaOpenSource(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	orgOutsideCollaborators := ghAPI.ListOutsideCollaborators(token, org)
+	orgOutsideCollaborators := ghAPI.ListOutsideCollaborators(org)
 
 	var orgOutsideCollaboratorUsernames []string
 
@@ -58,7 +55,7 @@ func CheckAvaOpenSource(w http.ResponseWriter, r *http.Request) {
 		var repoCollabUsernames []string
 		var repoAdminUsernames []string
 
-		repoCollaborators := ghAPI.RepositoriesListCollaborators(token, org, repo.Name, "", "direct")
+		repoCollaborators := ghAPI.RepositoriesListCollaborators(org, repo.Name, "", "direct")
 		for _, repoCollaborator := range repoCollaborators {
 
 			repoCollabUsernames = append(repoCollabUsernames, *repoCollaborator.Login)
@@ -100,9 +97,8 @@ func ClearOrgMembers(w http.ResponseWriter, r *http.Request) {
 
 	start := time.Now()
 	// FETCH ENTERPRISE
-	enterpriseToken := os.Getenv("GH_ENTERPRISE_TOKEN")
 	enterpriseName := os.Getenv("GH_ENTERPRISE_NAME")
-	enterpriseMembers, err := ghAPI.GetMembersByEnterprise(enterpriseName, enterpriseToken)
+	enterpriseMembers, err := ghAPI.GetMembersByEnterprise(enterpriseName)
 	if err != nil {
 		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -211,12 +207,11 @@ func ExpiringInvitation(w http.ResponseWriter, r *http.Request) {
 	logger := appinsights_wrapper.NewClient()
 	defer logger.EndOperation()
 
-	token := os.Getenv("GH_TOKEN")
 	innersourceName := os.Getenv("GH_ORG_INNERSOURCE")
 	opensourceName := os.Getenv("GH_ORG_OPENSOURCE")
 
-	sendNotification(token, innersourceName, logger)
-	sendNotification(token, opensourceName, logger)
+	sendNotification(innersourceName, logger)
+	sendNotification(opensourceName, logger)
 }
 
 func DemoteOutsideCollaboratorAdmin(w http.ResponseWriter, r *http.Request) {
@@ -224,9 +219,7 @@ func DemoteOutsideCollaboratorAdmin(w http.ResponseWriter, r *http.Request) {
 	defer logger.EndOperation()
 
 	org := os.Getenv("GH_ORG_OPENSOURCE")
-	token := os.Getenv("GH_TOKEN")
-
-	outsideCollaborators := ghAPI.ListOutsideCollaborators(token, org)
+	outsideCollaborators := ghAPI.ListOutsideCollaborators(org)
 
 	repositories, err := ghAPI.GetRepositoriesFromOrganization(org)
 	if err != nil {
@@ -260,8 +253,8 @@ func DemoteOutsideCollaboratorAdmin(w http.ResponseWriter, r *http.Request) {
 }
 
 // Send notifications to those who has pending org invitation that is about to expire tom.
-func sendNotification(token, org string, logger *appinsights_wrapper.TelemetryClient) {
-	invitations := ghAPI.ListPendingOrgInvitations(token, org)
+func sendNotification(org string, logger *appinsights_wrapper.TelemetryClient) {
+	invitations := ghAPI.ListPendingOrgInvitations(org)
 	for _, v := range invitations {
 		expiresIn, _ := time.ParseDuration("144h")
 
@@ -407,12 +400,12 @@ type RemovedMember struct {
 	Username string
 }
 
-func ClearOrgMembersInnersource(token, org string, logger *appinsights_wrapper.TelemetryClient) {
+func ClearOrgMembersInnersource(org string, logger *appinsights_wrapper.TelemetryClient) {
 	var notFoundDB []string
 	var notFoundAD []string
 	var disabledAccountAD []string
 
-	users, _ := ghAPI.OrgListMembers(token, org, "all")
+	users, _ := ghAPI.OrgListMembers(org, "all")
 	for _, user := range users {
 		email, err := db.GetUserEmailByGithubId(fmt.Sprint(user.GetID()))
 		if err != nil {
@@ -428,19 +421,19 @@ func ClearOrgMembersInnersource(token, org string, logger *appinsights_wrapper.T
 			if !isUserExist {
 				notFoundAD = append(notFoundAD, fmt.Sprint(user.GetLogin(), " - ", email))
 				if ev.GetEnvVar("ENABLED_REMOVE_COLLABORATORS", "false") == "true" {
-					ghAPI.RemoveOrganizationsMember(token, org, user.GetLogin()) // Remove user from organization
+					ghAPI.RemoveOrganizationsMember(org, user.GetLogin()) // Remove user from organization
 				}
 			}
 			if !isAccountEnabled {
 				disabledAccountAD = append(disabledAccountAD, fmt.Sprint(user.GetLogin(), " - ", email))
 				if ev.GetEnvVar("ENABLED_REMOVE_COLLABORATORS", "false") == "true" {
-					ghAPI.RemoveOrganizationsMember(token, org, user.GetLogin()) // Remove user from organization
+					ghAPI.RemoveOrganizationsMember(org, user.GetLogin()) // Remove user from organization
 				}
 			}
 		} else {
 			notFoundDB = append(notFoundDB, user.GetLogin())
 			if ev.GetEnvVar("ENABLED_REMOVE_COLLABORATORS", "false") == "true" {
-				ghAPI.RemoveOrganizationsMember(token, org, user.GetLogin()) // Remove user from organization
+				ghAPI.RemoveOrganizationsMember(org, user.GetLogin()) // Remove user from organization
 			}
 		}
 	}
@@ -494,9 +487,8 @@ func ProcessCleanupEnterpriseOrgs(enterpriseMembers *ghAPI.GetMembersByEnterpris
 			defer wgFCM.Done()
 			defer func() { <-concurrencyLimitFCM }() // Release the slot
 
-			token := os.Getenv("GH_TOKEN")
 			// Fetch all members of the community organization
-			members, err := ghAPI.OrgListMembers(token, enterpriseOrg, "all")
+			members, err := ghAPI.OrgListMembers(enterpriseOrg, "all")
 			if err != nil {
 				logger.LogException(err)
 				return
@@ -548,9 +540,8 @@ func ProcessCleanupEnterpriseOrgs(enterpriseMembers *ghAPI.GetMembersByEnterpris
 				removeMembers = append(removeMembers, fmt.Sprintln(member.Username, " - ", member.Email))
 				muRAD.Unlock()
 				if ev.GetEnvVar("ENABLED_REMOVE_COLLABORATORS", "false") == "true" && ev.GetEnvVar("ENABLED_REMOVE_ENTERPRISE_MEMBER", "false") == "true" {
-					token := os.Getenv("GH_TOKEN")
 					enterpriseId := os.Getenv("GH_ENTERPRISE_ID")
-					err := ghAPI.RemoveEnterpriseMember(token, enterpriseId, member.NodeId)
+					err := ghAPI.RemoveEnterpriseMember(enterpriseId, member.NodeId)
 					if err != nil {
 						logger.LogException(err)
 					}
@@ -576,7 +567,7 @@ func ProcessCleanupOpensourceOrg(enterpriseMembers *ghAPI.GetMembersByEnterprise
 	opensourceOrg := os.Getenv("GH_ORG_OPENSOURCE")
 
 	// Fetch opensource members
-	opensourceMembers, err := ghAPI.OrgListMembers(os.Getenv("GH_TOKEN"), opensourceOrg, "all")
+	opensourceMembers, err := ghAPI.OrgListMembers(opensourceOrg, "all")
 	if err != nil {
 		return err
 	}
@@ -616,8 +607,7 @@ func ProcessCleanupOpensourceOrg(enterpriseMembers *ghAPI.GetMembersByEnterprise
 				removeMembers = append(removeMembers, fmt.Sprintln(member.Username, " - ", member.Email))
 				muRAD.Unlock()
 				if ev.GetEnvVar("ENABLED_REMOVE_COLLABORATORS", "false") == "true" {
-					token := os.Getenv("GH_TOKEN")
-					ghAPI.ConvertMemberToOutsideCollaborator(token, opensourceOrg, member.Username)
+					ghAPI.ConvertMemberToOutsideCollaborator(opensourceOrg, member.Username)
 				}
 			}
 		}(member)

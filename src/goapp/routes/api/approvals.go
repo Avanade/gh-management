@@ -511,23 +511,22 @@ func ProcessApprovalProjects(r *http.Request, module string) error {
 			ghUsername := gc[0]["GitHubUsername"].(string)
 
 			// Check if team is existing
-			ghToken := os.Getenv("GH_TOKEN")
 			slug := os.Getenv("COPILOT_GROUP_SLUG")
-			team, err := ghAPI.GetTeam(ghToken, org, slug)
+			team, err := ghAPI.GetTeam(org, slug)
 			if err != nil {
 				return err
 			}
 
 			// If not existing create the team
 			if team == nil {
-				_, err := ghAPI.CreateTeam(ghToken, org, "GitHub Copilot License Group")
+				_, err := ghAPI.CreateTeam(org, "GitHub Copilot License Group")
 				if err != nil {
 					return err
 				}
 			}
 
 			// Add user to the team
-			_, err = ghAPI.AddMemberToTeam(ghToken, org, slug, ghUsername, "member")
+			_, err = ghAPI.AddMemberToTeam(org, slug, ghUsername, "member")
 			if err != nil {
 				return err
 			}
@@ -543,7 +542,7 @@ func ProcessApprovalProjects(r *http.Request, module string) error {
 			if err != nil {
 				return err
 			}
-			ghAPI.OrganizationInvitation(os.Getenv("GH_TOKEN"), orgAccess.User.GithubUsername, orgAccess.Organization.Name)
+			ghAPI.OrganizationInvitation(orgAccess.User.GithubUsername, orgAccess.Organization.Name)
 		}
 	}
 

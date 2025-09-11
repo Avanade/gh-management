@@ -38,9 +38,8 @@ func GetEnterpriseOrganizations(w http.ResponseWriter, r *http.Request) {
 	logger := appinsights_wrapper.NewClient()
 	defer logger.EndOperation()
 
-	token := os.Getenv("GH_ENTERPRISE_TOKEN")
 	enterprise := os.Getenv("GH_ENTERPRISE_NAME")
-	result, err := ghAPI.GetOrganizationsWithinEnterprise(enterprise, token)
+	result, err := ghAPI.GetOrganizationsWithinEnterprise(enterprise)
 	if err != nil {
 		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)

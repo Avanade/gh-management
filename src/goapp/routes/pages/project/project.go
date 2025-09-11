@@ -29,19 +29,18 @@ func IndexHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func MakePublicHandler(w http.ResponseWriter, r *http.Request) {
-	token := os.Getenv("GH_TOKEN")
 	innerSourceOrgName := os.Getenv("GH_ORG_INNERSOURCE")
 	openSourceOrgName := os.Getenv("GH_ORG_OPENSOURCE")
 	sessiongh, _ := session.GetGitHubUserData(w, r)
 	isInvalidToken := false
 
-	isInnerSourceMember, errInnerSource := ghAPI.IsOrganizationMember(token, innerSourceOrgName, sessiongh.Username)
+	isInnerSourceMember, errInnerSource := ghAPI.IsOrganizationMember(innerSourceOrgName, sessiongh.Username)
 	if errInnerSource != nil {
 		log.Println(errInnerSource.Error())
 		isInvalidToken = true
 	}
 
-	isOpenSourceMember, errOpenSource := ghAPI.IsOrganizationMember(token, openSourceOrgName, sessiongh.Username)
+	isOpenSourceMember, errOpenSource := ghAPI.IsOrganizationMember(openSourceOrgName, sessiongh.Username)
 	if errOpenSource != nil {
 		log.Println(errOpenSource.Error())
 		isInvalidToken = true
@@ -69,18 +68,17 @@ func FormHandler(w http.ResponseWriter, r *http.Request) {
 	profile := iprofile.(map[string]interface{})
 	username := profile["preferred_username"]
 
-	token := os.Getenv("GH_TOKEN")
 	innerSourceOrgName := os.Getenv("GH_ORG_INNERSOURCE")
 	openSourceOrgName := os.Getenv("GH_ORG_OPENSOURCE")
 	isInvalidToken := false
 
-	isInnerSourceMember, errInnerSource := ghAPI.IsOrganizationMember(token, innerSourceOrgName, sessiongh.Username)
+	isInnerSourceMember, errInnerSource := ghAPI.IsOrganizationMember(innerSourceOrgName, sessiongh.Username)
 	if errInnerSource != nil {
 		log.Println(errInnerSource.Error())
 		isInvalidToken = true
 	}
 
-	isOpenSourceMember, errOpenSource := ghAPI.IsOrganizationMember(token, openSourceOrgName, sessiongh.Username)
+	isOpenSourceMember, errOpenSource := ghAPI.IsOrganizationMember(openSourceOrgName, sessiongh.Username)
 	if errOpenSource != nil {
 		log.Println(errOpenSource.Error())
 		isInvalidToken = true
@@ -135,8 +133,7 @@ func ViewByIdHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	token := os.Getenv("GH_TOKEN")
-	isMember, err := ghAPI.IsOrganizationMember(token, orgName, sessiongh.Username)
+	isMember, err := ghAPI.IsOrganizationMember(orgName, sessiongh.Username)
 	if err != nil {
 		log.Println(err)
 		return
@@ -179,8 +176,7 @@ func ViewHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	token := os.Getenv("GH_TOKEN")
-	isMember, err := ghAPI.IsOrganizationMember(token, orgName, sessiongh.Username)
+	isMember, err := ghAPI.IsOrganizationMember(orgName, sessiongh.Username)
 	if err != nil {
 		log.Println(err)
 		return

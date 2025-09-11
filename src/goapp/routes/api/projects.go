@@ -186,7 +186,7 @@ func CreateRepository(w http.ResponseWriter, r *http.Request) {
 		if body.Visibility == 2 {
 			time.Sleep(10 * time.Second) // Wait for GitHub to initialize the repository
 			maxRetries := 3
-			
+
 			logger.LogTrace("Making the repository as internal...", contracts.Information)
 			for i := 0; i < maxRetries; i++ {
 				_, err := ghAPI.SetProjectVisibility(repo.GetName(), "internal", innersource)
@@ -453,10 +453,8 @@ func GetRepoCollaboratorsByRepoId(w http.ResponseWriter, r *http.Request) {
 			repoUrl := strings.Replace(repo.TFSProjectReference, "https://", "", -1)
 			repoUrlSub := strings.Split(repoUrl, "/")
 
-			token := os.Getenv("GH_TOKEN")
-
-			collaborators := ghAPI.RepositoriesListCollaborators(token, repoUrlSub[1], repo.Name, "", "direct")
-			outsideCollaborators := ghAPI.RepositoriesListCollaborators(token, repoUrlSub[1], repo.Name, "", "outside")
+			collaborators := ghAPI.RepositoriesListCollaborators(repoUrlSub[1], repo.Name, "", "direct")
+			outsideCollaborators := ghAPI.RepositoriesListCollaborators(repoUrlSub[1], repo.Name, "", "outside")
 			var outsideCollaboratorsUsernames []string
 			for _, x := range outsideCollaborators {
 				outsideCollaboratorsUsernames = append(outsideCollaboratorsUsernames, *x.Login)
@@ -737,7 +735,7 @@ func GetRepositoriesById(w http.ResponseWriter, r *http.Request) {
 		repo[0].Topics = strings.Split(data[0]["Topics"].(string), ",")
 	}
 
-	result, err := ghAPI.GetRepositoryProjects(repo[0].Organization, repo[0].Name, os.Getenv("GH_TOKEN"))
+	result, err := ghAPI.GetRepositoryProjects(repo[0].Organization, repo[0].Name)
 	if err != nil {
 		logger.LogException(err)
 	}
@@ -1098,7 +1096,7 @@ func AddCollaborator(w http.ResponseWriter, r *http.Request) {
 
 		isInnersource := strings.EqualFold(repoUrlSub[1], os.Getenv("GH_ORG_INNERSOURCE"))
 
-		isMember, err := ghAPI.IsOrganizationMember(os.Getenv("GH_TOKEN"), os.Getenv("GH_ORG_INNERSOURCE"), ghUser)
+		isMember, err := ghAPI.IsOrganizationMember(os.Getenv("GH_ORG_INNERSOURCE"), ghUser)
 		if err != nil {
 			logger.LogException(err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -1219,7 +1217,6 @@ func RepoOwnersCleanup(w http.ResponseWriter, r *http.Request) {
 	}
 
 	logger.TrackTrace("REPO OWNERS CLEANUP TRIGGERED", contracts.Information)
-	token := os.Getenv("GH_TOKEN")
 
 	// Get all repos from database
 	repos, err := db.ProjectsByRepositorySource("GitHub")
@@ -1237,7 +1234,7 @@ func RepoOwnersCleanup(w http.ResponseWriter, r *http.Request) {
 		guard <- struct{}{}
 		wg.Add(1)
 		go func(r map[string]interface{}) {
-			cleanupRepoOwners(r, token, logger)
+			cleanupRepoOwners(r, logger)
 			<-guard
 			wg.Done()
 		}(repo)
@@ -1298,15 +1295,11 @@ func RecurringApproval(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetRepoCollaborators(org string, repo string, role string, affiliations string) []*github.User {
-
-	token := os.Getenv("GH_TOKEN")
-
-	repoCollabs := ghAPI.RepositoriesListCollaborators(token, org, repo, role, affiliations)
-
+	repoCollabs := ghAPI.RepositoriesListCollaborators(org, repo, role, affiliations)
 	return repoCollabs
 }
 
-func cleanupRepoOwners(repo map[string]interface{}, token string, logger *appinsights_wrapper.TelemetryClient) {
+func cleanupRepoOwners(repo map[string]interface{}, logger *appinsights_wrapper.TelemetryClient) {
 	logger.TrackTrace("Checking owners of : "+repo["Name"].(string), contracts.Information)
 
 	if repo["TFSProjectReference"] == nil {
@@ -1329,7 +1322,7 @@ func cleanupRepoOwners(repo map[string]interface{}, token string, logger *appins
 	repoUrl := strings.Replace(repo["TFSProjectReference"].(string), "https://", "", -1)
 	repoUrlSub := strings.Split(repoUrl, "/")
 
-	admins := ghAPI.RepositoriesListCollaborators(token, repoUrlSub[1], repo["Name"].(string), "admin", "direct")
+	admins := ghAPI.RepositoriesListCollaborators(repoUrlSub[1], repo["Name"].(string), "admin", "direct")
 
 	// Get owners of the repo on the database
 	owners, err := db.GetRepoOwnersByProjectIdWithGHUsername(repo["Id"].(int64))
@@ -1413,9 +1406,7 @@ func indexRepo(repo ghAPI.Repo, logger *appinsights_wrapper.TelemetryClient) {
 		repoUrl := strings.Replace(repo.TFSProjectReference, "https://", "", -1)
 		repoUrlSub := strings.Split(repoUrl, "/")
 
-		token := os.Getenv("GH_TOKEN")
-
-		collaborators := ghAPI.RepositoriesListCollaborators(token, repoUrlSub[1], repo.Name, "admin", "direct")
+		collaborators := ghAPI.RepositoriesListCollaborators(repoUrlSub[1], repo.Name, "admin", "direct")
 		// Get userprincipal from database
 		for _, admin := range collaborators {
 			users, err := db.GetUserByGitHubId(strconv.FormatInt(*admin.ID, 10))
@@ -1449,9 +1440,7 @@ func indexRepo(repo ghAPI.Repo, logger *appinsights_wrapper.TelemetryClient) {
 		repoUrl := strings.Replace(repo.TFSProjectReference, "https://", "", -1)
 		repoUrlSub := strings.Split(repoUrl, "/")
 
-		token := os.Getenv("GH_TOKEN")
-
-		collaborators := ghAPI.RepositoriesListCollaborators(token, repoUrlSub[1], repo.Name, "admin", "direct")
+		collaborators := ghAPI.RepositoriesListCollaborators(repoUrlSub[1], repo.Name, "admin", "direct")
 		// Get userprincipal from database
 		for _, admin := range collaborators {
 			users, err := db.GetUserByGitHubId(strconv.FormatInt(*admin.ID, 10))
@@ -1809,7 +1798,7 @@ func AddCollaboratorToRequestedRepo(user string, repo string, repoId int64, logg
 	innersource := os.Getenv("GH_ORG_INNERSOURCE")
 	ghUser := db.Users_Get_GHUser(user)
 
-	isInnersourceMember, err := ghAPI.IsOrganizationMember(os.Getenv("GH_TOKEN"), os.Getenv("GH_ORG_INNERSOURCE"), ghUser)
+	isInnersourceMember, err := ghAPI.IsOrganizationMember(os.Getenv("GH_ORG_INNERSOURCE"), ghUser)
 	if err != nil {
 		logger.LogException(err)
 		return nil, err
@@ -2478,12 +2467,12 @@ func ValidateOrgMembers(org, repo, newOrg string, logger *appinsights_wrapper.Te
 	}
 	isSuccessful = true
 	// GET ALL MEMBERS OF THE REPO
-	collaborators := ghAPI.RepositoriesListCollaborators(os.Getenv("GH_TOKEN"), org, repo, "", "")
+	collaborators := ghAPI.RepositoriesListCollaborators(org, repo, "", "")
 
 	// CHECK EACH COLLABORATORS OF THE REPO IF THEY ARE MEMBER OF THE NEW ORG
 	// IF NOT REMOVE THEM FROM REPO
 	for _, collaborator := range collaborators {
-		isMember, err := ghAPI.IsOrganizationMember(os.Getenv("GH_TOKEN"), newOrg, collaborator.GetLogin())
+		isMember, err := ghAPI.IsOrganizationMember(newOrg, collaborator.GetLogin())
 		if err != nil {
 			isSuccessful = false
 			logger.LogException(err)

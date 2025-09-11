@@ -45,8 +45,9 @@ func CreateClient(token string) *github.Client {
 }
 
 func CreatePrivateGitHubRepository(name, description, requestor string) (*github.Repository, error) {
-	client := CreateClient(os.Getenv("GH_TOKEN"))
 	owner := os.Getenv("GH_ORG_INNERSOURCE")
+	token := GetToken(owner)
+	client := CreateClient(token)
 	repoRequest := &github.TemplateRepoRequest{
 		Name:        &name,
 		Owner:       &owner,
@@ -63,8 +64,9 @@ func CreatePrivateGitHubRepository(name, description, requestor string) (*github
 }
 
 func IsEnterpriseOrg() (bool, error) {
-	client := CreateClient(os.Getenv("GH_TOKEN"))
 	orgName := os.Getenv("GH_ORG_INNERSOURCE")
+	token := GetToken(orgName)
+	client := CreateClient(token)
 	org, _, err := client.Organizations.Get(context.Background(), orgName)
 	if err != nil {
 		return false, err
@@ -73,7 +75,8 @@ func IsEnterpriseOrg() (bool, error) {
 }
 
 func AddCollaborator(owner string, repo string, user string, permission string) (*github.Response, error) {
-	client := CreateClient(os.Getenv("GH_TOKEN"))
+	token := GetToken(owner)
+	client := CreateClient(token)
 	opts := &github.RepositoryAddCollaboratorOptions{
 		Permission: permission,
 	}
@@ -86,7 +89,8 @@ func AddCollaborator(owner string, repo string, user string, permission string) 
 }
 
 func RemoveCollaborator(owner string, repo string, user string, permission string) (*github.Response, error) {
-	client := CreateClient(os.Getenv("GH_TOKEN"))
+	token := GetToken(owner)
+	client := CreateClient(token)
 
 	resp, err := client.Repositories.RemoveCollaborator(context.Background(), owner, repo, user)
 	if err != nil {
@@ -96,7 +100,8 @@ func RemoveCollaborator(owner string, repo string, user string, permission strin
 }
 
 func GetRepository(repoName string, org string) (*github.Repository, error) {
-	client := CreateClient(os.Getenv("GH_TOKEN"))
+	token := GetToken(org)
+	client := CreateClient(token)
 	owner := org
 	repo, _, err := client.Repositories.Get(context.Background(), owner, repoName)
 	if err != nil {
@@ -106,7 +111,8 @@ func GetRepository(repoName string, org string) (*github.Repository, error) {
 }
 
 func GetPermissionLevel(repoOwner string, repoName string, username string) (string, error) {
-	client := CreateClient(os.Getenv("GH_TOKEN"))
+	token := GetToken(repoOwner)
+	client := CreateClient(token)
 	permission, _, err := client.Repositories.GetPermissionLevel(context.Background(), repoOwner, repoName, username)
 	if err != nil {
 		return "", err
@@ -115,7 +121,8 @@ func GetPermissionLevel(repoOwner string, repoName string, username string) (str
 }
 
 func GetRepositoryReadmeById(owner, repoName string) (string, error) {
-	client := CreateClient(os.Getenv("GH_TOKEN"))
+	token := GetToken(owner)
+	client := CreateClient(token)
 
 	readme, resp, err := client.Repositories.GetReadme(context.Background(), owner, repoName, nil)
 	if err != nil {
@@ -176,7 +183,7 @@ func IsRepoExisting(repoName string) (bool, error) {
 	return exists, nil
 }
 
-func GetCollaboratorRepositoriesFromOrganization(token, org, user string) ([]Repo, error) {
+func GetCollaboratorRepositoriesFromOrganization(org, user string) ([]Repo, error) {
 	repos, err := GetRepositoriesFromOrganization(org)
 	if err != nil {
 		return nil, err
@@ -187,7 +194,7 @@ func GetCollaboratorRepositoriesFromOrganization(token, org, user string) ([]Rep
 	for _, repo := range repos {
 
 		// Successfully fetches the collaborators of the repository
-		collaborators, err := GetRepositoryDirectCollaborators(token, org, repo.Name)
+		collaborators, err := GetRepositoryDirectCollaborators(org, repo.Name)
 		if err != nil {
 			log.Printf("Error checking if user %s is a collaborator for repository %s: %v", user, repo.Name, err)
 			continue
@@ -209,7 +216,8 @@ func GetCollaboratorRepositoriesFromOrganization(token, org, user string) ([]Rep
 }
 
 func GetRepositoriesFromOrganization(org string) ([]Repo, error) {
-	client := CreateClient(os.Getenv("GH_TOKEN"))
+	token := GetToken(org)
+	client := CreateClient(token)
 	var allRepos []*github.Repository
 	opt := &github.RepositoryListByOrgOptions{Type: "all", Sort: "full_name", ListOptions: github.ListOptions{PerPage: 30}}
 
@@ -253,7 +261,8 @@ func GetRepositoriesFromOrganization(org string) ([]Repo, error) {
 }
 
 func SetProjectVisibility(projectName string, visibility string, org string) (*github.Response, error) {
-	client := CreateClient(os.Getenv("GH_TOKEN"))
+	token := GetToken(org)
+	client := CreateClient(token)
 	opt := &github.Repository{Visibility: github.String(visibility)}
 
 	_, resp, err := client.Repositories.Edit(context.Background(), org, projectName, opt)
@@ -265,7 +274,8 @@ func SetProjectVisibility(projectName string, visibility string, org string) (*g
 }
 
 func ArchiveProject(projectName string, archive bool, org string) error {
-	client := CreateClient(os.Getenv("GH_TOKEN"))
+	token := GetToken(org)
+	client := CreateClient(token)
 	opt := &github.Repository{Archived: github.Bool(archive)}
 
 	_, _, err := client.Repositories.Edit(context.Background(), org, projectName, opt)
@@ -276,7 +286,13 @@ func ArchiveProject(projectName string, archive bool, org string) error {
 }
 
 func TransferRepository(name string, owner string, newOwner string) (*github.Repository, error) {
-	client := CreateClient(os.Getenv("GH_TOKEN"))
+	token := ""
+	if owner == os.Getenv("GH_ORG_OPENSOURCE") || newOwner == os.Getenv("GH_ORG_OPENSOURCE") {
+		token = GetToken(os.Getenv("GH_ORG_OPENSOURCE"))
+	} else {
+		token = GetToken(owner)
+	}
+	client := CreateClient(token)
 	opt := github.TransferRequest{NewOwner: newOwner}
 
 	repo, resp, err := client.Repositories.Transfer(context.Background(), owner, name, opt)
@@ -286,19 +302,15 @@ func TransferRepository(name string, owner string, newOwner string) (*github.Rep
 	return repo, nil
 }
 
-func IsOrganizationMember(token, org, ghUser string) (bool, error) {
+func IsOrganizationMember(org, ghUser string) (bool, error) {
+	token := GetToken(org)
 	client := CreateClient(token)
 	isOrgMember, _, err := client.Organizations.IsMember(context.Background(), org, ghUser)
 	return isOrgMember, err
 }
 
-func IsRepositoryCollaborator(token, owner, repo, ghUser string) (bool, error) {
-	client := CreateClient(token)
-	isRepoMember, _, err := client.Repositories.IsCollaborator(context.Background(), owner, repo, ghUser)
-	return isRepoMember, err
-}
-
-func GetRepositoryDirectCollaborators(token, owner, repo string) ([]*github.User, error) {
+func GetRepositoryDirectCollaborators(owner, repo string) ([]*github.User, error) {
+	token := GetToken(owner)
 	client := CreateClient(token)
 	opts := &github.ListCollaboratorsOptions{Affiliation: "direct"}
 	collaborators, ghResponse, _ := client.Repositories.ListCollaborators(context.Background(), owner, repo, opts)
@@ -309,13 +321,15 @@ func GetRepositoryDirectCollaborators(token, owner, repo string) ([]*github.User
 	return collaborators, nil
 }
 
-func UserMembership(token, org, ghUser string) (*github.Membership, error) {
+func UserMembership(org, ghUser string) (*github.Membership, error) {
+	token := GetToken(org)
 	client := CreateClient(token)
 	membership, _, err := client.Organizations.GetOrgMembership(context.Background(), ghUser, org)
 	return membership, err
 }
 
-func OrganizationInvitation(token string, username string, org string) *github.Invitation {
+func OrganizationInvitation(username string, org string) *github.Invitation {
+	token := GetToken(org)
 	client := CreateClient(token)
 	REINSTATE_ROLE := "reinstate"
 
@@ -337,7 +351,8 @@ func OrganizationInvitation(token string, username string, org string) *github.I
 	return invite
 }
 
-func ListPendingOrgInvitations(token, org string) []*github.Invitation {
+func ListPendingOrgInvitations(org string) []*github.Invitation {
+	token := GetToken(org)
 	client := CreateClient(token)
 	options := &github.ListOptions{PerPage: 30}
 
@@ -360,7 +375,8 @@ func ListPendingOrgInvitations(token, org string) []*github.Invitation {
 	return allPendingInvitations
 }
 
-func ListOutsideCollaborators(token string, org string) []*github.User {
+func ListOutsideCollaborators(org string) []*github.User {
+	token := GetToken(org)
 	client := CreateClient(token)
 
 	options := &github.ListOutsideCollaboratorsOptions{ListOptions: github.ListOptions{PerPage: 30}}
@@ -383,7 +399,8 @@ func ListOutsideCollaborators(token string, org string) []*github.User {
 	return collaborators
 }
 
-func RemoveOutsideCollaborator(token string, org string, username string) *github.Response {
+func RemoveOutsideCollaborator(org string, username string) *github.Response {
+	token := GetToken(org)
 	client := CreateClient(token)
 
 	repons, err := client.Organizations.RemoveOutsideCollaborator(context.Background(), org, username)
@@ -395,7 +412,8 @@ func RemoveOutsideCollaborator(token string, org string, username string) *githu
 	return repons
 }
 
-func ConvertMemberToOutsideCollaborator(token string, org string, username string) *github.Response {
+func ConvertMemberToOutsideCollaborator(org string, username string) *github.Response {
+	token := GetToken(org)
 	client := CreateClient(token)
 
 	repons, err := client.Organizations.ConvertMemberToOutsideCollaborator(context.Background(), org, username)
@@ -406,7 +424,8 @@ func ConvertMemberToOutsideCollaborator(token string, org string, username strin
 	return repons
 }
 
-func RemoveOrganizationsMember(token string, org string, username string) *github.Response {
+func RemoveOrganizationsMember(org string, username string) *github.Response {
+	token := GetToken(org)
 	client := CreateClient(token)
 
 	repons, err := client.Organizations.RemoveMember(context.Background(), org, username)
@@ -418,7 +437,8 @@ func RemoveOrganizationsMember(token string, org string, username string) *githu
 	return repons
 }
 
-func RepositoriesListCollaborators(token string, org string, repo string, role string, affiliations string) []*github.User {
+func RepositoriesListCollaborators(org string, repo string, role string, affiliations string) []*github.User {
+	token := GetToken(org)
 	client := CreateClient(token)
 	options := &github.ListCollaboratorsOptions{Permission: role, Affiliation: affiliations, ListOptions: github.ListOptions{PerPage: 30}}
 
@@ -439,7 +459,8 @@ func RepositoriesListCollaborators(token string, org string, repo string, role s
 	return collaborators
 }
 
-func OrgListMembers(token string, org string, role string) ([]*github.User, error) {
+func OrgListMembers(org string, role string) ([]*github.User, error) {
+	token := GetToken(org)
 	client := CreateClient(token)
 
 	opts := &github.ListMembersOptions{Role: role, ListOptions: github.ListOptions{PerPage: 30}}
@@ -463,7 +484,8 @@ func OrgListMembers(token string, org string, role string) ([]*github.User, erro
 	return members, nil
 }
 
-func GetOrganizations(token string) ([]*github.Organization, error) {
+func GetOrganizations() ([]*github.Organization, error) {
+	token := GetToken("") // GET ENTERPRISE TOKEN
 	client := CreateClient(token)
 	opts := &github.ListOptions{PerPage: 30}
 	var orgs []*github.Organization
@@ -486,7 +508,8 @@ func GetOrganizations(token string) ([]*github.Organization, error) {
 
 }
 
-func GetTeam(token string, org string, slug string) (*github.Team, error) {
+func GetTeam(org string, slug string) (*github.Team, error) {
+	token := GetToken(org)
 	client := CreateClient(token)
 
 	team, resp, err := client.Teams.GetTeamBySlug(context.Background(), org, slug)
@@ -498,7 +521,8 @@ func GetTeam(token string, org string, slug string) (*github.Team, error) {
 	return team, nil
 }
 
-func CreateTeam(token string, org string, teamName string) (*github.Team, error) {
+func CreateTeam(org string, teamName string) (*github.Team, error) {
+	token := GetToken(org)
 	client := CreateClient(token)
 	newTeam := github.NewTeam{
 		Name: teamName,
@@ -513,7 +537,8 @@ func CreateTeam(token string, org string, teamName string) (*github.Team, error)
 	return team, nil
 }
 
-func AddMemberToTeam(token string, org string, slug string, user string, role string) (*github.Membership, error) {
+func AddMemberToTeam(org string, slug string, user string, role string) (*github.Membership, error) {
+	token := GetToken(org)
 	client := CreateClient(token)
 	opts := &github.TeamAddTeamMembershipOptions{Role: role}
 
@@ -526,7 +551,8 @@ func AddMemberToTeam(token string, org string, slug string, user string, role st
 	return teamMembership, nil
 }
 
-func RemoveEnterpriseMember(token string, enterpriseId string, userId string) error {
+func RemoveEnterpriseMember(enterpriseId string, userId string) error {
+	token := GetToken("") // GET ENTERPRISE TOKEN
 	src := oauth2.StaticTokenSource(
 		&oauth2.Token{AccessToken: token},
 	)
@@ -553,7 +579,8 @@ func RemoveEnterpriseMember(token string, enterpriseId string, userId string) er
 	return nil
 }
 
-func GetOrganizationsByGitHubName(username string, token string) (*GetOrganizationsByGithubNameResult, error) {
+func GetOrganizationsByGitHubName(username string) (*GetOrganizationsByGithubNameResult, error) {
+	token := GetToken("") // GET ENTERPRISE TOKEN
 	src := oauth2.StaticTokenSource(
 		&oauth2.Token{AccessToken: token},
 	)
@@ -606,7 +633,8 @@ func GetOrganizationsByGitHubName(username string, token string) (*GetOrganizati
 	return &result, nil
 }
 
-func GetOrganizationsWithinEnterprise(enterprise string, token string) (*GetOrganizationsWithinEnterpriseResult, error) {
+func GetOrganizationsWithinEnterprise(enterprise string) (*GetOrganizationsWithinEnterpriseResult, error) {
+	token := GetToken("") // GET ENTERPRISE TOKEN
 	src := oauth2.StaticTokenSource(
 		&oauth2.Token{AccessToken: token},
 	)
@@ -654,7 +682,8 @@ func (t *customTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 	return t.Transport.RoundTrip(req)
 }
 
-func GetMembersByEnterprise(enterprise string, token string) (*GetMembersByEnterpriseResult, error) {
+func GetMembersByEnterprise(enterprise string) (*GetMembersByEnterpriseResult, error) {
+	token := GetToken("") // GET ENTERPRISE TOKEN
 	src := oauth2.StaticTokenSource(
 		&oauth2.Token{AccessToken: token},
 	)
@@ -701,7 +730,8 @@ func GetMembersByEnterprise(enterprise string, token string) (*GetMembersByEnter
 	return &result, nil
 }
 
-func GetRepositoryProjects(owner string, name string, token string) (*GetRepositoryProjectsResult, error) {
+func GetRepositoryProjects(owner string, name string) (*GetRepositoryProjectsResult, error) {
+	token := GetToken(owner)
 	src := oauth2.StaticTokenSource(
 		&oauth2.Token{AccessToken: token},
 	)
@@ -736,7 +766,8 @@ func GetRepositoryProjects(owner string, name string, token string) (*GetReposit
 	return &result, nil
 }
 
-func GetUserByLogin(login string, token string) (*GetUserByLoginResult, error) {
+func GetUserByLogin(login string) (*GetUserByLoginResult, error) {
+	token := GetToken("") // GET ENTERPRISE TOKEN
 	src := oauth2.StaticTokenSource(
 		&oauth2.Token{AccessToken: token},
 	)
@@ -767,6 +798,13 @@ func GetUserByLogin(login string, token string) (*GetUserByLoginResult, error) {
 	}
 
 	return &result, nil
+}
+
+func GetToken(org string) string {
+	if org == os.Getenv("GH_ORG_OPENSOURCE") {
+		return os.Getenv("GH_TOKEN")
+	}
+	return os.Getenv("GH_ENTERPRISE_TOKEN")
 }
 
 type GetOrganizationsByGitHubNameQuery struct {

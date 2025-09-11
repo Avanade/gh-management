@@ -331,7 +331,7 @@ func GetAllRegionalOrganizations(w http.ResponseWriter, r *http.Request) {
 			regOrgs, err = db.SelectRegionalOrganizationIsRegionalOrganization(&isEnabled)
 		}
 	} else {
-		regOrgs, err = db.SelectRegionalOrganization(&isEnabled)	
+		regOrgs, err = db.SelectRegionalOrganization(&isEnabled)
 	}
 
 	w.WriteHeader(http.StatusOK)
@@ -458,8 +458,7 @@ func IndexRegionalOrganizations(w http.ResponseWriter, r *http.Request) {
 	logger := appinsights_wrapper.NewClient()
 	defer logger.EndOperation()
 
-	token := os.Getenv("GH_TOKEN")
-	orgs, err := ghAPI.GetOrganizations(token)
+	orgs, err := ghAPI.GetOrganizations()
 	if err != nil {
 		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -513,9 +512,8 @@ func ScanCommunityOrganizations(w http.ResponseWriter, r *http.Request) {
 	logger.LogTrace(fmt.Sprint("Filter community organizations. communityOrgs.Length : ", len(communityOrgs)), contracts.Information)
 
 	// Fetch all enterprise members
-	enterpriseToken := os.Getenv("GH_ENTERPRISE_TOKEN")
 	enterpriseName := os.Getenv("GH_ENTERPRISE_NAME")
-	ghEnterpriseMembers, err := ghAPI.GetMembersByEnterprise(enterpriseName, enterpriseToken)
+	ghEnterpriseMembers, err := ghAPI.GetMembersByEnterprise(enterpriseName)
 	if err != nil {
 		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -527,9 +525,8 @@ func ScanCommunityOrganizations(w http.ResponseWriter, r *http.Request) {
 	var communityMembers []Member
 	communityMembersSet := make(map[string]struct{})
 	for _, communityOrg := range communityOrgs {
-		token := os.Getenv("GH_TOKEN")
 		// Fetch all members of the community organization
-		members, err := ghAPI.OrgListMembers(token, communityOrg, "all")
+		members, err := ghAPI.OrgListMembers(communityOrg, "all")
 		if err != nil {
 			logger.LogException(err)
 			continue

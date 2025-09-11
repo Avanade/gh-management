@@ -178,7 +178,7 @@ func GithubForceSaveHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// Get the user by GitHub ID
-		user, err := ghAPI.GetUserByLogin(currentDbUser[0]["GitHubUser"].(string), os.Getenv("GH_TOKEN"))
+		user, err := ghAPI.GetUserByLogin(currentDbUser[0]["GitHubUser"].(string))
 		if err != nil {
 			logger.LogTrace(err.Error(), contracts.Error)
 		}
@@ -187,7 +187,7 @@ func GithubForceSaveHandler(w http.ResponseWriter, r *http.Request) {
 		CheckMembership(userPrincipalName, newGhUser)
 
 		if user != nil {
-			orgs, err := ghAPI.GetOrganizationsByGitHubName(user.Login, os.Getenv("GH_TOKEN"))
+			orgs, err := ghAPI.GetOrganizationsByGitHubName(user.Login)
 			if err != nil {
 				logger.LogException(err)
 			}
@@ -197,14 +197,14 @@ func GithubForceSaveHandler(w http.ResponseWriter, r *http.Request) {
 					if org.Login == os.Getenv("GH_ORG_OPENSOURCE") || org.Login == os.Getenv("GH_ORG_INNERSOURCE") {
 						logger.LogTrace(fmt.Sprintf("User %s is already invited to organization %s", user.Login, org.Login), contracts.Information)
 					} else {
-						invite := ghAPI.OrganizationInvitation(os.Getenv("GH_TOKEN"), newGhUser, org.Login)
+						invite := ghAPI.OrganizationInvitation(newGhUser, org.Login)
 						if invite == nil {
 							logger.LogTrace(fmt.Sprintf("Error sending invitation to user from %s organization", org.Login), contracts.Error)
 						} else {
 							logger.LogTrace(fmt.Sprintf("Invitation sent to user from %s organization", org.Login), contracts.Information)
 						}
 					}
-					collaboratorRepos, err := ghAPI.GetCollaboratorRepositoriesFromOrganization(os.Getenv("GH_TOKEN"), org.Login, user.Login)
+					collaboratorRepos, err := ghAPI.GetCollaboratorRepositoriesFromOrganization(org.Login, user.Login)
 					if err != nil {
 						logger.LogException(err)
 					}
@@ -225,9 +225,8 @@ func GithubForceSaveHandler(w http.ResponseWriter, r *http.Request) {
 				logger.LogTrace(fmt.Sprintf("No organizations found for user: %s", user.Login), contracts.Information)
 			}
 
-			enterpriseToken := os.Getenv("GH_ENTERPRISE_TOKEN")
 			enterpriseId := os.Getenv("GH_ENTERPRISE_ID")
-			err = ghAPI.RemoveEnterpriseMember(enterpriseToken, enterpriseId, user.Id)
+			err = ghAPI.RemoveEnterpriseMember(enterpriseId, user.Id)
 			if err != nil {
 				logger.LogTrace(fmt.Sprintf("Error removing user %s from enterprise %s. Exception: %s", user.Login, enterpriseId, err.Error()), contracts.Error)
 			}
@@ -278,29 +277,27 @@ func GithubForceSaveHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func CheckMembership(userPrincipalName, ghusername string) {
-	token := os.Getenv("GH_TOKEN")
-
 	innerSourceOrgName := os.Getenv("GH_ORG_INNERSOURCE")
 	openSourceOrgName := os.Getenv("GH_ORG_OPENSOURCE")
 
-	isInnerSourceMember, err := ghAPI.IsOrganizationMember(token, innerSourceOrgName, ghusername)
+	isInnerSourceMember, err := ghAPI.IsOrganizationMember(innerSourceOrgName, ghusername)
 	if err != nil {
 		isInnerSourceMember = true
 		log.Println(err.Error())
 	} else {
 		if !isInnerSourceMember {
-			ghAPI.OrganizationInvitation(token, ghusername, innerSourceOrgName)
+			ghAPI.OrganizationInvitation(ghusername, innerSourceOrgName)
 			NotificationAccepOrgInvitation(userPrincipalName, innerSourceOrgName)
 		}
 	}
 
-	isOpenSourceMember, err := ghAPI.IsOrganizationMember(token, openSourceOrgName, ghusername)
+	isOpenSourceMember, err := ghAPI.IsOrganizationMember(openSourceOrgName, ghusername)
 	if err != nil {
 		isOpenSourceMember = true
 		log.Println(err.Error())
 	} else {
 		if !isOpenSourceMember {
-			ghAPI.OrganizationInvitation(token, ghusername, openSourceOrgName)
+			ghAPI.OrganizationInvitation(ghusername, openSourceOrgName)
 			NotificationAccepOrgInvitation(userPrincipalName, openSourceOrgName)
 		}
 	}
