@@ -54,9 +54,6 @@ func AddGitHubCopilot(w http.ResponseWriter, r *http.Request) {
 	body.GitHubId = int64(ghId)
 	body.GitHubUsername = ghUser
 
-	// Check user's membership
-	token := os.Getenv("GH_TOKEN")
-
 	// Check if there is a pending request
 	result, err := db.GitHubCopilotGetPendingByUserAndOrganization(body)
 	if err != nil {
@@ -71,7 +68,7 @@ func AddGitHubCopilot(w http.ResponseWriter, r *http.Request) {
 
 	// Get organization owners to produce list of approvers
 	var approvers []string
-	orgOwners, err := ghAPI.OrgListMembers(token, body.RegionName, "admin")
+	orgOwners, err := ghAPI.OrgListMembers(body.RegionName, "admin")
 	if err != nil {
 		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -418,8 +415,7 @@ func RequestOrganizationAccess(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	token := os.Getenv("GH_TOKEN")
-	membership, _ := ghAPI.UserMembership(token, regionalOrg.Name, ghUsername)
+	membership, _ := ghAPI.UserMembership(regionalOrg.Name, ghUsername)
 	if membership != nil {
 		switch membership.GetState() {
 		case "active":
@@ -445,7 +441,7 @@ func RequestOrganizationAccess(w http.ResponseWriter, r *http.Request) {
 
 	// Get organization owners to produce list of approvers
 	var approvers []string
-	orgOwners, err := ghAPI.OrgListMembers(token, regionalOrg.Name, "admin")
+	orgOwners, err := ghAPI.OrgListMembers(regionalOrg.Name, "admin")
 	if err != nil {
 		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
