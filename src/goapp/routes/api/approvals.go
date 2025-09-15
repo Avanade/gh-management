@@ -570,8 +570,16 @@ func CheckAllRequests(id int64, host string) {
 
 		ValidateOrgMembers(owner, repo, newOwner, nil)
 		ghAPI.SetProjectVisibility(repo, "public", owner)
-		ghAPI.TransferRepository(repo, owner, newOwner)
-		db.UpdateProjectVisibilityId(id, PUBLIC)
+
+		// Create a loop that will wait for the repository to be changed the visibility. If the get response is nil, wait for 3 seconds and try again.
+		for i := 0; i < 10; i++ {
+			time.Sleep(3 * time.Second)
+			_, err := ghAPI.TransferRepository(repo, owner, newOwner)
+			if err == nil {
+				db.UpdateProjectVisibilityId(id, PUBLIC)
+				break
+			}
+		}
 
 		// Create a loop that will wait for the repository to be transferred. If the get response is nil, wait for 3 seconds and try again.
 		for i := 0; i < 10; i++ {
