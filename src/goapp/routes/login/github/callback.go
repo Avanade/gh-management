@@ -90,10 +90,14 @@ func GithubCallbackHandler(w http.ResponseWriter, r *http.Request) {
 	ghId := strconv.FormatFloat(p["id"].(float64), 'f', 0, 64)
 	ghUser := fmt.Sprintf("%s", p["login"])
 
+	if strings.Contains(ghUser, "_") {
+		http.Redirect(w, r, "/authentication/github/failed", http.StatusSeeOther)
+		return
+	}
+
 	result, err := db.UpdateUserGithub(userPrincipalName, ghId, ghUser, 0)
 	if err != nil {
 		log.Println(err.Error())
-		// http.Error(w, err.Error(), http.StatusInternalServerError)
 		http.Redirect(w, r, "/authentication/github/failed", http.StatusSeeOther)
 		return
 	}
@@ -165,6 +169,11 @@ func GithubForceSaveHandler(w http.ResponseWriter, r *http.Request) {
 	userPrincipalName := fmt.Sprintf("%s", azProfile["preferred_username"])
 	newGhId := strconv.FormatFloat(p["id"].(float64), 'f', 0, 64)
 	newGhUser := fmt.Sprintf("%s", p["login"])
+
+	if strings.Contains(newGhUser, "_") {
+		http.Redirect(w, r, "/authentication/github/failed", http.StatusSeeOther)
+		return
+	}
 
 	logger.LogTrace(fmt.Sprintf("User %s is trying to reassociate new GitHub account %s", userPrincipalName, newGhUser), contracts.Information)
 
