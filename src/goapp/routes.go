@@ -174,6 +174,7 @@ func setApiRoutes() {
 	httpRouter.GET("/api/repositories/{id}", m.Chain(rtApi.GetRepositoriesById, m.AzureAuth()))
 	httpRouter.GET("/api/repositories/{id}/status", m.Chain(rtApi.GetRequestStatusByRepoId, m.AzureAuth(), m.GitHubAuth()))
 	httpRouter.GET("/api/repositories/{orgName}/{repoName}/readme", m.Chain(rtApi.GetRepositoryReadmeById, m.AzureAuth()))
+	httpRouter.GET("/api/repositories/{orgName}/{repoName}/projects", m.Chain(rtApi.GetRepositoryProjectsById, m.AzureAuth()))
 	httpRouter.POST("/api/repositories", m.Chain(rtApi.CreateRepository, m.AzureAuth(), m.GitHubAuth()))
 	httpRouter.PUT("/api/repositories/{id}/ecattid", m.Chain(rtApi.UpdateRepositoryEcattIdById, m.AzureAuth(), m.GitHubAuth()))
 
