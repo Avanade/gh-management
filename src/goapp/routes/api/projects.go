@@ -186,7 +186,7 @@ func CreateRepository(w http.ResponseWriter, r *http.Request) {
 		if body.Visibility == 2 {
 			time.Sleep(10 * time.Second) // Wait for GitHub to initialize the repository
 			maxRetries := 3
-			
+
 			logger.LogTrace("Making the repository as internal...", contracts.Information)
 			for i := 0; i < maxRetries; i++ {
 				_, err := ghAPI.SetProjectVisibility(repo.GetName(), "internal", innersource)
@@ -403,6 +403,41 @@ func GetRepositoryReadmeById(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	w.Header().Set("Content-Type", "application/json")
 	jsonResp, err := json.Marshal(readme)
+	if err != nil {
+		logger.LogException(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.Write(jsonResp)
+}
+
+func GetRepositoryProjectsById(w http.ResponseWriter, r *http.Request) {
+	logger := appinsights_wrapper.NewClient()
+	defer logger.EndOperation()
+
+	req := mux.Vars(r)
+	orgName := req["orgName"]
+	repoName := req["repoName"]
+
+	result, err := ghAPI.GetRepositoryProjects(orgName, repoName, os.Getenv("GH_TOKEN"))
+	if err != nil {
+		logger.LogException(err)
+	}
+
+	projects := make([]ProjectDto, 0)
+	for _, project := range result.Projects {
+		projects = append(projects, ProjectDto{
+			Id:        project.Databaseid,
+			Title:     project.Title,
+			Url:       project.Url,
+			CreatedAt: project.CreatedAt,
+			UpdatedAt: project.UpdatedAt,
+		})
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Header().Set("Content-Type", "application/json")
+	jsonResp, err := json.Marshal(projects)
 	if err != nil {
 		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -735,23 +770,6 @@ func GetRepositoriesById(w http.ResponseWriter, r *http.Request) {
 
 	if data[0]["Topics"] != nil {
 		repo[0].Topics = strings.Split(data[0]["Topics"].(string), ",")
-	}
-
-	result, err := ghAPI.GetRepositoryProjects(repo[0].Organization, repo[0].Name, os.Getenv("GH_TOKEN"))
-	if err != nil {
-		logger.LogException(err)
-	}
-
-	repo[0].ProjectUrl = result.ProjectUrl
-	repo[0].Projects = make([]ProjectDto, 0)
-	for _, project := range result.Projects {
-		repo[0].Projects = append(repo[0].Projects, ProjectDto{
-			Id:        project.Databaseid,
-			Title:     project.Title,
-			Url:       project.Url,
-			CreatedAt: project.CreatedAt,
-			UpdatedAt: project.UpdatedAt,
-		})
 	}
 
 	w.Header().Set("Content-Type", "application/json")
