@@ -1,0 +1,52 @@
+# https://docs.github.com/en/graphql/reference/queries#enterprise
+
+# Use by
+# Community Portal
+# File: pkg/github/github.go
+# Function: GetMembersByEnterprise
+# Scope: Enterprise Organizations
+
+###
+# Headers
+# @prompt token Enter your github token:
+
+# Variables
+# @prompt enterprise Enter your enterprise slug:
+
+
+POST https://api.github.com/graphql
+X-REQUEST-TYPE: GraphQL
+Authorization: Bearer {{token}}
+X-Github-Next-Global-ID: 1
+
+query getEnterpriseMembers($enterprise: String!, $after: String) {
+  enterprise(slug: $enterprise) {
+    id
+    databaseId
+    ownerInfo {
+      samlIdentityProvider {
+        externalIdentities(first: 100, after: $after) {
+          nodes {
+            samlIdentity {
+              username
+            }
+            user {
+              id
+              databaseId
+              login
+            }
+          }
+          pageInfo {
+            endCursor
+            hasNextPage
+          }
+        }
+      }
+    }
+  }
+}
+
+{
+  "enterprise": "{{enterprise}}",
+  "after": null
+}

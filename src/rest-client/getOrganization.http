@@ -1,0 +1,20 @@
+# https://docs.github.com/en/rest/orgs/orgs?apiVersion=2022-11-28#get-an-organization
+
+# Use by
+# Community Portal 
+#   File: pkg/github/github.go 
+#   Function: IsEnterpriseOrg
+#   Scope: *
+
+###
+# Headers
+# @prompt token Enter your github token:
+
+# Path parameters
+# @prompt org Enter the organization name:
+
+GET  https://api.github.com/orgs/{{org}}
+Accept: application/vnd.github+json
+Authorization: Bearer {{token}}
+X-GitHub-Api-Version: 2022-11-28
+X-Github-Next-Global-ID: 1
