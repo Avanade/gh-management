@@ -1,0 +1,21 @@
+# https://docs.github.com/en/rest/orgs/outside-collaborators?apiVersion=2022-11-28#remove-outside-collaborator-from-an-organization
+
+# Use by
+# Community Portal
+# File: pkg/github/github.go
+# Function: RemoveOutsideCollaborator
+# Scope: Innersource
+
+###
+# Headers
+# @prompt token Enter your github token:
+
+# Path parameters
+# @prompt org Enter the organization name:
+# @prompt username Enter the username of the outside collaborator to remove:
+
+DELETE https://api.github.com/orgs/{{org}}/outside_collaborators/{{username}}
+Accept: application/vnd.github+json
+Authorization: Bearer {{token}}
+X-GitHub-Api-Version: 2022-11-28
+X-Github-Next-Global-ID: 1

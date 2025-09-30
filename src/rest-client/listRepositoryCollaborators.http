@@ -1,0 +1,32 @@
+# https://docs.github.com/en/rest/collaborators/collaborators?apiVersion=2022-11-28#list-repository-collaborators
+
+# Use by
+# Community Portal
+# File: pkg/github/github.go
+# Function: RepositoriesListCollaborators
+# Scope: *
+
+###
+# Headers
+# @prompt token Enter your github token:
+
+# Path parameters
+# @prompt owner Enter the repository owner:
+# @prompt repo Enter the repository name:
+
+# Query parameters
+# @prompt affiliation Filter collaborators returned by their affiliation. Can be one of: 'outside', 'direct', 'all'.
+# @prompt permission Filter collaborators returned by a specific permission level. Can be one of: 'pull', 'triage', 'push', 'maintain', 'admin'.
+# @prompt per_page Results per page (max 100):
+# @prompt page Page number of the results to fetch.
+
+
+GET https://api.github.com/repos/{{owner}}/{{repo}}/collaborators
+    ?affiliation={{affiliation}}
+    &permission={{permission}}
+    &per_page={{per_page}}
+    &page={{page}}
+Accept: application/vnd.github+json
+Authorization: Bearer {{token}}
+X-GitHub-Api-Version: 2022-11-28
+X-Github-Next-Global-ID: 1

@@ -1,0 +1,24 @@
+# https://docs.github.com/en/rest/collaborators/collaborators?apiVersion=2022-11-28#list-repository-collaborators
+
+# Use by
+# Community Portal
+# File: pkg/github/github.go
+# Function: GetRepositoryDirectCollaborators
+# Scope: *
+
+###
+# Headers
+# @prompt token Enter your github token:
+
+# Path parameters
+# @prompt owner Enter the repository owner:
+# @prompt repo Enter the repository name:
+
+# Query parameters
+@affiliation="direct"
+
+GET https://api.github.com/repos/{{owner}}/{{repo}}/collaborators?affiliation={{affiliation}}
+Accept: application/vnd.github+json
+Authorization: Bearer {{token}}
+X-GitHub-Api-Version: 2022-11-28
+X-Github-Next-Global-ID: 1

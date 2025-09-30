@@ -1,0 +1,24 @@
+# https://docs.github.com/en/rest/orgs/outside-collaborators?apiVersion=2022-11-28#list-outside-collaborators-for-an-organization
+
+# Use by
+# Community Portal
+# File: pkg/github/github.go
+# Function: ListOutsideCollaborators
+# Scope: *
+
+###
+# Headers
+# @prompt token Enter your github token:
+
+# Path parameters
+# @prompt org Enter the organization name:
+
+# Query parameters
+# @prompt per_page Results per page (max 100)
+# @prompt page Page number of the results to fetch.
+
+GET https://api.github.com/orgs/{{org}}/outside_collaborators?per_page={{per_page}}&page={{page}}
+Accept: application/vnd.github+json
+Authorization: Bearer {{token}}
+X-GitHub-Api-Version: 2022-11-28
+X-Github-Next-Global-ID: 1

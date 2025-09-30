@@ -1,0 +1,25 @@
+# https://docs.github.com/en/rest/repos/contents?apiVersion=2022-11-28#get-a-repository-readme
+
+# Use by
+# Community Portal
+# File: pkg/github/github.go
+# Function: GetRepositoryReadmeById
+# Scope: *
+
+###
+# Headers
+# @prompt token Enter your github token:
+
+# Path parameters
+# @prompt owner Enter the repository owner:
+# @prompt repo Enter the repository name:
+
+# Query paramaters
+# @prompt ref Enter the name of the commit/branch/tag. Default: the repository’s default branch (usually main):
+
+GET https://api.github.com/repos/{{owner}}/{{repo}}/readme
+    ?ref={{ref}}
+Acccept: application/vnd.github+json
+Authorization: Bearer {{token}}
+X-GitHub-Api-Version: 2022-11-28
+X-Github-Next-Global-ID: 1
