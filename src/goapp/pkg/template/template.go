@@ -13,19 +13,21 @@ import (
 )
 
 type PageData struct {
-	Header            interface{}
-	Profile           interface{}
-	ProfileGH         interface{}
-	Content           interface{}
-	IsGHAssociated    bool
-	HasPhoto          bool
-	UserPhoto         string
-	IsMemberAccount   bool // Flag to indicate if user a org member or guest
-	ProfileLink       string
-	RequestAccessLink string
-	CommunitySite     string
-	Footers           []Footer
-	OrganizationName  string
+	Header             interface{}
+	Profile            interface{}
+	ProfileGH          interface{}
+	Content            interface{}
+	IsGHAssociated     bool
+	HasPhoto           bool
+	UserPhoto          string
+	IsMemberAccount    bool // Flag to indicate if user a org member or guest
+	ProfileLink        string
+	CheckAccessLink    string
+	RequestAccessLink  string
+	ReportAccessMailTo string
+	CommunitySite      string
+	Footers            []Footer
+	OrganizationName   string
 }
 
 type Headers struct {
@@ -98,15 +100,17 @@ func UseTemplate(w *http.ResponseWriter, r *http.Request, page string, pageData 
 	}
 
 	data := PageData{
-		Header:           masterPageData,
-		Profile:          sessionaz.Values["profile"],
-		ProfileGH:        sessiongh,
-		Content:          pageData,
-		HasPhoto:         hasPhoto,
-		UserPhoto:        userPhoto,
-		CommunitySite:    os.Getenv("LINK_COMMUNITY_SHAREPOINT_SITE"),
-		Footers:          footers,
-		OrganizationName: os.Getenv("ORGANIZATION_NAME"),
+		Header:             masterPageData,
+		Profile:            sessionaz.Values["profile"],
+		ProfileGH:          sessiongh,
+		Content:            pageData,
+		HasPhoto:           hasPhoto,
+		UserPhoto:          userPhoto,
+		CommunitySite:      os.Getenv("LINK_COMMUNITY_SHAREPOINT_SITE"),
+		Footers:            footers,
+		OrganizationName:   os.Getenv("ORGANIZATION_NAME"),
+		CheckAccessLink:    os.Getenv("LINK_CHECK_ACCESS"),
+		ReportAccessMailTo: os.Getenv("MAILTO_REPORT_ACCESS"),
 	}
 
 	// Check user email to determine if user is member or guest
