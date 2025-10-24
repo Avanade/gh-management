@@ -94,7 +94,8 @@
                 "MAILTO_REPORT_ACCESS":"",
 
                 "HOME_URL":"",
-                "CUSTOM_DOMAINS":""
+                "CUSTOM_DOMAINS":"",
+                "ENTERPRISE_OWNERS":""
             }
         }
     }
