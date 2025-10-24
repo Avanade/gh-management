@@ -358,15 +358,39 @@ func GetGitHubCopilotApprovalRequests(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	filterApprovals := []map[string]interface{}{}
+	if len(approvals) > 1 {
+		owners := GetEnterpriseOwners()
+		for _, approval := range approvals {
+			for _, owner := range owners {
+				if approval["ApproverUserPrincipalName"] == owner && approval["ApprovalStatus"] != "Approved" {
+					continue
+				}
+				filterApprovals = append(filterApprovals, approval)
+			}
+		}
+	} else {
+		filterApprovals = approvals
+	}
+
 	w.WriteHeader(http.StatusOK)
 	w.Header().Set("Content-Type", "application/json")
-	jsonResp, err := json.Marshal(approvals)
+	jsonResp, err := json.Marshal(filterApprovals)
 	if err != nil {
 		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	w.Write(jsonResp)
+}
+
+func GetEnterpriseOwners() []string {
+	enterpriseOwners := os.Getenv("ENTERPRISE_OWNERS")
+	if enterpriseOwners == "" {
+		return nil
+	}
+	ownersArray := strings.Split(enterpriseOwners, ",")
+	return ownersArray
 }
 
 func ReprocessCommunityApprovalRequestGitHubCoPilots() {
@@ -714,9 +738,24 @@ func GetOrganizationAccessApprovalRequests(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
+	filterApprovals := []map[string]interface{}{}
+	if len(approvals) > 1 {
+		owners := GetEnterpriseOwners()
+		for _, approval := range approvals {
+			for _, owner := range owners {
+				if approval["ApproverUserPrincipalName"] == owner && approval["ApprovalStatus"] != "Approved" {
+					continue
+				}
+				filterApprovals = append(filterApprovals, approval)
+			}
+		}
+	} else {
+		filterApprovals = approvals
+	}
+
 	w.WriteHeader(http.StatusOK)
 	w.Header().Set("Content-Type", "application/json")
-	jsonResp, err := json.Marshal(approvals)
+	jsonResp, err := json.Marshal(filterApprovals)
 	if err != nil {
 		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
