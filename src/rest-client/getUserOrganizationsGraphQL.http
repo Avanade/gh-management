@@ -1,0 +1,37 @@
+# https://docs.github.com/en/graphql/reference/queries#user
+
+# Use by
+# Community Portal
+# File: pkg/github/github.go
+# Function: GetOrganizationsByGitHubName
+# Scope: -
+
+###
+# Headers
+# @prompt token Enter your github token:
+
+# Variables
+# @prompt login Enter the github username:
+
+
+POST https://api.github.com/graphql
+X-REQUEST-TYPE: GraphQL
+Authorization: Bearer {{token}}
+X-Github-Next-Global-ID: 1
+
+query GetUserOrganizations($login: String!) {
+  user(login: $login) {
+    organizations(first: 100) {
+      edges {
+        node {
+          login
+          databaseId
+        }
+      }
+    }
+  }
+}
+
+{
+  "login": "{{login}}"
+}

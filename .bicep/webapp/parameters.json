@@ -90,9 +90,12 @@
                 "LINK_COMMUNITY_SHAREPOINT_SITE":"",
                 "LINK_FOOTERS":"",
                 "LEGAL_APPROVAL_TYPE_ID":"",
+                "LINK_CHECK_ACCESS":"",
+                "MAILTO_REPORT_ACCESS":"",
 
                 "HOME_URL":"",
-                "CUSTOM_DOMAINS":""
+                "CUSTOM_DOMAINS":"",
+                "ENTERPRISE_OWNERS":""
             }
         }
     }

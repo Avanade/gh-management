@@ -1,0 +1,30 @@
+# https://docs.github.com/en/rest/orgs/members?apiVersion=2022-11-28#list-organization-members
+
+# Use by
+# Community Portal
+# File: pkg/github/github.go
+# Function: OrgListMembers
+# Scope: *
+
+###
+# Headers
+# @prompt token Enter your github token:
+
+# Path parameters
+# @prompt org Enter the organization name:
+
+# Query parameters
+# @prompt filter Enter the filter (all, 2fa_disabled, admin, member):
+# @prompt role Enter the role (all, admin, member, billing_manager):
+# @prompt per_page Enter the number of results per page (max 100):
+# @prompt page Enter the page number of the results to fetch:
+
+GET https://api.github.com/orgs/{{org}}/members
+    ?filter={{filter}}
+    &role={{role}}
+    &per_page={{per_page}}
+    &page={{page}}
+Accept: application/vnd.github+json
+Authorization: Bearer {{token}}
+X-GitHub-Api-Version: 2022-11-28
+X-Github-Next-Global-ID: 1

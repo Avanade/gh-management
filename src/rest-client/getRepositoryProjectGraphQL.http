@@ -1,0 +1,42 @@
+# https://docs.github.com/en/graphql/reference/queries#repository
+
+# Use by
+# Community Portal
+# File: pkg/github/github.go
+# Function: GetRepositoryProjects
+# Scope: *
+
+###
+# Headers
+# @prompt token Enter your github token:
+
+# Variables
+# @prompt owner Enter the github repository owner:
+# @prompt name Enter the github repository name:
+
+
+POST https://api.github.com/graphql
+X-REQUEST-TYPE: GraphQL
+Authorization: Bearer {{token}}
+X-Github-Next-Global-ID: 1
+
+query getRepositoryProject($owner: String!, $name: String!) {
+  repository(owner: $owner, name: $name) {
+    projectsUrl
+    projectsV2(first: 100) {
+      nodes {
+        id
+        databaseId
+        title
+        url
+        createdAt
+        updatedAt
+      }
+    }
+  }
+}
+
+{
+  "owner": "{{owner}}",
+  "name": "{{name}}"
+}

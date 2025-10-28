@@ -1,0 +1,23 @@
+# https://docs.github.com/en/rest/orgs/orgs?apiVersion=2022-11-28#list-organizations-for-the-authenticated-user
+
+# Use by
+# Community Portal
+# File: pkg/github/github.go
+# Function: GetOrganizations
+# Scope: *
+
+###
+# Headers
+# @prompt token Enter your github token:
+
+# Query parameters
+# @prompt per_page Results per page (max 100) [30]:
+# @prompt page Page number of the results to fetch. [1]:
+
+GET https://api.github.com/user/orgs
+    ?per_page={{per_page}}
+    &page={{page}}
+Accept: application/vnd.github+json
+Authorization: Bearer {{token}}
+X-GitHub-Api-Version: 2022-11-28
+X-Github-Next-Global-ID: 1

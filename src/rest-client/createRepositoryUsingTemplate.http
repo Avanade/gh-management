@@ -1,0 +1,35 @@
+# https://docs.github.com/en/rest/repos/repos?apiVersion=2022-11-28#create-a-repository-using-a-template
+
+# Use by
+# Community Portal 
+#   File: pkg/github/github.go 
+#   Function: CreatePrivateGitHubRepository 
+#   Scope: Innersource
+
+###
+# Headers
+# @prompt token Enter your github token:
+
+# Path parameters
+# @prompt template_owner Enter the template repository owner:
+# @prompt template_repo Enter the template repository name:
+
+# Body parameters
+# @prompt owner Enter the new repository owner:
+# @prompt name Enter the new repository name:
+# @prompt description Enter the new repository description:
+# @prompt is_private Is the new repository private? (true/false):
+
+POST https://api.github.com/repos/{{template_owner}}/{{template_repo}}/generate
+Accept: application/vnd.github+json
+Authorization: Bearer {{token}}
+X-GitHub-Api-Version: 2022-11-28
+X-Github-Next-Global-ID: 1
+
+{
+    "owner":"{{owner}}",
+    "name":"{{name}}",
+    "description":"{{description}}",
+    "include_all_branches":false,
+    "private":{{is_private}}
+}

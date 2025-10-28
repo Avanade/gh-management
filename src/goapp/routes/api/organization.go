@@ -331,7 +331,7 @@ func GetAllRegionalOrganizations(w http.ResponseWriter, r *http.Request) {
 			regOrgs, err = db.SelectRegionalOrganizationIsRegionalOrganization(&isEnabled)
 		}
 	} else {
-		regOrgs, err = db.SelectRegionalOrganization(&isEnabled)	
+		regOrgs, err = db.SelectRegionalOrganization(&isEnabled)
 	}
 
 	w.WriteHeader(http.StatusOK)
@@ -443,9 +443,24 @@ func GetOrganizationApprovalRequests(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	filterApprovals := []map[string]interface{}{}
+	if len(approvals) > 1 {
+		owners := GetEnterpriseOwners()
+		for _, approval := range approvals {
+			for _, owner := range owners {
+				if approval["ApproverUserPrincipalName"] == owner && approval["ApprovalStatus"] != "Approved" {
+					continue
+				}
+				filterApprovals = append(filterApprovals, approval)
+			}
+		}
+	} else {
+		filterApprovals = approvals
+	}
+
 	w.WriteHeader(http.StatusOK)
 	w.Header().Set("Content-Type", "application/json")
-	jsonResp, err := json.Marshal(approvals)
+	jsonResp, err := json.Marshal(filterApprovals)
 	if err != nil {
 		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)

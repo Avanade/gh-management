@@ -178,16 +178,7 @@ func GithubForceSaveHandler(w http.ResponseWriter, r *http.Request) {
 	logger.LogTrace(fmt.Sprintf("User %s is trying to reassociate new GitHub account %s", userPrincipalName, newGhUser), contracts.Information)
 
 	if ev.GetEnvVar("ENABLED_REMOVE_ENTERPRISE_MEMBER", "false") == "true" {
-		// Get the current associated GitHub account
-		currentDbUser, err := db.GetUserByUserPrincipal(userPrincipalName)
-		if err != nil {
-			logger.LogException(err)
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-
-		// Get the user by GitHub ID
-		user, err := ghAPI.GetUserByLogin(currentDbUser[0]["GitHubUser"].(string), os.Getenv("GH_TOKEN"))
+		user, err := ghAPI.GetEnterpriseMemberByUSP(os.Getenv("GH_ENTERPRISE_NAME"), userPrincipalName, os.Getenv("GH_ENTERPRISE_TOKEN"))
 		if err != nil {
 			logger.LogTrace(err.Error(), contracts.Error)
 		}
@@ -241,7 +232,7 @@ func GithubForceSaveHandler(w http.ResponseWriter, r *http.Request) {
 				logger.LogTrace(fmt.Sprintf("Error removing user %s from enterprise %s. Exception: %s", user.Login, enterpriseId, err.Error()), contracts.Error)
 			}
 		} else {
-			logger.LogTrace(fmt.Sprintf("User %s not found in GitHub", currentDbUser[0]["GitHubUser"].(string)), contracts.Error)
+			logger.LogTrace(fmt.Sprintf("User %s not found in GitHub", userPrincipalName), contracts.Error)
 		}
 	}
 
