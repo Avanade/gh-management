@@ -1,0 +1,27 @@
+# https://docs.github.com/en/rest/teams/teams?apiVersion=2022-11-28#create-a-team
+
+# Use by
+# Community Portal
+# File: pkg/github/github.go
+# Function: CreateTeam
+# Scope: *
+
+###
+# Headers
+# @prompt token Enter your github token:
+
+# Path parameters
+# @prompt org Enter the organization name:
+
+# Body parameters
+# @prompt name Enter the team name:
+
+POST https://api.github.com/orgs/{{org}}/teams
+Accept: application/vnd.github+json
+Authorization: Bearer {{token}}
+X-GitHub-Api-Version: 2022-11-28
+X-Github-Next-Global-ID: 1
+
+{
+    "name": "{{name}}"
+}

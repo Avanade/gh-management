@@ -104,8 +104,9 @@ func RegionalOrganizationInsert(id int64, name string) error {
 	defer db.Close()
 
 	param := map[string]interface{}{
-		"Id":   id,
-		"Name": name,
+		"Id":        id,
+		"Name":      name,
+		"CreatedBy": "system",
 	}
 
 	_, err := db.ExecuteStoredProcedure("usp_RegionalOrganization_Insert", param)

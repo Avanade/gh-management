@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"regexp"
 	"strings"
 	"time"
 
@@ -769,6 +770,72 @@ func GetUserByLogin(login string, token string) (*GetUserByLoginResult, error) {
 	return &result, nil
 }
 
+func GetEnterpriseMembers(enterprise string, query string, token string) (*GetEnterpriseMembersResult, error) {
+	src := oauth2.StaticTokenSource(
+		&oauth2.Token{AccessToken: token},
+	)
+	httpClient := oauth2.NewClient(context.Background(), src)
+	httpClient.Transport = &customTransport{Transport: httpClient.Transport}
+
+	client := githubv4.NewClient(httpClient)
+
+	var result GetEnterpriseMembersResult
+	var after *githubv4.String
+
+	for {
+		var queryResult GetEnterpriseMembersQuery
+		variables := map[string]interface{}{
+			"enterprise": githubv4.String(enterprise),
+			"after":      after,
+			"query":      githubv4.String(query),
+		}
+		err := client.Query(context.Background(), &queryResult, variables)
+		if err != nil {
+			return nil, err
+		}
+
+		for _, edge := range queryResult.Enterprise.Members.Edges {
+			node := edge.Node.EnterpriseUserAccount
+			member := Member{
+				Id:    node.Id.(string),
+				Login: string(node.Login),
+			}
+			result.Members = append(result.Members, member)
+		}
+
+		if !queryResult.Enterprise.Members.PageInfo.HasNextPage {
+			break
+		}
+
+		after = &queryResult.Enterprise.Members.PageInfo.EndCursor
+	}
+
+	return &result, nil
+}
+
+func GetEnterpriseMemberByUSP(enterprise string, usp string, token string) (*Member, error) {
+	if !isValidEmail(usp) {
+		return nil, fmt.Errorf("invalid email format: %s", usp)
+	}
+
+	result, err := GetEnterpriseMembers(enterprise, usp, token)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(result.Members) == 1 {
+		return &result.Members[0], nil
+	}
+
+	return nil, fmt.Errorf("user %s not found in enterprise %s", usp, enterprise)
+}
+
+func isValidEmail(email string) bool {
+	// Basic email regex pattern
+	emailRegex := regexp.MustCompile(`^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`)
+	return emailRegex.MatchString(email)
+}
+
 type GetOrganizationsByGitHubNameQuery struct {
 	User struct {
 		Organizations struct {
@@ -841,6 +908,23 @@ type GetUserByLoginQuery struct {
 	} `graphql:"user(login: $login)"`
 }
 
+type GetEnterpriseMembersQuery struct {
+	Enterprise struct {
+		Members struct {
+			Edges []struct {
+				Node struct {
+					EnterpriseUserAccount struct {
+						Id    githubv4.ID
+						Name  githubv4.String
+						Login githubv4.String
+					} `graphql:"... on EnterpriseUserAccount"`
+				}
+			}
+			PageInfo PageInfo
+		} `graphql:"members(first: 100, after: $after, query: $query)"`
+	} `graphql:"enterprise(slug: $enterprise)"`
+}
+
 type PageInfo struct {
 	EndCursor   githubv4.String
 	HasNextPage bool
@@ -867,6 +951,10 @@ type GetRepositoryProjectsResult struct {
 
 type GetUserByLoginResult struct {
 	User
+}
+
+type GetEnterpriseMembersResult struct {
+	Members []Member
 }
 
 // Structs

@@ -15,6 +15,8 @@ import (
 	db "main/pkg/ghmgmtdb"
 	ghAPI "main/pkg/github"
 	"main/pkg/notification"
+
+	"github.com/microsoft/ApplicationInsights-Go/appinsights/contracts"
 )
 
 type ApprovalReAssignRequestBody struct {
@@ -39,7 +41,7 @@ func UpdateApprovalStatusProjects(w http.ResponseWriter, r *http.Request) {
 	logger := appinsights_wrapper.NewClient()
 	defer logger.EndOperation()
 
-	err := ProcessApprovalProjects(r, "projects")
+	err := ProcessApprovalProjects(logger, r, "projects")
 	if err != nil {
 		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -52,7 +54,7 @@ func UpdateApprovalStatusCommunity(w http.ResponseWriter, r *http.Request) {
 	logger := appinsights_wrapper.NewClient()
 	defer logger.EndOperation()
 
-	err := ProcessApprovalProjects(r, "community")
+	err := ProcessApprovalProjects(logger, r, "community")
 	if err != nil {
 		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -65,7 +67,7 @@ func UpdateApprovalStatusOrganization(w http.ResponseWriter, r *http.Request) {
 	logger := appinsights_wrapper.NewClient()
 	defer logger.EndOperation()
 
-	err := ProcessApprovalProjects(r, "organization")
+	err := ProcessApprovalProjects(logger, r, "organization")
 	if err != nil {
 		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -78,7 +80,7 @@ func UpdateApprovalStatusCopilot(w http.ResponseWriter, r *http.Request) {
 	logger := appinsights_wrapper.NewClient()
 	defer logger.EndOperation()
 
-	err := ProcessApprovalProjects(r, "github-copilot")
+	err := ProcessApprovalProjects(logger, r, "github-copilot")
 	if err != nil {
 		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -91,7 +93,7 @@ func UpdateApprovalStatusOrganizationAccess(w http.ResponseWriter, r *http.Reque
 	logger := appinsights_wrapper.NewClient()
 	defer logger.EndOperation()
 
-	err := ProcessApprovalProjects(r, "orgaccess")
+	err := ProcessApprovalProjects(logger, r, "orgaccess")
 	if err != nil {
 		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -453,7 +455,7 @@ func SendReassignEmail(data db.ProjectApproval) error {
 	return nil
 }
 
-func ProcessApprovalProjects(r *http.Request, module string) error {
+func ProcessApprovalProjects(logger *appinsights_wrapper.TelemetryClient, r *http.Request, module string) error {
 
 	// Decode payload
 	var req ApprovalStatusRequestBody
@@ -474,6 +476,8 @@ func ProcessApprovalProjects(r *http.Request, module string) error {
 	// Format req.RespondedBy to UTC time to zulu time
 	req.ResponseDate = strings.ReplaceAll(req.ResponseDate, " +0000 UTC", "Z")
 	req.ResponseDate = strings.ReplaceAll(req.ResponseDate, " ", "T")
+
+	logger.LogTrace(fmt.Sprintf("Approval Response: %v, %v, %v, %v, %v", req.ItemId, req.Remarks, req.ResponseDate, req.RespondedBy, approvalStatusId), contracts.Information)
 
 	switch module {
 	case "projects":
@@ -572,11 +576,17 @@ func CheckAllRequests(id int64, host string) {
 		ValidateOrgMembers(owner, repo, newOwner, nil)
 		ghAPI.SetProjectVisibility(repo, "public", owner)
 		ghAPI.TransferRepository(repo, owner, newOwner)
-		time.Sleep(3 * time.Second)
 		db.UpdateProjectVisibilityId(id, PUBLIC)
 
-		repoResp, _ := ghAPI.GetRepository(repo, newOwner)
-		db.UpdateTFSProjectReferenceById(id, repoResp.GetHTMLURL(), *repoResp.GetOwner().Login)
+		// Create a loop that will wait for the repository to be transferred. If the get response is nil, wait for 3 seconds and try again.
+		for i := 0; i < 10; i++ {
+			time.Sleep(3 * time.Second)
+			repoResp, err := ghAPI.GetRepository(repo, newOwner)
+			if err == nil {
+				db.UpdateTFSProjectReferenceById(id, repoResp.GetHTMLURL(), *repoResp.GetOwner().Login)
+				break
+			}
+		}
 	}
 
 	// Check if all requests are responded by approvers.

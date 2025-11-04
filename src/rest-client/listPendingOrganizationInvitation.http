@@ -1,0 +1,25 @@
+# https://docs.github.com/en/rest/orgs/members?apiVersion=2022-11-28#list-pending-organization-invitations
+
+# Use by
+# Community Portal
+# File: pkg/github/github.go
+# Function: ListPendingOrgInvitations
+# Scope: *
+
+###
+# Headers
+# @prompt token Enter your github token:
+
+# Path parameters
+# @prompt org Enter the organization name:
+
+# Query parameters
+# @prompt per_page Results per page (max 100):
+# @prompt page Page number of the results to fetch
+# @prompt role Filter invitations by their role. Can be one of: 'direct_member', 'admin', 'billing_manager', 'all'.
+
+GET https://api.github.com/orgs/{{org}}/invitations?per_page={{per_page}}&page={{page}}&role={{role}}
+Accept: application/vnd.github+json
+Authorization: Bearer {{token}}
+X-GitHub-Api-Version: 2022-11-28
+X-Github-Next-Global-ID: 1

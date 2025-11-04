@@ -1,0 +1,21 @@
+# https://docs.github.com/en/rest/orgs/outside-collaborators#convert-an-organization-member-to-outside-collaborator
+
+# Use by
+# Community Portal
+# File: pkg/github/github.go
+# Function: ConvertMemberToOutsideCollaborator
+# Scope: Opensource
+
+###
+# Headers
+# @prompt token Enter your github token:
+
+# Path parameters
+# @prompt org Enter the organization name: communityportal
+# @prompt username Enter the username of the member to convert: someuser
+
+PUT https://api.github.com/orgs/{{org}}/outside_collaborators/{{username}}
+Accept: application/vnd.github+json
+Authorization: Bearer {{token}}
+X-GitHub-Api-Version: 2022-11-28
+X-Github-Next-Global-ID: 1
