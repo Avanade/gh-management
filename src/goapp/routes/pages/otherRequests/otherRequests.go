@@ -20,3 +20,7 @@ func RequestGitHubCopilot(w http.ResponseWriter, r *http.Request) {
 func RequestOrganizationAccess(w http.ResponseWriter, r *http.Request) {
 	template.UseTemplate(&w, r, "otherRequests/organizationaccess", nil)
 }
+
+func RequestGHCPPremiumBudgetAllocation(w http.ResponseWriter, r *http.Request) {
+	template.UseTemplate(&w, r, "otherRequests/ghcpPremiumBudgetAllocation", nil)
+}

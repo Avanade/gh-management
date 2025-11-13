@@ -54,6 +54,7 @@ func setPageRoutes() {
 	httpRouter.GET("/other-requests/organization", m.Chain(rtOtherRequests.RequestNewOrganization, m.AzureAuth(), m.GitHubAuth()))
 	httpRouter.GET("/other-requests/github-copilot", m.Chain(rtOtherRequests.RequestGitHubCopilot, m.AzureAuth(), m.GitHubAuth()))
 	httpRouter.GET("/other-requests/organization-access", m.Chain(rtOtherRequests.RequestOrganizationAccess, m.AzureAuth(), m.GitHubAuth()))
+	httpRouter.GET("/other-requests/ghcp-premium-budget-allocation", m.Chain(rtOtherRequests.RequestGHCPPremiumBudgetAllocation, m.AzureAuth(), m.GitHubAuth()))
 
 	// AUTHENTICATION
 	httpRouter.GET("/loginredirect", rtPages.LoginRedirectHandler)
@@ -244,6 +245,11 @@ func setApiRoutes() {
 	httpRouter.GET("/api/organization-access/me", m.Chain(rtApi.GetMyOrganizationAccess, m.AzureAuth(), m.GitHubAuth()))
 	httpRouter.GET("/api/organization-access/{id}/status", m.Chain(rtApi.GetOrganizationAccessApprovalRequests, m.AzureAuth(), m.GitHubAuth()))
 
+	httpRouter.POST("/api/ghcp-premium-budget-allocation", m.Chain(rtApi.RequestGitHubCopilotPremiumBudgetAllocation, m.AzureAuth(), m.GitHubAuth()))
+	httpRouter.GET("/api/ghcp-premium-budget-allocation", m.Chain(rtApi.GetAllGitHubCopilotPremiumBudgetAllocationRequest, m.AzureAuth(), m.GitHubAuth()))
+	httpRouter.GET("/api/ghcp-premium-budget-allocation/{id}/status", m.Chain(rtApi.GetGitHubCopilotPremiumBudgetAllocationApprovalRequests, m.AzureAuth(), m.GitHubAuth()))
+	httpRouter.GET("/api/user/organizations/owned", m.Chain(rtApi.GetMyOwnedOrganizations, m.AzureAuth(), m.GitHubAuth()))
+
 	//ORGANIZATION APPROVERS API
 	httpRouter.GET("/api/github-organization-approvers/active", m.Chain(rtApi.GetAllActiveOrganizationApprovers, m.AzureAuth(), m.GitHubAuth()))
 
@@ -255,6 +261,7 @@ func setApiRoutes() {
 	httpRouter.POST("/api/approvals/community/reassign/callback", m.Chain(rtApi.UpdateCommunityApprovalReassignApprover, m.GuidAuth()))
 	httpRouter.POST("/api/approvals/project/callback", m.Chain(rtApi.UpdateApprovalStatusProjects, m.GuidAuth()))
 	httpRouter.POST("/api/approvals/project/reassign/callback", m.Chain(rtApi.UpdateApprovalReassignApprover, m.GuidAuth()))
+	httpRouter.POST("/api/approvals/ghcp-premium-budget-allocation/callback", m.Chain(rtApi.UpdateApprovalStatusGitHubCopilotPremiumBudgetAllocation, m.GuidAuth()))
 	httpRouter.GET("/api/users/{username}/approvals", m.Chain(rtApi.DownloadProjectApprovalsByUsername, m.GuidAuth()))
 
 	// LEGACY APIS

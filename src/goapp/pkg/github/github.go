@@ -646,6 +646,47 @@ func GetOrganizationsWithinEnterprise(enterprise string, token string) (*GetOrga
 	return &result, nil
 }
 
+func GetUserOwnedEnterpriseOrganizations(token string, enterprise string, memberLogin string, organizationQuery string) (*GetUserOwnedEnterpriseOrganizationsResult, error) {
+	src := oauth2.StaticTokenSource(
+		&oauth2.Token{AccessToken: token},
+	)
+	httpClient := oauth2.NewClient(context.Background(), src)
+
+	client := githubv4.NewClient(httpClient)
+
+	var result GetUserOwnedEnterpriseOrganizationsResult
+	var cursor *githubv4.String
+
+	for {
+		var queryResult GetUserOwnedEnterpriseOrganizationsQuery
+		variables := map[string]interface{}{
+			"enterprise":        githubv4.String(enterprise),
+			"memberLogin":       githubv4.String(memberLogin),
+			"organizationQuery": githubv4.String(organizationQuery),
+			"cursor":            cursor,
+		}
+		err := client.Query(context.Background(), &queryResult, variables)
+		if err != nil {
+			return nil, err
+		}
+
+		for _, org := range queryResult.Enterprise.Members.Nodes[0].EnterpriseUserAccount.Organizations.Edges {
+			result.Organizations = append(result.Organizations, Organization{
+				Login:      string(org.Node.Login),
+				DatabaseId: int64(org.Node.DatabaseId),
+			})
+		}
+
+		if !queryResult.Enterprise.Members.Nodes[0].EnterpriseUserAccount.Organizations.PageInfo.HasNextPage {
+			break
+		}
+
+		cursor = &queryResult.Enterprise.Members.Nodes[0].EnterpriseUserAccount.Organizations.PageInfo.EndCursor
+	}
+
+	return &result, nil
+}
+
 type customTransport struct {
 	Transport http.RoundTripper
 }
@@ -862,6 +903,29 @@ type GetOrganizationsWithinEnterpriseQuery struct {
 	} `graphql:"enterprise(slug: $enterprise)"`
 }
 
+type GetUserOwnedEnterpriseOrganizationsQuery struct {
+	Enterprise struct {
+		Members struct {
+			Nodes []struct {
+				EnterpriseUserAccount struct {
+					Organizations struct {
+						Edges []struct {
+							Node struct {
+								DatabaseId githubv4.Int
+								Login      githubv4.String
+							}
+						}
+						PageInfo struct {
+							HasNextPage bool
+							EndCursor   githubv4.String
+						}
+					} `graphql:"organizations(first: 100, after: $cursor, role: OWNER, query: $organizationQuery)"`
+				} `graphql:"... on EnterpriseUserAccount"`
+			}
+		} `graphql:"members(first: 100, query: $memberLogin)"`
+	} `graphql:"enterprise(slug: $enterprise)"`
+}
+
 type GetMembersByEnterpriseQuery struct {
 	Enterprise struct {
 		OwnerInfo struct {
@@ -933,6 +997,10 @@ type PageInfo struct {
 // Result structs
 
 type GetOrganizationsByGithubNameResult struct {
+	Organizations []Organization
+}
+
+type GetUserOwnedEnterpriseOrganizationsResult struct {
 	Organizations []Organization
 }
 
