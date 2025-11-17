@@ -351,7 +351,7 @@ func GetGitHubCopilotApprovalRequests(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	approvals, err := db.GetGHCPPremiumBudgetAllocationApprovalRequest(id)
+	approvals, err := db.GetGitHubCopilotApprovalRequest(id)
 	if err != nil {
 		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
