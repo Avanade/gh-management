@@ -223,7 +223,7 @@ func UpdateApprovalStatusGitHubCopilotPremiumBudgetAllocation(w http.ResponseWri
 	logger := appinsights_wrapper.NewClient()
 	defer logger.EndOperation()
 
-	err := ProcessApprovalProjects(r, "ghcp-premium-budget-allocation")
+	err := ProcessApprovalProjects(logger, r, "ghcp-premium-budget-allocation")
 	if err != nil {
 		logger.LogException(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
