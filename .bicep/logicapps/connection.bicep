@@ -37,14 +37,8 @@ resource connection 'Microsoft.Web/connections@2016-06-01' = {
   }
 }
 
-// Reference the existing access policy
-resource existingConnectionPolicy 'Microsoft.Web/connections/accessPolicies@2016-06-01' existing = {
-  parent: connection
-  name: logicAppName
-}
-
-// Create access policy for the connection only if it doesn't already exist
-resource ConnectionPolicy 'Microsoft.Web/connections/accessPolicies@2016-06-01' = if(existingConnectionPolicy == null) {
+// Create access policy for the connection (will create or update if already exists)
+resource ConnectionPolicy 'Microsoft.Web/connections/accessPolicies@2016-06-01' = {
   parent: connection
   name: logicAppName
   location: location
@@ -72,6 +66,7 @@ resource connectionTags 'Microsoft.Resources/tags@2022-09-01' = {
 }
 
 // Return the connection runtime URL, this needs to be set in the connection JSON file later
+#disable-next-line use-resource-symbol-reference
 output connectionRuntimeUrl string = reference(connection.id, connection.apiVersion, 'full').properties.connectionRuntimeUrl
 output api string = subscriptionResourceId('Microsoft.Web/locations/managedApis', location, 'azurequeues')
 output id string = connection.id

@@ -82,7 +82,7 @@ jobs:
       - name: Upload Logic App Workflows
         uses: azure/CLI@v1
         with:
-          azcliversion: 2.44.1
+          azcliversion: 2.81.0
           inlineScript: |
             chmod +x ./.bicep/logicapps/upload_workflows.sh
             ./.bicep/logicapps/upload_workflows.sh ${{needs.setup-logic-app-resource.outputs.accountName}} ${{needs.setup-logic-app-resource.outputs.destination}} ./.bicep/logicapps/workflows
