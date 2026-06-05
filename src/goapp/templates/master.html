@@ -286,6 +286,11 @@
           </div>
           <div class="pl-[48px] text-sm pb-7"><a href="{{ .CommunitySite }}" target="_blank">Community</a>
           </div>
+          <div class="mx-3 mt-3 mb-2 p-3 bg-green-50 border border-green-200 rounded-md">
+            <p class="text-green-700">
+              A new version of the Community Portal is now available. Please <a href="{{ .NewVersionLink }}" class="font-medium underline hover:text-green-900">click here</a> to be redirected.
+            </p>
+          </div>
           <nav class="mt-5 px-2 space-y-1">
             {{ $page := .Header.Page}}
             {{ range $menu := .Header.Menu }}
