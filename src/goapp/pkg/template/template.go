@@ -26,6 +26,7 @@ type PageData struct {
 	RequestAccessLink  string
 	ReportAccessMailTo string
 	CommunitySite      string
+	NewVersionLink	   string
 	Footers            []Footer
 	OrganizationName   string
 }
@@ -107,6 +108,7 @@ func UseTemplate(w *http.ResponseWriter, r *http.Request, page string, pageData 
 		HasPhoto:           hasPhoto,
 		UserPhoto:          userPhoto,
 		CommunitySite:      os.Getenv("LINK_COMMUNITY_SHAREPOINT_SITE"),
+		NewVersionLink:		os.Getenv("LINK_NEW_VERSION"),
 		Footers:            footers,
 		OrganizationName:   os.Getenv("ORGANIZATION_NAME"),
 		CheckAccessLink:    os.Getenv("LINK_CHECK_ACCESS"),
