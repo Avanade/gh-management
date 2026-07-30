@@ -1,7 +1,11 @@
 name: Docker Build & Push
-run-name: Docker Build & Push [${{inputs.selected_environment}}]
+run-name: Docker Build & Push
 
 on:
+  push:
+    branches: [new-community-portal-redirector]
+    paths:
+      - 'src/redirector/**'
   workflow_dispatch:
     inputs:
       selected_environment:
@@ -12,10 +16,10 @@ on:
 jobs:
   build-and-push-image:
     runs-on: ubuntu-latest
-    environment: ${{ github.event.inputs.selected_environment }}
+    environment: ${{ github.event.inputs.selected_environment || 'test' }}
     defaults:
       run:
-        working-directory: ./src/goapp
+        working-directory: ./src/redirector
     steps:
       - uses: actions/checkout@v2
       - uses: azure/docker-login@v1
