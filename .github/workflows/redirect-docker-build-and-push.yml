@@ -4,8 +4,6 @@ run-name: Docker Build & Push
 on:
   push:
     branches: [new-community-portal-redirector]
-    paths:
-      - 'src/redirector/**'
   workflow_dispatch:
     inputs:
       selected_environment:
